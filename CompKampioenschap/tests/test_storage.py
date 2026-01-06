@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2025 Ramon van der Winkel.
+#  Copyright (c) 2025-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -8,9 +8,9 @@ from django.test import TestCase
 from django.core.management.base import OutputWrapper
 from BasisTypen.models import BoogType, TeamType
 from Competitie.models import Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse
-from CompKampioenschap.operations.storage_wedstrijdformulieren import (StorageWedstrijdformulieren, StorageError,
-                                                                       zet_dirty, iter_dirty_wedstrijdformulieren,
-                                                                       aantal_ontbrekende_wedstrijdformulieren_rk_bk)
+from CompKampioenschap.operations import (StorageWedstrijdformulieren, StorageError,
+                                          zet_dirty, iter_dirty_wedstrijdformulieren,
+                                          aantal_ontbrekende_wedstrijdformulieren_rk_bk)
 from GoogleDrive.models import Bestand
 from TestHelpers.e2ehelpers import E2EHelpers
 import io
@@ -93,7 +93,8 @@ class TestCompKampioenschapStorage(E2EHelpers, TestCase):
                             is_dirty=False)
 
         count = aantal_ontbrekende_wedstrijdformulieren_rk_bk(comp)
-        self.assertEqual(count, 10)      # 2 klassen x (bk + 4 rk)
+        # self.assertEqual(count, 10)      # 2 klassen x (bk + 4 rk)
+        self.assertEqual(count, 5)         # teams staat uit: 1 klasse x (bk + 4 rk)
 
         Bestand.objects.create(
                             begin_jaar=2025,
@@ -111,6 +112,6 @@ class TestCompKampioenschapStorage(E2EHelpers, TestCase):
                             is_bk=True)
 
         count = aantal_ontbrekende_wedstrijdformulieren_rk_bk(comp)
-        self.assertEqual(count, 8)
+        self.assertEqual(count, 4)
 
 # end of file

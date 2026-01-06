@@ -10,7 +10,7 @@ from django.http import HttpResponseRedirect
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
-from Account.operations.otp import otp_is_controle_gelukt
+from Account.operations import otp_is_controle_gelukt
 from Functie.definities import Rol, rol2url
 from Functie.models import Functie
 from Functie.operations import account_needs_vhpg

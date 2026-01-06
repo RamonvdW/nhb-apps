@@ -7,7 +7,7 @@
 from django.conf import settings
 from django.utils import timezone
 from Account.models import Account, AccountSessions, get_account
-from Account.operations.session_vars import zet_sessionvar_if_changed
+from .session_vars import zet_sessionvar_if_changed     # must not rely on Account.operations.__init__
 from Account.plugin_manager import account_plugins_otp_was_reset
 from Logboek.models import schrijf_in_logboek
 from Overig.helpers import get_safe_from_ip

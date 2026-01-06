@@ -6,7 +6,7 @@
 
 from django.test import TestCase
 from django.utils import timezone
-from Account.operations.aanmaken import account_create
+from Account.operations import account_create
 from BasisTypen.models import BoogType
 from Bestelling.models import BestellingMandje, Bestelling, BestellingMutatie
 from Betaal.models import BetaalInstellingenVereniging, BetaalMutatie, BetaalActief, BetaalTransactie

@@ -59,9 +59,10 @@ def _verwijder_orphan_regels(stdout):
 
 def bestel_opschonen(stdout):
     """ Database opschonen:
-        - verwijder bestellingen die ouder zijn dan 18 maanden
+        - verwijder bestellingen die ouder zijn dan 3 jaar
         - verwijder lege mandjes
-        - verwijder adresgegevens van bestellingen gast-accounts
+        - verwijder adresgegevens van bestellingen gast-accounts        # TODO
+        - verwijder mutaties van meer dan 2 jaar geleden
 
         Let op: verwijderen van regels uit het mandje wordt door de bestel_mutaties achtergrondtaak gedaan
     """

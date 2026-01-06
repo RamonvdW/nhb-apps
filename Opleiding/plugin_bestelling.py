@@ -108,7 +108,7 @@ class OpleidingBestelPlugin(BestelPluginBase):
 
         return regel
 
-    def afmelden(self, product_pk: int):
+    def afmelden(self, inschrijving_pk: int):
         """
             Verwerk het verzoek tot afmelden voor een opleiding.
         """
@@ -117,32 +117,32 @@ class OpleidingBestelPlugin(BestelPluginBase):
                         .select_related('opleiding',
                                         'sporter',
                                         'koper')
-                        .get(pk=product_pk))
+                        .filter(pk=inschrijving_pk)
+                        .first())
 
-        now = timezone.now()
-        stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
-        msg = "[%s] Afgemeld voor deze opleiding\n" % stamp_str
+        if inschrijving:
+            now = timezone.now()
+            stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
+            msg = "[%s] Afgemeld voor deze opleiding\n" % stamp_str
 
-        # (nog) geen aantallen om bij te werken
+            # (nog) geen aantallen om bij te werken
 
-        # zet de inschrijving om in een afmelding
-        afmelding = OpleidingAfgemeld(
-                        wanneer_aangemeld=inschrijving.wanneer_aangemeld,
-                        wanneer_afgemeld=now,
-                        nummer=inschrijving.nummer,
-                        status=OPLEIDING_AFMELDING_STATUS_AFGEMELD,
-                        opleiding=inschrijving.opleiding,
-                        sporter=inschrijving.sporter,
-                        koper=inschrijving.koper,
-                        bedrag_ontvangen=inschrijving.bedrag_ontvangen,
-                        log=inschrijving.log + msg)
-        afmelding.save()
+            # zet de inschrijving om in een afmelding
+            afmelding = OpleidingAfgemeld(
+                            wanneer_aangemeld=inschrijving.wanneer_aangemeld,
+                            wanneer_afgemeld=now,
+                            nummer=inschrijving.nummer,
+                            status=OPLEIDING_AFMELDING_STATUS_AFGEMELD,
+                            opleiding=inschrijving.opleiding,
+                            sporter=inschrijving.sporter,
+                            koper=inschrijving.koper,
+                            bedrag_ontvangen=inschrijving.bedrag_ontvangen,
+                            bestelling=inschrijving.bestelling,
+                            log=inschrijving.log + msg)
+            afmelding.save()
 
-        # behoud de inschrijving, in verband met de verwijzing vanuit een bestelling
-        # zet de status op afgemeld
-        inschrijving.status = OPLEIDING_INSCHRIJVING_STATUS_AFGEMELD
-        inschrijving.log += msg
-        inschrijving.save(update_fields=['status', 'log'])
+            # verwijder de inschrijving
+            inschrijving.delete()
 
     def annuleer(self, regel: BestellingRegel):
         """

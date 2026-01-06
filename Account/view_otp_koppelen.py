@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2024 Ramon van der Winkel.
+#  Copyright (c) 2020-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -13,8 +13,7 @@ from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.forms import OTPControleForm
 from Account.models import get_account
-from Account.operations.maak_qrcode import qrcode_get
-from Account.operations.otp import otp_prepare_koppelen, otp_koppel_met_code
+from Account.operations import qrcode_get, otp_prepare_koppelen, otp_koppel_met_code
 from Functie.rol import rol_mag_wisselen
 
 TEMPLATE_OTP_KOPPELEN_STAP1 = 'account/otp-koppelen-stap1-uitleg.dtl'

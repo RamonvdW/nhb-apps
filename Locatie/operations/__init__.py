@@ -5,7 +5,8 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from .reistijd_bepalen import ReistijdBepaler
+from .opschonen import reistijd_opschonen
 
-__all__ = ['ReistijdBepaler']
+__all__ = ['ReistijdBepaler', 'reistijd_opschonen']
 
 # end of file

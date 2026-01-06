@@ -12,7 +12,7 @@ from django.shortcuts import render
 from django.views.generic import TemplateView
 from Account.forms import OTPControleForm
 from Account.models import get_account
-from Account.operations.otp import otp_controleer_code
+from Account.operations import otp_controleer_code
 
 TEMPLATE_OTP_CONTROLE = 'account/otp-controle.dtl'
 

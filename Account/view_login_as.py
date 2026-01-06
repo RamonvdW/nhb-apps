@@ -13,7 +13,7 @@ from django.db.models import Q
 from django.core.exceptions import PermissionDenied
 from Account.forms import ZoekAccountForm, KiesAccountForm
 from Account.models import Account, get_account
-from Account.operations.auto_login import auto_login_as
+from Account.operations import auto_login_as
 from Logboek.models import schrijf_in_logboek
 from TijdelijkeCodes.definities import RECEIVER_ACCOUNT_WISSEL
 from TijdelijkeCodes.operations import set_tijdelijke_codes_receiver, maak_tijdelijke_code_accountwissel

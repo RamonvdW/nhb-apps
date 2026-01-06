@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2025 Ramon van der Winkel.
+#  Copyright (c) 2021-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -10,7 +10,7 @@ from django.test import Client
 from django.core import management
 from django.utils import timezone
 from Account.models import Account
-from Account.operations.aanmaken import account_create
+from Account.operations import account_create
 from BasisTypen.definities import (GESLACHT_ANDERS,
                                    ORGANISATIE_WA, ORGANISATIE_KHSN, ORGANISATIE_IFAA,
                                    MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT,
@@ -231,8 +231,8 @@ class TestData(object):
         self.comp25_regiokampioenen = list()    # [KampioenschapSporterBoog met kampioen_label != '', ...]
 
         # aangemaakte RK sporters
-        self.comp18_rk_deelnemers = list()
-        self.comp25_rk_deelnemers = list()
+        self.comp18_rk_deelnemers = list()      # [KampioenschapSporterBoog, ...]
+        self.comp25_rk_deelnemers = list()      # [KampioenschapSporterBoog, ...]
 
         # aangemaakte RK teams
         self.comp18_kampioenschapteams = list()

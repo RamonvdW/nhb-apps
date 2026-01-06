@@ -876,7 +876,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
 
-        if options['use_test_database']:
+        if options['use_test_database']:                    # pragma: no cover
             # voor gebruik tijdens browser tests
             connection.close()
             test_database_name = "test_" + settings.DATABASES[DEFAULT_DB_ALIAS]["NAME"]

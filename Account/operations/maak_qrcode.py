@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -9,10 +9,10 @@
 from django.conf import settings
 from django.utils.encoding import force_str
 from django.utils.safestring import mark_safe
+from qrcode.main import QRCode
 from qrcode.image.svg import SvgPathImage
 import xml.etree.ElementTree as Tree
 import logging
-import qrcode
 import pyotp
 import io
 
@@ -51,7 +51,7 @@ def make_qr_code_image(text):
     Generates an image object (from the qrcode library) representing the QR code for the given text.
     Any invalid argument is silently converted into the default value for that argument.
     """
-    qr = qrcode.QRCode(
+    qr = QRCode(
                 version=QRCODE_VERSION,
                 image_factory=SvgEmbeddedInHtmlImage,
                 box_size=12, border=1)      # controls SVG image size

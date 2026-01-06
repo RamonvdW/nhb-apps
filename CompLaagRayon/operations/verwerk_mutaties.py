@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2025 Ramon van der Winkel.
+#  Copyright (c) 2020-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -9,7 +9,7 @@ from Competitie.definities import DEEL_RK, DEELNAME_NEE, DEELNAME_ONBEKEND
 from Competitie.models import (Competitie,
                                Regiocompetitie, RegiocompetitieSporterBoog,
                                Kampioenschap, KampioenschapSporterBoog, KampioenschapTeam)
-from CompKampioenschap.operations.verwerk_mutaties import VerwerkCompKampMutaties
+from CompKampioenschap.operations import VerwerkCompKampMutaties
 from Logboek.models import schrijf_in_logboek
 from Taken.operations import maak_taak
 

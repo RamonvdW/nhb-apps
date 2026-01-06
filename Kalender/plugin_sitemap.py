@@ -14,7 +14,8 @@ def generate_urls():
     """ deze generator geeft URLs terug voor de sitemap """
 
     # landing page
-    yield CHECK_LOW, reverse('Kalender:landing-page')
+    yield CHECK_MED, reverse('Kalender:landing-page')
+    yield CHECK_LOW, reverse('Kalender:landing-page-jaar')
 
     # rest van de URL's zijn filters, die nemen we niet op
 

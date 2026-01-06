@@ -7,7 +7,7 @@
 from django.utils import timezone
 from django.conf import settings
 from Account.models import get_account
-from Account.operations.session_vars import zet_sessionvar_if_changed
+from Account.operations import zet_sessionvar_if_changed
 from Functie.rol import rol_get_huidige_functie
 from Mailer.operations import mailer_queue_email, render_email_template
 from Taken.models import Taak

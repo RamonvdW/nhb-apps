@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2025 Ramon van der Winkel.
+#  Copyright (c) 2022-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -230,20 +230,25 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
             zoekterm = ""
         context['zoekterm'] = zoekterm
 
-        bestellingen = self._selecteer_bestellingen(context, form, zoekterm)
-
         # bepaal het aantal bestellingen sinds het begin van de maand
-        now = timezone.now()
+        bestelling = Bestelling.objects.order_by('-aangemaakt').first()
+        if bestelling:
+            now = bestelling.aangemaakt
+        else:
+            now = timezone.now()
         context['begin_maand'] = datetime.date(day=1, month=now.month, year=now.year)
         begin_maand = datetime.datetime(day=1, month=now.month, year=now.year)
         begin_maand = timezone.make_aware(begin_maand)
 
+        bestellingen = self._selecteer_bestellingen(context, form, zoekterm)
         qset = bestellingen.filter(aangemaakt__gte=begin_maand)
         context['aantal_bestellingen'] = qset.count()
 
         pks = qset.values_list('pk', flat=True)
         verkopers = Bestelling.objects.filter(pk__in=pks).order_by('ontvanger').distinct('ontvanger')
         context['aantal_verkopers'] = verkopers.count()
+        # for verkoper in verkopers:
+        #     print(verkoper.ontvanger)
 
         # details toevoegen voor de eerste 50 bestellingen deze maand
         bestellingen = list(bestellingen[:50])

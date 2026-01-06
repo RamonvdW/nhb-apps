@@ -108,41 +108,41 @@ class EvenementBestelPlugin(BestelPluginBase):
 
         return regel
 
-    def afmelden(self, product_pk: int):
+    def afmelden(self, inschrijving_pk: int):
         """
             Verwerk het verzoek tot afmelden voor een evenement.
         """
-        now = timezone.now()
-        stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
-        msg = "[%s] Afgemeld voor dit evenement\n" % stamp_str
-
         inschrijving = (EvenementInschrijving
                         .objects
                         .select_related('evenement',
                                         'sporter',
                                         'koper')
-                        .get(pk=product_pk))
+                        .filter(pk=inschrijving_pk)
+                        .first())
 
-        # (nog) geen aantallen om bij te werken
+        if inschrijving:
+            now = timezone.now()
+            stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
+            msg = "[%s] Afgemeld voor dit evenement\n" % stamp_str
 
-        # zet de inschrijving om in een afmelding
-        afmelding = EvenementAfgemeld(
-                            wanneer_inschrijving=inschrijving.wanneer,
-                            wanneer_afgemeld=now,
-                            nummer=inschrijving.nummer,
-                            status=EVENEMENT_AFMELDING_STATUS_AFGEMELD,
-                            evenement=inschrijving.evenement,
-                            sporter=inschrijving.sporter,
-                            koper=inschrijving.koper,
-                            bedrag_ontvangen=inschrijving.bedrag_ontvangen,
-                            log=inschrijving.log + msg)
-        afmelding.save()
+            # (nog) geen aantallen om bij te werken
 
-        # inschrijving kan niet verwijderd worden in verband met verwijzing vanuit de bestelling
-        # zet de originele inschrijving daarom op 'afgemeld'
-        inschrijving.status = EVENEMENT_INSCHRIJVING_STATUS_AFGEMELD
-        inschrijving.log += msg
-        inschrijving.save(update_fields=['status', 'log'])
+            # zet de inschrijving om in een afmelding
+            afmelding = EvenementAfgemeld(
+                                wanneer_inschrijving=inschrijving.wanneer,
+                                wanneer_afgemeld=now,
+                                nummer=inschrijving.nummer,
+                                status=EVENEMENT_AFMELDING_STATUS_AFGEMELD,
+                                evenement=inschrijving.evenement,
+                                sporter=inschrijving.sporter,
+                                koper=inschrijving.koper,
+                                bedrag_ontvangen=inschrijving.bedrag_ontvangen,
+                                bestelling=inschrijving.bestelling,
+                                log=inschrijving.log + msg)
+            afmelding.save()
+
+            # verwijder de originele inschrijving
+            inschrijving.delete()
 
     def annuleer(self, regel: BestellingRegel):
         """

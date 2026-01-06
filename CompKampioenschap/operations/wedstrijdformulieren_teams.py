@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2025 Ramon van der Winkel.
+#  Copyright (c) 2025-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -23,6 +23,9 @@ def iter_teams_wedstrijdformulieren(comp: Competitie):
         generates tuples:
             (afstand, is_bk, klasse_pk, rayon_nr, fname)
     """
+    # uitgezet omdat we het Excel formulier nog gebruiken
+    return
+
     afstand = int(comp.afstand)
     rayon_nrs = list(Rayon.objects.all().values_list('rayon_nr', flat=True))
 
@@ -91,8 +94,7 @@ class UpdateTeamsWedstrijdFormulier:
             self.titel = 'BK'
         else:
             self.titel = 'RK'
-        self.titel += ' teams, %s' % self.competitie.beschrijving.replace('competitie ', '')
-        self.titel += ' %s/%s' % (bestand.begin_jaar, bestand.begin_jaar + 1)
+        self.titel += ' teams, %s' % self.competitie.beschrijving.replace('competitie ', '')    # is inclusief seizoen
 
         if not bestand.is_bk:
             # benoem het rayon
@@ -232,7 +234,7 @@ class UpdateTeamsWedstrijdFormulier:
         self.sheet.selecteer_sheet('Deelnemers')
 
         volg_nr = 0
-        for team in self.teams:
+        for team in self.teams:         # TODO: begrens tot 8 teams max; rest is reserve. Wel in sheet zetten?
             regel = 12 + volg_nr * 5
             volg_nr += 1
 
@@ -321,7 +323,7 @@ class UpdateTeamsWedstrijdFormulier:
 
         if self._heeft_scores():
             self.stdout.write('[DEBUG] heeft scores')
-            return "Heeft scores"
+            return "NOK: Heeft scores"
 
         # update het bestand
         self._schrijf_update(bestand, match)

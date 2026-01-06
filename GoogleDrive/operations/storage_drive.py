@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2025 Ramon van der Winkel.
+#  Copyright (c) 2025-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -13,8 +13,10 @@ from googleapiclient.errors import HttpError as GoogleApiError
 from google.auth.exceptions import RefreshError
 from google.oauth2.credentials import Credentials
 from GoogleDrive.storage_base import StorageBase, StorageError
+import traceback
 import socket
 import json
+import sys
 
 
 class StorageGoogleDrive(StorageBase):
@@ -153,9 +155,12 @@ class StorageGoogleDrive(StorageBase):
             share_with = self._share_with_emails[:]
             for perm in response['permissions']:
                 if perm['type'] == 'user' and perm['emailAddress'] in share_with:
+                    # already shared with this user
+                    # remove from list to prevent sharing again
                     share_with.remove(perm['emailAddress'])
             # for
 
+            # add new sharing permissions
             for email in share_with:
                 request = self._service_perms.create(fileId=self._folder_id_seizoen,
                                                      body={
@@ -200,8 +205,19 @@ class StorageGoogleDrive(StorageBase):
 
         result = request.execute()
 
-        # self.stdout.write('[DEBUG] {maak_bestand_uit_template} result is %s' % repr(result))
+        # self.stdout.write('[DEBUG] {maak_bestand_uit_template} files copy result is %s' % repr(result))
         file_id = result['id']
+
+        # geef iedereen toestemming om dit bestand te wijzigen
+        request = self._service_perms.create(fileId=file_id,
+                                             body={
+                                                 "type": "anyone",
+                                                 "role": "writer",
+                                                 "allowFileDiscovery": "true",
+                                             })
+        result = request.execute()
+        self.stdout.write('[DEBUG] {maak_bestand_uit_template} perms create result is %s' % repr(result))
+
         return file_id
 
     def _save_bestand(self, afstand: int, is_teams: bool, is_bk: bool, klasse_pk: int, rayon_nr: int,
@@ -226,6 +242,7 @@ class StorageGoogleDrive(StorageBase):
         """ maak een Google Sheet aan """
 
         error_msg = None
+        tb_list = list()
         file_id = None
 
         try:
@@ -242,26 +259,43 @@ class StorageGoogleDrive(StorageBase):
             self._save_bestand(afstand, is_teams, is_bk, klasse_pk, rayon_nr, fname, file_id)
 
         except KeyError as exc:
+            e_type, _, tb = sys.exc_info()
+            tb_list = traceback.format_tb(tb)
             error_msg = 'KeyError: %s' % exc
 
         except (IndexError, ValueError) as exc:     # pragma: no cover
+            e_type, _, tb = sys.exc_info()
+            tb_list = traceback.format_tb(tb)
             error_msg = 'Exception: %s' % exc
 
         except socket.timeout as exc:               # pragma: no cover
+            e_type, _, tb = sys.exc_info()
+            tb_list = traceback.format_tb(tb)
             error_msg = 'Socket timeout exception: %s' % exc
 
         except socket.gaierror as exc:              # pragma: no cover
+            e_type, _, tb = sys.exc_info()
+            tb_list = traceback.format_tb(tb)
             # example: [Errno -3] Temporary failure in name resolution
             error_msg = 'Socket exception: %s' % exc
 
         except GoogleApiError as exc:
+            e_type, _, tb = sys.exc_info()
+            tb_list = traceback.format_tb(tb)
             error_msg = 'GoogleApiError: %s' % exc.reason
 
         except RefreshError as exc:
+            e_type, _, tb = sys.exc_info()
+            tb_list = traceback.format_tb(tb)
             error_msg = 'RefreshError: %s' % exc
 
         if error_msg:
-            raise StorageError('{google_drive} ' + error_msg)
+            msg = 'Onverwachte fout in storage_drive:\n'
+            msg += '   %s\n' % error_msg
+            if tb_list:                             # pragma: no branch
+                msg += 'Traceback:\n'
+                msg += ''.join(tb_list)
+            raise StorageError('{google_drive} ' + msg)
 
         return file_id
 

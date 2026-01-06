@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -19,8 +19,8 @@ TEMPLATE_COMPRAYON_LIJST_RK = 'complaagrayon/hwl-rk-selectie.dtl'
 
 class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
 
-    """ Deze view laat de (kandidaat) schutters van en RK zien,
-        met mogelijkheid voor de RKO om deze te bevestigen.
+    """ Deze view laat de (kandidaat) deelnemers van en RK zien,
+        met mogelijkheid voor de HWL van de eigen vereniging om de deelname status aan te passen.
     """
 
     # class variables shared by all instances

@@ -10,9 +10,8 @@ from django.conf import settings
 from django.utils import timezone
 from django.core.management.base import BaseCommand
 from Account.models import Account
-from Account.operations.otp import otp_stuur_email_losgekoppeld
+from Account.operations import otp_stuur_email_losgekoppeld, account_stuur_email_bevestig_nieuwe_email
 from Account.view_wachtwoord import account_stuur_email_wachtwoord_vergeten
-from Account.operations.email import account_stuur_email_bevestig_nieuwe_email
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
 from Bestelling.definities import BESTELLING_STATUS_NIEUW, BESTELLING_REGEL_CODE_WEDSTRIJD
 from Bestelling.operations import stuur_email_naar_koper_betaalbevestiging

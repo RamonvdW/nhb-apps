@@ -10,7 +10,7 @@ from django.http import HttpResponseRedirect
 from django.contrib.auth import logout
 from django.shortcuts import reverse
 from Account.models import get_account
-from Account.operations.otp import otp_zet_controle_niet_gelukt
+from Account.operations import otp_zet_controle_niet_gelukt
 import datetime
 import logging
 

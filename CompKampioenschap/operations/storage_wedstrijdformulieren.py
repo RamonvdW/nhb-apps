@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2025 Ramon van der Winkel.
+#  Copyright (c) 2025-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -21,7 +21,7 @@ class StorageWedstrijdformulieren(StorageGoogleDrive):
     """ let op: genereert StorageError exception """
 
     FOLDER_NAME_TOP = settings.GOOGLE_DRIVE_FOLDER_NAME_TOP
-    FOLDER_NAME_SITE = settings.NAAM_SITE
+    FOLDER_NAME_SITE = settings.GOOGLE_DRIVE_FOLDER_SITE
     FOLDER_NAME_TEMPLATES = settings.GOOGLE_DRIVE_FOLDER_NAME_TEMPLATES
 
     COMP2TEMPLATE = {
@@ -96,6 +96,21 @@ def aantal_ontbrekende_wedstrijdformulieren_rk_bk(comp: Competitie) -> int:
         # for
 
     return todo_count
+
+
+def get_url_wedstrijdformulier(begin_jaar: int, afstand: int, rayon_nr: int, klasse_pk: int, is_bk: bool, is_teams: bool):
+
+    bestand = Bestand.objects.filter(begin_jaar=begin_jaar,
+                                     afstand=afstand,
+                                     rayon_nr=rayon_nr,
+                                     klasse_pk=klasse_pk,
+                                     is_bk=is_bk,
+                                     is_teams=is_teams).first()
+
+    if bestand:
+        return "https://docs.google.com/spreadsheets/d/%s/edit" % bestand.file_id
+
+    return None
 
 
 def zet_dirty(begin_jaar: int, afstand: int, rayon_nr: int, klasse_pk: int, is_bk: bool, is_teams: bool):

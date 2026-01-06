@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2025 Ramon van der Winkel.
+#  Copyright (c) 2020-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -741,31 +741,43 @@ class VerwerkCompKampMutaties:
                                 competitie=comp)      # alleen nodig voor begin_jaar
 
         except StorageError as err:
-            self.stdout.write('[ERROR] StorageError: %s' % str(err))
+            msg = 'Onverwachte fout in verwerk_mutatie_maak_wedstrijdformulieren:\n'
+            msg += '   %s\n' % str(err)
+            self.stdout.write('[ERROR] {CompKampioenschap.verwerk_mutaties} ' + msg)
 
     def _verwerk_mutatie_update_dirty_wedstrijdformulieren(self, mutatie):
         begin_jaar = mutatie.competitie.begin_jaar
         self.stdout.write('[INFO] Update dirty wedstrijdformulieren')
         sheet = None
 
-        # note: Indoor en 25m1pijl hebben aparte klassen
-        indiv_klasse_pk2match = dict[int, CompetitieMatch]()
-        team_klasse_pk2match = dict[int, CompetitieMatch]()
+        # note: Indoor en 25m1pijl hebben aparte klassen, maar BK+elk RK hebben dezelfde klasse_pk, dus index nodig
+        indiv_klasse_pk_index2match = dict[tuple[int, int], CompetitieMatch]()
+        team_klasse_pk_index2match = dict[tuple[int, int], CompetitieMatch]()
 
-        for match in (CompetitieMatch
-                      .objects
-                      .filter(competitie__begin_jaar=begin_jaar)
-                      .prefetch_related('indiv_klassen',
-                                        'team_klassen')
-                      .select_related('vereniging',
-                                      'locatie')):
+        # doorloop alle wedstrijden
+        for deelkamp in (Kampioenschap
+                         .objects
+                         .filter(competitie__begin_jaar=begin_jaar)
+                         .select_related('rayon')
+                         .prefetch_related('rk_bk_matches')):
+            if deelkamp.is_bk():
+                index = 0
+            else:
+                index = deelkamp.rayon.rayon_nr
 
-            for klasse in match.indiv_klassen.all():
-                indiv_klasse_pk2match[klasse.pk] = match
-            # for
-            for klasse in match.team_klassen.all():
-                team_klasse_pk2match[klasse.pk] = match
-            # for
+            for match in (deelkamp.rk_bk_matches
+                          .prefetch_related('indiv_klassen',
+                                            'team_klassen')
+                          .select_related('vereniging',
+                                          'locatie')):
+
+                for klasse in match.indiv_klassen.all():
+                    indiv_klasse_pk_index2match[(klasse.pk, index)] = match
+                # for
+
+                for klasse in match.team_klassen.all():
+                    team_klasse_pk_index2match[(klasse.pk, index)] = match
+                # for
         # for
 
         for bestand in iter_dirty_wedstrijdformulieren(begin_jaar):
@@ -779,15 +791,20 @@ class VerwerkCompKampMutaties:
                 sheet = StorageGoogleSheet(self.stdout)
             sheet.selecteer_file(bestand.file_id)
 
+            if bestand.is_bk:
+                index = 0
+            else:
+                index = bestand.rayon_nr
+
             res = ''
             if bestand.is_teams:
                 # teams
                 updater = UpdateTeamsWedstrijdFormulier(self.stdout, sheet)
-                match = team_klasse_pk2match.get(bestand.klasse_pk, None)
+                match = team_klasse_pk_index2match.get((bestand.klasse_pk, index), None)
             else:
                 # individueel
                 updater = UpdateIndivWedstrijdFormulier(self.stdout, sheet)
-                match = indiv_klasse_pk2match.get(bestand.klasse_pk, None)
+                match = indiv_klasse_pk_index2match.get((bestand.klasse_pk, index), None)
 
             now = timezone.now()
             stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
@@ -799,6 +816,8 @@ class VerwerkCompKampMutaties:
                 msg = '[%s] ERROR: kan CompetitieMatch niet vinden voor Bestand pk=%s\n' % (stamp_str, bestand.pk)
 
             bestand.is_dirty = False
+            # newline toevoegen na handmatige edit in admin interface
+            bestand.log = bestand.log.strip() + '\n'
             bestand.log += msg
             bestand.save(update_fields=['is_dirty', 'log'])
         # for

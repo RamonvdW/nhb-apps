@@ -8,15 +8,15 @@ from django.test import TestCase, override_settings
 from django.core.management.base import OutputWrapper
 from BasisTypen.definities import SCHEIDS_BOND
 from Locatie.models import WedstrijdLocatie, Reistijd
-from Locatie.operations import ReistijdBepaler
+from Locatie.operations import ReistijdBepaler, reistijd_opschonen
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 import io
 
 
-class TestLocatieCliReistijd(E2EHelpers, TestCase):
+class TestLocatieOperations(E2EHelpers, TestCase):
 
-    """ tests voor de Locatie applicatie, management commando's """
+    """ tests voor de Locatie applicatie, operations """
 
     SR3_LAT = 1.0
     SR3_LON = 1.1
@@ -348,5 +348,42 @@ class TestLocatieCliReistijd(E2EHelpers, TestCase):
 
         reistijd = Reistijd(naar_lat='', vanaf_lat='x', vanaf_lon='y')
         self.assertFalse(reistijd.is_compleet())
+
+    def test_opschonen(self):
+        # reistijd niet gekoppeld aan sporter
+        Reistijd.objects.create(vanaf_lat=self.SR3_LAT, vanaf_lon=self.SR3_LON,
+                                naar_lat=self.ZELF_LAT, naar_lon=self.ZELF_LON,
+                                reistijd_min=10)
+        stdout = io.StringIO()
+        reistijd_opschonen(stdout)
+        self.assertTrue("[INFO] Verwijder reistijd zonder koppeling met sporter" in stdout.getvalue())
+
+        # reistijd wel gekoppeld aan sporter, maar niet aan een wedstrijdlocatie
+        self.scheids.adres_lat = self.SR3_LAT
+        self.scheids.adres_lon = self.SR3_LON
+        self.scheids.save()
+        Reistijd.objects.create(vanaf_lat=self.SR3_LAT, vanaf_lon=self.SR3_LON,
+                                naar_lat=self.ZELF_LAT, naar_lon=self.ZELF_LON,
+                                reistijd_min=10)
+        stdout = io.StringIO()
+        reistijd_opschonen(stdout)
+        self.assertTrue("[INFO] Verwijder reistijd zonder koppeling met wedstrijdlocatie" in stdout.getvalue())
+
+        # reistijd gekoppeld aan sporter en wedstrijdlocatie
+        WedstrijdLocatie.objects.create(
+                        adres_lat=self.ZELF_LAT,
+                        adres_lon=self.ZELF_LON)
+        Reistijd.objects.create(vanaf_lat=self.SR3_LAT, vanaf_lon=self.SR3_LON,
+                                naar_lat=self.ZELF_LAT, naar_lon=self.ZELF_LON,
+                                reistijd_min=10)
+        stdout = io.StringIO()
+        reistijd_opschonen(stdout)
+        self.assertFalse("[INFO] Verwijder reistijd" in stdout.getvalue())
+
+        # no records
+        Reistijd.objects.all().delete()
+        stdout = io.StringIO()
+        reistijd_opschonen(stdout)
+        self.assertFalse("[INFO] Verwijder reistijd" in stdout.getvalue())
 
 # end of file

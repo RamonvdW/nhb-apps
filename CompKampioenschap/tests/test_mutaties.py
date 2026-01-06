@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2025 Ramon van der Winkel.
+#  Copyright (c) 2025-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -9,10 +9,10 @@ from BasisTypen.models import BoogType, TeamType
 from Competitie.definities import MUTATIE_UPDATE_DIRTY_WEDSTRIJDFORMULIEREN, DEELNAME_NEE
 from Competitie.models import (CompetitieMutatie, Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
                                CompetitieMatch, Kampioenschap, KampioenschapSporterBoog, KampioenschapTeam)
-from CompKampioenschap.operations.maak_mutatie import (aanmaken_wedstrijdformulieren_is_pending,
-                                                       maak_mutatie_wedstrijdformulieren_aanmaken)
+from CompKampioenschap.operations import (aanmaken_wedstrijdformulieren_is_pending,
+                                          maak_mutatie_wedstrijdformulieren_aanmaken)
 from Functie.tests.helpers import maak_functie
-from Geo.models import Regio
+from Geo.models import Regio, Rayon
 from GoogleDrive.models import Bestand
 from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -128,8 +128,10 @@ class TestCompKampioenschapMutaties(E2EHelpers, TestCase):
                             functie=self.functie_bko)
         kamp.rk_bk_matches.add(match)
 
+        rayon1 = Rayon.objects.get(rayon_nr=1)
         kamp_rk = Kampioenschap.objects.create(
                             deel='RK',
+                            rayon=rayon1,
                             competitie=self.comp_18,
                             functie=self.functie_bko)
         kamp_rk.rk_bk_matches.add(match)
@@ -284,7 +286,9 @@ class TestCompKampioenschapMutaties(E2EHelpers, TestCase):
 
         _, f2, = self.verwerk_competitie_mutaties(ignore_errors=True)
         self.assertTrue('[INFO] Maak wedstrijdformulieren voor comp_18' in f2.getvalue())
-        self.assertTrue('[ERROR] StorageError: No token' in f2.getvalue())
+        # print('f2:', f2.getvalue())
+        self.assertTrue('[ERROR]' in f2.getvalue())
+        self.assertTrue('No token' in f2.getvalue())
 
         # hergebruik de mutatie
         mutatie = CompetitieMutatie.objects.first()
@@ -298,12 +302,13 @@ class TestCompKampioenschapMutaties(E2EHelpers, TestCase):
 [INFO] Maak rk-programma_individueel-rayon2_indiv-1
 [INFO] Maak rk-programma_individueel-rayon3_indiv-1
 [INFO] Maak rk-programma_individueel-rayon4_indiv-1
-[INFO] Maak bk-programma_individueel_indiv-1
-[INFO] Maak rk-programma_teams-rayon1_team-1
-[INFO] Maak rk-programma_teams-rayon2_team-1
-[INFO] Maak rk-programma_teams-rayon3_team-1
-[INFO] Maak rk-programma_teams-rayon4_team-1
-[INFO] Maak bk-programma_teams_team-1""" in f2.getvalue())
+[INFO] Maak bk-programma_individueel_indiv-1""" in f2.getvalue())
+            # teams is uitgezet
+            # [INFO] Maak rk-programma_teams-rayon1_team-1
+            # [INFO] Maak rk-programma_teams-rayon2_team-1
+            # [INFO] Maak rk-programma_teams-rayon3_team-1
+            # [INFO] Maak rk-programma_teams-rayon4_team-1
+            # [INFO] Maak bk-programma_teams_team-1
 
     def test_update_dirty_18(self):
         self.assertEqual(CompetitieMutatie.objects.count(), 0)

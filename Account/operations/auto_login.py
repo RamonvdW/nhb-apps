@@ -8,11 +8,11 @@ from django.utils import timezone
 from django.contrib.auth import login, logout
 from Account.middleware import SESSIONVAR_ACCOUNT_LOGIN_AS_DATE
 from Account.models import Account
-from Account.operations.otp import otp_zet_controle_niet_gelukt, otp_zet_controle_gelukt
 from Account.plugin_manager import account_plugins_login_gate, account_plugins_post_login
-from Account.operations.session_vars import zet_sessionvar_if_changed
 from Logboek.models import schrijf_in_logboek
 from Overig.helpers import get_safe_from_ip
+from .session_vars import zet_sessionvar_if_changed                      # must not rely on Account.operations.__init__
+from .otp import otp_zet_controle_niet_gelukt, otp_zet_controle_gelukt   # must not rely on Account.operations.__init__
 import logging
 
 my_logger = logging.getLogger('MH.Account')

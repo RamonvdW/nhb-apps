@@ -6,7 +6,7 @@
 
 """ Ondersteuning voor de rollen binnen de applicatie """
 
-from Account.operations.session_vars import zet_sessionvar_if_changed
+from Account.operations import zet_sessionvar_if_changed
 from Functie.definities import Rol
 from Functie.models import Functie
 

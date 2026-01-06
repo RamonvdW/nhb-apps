@@ -11,7 +11,7 @@ from django.shortcuts import redirect, render, reverse
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
-from Account.operations.session_vars import zet_sessionvar_if_changed
+from Account.operations import zet_sessionvar_if_changed
 from Bestelling.operations import eval_mandje_inhoud
 from Functie.definities import Rol
 from Functie.rol import (rol_get_huidige, rol_get_beschrijving, rol_mag_wisselen, rol_eval_rechten_simpel,

@@ -7,8 +7,7 @@
 from django.conf import settings
 from django.shortcuts import render, reverse
 from django.views.generic import TemplateView
-from Account.operations.aanmaken import AccountCreateError, account_create
-from Account.operations.email import account_email_bevestiging_ontvangen
+from Account.operations import AccountCreateError, account_create, account_email_bevestiging_ontvangen
 from Functie.models import Functie
 from Logboek.models import schrijf_in_logboek
 from Mailer.operations import mailer_email_is_valide, mailer_obfuscate_email, mailer_queue_email, render_email_template

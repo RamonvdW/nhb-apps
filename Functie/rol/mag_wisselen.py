@@ -7,7 +7,7 @@
 """ Ondersteuning voor de rollen binnen de applicatie """
 
 from django.contrib.sessions.backends.db import SessionStore
-from Account.operations.session_vars import zet_sessionvar_if_changed
+from Account.operations import zet_sessionvar_if_changed
 from Account.models import AccountSessions
 
 SESSIONVAR_ROL_MAG_WISSELEN_BOOL = 'gebruiker_rol_mag_wisselen_bool'

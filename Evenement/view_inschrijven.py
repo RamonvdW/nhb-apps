@@ -357,6 +357,7 @@ class InschrijvenFamilieView(UserPassesTestMixin, TemplateView):
                 # val terug op de ingelogde gebruiker
                 lid_nr = sporter.lid_nr
 
+        # onderstaande query vindt altijd minimaal de ingelogde gebruiker
         context['familie'] = list(Sporter
                                   .objects
                                   .exclude(is_overleden=True)
@@ -366,11 +367,8 @@ class InschrijvenFamilieView(UserPassesTestMixin, TemplateView):
                                   .order_by('sinds_datum',
                                             'lid_nr')[:50])
 
-        context['niets_gevonden'] = True
         geselecteerd = None
         for sporter in context['familie']:
-            context['niets_gevonden'] = False
-
             sporter.is_geselecteerd = False
 
             sporter.url_selecteer = reverse('Evenement:inschrijven-familie-lid',
@@ -384,7 +382,7 @@ class InschrijvenFamilieView(UserPassesTestMixin, TemplateView):
         if not geselecteerd and len(context['familie']) > 0:
             geselecteerd = context['familie'][0]
 
-        if geselecteerd:
+        if geselecteerd:        # pragma: no branch
             context['geselecteerd'] = geselecteerd
 
             # geen wissel knop meer tonen
@@ -698,8 +696,8 @@ class InschrijvenDoorHWL(UserPassesTestMixin, TemplateView):
         workshops = splits_evenement_workshop_keuzes(evenement)
         if workshops:
             ws_codes = [code
-                        for _, ronde_ws in workshops
-                        for code, _ in ronde_ws]
+                        for _ronde_nr, ronde_ws in workshops
+                        for code, _titel in ronde_ws]
             ws_rondes = ['ws_%s' % ronde_nr  # naam van de radiobutton groep
                          for ronde_nr, _ in workshops]
 
@@ -715,9 +713,7 @@ class InschrijvenDoorHWL(UserPassesTestMixin, TemplateView):
         stamp_str = timezone.localtime(timezone.now()).strftime('%Y-%m-%d om %H:%M')
 
         msg = "[%s] Inschrijving voor %s aangemaakt." % (stamp_str, sporter.lid_nr_en_volledige_naam())
-        if sporter.account != account_koper:
-            msg += " Toegevoegd door %s" % account_koper.get_account_full_name()
-        msg += '\n'
+        msg += " Toegevoegd door %s\n" % account_koper.get_account_full_name()
 
         # maak de inschrijving aan
         inschrijving = EvenementInschrijving(

@@ -7,7 +7,7 @@
 from django.conf import settings
 from django.shortcuts import reverse
 from Account.models import get_account
-from Account.operations.otp import otp_is_controle_gelukt
+from Account.operations import otp_is_controle_gelukt
 from Functie.definities import Rol
 from Functie.rol import rol_mag_wisselen, rol_get_huidige
 from Bestelling.operations import cached_aantal_in_mandje_get

@@ -12,11 +12,9 @@ from django.shortcuts import render, reverse, redirect, Http404
 from django.contrib.auth import update_session_auth_hash
 from django.views.generic import View, TemplateView
 from Account.models import get_account
-from Account.operations.aanmaken import AccountCreateError, account_create
-from Account.operations.wachtwoord import account_test_wachtwoord_sterkte
-from Account.operations.auto_login import auto_login_gast_account
+from Account.operations import (AccountCreateError, account_create, account_test_wachtwoord_sterkte,
+                                auto_login_gast_account)
 from BasisTypen.definities import GESLACHT2STR
-from Functie.models import Functie
 from Logboek.models import schrijf_in_logboek
 from Mailer.operations import mailer_queue_email, render_email_template
 from Overig.helpers import get_safe_from_ip, maak_unaccented
@@ -28,7 +26,6 @@ from Registreer.forms import RegistreerGastForm, scrub_input_name
 from Registreer.models import GastRegistratie, GastRegistratieRateTracker
 from Registreer.operations import registratie_gast_volgende_lid_nr, registratie_gast_is_open
 from Sporter.models import Sporter
-from Taken.operations import maak_taak
 from TijdelijkeCodes.operations import (set_tijdelijke_codes_receiver, RECEIVER_BEVESTIG_EMAIL_REG_GAST,
                                         maak_tijdelijke_code_bevestig_email_registreer_gast)
 from Vereniging.models import Vereniging

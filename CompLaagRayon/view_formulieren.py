@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2025 Ramon van der Winkel.
+#  Copyright (c) 2020-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -13,6 +13,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.definities import DEEL_RK, DEELNAME_NEE, DEELNAME2STR
 from Competitie.models import (CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMatch,
                                KampioenschapIndivKlasseLimiet, KampioenschapSporterBoog, KampioenschapTeam)
+from CompKampioenschap.operations import get_url_wedstrijdformulier
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
 from Scheidsrechter.models import MatchScheidsrechters
@@ -113,9 +114,12 @@ class DownloadRkFormulierView(UserPassesTestMixin, TemplateView):
                 beschr.append('Teams')
         # for
 
-        lid2voorkeuren = dict()  # [lid_nr] = SporterVoorkeuren
-        for voorkeuren in SporterVoorkeuren.objects.select_related('sporter').all():
-            lid2voorkeuren[voorkeuren.sporter.lid_nr] = voorkeuren
+        lid2voorkeuren = dict()  # [lid_nr] = (SporterVoorkeuren: .para_voorwerpen, .opmerking_para_sporter)
+        for tup in SporterVoorkeuren.objects.select_related('sporter').values_list('sporter__lid_nr',
+                                                                                   'para_voorwerpen',
+                                                                                   'opmerking_para_sporter'):
+            lid_nr, para_voorwerpen, opmerking_para_sporter = tup
+            lid2voorkeuren[lid_nr] = (para_voorwerpen, opmerking_para_sporter)
         # for
 
         vastgesteld = timezone.localtime(timezone.now())
@@ -144,9 +148,10 @@ class DownloadRkFormulierView(UserPassesTestMixin, TemplateView):
             for deelnemer in deelnemers:
                 if deelnemer.indiv_klasse != prev_klasse:
                     deelnemer.break_before = True
-                    deelnemer.url_download_indiv = reverse('CompLaagRayon:formulier-indiv-als-bestand',
-                                                           kwargs={'match_pk': match.pk,
-                                                                   'klasse_pk': deelnemer.indiv_klasse.pk})
+                    deelnemer.url_open_indiv = get_url_wedstrijdformulier(comp.begin_jaar, int(comp.afstand),
+                                                                          deelkamp.rayon.rayon_nr,
+                                                                          deelnemer.indiv_klasse.pk,
+                                                                          is_bk=False, is_teams=False)
                     prev_klasse = deelnemer.indiv_klasse
 
                 deelnemer.ver_nr = deelnemer.bij_vereniging.ver_nr
@@ -157,19 +162,19 @@ class DownloadRkFormulierView(UserPassesTestMixin, TemplateView):
                 deelnemer.gemiddelde_str = deelnemer.gemiddelde_str.replace('.', ',')
 
                 try:
-                    voorkeuren = lid2voorkeuren[deelnemer.lid_nr]
+                    voorkeuren_para_voorwerpen, voorkeuren_opmerking_para_sporter = lid2voorkeuren[deelnemer.lid_nr]
                 except KeyError:        # pragma: no cover
                     pass
                 else:
-                    if voorkeuren.para_voorwerpen:
+                    if voorkeuren_para_voorwerpen:
                         if deelnemer.kampioen_label != '':
                             deelnemer.kampioen_label += ';\n'
                         deelnemer.kampioen_label += 'Sporter laat voorwerpen\nop de schietlijn staan'
 
-                    if voorkeuren.opmerking_para_sporter:
+                    if voorkeuren_opmerking_para_sporter:
                         if deelnemer.kampioen_label != '':
                             deelnemer.kampioen_label += ';\n'
-                        deelnemer.kampioen_label += textwrap.fill(voorkeuren.opmerking_para_sporter, 30)
+                        deelnemer.kampioen_label += textwrap.fill(voorkeuren_opmerking_para_sporter, 30)
             # for
 
         if heeft_teams:
@@ -210,14 +215,14 @@ class DownloadRkFormulierView(UserPassesTestMixin, TemplateView):
                 for lid in team.gekoppelde_leden.select_related('sporterboog__sporter').order_by('-gemiddelde'):
                     sporter = lid.sporterboog.sporter
                     lid.naam_str = "[%s] %s" % (sporter.lid_nr, sporter.volledige_naam())
-                    lid.gem_str = lid.gemiddelde
+                    lid.gem_str = '%.3f' % lid.gemiddelde
 
                     try:
-                        voorkeuren = lid2voorkeuren[sporter.lid_nr]
+                        voorkeuren_para_voorwerpen, voorkeuren_opmerking_para_sporter = lid2voorkeuren[sporter.lid_nr]
                     except KeyError:        # pragma: no cover
                         pass
                     else:
-                        if voorkeuren.para_voorwerpen or len(voorkeuren.opmerking_para_sporter) > 1:
+                        if voorkeuren_para_voorwerpen or len(voorkeuren_opmerking_para_sporter) > 1:
                             lid.is_para = True
                             context['toon_para_uitleg'] = True
 
@@ -250,233 +255,9 @@ class DownloadRkFormulierView(UserPassesTestMixin, TemplateView):
         return context
 
 
-class FormulierIndivAlsBestandView(UserPassesTestMixin, TemplateView):
-
-    """ Geef de HWL het ingevulde wedstrijdformulier voor een RK wedstrijd bij deze vereniging """
-
-    # class variables shared by all instances
-    raise_exception = True  # genereer PermissionDefined als test_func False terug geeft
-    permission_denied_message = 'Geen toegang'
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.rol_nu, self.functie_nu = None, None
-
-    def test_func(self):
-        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.functie_nu and self.rol_nu in (Rol.ROL_HWL, Rol.ROL_WL)
-
-    def get(self, request, *args, **kwargs):
-        """ Afhandelen van de GET request waarmee we een bestand terug geven. """
-
-        try:
-            match_pk = int(kwargs['match_pk'][:6])      # afkappen voor de veiligheid
-            match = (CompetitieMatch
-                     .objects
-                     .select_related('vereniging')
-                     .get(pk=match_pk,
-                          vereniging=self.functie_nu.vereniging))
-        except (ValueError, CompetitieMatch.DoesNotExist):
-            raise Http404('Wedstrijd niet gevonden')
-
-        try:
-            klasse_pk = int(kwargs['klasse_pk'][:6])            # afkappen voor de veiligheid
-            klasse = (CompetitieIndivKlasse
-                      .objects
-                      .get(pk=klasse_pk))
-        except (ValueError, CompetitieIndivKlasse.DoesNotExist):
-            raise Http404('Klasse niet gevonden')
-
-        deelkamps = match.kampioenschap_set.filter(deel=DEEL_RK)
-        if len(deelkamps) == 0:
-            raise Http404('Geen kampioenschap')
-
-        deelkamp = deelkamps[0]
-
-        comp = deelkamp.competitie
-        # TODO: check competitie fase
-
-        vastgesteld = timezone.localtime(timezone.now())
-
-        klasse_str = klasse.beschrijving
-
-        aantal_banen = 16
-        if match.locatie:
-            if comp.is_indoor():
-                aantal_banen = match.locatie.banen_18m
-            else:
-                aantal_banen = match.locatie.banen_25m
-
-        # haal de limiet op (maximum aantal deelnemers)
-        try:
-            lim = KampioenschapIndivKlasseLimiet.objects.get(kampioenschap=deelkamp,
-                                                             indiv_klasse=klasse)
-        except KampioenschapIndivKlasseLimiet.DoesNotExist:
-            limiet = 24
-        else:
-            limiet = lim.limiet
-
-        lid2voorkeuren = dict()  # [lid_nr] = SporterVoorkeuren
-        for voorkeuren in SporterVoorkeuren.objects.select_related('sporter').all():
-            lid2voorkeuren[voorkeuren.sporter.lid_nr] = voorkeuren
-        # for
-
-        if comp.is_indoor():
-            excel_name = 'template-excel-rk-indoor-indiv.xlsx'
-            ws_name = 'Voorronde'
-        else:
-            excel_name = 'template-excel-rk-25m1pijl-indiv.xlsx'
-            ws_name = 'Wedstrijd'
-
-        # bepaal de naam van het terug te geven bestand
-        fname = "rk-programma_individueel-rayon%s_" % deelkamp.rayon.rayon_nr
-        fname += klasse_str.lower().replace(' ', '-')
-        fname += '.xlsx'
-
-        # make een kopie van het RK programma in een tijdelijk bestand
-        fpath = os.path.join(settings.INSTALL_PATH, 'CompLaagRayon', 'files', excel_name)
-        tmp_file = NamedTemporaryFile()
-        try:
-            shutil.copyfile(fpath, tmp_file.name)
-        except FileNotFoundError:
-            raise Http404('Kan RK programma niet vinden')
-
-        # open de kopie, zodat we die aan kunnen passen
-        try:
-            prg = openpyxl.load_workbook(tmp_file)
-        except (OSError, zipfile.BadZipFile, KeyError):
-            raise Http404('Kan RK programma niet openen')
-
-        # maak wijzigingen in het RK programma
-        ws = prg[ws_name]
-
-        ws['C2'] = 'Rayonkampioenschappen %s, Rayon %s, %s' % (comp.beschrijving,
-                                                               deelkamp.rayon.rayon_nr,
-                                                               klasse.beschrijving)
-
-        ws['D3'] = match.vereniging.naam     # organisatie
-        ws['J3'] = "Datum: " + match.datum_wanneer.strftime('%Y-%m-%d')
-
-        if match.locatie:
-            ws['H3'] = match.locatie.adres       # adres van de locatie
-        else:
-            ws['H3'] = 'Onbekend'
-
-        ws['A33'] = 'Deze gegevens zijn opgehaald op %s' % vastgesteld.strftime('%Y-%m-%d %H:%M:%S')
-
-        d_align = ws['D7'].alignment        # bondsnummer
-        g_align = ws['G7'].alignment        # regio nummer
-
-        i_font = ws['I7'].font              # gemiddelde (getal met 3 decimalen)
-        i_align = ws['I7'].alignment
-        i_format = ws['I7'].number_format
-
-        deelnemers = (KampioenschapSporterBoog
-                      .objects
-                      .filter(kampioenschap=deelkamp,
-                              indiv_klasse=klasse.pk)
-                      .select_related('sporterboog',
-                                      'sporterboog__sporter',
-                                      'bij_vereniging',
-                                      'bij_vereniging__regio')
-                      .order_by('rank'))
-
-        baan_nr = 1
-        baan_letter = 'A'
-        deelnemer_nr = 0
-
-        row1_nr = 7 - 1
-        row2_nr = 37 - 1
-        for deelnemer in deelnemers:
-
-            para_notities = ''
-            try:
-                voorkeuren = lid2voorkeuren[deelnemer.sporterboog.sporter.lid_nr]
-            except KeyError:        # pragma: no cover
-                pass
-            else:
-                if voorkeuren.para_voorwerpen:
-                    para_notities = 'Sporter laat voorwerpen op de schietlijn staan'
-
-                if voorkeuren.opmerking_para_sporter:
-                    if para_notities != '':
-                        para_notities += '\n'
-                    para_notities += voorkeuren.opmerking_para_sporter
-
-            is_deelnemer = False
-            reserve_str = ''
-            if deelnemer.deelname != DEELNAME_NEE:
-                deelnemer_nr += 1
-                if deelnemer_nr > limiet:
-                    reserve_str = ' (reserve)'
-                else:
-                    is_deelnemer = True
-
-            if is_deelnemer:
-                row1_nr += 1
-                row = str(row1_nr)
-            else:
-                row2_nr += 1
-                row = str(row2_nr)
-                ws['D' + row].alignment = copy(d_align)     # bondsnummer
-                ws['G' + row].alignment = copy(g_align)
-                ws['I' + row].alignment = copy(i_align)
-                ws['I' + row].font = copy(i_font)
-                ws['I' + row].number_format = copy(i_format)
-
-            if is_deelnemer:
-                ws['A' + row] = baan_nr
-                ws['B' + row] = baan_letter
-
-                baan_nr += 1
-                if baan_nr > aantal_banen:
-                    baan_nr = 1
-                    baan_letter = chr(ord(baan_letter) + 1)
-
-            # bondsnummer
-            ws['D' + row] = deelnemer.sporterboog.sporter.lid_nr
-
-            # volledige naam
-            ws['E' + row] = deelnemer.sporterboog.sporter.volledige_naam()
-
-            # vereniging
-            ver = deelnemer.bij_vereniging
-            ws['F' + row] = '%s %s' % (ver.ver_nr, ver.naam)
-
-            # regio
-            ws['G' + row] = ver.regio.regio_nr
-
-            # gemiddelde
-            ws['I' + row] = deelnemer.gemiddelde
-
-            # deelname
-            ws['T' + row] = DEELNAME2STR[deelnemer.deelname] + reserve_str
-
-            # notities
-            if deelnemer.kampioen_label:
-                if para_notities != '':
-                    para_notities += '\n'
-                para_notities += deelnemer.kampioen_label
-
-            if para_notities:
-                ws['U' + row] = para_notities
-        # for
-
-        # geef het aangepaste RK programma aan de client
-        response = HttpResponse(content_type=CONTENT_TYPE_XLSX)
-        response['Content-Disposition'] = 'attachment; filename="%s"' % fname
-        prg.save(response)      # noqa
-
-        del prg
-        tmp_file.close()
-
-        return response
-
-
 class FormulierTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
 
-    """ Geef de HWL het ingevulde wedstrijdformulier voor een RK wedstrijd bij deze vereniging """
+    """ Geef de HWL het ingevulde wedstrijdformulier voor een RK teams wedstrijd bij deze vereniging """
 
     # class variables shared by all instances
     raise_exception = True  # genereer PermissionDefined als test_func False terug geeft
@@ -486,135 +267,78 @@ class FormulierTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
         super().__init__(**kwargs)
         self.rol_nu, self.functie_nu = None, None
 
+        self.match = None
+        self.deelkamp = None
+        self.team_klasse = None
+        self.klasse_str = ''
+        self.titel = ''
+        self.lid2voorkeuren = dict()  # [lid_nr] = (SporterVoorkeuren: .para_voorwerpen, .opmerking_para_sporter)
+        self.deelnemers_ver_nrs = list()
+        self.vastgesteld = timezone.localtime(timezone.now())
+
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
         return self.functie_nu and self.rol_nu in (Rol.ROL_HWL, Rol.ROL_WL)
 
-    def get(self, request, *args, **kwargs):
-        """ Afhandelen van de GET request waarmee we een bestand terug geven. """
-
-        try:
-            match_pk = int(kwargs['match_pk'][:6])      # afkappen voor de veiligheid
-            match = (CompetitieMatch
-                     .objects
-                     .select_related('vereniging',
-                                     'locatie')
-                     .get(pk=match_pk,
-                          vereniging=self.functie_nu.vereniging))
-        except (ValueError, CompetitieMatch.DoesNotExist):
-            raise Http404('Wedstrijd niet gevonden')
-
-        try:
-            klasse_pk = int(kwargs['klasse_pk'][:6])            # afkappen voor de veiligheid
-            team_klasse = (CompetitieTeamKlasse
-                           .objects
-                           .get(pk=klasse_pk))
-        except (ValueError, CompetitieTeamKlasse.DoesNotExist):
-            raise Http404('Klasse niet gevonden')
-
-        deelkamps = match.kampioenschap_set.filter(deel=DEEL_RK)
-        if len(deelkamps) == 0:
-            raise Http404('Geen kampioenschap')
-
-        deelkamp = deelkamps[0]
-
-        comp = deelkamp.competitie
-        # TODO: check fase
-
-        if comp.is_indoor():
-            aantal_pijlen = 30
-        else:
-            aantal_pijlen = 25
-
-        lid2voorkeuren = dict()  # [lid_nr] = SporterVoorkeuren
-        for voorkeuren in SporterVoorkeuren.objects.select_related('sporter').all():
-            lid2voorkeuren[voorkeuren.sporter.lid_nr] = voorkeuren
+    def _laad_lid_voorkeuren(self):
+        self.lid2voorkeuren = dict()  # [lid_nr] = (SporterVoorkeuren: .para_voorwerpen, .opmerking_para_sporter)
+        for tup in SporterVoorkeuren.objects.select_related('sporter').values_list('sporter__lid_nr',
+                                                                                   'para_voorwerpen',
+                                                                                   'opmerking_para_sporter'):
+            lid_nr, para_voorwerpen, opmerking_para_sporter = tup
+            self.lid2voorkeuren[lid_nr] = (para_voorwerpen, opmerking_para_sporter)
         # for
 
-        vastgesteld = timezone.localtime(timezone.now())
-
-        klasse_str = team_klasse.beschrijving
-
-        boog_typen = team_klasse.team_type.boog_typen.all()
-        boog_pks = list(boog_typen.values_list('pk', flat=True))
-
-        # bepaal de naam van het terug te geven bestand
-        fname = "rk-programma_teams-rayon%s_" % deelkamp.rayon.rayon_nr
-        fname += klasse_str.lower().replace(' ', '-')
-        fname += '.xlsx'
-
-        if comp.is_indoor():
-            excel_name = 'template-excel-rk-indoor-teams.xlsx'
-        else:
-            excel_name = 'template-excel-rk-25m1pijl-teams.xlsx'
-
-        # make een kopie van het RK programma in een tijdelijk bestand
-        fpath = os.path.join(settings.INSTALL_PATH, 'CompLaagRayon', 'files', excel_name)
-        tmp_file = NamedTemporaryFile()
-
-        try:
-            shutil.copyfile(fpath, tmp_file.name)
-        except FileNotFoundError:
-            raise Http404('Kan RK programma niet vinden')
-
-        # open de kopie, zodat we die aan kunnen passen
-        try:
-            prg = openpyxl.load_workbook(tmp_file)
-        except (OSError, zipfile.BadZipFile, KeyError):
-            raise Http404('Kan RK programma niet openen')
-
+    def _vul_deelnemers(self, prg):
         # maak wijzigingen in het RK programma
-        ws = prg['Uitleg']
-        ws['A5'] = 'Deze gegevens zijn opgehaald op %s' % vastgesteld.strftime('%Y-%m-%d %H:%M:%S')
+        ws = prg['Deelnemers']
 
-        ws = prg['Deelnemers en Scores']
+        ws['B1'] = self.titel
+        ws['B2'] = self.klasse_str
 
-        ws['B2'] = 'RK Teams Rayon %s, %s, Klasse: %s' % (deelkamp.rayon.rayon_nr, comp.beschrijving, klasse_str)
-        ws['B4'] = match.vereniging.naam         # organisatie
-        if match.locatie:
-            ws['F4'] = match.locatie.adres       # adres van de locatie
+        # organisatie
+        if self.match.locatie:
+            ws['B3'] = self.match.vereniging.naam + ', ' + self.match.locatie.plaats
         else:
-            ws['F4'] = 'Onbekend'
-        ws['H4'] = match.datum_wanneer.strftime('%Y-%m-%d')
+            ws['B3'] = self.match.vereniging.naam
+
+        ws['B4'] = self.match.datum_wanneer.strftime('%Y-%m-%d')
 
         teams = (KampioenschapTeam
                  .objects
-                 .filter(kampioenschap=deelkamp,
-                         team_klasse=team_klasse.pk)
+                 .filter(kampioenschap=self.deelkamp,
+                         team_klasse=self.team_klasse.pk)
                  .select_related('vereniging',
                                  'vereniging__regio')
                  .prefetch_related('gekoppelde_leden')
                  .order_by('-aanvangsgemiddelde'))      # sterkste team bovenaan
 
-        ver_nrs = list()
+        self.deelnemers_ver_nrs = list()
 
         volg_nr = 0
         for team in teams:
-            row_nr = 9 + volg_nr * 6
+            row_nr = 8 + volg_nr * 5
             row = str(row_nr)
 
             ver = team.vereniging
-            if ver.ver_nr not in ver_nrs:
-                ver_nrs.append(ver.ver_nr)
-
-            # regio
-            ws['C' + row] = ver.regio.regio_nr
-
-            # vereniging
-            ws['D' + row] = '[%s] %s' % (ver.ver_nr, ver.naam)
+            if ver.ver_nr not in self.deelnemers_ver_nrs:
+                self.deelnemers_ver_nrs.append(ver.ver_nr)
 
             # team naam
-            ws['F' + row] = team.team_naam
+            ws['B' + row] = team.team_naam
+
+            # ver_nr
+            ws['C' + row] = str(ver.ver_nr)
 
             # team sterkte
-            sterkte_str = "%.1f" % (team.aanvangsgemiddelde * aantal_pijlen)
-            sterkte_str = sterkte_str.replace('.', ',')
-            ws['G' + row] = sterkte_str
+            # sterkte_str = "%.1f" % (team.aanvangsgemiddelde * aantal_pijlen)
+            # sterkte_str = sterkte_str.replace('.', ',')
+            # ws['G' + row] = sterkte_str
 
-            # vul de 4 sporters in
+            # vul de 3 sporters in
             aantal = 0
-            for deelnemer in team.gekoppelde_leden.select_related('sporterboog__sporter').all():
+            for deelnemer in team.gekoppelde_leden.select_related('sporterboog__sporter'):
                 row_nr += 1
                 row = str(row_nr)
 
@@ -622,73 +346,76 @@ class FormulierTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
 
                 para_mark = False
                 try:
-                    voorkeuren = lid2voorkeuren[sporter.lid_nr]
+                    voorkeuren_para_voorwerpen, voorkeuren_opmerking_para_sporter = self.lid2voorkeuren[sporter.lid_nr]
                 except KeyError:        # pragma: no cover
                     pass
                 else:
-                    if voorkeuren.para_voorwerpen or voorkeuren.opmerking_para_sporter:
+                    if voorkeuren_para_voorwerpen or voorkeuren_opmerking_para_sporter:
                         para_mark = True
-
-                # bondsnummer
-                ws['E' + row] = sporter.lid_nr
 
                 # volledige naam
                 naam_str = sporter.volledige_naam()
                 if para_mark:
                     naam_str += ' **'
-                ws['F' + row] = naam_str
+                ws['B' + row] = naam_str
+
+                # bondsnummer
+                ws['C' + row] = str(sporter.lid_nr)
 
                 # regio gemiddelde
-                ws['G' + row] = deelnemer.gemiddelde
+                gem_str = '%.3f' % deelnemer.gemiddelde
+                gem_str = gem_str.replace('.', ',')         # NL komma
+                ws['D' + row] = gem_str
 
                 aantal += 1
             # for
 
-            # bij minder dan 4 sporters de overgebleven regels leegmaken
-            while aantal < 4:
+            # altijd 3 regels invullen
+            while aantal < 3:
                 row_nr += 1
                 row = str(row_nr)
-                ws['E' + row] = '-'         # bondsnummer
-                ws['F' + row] = 'n.v.t.'    # naam
-                ws['G' + row] = ''          # gemiddelde
-                ws['H' + row] = ''          # score 1
-                ws['I' + row] = ''          # score 2
+                ws['B' + row] = 'n.v.t.'    # naam
+                ws['C' + row] = '-'         # bondsnummer
+                ws['D' + row] = ''          # gemiddelde
                 aantal += 1
             # while
 
             volg_nr += 1
         # for
 
-        while volg_nr < 12:
-            row_nr = 9 + volg_nr * 6
+        # 5 of meer teams?
+        ws['D5'] = "Ja" if volg_nr > 4 else "Nee"
+
+        while volg_nr < 8:
+            row_nr = 8 + volg_nr * 5
             row = str(row_nr)
 
             # vereniging leeg maken
-            ws['C' + row] = '-'          # regio
-            ws['D' + row] = 'n.v.t.'     # vereniging
-            ws['F' + row] = 'n.v.t.'     # team naam
-            ws['G' + row] = ''           # team sterkte
+            ws['B' + row] = 'n.v.t.'     # vereniging
+            ws['C' + row] = ''           # regio
 
             # sporters leegmaken
             aantal = 0
-            while aantal < 4:
+            while aantal < 3:
                 row_nr += 1
                 row = str(row_nr)
-                ws['E' + row] = '-'         # bondsnummer
-                ws['F' + row] = '-'         # naam
-                ws['G' + row] = ''          # gemiddelde
-                ws['H' + row] = ''          # score 1
-                ws['I' + row] = ''          # score 2
+                ws['B' + row] = ''         # naam
+                ws['C' + row] = ''         # bondsnummer
+                ws['D' + row] = ''         # gemiddelde
                 aantal += 1
             # while
 
             volg_nr += 1
         # while
 
-        ws['B82'] = 'Deze gegevens zijn opgehaald op %s' % vastgesteld.strftime('%Y-%m-%d %H:%M:%S')
+        ws['A50'] = 'Deze gegevens zijn opgehaald op %s' % self.vastgesteld.strftime('%Y-%m-%d %H:%M:%S')
 
+    def _vul_toegestane_deelnemers(self, prg):
         # alle gerechtigde deelnemers opnemen op een apart tabblad, met gemiddelde en boogtype
+
         ws = prg['Toegestane deelnemers']
+
+        ws['B1'] = '%s, %s' % (self.titel, self.klasse_str)
 
         cd_font = ws['C18'].font
         c_align = ws['C18'].alignment
@@ -705,12 +432,15 @@ class FormulierTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
         g_align = ws['G18'].alignment
         g_format = ws['G18'].number_format
 
+        boog_typen = self.team_klasse.team_type.boog_typen.all()
+        boog_pks = list(boog_typen.values_list('pk', flat=True))
+
         row_nr = 16
         prev_ver = None
         for deelnemer in (KampioenschapSporterBoog
                           .objects
-                          .filter(kampioenschap=deelkamp,
-                                  bij_vereniging__ver_nr__in=ver_nrs,
+                          .filter(kampioenschap=self.deelkamp,
+                                  bij_vereniging__ver_nr__in=self.deelnemers_ver_nrs,
                                   sporterboog__boogtype__pk__in=boog_pks)       # filter op toegestane boogtypen
                           .select_related('bij_vereniging__regio',
                                           'sporterboog__sporter',
@@ -746,26 +476,27 @@ class FormulierTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
 
             para_notities = ''
             try:
-                voorkeuren = lid2voorkeuren[sporter.lid_nr]
+                voorkeuren_para_voorwerpen, voorkeuren_opmerking_para_sporter = self.lid2voorkeuren[sporter.lid_nr]
             except KeyError:        # pragma: no cover
                 pass
             else:
-                if voorkeuren.para_voorwerpen:
-                    para_notities = 'Sporter laat voorwerpen op de schietlijn staan'
+                if voorkeuren_para_voorwerpen:
+                    para_notities = 'Sporter laat voorwerpen op de schietlijn staan. '
 
-                if voorkeuren.opmerking_para_sporter:
-                    if para_notities != '':
-                        para_notities += '\n'
-                    para_notities += voorkeuren.opmerking_para_sporter
-
-            ws['E' + row] = sporter.lid_nr
+                if voorkeuren_opmerking_para_sporter:
+                    para_notities += voorkeuren_opmerking_para_sporter
+            para_notities = para_notities.strip()
 
             naam_str = sporter.volledige_naam()
             if para_notities:
                 naam_str += ' **'
-            ws['F' + row] = naam_str
+            ws['E' + row] = naam_str
 
-            ws['G' + row] = deelnemer.gemiddelde
+            ws['F' + row] = str(sporter.lid_nr)
+
+            gem_str = '%.3f' % deelnemer.gemiddelde
+            gem_str = gem_str.replace('.', ',')  # NL komma
+            ws['G' + row] = gem_str
             ws['H' + row] = deelnemer.sporterboog.boogtype.beschrijving
 
             if para_notities:
@@ -785,9 +516,70 @@ class FormulierTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
 
         row_nr += 2
         row = str(row_nr)
-        ws['B' + row] = 'Deze gegevens zijn opgehaald op %s' % vastgesteld.strftime('%Y-%m-%d %H:%M:%S')
+        ws['B' + row] = 'Deze gegevens zijn opgehaald op %s' % self.vastgesteld.strftime('%Y-%m-%d %H:%M:%S')
         ws['B' + row].font = copy(efgh_font)
         ws['B' + row].alignment = copy(f_align)
+
+    def get(self, request, *args, **kwargs):
+        """ Afhandelen van de GET request waarmee we een bestand terug geven. """
+
+        try:
+            match_pk = int(kwargs['match_pk'][:6])      # afkappen voor de veiligheid
+            self.match = (CompetitieMatch
+                          .objects
+                          .select_related('vereniging',
+                                          'locatie')
+                          .get(pk=match_pk,
+                               vereniging=self.functie_nu.vereniging))
+        except (ValueError, CompetitieMatch.DoesNotExist):
+            raise Http404('Wedstrijd niet gevonden')
+
+        try:
+            klasse_pk = int(kwargs['klasse_pk'][:6])            # afkappen voor de veiligheid
+            self.team_klasse = (CompetitieTeamKlasse
+                                .objects
+                                .get(pk=klasse_pk))
+        except (ValueError, CompetitieTeamKlasse.DoesNotExist):
+            raise Http404('Klasse niet gevonden')
+
+        self.deelkamp = self.match.kampioenschap_set.filter(deel=DEEL_RK).first()
+        if not self.deelkamp:
+            raise Http404('Geen kampioenschap')
+
+        # comp = self.deelkamp.competitie
+        # # TODO: check fase
+
+        self._laad_lid_voorkeuren()
+
+        self.klasse_str = self.team_klasse.beschrijving
+
+        self.titel = 'RK Teams Rayon %s, %s' % (self.deelkamp.rayon.rayon_nr,
+                                                self.deelkamp.competitie.beschrijving)
+
+        # bepaal de naam van het terug te geven bestand
+        fname = "rk-programma_teams-rayon%s_" % self.deelkamp.rayon.rayon_nr
+        fname += self.klasse_str.lower().replace(' ', '-')
+        fname += '.xlsx'
+
+        excel_template_name = 'template-excel-rk-teams.xlsx'
+
+        # make een kopie van het RK programma in een tijdelijk bestand
+        fpath = os.path.join(settings.INSTALL_PATH, 'CompLaagRayon', 'files', excel_template_name)
+        tmp_file = NamedTemporaryFile()
+
+        try:
+            shutil.copyfile(fpath, tmp_file.name)
+        except FileNotFoundError:
+            raise Http404('Kan RK programma niet vinden')
+
+        # open de kopie, zodat we die aan kunnen passen
+        try:
+            prg = openpyxl.load_workbook(tmp_file)
+        except (OSError, zipfile.BadZipFile, KeyError):
+            raise Http404('Kan RK programma niet openen')
+
+        self._vul_deelnemers(prg)
+        self._vul_toegestane_deelnemers(prg)
 
         # geef het aangepaste RK programma aan de client
         response = HttpResponse(content_type=CONTENT_TYPE_XLSX)

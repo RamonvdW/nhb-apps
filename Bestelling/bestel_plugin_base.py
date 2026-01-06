@@ -65,10 +65,10 @@ class BestelPluginBase:
         """
         raise NotImplementedError(regel)        # pragma: no cover
 
-    def afmelden(self, product_pk):
+    def afmelden(self, inschrijving_pk):
         """
             Verwerk het verzoek tot afmelden voor een wedstrijd/evenement/opleiding.
-            product_pk kan verwijzen naar: Evenement, Opleiding, WedstrijdInschrijving
+            inschrijving_pk kan verwijzen naar: EvenementInschrijving, OpleidingInschrijving, WedstrijdInschrijving
         """
         raise NotImplementedError()             # pragma: no cover
 

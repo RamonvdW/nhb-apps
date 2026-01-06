@@ -1,9 +1,12 @@
 # constraints for pip packages for the NHB apps
 
-# stick to django 4.x for now
+# stick to django 5.x for now
 django>=5.2,<6.0
 
 # stick to v2 for now
 mollie-api-python<3.0
+
+# [2025-12] stick to 3.2.x for now due to too many deprecation warnings
+pyparsing<3.3
 
 # end of file

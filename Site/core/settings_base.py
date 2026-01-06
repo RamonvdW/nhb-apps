@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -62,7 +62,7 @@ APPS_DIR = os.path.dirname(BASE_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2025-12-28'
+SITE_VERSIE = '2026-01-06'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -632,7 +632,7 @@ INSTAPTOETS_AANTAL_MINUTEN = 30
 # google drive
 GOOGLE_DRIVE_FOLDER_NAME_TOP = 'MH wedstrijdformulieren'        # moet uniek zijn in de drive
 GOOGLE_DRIVE_FOLDER_NAME_TEMPLATES = 'MH templates RK/BK'       # moet uniek zijn in de drive
-
+GOOGLE_DRIVE_FOLDER_SITE = NAAM_SITE
 
 # -------------------------------------------
 # defaults for 'dev' and 'test' options below

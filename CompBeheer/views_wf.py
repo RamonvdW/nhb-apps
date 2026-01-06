@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-#  Copyright (c) 2025 Ramon van der Winkel.
+#  Copyright (c) 2025-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -9,8 +9,8 @@ from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
 from Competitie.models import Competitie
-from CompKampioenschap.operations.maak_mutatie import maak_mutatie_wedstrijdformulieren_aanmaken
-from CompKampioenschap.operations.storage_wedstrijdformulieren import aantal_ontbrekende_wedstrijdformulieren_rk_bk
+from CompKampioenschap.operations import (maak_mutatie_wedstrijdformulieren_aanmaken,
+                                          aantal_ontbrekende_wedstrijdformulieren_rk_bk)
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
 from GoogleDrive.operations import check_heeft_toestemming, get_authorization_url
@@ -74,6 +74,13 @@ class AanmakenView(UserPassesTestMixin, TemplateView):
         rol_nu = rol_get_huidige(self.request)
         return rol_nu == Rol.ROL_BB
 
+    def _get_begin_jaar_or_404(self):
+        comp = Competitie.objects.order_by('begin_jaar').first()
+        if not comp:
+            raise Http404('Geen competitie gevonden')
+
+        return comp.begin_jaar
+
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
@@ -82,10 +89,12 @@ class AanmakenView(UserPassesTestMixin, TemplateView):
         if not check_heeft_toestemming():
             raise Http404('Geen toestemming')
 
-        comp18 = Competitie.objects.exclude(regiocompetitie_is_afgesloten=True).filter(afstand=18).first()
+        begin_jaar = self._get_begin_jaar_or_404()
+
+        comp18 = Competitie.objects.filter(begin_jaar=begin_jaar, afstand=18).first()
         context['aantal_aanmaken_18'] = aantal_ontbrekende_wedstrijdformulieren_rk_bk(comp18)
 
-        comp25 = Competitie.objects.exclude(regiocompetitie_is_afgesloten=True).filter(afstand=25).first()
+        comp25 = Competitie.objects.filter(begin_jaar=begin_jaar, afstand=25).first()
         context['aantal_aanmaken_25'] = aantal_ontbrekende_wedstrijdformulieren_rk_bk(comp25)
 
         context['url_aanmaken'] = reverse('CompBeheer:wf-aanmaken')
@@ -97,19 +106,20 @@ class AanmakenView(UserPassesTestMixin, TemplateView):
 
         return context
 
-    @staticmethod
-    def post(request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         # gebruiker heeft op de knop BEGIN gedrukt
         # het form heeft een POST gedaan, welke hier uit komt
 
         account = get_account(request)
         door_str = account.get_account_full_name()
 
-        comp18 = Competitie.objects.exclude(regiocompetitie_is_afgesloten=True).filter(afstand=18).first()
+        begin_jaar = self._get_begin_jaar_or_404()
+
+        comp18 = Competitie.objects.filter(begin_jaar=begin_jaar, afstand=18).first()
         if comp18:
             maak_mutatie_wedstrijdformulieren_aanmaken(comp18, door_str)
 
-        comp25 = Competitie.objects.exclude(regiocompetitie_is_afgesloten=True).filter(afstand=25).first()
+        comp25 = Competitie.objects.filter(begin_jaar=begin_jaar, afstand=25).first()
         if comp25:
             maak_mutatie_wedstrijdformulieren_aanmaken(comp25, door_str)
 
