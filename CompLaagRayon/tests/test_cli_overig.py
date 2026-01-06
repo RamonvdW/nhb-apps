@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from Competitie.definities import MUTATIE_KAMP_REINIT_TEST, DEELNAME_ONBEKEND
+from Competitie.definities import MUTATIE_KAMP_REINIT_TEST
 from Competitie.models import (Competitie, Kampioenschap,
                                CompetitieIndivKlasse, CompetitieTeamKlasse,
                                CompetitieMutatie, CompetitieMatch,
@@ -146,7 +146,7 @@ class TestCompLaagRayonCliOverig(E2EHelpers, TestCase):
         # print('f1:', f1.getvalue())
         # print('f2:', f2.getvalue())
 
-        f1, f2 = self.run_management_command(self.check_rk_uitslagen,
+        f1, f2 = self.run_management_command(self.cli_check_rk_uitslagen,
                                              '25', '--verbose')
         _ = (f1, f2)
         # print('f1:', f1.getvalue())
@@ -205,9 +205,8 @@ class TestCompLaagRayonCliOverig(E2EHelpers, TestCase):
         ver = self.testdata.vereniging[self.testdata.regio_ver_nrs[self.regio_nr][0]]
         loc = self.testdata.maak_wedstrijd_locatie(ver.ver_nr)
 
+        deelkamp = self.testdata.deelkamp18_rk[self.rayon_nr]
         deelnemer = self.testdata.comp18_rk_deelnemers[0]
-        # deelnemer.deelname = DEELNAME_ONBEKEND
-        # deelnemer.save(update_fields=['deelname'])
 
         # maak een wedstrijd aan
         match = CompetitieMatch(
@@ -219,8 +218,6 @@ class TestCompLaagRayonCliOverig(E2EHelpers, TestCase):
                     locatie=loc)
         match.save()
         match.indiv_klassen.add(deelnemer.indiv_klasse)
-
-        deelkamp = self.testdata.deelkamp18_rk[self.rayon_nr]
         deelkamp.rk_bk_matches.add(match)
 
         # zet functie e-mail
@@ -259,8 +256,8 @@ class TestCompLaagRayonCliOverig(E2EHelpers, TestCase):
         self.assertEqual(MailQueue.objects.count(), 8)
 
         mail = MailQueue.objects.first()
+        # self.e2e_show_email_in_browser(mail)
         self.assert_email_html_ok(mail, 'email_complaagrayon/bevestig-deelname.dtl')
-        self.e2e_show_email_in_browser(mail)
 
         # verwijder de functie
         Functie.objects.filter(rol='HWL', vereniging=ver).delete()

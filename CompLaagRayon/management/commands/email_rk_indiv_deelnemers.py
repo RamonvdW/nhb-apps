@@ -14,6 +14,7 @@ from Competitie.models import Competitie, Kampioenschap, CompetitieMatch, Kampio
 from Functie.models import Functie
 from Mailer.operations import mailer_queue_email, render_email_template
 from Vereniging.models import Vereniging
+import datetime
 
 EMAIL_TEMPLATE_BEVESTIG_DEELNAME = 'email_complaagrayon/bevestig-deelname.dtl'
 
@@ -102,6 +103,9 @@ class Command(BaseCommand):
         seizoen_url = self.competitie.maak_seizoen_url()
         rayon_nr = self.deelkamp.rayon.rayon_nr
 
+        # geen e-mail sturen als we de afgelopen dagen al een mail gestuurd hebben
+        cut_off_date = timezone.now() - datetime.timedelta(days=7)
+
         # doorloop de sporters
         self.error_msgs = list()
         for deelnemer in (KampioenschapSporterBoog
@@ -109,6 +113,7 @@ class Command(BaseCommand):
                           .filter(kampioenschap=self.deelkamp,
                                   deelname=DEELNAME_ONBEKEND)
                           .exclude(sporterboog__sporter__bij_vereniging=None)
+                          .exclude(bevestiging_gevraagd_op__gt=cut_off_date)
                           .select_related('kampioenschap__rayon',
                                           'sporterboog__sporter',
                                           'sporterboog__sporter__account',
@@ -126,12 +131,9 @@ class Command(BaseCommand):
                 msg = 'Geen wedstrijd voor klasse %s' % deelnemer.indiv_klasse
                 if msg not in self.error_msgs:
                     self.error_msgs.append(msg)
-
-                tup = (deelnemer, None)
             else:
                 tup = (deelnemer, match)
-
-            self.deelname_onbekend.append(tup)
+                self.deelname_onbekend.append(tup)
         # for
 
     def _stuur_email(self, deelnemer: KampioenschapSporterBoog, match: CompetitieMatch, url_deelnemerslijst):
@@ -192,7 +194,6 @@ class Command(BaseCommand):
             for msg in self.error_msgs:
                 self.stdout.write('  %s' % msg)
             # for
-            return
 
         self.stdout.write('[INFO] Deelname onbekend: %s sporters' % len(self.deelname_onbekend))
 
