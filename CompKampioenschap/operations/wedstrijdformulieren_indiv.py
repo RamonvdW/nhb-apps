@@ -50,13 +50,14 @@ class UpdateIndivWedstrijdFormulier:
         self.stdout = stdout
         self.sheet = sheet      # kan google sheets bijwerken
 
-        self.aantal_regels_deelnemers = 24        # altijd dit aantal overschrijven, voor als de cut omlaag gezet wordt
+        self.aantal_regels_deelnemers = 24        # altijd dit aantal invullen, voor als de cut omlaag gezet wordt
         self.aantal_regels_reserves = 0
 
         self.klasse = None
         self.kampioenschap = None
         self.limiet = 0                 # maximaal aantal deelnemers
         self.aantal_ingeschreven = 0
+        self._max_naar_finales = 0
 
         self.ranges = {
             'titel': 'C2',
@@ -181,6 +182,7 @@ class UpdateIndivWedstrijdFormulier:
         # pas de cut toe
         reserves = deelnemers[self.limiet:] + afgemeld
         deelnemers = deelnemers[:self.limiet]
+        self._max_naar_finales = len(deelnemers)
 
         # maak beide lijsten op lengte
         regel = ['', '', '', '', '', '', '', '']  # bondsnr, naam, ver, regio, leeg, gemiddelde, deelname, notities
@@ -208,10 +210,33 @@ class UpdateIndivWedstrijdFormulier:
         msg = 'Deze gegevens zijn bijgewerkt door MijnHandboogsport op %s' % vastgesteld.strftime('%Y-%m-%d %H:%M:%S')
         self.sheet.wijzig_cellen(self.ranges['bijgewerkt'], [[msg]])
 
+    def _hide_show_sheets(self):
+        # er zijn wedstrijd finale sheets met 4, 8 of 16 deelnemers
+        # toon alleen de het benodigde sheet
+
+        # minimaal 16
+        if self._max_naar_finales >= 16:
+            self.sheet.toon_sheet('Finales 16')
+        else:
+            self.sheet.hide_sheet('Finales 16')
+
+        # minimaal 8, minder dan 16
+        if 8 <= self._max_naar_finales < 16:
+            self.sheet.toon_sheet('Finales 8')
+        else:
+            self.sheet.hide_sheet('Finales 8')
+
+        # minder dan 8
+        if self._max_naar_finales < 8:
+            self.sheet.toon_sheet('Finales 4')
+        else:
+            self.sheet.hide_sheet('Finales 4')
+
     def _schrijf_update(self, bestand: Bestand, match: CompetitieMatch):
         self._schrijf_kopje(match)
         self._schrijf_deelnemers()
         self._schrijf_bijgewerkt()
+        self._hide_show_sheets()
 
         # voer alle wijzigingen door met 1 transactie
         self.sheet.stuur_wijzigingen()

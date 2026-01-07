@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -38,11 +38,82 @@ class WijzigStatusRkDeelnemerView(UserPassesTestMixin, TemplateView):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.rol_nu, self.functie_nu = None, None
+        self.kruimel = list()       # voor de get
+        self.url_next = ''          # voor na de post
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
         return self.rol_nu in (Rol.ROL_RKO, Rol.ROL_HWL)
+
+    def _check_toegang(self, deelnemer: KampioenschapSporterBoog):
+        comp = deelnemer.kampioenschap.competitie
+        comp.bepaal_fase()
+        if comp.fase_indiv not in ('J', 'K', 'L'):
+            raise Http404('Mag niet wijzigen')
+
+        if self.rol_nu == Rol.ROL_RKO:
+            if self.functie_nu == deelnemer.kampioenschap.functie:
+                # RKO van het rayon van het RK
+
+                self.url_next = reverse('CompLaagRayon:lijst-rk',
+                                        kwargs={'deelkamp_pk': deelnemer.kampioenschap.pk})
+
+                self.kruimels = (
+                    (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
+                    (reverse('CompBeheer:overzicht',
+                             kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+                    (self.url_next, 'RK selectie'),
+                    (None, 'Wijzig sporter status')
+                )
+                return
+
+            raise PermissionDenied('Geen toegang tot deze competitie')
+
+        if self.rol_nu == Rol.ROL_HWL:
+            if deelnemer.bij_vereniging == self.functie_nu.vereniging:
+                # HWL van vereniging van de sporter
+
+                # afmelden tijdens de wedstrijden (fase L) niet toestaan
+                if comp.fase_indiv not in ('J', 'K'):
+                    raise Http404('Mag niet wijzigen')
+
+                self.url_next = reverse('CompLaagRayon:lijst-rk-ver',
+                                        kwargs={'deelkamp_pk': deelnemer.kampioenschap.pk})
+
+                url_overzicht = reverse('Vereniging:overzicht')
+                anker = '#competitie_%s' % comp.pk
+                self.kruimels = (
+                    (url_overzicht, 'Beheer vereniging'),
+                    (url_overzicht + anker, comp.beschrijving.replace(' competitie', '')),
+                    (self.url_next, 'Deelnemers RK'),
+                    (None, 'Wijzig sporter status')
+                )
+
+                return
+
+            # kijk of dit de HWL is van de vereniging die de RK wedstrijd organiseert
+            for match in (deelnemer
+                          .kampioenschap
+                          .rk_bk_matches
+                          .filter(vereniging=self.functie_nu.vereniging)
+                          .prefetch_related('indiv_klassen')
+                          .all()):
+                if deelnemer.indiv_klasse in match.indiv_klassen.all():
+                    # deze klasse is onderdeel van de RK-wedstrijd bij deze vereniging
+
+                    self.url_next = reverse('CompLaagRayon:download-formulier', kwargs={'match_pk': match.pk})
+
+                    self.kruimels = (
+                        (reverse('Vereniging:overzicht'), 'Beheer vereniging'),
+                        (reverse('CompScores:wedstrijden'), 'Competitiewedstrijden'),
+                        (self.url_next, 'RK programma'),
+                        (None, 'Wijzig sporter status')
+                    )
+                    return
+            # for
+
+            raise PermissionDenied('Geen sporter van jouw vereniging')
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -52,20 +123,18 @@ class WijzigStatusRkDeelnemerView(UserPassesTestMixin, TemplateView):
             deelnemer_pk = int(kwargs['deelnemer_pk'][:6])  # afkappen voor de veiligheid
             deelnemer = (KampioenschapSporterBoog
                          .objects
-                         .select_related('kampioenschap__competitie',
+                         .select_related('kampioenschap',
+                                         'kampioenschap__competitie',
                                          'kampioenschap__rayon',
                                          'sporterboog__sporter',
-                                         'bij_vereniging')
+                                         'bij_vereniging',
+                                         'indiv_klasse')
                          .get(pk=deelnemer_pk,
                               kampioenschap__deel=DEEL_RK))
         except (ValueError, KampioenschapSporterBoog.DoesNotExist):
             raise Http404('Deelnemer niet gevonden')
 
-        if self.rol_nu == Rol.ROL_HWL and deelnemer.bij_vereniging != self.functie_nu.vereniging:
-            raise PermissionDenied('Geen sporter van jouw vereniging')
-
-        if self.rol_nu == Rol.ROL_RKO and self.functie_nu != deelnemer.kampioenschap.functie:
-            raise PermissionDenied('Geen toegang tot deze competitie')
+        self._check_toegang(deelnemer)      # kan 403 of 404 geven
 
         comp = deelnemer.kampioenschap.competitie
         comp.bepaal_fase()
@@ -85,23 +154,7 @@ class WijzigStatusRkDeelnemerView(UserPassesTestMixin, TemplateView):
         context['url_wijzig'] = reverse('CompLaagRayon:wijzig-status-rk-deelnemer',
                                         kwargs={'deelnemer_pk': deelnemer.pk})
 
-        if self.rol_nu == Rol.ROL_RKO:
-            context['kruimels'] = (
-                (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
-                (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
-                (reverse('CompLaagRayon:lijst-rk', kwargs={'deelkamp_pk': deelnemer.kampioenschap.pk}), 'RK selectie'),
-                (None, 'Wijzig sporter status')
-            )
-        else:
-            # HWL
-            url_overzicht = reverse('Vereniging:overzicht')
-            anker = '#competitie_%s' % comp.pk
-            context['kruimels'] = (
-                (url_overzicht, 'Beheer vereniging'),
-                (url_overzicht + anker, comp.beschrijving.replace(' competitie', '')),
-                (reverse('CompLaagRayon:lijst-rk-ver', kwargs={'deelkamp_pk': deelnemer.kampioenschap.pk}), 'Deelnemers RK'),
-                (None, 'Wijzig sporter status')
-            )
+        context['kruimels'] = self.kruimels
 
         return context
 
@@ -112,7 +165,11 @@ class WijzigStatusRkDeelnemerView(UserPassesTestMixin, TemplateView):
             deelnemer = (KampioenschapSporterBoog
                          .objects
                          .select_related('kampioenschap',
-                                         'kampioenschap__competitie')
+                                         'kampioenschap__competitie',
+                                         'kampioenschap__rayon',
+                                         'sporterboog__sporter',
+                                         'bij_vereniging',
+                                         'indiv_klasse')
                          .get(pk=deelnemer_pk))
         except (ValueError, KampioenschapSporterBoog.DoesNotExist):
             raise Http404('Deelnemer niet gevonden')
@@ -126,11 +183,7 @@ class WijzigStatusRkDeelnemerView(UserPassesTestMixin, TemplateView):
         afmelden = str(request.POST.get('afmelden', ''))[:2]
         snel = str(request.POST.get('snel', ''))[:1]
 
-        if self.rol_nu == Rol.ROL_HWL and deelnemer.bij_vereniging != self.functie_nu.vereniging:
-            raise PermissionDenied('Geen sporter van jouw vereniging')
-
-        if self.rol_nu == Rol.ROL_RKO and self.functie_nu != deelnemer.kampioenschap.functie:
-            raise PermissionDenied('Geen toegang tot deze competitie')
+        self._check_toegang(deelnemer)
 
         account = get_account(request)
         door_str = "%s %s" % (rol_get_beschrijving(request), account.get_account_full_name())
@@ -165,14 +218,7 @@ class WijzigStatusRkDeelnemerView(UserPassesTestMixin, TemplateView):
                     mutatie = CompetitieMutatie.objects.get(pk=mutatie.pk)
                 # while
 
-        if self.rol_nu == Rol.ROL_RKO:
-            url = reverse('CompLaagRayon:lijst-rk',
-                          kwargs={'deelkamp_pk': deelnemer.kampioenschap.pk})
-        else:
-            url = reverse('CompLaagRayon:lijst-rk-ver',
-                          kwargs={'deelkamp_pk': deelnemer.kampioenschap.pk})
-
-        return HttpResponseRedirect(url)
+        return HttpResponseRedirect(self.url_next)
 
 
 class SporterWijzigStatusRkDeelnameView(UserPassesTestMixin, TemplateView):
@@ -214,7 +260,7 @@ class SporterWijzigStatusRkDeelnameView(UserPassesTestMixin, TemplateView):
 
         comp = deelnemer.kampioenschap.competitie
         comp.bepaal_fase()
-        if comp.fase_indiv not in ('J', 'K'):       # TODO: toestaan in de laatste 2 weken voor de wedstrijd (=fase L)?
+        if comp.fase_indiv not in ('J', 'K'):
             raise Http404('Mag niet wijzigen')
 
         keuze = str(request.POST.get('keuze', ''))[:2]

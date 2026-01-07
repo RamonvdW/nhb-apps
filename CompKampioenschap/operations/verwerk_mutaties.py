@@ -380,8 +380,11 @@ class VerwerkCompKampMutaties:
 
         now = timezone.now()
         stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
-        msg = '[%s] Deelname op Nee gezet want afmelding ontvangen van  %s\n' % (stamp_str, door)
 
+        msg = '[%s] Mutatie door %s\n' % (stamp_str, door)
+        deelnemer.logboek += msg
+
+        msg = '[%s] Deelname op Nee gezet\n' % stamp_str
         deelnemer.deelname = DEELNAME_NEE
         deelnemer.logboek += msg
         deelnemer.save(update_fields=['deelname', 'logboek'])
