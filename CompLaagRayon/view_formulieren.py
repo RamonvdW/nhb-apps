@@ -175,6 +175,9 @@ class DownloadRkFormulierView(UserPassesTestMixin, TemplateView):
                         if deelnemer.kampioen_label != '':
                             deelnemer.kampioen_label += ';\n'
                         deelnemer.kampioen_label += textwrap.fill(voorkeuren_opmerking_para_sporter, 30)
+
+                deelnemer.url_wijzig = reverse('CompLaagRayon:wijzig-status-rk-deelnemer',
+                                               kwargs={'deelnemer_pk': deelnemer.pk})
             # for
 
         if heeft_teams:

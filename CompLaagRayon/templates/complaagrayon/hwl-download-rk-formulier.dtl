@@ -97,11 +97,11 @@
                         {% if deelnemer.break_before %}
                             {% if not forloop.first %}
                                 <tr class="sv-table-onderrand">
-                                    <td colspan="6" class="sv-table-onderrand" style="height:50px"></td>
+                                    <td colspan="7" class="sv-table-onderrand" style="height:50px"></td>
                                 </tr>
                             {% endif %}
                             <tr class="sv-table-sectie-header">
-                                <td colspan="6" class="center">
+                                <td colspan="7" class="center">
                                     <h5>{{ deelnemer.indiv_klasse.beschrijving }}</h5>
                                     {% if deelnemer.url_open_indiv %}
                                         <br>
@@ -111,17 +111,18 @@
                             </tr>
 
                             <tr>
-                                <th><span class="hide-on-small-only">Nummer</span><span class="hide-unless-small">Nr</span></th>
+                                <th class="center">Nr</th>
                                 <th>Vereniging</th>
                                 <th>Sporter</th>
                                 <th class="center">Gemiddelde</th>
                                 <th class="center">Status</th>
+                                <th></th>
                                 <th>Notitie</th>
                             </tr>
                         {% endif %}
 
                         <tr>
-                            <td>{{ deelnemer.rank }}</td>
+                            <td class="center">{{ deelnemer.rank }}</td>
                             <td>[{{ deelnemer.ver_nr }}]<span class="hide-on-small-only">&nbsp;{{ deelnemer.ver_naam }}</span></td>
                             <td>[{{ deelnemer.lid_nr }}] {{ deelnemer.volledige_naam }}</td>
                             <td class="center">{{ deelnemer.gemiddelde_str }}</td>
@@ -134,12 +135,17 @@
                                     {% sv-icon 'comp kamp selectie status onbekend' kleur='blauw' %}
                                 {% endif %}
                             </td>
+                            <td>
+                                {% if deelnemer.url_wijzig %}
+                                    {% sv-knop-nav url=deelnemer.url_wijzig icon='aanpassen' tekst='' %}
+                                {% endif %}
+                            </td>
                             <td>{{ deelnemer.kampioen_label|linebreaksbr }}</td>
                         </tr>
 
                     {% empty %}
                         <tr>
-                            <td colspan="6" class="center"><i>Geen sporters gevonden</i></td>
+                            <td colspan="7" class="center"><i>Geen sporters gevonden</i></td>
                         </tr>
                     {% endfor %}
 
@@ -189,7 +195,7 @@
                                 </td>
                             </tr>
                             <tr>
-                                <th><span class="hide-on-small-only">Nummer</span><span class="hide-unless-small">Nr</span></th>
+                                <th class="center">Nr</th>
                                 <th>Vereniging</th>
                                 <th>Team / Sporters<sup>*1</sup></th>
                                 <th class="center">Gemiddelde<sup>*2</sup></th>
@@ -198,7 +204,7 @@
                         {% endif %}
 
                         <tr>
-                            <td>{{ team.volg_nr }}</td>
+                            <td class="center">{{ team.volg_nr }}</td>
                             <td>[{{ team.ver_nr }}] {{ team.ver_naam }}</td>
                             <td colspan="2">{{ team.team_naam }}</td>
                             <td class="center">{{ team.sterkte_str }}</td>
