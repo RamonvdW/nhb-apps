@@ -54,8 +54,9 @@ class UpdateIndivWedstrijdFormulier:
         self.aantal_regels_reserves = 0
 
         self.klasse = None
+        self.haalbare_titel = 'Kampioen'            # wordt bijgewerkt in laad_klasse
         self.kampioenschap = None
-        self.limiet = 0                 # maximaal aantal deelnemers
+        self.limiet = 0                             # maximaal aantal deelnemers
         self.aantal_ingeschreven = 0
         self._max_naar_finales = 0
 
@@ -68,6 +69,7 @@ class UpdateIndivWedstrijdFormulier:
             'deelnemers_notities': 'T11:U%d' % (11 + self.aantal_regels_deelnemers - 1),
             'reserves': 'D41:I99',                # wordt bijgewerkt in laad_klasse
             'reserves_notities': 'T41:U99',       # wordt bijgewerkt in laad_klasse
+            'haalbare_titel': 'U7',
         }
 
     def _laad_klasse(self, bestand: Bestand):
@@ -106,6 +108,11 @@ class UpdateIndivWedstrijdFormulier:
             # benoem het rayon
             self.titel += ', Rayon %s' % bestand.rayon_nr
 
+        if bestand.is_bk:
+            self.haalbare_titel = self.klasse.titel_bk      # Bondskampioen / Nederlands Kampioen
+        else:
+            self.haalbare_titel = 'Rayonkampioen'
+
     def _schrijf_kopje(self, match: CompetitieMatch):
         # zet de titel
         self.sheet.wijzig_cellen(self.ranges['titel'], [[self.titel]])
@@ -117,7 +124,7 @@ class UpdateIndivWedstrijdFormulier:
         regels.append([self.klasse.beschrijving])
 
         # datum
-        print('pk=%s' % match.pk, match.datum_wanneer, '->', localize(match.datum_wanneer))
+        # print('pk=%s' % match.pk, match.datum_wanneer, '->', localize(match.datum_wanneer))
         regels.append([localize(match.datum_wanneer)])      # localize geeft NL formaat "1 januari 2026"
 
         # organisatie
@@ -135,6 +142,8 @@ class UpdateIndivWedstrijdFormulier:
             regels.append(['Onbekend'])
 
         self.sheet.wijzig_cellen(self.ranges['info'], regels)
+
+        self.sheet.wijzig_cellen(self.ranges['haalbare_titel'], [[self.haalbare_titel]])
 
     def _schrijf_deelnemers(self):
         deelnemers = list()

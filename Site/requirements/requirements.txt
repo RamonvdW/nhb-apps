@@ -8,11 +8,11 @@ asgiref==3.11.0
     # via django
 cachetools==6.2.4
     # via google-auth
-certifi==2025.11.12
+certifi==2026.1.4
     # via requests
 charset-normalizer==3.4.4
     # via requests
-django==5.2.9
+django==5.2.10
     # via
     #   -c constraints.in
     #   -r requirements.in
@@ -70,7 +70,7 @@ oauthlib==3.3.1
     # via requests-oauthlib
 openpyxl==3.1.5
     # via -r requirements.in
-pillow==12.0.0
+pillow==12.1.0
     # via -r requirements.in
 proto-plus==1.27.0
     # via
@@ -121,7 +121,7 @@ typing-extensions==4.15.0
     # via grpcio
 uritemplate==4.2.0
     # via google-api-python-client
-urllib3==2.6.2
+urllib3==2.6.3
     # via
     #   mollie-api-python
     #   requests
