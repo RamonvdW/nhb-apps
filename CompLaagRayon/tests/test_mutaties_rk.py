@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2025 Ramon van der Winkel.
+#  Copyright (c) 2020-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -1052,6 +1052,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         self.assert404(resp, 'Mag niet wijzigen')
 
         # sporter van andere vereniging
+        zet_competitie_fases(comp, 'K', 'K')
         andere_ver = self.ver_nrs[0]
         andere_deelnemer_pk = (KampioenschapSporterBoog
                                .objects

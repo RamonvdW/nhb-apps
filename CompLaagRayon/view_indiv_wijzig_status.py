@@ -46,8 +46,11 @@ class WijzigStatusRkDeelnemerView(UserPassesTestMixin, TemplateView):
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
         return self.rol_nu in (Rol.ROL_RKO, Rol.ROL_HWL)
 
-    def _check_toegang_of_403(self, deelnemer: KampioenschapSporterBoog):
+    def _check_toegang(self, deelnemer: KampioenschapSporterBoog):
         comp = deelnemer.kampioenschap.competitie
+        comp.bepaal_fase()
+        if comp.fase_indiv not in ('J', 'K', 'L'):
+            raise Http404('Mag niet wijzigen')
 
         if self.rol_nu == Rol.ROL_RKO:
             if self.functie_nu == deelnemer.kampioenschap.functie:
@@ -70,6 +73,10 @@ class WijzigStatusRkDeelnemerView(UserPassesTestMixin, TemplateView):
         if self.rol_nu == Rol.ROL_HWL:
             if deelnemer.bij_vereniging == self.functie_nu.vereniging:
                 # HWL van vereniging van de sporter
+
+                # afmelden tijdens de wedstrijden (fase L) niet toestaan
+                if comp.fase_indiv not in ('J', 'K'):
+                    raise Http404('Mag niet wijzigen')
 
                 self.url_next = reverse('CompLaagRayon:lijst-rk-ver',
                                         kwargs={'deelkamp_pk': deelnemer.kampioenschap.pk})
@@ -127,7 +134,7 @@ class WijzigStatusRkDeelnemerView(UserPassesTestMixin, TemplateView):
         except (ValueError, KampioenschapSporterBoog.DoesNotExist):
             raise Http404('Deelnemer niet gevonden')
 
-        self._check_toegang_of_403(deelnemer)
+        self._check_toegang(deelnemer)      # kan 403 of 404 geven
 
         comp = deelnemer.kampioenschap.competitie
         comp.bepaal_fase()
@@ -176,7 +183,7 @@ class WijzigStatusRkDeelnemerView(UserPassesTestMixin, TemplateView):
         afmelden = str(request.POST.get('afmelden', ''))[:2]
         snel = str(request.POST.get('snel', ''))[:1]
 
-        self._check_toegang_of_403(deelnemer)
+        self._check_toegang(deelnemer)
 
         account = get_account(request)
         door_str = "%s %s" % (rol_get_beschrijving(request), account.get_account_full_name())
@@ -253,7 +260,7 @@ class SporterWijzigStatusRkDeelnameView(UserPassesTestMixin, TemplateView):
 
         comp = deelnemer.kampioenschap.competitie
         comp.bepaal_fase()
-        if comp.fase_indiv not in ('J', 'K'):       # TODO: toestaan in de laatste 2 weken voor de wedstrijd (=fase L)?
+        if comp.fase_indiv not in ('J', 'K'):
             raise Http404('Mag niet wijzigen')
 
         keuze = str(request.POST.get('keuze', ''))[:2]
