@@ -210,7 +210,7 @@ class UpdateIndivWedstrijdFormulier:
         msg = 'Deze gegevens zijn bijgewerkt door MijnHandboogsport op %s' % vastgesteld.strftime('%Y-%m-%d %H:%M:%S')
         self.sheet.wijzig_cellen(self.ranges['bijgewerkt'], [[msg]])
 
-    def _hide_show_sheets(self):
+    def _hide_show_finale_sheets_indoor(self):
         # er zijn wedstrijd finale sheets met 4, 8 of 16 deelnemers
         # toon alleen de het benodigde sheet
 
@@ -236,7 +236,9 @@ class UpdateIndivWedstrijdFormulier:
         self._schrijf_kopje(match)
         self._schrijf_deelnemers()
         self._schrijf_bijgewerkt()
-        self._hide_show_sheets()
+
+        if bestand.afstand == 18:
+            self._hide_show_finale_sheets_indoor()
 
         # voer alle wijzigingen door met 1 transactie
         self.sheet.stuur_wijzigingen()
