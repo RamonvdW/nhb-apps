@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import reverse
+from django.utils import timezone
+from django.db.models import Count
 from django.views.generic import TemplateView
 from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
@@ -14,8 +16,8 @@ from Competitie.models import (Competitie, Regiocompetitie, RegiocompetitieSport
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
 from Sporter.models import Sporter
+from typing import Tuple
 from decimal import Decimal
-
 
 TEMPLATE_COMPETITIE_STATISTIEK = 'compbeheer/statistiek.dtl'
 
@@ -31,16 +33,40 @@ class CompetitieStatistiekView(UserPassesTestMixin, TemplateView):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.rol_nu = None
+        self.comp_pks = list()
+        self.huidig_jaar = timezone.now().year
+        self.age_group_counts_18m_indiv_rk = dict()
+        self.age_group_counts_25m_indiv_rk = dict()
+        self.age_group_counts_18m_teams_rk = dict()
+        self.age_group_counts_25m_teams_rk = dict()
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu = rol_get_huidige(self.request)
         return self.rol_nu in (Rol.ROL_BB, Rol.ROL_BKO, Rol.ROL_RKO, Rol.ROL_RCL)
 
-    @staticmethod
-    def _tel_aantallen(context, actuele_comps):
-        context['toon_aantal_inschrijvingen'] = True
+    def _add_to_age_group(self, age_group_counts: dict, geboorte_jaar: int):
+        leeftijd = self.huidig_jaar - geboorte_jaar
+        leeftijd = min(leeftijd, 89)  # groep "80 en ouder"
+        group = leeftijd // 10
+        age_group_counts[group] += 1
 
+    @staticmethod
+    def _make_age_groups(age_group_counts: dict, titel) -> Tuple[str, int, list]:
+        total = sum(age_group_counts.values())
+        divider = max(1, total)   # prevent div by zero
+
+        age_groups = [((age * 10),
+                       (age * 10)+9,
+                       count,
+                       int((count * 100) / divider),
+                      )
+                      for age, count in age_group_counts.items()]
+        age_groups.sort()
+
+        return titel, total, age_groups
+
+    def _tel_totalen(self, context, actuele_comps):
         context['totaal_18m_indiv'] = 0
         context['aantal_18m_teams_niet_af'] = 0
 
@@ -54,9 +80,10 @@ class CompetitieStatistiekView(UserPassesTestMixin, TemplateView):
             aantal_25m_teams[regio_nr] = 0
         # for
 
-        pks = list()
+        self.comp_pks = list()
         for comp in actuele_comps:
-            pks.append(comp.pk)
+            self.comp_pks.append(comp.pk)
+
             aantal_indiv = (RegiocompetitieSporterBoog
                             .objects
                             .filter(regiocompetitie__competitie=comp)
@@ -125,6 +152,7 @@ class CompetitieStatistiekView(UserPassesTestMixin, TemplateView):
                 context['aantal_25m_teams'].append('-')
         # for
 
+    def _tel_regio(self, context):
         aantal_18m_rayon = dict()
         aantal_25m_rayon = dict()
         aantal_18m_regio = dict()
@@ -136,6 +164,18 @@ class CompetitieStatistiekView(UserPassesTestMixin, TemplateView):
         aantal_geen_scores_18m_regio = dict()
         aantal_geen_scores_25m_regio = dict()
         aantal_leden_regio = dict()
+
+        age_group_counts_18m_indiv_regio = dict()       # [groep] = aantal
+        age_group_counts_25m_indiv_regio = dict()
+        age_group_counts_18m_teams_regio = dict()
+        age_group_counts_25m_teams_regio = dict()
+        for leeftijd in (1, 10, 20, 30, 40, 50, 60, 70, 80):
+            group = leeftijd // 10
+            age_group_counts_18m_indiv_regio[group] = 0
+            age_group_counts_25m_indiv_regio[group] = 0
+            age_group_counts_18m_teams_regio[group] = 0
+            age_group_counts_25m_teams_regio[group] = 0
+        # for
 
         for rayon_nr in range(1, 4+1):
             aantal_18m_rayon[rayon_nr] = 0
@@ -157,16 +197,17 @@ class CompetitieStatistiekView(UserPassesTestMixin, TemplateView):
         hoogste_aantal_scores = 0
         for values in (RegiocompetitieSporterBoog       # 14ms
                        .objects
-                       .filter(regiocompetitie__competitie__pk__in=pks)
+                       .filter(regiocompetitie__competitie__pk__in=self.comp_pks)
                        .values_list('bij_vereniging__regio__rayon_nr',
                                     'bij_vereniging__regio__regio_nr',
                                     'aangemeld_door',
+                                    'sporterboog__sporter__geboorte_datum',
                                     'sporterboog__sporter__account',
                                     'regiocompetitie__competitie__afstand',
                                     'inschrijf_voorkeur_rk_bk',
                                     'aantal_scores')):
 
-            rayon_nr, regio_nr, aangemeld_door, account, afstand, voorkeur_rk_bk, aantal_scores = values
+            rayon_nr, regio_nr, aangemeld_door, geboorte_datum, account, afstand, voorkeur_rk_bk, aantal_scores = values
             zelfstandig = (aangemeld_door == account)
 
             if afstand == '18':
@@ -178,6 +219,8 @@ class CompetitieStatistiekView(UserPassesTestMixin, TemplateView):
                     aantal_zelfstandig_18m_regio[regio_nr] += 1
                 if aantal_scores == 0:
                     aantal_geen_scores_18m_regio[regio_nr] += 1
+
+                self._add_to_age_group(age_group_counts_18m_indiv_regio, geboorte_datum.year)
             else:
                 aantal_25m_rayon[rayon_nr] += 1
                 aantal_25m_regio[regio_nr] += 1
@@ -187,6 +230,8 @@ class CompetitieStatistiekView(UserPassesTestMixin, TemplateView):
                     aantal_zelfstandig_25m_regio[regio_nr] += 1
                 if aantal_scores == 0:
                     aantal_geen_scores_25m_regio[regio_nr] += 1
+
+                self._add_to_age_group(age_group_counts_25m_indiv_regio, geboorte_datum.year)
 
             if aantal_scores > hoogste_aantal_scores:
                 hoogste_aantal_scores = aantal_scores
@@ -219,28 +264,27 @@ class CompetitieStatistiekView(UserPassesTestMixin, TemplateView):
                 context['aantal_25m_geen_scores'].append(aantal_geen_scores_25m_regio[regio_nr])
             # for
 
-        if True:
-            pks1 = list()
-            pks2 = list()
-            zelfstandig = 0
-            for values in (RegiocompetitieSporterBoog       # 10,5ms
-                           .objects
-                           .filter(regiocompetitie__competitie__pk__in=pks)
-                           .values_list('sporterboog__pk',
-                                        'sporterboog__sporter__lid_nr',
-                                        'sporterboog__sporter__account',
-                                        'aangemeld_door')):
-                sporterboog_pk, lid_nr, account, aangemeld_door = values
-                pks1.append(sporterboog_pk)
-                pks2.append(lid_nr)
-                if account == aangemeld_door:
-                    zelfstandig += 1
-            # for
+        pks1 = list()
+        pks2 = list()
+        zelfstandig = 0
+        for values in (RegiocompetitieSporterBoog       # 10,5ms
+                       .objects
+                       .filter(regiocompetitie__competitie__pk__in=self.comp_pks)
+                       .values_list('sporterboog__pk',
+                                    'sporterboog__sporter__lid_nr',
+                                    'sporterboog__sporter__account',
+                                    'aangemeld_door')):
+            sporterboog_pk, lid_nr, account, aangemeld_door = values
+            pks1.append(sporterboog_pk)
+            pks2.append(lid_nr)
+            if account == aangemeld_door:
+                zelfstandig += 1
+        # for
 
-            aantal_sportersboog = len(set(pks1))
-            context['aantal_sporters'] = len(set(pks2))
-            context['aantal_multiboog'] = aantal_sportersboog - context['aantal_sporters']
-            context['aantal_zelfstandig'] = zelfstandig
+        aantal_sportersboog = len(set(pks1))
+        context['aantal_sporters'] = len(set(pks2))
+        context['aantal_multiboog'] = aantal_sportersboog - context['aantal_sporters']
+        context['aantal_zelfstandig'] = zelfstandig
 
         for regio_nr in (Sporter        # 3,8ms
                          .objects
@@ -287,6 +331,39 @@ class CompetitieStatistiekView(UserPassesTestMixin, TemplateView):
         if aantal_sportersboog > 0:
             context['procent_zelfstandig'] = '%.1f' % ((context['aantal_zelfstandig'] / aantal_sportersboog) * 100.0)
 
+        for values in (RegiocompetitieSporterBoog
+                       .objects
+                       .annotate(c=Count('regiocompetitieteam'))
+                       .exclude(c=0)
+                       .values_list('sporterboog__sporter__geboorte_datum',
+                                    'regiocompetitie__competitie__afstand')):
+            geboorte_datum, afstand = values
+
+            if afstand == '18':
+                self._add_to_age_group(age_group_counts_18m_teams_regio, geboorte_datum.year)
+            else:
+                self._add_to_age_group(age_group_counts_25m_teams_regio, geboorte_datum.year)
+        # for
+
+        context['age_groups_regio'] = (
+            self._make_age_groups(age_group_counts_18m_indiv_regio, 'Indoor individueel'),
+            self._make_age_groups(age_group_counts_25m_indiv_regio, '25m 1pijl individueel'),
+            self._make_age_groups(age_group_counts_18m_teams_regio, 'Indoor teams'),
+            self._make_age_groups(age_group_counts_25m_teams_regio, '25m 1pijl teams') )
+
+    def _tel_rk_bk(self, context):
+        age_group_counts_18m_indiv_rk = dict()
+        age_group_counts_25m_indiv_rk = dict()
+        age_group_counts_18m_teams_rk = dict()
+        age_group_counts_25m_teams_rk = dict()
+        for leeftijd in (1, 10, 20, 30, 40, 50, 60, 70, 80):
+            group = leeftijd // 10
+            age_group_counts_18m_indiv_rk[group] = 0
+            age_group_counts_25m_indiv_rk[group] = 0
+            age_group_counts_18m_teams_rk[group] = 0
+            age_group_counts_25m_teams_rk[group] = 0
+        # for
+
         for afstand in (18, 25):
             context['geplaatst_rk_%sm' % afstand] = geplaatst_rk = list()
             context['deelnemers_rk_%sm' % afstand] = deelnemers_rk = list()
@@ -296,13 +373,15 @@ class CompetitieStatistiekView(UserPassesTestMixin, TemplateView):
             qset = (KampioenschapSporterBoog
                     .objects
                     .filter(kampioenschap__competitie__afstand=afstand,
-                            kampioenschap__competitie__pk__in=pks,
-                            kampioenschap__deel=DEEL_RK))
+                            kampioenschap__competitie__pk__in=self.comp_pks,
+                            kampioenschap__deel=DEEL_RK)
+                    .select_related('sporterboog__sporter')
+                    .prefetch_related('kampioenschapteam'))
 
             qset_teams = (KampioenschapTeam
                           .objects
                           .filter(kampioenschap__competitie__afstand=afstand,
-                                  kampioenschap__competitie__pk__in=pks,
+                                  kampioenschap__competitie__pk__in=self.comp_pks,
                                   kampioenschap__deel=DEEL_RK))
 
             totaal1 = totaal2 = totaal3 = totaal4 = 0
@@ -320,12 +399,10 @@ class CompetitieStatistiekView(UserPassesTestMixin, TemplateView):
 
                 aantal = qset_rayon.filter(result_rank__gte=1, result_rank__lt=100).count()
                 in_uitslag_rk.append(aantal)
-
                 totaal3 += aantal
 
                 aantal = qset_teams.filter(kampioenschap__rayon__rayon_nr=rayon_nr).count()
                 teams_rk.append(aantal)
-
                 totaal4 += aantal
             # for
 
@@ -334,10 +411,33 @@ class CompetitieStatistiekView(UserPassesTestMixin, TemplateView):
             in_uitslag_rk.append(totaal3)
             teams_rk.append(totaal4)
 
+            if afstand == 18:
+                age_group_counts = age_group_counts_18m_indiv_rk
+            else:
+                age_group_counts = age_group_counts_25m_indiv_rk
+
+            for values in qset.values_list('sporterboog__sporter__geboorte_datum'):
+                geboorte_datum = values[0]
+                self._add_to_age_group(age_group_counts, geboorte_datum.year)
+            # for
+
+            if afstand == 18:
+                age_group_counts = age_group_counts_18m_teams_rk
+            else:
+                age_group_counts = age_group_counts_25m_teams_rk
+
+            for values in (qset
+                           .annotate(c=Count('kampioenschapteam_gekoppelde_leden'))
+                           .exclude(c=0)
+                           .values_list('sporterboog__sporter__geboorte_datum')):
+                geboorte_datum = values[0]
+                self._add_to_age_group(age_group_counts, geboorte_datum.year)
+            # for
+
             qset_bk = (KampioenschapSporterBoog
                        .objects
                        .filter(kampioenschap__competitie__afstand=afstand,
-                               kampioenschap__competitie__pk__in=pks,
+                               kampioenschap__competitie__pk__in=self.comp_pks,
                                kampioenschap__deel=DEEL_BK))
             context['deelnemers_bk_%sm' % afstand] = qset_bk.count()
 
@@ -347,13 +447,19 @@ class CompetitieStatistiekView(UserPassesTestMixin, TemplateView):
             qset_bk = (KampioenschapTeam
                        .objects
                        .filter(kampioenschap__competitie__afstand=afstand,
-                               kampioenschap__competitie__pk__in=pks,
+                               kampioenschap__competitie__pk__in=self.comp_pks,
                                kampioenschap__deel=DEEL_BK))
             context['teams_bk_%sm' % afstand] = qset_bk.count()
 
             qset_bk = qset_bk.filter(result_rank__gte=1, result_rank__lt=100)
             context['uitslag_teams_bk_%sm' % afstand] = qset_bk.count()
         # for
+
+        context['age_groups_rk'] = (
+            self._make_age_groups(age_group_counts_18m_indiv_rk, 'RK Indoor individueel'),
+            self._make_age_groups(age_group_counts_25m_indiv_rk, 'RK 25m 1pijl individueel'),
+            self._make_age_groups(age_group_counts_18m_teams_rk, 'RK Indoor teams'),
+            self._make_age_groups(age_group_counts_25m_teams_rk, 'RK 25m 1pijl teams') )
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -381,7 +487,10 @@ class CompetitieStatistiekView(UserPassesTestMixin, TemplateView):
         context['heeft_data'] = len(actuele_comps) > 0
 
         if len(actuele_comps):
-            self._tel_aantallen(context, actuele_comps)
+            context['toon_aantal_inschrijvingen'] = True
+            self._tel_totalen(context, actuele_comps)
+            self._tel_regio(context)
+            self._tel_rk_bk(context)
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),

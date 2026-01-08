@@ -297,7 +297,11 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
         # for
 
         if total > 0:       # pragma: no branch
-            age_groups = [((age * 10), (age * 10)+9, count, int((count * 100) / total))
+            age_groups = [((age * 10),
+                           (age * 10)+9,
+                           count,
+                           int((count * 100) / total),
+                          )
                           for age, count in age_group_counts.items()]
             age_groups.sort()
             context['age_groups'] = age_groups

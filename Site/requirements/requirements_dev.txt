@@ -18,7 +18,7 @@ cachetools==6.2.4
     # via
     #   -r requirements.txt
     #   google-auth
-certifi==2025.11.12
+certifi==2026.1.4
     # via
     #   -r requirements.txt
     #   requests
@@ -31,7 +31,7 @@ coverage==7.13.1
     # via
     #   -r requirements_dev.in
     #   django-coverage-plugin
-django==5.2.9
+django==5.2.10
     # via
     #   -r requirements.txt
     #   django-coverage-plugin
@@ -122,7 +122,7 @@ outcome==1.3.0.post0
     # via
     #   trio
     #   trio-websocket
-pillow==12.0.0
+pillow==12.1.0
     # via -r requirements.txt
 pip-licenses-cli==3.0.1
     # via -r requirements_dev.in
@@ -215,7 +215,7 @@ uritemplate==4.2.0
     # via
     #   -r requirements.txt
     #   google-api-python-client
-urllib3==2.6.2
+urllib3==2.6.3
     # via
     #   -r requirements.txt
     #   mollie-api-python

@@ -359,12 +359,12 @@
 
         <!-- blauwe balk met informatie label : info -->
         <div class="row-sv-blauw">
-            <div class="col s12">
+            <div class="col s12 m8 offset-m2 l6 offset-l3 xl4 offset-xl4">
                 <table class="sv-kader-tabel">
                     <thead>
-                        <tr class="sv-table-header">
-                            <th>Leeftijdsgroep</th>
-                            <th>Aantal</th>
+                        <tr>
+                            <th class="center">Leeftijdsgroep</th>
+                            <th class="right-align">Aantal</th>
                             <th class="right-align">Aandeel</th>
                             <th style="width:40%"><!-- chart --></th>
                         </tr>
@@ -372,13 +372,20 @@
 
                     {% for age1, age2, count, perc in age_groups %}
                         <tr>
-                            <td>{% if age1 == 0 %}<span>onder 10</span>
-                                {% elif age2 == 89 %}<span>{{ age1 }} en ouder</span>
-                                {% else %}<span>{{ age1 }} .. {{ age2 }}</span>
+                            <td class="center">
+                                {% if forloop.first %}
+                                    <span>onder {{ age2|add:1 }}</span>
+                                {% elif forloop.last %}
+                                    <span>{{ age1 }} en ouder</span>
+                                {% else %}
+                                    <span>{{ age1 }} .. {{ age2 }}</span>
                                 {% endif %}
-                            <td>{{ count }}</td>
+                            </td>
+                            <td class="right-align">{{ count }}</td>
                             <td class="right-align">{{ perc }}%</td>
-                            <td style="padding: 5px"><div style="background: linear-gradient(to right, #f94137, #f94137 {{ perc }}%, white {{ perc }}%, white 100%); height: 36px">&nbsp;</div></td>
+                            <td style="padding: 5px">
+                                <div style="background: linear-gradient(to right, #f94137, #f94137 {{ perc }}%, white {{ perc }}%, white 100%); height: 36px">&nbsp;</div>
+                            </td>
                         </tr>
                     {% endfor %}
                 </table>
