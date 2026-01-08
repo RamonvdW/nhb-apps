@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -297,7 +297,11 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
         # for
 
         if total > 0:       # pragma: no branch
-            age_groups = [((age * 10), (age * 10)+9, count, int((count * 100) / total))
+            age_groups = [((age * 10),
+                           (age * 10)+9,
+                           count,
+                           int((count * 100) / total),
+                          )
                           for age, count in age_group_counts.items()]
             age_groups.sort()
             context['age_groups'] = age_groups

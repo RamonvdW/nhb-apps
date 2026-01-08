@@ -1,6 +1,6 @@
 {% extends 'design/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2022-2025 Ramon van der Winkel.
+                Copyright (c) 2022-2026 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -118,6 +118,47 @@
                         </tr>
                     {% endif %}
 
+                    <tr>
+                        <td colspan="4" class="center sv-blauw-text"><h5>Leeftijdsgroepen regiocompetitie</h5></td>
+                    </tr>
+
+                    {% for titel, total, age_groups in age_groups_regio %}
+                        {% if total > 0 %}
+                            <tr>
+                                <td colspan="4" class="center">
+                                    <h5>{{ titel }}</h5>
+                                    <p>Leeftijd van de {{ total }} sporters, gegroepeerd per 10 jaar.</p>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th class="center">Leeftijdsgroep</th>
+                                <th class="right-align">Aantal</th>
+                                <th class="right-align">Aandeel</th>
+                                <th style="width:40%"><!-- chart --></th>
+                            </tr>
+
+                            {% for age1, age2, count, perc in age_groups %}
+                                <tr>
+                                    <td class="center">
+                                        {% if forloop.first %}
+                                            <span>onder {{ age2|add:1 }}</span>
+                                        {% elif forloop.last %}
+                                            <span>{{ age1 }} en ouder</span>
+                                        {% else %}
+                                            <span>{{ age1 }} .. {{ age2 }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="right-align">{{ count }}</td>
+                                    <td class="right-align">{{ perc }}%</td>
+                                    <td style="padding: 5px">
+                                        <div style="background: linear-gradient(to right, #f94137, #f94137 {{ perc }}%, white {{ perc }}%, white 100%); height: 36px">&nbsp;</div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% endif %}
+                    {% endfor %}
+
 
                     <tr>
                         <td colspan="4" class="center sv-blauw-text"><h5>Rayonkampioenschappen individueel</h5></td>
@@ -163,6 +204,48 @@
                         <td class="right-align"><b>Indoor</b>{% for aantal in teams_rk_18m %}<br>{{ aantal }}{% endfor %}</td>
                         <td class="right-align" style="padding-right:15px"><b>25m1pijl</b>{% for aantal in teams_rk_25m %}<br>{{ aantal }}{% endfor %}</td>
                     </tr>
+
+
+                    <tr>
+                        <td colspan="4" class="center sv-blauw-text"><h5>Leeftijdsgroepen rayonkampioenschappen</h5></td>
+                    </tr>
+
+                    {% for titel, total, age_groups in age_groups_rk %}
+                        {% if total > 0 %}
+                            <tr>
+                                <td colspan="4" class="center">
+                                    <h5>{{ titel }}</h5>
+                                    <p>Leeftijd van de {{ total }} sporters, gegroepeerd per 10 jaar.</p>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th class="center">Leeftijdsgroep</th>
+                                <th class="right-align">Aantal</th>
+                                <th class="right-align">Aandeel</th>
+                                <th style="width:40%"><!-- chart --></th>
+                            </tr>
+
+                            {% for age1, age2, count, perc in age_groups %}
+                                <tr>
+                                    <td class="center">
+                                        {% if forloop.first %}
+                                            <span>onder {{ age2|add:1 }}</span>
+                                        {% elif forloop.last %}
+                                            <span>{{ age1 }} en ouder</span>
+                                        {% else %}
+                                            <span>{{ age1 }} .. {{ age2 }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="right-align">{{ count }}</td>
+                                    <td class="right-align">{{ perc }}%</td>
+                                    <td style="padding: 5px">
+                                        <div style="background: linear-gradient(to right, #f94137, #f94137 {{ perc }}%, white {{ perc }}%, white 100%); height: 36px">&nbsp;</div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% endif %}
+                    {% endfor %}
 
 
                     <tr>
