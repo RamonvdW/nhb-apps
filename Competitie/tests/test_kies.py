@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2025 Ramon van der Winkel.
+#  Copyright (c) 2020-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -22,6 +22,8 @@ class TestCompetitieKies(E2EHelpers, TestCase):
     """ tests voor de Competitie applicatie, pagina Kies """
 
     url_kies = '/bondscompetities/'
+    url_latest_18m = '/bondscompetities/indoor/'
+    url_latest_25m = '/bondscompetities/25m1pijl/'
 
     def setUp(self):
         self.account_admin = self.e2e_create_account_admin()
@@ -149,5 +151,28 @@ class TestCompetitieKies(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/kies.dtl', 'design/site_layout.dtl'))
+
+    def test_redirect_latest(self):
+        # geen competitie --> redirect naar kies pagina
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_latest_18m)
+        self.assert_is_redirect(resp, self.url_kies)
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_latest_25m)
+        self.assert_is_redirect(resp, self.url_kies)
+
+        # maak de competities
+        maak_competities_en_zet_fase_c(startjaar=2019)
+
+        # redirect naar nieuwste seizoen
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_latest_18m)
+        self.assert_is_redirect(resp, '/bondscompetities/indoor-2019-2020/')
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_latest_25m)
+        self.assert_is_redirect(resp, '/bondscompetities/25m1pijl-2019-2020/')
+
 
 # end of file

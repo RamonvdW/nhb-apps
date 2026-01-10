@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -879,7 +879,7 @@ class MyTestAsserts(TestCase):
             self.fail(msg=msg)
         pos = expected_url.find('##')
         if pos > 0:
-            self.assertTrue(resp.url.startswith(expected_url[:pos]))
+            self.assertEqual(expected_url[:pos], resp.url[:pos])
         else:
             self.assertEqual(expected_url, resp.url)
 
@@ -1199,6 +1199,25 @@ class MyTestAsserts(TestCase):
 
             # nog een?
             pos = html.find('<a href="mailto:')
+        # while
+
+        # verwijder alle <a href="url"><code>url</code></a> en behoud alleen de url
+        pos = html.find('<a href="http')
+        while pos > 0:
+            pos2 = html.find('"><code>', pos)
+            if pos2 > 0:  # pragma: no cover
+                pos3 = html.find('</code></a>', pos2)
+                html = html[:pos3] + html[pos3 + 11:]
+                html = html[:pos] + html[pos2 + 8:]
+            else:
+                # try without <code>
+                pos2 = html.find('">', pos)
+                pos3 = html.find('</a>', pos2)
+                html = html[:pos3] + html[pos3 + 4:]
+                html = html[:pos] + html[pos2 + 2:]
+
+            # nog een?
+            pos = html.find('<a href="http')
         # while
 
         # check distance between euro signs

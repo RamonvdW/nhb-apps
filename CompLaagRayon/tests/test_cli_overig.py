@@ -258,6 +258,7 @@ class TestCompLaagRayonCliOverig(E2EHelpers, TestCase):
         mail = MailQueue.objects.first()
         # self.e2e_show_email_in_browser(mail)
         self.assert_email_html_ok(mail, 'email_complaagrayon/bevestig-deelname.dtl')
+        self.assert_consistent_email_html_text(mail)
 
         # verwijder de functie
         Functie.objects.filter(rol='HWL', vereniging=ver).delete()

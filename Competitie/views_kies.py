@@ -5,7 +5,8 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import reverse
-from django.views.generic import TemplateView
+from django.http import HttpResponseRedirect
+from django.views.generic import TemplateView, View
 from CompBeheer.operations.toegang import is_competitie_openbaar_voor_rol
 from CompKampioenschap.operations import aanmaken_wedstrijdformulieren_is_pending
 from Competitie.models import Competitie
@@ -147,5 +148,31 @@ class CompetitieKiesView(TemplateView):
 
         return context
 
+
+class CompetitieRedirect(View):
+    afstand = 0
+
+    def get(self, request, *args, **kwargs):
+        comp = (Competitie
+                .objects
+                .filter(afstand=self.afstand,
+                        is_afgesloten=False)
+                .order_by('begin_jaar')         # oudste eerst
+                .first())
+
+        if comp:
+            url = reverse('Competitie:overzicht', kwargs={'comp_pk_of_seizoen': comp.maak_seizoen_url()})
+        else:
+            # geen competitie gevonden --> stuur naar de landing page (in plaats van foutmelding)
+            url = reverse('Competitie:kies')
+
+        return HttpResponseRedirect(url)
+
+
+class CompetitieKies18mView(CompetitieRedirect):
+    afstand = 18
+
+class CompetitieKies25mView(CompetitieRedirect):
+    afstand = 25
 
 # end of file
