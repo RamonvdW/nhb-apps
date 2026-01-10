@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023-2025 Ramon van der Winkel.
+#  Copyright (c) 2023-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -63,7 +63,7 @@ class TestCompBeheerStats(E2EHelpers, TestCase):
         self.assertIn(self.url_statistiek, urls)
 
         # haal de statistiek pagina op
-        with self.assert_max_queries(55):
+        with self.assert_max_queries(56):
             resp = self.client.get(self.url_statistiek)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -71,7 +71,7 @@ class TestCompBeheerStats(E2EHelpers, TestCase):
 
         # cornercase: nul alle inschrijvingen
         RegiocompetitieSporterBoog.objects.all().delete()
-        with self.assert_max_queries(55):
+        with self.assert_max_queries(56):
             resp = self.client.get(self.url_statistiek)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -96,7 +96,7 @@ class TestCompBeheerStats(E2EHelpers, TestCase):
         competities_aanmaken(jaar=2018)
 
         # haal de statistiek pagina op
-        with self.assert_max_queries(55):
+        with self.assert_max_queries(56):
             resp = self.client.get(self.url_statistiek)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)

@@ -29,7 +29,7 @@
 {% block inhoud_html %}
     <div>Hallo {{ voornaam }}!</div>
     <br>
-    <div>We willen graag weten of je deel kan nemen aan het het {{ rk_kort }}</div>
+    <div>We willen graag weten of je deel kan nemen aan het het {{ rk_kort }}.</div>
     <br>
     <div>Je kan dit doorgeven door in te loggen op MijnHandboogsport.<br>Ga naar Mijn pagina en klik op "Geef door".</div>
     <br>
