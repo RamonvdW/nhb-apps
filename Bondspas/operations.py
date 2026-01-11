@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2025 Ramon van der Winkel.
+#  Copyright (c) 2021-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -8,6 +8,7 @@ from django.conf import settings
 from django.utils import timezone
 from django.utils.formats import date_format
 from BasisTypen.definities import GESLACHT_ANDERS
+from Bondspas.models import BondspasJaar
 from Opleiding.models import OpleidingDiploma
 from Sporter.leeftijdsklassen import (bereken_leeftijdsklasse_wa,
                                       bereken_leeftijdsklasse_khsn,
@@ -25,19 +26,28 @@ EXIF_TAG_TITLE = 0x010D     # DocumentName
 # EXIF_TAG_TITLE = 0x010E     # ImageDescription
 
 
-def bepaal_jaar_bondspas_en_wedstrijden():
-    # bepaal het jaar voor op de bondspas en de wedstrijdklassen waarin de sporter uit moet komen
-    now = timezone.localtime(timezone.now())
-    jaar_pas = jaar_wedstrijden = now.year
+def bepaal_jaar_bondspas() -> int:
+    """ bepaal het jaar voor op de bondspas """
 
-    # toon de "oude pas" tot 15 januari
-    if now.month == 1 and now.day < 15:
-        jaar_pas -= 1
+    # bondspas is het nieuwste jaar
+    bondspas = (BondspasJaar
+                .objects
+                .exclude(zichtbaar=False)
+                .order_by('-jaar')        # hoogste eerst
+                .first())
+    if bondspas:
+        # gevonden
+        jaar_pas = bondspas.jaar
+    else:
+        # niet gevonden
+        # toon de pas van vorige jaar
+        now = timezone.localtime(timezone.now())
+        jaar_pas = now.year - 1
 
-    return jaar_pas, jaar_wedstrijden
+    return jaar_pas
 
 
-def maak_bondspas_regels(sporter, jaar_pas, jaar_wedstrijdklasse):
+def maak_bondspas_regels(sporter, jaar_pas):
     """ Bepaal de regels tekst die op de bondspas moeten komen voor deze specifieke sporter
     """
     regels = []
@@ -123,9 +133,9 @@ def maak_bondspas_regels(sporter, jaar_pas, jaar_wedstrijdklasse):
     else:
         regels.append(("Speelsterkte", "n.v.t."))
 
-    wedstrijdleeftijd_wa = sporter.bereken_wedstrijdleeftijd_wa(jaar_wedstrijdklasse)
+    wedstrijdleeftijd_wa = sporter.bereken_wedstrijdleeftijd_wa(jaar_pas)
 
-    wedstrijd_datum = datetime.date(year=jaar_wedstrijdklasse,
+    wedstrijd_datum = datetime.date(year=jaar_pas,
                                     month=sporter.geboorte_datum.month,
                                     day=sporter.geboorte_datum.day)
     wedstrijdleeftijd_ifaa_vanaf_verjaardag = sporter.bereken_wedstrijdleeftijd_ifaa(wedstrijd_datum)
@@ -146,12 +156,7 @@ def maak_bondspas_regels(sporter, jaar_pas, jaar_wedstrijdklasse):
         wedstrijdgeslacht = 'M'
         wedstrijdgeslacht_khsn = GESLACHT_ANDERS
 
-    if jaar_wedstrijdklasse > jaar_pas:
-        suffix = ' %s' % jaar_wedstrijdklasse
-    else:
-        suffix = ''
-
-    regels.append(('Wedstrijdklassen' + suffix, ''))     # sectie titel
+    regels.append(('Wedstrijdklassen', ''))     # sectie titel
 
     lkl_wa = bereken_leeftijdsklasse_wa(wedstrijdleeftijd_wa, wedstrijdgeslacht)
     regels.append(("WA", lkl_wa))
@@ -228,9 +233,11 @@ def plaatje_teken_barcode(lid_nr, draw, begin_x, end_y, font):
     # for
 
 
-def plaatje_teken(regels):
-    fpath = os_path.join(settings.INSTALL_PATH, 'Bondspas', 'files', 'achtergrond_bondspas.jpg')
+def plaatje_teken(jaar_pas, regels):
+
+    fpath = os_path.join(settings.INSTALL_PATH, 'Bondspas', 'files', 'achtergrond_bondspas-%s.jpg' % jaar_pas)
     image = Image.open(fpath)
+
     _, _, width, height = image.getbbox()
     # standard size = 1418 x 2000
 
@@ -358,7 +365,7 @@ def plaatje_teken(regels):
 
 def maak_bondspas_jpeg_en_pdf(jaar_pas, lid_nr, regels):
 
-    image = plaatje_teken(regels)
+    image = plaatje_teken(jaar_pas, regels)
 
     # maak de JPEG
     ifd = ImageFileDirectory_v2()

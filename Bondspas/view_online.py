@@ -1,18 +1,20 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2025 Ramon van der Winkel.
+#  Copyright (c) 2021-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.http import JsonResponse, HttpResponse, Http404
+from django.utils import timezone
 from django.shortcuts import render, reverse
 from django.views.generic import View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
-from Bondspas.operations import bepaal_jaar_bondspas_en_wedstrijden, maak_bondspas_regels, maak_bondspas_jpeg_en_pdf
+from Bondspas.operations import bepaal_jaar_bondspas, maak_bondspas_regels, maak_bondspas_jpeg_en_pdf
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie
 from Sporter.models import Sporter, get_sporter
+import datetime
 import base64
 
 
@@ -61,6 +63,12 @@ class ToonBondspasView(UserPassesTestMixin, View):
 
         _get_sporter_or_404(request)
 
+        now = timezone.now()
+        if now.month == 1:
+            pas_jaar = bepaal_jaar_bondspas()
+            if pas_jaar < now.year:
+                context['is_oude_pas'] = True
+
         context['kruimels'] = (
             (reverse('Sporter:profiel'), 'Mijn pagina'),
             (None, 'Toon bondspas'),
@@ -90,8 +98,8 @@ class DynamicBondspasOphalenView(UserPassesTestMixin, View):
 
         sporter = _get_sporter_or_404(request)
 
-        jaar_pas, jaar_wedstrijden = bepaal_jaar_bondspas_en_wedstrijden()
-        regels = maak_bondspas_regels(sporter, jaar_pas, jaar_wedstrijden)
+        jaar_pas = bepaal_jaar_bondspas()
+        regels = maak_bondspas_regels(sporter, jaar_pas)
         img_data, _ = maak_bondspas_jpeg_en_pdf(jaar_pas, sporter.lid_nr, regels)
 
         # base64 is nodig voor img in html
@@ -120,8 +128,8 @@ class DynamicBondspasDownloadView(UserPassesTestMixin, View):
         """
         sporter = _get_sporter_or_404(request)
 
-        jaar_pas, jaar_wedstrijden = bepaal_jaar_bondspas_en_wedstrijden()
-        regels = maak_bondspas_regels(sporter, jaar_pas, jaar_wedstrijden)
+        jaar_pas = bepaal_jaar_bondspas()
+        regels = maak_bondspas_regels(sporter, jaar_pas)
         _, pdf_data = maak_bondspas_jpeg_en_pdf(jaar_pas, sporter.lid_nr, regels)
 
         fname = 'bondspas_%s_%s.pdf' % (sporter.lid_nr, jaar_pas)
@@ -161,8 +169,8 @@ class ToonBondspasBeheerderView(UserPassesTestMixin, View):
         if sporter.is_gast:
             raise Http404('Geen bondspas voor gast-accounts')
 
-        jaar_pas, jaar_wedstrijden = bepaal_jaar_bondspas_en_wedstrijden()
-        regels = maak_bondspas_regels(sporter, jaar_pas, jaar_wedstrijden)
+        jaar_pas = bepaal_jaar_bondspas()
+        regels = maak_bondspas_regels(sporter, jaar_pas)
         img_data, _ = maak_bondspas_jpeg_en_pdf(jaar_pas, sporter.lid_nr, regels)
 
         # base64 is nodig voor img in html
@@ -191,8 +199,8 @@ class ToonBondspasBeheerderView(UserPassesTestMixin, View):
         if sporter.is_gast:
             raise Http404('Geen bondspas voor gast-accounts')
 
-        jaar_pas, jaar_wedstrijden = bepaal_jaar_bondspas_en_wedstrijden()
-        regels = maak_bondspas_regels(sporter, jaar_pas, jaar_wedstrijden)
+        jaar_pas = bepaal_jaar_bondspas()
+        regels = maak_bondspas_regels(sporter, jaar_pas)
         _, pdf_data = maak_bondspas_jpeg_en_pdf(jaar_pas, sporter.lid_nr, regels)
 
         fname = 'bondspas_%s_%s.pdf' % (sporter.lid_nr, jaar_pas)
@@ -235,8 +243,8 @@ class ToonBondspasVerenigingView(UserPassesTestMixin, View):
         if not sporter.bij_vereniging or sporter.bij_vereniging != self.functie_nu.vereniging:
             raise Http404('Verkeerde vereniging')
 
-        jaar_pas, jaar_wedstrijden = bepaal_jaar_bondspas_en_wedstrijden()
-        regels = maak_bondspas_regels(sporter, jaar_pas, jaar_wedstrijden)
+        jaar_pas = bepaal_jaar_bondspas()
+        regels = maak_bondspas_regels(sporter, jaar_pas)
         img_data, _ = maak_bondspas_jpeg_en_pdf(jaar_pas, sporter.lid_nr, regels)
 
         # base64 is nodig voor img in html
@@ -268,8 +276,8 @@ class ToonBondspasVerenigingView(UserPassesTestMixin, View):
         if not sporter.bij_vereniging or sporter.bij_vereniging != self.functie_nu.vereniging:
             raise Http404('Verkeerde vereniging')
 
-        jaar_pas, jaar_wedstrijden = bepaal_jaar_bondspas_en_wedstrijden()
-        regels = maak_bondspas_regels(sporter, jaar_pas, jaar_wedstrijden)
+        jaar_pas = bepaal_jaar_bondspas()
+        regels = maak_bondspas_regels(sporter, jaar_pas)
         _, pdf_data = maak_bondspas_jpeg_en_pdf(jaar_pas, sporter.lid_nr, regels)
 
         fname = 'bondspas_%s_%s.pdf' % (sporter.lid_nr, jaar_pas)

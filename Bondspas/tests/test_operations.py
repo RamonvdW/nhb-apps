@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2025 Ramon van der Winkel.
+#  Copyright (c) 2021-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.test import TestCase, override_settings
-from django.utils import timezone
-from BasisTypen.definities import GESLACHT_ANDERS
-from Bondspas.operations import bepaal_jaar_bondspas_en_wedstrijden, maak_bondspas_regels
+from django.test import TestCase
+from Bondspas.operations import bepaal_jaar_bondspas, maak_bondspas_regels
+from Bondspas.models import BondspasJaar
 from Geo.models import Regio
 from Opleiding.models import OpleidingDiploma
 from Sporter.models import Sporter, Speelsterkte
@@ -21,28 +20,38 @@ class TestBondspasOperations(E2EHelpers, TestCase):
 
     """ tests voor de Bondspas applicatie, berekenen van de informatie die op de bondspas moet komen """
 
-    url_toon_sporter = '/bondspas/toon/'
-    url_toon_van = '/bondspas/toon/van-lid/%s/'         # lid_nr
-    url_ver_van = '/bondspas/vereniging/van-lid/%s/'    # lid_nr
-    url_ophalen = '/bondspas/dynamic/ophalen/'
-    url_download = '/bondspas/dynamic/download/'
+    bondspas_jaar1 = 2025       # files/achtergrond_bondspas-2025.jpg moet aanwezig zijn
+    bondspas_jaar2 = 2026       # files/achtergrond_bondspas-2026.jpg moet aanwezig zijn
 
     def setUp(self):
         pass
 
     def test_jaar(self):
-        with patch('django.utils.timezone.localtime') as mock_timezone:
-            mock_timezone.return_value = datetime.datetime(year=2010, month=11, day=12, tzinfo=datetime.timezone.utc)
-            jaar_pas, jaar_wedstrijden = bepaal_jaar_bondspas_en_wedstrijden()
-            # print('jaar_pas=%s, jaar_wedstrijden=%s' % (jaar_pas, jaar_wedstrijden))
-            self.assertEqual(jaar_pas, 2010)
-            self.assertEqual(jaar_wedstrijden, 2010)
+        BondspasJaar.objects.create(jaar=self.bondspas_jaar1, zichtbaar=True)
+        BondspasJaar.objects.create(jaar=self.bondspas_jaar2, zichtbaar=False)
 
-            mock_timezone.return_value = datetime.datetime(year=2011, month=1, day=12, tzinfo=datetime.timezone.utc)
-            jaar_pas, jaar_wedstrijden = bepaal_jaar_bondspas_en_wedstrijden()
-            # print('jaar_pas=%s, jaar_wedstrijden=%s' % (jaar_pas, jaar_wedstrijden))
-            self.assertEqual(jaar_pas, 2010)
-            self.assertEqual(jaar_wedstrijden, 2011)
+        with patch('django.utils.timezone.localtime') as mock_timezone:
+            mock_timezone.return_value = datetime.datetime(year=self.bondspas_jaar1, month=11, day=12, tzinfo=datetime.timezone.utc)
+            jaar_pas = bepaal_jaar_bondspas()
+            self.assertEqual(jaar_pas, self.bondspas_jaar1)
+
+            mock_timezone.return_value = datetime.datetime(year=self.bondspas_jaar2, month=1, day=12, tzinfo=datetime.timezone.utc)
+            jaar_pas = bepaal_jaar_bondspas()
+            self.assertEqual(jaar_pas, self.bondspas_jaar1)
+
+            mock_timezone.return_value = datetime.datetime(year=self.bondspas_jaar2, month=1, day=31, tzinfo=datetime.timezone.utc)
+            jaar_pas = bepaal_jaar_bondspas()
+            self.assertEqual(jaar_pas, self.bondspas_jaar1)
+
+            BondspasJaar.objects.filter(jaar=self.bondspas_jaar2).update(zichtbaar=True)
+
+            mock_timezone.return_value = datetime.datetime(year=self.bondspas_jaar2, month=1, day=12, tzinfo=datetime.timezone.utc)
+            jaar_pas = bepaal_jaar_bondspas()
+            self.assertEqual(jaar_pas, self.bondspas_jaar2)
+
+            mock_timezone.return_value = datetime.datetime(year=self.bondspas_jaar2, month=1, day=31, tzinfo=datetime.timezone.utc)
+            jaar_pas = bepaal_jaar_bondspas()
+            self.assertEqual(jaar_pas, self.bondspas_jaar2)
 
     def test_regels(self):
         now = datetime.datetime.now()
@@ -68,7 +77,7 @@ class TestBondspasOperations(E2EHelpers, TestCase):
                         is_erelid=True,
                         para_classificatie='test')
 
-        regels = maak_bondspas_regels(sporter, year, year)
+        regels = maak_bondspas_regels(sporter, year)
         # print(regels)
 
         # andere varianten
@@ -76,7 +85,7 @@ class TestBondspasOperations(E2EHelpers, TestCase):
         sporter.para_classificatie = ''
         sporter.bij_vereniging = ver
 
-        regels = maak_bondspas_regels(sporter, year, year)
+        regels = maak_bondspas_regels(sporter, year)
         # print(regels)
 
         sporter.save()
@@ -149,7 +158,7 @@ class TestBondspasOperations(E2EHelpers, TestCase):
                 toon_op_pas=True,
                 datum_begin=now).save()
 
-        regels = maak_bondspas_regels(sporter, year, year+1)
+        regels = maak_bondspas_regels(sporter, year)
         # print(regels)
 
         self.assertTrue(('Speelsterkte', 'R1000, RM1100, TS1150') in regels)
