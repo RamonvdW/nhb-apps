@@ -5,6 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase, override_settings
+from django.utils.timezone import make_aware
 from BasisTypen.definities import GESLACHT_ANDERS
 from Bondspas.models import BondspasJaar
 from Functie.tests.helpers import maak_functie
@@ -93,11 +94,38 @@ class TestBondspasOnline(E2EHelpers, TestCase):
         # sporter
         self.e2e_login(self.account)
 
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_toon_sporter)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('bondspas/toon-bondspas-sporter.dtl', 'design/site_layout.dtl'))
+        # in januari van het oude jaar
+        with patch('django.utils.timezone.now') as mock_timezone:
+            dt = make_aware(datetime.datetime(year=self.bondspas_jaar1, month=1, day=31, hour=19))
+            mock_timezone.return_value = dt
+
+            with self.assert_max_queries(20):
+                resp = self.client.get(self.url_toon_sporter)
+            self.assertEqual(resp.status_code, 200)     # 200 = OK
+            self.assert_html_ok(resp)
+            self.assert_template_used(resp, ('bondspas/toon-bondspas-sporter.dtl', 'design/site_layout.dtl'))
+
+        # in juli
+        with patch('django.utils.timezone.now') as mock_timezone:
+            dt = make_aware(datetime.datetime(year=self.bondspas_jaar1, month=7, day=1, hour=19))
+            mock_timezone.return_value = dt
+
+            with self.assert_max_queries(20):
+                resp = self.client.get(self.url_toon_sporter)
+            self.assertEqual(resp.status_code, 200)     # 200 = OK
+            self.assert_html_ok(resp)
+            self.assert_template_used(resp, ('bondspas/toon-bondspas-sporter.dtl', 'design/site_layout.dtl'))
+
+        # in januari van het nieuwe jaar
+        with patch('django.utils.timezone.now') as mock_timezone:
+            dt = make_aware(datetime.datetime(year=self.bondspas_jaar2, month=1, day=7, hour=19))
+            mock_timezone.return_value = dt
+
+            with self.assert_max_queries(20):
+                resp = self.client.get(self.url_toon_sporter)
+            self.assertEqual(resp.status_code, 200)     # 200 = OK
+            self.assert_html_ok(resp)
+            self.assert_template_used(resp, ('bondspas/toon-bondspas-sporter.dtl', 'design/site_layout.dtl'))
 
         # gast-account
         self.sporter.is_gast = True
@@ -341,8 +369,8 @@ class TestBondspasOnline(E2EHelpers, TestCase):
         self.e2e_login(self.account)
 
         # self.bondspas_jaar2 heeft zichtbaar=False
-        with patch('django.utils.timezone.localtime') as mock_timezone:
-            dt = datetime.datetime(year=self.bondspas_jaar2, month=1, day=1, hour=19)
+        with patch('django.utils.timezone.now') as mock_timezone:
+            dt = make_aware(datetime.datetime(year=self.bondspas_jaar2, month=1, day=1, hour=19))
             mock_timezone.return_value = dt
 
             with self.assert_max_queries(20):
@@ -354,6 +382,22 @@ class TestBondspasOnline(E2EHelpers, TestCase):
         # sporter
         self.e2e_login(self.account)
 
+        # geen bondspas record
+        BondspasJaar.objects.all().update(zichtbaar=False)
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_toon_sporter)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('bondspas/toon-bondspas-sporter.dtl', 'design/site_layout.dtl'))
+
+        # admin interface
+        bondspas = BondspasJaar(jaar=1999, zichtbaar=False)
+        self.assertTrue(str(bondspas) != '')
+        bondspas.zichtbaar = True
+        self.assertTrue(str(bondspas) != '')
+
+        # inactief lid
         self.sporter.is_actief_lid = False
         self.sporter.save(update_fields=['is_actief_lid'])
 
