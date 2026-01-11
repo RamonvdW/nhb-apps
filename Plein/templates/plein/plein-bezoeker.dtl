@@ -79,6 +79,12 @@
             <p>&nbsp;</p>
             <h4>Maak het persoonlijk</h4>
             <p>Door een account aan te maken kunnen we informatie tonen die voor jou relevant is<br>en kan je je aanmelden voor wedstrijden.</p>
+            {% if url_privacy %}
+                <p>
+                    <!-- vereiste link voor OAuth2.0 voor integratie met Google Drive -->
+                    <a href="{{ url_privacy }}">Privacy Policy</a>
+                </p>
+            {% endif %}
         </div>
     </div>
 
@@ -111,8 +117,5 @@
             {% include 'plein/andere-sites.dtl' %}
         </div>
     </div>
-
-    <!-- vereiste link voor OAuth2.0 voor integratie met Google Drive -->
-    <a href="{{ url_privacy }}">Privacy Policy</a>
 
 {% endblock %}
