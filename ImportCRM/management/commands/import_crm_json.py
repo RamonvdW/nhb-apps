@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -968,10 +968,10 @@ class Command(BaseCommand):
                 else:
                     new_plaats = upper_plaats[0] + plaats[1:]
 
-                if plaats != new_plaats:
-                    self.stdout.write("[WARNING] Lid %s: corrigeer geboorteplaats: %s --> %s" % (
-                        lid_nr, repr(plaats), repr(new_plaats)))
-                    self._count_warnings += 1
+                # if plaats != new_plaats:
+                #     self.stdout.write("[WARNING] Lid %s: corrigeer geboorteplaats: %s --> %s" % (
+                #         lid_nr, repr(plaats), repr(new_plaats)))
+                #     self._count_warnings += 1
 
                 return new_plaats
 
