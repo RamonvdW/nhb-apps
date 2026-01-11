@@ -18,7 +18,11 @@ class BondspasJaar(models.Model):
 
     def __str__(self):
         """ geef een tekstuele afkorting van dit object, voor in de admin interface """
-        return "Jaar %s; zichtbaar=%s" % (self.jaar, self.zichtbaar)
+        msg = 'Jaar %s (' % self.jaar
+        if not self.zichtbaar:
+            msg += 'niet '
+        msg += 'zichtbaar)'
+        return msg
 
     class Meta:
         verbose_name = "Bondspas jaar"

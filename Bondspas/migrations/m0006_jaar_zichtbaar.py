@@ -29,9 +29,9 @@ class Migration(migrations.Migration):
                 ('jaar', models.PositiveSmallIntegerField(default=0)),
             ],
             options={
-                'verbose_name': 'Bondspas jaar',
-                'verbose_name_plural': 'Bondspassen jaren',
                 'ordering': ['-jaar'],
+                'verbose_name': 'Bondspas jaar',
+                'verbose_name_plural': 'Bondspas jaren'
             },
         ),
     ]
