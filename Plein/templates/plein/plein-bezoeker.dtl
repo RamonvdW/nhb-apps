@@ -85,8 +85,13 @@
     <!-- blauwe balk met account aanmaken -->
     <div class="row-sv-blauw">
         <div class="col s12">
+            <!-- account aanmaken -->
             {% url 'Registreer:begin' as card_url %}
             {% include 'design/card_icon.dtl' with title="Account aanmaken" text="Met een account wordt het persoonlijker en krijg je toegang tot meer functionaliteit." sv_icon="account aanmaken" url=card_url %}
+
+            <!-- privacyverklaring -->
+            {% url 'Plein:privacy' as card_url %}
+            {% include 'design/card_icon.dtl' with title="Privacyverklaring" text="Lees hier hoe we omgaan met jouw privacy." sv_icon="privacyverklaring" url=card_url %}
         </div>
     </div>
 
