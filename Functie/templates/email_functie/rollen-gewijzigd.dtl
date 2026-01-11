@@ -1,6 +1,6 @@
 {% extends 'email_mailer/email_basis.dtl' %}
 {% comment %}
-                Copyright (c) 2022 Ramon van der Winkel.
+                Copyright (c) 2022-2026 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -29,8 +29,8 @@
     {% if uitleg_2fa %}
         <div>Om gebruik te kunnen maken van deze rol vragen we je om eenmalig een aantal stappen te doorlopen.</div>
         <div>Deze stappen staan beschreven in de handleiding voor beheerders:<br>
-            <a href="{{ url_handleiding_beheerders }}" target="_blank">Handleiding voor beheerders</a>.</div>
+            <a href="{{ url_handleiding_beheerders }}" target="_blank"><code>{{ url_handleiding_beheerders }}</code></a></div>
         <br>
     {% endif %}
-    <div>Als je dit niet herkent, of hier vragen over hebt, neem dan contact met ons op via {{ contact_email }}</div>
+    <div>Als je dit niet herkent, of hier vragen over hebt, neem dan contact met ons op via <a href="mailto:{{ contact_email }}"><code>{{ contact_email }}</code></a></div>
 {% endblock %}
