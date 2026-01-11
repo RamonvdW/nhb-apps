@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -194,6 +194,7 @@ class PleinView(View):
 
         context['email_support'] = settings.EMAIL_SUPPORT
         context['url_email_support'] = 'mailto:' + settings.EMAIL_SUPPORT
+        context['url_privacy'] = settings.SITE_URL + reverse('Plein:privacy')
 
         context['canonical'] = reverse('Plein:plein')
 

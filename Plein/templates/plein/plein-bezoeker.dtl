@@ -1,6 +1,6 @@
 {% extends 'design/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2021-2025 Ramon van der Winkel.
+                Copyright (c) 2021-2026 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -85,8 +85,14 @@
     <!-- blauwe balk met account aanmaken -->
     <div class="row-sv-blauw">
         <div class="col s12">
+            <!-- account aanmaken -->
             {% url 'Registreer:begin' as card_url %}
             {% include 'design/card_icon.dtl' with title="Account aanmaken" text="Met een account wordt het persoonlijker en krijg je toegang tot meer functionaliteit." sv_icon="account aanmaken" url=card_url %}
+
+            <!-- privacyverklaring -->
+            {% if url_privacy %}
+                {% include 'design/card_icon.dtl' with title="Privacyverklaring" text="Lees hier hoe we omgaan met jouw privacy." sv_icon="privacyverklaring" url=url_privacy %}
+            {% endif %}
         </div>
     </div>
 
