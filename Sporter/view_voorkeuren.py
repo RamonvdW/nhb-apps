@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2025 Ramon van der Winkel.
+#  Copyright (c) 2020-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -107,6 +107,7 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
         voorkeuren.voorkeur_meedoen_competitie = keuze
 
         para_notitie = self.request.POST.get('para_notitie', '')
+        para_notitie = para_notitie.strip().replace('  ', ' ').capitalize()  # "  schiet met  .." --> "Schiet met .."
         voorkeuren.opmerking_para_sporter = para_notitie
 
         keuze = self.request.POST.get('para_voorwerpen', None) is not None

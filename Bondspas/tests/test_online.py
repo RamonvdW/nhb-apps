@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2025 Ramon van der Winkel.
+#  Copyright (c) 2021-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase, override_settings
 from BasisTypen.definities import GESLACHT_ANDERS
+from Bondspas.models import BondspasJaar
 from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
 from Opleiding.models import OpleidingDiploma
@@ -26,9 +27,15 @@ class TestBondspasOnline(E2EHelpers, TestCase):
     url_ophalen = '/bondspas/dynamic/ophalen/'
     url_download = '/bondspas/dynamic/download/'
 
+    bondspas_jaar1 = 2025       # files/achtergrond_bondspas-2025.jpg moet aanwezig zijn
+    bondspas_jaar2 = 2026       # files/achtergrond_bondspas-2026.jpg moet aanwezig zijn
+
     def setUp(self):
 
         self.lid_nr = 123456
+
+        BondspasJaar.objects.create(jaar=self.bondspas_jaar1, zichtbaar=True)
+        BondspasJaar.objects.create(jaar=self.bondspas_jaar2, zichtbaar=False)
 
         now = datetime.datetime.now()
 
@@ -329,12 +336,13 @@ class TestBondspasOnline(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self._check_bondspas_resp(resp)
 
-    def test_begin_januari(self):
+    def test_begin_nieuwe_jaar(self):
         # sporter
         self.e2e_login(self.account)
 
+        # self.bondspas_jaar2 heeft zichtbaar=False
         with patch('django.utils.timezone.localtime') as mock_timezone:
-            dt = datetime.datetime(year=2000, month=1, day=1, hour=19)
+            dt = datetime.datetime(year=self.bondspas_jaar2, month=1, day=1, hour=19)
             mock_timezone.return_value = dt
 
             with self.assert_max_queries(20):

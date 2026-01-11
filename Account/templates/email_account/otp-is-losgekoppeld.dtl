@@ -1,6 +1,6 @@
 {% extends 'email_mailer/email_basis.dtl' %}
 {% comment %}
-                Copyright (c) 2022 Ramon van der Winkel.
+                Copyright (c) 2022-2026 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -12,7 +12,7 @@
     |Na de volgende inlog op MijnHandboogsport krijg je de QR-code weer aangeboden en kan je opnieuw koppelen.
     |
     |Het koppelen van de tweede factor staat beschrijven in de handleiding voor beheerders:
-    |<a href="{{ url_handleiding_beheerders }}" target="_blank">Handleiding voor beheerders</a>.
+    |{{ url_handleiding_beheerders }}
     |
     |Als je dit verzoekt niet herkent, neem dan contact met ons op via {{ contact_email }}
     |
@@ -26,7 +26,7 @@
     <div>Na de volgende inlog op MijnHandboogsport krijg je de QR-code weer aangeboden en kan je opnieuw koppelen.</div>
     <br>
     <div>Het koppelen van de tweede factor staat beschrijven in de handleiding voor beheerders:<br>
-        <a href="{{ url_handleiding_beheerders }}" target="_blank">Handleiding voor beheerders</a>.</div>
+        <a href="{{ url_handleiding_beheerders }}" target="_blank"><code>{{ url_handleiding_beheerders }}</code></a></div>
     <br>
     <div>Als je dit verzoekt niet herkent, neem dan contact met ons op via {{ contact_email }}</div>
     <br>

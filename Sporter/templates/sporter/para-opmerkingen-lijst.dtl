@@ -1,0 +1,62 @@
+{% extends 'design/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2026 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+{% load design_knop %}
+
+{% block title %}Para opmerkingen{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Para opmerkingen</h3>
+            <p>Via deze pagina kan je alle para opmerkingen van sporters bekijken en aanpassen.</p>
+        </div>
+    </div>
+
+    <!-- blauw balk met wit informatie vlak -->
+    <div class="row-sv-blauw">
+        <div class="col s12 sv-kader-tabel">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Lid nr</th>
+                        <th class="center">Classificatie</th>
+                        <th class="center">Voorwerpen</th>
+                        <th>Opmerking</th>
+                        <th><!-- kolom voor knop --></th>
+                    </tr>
+                </thead>
+
+                {% for obj in voorkeuren %}
+                    <tr>
+                        <td>{{ obj.sporter.lid_nr }}</td>
+                        <td class="center">
+                            {% if obj.sporter.para_classificatie %}{{ obj.sporter.para_classificatie }}{% else %}-{% endif %}
+                        </td>
+                        <td class="center">
+                            {% if obj.para_voorwerpen %}Ja{% else %}Nee{% endif %}
+                        </td>
+                        <td>{{ obj.opmerking_para_sporter }}</td>
+                        <td class="center">
+                            {% sv-knop-nav icon='aanpassen' tekst='' url=obj.url_edit %}
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="5">Geen relevante voorkeuren gevonden.</td>
+                    </tr>
+                {% endfor %}
+
+            </table>
+        </div>
+    </div>
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="sporter-para-opmerkingen" %}
+
+{% endblock %}

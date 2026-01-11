@@ -1158,6 +1158,12 @@ class MyTestAsserts(TestCase):
 
         issues = list()
 
+        text = email.mail_text
+        for tag in ('<a ', '<div', '<br', '<code>'):
+            if tag in text:
+                issues.append('Found html tag in plain text e-mail: %s' % tag)
+        # for
+
         html = email.mail_html[:]
 
         html = html[html.find('<body'):]

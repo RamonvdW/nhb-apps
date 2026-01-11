@@ -1,6 +1,6 @@
 {% extends 'design/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2022-2025 Ramon van der Winkel.
+                Copyright (c) 2022-2026 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -14,6 +14,17 @@
     <div class="row center">
         <div class="col s12">
             <h3 class="page-banner">Jouw digitale bondspas</h3>
+
+            {% if is_oude_pas %}
+                <!-- blauw bordje -->
+                <div class="row">
+                    <div style="padding:10px">
+                        <div class="col s12 m10 offset-m1 l8 offset-l2 xl6 offset-xl3 sv-blauw white-text z-depth-3 center">
+                            <p>De bondspassen voor het nieuwe jaar komen halverwege januari beschikbaar.</p>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
 
             <!-- download knop wordt pas zichtbaar nadat het plaatje opgehaald is -->
             <div id="id_download_knop" style="display:none">

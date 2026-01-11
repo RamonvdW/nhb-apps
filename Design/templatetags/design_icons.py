@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2025 Ramon van der Winkel.
+#  Copyright (c) 2025-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -214,6 +214,7 @@ ICON_NAME2MATERIAL_SYMBOL_NAME = {
     'spelden tussenspelden': 'trending_up',
     'sporter voorkeuren': 'tune',
     'sporter afmelden': 'cancel',
+    'sporter para opmerkingen': 'fact_check',
     'taken': 'inbox',
     'tijdelijke code ga door': 'check',
     'uitloggen': 'logout',

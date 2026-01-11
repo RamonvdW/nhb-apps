@@ -968,10 +968,10 @@ class Command(BaseCommand):
                 else:
                     new_plaats = upper_plaats[0] + plaats[1:]
 
-                if plaats != new_plaats:
-                    self.stdout.write("[WARNING] Lid %s: corrigeer geboorteplaats: %s --> %s" % (
-                        lid_nr, repr(plaats), repr(new_plaats)))
-                    self._count_warnings += 1
+                # if plaats != new_plaats:
+                #     self.stdout.write("[WARNING] Lid %s: corrigeer geboorteplaats: %s --> %s" % (
+                #         lid_nr, repr(plaats), repr(new_plaats)))
+                #     self._count_warnings += 1
 
                 return new_plaats
 
