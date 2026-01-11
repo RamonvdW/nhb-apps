@@ -112,4 +112,6 @@
         </div>
     </div>
 
+    <a href="{{ url_privacy }}">Privacy Policy</a>
+
 {% endblock %}
