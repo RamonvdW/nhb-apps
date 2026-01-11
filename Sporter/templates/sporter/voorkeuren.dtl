@@ -1,6 +1,6 @@
 {% extends 'design/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2025 Ramon van der Winkel.
+                Copyright (c) 2020-2026 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -23,316 +23,323 @@
 
     <!-- blauwe balk met informatie -->
     <div class="row-sv-blauw">
-        <div class="col s10 offset-s1 l8 offset-l2 sv-kader-form">
+        <div class="col s10 offset-s1 l8 offset-l2">
 
             <!-- dialoog venster -->
-            <div style="margin:0 30px 30px 30px">
-                <form action="{{ opslaan_url }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
-                    {% csrf_token %}
+            <div class="sv-kader-form">
+                <div class="form-padding">
 
-                    {% if sporter_pk %}
-                        <input type="hidden" name="sporter_pk" value="{{ sporter_pk }}">
-                    {% endif %}
+                    <form action="{{ opslaan_url }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
+                        {% csrf_token %}
 
-                    <table class="sv-kader-tabel">
-
-                    {% if bogen_wa %}
-                        {% if not is_hwl %}
-                            <tr>
-                                <td colspan="2">
-                                    <p>Door aan te geven welke bogen jouw voorkeur hebben kunnen we beschikbare informatie aanpassen aan jouw wensen en hoef je minder handelingen te verrichten.</p>
-
-                                    <p>Voorbeelden:</p>
-                                    <ul class="browser-default">
-                                        <li>We laten alleen wedstrijden zien waar je met de door jou gekozen bogen in uit mag komen.</li>
-                                        <li>Waar mogelijk, kunnen we je meteen in de juiste wedstrijdklasse plaatsen.</li>
-                                    </ul>
-                                </td>
-                            </tr>
+                        {% if sporter_pk %}
+                            <input type="hidden" name="sporter_pk" value="{{ sporter_pk }}">
                         {% endif %}
 
-                        <tr>
-                            <td colspan="2">
-                                <h5>Bogen World Archery</h5>
-                            </td>
-                        </tr>
+                        <table class="sv-kader-tabel">
 
-                        <tr>
-                            <th>Hier schiet ik mee</th>
-                            <th>Alleen informatie</th>
-                        </tr>
+                        {% if bogen_wa %}
+                            {% if not is_hwl %}
+                                <tr>
+                                    <td colspan="2">
+                                        <p>Door aan te geven welke bogen jouw voorkeur hebben kunnen we beschikbare informatie aanpassen aan jouw wensen en hoef je minder handelingen te verrichten.</p>
 
-                        {% for obj in bogen_wa %}
+                                        <p>Voorbeelden:</p>
+                                        <ul class="browser-default">
+                                            <li>We laten alleen wedstrijden zien waar je met de door jou gekozen bogen in uit mag komen.</li>
+                                            <li>Waar mogelijk, kunnen we je meteen in de juiste wedstrijdklasse plaatsen.</li>
+                                        </ul>
+                                    </td>
+                                </tr>
+                            {% endif %}
+
                             <tr>
-                                <td>
-                                    <label>
-                                        <input type="checkbox" class="filled-in" name="{{ obj.check_schiet }}" {% if obj.voor_wedstrijd %}checked{% endif %} onchange="gewijzigd()">
-                                        <span class="black-text">{{ obj.boogtype.beschrijving }}</span>
-                                    </label>
-                                </td>
-
-                                <td>
-                                    <label>
-                                        <input type="checkbox" class="filled-in" name="{{ obj.check_info }}" {% if obj.heeft_interesse %}checked{% endif %} onchange="gewijzigd()">
-                                        <span class="black-text">{{ obj.boogtype.beschrijving }}</span>
-                                    </label>
+                                <td colspan="2">
+                                    <h5>Bogen World Archery</h5>
                                 </td>
                             </tr>
-                        {% endfor %}
 
-
-                        <tr>
-                            <td colspan="2">
-                                <h5>Bogen IFAA</h5>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <th>Hier schiet ik mee</th>
-                            <th>Alleen informatie</th>
-                        </tr>
-
-                        {% for obj in bogen_ifaa %}
                             <tr>
-                                <td>
-                                    <label>
-                                        <input type="checkbox" class="filled-in" name="{{ obj.check_schiet }}" {% if obj.voor_wedstrijd %}checked{% endif %} onchange="gewijzigd()">
-                                        <span class="black-text">{{ obj.boogtype.beschrijving }}</span>
-                                    </label>
-                                </td>
+                                <th>Hier schiet ik mee</th>
+                                <th>Alleen informatie</th>
+                            </tr>
 
-                                <td>
-                                    <label>
-                                        <input type="checkbox" class="filled-in" name="{{ obj.check_info }}" {% if obj.heeft_interesse %}checked{% endif %} onchange="gewijzigd()">
-                                        <span class="black-text">{{ obj.boogtype.beschrijving }}</span>
-                                    </label>
+                            {% for obj in bogen_wa %}
+                                <tr>
+                                    <td>
+                                        <label>
+                                            <input type="checkbox" class="filled-in" name="{{ obj.check_schiet }}" {% if obj.voor_wedstrijd %}checked{% endif %} onchange="gewijzigd()">
+                                            <span class="black-text">{{ obj.boogtype.beschrijving }}</span>
+                                        </label>
+                                    </td>
+
+                                    <td>
+                                        <label>
+                                            <input type="checkbox" class="filled-in" name="{{ obj.check_info }}" {% if obj.heeft_interesse %}checked{% endif %} onchange="gewijzigd()">
+                                            <span class="black-text">{{ obj.boogtype.beschrijving }}</span>
+                                        </label>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+
+
+                            <tr>
+                                <td colspan="2">
+                                    <h5>Bogen IFAA</h5>
                                 </td>
                             </tr>
-                        {% endfor %}
+
+                            <tr>
+                                <th>Hier schiet ik mee</th>
+                                <th>Alleen informatie</th>
+                            </tr>
+
+                            {% for obj in bogen_ifaa %}
+                                <tr>
+                                    <td>
+                                        <label>
+                                            <input type="checkbox" class="filled-in" name="{{ obj.check_schiet }}" {% if obj.voor_wedstrijd %}checked{% endif %} onchange="gewijzigd()">
+                                            <span class="black-text">{{ obj.boogtype.beschrijving }}</span>
+                                        </label>
+                                    </td>
+
+                                    <td>
+                                        <label>
+                                            <input type="checkbox" class="filled-in" name="{{ obj.check_info }}" {% if obj.heeft_interesse %}checked{% endif %} onchange="gewijzigd()">
+                                            <span class="black-text">{{ obj.boogtype.beschrijving }}</span>
+                                        </label>
+                                    </td>
+                                </tr>
+                            {% endfor %}
 
 
 
-                        <tr>
-                            <td colspan="2">
-                                <h5>Voorkeuren wedstrijden</h5>
-                            </td>
-                        </tr>
+                            <tr>
+                                <td colspan="2">
+                                    <h5>Voorkeuren wedstrijden</h5>
+                                </td>
+                            </tr>
 
-                        <tr>
-                            <td colspan="2">
-                                <label>
-                                    <input type="checkbox" class="filled-in" name="voorkeur_eigen_blazoen"{% if voorkeuren.voorkeur_eigen_blazoen %} checked{% endif %} onchange="gewijzigd()">
-                                    <span class="black-text">Voorkeur voor eigen blazoen (zie uitleg onder aan de pagina)</span>
-                                </label>
-                            </td>
-                        </tr>
-
-                        {% if toon_bondscompetities %}
                             <tr>
                                 <td colspan="2">
                                     <label>
-                                        <input type="checkbox" class="filled-in" name="voorkeur_meedoen_competitie"{% if voorkeuren.voorkeur_meedoen_competitie %} checked{% endif %} onchange="gewijzigd()">
-                                        <span class="black-text">Voorkeur voor de bondscompetities (Indoor en 25m1pijl)</span>
+                                        <input type="checkbox" class="filled-in" name="voorkeur_eigen_blazoen"{% if voorkeuren.voorkeur_eigen_blazoen %} checked{% endif %} onchange="gewijzigd()">
+                                        <span class="black-text">Voorkeur voor eigen blazoen (zie uitleg onder aan de pagina)</span>
+                                    </label>
+                                </td>
+                            </tr>
+
+                            {% if toon_bondscompetities %}
+                                <tr>
+                                    <td colspan="2">
+                                        <label>
+                                            <input type="checkbox" class="filled-in" name="voorkeur_meedoen_competitie"{% if voorkeuren.voorkeur_meedoen_competitie %} checked{% endif %} onchange="gewijzigd()">
+                                            <span class="black-text">Voorkeur voor de bondscompetities (Indoor en 25m1pijl)</span>
+                                        </label>
+                                    </td>
+                                </tr>
+                            {% endif %}
+
+                            {% if toon_geslacht %}
+                                <tr>
+                                    <td style="width:60%">Om in te kunnen schrijven op wedstrijden zonder gender-neutrale klassen kan je hier een keuze maken.</td>
+                                    <td>
+                                        <select name="wedstrijd_mv" onchange="gewijzigd()">
+                                            {% for opt in opt_wedstrijd_mv %}
+                                                <option value="{{ opt.sel }}"{% if opt.selected %} selected{% endif %}>{{ opt.tekst }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </td>
+                                </tr>
+                            {% endif %}
+
+                            <tr>
+                                <td colspan="2">
+                                    <h5>Voorkeuren disciplines</h5>
+                                </td>
+                            </tr>
+
+
+                            <tr>
+                                <td colspan="2">
+                                    <label>
+                                        <input type="checkbox" class="filled-in" name="voorkeur_disc_outdoor"{% if voorkeuren.voorkeur_discipline_outdoor %} checked{% endif %} onchange="gewijzigd()">
+                                        <span class="black-text">Voorkeur voor de discipline Outdoor</span>
+                                    </label>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td colspan="2">
+                                    <label>
+                                        <input type="checkbox" class="filled-in" name="voorkeur_disc_indoor"{% if voorkeuren.voorkeur_discipline_indoor %} checked{% endif %} onchange="gewijzigd()">
+                                        <span class="black-text">Voorkeur voor de discipline Indoor</span>
+                                    </label>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td colspan="2">
+                                    <label>
+                                        <input type="checkbox" class="filled-in" name="voorkeur_disc_25m1p"{% if voorkeuren.voorkeur_discipline_25m1pijl %} checked{% endif %} onchange="gewijzigd()">
+                                        <span class="black-text">Voorkeur voor de discipline 25m 1pijl</span>
+                                    </label>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td colspan="2">
+                                    <label>
+                                        <input type="checkbox" class="filled-in" name="voorkeur_disc_veld"{% if voorkeuren.voorkeur_discipline_veld %} checked{% endif %} onchange="gewijzigd()">
+                                        <span class="black-text">Voorkeur voor de discipline Veld</span>
+                                    </label>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td colspan="2">
+                                    <label>
+                                        <input type="checkbox" class="filled-in" name="voorkeur_disc_3d"{% if voorkeuren.voorkeur_discipline_3d %} checked{% endif %} onchange="gewijzigd()">
+                                        <span class="black-text">Voorkeur voor de discipline 3D</span>
+                                    </label>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td colspan="2">
+                                    <label>
+                                        <input type="checkbox" class="filled-in" name="voorkeur_disc_run"{% if voorkeuren.voorkeur_discipline_run %} checked{% endif %} onchange="gewijzigd()">
+                                        <span class="black-text">Voorkeur voor de discipline Run archery</span>
+                                    </label>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td colspan="2">
+                                    <label>
+                                        <input type="checkbox" class="filled-in" name="voorkeur_disc_clout"{% if voorkeuren.voorkeur_discipline_clout %} checked{% endif %} onchange="gewijzigd()">
+                                        <span class="black-text">Voorkeur voor de discipline Clout</span>
+                                    </label>
+                                </td>
+                            </tr>
+
+
+                            <tr>
+                                <td colspan="2">
+                                    <h5>Voorkeuren voor para-sporters</h5>
+                                    <br>
+                                    <span>De ingevoerde informatie wordt gedeeld met de wedstrijdleiding zodat ze, indien mogelijk, hier rekening mee houden.</span>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td colspan="2">
+                                    <label>
+                                        <input type="checkbox" class="filled-in" name="para_voorwerpen"{% if voorkeuren.para_voorwerpen %} checked{% endif %} onchange="gewijzigd()">
+                                        <span class="black-text">Ik blijf op de schietlijn zitten of gebruik voorwerpen die op de schietlijn blijven staan.</span>
+                                    </label>
+
+                                    <div style="margin:20px 0 0 35px">
+                                        <span>Let op: alleen een officieel geregistreerde classificatie geeft <i>recht</i> op extra ruimte op de schietlijn.</span>
+                                        {% if sporter.para_classificatie %}
+                                            <br>
+                                            <br>
+                                            <span>Jouw geregistreerde classificatie: <code class="sv-rood-text">{{ sporter.para_classificatie }}</code></span>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td colspan="2" class="input-field">
+                                    <p>Korte toelichting over jouw para situatie:</p>
+                                    <div>
+                                        <input type="text" maxlength="256" name="para_notitie" placeholder="Hier invoeren" value="{{ voorkeuren.opmerking_para_sporter }}" oninput="gewijzigd()">
+                                    </div>
+                                </td>
+                            </tr>
+
+                        {% endif %}     <!-- bogen -->
+
+
+                        {% if toon_contact_sr %}
+
+                            <tr>
+                                <td colspan="2">
+                                    <h5>Voorkeuren voor scheidsrechters</h5>
+                                    <br>
+                                    <span>Keuzes voor het delen van jouw contactgegevens binnen het korps scheidsrechters en met de organisatie van wedstrijden waar je voor geselecteerd wordt.</span>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td colspan="2">
+                                    <label>
+                                        <input type="checkbox" class="filled-in" name="sr_korps_email"{% if voorkeuren.scheids_opt_in_korps_email %} checked{% endif %} onchange="gewijzigd()">
+                                        <span class="black-text">Deel mijn e-mailadres binnen het korps scheidsrechters</span>
+                                    </label>
+                                    <br>
+                                    <label>
+                                        <input type="checkbox" class="filled-in" name="sr_korps_tel"{% if voorkeuren.scheids_opt_in_korps_tel_nr %} checked{% endif %} onchange="gewijzigd()">
+                                        <span class="black-text">Deel mijn telefoonnummer binnen het korps scheidsrechters</span>
+                                    </label>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td colspan="2">
+                                    <label>
+                                        <input type="checkbox" class="filled-in" name="sr_wed_email"{% if voorkeuren.scheids_opt_in_ver_email %} checked{% endif %} onchange="gewijzigd()">
+                                        <span class="black-text">Deel mijn e-mailadres met de wedstrijdleiding</span>
+                                    </label>
+                                    <br>
+                                    <label>
+                                        <input type="checkbox" class="filled-in" name="sr_wed_tel"{% if voorkeuren.scheids_opt_in_ver_tel_nr %} checked{% endif %} onchange="gewijzigd()">
+                                        <span class="black-text">Deel mijn telefoonnummer met de wedstrijdleiding</span>
+                                    </label>
+                                </td>
+                            </tr>
+
+                        {% endif %}
+
+
+                        {% if account %}
+                            <tr>
+                                <td colspan="2">
+                                    <h5>Voorkeuren ontvangen e-mails</h5>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td colspan="2">
+                                    <label>
+                                        <input type="checkbox" class="filled-in" name="optout_nieuwe_taak"{% if account.optout_nieuwe_taak %} checked{% endif %} onchange="gewijzigd()">
+                                        <span class="black-text">Stuur e-mail zodra er een nieuwe taak voor mij is aangemaakt</span>
+                                    </label>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td colspan="2">
+                                    <label>
+                                        <input type="checkbox" class="filled-in" name="optout_herinnering_taken"{% if account.optout_herinnering_taken %} checked{% endif %} onchange="gewijzigd()">
+                                        <span class="black-text">Stuur e-mail om te herinneren aan taken (maximaal &eacute;&eacute;n e-mail per week)</span>
                                     </label>
                                 </td>
                             </tr>
                         {% endif %}
 
-                        {% if toon_geslacht %}
-                            <tr>
-                                <td style="width:60%">Om in te kunnen schrijven op wedstrijden zonder gender-neutrale klassen kan je hier een keuze maken.</td>
-                                <td>
-                                    <select name="wedstrijd_mv" onchange="gewijzigd()">
-                                        {% for opt in opt_wedstrijd_mv %}
-                                            <option value="{{ opt.sel }}"{% if opt.selected %} selected{% endif %}>{{ opt.tekst }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </td>
-                            </tr>
-                        {% endif %}
+                        </table>
 
-                        <tr>
-                            <td colspan="2">
-                                <h5>Voorkeuren disciplines</h5>
-                            </td>
-                        </tr>
+                        <div style="display: none">
+                            <button class="btn-sv-float" id="submit_knop" type="submit" disabled>
+                                {% sv-icon-op-button 'opslaan' tekst='Voorkeuren opslaan' %}
+                            </button>
+                        </div>
 
+                    </form>
 
-                        <tr>
-                            <td colspan="2">
-                                <label>
-                                    <input type="checkbox" class="filled-in" name="voorkeur_disc_outdoor"{% if voorkeuren.voorkeur_discipline_outdoor %} checked{% endif %} onchange="gewijzigd()">
-                                    <span class="black-text">Voorkeur voor de discipline Outdoor</span>
-                                </label>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td colspan="2">
-                                <label>
-                                    <input type="checkbox" class="filled-in" name="voorkeur_disc_indoor"{% if voorkeuren.voorkeur_discipline_indoor %} checked{% endif %} onchange="gewijzigd()">
-                                    <span class="black-text">Voorkeur voor de discipline Indoor</span>
-                                </label>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td colspan="2">
-                                <label>
-                                    <input type="checkbox" class="filled-in" name="voorkeur_disc_25m1p"{% if voorkeuren.voorkeur_discipline_25m1pijl %} checked{% endif %} onchange="gewijzigd()">
-                                    <span class="black-text">Voorkeur voor de discipline 25m 1pijl</span>
-                                </label>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td colspan="2">
-                                <label>
-                                    <input type="checkbox" class="filled-in" name="voorkeur_disc_veld"{% if voorkeuren.voorkeur_discipline_veld %} checked{% endif %} onchange="gewijzigd()">
-                                    <span class="black-text">Voorkeur voor de discipline Veld</span>
-                                </label>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td colspan="2">
-                                <label>
-                                    <input type="checkbox" class="filled-in" name="voorkeur_disc_3d"{% if voorkeuren.voorkeur_discipline_3d %} checked{% endif %} onchange="gewijzigd()">
-                                    <span class="black-text">Voorkeur voor de discipline 3D</span>
-                                </label>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td colspan="2">
-                                <label>
-                                    <input type="checkbox" class="filled-in" name="voorkeur_disc_run"{% if voorkeuren.voorkeur_discipline_run %} checked{% endif %} onchange="gewijzigd()">
-                                    <span class="black-text">Voorkeur voor de discipline Run archery</span>
-                                </label>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td colspan="2">
-                                <label>
-                                    <input type="checkbox" class="filled-in" name="voorkeur_disc_clout"{% if voorkeuren.voorkeur_discipline_clout %} checked{% endif %} onchange="gewijzigd()">
-                                    <span class="black-text">Voorkeur voor de discipline Clout</span>
-                                </label>
-                            </td>
-                        </tr>
-
-
-                        <tr>
-                            <td colspan="2">
-                                <h5>Voorkeuren voor para-sporters</h5>
-                                <br>
-                                <span>Ingevoerde informatie wordt gedeeld met de wedstrijdleiding zodat ze, indien mogelijk, hier rekening mee houden.</span>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td colspan="2">
-                                <label>
-                                    <input type="checkbox" class="filled-in" name="para_voorwerpen"{% if voorkeuren.para_voorwerpen %} checked{% endif %} onchange="gewijzigd()">
-                                    <span class="black-text">Ik blijf op de schietlijn zitten of gebruik voorwerpen die op de schietlijn blijven staan.</span>
-                                </label>
-
-                                <p>Let op: alleen een officieel geregistreerde classificatie geeft <i>recht</i> op extra ruimte op de schietlijn.</p>
-                                {% if sporter.para_classificatie %}
-                                    <span>Jouw geregistreerde classificatie: {{ sporter.para_classificatie }}</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td colspan="2" class="input-field">
-                                <p>Kort bericht (1 regel) voor de wedstrijdleiding:</p>
-                                <div>
-                                    <input type="text" maxlength="256" name="para_notitie" placeholder="Hier invoeren" value="{{ voorkeuren.opmerking_para_sporter }}" oninput="gewijzigd()">
-                                </div>
-                            </td>
-                        </tr>
-
-                    {% endif %}     <!-- bogen -->
-
-
-                    {% if toon_contact_sr %}
-
-                        <tr>
-                            <td colspan="2">
-                                <h5>Voorkeuren voor scheidsrechters</h5>
-                                <br>
-                                <span>Keuzes voor het delen van jouw contactgegevens binnen het korps scheidsrechters en met de organisatie van wedstrijden waar je voor geselecteerd wordt.</span>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td colspan="2">
-                                <label>
-                                    <input type="checkbox" class="filled-in" name="sr_korps_email"{% if voorkeuren.scheids_opt_in_korps_email %} checked{% endif %} onchange="gewijzigd()">
-                                    <span class="black-text">Deel mijn e-mailadres binnen het korps scheidsrechters</span>
-                                </label>
-                                <br>
-                                <label>
-                                    <input type="checkbox" class="filled-in" name="sr_korps_tel"{% if voorkeuren.scheids_opt_in_korps_tel_nr %} checked{% endif %} onchange="gewijzigd()">
-                                    <span class="black-text">Deel mijn telefoonnummer binnen het korps scheidsrechters</span>
-                                </label>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td colspan="2">
-                                <label>
-                                    <input type="checkbox" class="filled-in" name="sr_wed_email"{% if voorkeuren.scheids_opt_in_ver_email %} checked{% endif %} onchange="gewijzigd()">
-                                    <span class="black-text">Deel mijn e-mailadres met de wedstrijdleiding</span>
-                                </label>
-                                <br>
-                                <label>
-                                    <input type="checkbox" class="filled-in" name="sr_wed_tel"{% if voorkeuren.scheids_opt_in_ver_tel_nr %} checked{% endif %} onchange="gewijzigd()">
-                                    <span class="black-text">Deel mijn telefoonnummer met de wedstrijdleiding</span>
-                                </label>
-                            </td>
-                        </tr>
-
-                    {% endif %}
-
-
-                    {% if account %}
-                        <tr>
-                            <td colspan="2">
-                                <h5>Voorkeuren ontvangen e-mails</h5>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td colspan="2">
-                                <label>
-                                    <input type="checkbox" class="filled-in" name="optout_nieuwe_taak"{% if account.optout_nieuwe_taak %} checked{% endif %} onchange="gewijzigd()">
-                                    <span class="black-text">Stuur e-mail zodra er een nieuwe taak voor mij is aangemaakt</span>
-                                </label>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td colspan="2">
-                                <label>
-                                    <input type="checkbox" class="filled-in" name="optout_herinnering_taken"{% if account.optout_herinnering_taken %} checked{% endif %} onchange="gewijzigd()">
-                                    <span class="black-text">Stuur e-mail om te herinneren aan taken (maximaal &eacute;&eacute;n e-mail per week)</span>
-                                </label>
-                            </td>
-                        </tr>
-                    {% endif %}
-
-                    </table>
-
-                    <div style="display: none">
-                        <button class="btn-sv-float" id="submit_knop" type="submit" disabled>
-                            {% sv-icon-op-button 'opslaan' tekst='Voorkeuren opslaan' %}
-                        </button>
-                    </div>
-
-                </form>
-
+                </div>  <!-- form-padding -->
             </div>      <!-- dialoog -->
 
         </div>

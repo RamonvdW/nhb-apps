@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2025 Ramon van der Winkel.
+#  Copyright (c) 2020-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -12,7 +12,7 @@ from Account.models import Account
 from BasisTypen.definities import (GESLACHT_MVX, GESLACHT_MV, GESLACHT_MAN, ORGANISATIE_IFAA,
                                    SCHEIDS_NIET, SCHEIDS_CHOICES)
 from BasisTypen.models import BoogType
-# mag niet afhankelijk zijn van Competitie
+# mag niet afhankelijk zijn van Competitie!
 from Vereniging.models import Vereniging
 import datetime
 

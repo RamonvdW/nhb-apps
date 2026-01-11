@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2024 Ramon van der Winkel.
+#  Copyright (c) 2020-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from Sporter import view_profiel, view_profiel_test, view_voorkeuren, view_leeftijdsklassen
+from Sporter import view_profiel, view_profiel_test, view_voorkeuren, view_leeftijdsklassen, view_para_opmerkingen
 
 app_name = 'Sporter'
 
@@ -36,6 +36,13 @@ urlpatterns = [
          view_profiel_test.ProfielTestView.as_view(),
          name='profiel-test'),
 
+    path('para-opmerkingen/',
+         view_para_opmerkingen.ParaOpmerkingenView.as_view(),
+         name='para-opmerkingen'),
+
+    path('para-opmerkingen/<sporter_pk>/wijzig/',
+         view_para_opmerkingen.WijzigParaOpmerkingView.as_view(),
+         name='wijzig-para-opmerking'),
 ]
 
 # end of file

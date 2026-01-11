@@ -1,0 +1,82 @@
+{% extends 'design/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2026 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+{% load design_icons %}
+
+{% block title %}Wijzig para notitie{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Wijzig para notitie</h3>
+            <p>Voor sporter <b>{{ voorkeuren.sporter.lid_nr_en_volledige_naam }}</b></p>
+        </div>
+    </div>
+
+    <!-- blauwe balk met informatie -->
+    <div class="row-sv-blauw">
+        <div class="col s12 sv-kader-form">
+
+            <!-- dialoog venster -->
+            <form action="{{ url_opslaan }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
+                {% csrf_token %}
+
+                <div class="sv-kader-tabel">
+                    <table>
+
+                        <tr>
+                            <td colspan="2">
+                                <h5>Voorkeuren voor para-sporters</h5>
+                                <br>
+                                <span>De ingevoerde informatie wordt gedeeld met de wedstrijdleiding zodat ze, indien mogelijk, hier rekening mee houden.</span>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td colspan="2">
+                                <label>
+                                    <input type="checkbox" class="filled-in" name="para_voorwerpen"{% if voorkeuren.para_voorwerpen %} checked{% endif %}>
+                                    <span class="black-text">Ik blijf op de schietlijn zitten of gebruik voorwerpen die op de schietlijn blijven staan.</span>
+                                </label>
+
+                                <div style="margin:20px 0 0 35px">
+                                    <span>Let op: alleen een officieel geregistreerde classificatie geeft <i>recht</i> op extra ruimte op de schietlijn.</span>
+                                    {% if voorkeuren.sporter.para_classificatie %}
+                                        <br>
+                                        <br>
+                                        <span>Jouw geregistreerde classificatie: <code class="sv-rood-text">{{ voorkeuren.sporter.para_classificatie }}</code></span>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td colspan="2" class="input-field">
+                                <span>Korte toelichting over jouw para situatie:</span>
+                                <div>
+                                    <input type="text" maxlength="256" name="para_notitie" placeholder="Hier invoeren" value="{{ voorkeuren.opmerking_para_sporter }}">
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <div class="center" style="margin-bottom:30px">
+                        <button class="btn-sv-rood" id="submit_knop" type="submit">
+                            {% sv-icon-op-button 'opslaan' tekst='Opslaan' %}
+                        </button>
+                    </div>
+
+                </div>  <!-- sv-kader-tabel -->
+            </form>
+        </div>
+    </div>              <!-- blauwe balk -->
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="sporter-wijzig-para-voorkeur" %}
+
+{% endblock %}
