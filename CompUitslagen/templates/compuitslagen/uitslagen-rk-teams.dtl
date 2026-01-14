@@ -126,7 +126,7 @@
                 {% if team.break_klasse %}
                     {% if not forloop.first %}
                         <tr class="sv-table-onderrand">
-                            <td colspan="5" class="sv-table-onderrand"></td>
+                            <td colspan="6" class="sv-table-onderrand"></td>
                         </tr>
                     {% endif %}
 
@@ -153,6 +153,7 @@
                         </th>
                         <th>Team</th>
                         <th class="center hide-on-small-only">Team sterkte</th>
+                        <th><!-- toekomstig label / reserve --></th>
                         <th class="right-align" style="padding-right:10px">RK scores</th>
                         <td rowspan="{{ team.aantal_regels }}" class="sv-table-zijrand"></td>
                     </tr>
@@ -219,6 +220,13 @@
                         {% endif %}
                     </td>
 
+                    <!-- label/reserve -->
+                    <td>
+                        {% if team.is_reserve %}
+                            <i>Reserve</i>
+                        {% endif %}
+                    </td>
+
                     <!-- RK scores -->
                     <td class="right-align" style="padding-right:10px">
                         {% if team.klasse_heeft_uitslag %}
@@ -240,7 +248,7 @@
             {% endfor %}
 
             <tr class="sv-table-onderrand">
-                <td colspan="5" class="sv-table-onderrand"></td>
+                <td colspan="6" class="sv-table-onderrand"></td>
             </tr>
         </table>
 

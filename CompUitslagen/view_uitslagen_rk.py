@@ -12,7 +12,7 @@ from Account.models import get_account
 from Competitie.definities import DEEL_RK, DEELNAME_NEE, KAMP_RANK_RESERVE, KAMP_RANK_NO_SHOW, KAMP_RANK_BLANCO
 from Competitie.models import (Competitie, CompetitieMatch, Regiocompetitie, RegiocompetitieSporterBoog,
                                Kampioenschap, KampioenschapSporterBoog, KampioenschapTeam,
-                               KampioenschapIndivKlasseLimiet)
+                               KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet)
 from Competitie.seizoenen import get_comp_pk
 from Functie.rol import rol_get_huidige_functie
 from Geo.models import Rayon
@@ -241,10 +241,7 @@ class UitslagenRayonIndivView(TemplateView):
                 except KeyError:
                     pass
 
-                try:
-                    limiet = wkl2limiet[deelnemer.indiv_klasse.pk]
-                except KeyError:
-                    limiet = 24
+                limiet = wkl2limiet.get(deelnemer.indiv_klasse.pk, 24)
 
                 curr_teller = deelnemer
                 curr_teller.aantal_regels = 2
@@ -383,7 +380,7 @@ class UitslagenRayonTeamsView(TemplateView):
             # for
 
     @staticmethod
-    def _finalize_klasse(deelkamp, done, plan, afgemeld):
+    def _finalize_klasse(deelkamp, done: list, plan: list, afgemeld: list):
         if len(done) > 0:
             # er is uitslag, dus overige teams hebben niet meegedaan
             for plan_team in plan:
@@ -478,6 +475,14 @@ class UitslagenRayonTeamsView(TemplateView):
         comp = deelkamp.competitie
         comp.bepaal_fase()
 
+        wkl2limiet = dict()   # [pk] = limiet
+        for limiet in (KampioenschapTeamKlasseLimiet
+                       .objects
+                       .select_related('team_klasse')
+                       .filter(kampioenschap=deelkamp)):
+            wkl2limiet[limiet.team_klasse.pk] = limiet.limiet
+        # for
+
         # als de gebruiker ingelogd is, laat dan de voor de teams van zijn vereniging zien wie er in de teams zitten
         toon_team_leden_van_ver_nr = None
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
@@ -516,6 +521,7 @@ class UitslagenRayonTeamsView(TemplateView):
         context['rk_teams'] = totaal_lijst = list()
 
         prev_klasse = ""
+        limiet = 8
         klasse_teams_done = list()
         klasse_teams_plan = list()
         klasse_teams_afgemeld = list()
@@ -547,6 +553,8 @@ class UitslagenRayonTeamsView(TemplateView):
                             pass
                     else:
                         teller.klasse_str = team.team_type.beschrijving + " - Nog niet ingedeeld in een wedstrijdklasse"
+
+                limiet = wkl2limiet.get(team.team_klasse.pk, 8)
 
                 totaal_lijst.extend(klasse_teams_done)
                 totaal_lijst.extend(klasse_teams_plan)
@@ -615,6 +623,9 @@ class UitslagenRayonTeamsView(TemplateView):
                 else:
                     team.rank = len(klasse_teams_plan) + 1
                     klasse_teams_plan.append(team)
+
+                if team.rank > limiet:
+                    team.is_reserve = True
 
                 # toon teamleden waar ze heen moeten
                 if team.ver_nr == toon_team_leden_van_ver_nr:

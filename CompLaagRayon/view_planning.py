@@ -742,9 +742,7 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
 
         pk2wkl_team = dict()
         for wkl in wkl_teams:
-            # ERE klasse: 12 teams
-            # overige: 8 teams
-            wkl.limiet = 12 if "ERE" in wkl.beschrijving else 8
+            wkl.limiet = 8
             wkl.sel = 'tsel_%s' % wkl.pk
             pk2wkl_team[wkl.pk] = wkl
         # for

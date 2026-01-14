@@ -102,8 +102,6 @@
                                 <td>{{ wkl.beschrijving }}</td>
                                 <td>
                                     <select name="{{ wkl.sel }}" onchange="gewijzigd()">
-                                        <option value="12"{%if wkl.limiet == 12 %} selected{% endif %}>12 teams</option>
-                                        <option value="10"{%if wkl.limiet == 10 %} selected{% endif %}>10 teams</option>
                                         <option value="8"{%if wkl.limiet == 8 %} selected{% endif %}>8 teams</option>
                                         <option value="6"{%if wkl.limiet == 6 %} selected{% endif %}>6 teams</option>
                                         <option value="4"{%if wkl.limiet == 4 %} selected{% endif %}>4 teams</option>
