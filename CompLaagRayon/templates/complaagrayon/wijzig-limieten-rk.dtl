@@ -1,6 +1,6 @@
 {% extends 'design/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2025 Ramon van der Winkel.
+                Copyright (c) 2020-2026 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -102,8 +102,6 @@
                                 <td>{{ wkl.beschrijving }}</td>
                                 <td>
                                     <select name="{{ wkl.sel }}" onchange="gewijzigd()">
-                                        <option value="12"{%if wkl.limiet == 12 %} selected{% endif %}>12 teams</option>
-                                        <option value="10"{%if wkl.limiet == 10 %} selected{% endif %}>10 teams</option>
                                         <option value="8"{%if wkl.limiet == 8 %} selected{% endif %}>8 teams</option>
                                         <option value="6"{%if wkl.limiet == 6 %} selected{% endif %}>6 teams</option>
                                         <option value="4"{%if wkl.limiet == 4 %} selected{% endif %}>4 teams</option>

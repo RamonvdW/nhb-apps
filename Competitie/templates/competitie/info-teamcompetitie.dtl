@@ -1,6 +1,6 @@
 {% extends 'design/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2023-2025 Ramon van der Winkel.
+                Copyright (c) 2023-2026 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -314,7 +314,7 @@
             <div class="sv-kader">
                 <p>Landelijk wordt per wedstrijdklasse een BK teams georganiseerd.</p>
                 <p>Voor elke klasse worden 8 teams uitgenodigd: nummers 1 en 2 van elk rayon.<br>Van elk RK team worden dezelfde 3 sporters verwacht op het BK.</p>
-                <p>Wedstrijdverloop is gelijk aan het de rayonkampioenschappen.</p>
+                <p>Wedstrijdverloop is gelijk aan de Rayonkampioenschappen.</p>
                 <p>Winnaars in de ERE klassen krijgen de titel Nederlands Kampioen.<br>Winnaars van de overige klassen zijn Bondskampioen.</p>
             </div>
         </div>
