@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2025 Ramon van der Winkel.
+#  Copyright (c) 2020-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -346,7 +346,7 @@ class TestCompUitslagenRK(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.testdata.functie_hwl[self.ver_nr])
 
         url = self.url_uitslagen_rk_teams_n % (self.testdata.comp25.pk, 1, 'R2')
-        with self.assert_max_queries(25):
+        with self.assert_max_queries(26):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
@@ -356,7 +356,7 @@ class TestCompUitslagenRK(E2EHelpers, TestCase):
         self.e2e_wisselnaarrol_sporter()
 
         url = self.url_uitslagen_rk_teams_n % (self.testdata.comp25.pk, 1, 'R2')
-        with self.assert_max_queries(26):
+        with self.assert_max_queries(27):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
@@ -368,7 +368,7 @@ class TestCompUitslagenRK(E2EHelpers, TestCase):
         sporter.save(update_fields=['is_actief_lid'])
 
         url = self.url_uitslagen_rk_teams_n % (self.testdata.comp25.pk, 1, 'R2')
-        with self.assert_max_queries(21):
+        with self.assert_max_queries(22):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)

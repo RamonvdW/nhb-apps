@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2025 Ramon van der Winkel.
+#  Copyright (c) 2025-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -161,13 +161,15 @@ class StorageGoogleSheet:
     def toon_sheet(self, sheet_name: str):
         # hiermee kan een blad getoond worden
         if sheet_name not in self._sheet_name2id:
-            raise StorageError('{toon_sheet} Sheet %s niet gevonden' % repr(sheet_name))
+            raise StorageError('{toon_sheet} Sheet %s niet gevonden in bestand %s' % (repr(sheet_name),
+                                                                                      repr(self._file_id)))
         self._set_sheet_hidden(sheet_name, False)
 
     def hide_sheet(self, sheet_name: str):
         # hiermee kan een blad verstopt worden
         if sheet_name not in self._sheet_name2id:
-            raise StorageError('{hide_sheet} Sheet %s niet gevonden' % repr(sheet_name))
+            raise StorageError('{hide_sheet} Sheet %s niet gevonden in bestand %s' % (repr(sheet_name),
+                                                                                      repr(self._file_id)))
         self._set_sheet_hidden(sheet_name, True)
 
     def wijzig_cellen(self, range_a1: str, values: list):
