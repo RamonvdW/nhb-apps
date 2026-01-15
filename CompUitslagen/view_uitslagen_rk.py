@@ -530,6 +530,7 @@ class UitslagenRayonTeamsView(TemplateView):
                      .objects
                      .filter(kampioenschap=deelkamp,
                              team_type=teamtype)
+                     .exclude(team_klasse=None)
                      .select_related('team_klasse',
                                      'vereniging')
                      .prefetch_related('gekoppelde_leden',
@@ -551,10 +552,10 @@ class UitslagenRayonTeamsView(TemplateView):
                             teller.match = teamklasse2match[teller.team_klasse.pk]
                         except KeyError:
                             pass
+                        limiet = wkl2limiet.get(team.team_klasse.pk, 8)
                     else:
                         teller.klasse_str = team.team_type.beschrijving + " - Nog niet ingedeeld in een wedstrijdklasse"
-
-                limiet = wkl2limiet.get(team.team_klasse.pk, 8)
+                        limiet = 99
 
                 totaal_lijst.extend(klasse_teams_done)
                 totaal_lijst.extend(klasse_teams_plan)
