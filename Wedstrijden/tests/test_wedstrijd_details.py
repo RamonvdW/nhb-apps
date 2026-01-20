@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2025 Ramon van der Winkel.
+#  Copyright (c) 2022-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -162,6 +162,7 @@ class TestWedstrijdenWedstrijdDetails(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('wedstrijden/wedstrijd-details.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
+        self.assertFalse('Om in te schrijven op deze wedstrijd moet je eerst inloggen' in resp.content.decode('utf-8'))
 
         self.client.logout()
 
@@ -170,6 +171,7 @@ class TestWedstrijdenWedstrijdDetails(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('wedstrijden/wedstrijd-details.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
+        self.assertTrue('Om in te schrijven op deze wedstrijd moet je eerst inloggen' in resp.content.decode('utf-8'))
 
     def test_uitslag(self):
         self.wedstrijd.url_uitslag_1 = 'http://uitslag.test.not/part_a.pdf'
@@ -215,5 +217,6 @@ class TestWedstrijdenWedstrijdDetails(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('wedstrijden/wedstrijd-details.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
+        self.assertFalse('Om in te schrijven op deze wedstrijd moet je eerst inloggen' in resp.content.decode('utf-8'))
 
 # end of file
