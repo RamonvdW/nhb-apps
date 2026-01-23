@@ -52,7 +52,7 @@ class MonitorDriveFiles:
         fields = "modifiedTime,lastModifyingUser(displayName,emailAddress)"
         request = self._service_files.get(fileId=file_id, fields=fields)
         resp = request.execute()
-        # self.stdout.write('[DEBUG] resp: %s' % repr(resp))
+        self.stdout.write('[DEBUG] resp: %s' % repr(resp))
 
         if resp:
             op = resp['modifiedTime']
