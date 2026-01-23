@@ -138,7 +138,10 @@ class MonitorGoogleSheetsWedstrijdformulieren:
         """
         bestand_count = len(self._bestanden) + len(self._bestanden_nieuw)
         sheet_count = len(self._sheetstatus_todo)
-        self.stdout.write('{doe_beetje_werk} %s sheets en %s bestanden te gaan' % (sheet_count, bestand_count))
+        if sheet_count + bestand_count == 0:
+            return
+
+        self.stdout.write('[DEBUG] {doe_beetje_werk} %s sheets en %s bestanden te gaan' % (sheet_count, bestand_count))
 
         # analyseer de inhoud van een wedstrijdformulier
         status = self._get_sheet_todo()
@@ -162,7 +165,8 @@ class MonitorGoogleSheetsWedstrijdformulieren:
                 status.refresh_from_db()
 
                 if status.gewijzigd_op > status.bekeken_op:
-                    self._sheetstatus_todo.append(status)
+                    if status not in self._sheetstatus_todo:
+                        self._sheetstatus_todo.append(status)
 
 
 # end of file

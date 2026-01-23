@@ -16,14 +16,14 @@ class MonitorDriveFiles:
 
     # service account dat gebruikt wordt om te downloaden (moet view rechten hebben op het document)
     SERVICE_ACCOUNT_FILE = os.path.join(settings.CREDENTIALS_PATH,
-                                        settings.CREDENTIALS_SERVICE_ACCOUNT_DOWNLOADER)
+                                        settings.CREDENTIALS_SERVICE_ACCOUNT_WEDSTRIJDFORMULIEREN)
 
     # Scopes that allow to edit, create, delete and share all of the owners' google drive files
     SCOPES = ['https://www.googleapis.com/auth/drive']
 
     def __init__(self, stdout):
         self.stdout = stdout
-        self._service_revisions = None
+        self._service_files = None
 
         self._setup_service()
 
@@ -34,42 +34,35 @@ class MonitorDriveFiles:
         self._close_services()
 
     def _setup_service(self):
-        if not self._service_revisions:
+        if not self._service_files:
             creds = Credentials.from_service_account_file(self.SERVICE_ACCOUNT_FILE, scopes=self.SCOPES)
             service = build('drive', 'v3', credentials=creds)
-            self._service_revisions = service.revisions()
+            self._service_files = service.files()
 
     def _close_services(self):
-        for service in (self._service_revisions,):
+        for service in (self._service_files,):
             if service:
                 service.close()
         # for
-        self._service_revisions = None
+        self._service_files = None
 
     def get_laatste_wijziging(self, file_id):
-        # self.stdout.write('{get_laatste_wijziging} file_id=%s' % repr(file_id))
-        fields = "revisions(id,modifiedTime,lastModifyingUser(displayName,emailAddress))"
-        request = self._service_revisions.list(fileId=file_id, fields=fields)
+        # self.stdout.write('[DEBUG] {get_laatste_wijziging} file_id=%s' % repr(file_id))
+
+        fields = "modifiedTime,lastModifyingUser(displayName,emailAddress)"
+        request = self._service_files.get(fileId=file_id, fields=fields)
         resp = request.execute()
-        # print('resp: %s' % repr(resp))
+        # self.stdout.write('[DEBUG] resp: %s' % repr(resp))
 
         if resp:
-            revisions = resp.get('revisions', [])
-            order = list()
-            for revision in revisions:
-                tup = (revision['modifiedTime'], revision)
-                order.append(tup)
-            # for
-            if len(order):
-                order.sort(reverse=True)        # newest first
-                newest_revision = order[0][-1]
-                # print(newest_revision)
-                op = newest_revision['modifiedTime']
-                door = (newest_revision['lastModifyingUser'].get('displayName', '') or
-                        newest_revision['lastModifyingUser'].get('emailAddress', '') or
-                        'Anoniem')
-                return op, door
+            op = resp['modifiedTime']
+            door = (resp['lastModifyingUser'].get('displayName', '') or
+                    resp['lastModifyingUser'].get('emailAddress', '') or    # if present, in case displayName is empty
+                    'Anoniem')                                              # fallback
+        else:
+            op = door = ''
 
-        return '', ''
+        return op, door
+
 
 # end of file
