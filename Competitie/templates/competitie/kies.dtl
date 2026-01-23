@@ -1,6 +1,6 @@
 {% extends 'design/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2021-2025 Ramon van der Winkel.
+                Copyright (c) 2021-2026 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -112,7 +112,10 @@
         <!-- blauwe balk met kaartjes -->
         <div class="row-sv-blauw">
             <div class="col s12">
-                <!-- competities opstarten -->
+                {% if url_wf_status %}
+                    {% include 'design/card_icon.dtl' with title='RK/BK status' text="Status van alle google sheets programma's voor de RK en BK" sv_icon='wf status' url=url_wf_status %}
+                {% endif %}
+
                 {% if url_seizoen_opstarten %}
                     {% include 'design/card_icon.dtl' with title="Start competitie" text="Instellingen voor seizoen "|add:nieuwe_seizoen|add:" controleren en nieuwe competities aanmaken." sv_icon="comp seizoen starten" url=url_seizoen_opstarten %}
                 {% endif %}

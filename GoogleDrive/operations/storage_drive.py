@@ -10,13 +10,16 @@ from django.utils import timezone
 from GoogleDrive.models import Token, Bestand
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError as GoogleApiError
+from googleapiclient.http import HttpRequest
 from google.auth.exceptions import RefreshError
 from google.oauth2.credentials import Credentials
 from GoogleDrive.storage_base import StorageBase, StorageError
 import traceback
 import socket
 import json
+import time
 import sys
+import os
 
 
 class StorageGoogleDrive(StorageBase):
@@ -30,12 +33,13 @@ class StorageGoogleDrive(StorageBase):
     MIME_TYPE_FOLDER = 'application/vnd.google-apps.folder'
     MIME_TYPE_SHEET = 'application/vnd.google-apps.spreadsheet'
 
-    def __init__(self, stdout, begin_jaar: int, share_with_emails: list):
+    def __init__(self, stdout, begin_jaar: int, share_with_emails: list, retry_delay:float=1.0):
         super().__init__(stdout, begin_jaar, share_with_emails)
 
         self._creds = None
         self._service_files = None
         self._service_perms = None
+        self._retry_delay = retry_delay
 
     def __enter__(self):
         return self
@@ -86,6 +90,32 @@ class StorageGoogleDrive(StorageBase):
         self._service_files = None
         self._service_perms = None
 
+    def _execute(self, request: HttpRequest) -> dict | None:
+        retries = 7
+        wait_sec = self._retry_delay
+        while retries > 0:
+            try:
+                response = request.execute()
+            except socket.timeout as exc:           # pragma: no cover
+                self.stdout.write('[ERROR] {execute} Socket timeout: %s' % exc)
+            except socket.gaierror as exc:          # pragma: no cover
+                # example: [Errno -3] Temporary failure in name resolution
+                self.stdout.write('[ERROR] {execute} Socket error: %s' % exc)
+            except GoogleApiError as exc:           # aka HttpError
+                self.stdout.write('[ERROR] {execute} GoogleApiError: %s' % exc)
+            else:
+                # self.stdout.write('[DEBUG] {execute} response=%s' % repr(response))
+                return response
+
+            self.stdout.write('[DEBUG] {execute} Retrying in %s seconds' % wait_sec)
+
+            time.sleep(wait_sec)
+            wait_sec *= 2       # 1, 2, 4, 8, 16, 32, 64
+            retries -= 1
+        # while
+
+        return None
+
     def _maak_folder(self, parent_folder_id, folder_name):
         file_metadata = {
             "name": folder_name,
@@ -94,10 +124,14 @@ class StorageGoogleDrive(StorageBase):
         }
         request = self._service_files.create(body=file_metadata, fields='id')   # fields is comma-separated
 
-        results = request.execute()
+        response = self._execute(request)
 
-        folder_id = results.get("id")
-        return folder_id
+        if response:
+            folder_id = response['id']
+            return folder_id
+
+        raise StorageError('{maak_folder} Failed to create folder %s in parent %s' % (repr(folder_name),
+                                                                                      repr(parent_folder_id)))
 
     def _vind_globale_folder(self, folder_name):
         query = "mimeType='%s'" % self.MIME_TYPE_FOLDER
@@ -105,13 +139,13 @@ class StorageGoogleDrive(StorageBase):
         query += " and name='%s'" % folder_name
         request = self._service_files.list(q=query)
 
-        results = request.execute()
+        response = self._execute(request)
+        # print('[DEBUG] {vind_globale_folder} response:', response)
 
-        if 'files' not in results:
-            raise StorageError("{vind_globale_folder} Missing 'files' in results")
+        if not (response and 'files' in response):
+            raise StorageError("{vind_globale_folder} Missing 'files' in response")
 
-        # print('[DEBUG] {vind_globale_folder} results:', results)
-        all_files = results['files']
+        all_files = response['files']
         if len(all_files) > 0:
             first_file = all_files[0]
             # self.stdout.write('first_file: %s' % repr(first_file))
@@ -130,28 +164,28 @@ class StorageGoogleDrive(StorageBase):
             query += " and mimeType='%s'" % self.MIME_TYPE_FOLDER
         request = self._service_files.list(q=query)
 
-        results = request.execute()
+        response = self._execute(request)
+        # print('[DEBUG] list folder response:', response)
 
-        if 'files' not in results:
-            raise StorageError("{list_folder} Missing 'files' in results")
+        if not (response and 'files' in response):
+            raise StorageError("{list_folder} No 'files' in response")
 
-        # print('[DEBUG] list folder results:', results)
         out = {obj['name']: obj['id']
-               for obj in results['files']}
+               for obj in response['files']}
         return out
 
     def _share_seizoen_folder(self):
         if self._folder_id_seizoen:
             # request = self._service_files.get(fileId=self._folder_id_seizoen)
-            # response = request.execute()
+            # response = self._execute(request)
             # print('{share_seizoen_folder} files.get response=%s' % repr(response))
 
             request = self._service_perms.list(fileId=self._folder_id_seizoen,
                                                fields="permissions(id, role, type, emailAddress)")
 
-            response = request.execute()
+            response = self._execute(request)
+            # self.stdout.write('[INFO] {share_seizoen_folder} perms.list response=%s' % repr(response))
 
-            self.stdout.write('[INFO] {share_seizoen_folder} perms.list response=%s' % repr(response))
             share_with = self._share_with_emails[:]
             for perm in response['permissions']:
                 if perm['type'] == 'user' and perm['emailAddress'] in share_with:
@@ -169,8 +203,8 @@ class StorageGoogleDrive(StorageBase):
                                                          "emailAddress": email,
                                                      },
                                                      sendNotificationEmail=False)
-                response = request.execute()
-                self.stdout.write('[INFO] {share_seizoen_folder} perms.create response=%s' % repr(response))
+                response = self._execute(request)
+                # self.stdout.write('[INFO] {share_seizoen_folder} perms.create response=%s' % repr(response))
             # for
 
     def _vind_comp_bestand(self, folder_name, fname) -> str:
@@ -183,10 +217,10 @@ class StorageGoogleDrive(StorageBase):
         query += " and mimeType='%s'" % self.MIME_TYPE_SHEET
         request = self._service_files.list(q=query)
 
-        results = request.execute()
+        response = self._execute(request)
+        # self.stdout.write('[DEBUG] {vind_comp_bestand} response: %s' % repr(response))
 
-        # self.stdout.write('[DEBUG] {vind_comp_bestand} results: %s' % repr(results))
-        all_files = results['files']
+        all_files = response['files']
         if len(all_files) > 0:
             first_file = all_files[0]
             return first_file['id']
@@ -196,17 +230,30 @@ class StorageGoogleDrive(StorageBase):
         # kopieer een template naar een nieuw bestand
         # print('[DEBUG] {google_drive.maak_bestand_uit_template} folder_name=%s, fname=%s' % (repr(folder_name),
         #                                                                                      repr(fname)))
-        folder_id = self._comp2folder_id[folder_name]
-        template_file_id = self._comp2template_file_id[folder_name]
+
+        # bepaal de directory waar het bestand in aangemaakt moet worden
+        folder_id = self._comp2folder_id.get(folder_name, None)
+        if not folder_id:
+            raise StorageError('{maak_bestand_uit_template} Folder met naam %s niet gevonden' % repr(folder_name))
+
+        # bepaal de template die gebruikt moet worden
+        template_file_id = self._comp2template_file_id.get(folder_name, None)
+        if not template_file_id:
+            raise StorageError('{maak_bestand_uit_template} Geen template_file_id voor folder %s' % repr(folder_name))
 
         request = self._service_files.copy(fileId=template_file_id,
                                            body={"parents": [folder_id],
                                                  "name": fname})
 
-        result = request.execute()
-
+        response = self._execute(request)
         # self.stdout.write('[DEBUG] {maak_bestand_uit_template} files copy result is %s' % repr(result))
-        file_id = result['id']
+
+        if not response:
+            raise StorageError('{maak_bestand_uit_template} Aanmaken van bestand %s in folder %s is mislukt' % (
+                                                                                                    repr(fname),
+                                                                                                    repr(folder_name)))
+
+        file_id = response['id']
 
         # geef iedereen toestemming om dit bestand te wijzigen
         request = self._service_perms.create(fileId=file_id,
@@ -215,8 +262,8 @@ class StorageGoogleDrive(StorageBase):
                                                  "role": "writer",
                                                  "allowFileDiscovery": "true",
                                              })
-        result = request.execute()
-        self.stdout.write('[DEBUG] {maak_bestand_uit_template} perms create result is %s' % repr(result))
+        _response = self._execute(request)
+        # self.stdout.write('[DEBUG] {maak_bestand_uit_template} perms create result is %s' % repr(_response))
 
         return file_id
 

@@ -1,0 +1,73 @@
+{% extends 'design/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2026 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+{% load design_filters %}
+{% load design_knop %}
+
+{% block title %}Status wedstrijdformulieren{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Status wedstrijdformulieren</h3>
+            <p>Voor de RK's en BK's die nu actief zijn.</p>
+            <p>De informatie wordt 1x per uur ververst.</p>
+        </div>
+    </div>
+
+
+    <!-- blauwe balk met informatie in een tabel -->
+    <div class="row-sv-blauw">
+        <div class="col s12">
+            <table class="sv-kader-tabel">
+                {% for match in matches %}
+                    {% if match.do_header %}
+                        <tr>
+                            <td colspan="6" class="center">
+                                <h5 class="sv-middel-blauw-text">{{ match.datum_wanneer }}</h5>
+                            </td>
+                        </tr>
+                    {% endif %}
+
+                    <tr>
+                        <td colspan="6">
+                            <h6>{{ match.vereniging.ver_nr_en_naam }}</h6>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Bestand</th>
+                        <th>Aantal deelnemers</th>
+                        <th>Fase</th>
+                        <th>Gewijzigd</th>
+                        <th>Door</th>
+                        <th><!-- kolom voor knop --></th>
+                    </tr>
+
+                    {% for status in match.status_list %}
+                        <tr>
+                            <td>{{ status.bestand.afstand }}m: {{ status.bestand.fname }}</td>
+                            <td>{{ status.aantal_deelnemers }}</td>
+                            <td>{{ status.wedstrijd_fase }}</td>
+                            <td>{{ status.gewijzigd_op }}</td>
+                            <td>{{ status.gewijzigd_door|wbr_email }}</td>
+                            <td>
+                                {% if status.url_open_wf %}
+                                    {% sv-knop-ext url=status.url_open_wf tekst='' %}
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="compbeheer-wf-status" %}
+
+{% endblock %}

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2024 Ramon van der Winkel.
+#  Copyright (c) 2020-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -47,7 +47,7 @@ class SporterAdmin(admin.ModelAdmin):
 
     ordering = ('-lid_nr',)         # nieuwste eerst
 
-    search_fields = ('unaccented_naam', 'lid_nr', 'email')
+    search_fields = ('unaccented_naam', 'lid_nr', 'email', 'adres_code')
 
     # filter mogelijkheid
     list_filter = ('geslacht', 'scheids', 'is_actief_lid', 'is_gast', 'is_erelid', 'is_overleden',

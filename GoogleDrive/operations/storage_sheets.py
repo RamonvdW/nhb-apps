@@ -13,9 +13,9 @@ from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
 from googleapiclient.http import HttpRequest
 import googleapiclient.errors
-import socket
 import os.path
-
+import socket
+import time
 
 # FUTURE: Google Drive API heeft push notification voor wijzigingen
 
@@ -26,8 +26,9 @@ class StorageGoogleSheet:
 
     SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
 
-    def __init__(self, stdout):
+    def __init__(self, stdout, retry_delay:float=1.0):
         self.stdout = stdout
+        self._retry_delay = retry_delay
         self._api_spreadsheets = None
         self._api_sheet_values = None
         self._file_id = ""
@@ -60,18 +61,28 @@ class StorageGoogleSheet:
         self._api_sheet_values = None
 
     def _execute(self, request: HttpRequest) -> dict | None:
-        try:
-            response = request.execute()
-        except socket.timeout as exc:           # pragma: no cover
-            self.stdout.write('[ERROR] {execute} Socket timeout: %s' % exc)
-        except socket.gaierror as exc:          # pragma: no cover
-            # example: [Errno -3] Temporary failure in name resolution
-            self.stdout.write('[ERROR] {execute} Socket error: %s' % exc)
-        except googleapiclient.errors.HttpError as exc:
-            self.stdout.write('[ERROR] {execute} HttpError from API: %s' % exc)
-        else:
-            # self.stdout.write('[DEBUG] {execute} response=%s' % repr(response))
-            return response
+        retries = 7
+        wait_sec = self._retry_delay
+        while retries > 0:
+            try:
+                response = request.execute()
+            except socket.timeout as exc:           # pragma: no cover
+                self.stdout.write('[ERROR] {execute} Socket timeout: %s' % exc)
+            except socket.gaierror as exc:          # pragma: no cover
+                # example: [Errno -3] Temporary failure in name resolution
+                self.stdout.write('[ERROR] {execute} Socket error: %s' % exc)
+            except googleapiclient.errors.HttpError as exc:
+                self.stdout.write('[ERROR] {execute} HttpError from API: %s' % exc)
+            else:
+                # self.stdout.write('[DEBUG] {execute} response=%s' % repr(response))
+                return response
+
+            self.stdout.write('[DEBUG] {execute} Retrying in %s seconds' % wait_sec)
+
+            time.sleep(wait_sec)
+            wait_sec *= 2       # 1, 2, 4, 8, 16, 32, 64
+            retries -= 1
+        # while
 
         return None
 
@@ -88,8 +99,9 @@ class StorageGoogleSheet:
                 # properties = {'title': 'bla', 'sheetId': 1234}
                 self._sheet_name2id[properties['title']] = properties['sheetId']
             # for
-
-        # TODO: raise StorageError in case sheet not accessible
+        else:
+            # TODO: consider retry
+            raise StorageError('{get_sheet_ids} Could not retrieve sheets for file %s' % self._file_id)
 
     def selecteer_file(self, file_id):
         self._setup_api()
@@ -114,10 +126,10 @@ class StorageGoogleSheet:
                                             spreadsheetId=self._file_id,
                                             body=body)
 
-            response = self._execute(request)
+            _response = self._execute(request)
 
-            # response is a dict met spreadsheetId, totalUpdated[Rows, Columns, Cells, Sheets] en responses
-            # response['responses'] is a lijst met dict, elk met spreadsheetId, updated[Cells, Columns, Rows, Ranges]
+            # _response is a dict met spreadsheetId, totalUpdated[Rows, Columns, Cells, Sheets] en responses
+            # _response['responses'] is a lijst met dict, elk met spreadsheetId, updated[Cells, Columns, Rows, Ranges]
 
             self._value_changes = list()
 
@@ -142,7 +154,6 @@ class StorageGoogleSheet:
         self._stuur_spreadsheet_requests()
 
     def _set_sheet_hidden(self, sheet_name: str, hidden: bool):
-
         # vertaal de sheet naam naar het sheetId
         sheet_id = self._sheet_name2id[sheet_name]
 
@@ -161,15 +172,19 @@ class StorageGoogleSheet:
     def toon_sheet(self, sheet_name: str):
         # hiermee kan een blad getoond worden
         if sheet_name not in self._sheet_name2id:
-            raise StorageError('{toon_sheet} Sheet %s niet gevonden in bestand %s' % (repr(sheet_name),
-                                                                                      repr(self._file_id)))
+            raise StorageError('{toon_sheet} Sheet %s niet gevonden in bestand %s met sheets %s' % (
+                                                                                        repr(sheet_name),
+                                                                                        repr(self._file_id),
+                                                                                        repr(self._sheet_name2id)))
         self._set_sheet_hidden(sheet_name, False)
 
     def hide_sheet(self, sheet_name: str):
         # hiermee kan een blad verstopt worden
         if sheet_name not in self._sheet_name2id:
-            raise StorageError('{hide_sheet} Sheet %s niet gevonden in bestand %s' % (repr(sheet_name),
-                                                                                      repr(self._file_id)))
+            raise StorageError('{hide_sheet} Sheet %s niet gevonden in bestand %s met sheets %s' % (
+                                                                                        repr(sheet_name),
+                                                                                        repr(self._file_id),
+                                                                                        repr(self._sheet_name2id)))
         self._set_sheet_hidden(sheet_name, True)
 
     def wijzig_cellen(self, range_a1: str, values: list):

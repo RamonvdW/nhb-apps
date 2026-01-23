@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2025 Ramon van der Winkel.
+#  Copyright (c) 2025-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -10,7 +10,7 @@ from Competitie.models import (Competitie, CompetitieMutatie, KampioenschapSport
                                CompetitieTeamKlasse)
 from Competitie.definities import (MUTATIE_KAMP_CUT, MUTATIE_KAMP_TEAMS_NUMMEREN,
                                    MUTATIE_KAMP_AANMELDEN_INDIV, MUTATIE_KAMP_AFMELDEN_INDIV,
-                                   MUTATIE_MAAK_WEDSTRIJDFORMULIEREN)
+                                   MUTATIE_MAAK_WEDSTRIJDFORMULIEREN, MUTATIE_UPDATE_DIRTY_WEDSTRIJDFORMULIEREN)
 from Competitie.operations.competitie_mutaties import ping_achtergrondtaak
 
 
@@ -84,6 +84,15 @@ def aanmaken_wedstrijdformulieren_is_pending():
                                 mutatie=MUTATIE_MAAK_WEDSTRIJDFORMULIEREN,
                                 is_verwerkt=False).count()
     return cnt > 0
+
+
+def maak_mutatie_update_dirty_wedstrijdformulieren(comp: Competitie):
+    mutatie = CompetitieMutatie.objects.create(
+                                mutatie=MUTATIE_UPDATE_DIRTY_WEDSTRIJDFORMULIEREN,
+                                competitie=comp)    # nodig voor begin_jaar
+
+    # ping de achtergrondtaak (zonder te wachten)
+    ping_achtergrondtaak(mutatie, snel=True)
 
 
 # end of file
