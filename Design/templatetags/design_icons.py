@@ -257,6 +257,7 @@ ICON_NAME2MATERIAL_SYMBOL_NAME = {
     'wedstrijd kwalificatiescores': 'verified',
     'wedstrijd sessies': 'schedule',
     'wedstrijdklassen': 'equalizer',
+    'wf status': 'cardiology',
     'zoek vereniging': 'travel_explore',
 }
 

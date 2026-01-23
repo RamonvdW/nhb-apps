@@ -27,10 +27,15 @@ class MonitorGoogleSheetsWedstrijdformulieren:
         self._sheetstatus_cache = dict()
         self._sheetstatus_todo = list()
 
-        for status in SheetStatus.objects.select_related('bestand'):
+        for status in (SheetStatus
+                       .objects
+                       .select_related('bestand')
+                       .order_by('bekeken_op')):
             self._sheetstatus_cache[status.bestand.pk] = status
 
             if status.keep_monitoring():
+                self._bestanden.append(status.bestand)
+
                 if status.gewijzigd_op > status.bekeken_op:
                     self._sheetstatus_todo.append(status)
         # for
@@ -47,8 +52,6 @@ class MonitorGoogleSheetsWedstrijdformulieren:
         for bestand in Bestand.objects.filter(begin_jaar=begin_jaar, afstand=afstand, is_bk=is_bk, is_teams=is_teams):
             if bestand.pk not in self._sheetstatus_cache:
                 self._bestanden_nieuw.append(bestand)
-            else:
-                self._bestanden.append(bestand)
         # for
 
     def _get_sheetstatus(self, bestand):
@@ -68,6 +71,12 @@ class MonitorGoogleSheetsWedstrijdformulieren:
         else:
             lezer = LeesIndivWedstrijdFormulier(self.stdout, status.bestand, self._sheets)
 
+        aantal_deelnemers = lezer.tel_deelnemers()
+        if aantal_deelnemers != status.aantal_deelnemers:
+            self.stdout.write('[INFO] aantal_deelnemers %s --> %s' % (status.aantal_deelnemers, aantal_deelnemers))
+            status.aantal_deelnemers = aantal_deelnemers
+            status.save(update_fields=['aantal_deelnemers'])
+
         heeft_scores = lezer.heeft_scores()
         if heeft_scores != status.bevat_scores:
             self.stdout.write('[INFO] heeft_scores %s --> %s' % (status.bevat_scores, heeft_scores))
@@ -82,12 +91,6 @@ class MonitorGoogleSheetsWedstrijdformulieren:
 
         # is de uitslag al compleet?
         if status.bevat_scores:
-            aantal_deelnemers = lezer.tel_deelnemers()
-            if aantal_deelnemers != status.aantal_deelnemers:
-                self.stdout.write('[INFO] aantal_deelnemers %s --> %s' % (status.aantal_deelnemers, aantal_deelnemers))
-                status.aantal_deelnemers = aantal_deelnemers
-                status.save(update_fields=['aantal_deelnemers'])
-
             uitslag_is_compleet = lezer.heeft_uitslag()
             if uitslag_is_compleet != status.uitslag_is_compleet:
                 self.stdout.write('[INFO] uitslag_is_compleet %s --> %s' % (status.uitslag_is_compleet,
@@ -131,7 +134,7 @@ class MonitorGoogleSheetsWedstrijdformulieren:
         if sheet_count + bestand_count == 0:
             return
 
-        self.stdout.write('[DEBUG] {doe_beetje_werk} %s sheets en %s bestanden te gaan' % (sheet_count, bestand_count))
+        # self.stdout.write('[DEBUG] {doe_beetje_werk} %s sheets en %s bestanden te gaan' % (sheet_count, bestand_count))
 
         # analyseer de inhoud van een wedstrijdformulier
         status = self._get_sheet_todo()
@@ -142,22 +145,25 @@ class MonitorGoogleSheetsWedstrijdformulieren:
         # zoek naar nieuwe revisies van de google drive bestanden
         bestand = self._get_bestand_todo()
         if bestand:
-            self.stdout.write('[INFO] bepaal laatste wijziging voor Bestand %s' % repr(bestand.fname))
+            # self.stdout.write('[INFO] bepaal laatste wijziging voor Bestand %s' % repr(bestand.fname))
             status = self._get_sheetstatus(bestand)
 
             # wanneer is het bestand voor het laatst gewijzigd?
             op, door = self._drive.get_laatste_wijziging(bestand.file_id)
-            if op and door:
-                status.gewijzigd_op, status.gewijzigd_door = op, door
-                status.save(update_fields=['gewijzigd_op', 'gewijzigd_door'])
+            if op:
+                if op != status.gewijzigd_op or door != status.gewijzigd_door:
+                    status.gewijzigd_op, status.gewijzigd_door = op, door
+                    status.save(update_fields=['gewijzigd_op', 'gewijzigd_door'])
 
-                # get the converted date/time
-                status.refresh_from_db()
+                    self.stdout.write('[INFO] bestand %s is gewijzigd op %s door %s' % (repr(bestand.fname),
+                                                                                        timezone.localtime(status.gewijzigd_op).strftime('%Y-%m-%d %H:%M:%S'),
+                                                                                        repr(door)))
 
-                if status.gewijzigd_op > status.bekeken_op:
-                    if status.keep_monitoring():
-                        if status not in self._sheetstatus_todo:
-                            self._sheetstatus_todo.append(status)
+
+            if status.gewijzigd_op > status.bekeken_op:
+                if status.keep_monitoring():
+                    if status not in self._sheetstatus_todo:
+                        self._sheetstatus_todo.append(status)
 
 
 # end of file

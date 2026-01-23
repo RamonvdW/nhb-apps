@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2025 Ramon van der Winkel.
+#  Copyright (c) 2022-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -43,6 +43,10 @@ urlpatterns = [
     path('wedstrijdformulieren/aanmaken/',
          views_wf.AanmakenView.as_view(),
          name='wf-aanmaken'),
+
+    path('wedstrijdformulieren/status/',
+         views_wf.StatusView.as_view(),
+         name='wf-status'),
 
     path('<comp_pk>/klassengrenzen-vaststellen/',
          views_bb.KlassengrenzenVaststellenView.as_view(),

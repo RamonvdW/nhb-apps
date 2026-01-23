@@ -11,6 +11,7 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError as GoogleApiError
 from googleapiclient.http import HttpRequest
 from google.oauth2.service_account import Credentials
+import datetime
 import socket
 import time
 import os
@@ -83,16 +84,19 @@ class MonitorDriveFiles:
         fields = "modifiedTime,lastModifyingUser(displayName,emailAddress)"
         request = self._service_files.get(fileId=file_id, fields=fields)
         resp = self._execute(request)
-        self.stdout.write('[DEBUG] resp: %s' % repr(resp))
+        # self.stdout.write('[DEBUG] resp: %s' % repr(resp))
 
         op = door = ''
         if resp:
             op = resp.get('modifiedTime', '')
+            op = datetime.datetime.fromisoformat(op)
             last_user = resp.get('lastModifyingUser', None)
             if last_user and isinstance(last_user, dict):
                 door = (last_user.get('displayName', '') or
                         last_user.get('emailAddress', '') or    # if present, in case displayName is empty
                         'Anoniem')                              # fallback
+            else:
+                door = 'Anoniem'
 
         return op, door
 

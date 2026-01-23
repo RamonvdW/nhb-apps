@@ -8,15 +8,19 @@ from django.http import HttpResponseRedirect, Http404
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
-from Competitie.models import Competitie
+from Competitie.definities import DEEL_BK
+from Competitie.models import Competitie, CompetitieMatch, Kampioenschap
+from CompKampioenschap.models import SheetStatus
 from CompKampioenschap.operations import (maak_mutatie_wedstrijdformulieren_aanmaken,
                                           aantal_ontbrekende_wedstrijdformulieren_rk_bk)
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
+from GoogleDrive.models import Bestand
 from GoogleDrive.operations import check_heeft_toestemming, get_authorization_url
 
 TEMPLATE_COMPBEHEER_DRIVE_TOESTEMMING = 'compbeheer/drive-toestemming.dtl'
 TEMPLATE_COMPBEHEER_DRIVE_AANMAKEN = 'compbeheer/drive-aanmaken.dtl'
+TEMPLATE_COMPBEHEER_WF_STATUS = 'compbeheer/wf-status.dtl'
 
 
 class ToestemmingView(UserPassesTestMixin, TemplateView):
@@ -124,6 +128,152 @@ class AanmakenView(UserPassesTestMixin, TemplateView):
             maak_mutatie_wedstrijdformulieren_aanmaken(comp25, door_str)
 
         return HttpResponseRedirect(reverse('Competitie:kies'))
+
+
+class StatusView(UserPassesTestMixin, TemplateView):
+
+    """ Deze view is voor de manager om het de status van de wedstrijdformulieren te zien """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_COMPBEHEER_WF_STATUS
+    raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        rol_nu = rol_get_huidige(self.request)
+        return rol_nu == Rol.ROL_BB
+
+    def _get_werk(self):
+        werk = list()
+        for comp in Competitie.objects.all():
+            comp.bepaal_fase()
+
+            is_teams = False
+            if 'J' <= comp.fase_indiv <= 'L':
+                is_bk = False
+                tup = (comp.begin_jaar, int(comp.afstand), is_bk, is_teams)
+                werk.append(tup)
+
+            if 'N' <= comp.fase_indiv <= 'P':
+                is_bk = True
+                tup = (comp.begin_jaar, int(comp.afstand), is_bk, is_teams)
+                werk.append(tup)
+
+            if False:  # teams are Excel, for now
+                is_teams = True
+                if 'J' <= comp.fase_teams <= 'L':
+                    is_bk = False
+                    tup = (comp.begin_jaar, int(comp.afstand), is_bk, is_teams)
+                    werk.append(tup)
+
+                if 'N' <= comp.fase_teams <= 'P':
+                    is_bk = True
+                    tup = (comp.begin_jaar, int(comp.afstand), is_bk, is_teams)
+                    werk.append(tup)
+
+        # for
+        return werk
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        werk = self._get_werk()
+
+        match_pk2deelkamp = dict()
+        for deelkamp in (Kampioenschap
+                         .objects
+                         .select_related('competitie',
+                                         'rayon')
+                         .prefetch_related('rk_bk_matches')):
+
+            match_pks = list(deelkamp.rk_bk_matches.all().values_list('pk', flat=True))
+            for pk in match_pks:
+                match_pk2deelkamp[pk] = deelkamp
+            # for
+        # for
+        all_match_pks = list(match_pk2deelkamp.keys())
+
+        tup2status = dict()
+        for status in (SheetStatus
+                       .objects
+                       .select_related('bestand')
+                       .order_by('bestand__fname')):
+
+            bestand = status.bestand
+            tup = (bestand.begin_jaar, bestand.afstand, bestand.is_bk, bestand.is_teams)
+            if tup[:4] in werk:
+                status.url_open_wf = "https://docs.google.com/spreadsheets/d/%s/edit" % status.bestand.file_id
+
+                pos = status.gewijzigd_door.find('@')
+                if pos > 0:
+                    status.gewijzigd_door = status.gewijzigd_door[:pos]
+
+                # improve wbr
+                status.bestand.fname = status.bestand.fname.replace('_', ' ')
+                status.bestand.fname = status.bestand.fname.replace('individueel-', 'individueel ')
+                status.bestand.fname = status.bestand.fname.replace('-onder', ' onder')
+                status.bestand.fname = status.bestand.fname.replace('-jeugd', ' jeugd')
+                status.bestand.fname = status.bestand.fname.replace('-klasse', ' klasse')
+
+                tup = (bestand.begin_jaar, bestand.afstand, bestand.is_bk, bestand.is_teams, bestand.rayon_nr, bestand.klasse_pk)
+                tup2status[tup] = status
+        # for
+
+        context['matches'] = matches = list()
+
+        prev_datum = None
+        for match in (CompetitieMatch
+                      .objects
+                      .filter(pk__in=all_match_pks)
+                      .select_related('vereniging')
+                      .prefetch_related('indiv_klassen',
+                                        'team_klassen')
+                      .order_by('datum_wanneer',
+                                'vereniging__regio__rayon_nr',
+                                'vereniging__ver_nr')):
+
+            deelkamp = match_pk2deelkamp[match.pk]
+            comp = deelkamp.competitie
+            afstand = int(comp.afstand)
+            is_bk = deelkamp.deel == DEEL_BK
+            if is_bk:
+                rayon_nr = 0
+            else:
+                rayon_nr = deelkamp.rayon.rayon_nr
+
+            match.status_list = list()
+
+            for klasse in match.indiv_klassen.all():
+                tup = (comp.begin_jaar, afstand, is_bk, False, rayon_nr, klasse.pk)
+                status = tup2status.get(tup, None)
+                if status:
+                    match.status_list.append(status)
+            # for
+
+            for klasse in match.team_klassen.all():
+                tup = (comp.begin_jaar, afstand, is_bk, True, rayon_nr, klasse.pk)
+                status = tup2status.get(tup, None)
+                if status:
+                    match.status_list.append(status)
+            # for
+
+            if len(match.status_list) > 0:
+                if prev_datum != match.datum_wanneer:
+                    match.do_header = True
+                    prev_datum = match.datum_wanneer
+
+                matches.append(match)
+        # for
+
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (None, 'Status wedstrijdformulieren'),
+        )
+
+        return context
+
 
 
 # end of file

@@ -293,7 +293,7 @@ class LeesIndivWedstrijdFormulier:
         self.sheet = sheet      # kan google sheets bijwerken
         self.afstand = bestand.afstand
 
-        self.aantal_regels_deelnemers = 24        # altijd dit aantal invullen, voor als de cut omlaag gezet wordt
+        self.aantal_regels_deelnemers = 24          # maximum
         self.aantal_regels_reserves = 0
 
         self.klasse = None
@@ -310,10 +310,7 @@ class LeesIndivWedstrijdFormulier:
             'voorronde_1': 'J11:J35',
             'voorronde_2': 'K11:K35',
             'uitslag_25m1p': 'R11:R35',
-            'deelnemers': 'D11:I%d' % (11 + self.aantal_regels_deelnemers - 1),
-            'deelnemers_notities': 'T11:U%d' % (11 + self.aantal_regels_deelnemers - 1),
-            'reserves': 'D41:I99',                # wordt bijgewerkt in laad_klasse
-            'reserves_notities': 'T41:U99',       # wordt bijgewerkt in laad_klasse
+            'deelnemers': 'D11:I34',
             'haalbare_titel': 'U7',
             'finales16_8': 'C8:C53',        # 1/8 (laatste 16)
             'finales16_4': 'I11:I49',       # 1/4 (laatste 8)
@@ -334,49 +331,7 @@ class LeesIndivWedstrijdFormulier:
         self._data_heeft_uitslag = False
         self._wedstrijd_voortgang = ''
 
-        self._laad_klasse(bestand)
         self._laad_sheet()
-
-    def _laad_klasse(self, bestand: Bestand):
-        # zoek de wedstrijdklasse erbij
-        self.klasse = CompetitieIndivKlasse.objects.get(pk=bestand.klasse_pk)
-
-        competitie = self.klasse.competitie
-        if bestand.is_bk:
-            self.kampioenschap = Kampioenschap.objects.filter(competitie=competitie, deel=DEEL_BK).first()
-        else:
-            self.kampioenschap = Kampioenschap.objects.filter(competitie=competitie, deel=DEEL_RK,
-                                                              rayon__rayon_nr=bestand.rayon_nr).first()
-
-        self.aantal_ingeschreven = KampioenschapSporterBoog.objects.filter(kampioenschap=self.kampioenschap,
-                                                                           indiv_klasse=self.klasse).count()
-
-        # haal de limiet op (maximum aantal deelnemers)
-        self.limiet = 24
-        lim = KampioenschapIndivKlasseLimiet.objects.filter(kampioenschap=self.kampioenschap,
-                                                            indiv_klasse=self.klasse).first()
-        if lim:
-            self.limiet = lim.limiet
-
-        # pas de range aan zodat we niet onnodig veel data hoeven te sturen
-        self.aantal_regels_reserves = self.aantal_ingeschreven      # iedereen kan afgemeld zijn
-        self.ranges['reserves'] = 'D41:I%d' % (41 + self.aantal_regels_reserves - 1)
-        self.ranges['reserves_notities'] = 'T41:U%d' % (41 + self.aantal_regels_reserves - 1)
-
-        if bestand.is_bk:
-            self.titel = 'BK'
-        else:
-            self.titel = 'RK'
-        self.titel += ' individueel, %s' % competitie.beschrijving.replace('competitie ', '')   # is inclusief seizoen
-
-        if not bestand.is_bk:
-            # benoem het rayon
-            self.titel += ', Rayon %s' % bestand.rayon_nr
-
-        if bestand.is_bk:
-            self.haalbare_titel = self.klasse.titel_bk      # Bondskampioen / Nederlands Kampioen
-        else:
-            self.haalbare_titel = 'Rayonkampioen'
 
     def _check_input(self, cells_range):
         values = self.sheet.get_range(cells_range)
