@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2025 Ramon van der Winkel.
+#  Copyright (c) 2020-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -162,6 +162,10 @@ class VerwerkCompBeheerMutaties:
 
         mutatie_code_verwerk_functie(self, mutatie)  # noqa
         return True
+
+    def verwerk_in_achtergrond(self):
+        # doe een klein beetje werk
+        pass
 
 
 # end of file

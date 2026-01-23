@@ -60,6 +60,12 @@ class Command(BaseCommand):
         parser.add_argument('--quick', action='store_true')                 # for testing
         parser.add_argument('--use-test-database', action='store_true')     # for testing
 
+    def _verwerk_in_achtergrond(self):
+        # vraag elk van de verwerkers om een stukje werk in de achtergrond te doen
+        for plugin in self.verwerk_mutaties:
+            plugin.verwerk_in_achtergrond()
+        # for
+
     def _verwerk_mutatie(self, mutatie):
         # vraag elk van de mutatie verwerkers om de mutatie af te handelen
         done = False
@@ -137,12 +143,14 @@ class Command(BaseCommand):
                 mutatie_count = new_count
                 self._verwerk_nieuwe_mutaties()
                 now = datetime.datetime.now()
+            else:
+                self._verwerk_in_achtergrond()
 
-            # wacht 5 seconden voordat we opnieuw in de database kijken
+            # wacht 3 seconden voordat we opnieuw in de database kijken
             # het wachten kan onderbroken worden door een ping, als er een nieuwe mutatie toegevoegd is
             secs = (self.stop_at - now).total_seconds()
             if secs > 1:                                    # pragma: no branch
-                timeout = min(5.0, secs)
+                timeout = min(3.0, secs)
                 if self._sync.wait_for_ping(timeout):       # pragma: no branch
                     self._count_ping += 1                   # pragma: no cover
             else:

@@ -286,4 +286,126 @@ class UpdateIndivWedstrijdFormulier:
         return "OK"
 
 
+class LeesIndivWedstrijdFormulier:
+
+    def __init__(self, stdout, bestand: Bestand, sheet: StorageGoogleSheet):
+        self.stdout = stdout
+        self.sheet = sheet      # kan google sheets bijwerken
+        self.afstand = bestand.afstand
+
+        self.aantal_regels_deelnemers = 24        # altijd dit aantal invullen, voor als de cut omlaag gezet wordt
+        self.aantal_regels_reserves = 0
+
+        self.klasse = None
+        self.haalbare_titel = 'Kampioen'            # wordt bijgewerkt in laad_klasse
+        self.kampioenschap = None
+        self.limiet = 0                             # maximaal aantal deelnemers
+        self.aantal_ingeschreven = 0
+        self._max_naar_finales = 0
+
+        self.ranges = {
+            'titel': 'C2',
+            'info': 'F4:F7',
+            'bijgewerkt': 'A37',
+            'scores': 'J11:K35',
+            'deelnemers': 'D11:I%d' % (11 + self.aantal_regels_deelnemers - 1),
+            'deelnemers_notities': 'T11:U%d' % (11 + self.aantal_regels_deelnemers - 1),
+            'reserves': 'D41:I99',                # wordt bijgewerkt in laad_klasse
+            'reserves_notities': 'T41:U99',       # wordt bijgewerkt in laad_klasse
+            'haalbare_titel': 'U7',
+        }
+
+        self._laad_klasse(bestand)
+
+    def _laad_klasse(self, bestand: Bestand):
+        # zoek de wedstrijdklasse erbij
+        self.klasse = CompetitieIndivKlasse.objects.get(pk=bestand.klasse_pk)
+
+        competitie = self.klasse.competitie
+        if bestand.is_bk:
+            self.kampioenschap = Kampioenschap.objects.filter(competitie=competitie, deel=DEEL_BK).first()
+        else:
+            self.kampioenschap = Kampioenschap.objects.filter(competitie=competitie, deel=DEEL_RK,
+                                                              rayon__rayon_nr=bestand.rayon_nr).first()
+
+        self.aantal_ingeschreven = KampioenschapSporterBoog.objects.filter(kampioenschap=self.kampioenschap,
+                                                                           indiv_klasse=self.klasse).count()
+
+        # haal de limiet op (maximum aantal deelnemers)
+        self.limiet = 24
+        lim = KampioenschapIndivKlasseLimiet.objects.filter(kampioenschap=self.kampioenschap,
+                                                            indiv_klasse=self.klasse).first()
+        if lim:
+            self.limiet = lim.limiet
+
+        # pas de range aan zodat we niet onnodig veel data hoeven te sturen
+        self.aantal_regels_reserves = self.aantal_ingeschreven      # iedereen kan afgemeld zijn
+        self.ranges['reserves'] = 'D41:I%d' % (41 + self.aantal_regels_reserves - 1)
+        self.ranges['reserves_notities'] = 'T41:U%d' % (41 + self.aantal_regels_reserves - 1)
+
+        if bestand.is_bk:
+            self.titel = 'BK'
+        else:
+            self.titel = 'RK'
+        self.titel += ' individueel, %s' % competitie.beschrijving.replace('competitie ', '')   # is inclusief seizoen
+
+        if not bestand.is_bk:
+            # benoem het rayon
+            self.titel += ', Rayon %s' % bestand.rayon_nr
+
+        if bestand.is_bk:
+            self.haalbare_titel = self.klasse.titel_bk      # Bondskampioen / Nederlands Kampioen
+        else:
+            self.haalbare_titel = 'Rayonkampioen'
+
+    # def _hide_show_finale_sheets_indoor(self):
+    #     # er zijn wedstrijd finale sheets met 4, 8 of 16 deelnemers
+    #     # toon alleen de het benodigde sheet
+    #
+    #     # minimaal 16
+    #     if self._max_naar_finales >= 16:
+    #         self.sheet.toon_sheet('Finales 16')
+    #     else:
+    #         self.sheet.hide_sheet('Finales 16')
+    #
+    #     # minimaal 8, minder dan 16
+    #     if 8 <= self._max_naar_finales < 16:
+    #         self.sheet.toon_sheet('Finales 8')
+    #     else:
+    #         self.sheet.hide_sheet('Finales 8')
+    #
+    #     # minder dan 8
+    #     if self._max_naar_finales < 8:
+    #         self.sheet.toon_sheet('Finales 4')
+    #     else:
+    #         self.sheet.hide_sheet('Finales 4')
+
+    def heeft_scores(self):
+        values = self.sheet.get_range(self.ranges['scores'])
+        if values:
+            for row in values:
+                for cell in row:
+                    if cell:
+                        # cell is niet leeg
+                        self.stdout.write('[DEBUG] score gevonden: %s' % repr(cell))
+                        return True
+                # for
+            # for
+        return False
+
+    def tel_deelnemers(self):
+        if self.afstand == 18:
+            # Indoor
+            self.sheet.selecteer_sheet('Voorronde')
+        else:
+            # 25m1pijl
+            self.sheet.selecteer_sheet('Wedstrijd')
+
+        regels = self.sheet.get_range(self.ranges['deelnemers'])
+        # self.stdout.write('{tel_deelnemers} regels=%s' % repr(regels))
+
+        aantal_deelnemers = len(regels)
+        return aantal_deelnemers
+
+
 # end of file

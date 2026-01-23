@@ -330,5 +330,13 @@ class UpdateTeamsWedstrijdFormulier:
         return "OK"
 
 
+class LeesTeamsWedstrijdFormulier:
+
+    def __init__(self, stdout, sheet: StorageGoogleSheet):
+        self.stdout = stdout
+        self.sheet = sheet              # kan google sheets bijwerken
+
+    # TODO: implement
+
 
 # end of file

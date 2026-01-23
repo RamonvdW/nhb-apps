@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -16,15 +16,15 @@ import os.path
 import socket
 import json
 
-# service account dat gebruikt wordt om te downloaden (moet view rechten hebben op het document)
-SERVICE_ACCOUNT_FILE = os.path.join(settings.CREDENTIALS_PATH,
-                                    settings.CREDENTIALS_SERVICE_ACCOUNT_DOWNLOADER)
-
-SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
-
-
 class Command(BaseCommand):
+
     help = "Download de instaptoets vragenlijst gsheet"
+
+    # service account dat gebruikt wordt om te downloaden (moet view rechten hebben op het document)
+    SERVICE_ACCOUNT_FILE = os.path.join(settings.CREDENTIALS_PATH,
+                                        settings.CREDENTIALS_SERVICE_ACCOUNT_DOWNLOADER)
+
+    SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
 
     def __init__(self):
         super().__init__()
@@ -35,7 +35,7 @@ class Command(BaseCommand):
 
     def _setup_api(self):
         # TODO: exception handling
-        creds = Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
+        creds = Credentials.from_service_account_file(self.SERVICE_ACCOUNT_FILE, scopes=self.SCOPES)
         self._gsheets_api = build('sheets', 'v4', credentials=creds).spreadsheets()
 
     def _close_api(self):

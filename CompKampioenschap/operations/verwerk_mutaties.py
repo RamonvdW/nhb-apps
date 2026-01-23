@@ -16,12 +16,14 @@ from Competitie.definities import (DEELNAME_JA, DEELNAME_NEE,
 from Competitie.models import (Kampioenschap, KampioenschapSporterBoog, KampioenschapTeam, CompetitieMatch,
                                KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet,
                                Competitie, CompetitieMutatie, CompetitieIndivKlasse, CompetitieTeamKlasse)
+from CompKampioenschap.operations import maak_mutatie_update_dirty_wedstrijdformulieren
 from CompKampioenschap.operations.wedstrijdformulieren_indiv import (iter_indiv_wedstrijdformulieren,
                                                                      UpdateIndivWedstrijdFormulier)
 from CompKampioenschap.operations.wedstrijdformulieren_teams import (iter_teams_wedstrijdformulieren,
                                                                      UpdateTeamsWedstrijdFormulier)
 from CompKampioenschap.operations.storage_wedstrijdformulieren import (StorageWedstrijdformulieren,
                                                                        iter_dirty_wedstrijdformulieren, zet_dirty)
+from CompKampioenschap.operations.monitor_wedstrijdformulieren import MonitorGoogleSheetsWedstrijdformulieren
 from GoogleDrive.operations import StorageGoogleSheet, StorageError
 import time
 
@@ -38,6 +40,7 @@ class VerwerkCompKampMutaties:
     def __init__(self, stdout, logger):
         self.stdout = stdout
         self.my_logger = logger
+        self._achtergrond_monitor = None
 
     @staticmethod
     def _zet_dirty(deelkamp: Kampioenschap, klasse_pk: int, is_team: bool):
@@ -52,9 +55,7 @@ class VerwerkCompKampMutaties:
 
         zet_dirty(comp.begin_jaar, int(comp.afstand), rayon_nr, klasse_pk, is_bk, is_team)
 
-        CompetitieMutatie.objects.create(
-                            mutatie=MUTATIE_UPDATE_DIRTY_WEDSTRIJDFORMULIEREN,
-                            competitie=comp)      # alleen nodig voor begin_jaar
+        maak_mutatie_update_dirty_wedstrijdformulieren(comp)
 
     @staticmethod
     def _get_limiet_indiv(deelkamp, indiv_klasse):
@@ -739,9 +740,7 @@ class VerwerkCompKampMutaties:
             # for
 
             # laat alle formulieren vullen
-            CompetitieMutatie.objects.create(
-                                mutatie=MUTATIE_UPDATE_DIRTY_WEDSTRIJDFORMULIEREN,
-                                competitie=comp)      # alleen nodig voor begin_jaar
+            maak_mutatie_update_dirty_wedstrijdformulieren(comp)
 
         except StorageError as err:
             msg = 'Onverwachte fout in verwerk_mutatie_maak_wedstrijdformulieren:\n'
@@ -849,6 +848,42 @@ class VerwerkCompKampMutaties:
 
         mutatie_code_verwerk_functie(self, mutatie)  # noqa
         return True
+
+    def verwerk_in_achtergrond(self):
+        # doe een klein beetje werk
+        if not self._achtergrond_monitor:
+            werk = list()
+            for comp in Competitie.objects.all():
+                comp.bepaal_fase()
+
+                is_teams = False
+                if 'J' <= comp.fase_indiv <= 'L':
+                    is_bk = False
+                    tup = (comp.begin_jaar, int(comp.afstand), is_bk, is_teams)
+                    werk.append(tup)
+
+                if 'N' <= comp.fase_indiv <= 'P':
+                    is_bk = True
+                    tup = (comp.begin_jaar, int(comp.afstand), is_bk, is_teams)
+                    werk.append(tup)
+
+                if False:       # teams are Excel, for now
+                    is_teams = True
+                    if 'J' <= comp.fase_teams <= 'L':
+                        is_bk = False
+                        tup = (comp.begin_jaar, int(comp.afstand), is_bk, is_teams)
+                        werk.append(tup)
+
+                    if 'N' <= comp.fase_teams <= 'P':
+                        is_bk = True
+                        tup = (comp.begin_jaar, int(comp.afstand), is_bk, is_teams)
+                        werk.append(tup)
+
+            # for
+
+            self._achtergrond_monitor = MonitorGoogleSheetsWedstrijdformulieren(self.stdout, werk)
+
+        self._achtergrond_monitor.doe_beetje_werk()
 
 
 # end of file
