@@ -54,13 +54,14 @@ class MonitorDriveFiles:
         resp = request.execute()
         self.stdout.write('[DEBUG] resp: %s' % repr(resp))
 
+        op = door = ''
         if resp:
-            op = resp['modifiedTime']
-            door = (resp['lastModifyingUser'].get('displayName', '') or
-                    resp['lastModifyingUser'].get('emailAddress', '') or    # if present, in case displayName is empty
-                    'Anoniem')                                              # fallback
-        else:
-            op = door = ''
+            op = resp.get('modifiedTime', '')
+            last_user = resp.get('lastModifyingUser', None)
+            if last_user:
+                door = (last_user.get('displayName', '') or
+                        last_user.get('emailAddress', '') or    # if present, in case displayName is empty
+                        'Anoniem')                              # fallback
 
         return op, door
 

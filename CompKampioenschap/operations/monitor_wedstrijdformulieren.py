@@ -30,8 +30,9 @@ class MonitorGoogleSheetsWedstrijdformulieren:
         for status in SheetStatus.objects.select_related('bestand'):
             self._sheetstatus_cache[status.bestand.pk] = status
 
-            if status.gewijzigd_op > status.bekeken_op:
-                self._sheetstatus_todo.append(status)
+            if status.keep_monitoring():
+                if status.gewijzigd_op > status.bekeken_op:
+                    self._sheetstatus_todo.append(status)
         # for
 
         # for tup in werk:
@@ -165,8 +166,9 @@ class MonitorGoogleSheetsWedstrijdformulieren:
                 status.refresh_from_db()
 
                 if status.gewijzigd_op > status.bekeken_op:
-                    if status not in self._sheetstatus_todo:
-                        self._sheetstatus_todo.append(status)
+                    if status.keep_monitoring():
+                        if status not in self._sheetstatus_todo:
+                            self._sheetstatus_todo.append(status)
 
 
 # end of file

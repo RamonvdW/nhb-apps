@@ -56,6 +56,11 @@ class SheetStatus(models.Model):
     # hoeveel deelnemers bevat dit bestand (individueel of teams)
     aantal_deelnemers = models.PositiveSmallIntegerField(default=0)
 
+    def keep_monitoring(self):
+        # moeten we dit bestand blijven monitoren?
+        # of kan dit stoppen omdat we de uitslag ingelezen hebben?
+        return self.uitslag_ingelezen_op.year == 2000
+
     def __str__(self):
         return "[%s] gewijzigd op %s" % (self.pk,
                                          self.gewijzigd_op.strftime('%Y-%m-%d %H:%M:%S'))
