@@ -103,7 +103,7 @@ class MonitorGoogleSheetsWedstrijdformulieren:
 
         # update bekeken_op
         status.bekeken_op = timezone.now()
-        status.save(update_fields=['bekeken_op'])      
+        status.save(update_fields=['bekeken_op'])
 
     def _get_bestand_todo(self) -> Bestand | None:
         if len(self._bestanden_nieuw):
@@ -142,7 +142,7 @@ class MonitorGoogleSheetsWedstrijdformulieren:
         # zoek naar nieuwe revisies van de google drive bestanden
         bestand = self._get_bestand_todo()
         if bestand:
-            self.stdout.write('[INFO] bepaal laatste wijziging voor Bestand met pk=%s' % repr(bestand.pk))
+            self.stdout.write('[INFO] bepaal laatste wijziging voor Bestand %s' % repr(bestand.fname))
             status = self._get_sheetstatus(bestand)
 
             # wanneer is het bestand voor het laatst gewijzigd?

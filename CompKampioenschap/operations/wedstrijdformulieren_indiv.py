@@ -315,17 +315,17 @@ class LeesIndivWedstrijdFormulier:
             'reserves': 'D41:I99',                # wordt bijgewerkt in laad_klasse
             'reserves_notities': 'T41:U99',       # wordt bijgewerkt in laad_klasse
             'haalbare_titel': 'U7',
-            'finales16_8': 'C8:C53',
-            'finales16_4': 'I11:I49',
-            'finales16_2': 'O17:O43',
-            'finales16_1': 'U25:U35',
+            'finales16_8': 'C8:C53',        # 1/8 (laatste 16)
+            'finales16_4': 'I11:I49',       # 1/4 (laatste 8)
+            'finales16_2': 'O17:O43',       # 1/2 (laatste 4)
+            'finales16_1': 'U25:U35',       # 1/1 (brons en gouden match)
             'finales16_uitslag': 'X25:X35',
-            'finales8_4': 'C11:C49',
-            'finales8_2': 'I17:I43',
-            'finales8_1': 'O25:O35',
+            'finales8_4': 'C11:C49',        # 1/4 (laatste 8)
+            'finales8_2': 'I17:I43',        # 1/2 (laatste 4)
+            'finales8_1': 'O25:O35',        # 1/1 (brons en gouden match)
             'finales8_uitslag': 'R25:R35',
-            'finales4_2': 'C17:C43',
-            'finales4_1': 'I25:I35',
+            'finales4_2': 'C17:C43',        # 1/2 (laatste 4)
+            'finales4_1': 'I25:I35',        # 1/1 (brons en gouden match)
             'finales4_uitslag': 'L25:L35',
         }
 
@@ -391,6 +391,7 @@ class LeesIndivWedstrijdFormulier:
         return False
 
     def _check_input_on_sheet(self, sheet_name, range_name):
+        # self.stdout.write('[DEBUG] check range %s op sheet %s' % (range_name, sheet_name))
         self.sheet.selecteer_sheet(sheet_name)
         return self._check_input(self.ranges[range_name])
 

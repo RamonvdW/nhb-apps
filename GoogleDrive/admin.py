@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2025 Ramon van der Winkel.
+#  Copyright (c) 2025-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -19,7 +19,7 @@ class BestandAdmin(admin.ModelAdmin):
 
     search_fields = ('fname', 'file_id', 'log')
 
-    list_filter = ('afstand', 'is_teams', 'is_bk', 'is_dirty')
+    list_filter = ('afstand', 'is_teams', 'is_bk', 'is_dirty', 'rayon_nr')
 
     exclude = ('gedeeld_met',)
 
