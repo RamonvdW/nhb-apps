@@ -68,38 +68,27 @@ class MonitorGoogleSheetsWedstrijdformulieren:
         else:
             lezer = LeesIndivWedstrijdFormulier(self.stdout, status.bestand, self._sheets)
 
-        # vastgestelde fase van de wedstrijd
-        # - nog niet begonnen
-        # - klaar
-        # indiv:
-        # - voorronde 1 (individueel)
-        # - voorronde 2 (individueel)
-        # - laatste 16 / 8 / 4
-        # - bronzen finale
-        # - gouden finale
-        # teams:
-        # - ronde 1..7
-        # wedstrijd_fase = models.CharField(max_length=100, default='')
-
         heeft_scores = lezer.heeft_scores()
         if heeft_scores != status.bevat_scores:
             self.stdout.write('[INFO] heeft_scores %s --> %s' % (status.bevat_scores, heeft_scores))
             status.bevat_scores = heeft_scores
             status.save(update_fields=['bevat_scores'])
 
-        # is de uitslag al compleet?
-        if status.bevat_scores or True:
-            aantal_deelnemers = lezer.tel_deelnemers()
+        fase = lezer.bepaal_wedstrijd_fase()
+        if fase != status.wedstrijd_fase:
+            self.stdout.write('[INFO] wedstrijd_fase %s --> %s' % (repr(status.wedstrijd_fase), repr(fase)))
+            status.wedstrijd_fase = fase
+            status.save(update_fields=['wedstrijd_fase'])
 
+        # is de uitslag al compleet?
+        if status.bevat_scores:
+            aantal_deelnemers = lezer.tel_deelnemers()
             if aantal_deelnemers != status.aantal_deelnemers:
                 self.stdout.write('[INFO] aantal_deelnemers %s --> %s' % (status.aantal_deelnemers, aantal_deelnemers))
                 status.aantal_deelnemers = aantal_deelnemers
                 status.save(update_fields=['aantal_deelnemers'])
 
-            uitslag_is_compleet = False
-
-            # TODO
-
+            uitslag_is_compleet = lezer.heeft_uitslag()
             if uitslag_is_compleet != status.uitslag_is_compleet:
                 self.stdout.write('[INFO] uitslag_is_compleet %s --> %s' % (status.uitslag_is_compleet,
                                                                             uitslag_is_compleet))
@@ -114,7 +103,7 @@ class MonitorGoogleSheetsWedstrijdformulieren:
 
         # update bekeken_op
         status.bekeken_op = timezone.now()
-        #status.save(update_fields=['bekeken_op'])      # TODO: enable
+        status.save(update_fields=['bekeken_op'])      
 
     def _get_bestand_todo(self) -> Bestand | None:
         if len(self._bestanden_nieuw):

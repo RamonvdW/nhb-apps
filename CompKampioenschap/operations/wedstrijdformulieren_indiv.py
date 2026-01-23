@@ -307,15 +307,35 @@ class LeesIndivWedstrijdFormulier:
             'titel': 'C2',
             'info': 'F4:F7',
             'bijgewerkt': 'A37',
-            'scores': 'J11:K35',
+            'voorronde_1': 'J11:J35',
+            'voorronde_2': 'K11:K35',
+            'uitslag_25m1p': 'R11:R35',
             'deelnemers': 'D11:I%d' % (11 + self.aantal_regels_deelnemers - 1),
             'deelnemers_notities': 'T11:U%d' % (11 + self.aantal_regels_deelnemers - 1),
             'reserves': 'D41:I99',                # wordt bijgewerkt in laad_klasse
             'reserves_notities': 'T41:U99',       # wordt bijgewerkt in laad_klasse
             'haalbare_titel': 'U7',
+            'finales16_8': 'C8:C53',
+            'finales16_4': 'I11:I49',
+            'finales16_2': 'O17:O43',
+            'finales16_1': 'U25:U35',
+            'finales16_uitslag': 'X25:X35',
+            'finales8_4': 'C11:C49',
+            'finales8_2': 'I17:I43',
+            'finales8_1': 'O25:O35',
+            'finales8_uitslag': 'R25:R35',
+            'finales4_2': 'C17:C43',
+            'finales4_1': 'I25:I35',
+            'finales4_uitslag': 'L25:L35',
         }
 
+        self._data_deelnemers = list()
+        self._data_heeft_scores = False
+        self._data_heeft_uitslag = False
+        self._wedstrijd_voortgang = ''
+
         self._laad_klasse(bestand)
+        self._laad_sheet()
 
     def _laad_klasse(self, bestand: Bestand):
         # zoek de wedstrijdklasse erbij
@@ -358,42 +378,81 @@ class LeesIndivWedstrijdFormulier:
         else:
             self.haalbare_titel = 'Rayonkampioen'
 
-    # def _hide_show_finale_sheets_indoor(self):
-    #     # er zijn wedstrijd finale sheets met 4, 8 of 16 deelnemers
-    #     # toon alleen de het benodigde sheet
-    #
-    #     # minimaal 16
-    #     if self._max_naar_finales >= 16:
-    #         self.sheet.toon_sheet('Finales 16')
-    #     else:
-    #         self.sheet.hide_sheet('Finales 16')
-    #
-    #     # minimaal 8, minder dan 16
-    #     if 8 <= self._max_naar_finales < 16:
-    #         self.sheet.toon_sheet('Finales 8')
-    #     else:
-    #         self.sheet.hide_sheet('Finales 8')
-    #
-    #     # minder dan 8
-    #     if self._max_naar_finales < 8:
-    #         self.sheet.toon_sheet('Finales 4')
-    #     else:
-    #         self.sheet.hide_sheet('Finales 4')
-
-    def heeft_scores(self):
-        values = self.sheet.get_range(self.ranges['scores'])
+    def _check_input(self, cells_range):
+        values = self.sheet.get_range(cells_range)
         if values:
             for row in values:
                 for cell in row:
                     if cell:
                         # cell is niet leeg
-                        self.stdout.write('[DEBUG] score gevonden: %s' % repr(cell))
                         return True
                 # for
             # for
         return False
 
-    def tel_deelnemers(self):
+    def _check_input_on_sheet(self, sheet_name, range_name):
+        self.sheet.selecteer_sheet(sheet_name)
+        return self._check_input(self.ranges[range_name])
+
+    def _laad_sheet_indoor_finales(self):
+        # zoek naar de uitslag
+        # TODO: kunnen we dit verfijnen naar "bronzen finale" en "gouden finale"?
+        if self._check_input_on_sheet('Finales 16', 'finales16_uitslag'):
+            self._wedstrijd_voortgang = 'Uitslag bekend'
+            self._data_heeft_uitslag = True
+            return
+
+        if self._check_input_on_sheet('Finales 8', 'finales8_uitslag'):
+            self._wedstrijd_voortgang = 'Uitslag bekend'
+            self._data_heeft_uitslag = True
+            return
+
+        if self._check_input_on_sheet('Finales 4', 'finales4_uitslag'):
+            self._wedstrijd_voortgang = 'Uitslag bekend'
+            self._data_heeft_uitslag = True
+            return
+
+        # zoek naar de medaille finales
+        if self._check_input_on_sheet('Finales 16', 'finales16_1'):
+            self._wedstrijd_voortgang = 'Medaille finales'
+            return
+
+        if self._check_input_on_sheet('Finales 8', 'finales8_1'):
+            self._wedstrijd_voortgang = 'Medaille finales'
+            return
+
+        if self._check_input_on_sheet('Finales 4', 'finales4_1'):
+            self._wedstrijd_voortgang = 'Medaille finales'
+            return
+
+        # zoek naar de 1/2 finales
+        if self._check_input_on_sheet('Finales 16', 'finales16_2'):
+            self._wedstrijd_voortgang = '1/2 finales'
+            return
+
+        if self._check_input_on_sheet('Finales 8', 'finales8_2'):
+            self._wedstrijd_voortgang = '1/2 finales'
+            return
+
+        if self._check_input_on_sheet('Finales 4', 'finales4_2'):
+            self._wedstrijd_voortgang = '1/2 finales'
+            return
+
+        # zoek naar de 1/4 finales
+        if self._check_input_on_sheet('Finales 16', 'finales16_4'):
+            self._wedstrijd_voortgang = '1/4 finales'
+            return
+
+        if self._check_input_on_sheet('Finales 8', 'finales8_4'):
+            self._wedstrijd_voortgang = '1/4 finales'
+            return
+
+        # zoek naar de 1/8 finales
+        if self._check_input_on_sheet('Finales 16', 'finales16_8'):
+            self._wedstrijd_voortgang = '1/8 finales'
+            return
+
+    def _laad_sheet(self):
         if self.afstand == 18:
             # Indoor
             self.sheet.selecteer_sheet('Voorronde')
@@ -401,11 +460,37 @@ class LeesIndivWedstrijdFormulier:
             # 25m1pijl
             self.sheet.selecteer_sheet('Wedstrijd')
 
-        regels = self.sheet.get_range(self.ranges['deelnemers'])
-        # self.stdout.write('{tel_deelnemers} regels=%s' % repr(regels))
+        self._data_deelnemers = self.sheet.get_range(self.ranges['deelnemers'])
 
-        aantal_deelnemers = len(regels)
-        return aantal_deelnemers
+        self._wedstrijd_voortgang = 'Geen invoer'
+
+        if self._check_input(self.ranges['voorronde_1']):
+            self._wedstrijd_voortgang = 'Voorronde 1'
+
+            if self._check_input(self.ranges['voorronde_2']):
+                self._wedstrijd_voortgang = 'Voorronde 2'
+
+                if self.afstand == 25:
+                    if self._check_input(self.ranges['uitslag_25m1p']):
+                        self._wedstrijd_voortgang = 'Uitslag bekend'
+                        self._data_heeft_uitslag = True
+                else:
+                    # bekijk de finales (alleen voor de Indoor)
+                    # dit kan op 3 van de finale-sheets staan
+                    self._laad_sheet_indoor_finales()
+            # for
+
+    def heeft_scores(self):
+        return self._data_heeft_scores
+
+    def heeft_uitslag(self):
+        return self._data_heeft_uitslag
+
+    def tel_deelnemers(self):
+        return len(self._data_deelnemers)
+
+    def bepaal_wedstrijd_fase(self):
+        return self._wedstrijd_voortgang
 
 
 # end of file
