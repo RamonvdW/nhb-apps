@@ -233,7 +233,7 @@ urllib3==2.6.3
     #   mollie-api-python
     #   requests
     #   selenium
-wcwidth==0.3.2
+wcwidth==0.3.3
     # via prettytable
 websocket-client==1.9.0
     # via selenium

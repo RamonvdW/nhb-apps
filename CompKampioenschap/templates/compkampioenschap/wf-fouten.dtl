@@ -1,0 +1,40 @@
+{% extends 'design/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2026 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+
+{% block title %}Importeer fouten{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Importeer fouten</h3>
+            <p>Er zijn fouten gevonden tijdens het importeren van de uitslag uit het Google Sheet.</p>
+        </div>
+    </div>
+
+
+    <!-- blauwe balk met informatie in een tabel -->
+    <div class="row-sv-blauw">
+        <div class="col s12">
+            <table class="sv-kader-tabel">
+                {% for regels in fouten %}
+                    <tr>
+                        <td>
+                            {% for regel in regels %}
+                                <span>{{ regel }}</span><br>
+                            {% endfor %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="compbeheer-wf-fouten" %}
+
+{% endblock %}

@@ -68,9 +68,12 @@
                             </td>
                             <td>
                                 {% if status.url_importeer %}
-                                    <a class="btn-sv-rood" href="{{ status.url_importeer }}">
-                                        {% sv-icon-op-button 'open ext' %}
-                                    </a>
+                                    <form method="post" action="{{ status.url_importeer }}">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn-sv-rood">
+                                            {% sv-icon-op-button 'download' %}
+                                        </button>
+                                    </form>
                                 {% endif %}
                             </td>
                             <td>

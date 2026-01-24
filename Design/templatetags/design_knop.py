@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2025 Ramon van der Winkel.
+#  Copyright (c) 2025-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -52,17 +52,18 @@ def sv_knop_nav(url='', kleur='rood', icon='', tekst='##BUG', knop_id='',
     new_text += '>\n'
 
     if icon:
-        new_text += '<span style="display:inline-block; vertical-align:text-bottom; height:24px'
+        new_text += '<span style="display:inline'
 
         if tekst:
-            new_text += '; padding-right:10px'
+            new_text += '; margin-right:10px'
 
         new_text += '">\n'
 
-        new_text += sv_icon(icon, kleur='wit', use='button')
+        new_text += sv_icon(icon, kleur='wit', use='button', extra_style='vertical-align:text-bottom')
         new_text += '</span>\n'
 
-    new_text += tekst
+    new_text += '<span style="display:inline">' + tekst + '</span>\n'
+
     new_text += '</a>\n'
 
     return mark_safe(new_text)
@@ -80,11 +81,12 @@ def sv_knop_mailto(kleur='rood', icon='email', email='', tekst=''):
     new_text = '<a class="%s" href="mailto:%s">\n' % (kleur_class, email)
 
     if icon:
-        new_text += '<span style="display:inline-block; vertical-align:text-bottom; height:24px">\n'
-        new_text += sv_icon('email', kleur='wit', use='text')
+        # button height is 36px
+        new_text += '<span style="display:inline">\n'
+        new_text += sv_icon('email', kleur='rood', use='button', extra_style='vertical-align:text-bottom')
         new_text += '</span>\n'
 
-    new_text += tekst
+    new_text += '<span style="display:inline">' + tekst + '</span>\n'
 
     new_text += '</a>\n'
 
@@ -93,28 +95,37 @@ def sv_knop_mailto(kleur='rood', icon='email', email='', tekst=''):
 
 @register.simple_tag(name='sv-knop-ext')
 @functools.cache
-def sv_knop_ext(kleur='rood', icon='open url', tekst='tbd', url='', extra_stijl=''):
+def sv_knop_ext(kleur='rood', icon='open url', tekst='tbd', url='', extra_style='', smal=False):
 
     if kleur == 'rood':
         kleur_class = 'btn-sv-rood'
     else:
         kleur_class = 'btn-sv-blauw'
 
+    if smal and len(tekst) > 0:
+        smal = False
+
+    # button height is 36px
+    if smal:
+        if extra_style:
+            extra_style += ';'
+        extra_style += 'width:35px; padding:0'
+
     new_text = '<a class="%s" href="%s" target="_blank" rel="noopener noreferrer"' % (kleur_class, url)
-    if extra_stijl:
-        new_text += ' style="%s"' % extra_stijl
+    if extra_style:
+        new_text += ' style="%s"' % extra_style
     new_text += '>\n'
 
-    new_text += '<span style="display:inline-block; vertical-align:text-bottom; height:24px'
+    new_text += '<span style="display:inline'
     if tekst:
-        new_text += '; padding-right:10px'
+        new_text += '; margin-right:10px'
     new_text += '">\n'
 
-    new_text += sv_icon(icon, kleur='wit')
+    new_text += sv_icon(icon, kleur='wit', use='button', extra_style='vertical-align:text-bottom')
 
     new_text += '</span>\n'
 
-    new_text += tekst
+    new_text += '<span style="display:inline">' + tekst + '</span>\n'
 
     new_text += '</a>\n'
 

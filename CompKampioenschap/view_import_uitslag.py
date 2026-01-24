@@ -7,17 +7,19 @@
 from django.conf import settings
 from django.urls import reverse
 from django.http import HttpResponseRedirect, Http404
+from django.shortcuts import render
 from django.views.generic import View
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Account.models import get_account
-from Competitie.definities import DEEL_RK, MUTATIE_KAMP_AFMELDEN_INDIV, MUTATIE_KAMP_AANMELDEN_INDIV
-from Competitie.models import Competitie, CompetitieIndivKlasse, KampioenschapSporterBoog, CompetitieMutatie
+from Competitie.definities import DEEL_RK, DEEL_BK
+from Competitie.models import Competitie, CompetitieIndivKlasse, Kampioenschap
 from CompKampioenschap.models import SheetStatus
 from CompKampioenschap.operations import importeert_sheet_uitslag_indiv
 from CompUitslagen.operations import (maak_url_uitslag_rk_indiv, maak_url_uitslag_bk_indiv,
                                       maak_url_uitslag_rk_teams, maak_url_uitslag_bk_teams)
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
+
+TEMPLATE_COMPKAMPIOENSCHAP_WF_FOUTEN = 'compkampioenschap/wf-fouten.dtl'
 
 
 class ImporteerUitslagIndivView(UserPassesTestMixin, View):
@@ -36,8 +38,9 @@ class ImporteerUitslagIndivView(UserPassesTestMixin, View):
     def post(self, request, *args, **kwargs):
         """ wordt aangeroepen als de beheerder op de knop drukt om een uitslag te importeren """
         try:
-            status_pk = int(kwargs['status_pk'][:6])  # afkappen voor de veiligheid
-            status = SheetStatus.objects.select_related('bestand').get(pk=status_pk, is_teams=False)
+            status_pk = int(str(kwargs['status_pk'])[:6])  # afkappen voor de veiligheid
+            status = SheetStatus.objects.select_related('bestand').get(pk=status_pk,
+                                                                       bestand__is_teams=False)
         except (ValueError, SheetStatus.DoesNotExist):
             raise Http404('Niet gevonden')
 
@@ -45,7 +48,25 @@ class ImporteerUitslagIndivView(UserPassesTestMixin, View):
         comp = Competitie.objects.filter(begin_jaar=bestand.begin_jaar, afstand=bestand.afstand).first()
         klasse = CompetitieIndivKlasse.objects.select_related('boogtype').get(pk=bestand.klasse_pk)
 
-        importeert_sheet_uitslag_indiv(comp, klasse, status)
+        if bestand.is_bk:
+            deelkamp = Kampioenschap.objects.filter(competitie=comp,
+                                                    deel=DEEL_BK).first()
+        else:
+            deelkamp = Kampioenschap.objects.filter(competitie=comp,
+                                                    deel=DEEL_RK,
+                                                    rayon__rayon_nr=bestand.rayon_nr).first()
+
+        if not deelkamp:
+            raise Http404('Kampioenschap niet gevonden')
+
+        # TODO: check competitie fase
+
+        fouten = importeert_sheet_uitslag_indiv(deelkamp, klasse, status)
+        if len(fouten) > 0:
+            context = {
+                'fouten': fouten,
+            }
+            return render(request, TEMPLATE_COMPKAMPIOENSCHAP_WF_FOUTEN, context)
 
         seizoen_url = comp.maak_seizoen_url()
         klasse_str = klasse.beschrijving
@@ -76,7 +97,8 @@ class ImporteerUitslagTeamsView(UserPassesTestMixin, View):
         """ wordt aangeroepen als de beheerder op de knop drukt om een uitslag te importeren """
         try:
             status_pk = int(kwargs['status_pk'][:6])  # afkappen voor de veiligheid
-            status = SheetStatus.objects.select_related('bestand').get(pk=status_pk, is_teams=True)
+            status = SheetStatus.objects.select_related('bestand').get(pk=status_pk,
+                                                                       bestand__is_teams=True)
         except (ValueError, SheetStatus.DoesNotExist):
             raise Http404('Niet gevonden')
 
@@ -84,7 +106,23 @@ class ImporteerUitslagTeamsView(UserPassesTestMixin, View):
         comp = Competitie.objects.filter(begin_jaar=bestand.begin_jaar, afstand=bestand.afstand).first()
         klasse = CompetitieIndivKlasse.objects.select_related('boogtype').get(pk=bestand.klasse_pk)
 
-        importeert_sheet_uitslag_teams(comp, klasse, bestand)
+        if bestand.is_bk:
+            deelkamp = Kampioenschap.objects.filter(competitie=comp,
+                                                    deel=DEEL_BK).first()
+        else:
+            deelkamp = Kampioenschap.objects.filter(competitie=comp,
+                                                    deel=DEEL_RK,
+                                                    rayon__rayon_nr=bestand.rayon_nr).first()
+
+        if not deelkamp:
+            raise Http404('Kampioenschap niet gevonden')
+
+        fouten = importeert_sheet_uitslag_teams(deelkamp, klasse, bestand)
+        if len(fouten) > 0:
+            context = {
+                'fouten': fouten,
+            }
+            return render(request, TEMPLATE_COMPKAMPIOENSCHAP_WF_FOUTEN, context)
 
         seizoen_url = comp.maak_seizoen_url()
         klasse_str = klasse.beschrijving
