@@ -44,10 +44,6 @@ urlpatterns = [
          views_wf.AanmakenView.as_view(),
          name='wf-aanmaken'),
 
-    path('wedstrijdformulieren/status/',
-         views_wf.StatusView.as_view(),
-         name='wf-status'),
-
     path('<comp_pk>/klassengrenzen-vaststellen/',
          views_bb.KlassengrenzenVaststellenView.as_view(),
          name='klassengrenzen-vaststellen'),

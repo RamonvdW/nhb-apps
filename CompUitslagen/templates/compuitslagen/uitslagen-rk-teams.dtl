@@ -130,7 +130,7 @@
                         </tr>
                     {% endif %}
 
-                    <tr class="sv-table-sectie-header">
+                    <tr class="sv-table-sectie-header" id="{{ team.klasse_hashtag }}">
                         <td colspan="7" class="center">
                             <h5>{{ team.klasse_str }}</h5>
                             {% if team.match %}

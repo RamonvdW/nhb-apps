@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -48,6 +48,18 @@ def maak_unaccented(naam):
     bytes_naam = tussenvorm.encode('ASCII', 'ignore')
     nieuwe_naam = bytes_naam.decode('UTF-8')
     return nieuwe_naam
+
+
+def make_valid_hashtag(text: str) -> str:
+    """ convert a text into a valid URI fragment ('hashtag') that can be used in a URL and an id
+        example:
+            Compound Klasse 1 --> compound-klasse-1
+
+        URL: /some/url/#compound-klasse-1
+        id:  <h4 id="compound-klasse-1">Compound Klasse 1</h4>
+    """
+    hashtag = text.lower().replace(' ', '-')
+    return hashtag
 
 
 # end of file

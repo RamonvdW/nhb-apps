@@ -1,11 +1,12 @@
 {% extends 'design/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2025 Ramon van der Winkel.
+                Copyright (c) 2025-2026 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
 {% load design_icons %}
+{% load design_knop %}
 
 {% block title %}Test{% endblock %}
 
@@ -14,187 +15,130 @@
     <table class="sv-kader-tabel" style="width:auto; margin-left:auto; margin-right:auto; border-collapse:unset; border-spacing:5px">
 
         <tr>
-            <th class="center">Huidige MH</th>
-            <th class="center" colspan="2">Text schaduw aan</th>
-            <th class="center" colspan="2">Text schaduw uit</th>
-            <th class="center">Off-black</th>
+            <th class="center">sv-knop-nav</th>
+            <th class="center">sv-knop-mailto</th>
+            <th class="center">sv-knop-ext</th>
+            <th class="center">Text schaduw aan</th>
+            <th class="center">Text schaduw uit</th>
         </tr>
 
         <!-- geel -->
         <tr>
             <td></td>
+            <td></td>
+            <td></td>
 
-            <td>
-                <button class="btn-sv-rood black-text" style="background-color:#FABE00">
-                    {% sv-icon icon kleur='black-text' %}Voorbeeld</button>
-            </td>
             <td style="border:1px solid red">
-                <button class="btn-sv-rood white-text" style="background-color:#FABE00">
-                    {% sv-icon icon kleur='wit' %}Voorbeeld</button>
+                {% sv-knop-nav kleur='rood' icon='open url' tekst='Voorbeeld' extra_style='text-shadow:0 0 1px rgba(0,0,0,0.87); background-color:#FABE00' %}
             </td>
 
-            <td>
-                <button class="btn-sv-rood black-text" style="background-color:#FABE00; text-shadow:none">
-                    {% sv-icon icon kleur='black-text' %}Voorbeeld</button>
-            </td>
             <td style="border:1px solid red">
-                <button class="btn-sv-rood white-text" style="background-color:#FABE00; text-shadow:none">
-                    {% sv-icon icon kleur='wit' %}Voorbeeld</button>
-            </td>
-
-            <td>
-                <button class="btn-sv-rood" style="background-color:#FABE00; text-shadow:none; color:rgba(0,0,0,0.85)">
-                    {% sv-icon icon kleur='off-black' %}Voorbeeld</button>
+                {% sv-knop-nav kleur='rood' icon='open url' tekst='Voorbeeld' extra_style='text-shadow:none; background-color:#FABE00' %}
             </td>
         </tr>
 
         <!-- rood -->
         <tr>
             <td>
-                <button class="btn-sv-rood white-text">
-                    {% sv-icon icon kleur='wit' %}Voorbeeld</button>
+                {% sv-knop-nav kleur='rood' icon='sluiten' tekst='Sluit' %}
             </td>
 
             <td>
-                <button class="btn-sv-rood black-text" style="background-color:#F94137">
-                    {% sv-icon icon kleur='black-text' %}Voorbeeld</button>
+                {% sv-knop-mailto kleur='rood' email='ui@sv.nl' tekst='ui support' %}
             </td>
+
             <td>
-                <button class="btn-sv-rood white-text" style="background-color:#F94137">
-                    {% sv-icon icon kleur='wit' %}Voorbeeld</button>
+                {% sv-knop-ext kleur='rood' icon='open url' tekst='Link' %}
             </td>
+
             <td>
-                <button class="btn-sv-rood black-text" style="background-color:#F94137; text-shadow:none">
-                    {% sv-icon icon kleur='black-text' %}Voorbeeld</button>
+                {% sv-knop-nav kleur='rood' icon='open url' tekst='Voorbeeld' extra_style='text-shadow:0 0 1px rgba(0,0,0,0.87)' %}
             </td>
+
             <td style="border:1px solid red">
-                <button class="btn-sv-rood white-text" style="background-color:#F94137; text-shadow:none">
-                    {% sv-icon icon kleur='wit' %}Voorbeeld</button>
-            </td>
-
-            <td>
-                <button class="btn-sv-rood" style="background-color:#F94137; text-shadow:none; color:rgba(0,0,0,0.85)">
-                    {% sv-icon icon kleur='off-black' %}Voorbeeld</button>
+                {% sv-knop-nav kleur='rood' icon='open url' tekst='Voorbeeld' extra_style='text-shadow:none' %}
             </td>
         </tr>
 
         <!-- lichtblauw -->
         <tr>
             <td></td>
+            <td></td>
+            <td></td>
 
             <td>
-                <button class="btn-sv-rood black-text" style="background-color:#0AA0E1">
-                    {% sv-icon icon kleur='black-text' %}Voorbeeld</button>
-            </td>
-            <td>
-                <button class="btn-sv-rood white-text" style="background-color:#0AA0E1">
-                    {% sv-icon icon kleur='wit' %}Voorbeeld</button>
+                {% sv-knop-nav kleur='rood' icon='open url' tekst='Voorbeeld' extra_style='text-shadow:0 0 1px rgba(0,0,0,0.87); background-color:#0AA0E1' %}
             </td>
 
-            <td>
-                <button class="btn-sv-rood black-text" style="background-color:#0AA0E1; text-shadow:none">
-                    {% sv-icon icon kleur='black-text' %}Voorbeeld</button>
-            </td>
             <td style="border:1px solid red">
-                <button class="btn-sv-rood white-text" style="background-color:#0AA0E1; text-shadow:none">
-                    {% sv-icon icon kleur='wit' %}Voorbeeld</button>
-            </td>
-
-            <td>
-                <button class="btn-sv-rood" style="background-color:#0AA0E1; text-shadow:none; color:rgba(0,0,0,0.85)">
-                    {% sv-icon icon kleur='off-black' %}Voorbeeld</button>
+                {% sv-knop-nav kleur='rood' icon='open url' tekst='Voorbeeld' extra_style='text-shadow:none; background-color:#0AA0E1' %}
             </td>
         </tr>
 
         <!-- donkerblauw -->
         <tr>
             <td>
-                <button class="btn-sv-blauw white-text">
-                    {% sv-icon icon kleur='wit' %}Voorbeeld</button>
-            </td>
-
-            <td style="border:1px solid red">
-                <button class="btn-sv-rood black-text" style="background-color:#1C6284">
-                    {% sv-icon icon kleur='black-text' %}Voorbeeld</button>
-            </td>
-            <td>
-                <button class="btn-sv-rood white-text" style="background-color:#1C6284">
-                    {% sv-icon icon kleur='wit' %}Voorbeeld</button>
-            </td>
-            <td style="border:1px solid red">
-                <button class="btn-sv-rood black-text" style="background-color:#1C6284; text-shadow:none">
-                    {% sv-icon icon kleur='black-text' %}Voorbeeld</button>
-            </td>
-            <td>
-                <button class="btn-sv-rood white-text" style="background-color:#1C6284; text-shadow:none">
-                    {% sv-icon icon kleur='wit' %}Voorbeeld</button>
-            </td>
-
-            <td style="border:1px solid red">
-                <button class="btn-sv-rood" style="background-color:#1C6284; text-shadow:none; color:rgba(0,0,0,0.85)">
-                    {% sv-icon icon kleur='off-black' %}Voorbeeld</button>
-            </td>
-        </tr>
-
-        <!-- wit met zwarte tekst -->
-        <tr>
-            <td></td>
-
-            <td>
-                <button class="btn-sv-rood black-text" style="background-color:#fff">
-                    {% sv-icon icon kleur='black-text' %}Voorbeeld</button>
-            </td>
-            <td style="border:1px solid red">
-                <button class="btn-sv-rood white-text" style="background-color:#fff">
-                    {% sv-icon icon kleur='wit' %}Voorbeeld</button>
-            </td>
-            <td>
-                <button class="btn-sv-rood black-text" style="background-color:#fff; text-shadow:none">
-                    {% sv-icon icon kleur='black-text' %}Voorbeeld</button>
-            </td>
-            <td style="border:1px solid red">
-                <button class="btn-sv-rood white-text" style="background-color:#fff; text-shadow:none">
-                    {% sv-icon icon kleur='wit' %}Voorbeeld</button>
+                {% sv-knop-nav kleur='blauw' icon='sluiten' tekst='Sluit' %}
             </td>
 
             <td>
-                <button class="btn-sv-rood" style="background-color:#fff; color:rgba(0,0,0,0.85); text-shadow:none">
-                    {% sv-icon icon kleur='off-black' %}Voorbeeld</button>
+                {% sv-knop-mailto kleur='blauw' email='ui@sv.nl' tekst='ui support' %}
+            </td>
+
+            <td>
+                {% sv-knop-ext kleur='blauw' tekst='Link' %}
+            </td>
+
+            <td>
+                {% sv-knop-nav kleur='blauw' icon='open url' tekst='Voorbeeld' extra_style='text-shadow:0 0 1px rgba(0,0,0,0.87)' %}
+            </td>
+
+            <td>
+                {% sv-knop-nav kleur='blauw' icon='open url' tekst='Voorbeeld' extra_style='text-shadow:none' %}
             </td>
         </tr>
 
         <!-- oranje -->
         <tr>
             <td></td>
+            <td></td>
+            <td></td>
 
             <td>
-                <button class="btn-sv-rood black-text" style="background-color:#F7941E">
-                    {% sv-icon icon kleur='black-text' %}Voorbeeld</button>
+                {% sv-knop-nav icon='open url' tekst='Voorbeeld' extra_style='text-shadow:0 0 1px rgba(0,0,0,0.87); background-color:#F7941E' %}
             </td>
-            <td>
-                <button class="btn-sv-rood white-text" style="background-color:#F7941E">
-                    {% sv-icon icon kleur='wit' %}Voorbeeld</button>
-            </td>
-            <td>
-                <button class="btn-sv-rood black-text" style="background-color:#F7941E; text-shadow:none">
-                    {% sv-icon icon kleur='black-text' %}Voorbeeld</button>
-            </td>
+
             <td style="border:1px solid red">
-                <button class="btn-sv-rood white-text" style="background-color:#F7941E; text-shadow:none">
-                    {% sv-icon icon kleur='wit' %}Voorbeeld</button>
-            </td>
-
-            <td>
-                <button class="btn-sv-rood" style="background-color:#F7941E; text-shadow:none; color:rgba(0,0,0,0.85)">
-                    {% sv-icon icon kleur='off-black' %}Voorbeeld</button>
+                {% sv-knop-nav icon='open url' tekst='Voorbeeld' extra_style='text-shadow:none; background-color:#F7941E' %}
             </td>
         </tr>
 
 
+        <!-- wit met zwarte tekst -->
         <tr>
             <td></td>
             <td></td>
             <td></td>
+
+            <td style="border:1px solid red">
+                <button class="btn-sv-rood white-text" style="background-color:#fff">
+                    {% sv-icon icon kleur='wit' %}Voorbeeld</button>
+            </td>
+
+            <td style="border:1px solid red">
+                {% sv-knop-nav icon='open url' tekst='Voorbeeld' extra_style='text-shadow:none; background-color:#fff; color:white' %}
+            </td>
+        </tr>
+
+        <!-- experimenteer -->
+        <tr>
+            <td>
+                {% sv-knop-nav icon='open url' smal=True tekst='' %}
+            </td>
+
+            <td></td>
+            <td></td>
+
             <td>
                 <button class="btn-sv-rood white" style="background-color:#eff2f5 !important; text-shadow:none; border:1px solid #F7941E; line-height:34px">
                     {% sv-icon icon kleur='wit' %}Voorbeeld</button>

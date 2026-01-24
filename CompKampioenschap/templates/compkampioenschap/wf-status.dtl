@@ -7,6 +7,7 @@
 {% load static %}
 {% load design_filters %}
 {% load design_knop %}
+{% load design_icons %}
 
 {% block title %}Status wedstrijdformulieren{% endblock %}
 
@@ -41,25 +42,39 @@
                         </td>
                     </tr>
                     <tr>
+                        <th><!-- knop om bestand te openen --></th>
                         <th>Bestand</th>
-                        <th>Aantal deelnemers</th>
+                        <th><span class="hide-on-small-only">Aantal deelnemers</span></th>
                         <th>Fase</th>
                         <th>Gewijzigd</th>
-                        <th>Door</th>
-                        <th><!-- kolom voor knop --></th>
+                        <th><span class="hide-on-small-only">Door</span></th>
+                        <th><!-- knop om te importeren --></th>
+                        <th>Uitslag</th>
                     </tr>
 
                     {% for status in match.status_list %}
                         <tr>
-                            <td>{{ status.bestand.afstand }}m: {{ status.bestand.fname }}</td>
-                            <td>{{ status.aantal_deelnemers }}</td>
-                            <td>{{ status.wedstrijd_fase }}</td>
-                            <td>{{ status.gewijzigd_op }}</td>
-                            <td>{{ status.gewijzigd_door|wbr_email }}</td>
                             <td>
                                 {% if status.url_open_wf %}
-                                    {% sv-knop-ext url=status.url_open_wf tekst='' %}
+                                    {% sv-knop-ext url=status.url_open_wf tekst='' smal=True %}
                                 {% endif %}
+                            </td>
+                            <td>{{ status.bestand.afstand }}m: {{ status.bestand.fname }}</td>
+                            <td><span class="hide-on-small-only">{{ status.aantal_deelnemers }}</span></td>
+                            <td>{{ status.wedstrijd_fase }}</td>
+                            <td>{{ status.gewijzigd_op }}</td>
+                            <td>
+                                <span class="hide-on-small-only">{{ status.gewijzigd_door|wbr_email }}</span>
+                            </td>
+                            <td>
+                                {% if status.url_importeer %}
+                                    <a class="btn-sv-rood" href="{{ status.url_importeer }}">
+                                        {% sv-icon-op-button 'open ext' %}
+                                    </a>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% sv-knop-ext kleur='blauw' url=status.url_uitslag tekst='' smal=True %}
                             </td>
                         </tr>
                     {% endfor %}

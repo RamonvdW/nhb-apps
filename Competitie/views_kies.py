@@ -114,7 +114,7 @@ class CompetitieKiesView(TemplateView):
             if rol_nu == Rol.ROL_BB:
                 context['toon_management'] = True
 
-                context['url_wf_status'] = reverse('CompBeheer:wf-status')
+                context['url_wf_status'] = reverse('CompKampioenschap:wf-status')
 
                 # als er nog geen competitie is voor het huidige jaar, geeft de BB dan de optie om deze op te starten
                 if begin_jaar is not None:

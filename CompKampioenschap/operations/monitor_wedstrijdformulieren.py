@@ -8,7 +8,7 @@ from django.utils import timezone
 from GoogleDrive.models import Bestand
 from GoogleDrive.operations import StorageGoogleSheet, MonitorDriveFiles
 from CompKampioenschap.models import SheetStatus
-from CompKampioenschap.operations.wedstrijdformulieren_indiv import LeesIndivWedstrijdFormulier
+from CompKampioenschap.operations.wedstrijdformulieren_indiv_lees import LeesIndivWedstrijdFormulier
 from CompKampioenschap.operations.wedstrijdformulieren_teams import LeesTeamsWedstrijdFormulier
 
 
