@@ -15,7 +15,7 @@ from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
 from GoogleDrive.models import Bestand
 
-TEMPLATE_COMPBEHEER_WF_STATUS = 'compbeheer/wf-status.dtl'
+TEMPLATE_COMPBEHEER_WF_STATUS = 'compkampioenschap/wf-status.dtl'
 
 
 class StatusView(UserPassesTestMixin, TemplateView):
@@ -64,7 +64,8 @@ class StatusView(UserPassesTestMixin, TemplateView):
         # for
         return werk
 
-    def _get_uitslag_url(self, comp: Competitie, bestand: Bestand, klasse: CompetitieIndivKlasse | CompetitieTeamKlasse):
+    @staticmethod
+    def _get_uitslag_url(comp: Competitie, bestand: Bestand, klasse: CompetitieIndivKlasse | CompetitieTeamKlasse):
         seizoen_url = comp.maak_seizoen_url()
         klasse_str = klasse.beschrijving
 
@@ -83,7 +84,6 @@ class StatusView(UserPassesTestMixin, TemplateView):
                 url = maak_url_uitslag_rk_indiv(seizoen_url, bestand.rayon_nr, boog_type_url, klasse_str)
 
         return url
-        klasse_pk = models.PositiveIntegerField(default=0)  # welke CompetitieIndiv/TeamKlasse
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -163,6 +163,9 @@ class StatusView(UserPassesTestMixin, TemplateView):
                 except KeyError:
                     pass
                 else:
+                    if status.uitslag_is_compleet and status.uitslag_ingelezen_op < status.gewijzigd_op:
+                        status.url_importeer = reverse('CompKampioenschap:importeer-uitslag-indiv',
+                                                       kwargs={'status_pk': status.pk})
                     status.url_uitslag = self._get_uitslag_url(comp, status.bestand, klasse)
                     match.status_list.append(status)
             # for
@@ -170,10 +173,14 @@ class StatusView(UserPassesTestMixin, TemplateView):
             for klasse in match.team_klassen.select_related('team_type'):
                 tup = (comp.begin_jaar, afstand, is_bk, True, rayon_nr, klasse.pk)
                 try:
+                    # TODO: no SheetStatus records exist for teams, right now
                     status = tup2status[tup]
                 except KeyError:
                     pass
                 else:
+                    if status.uitslag_is_compleet and status.uitslag_ingelezen_op < status.gewijzigd_op:
+                        status.url_importeer = reverse('CompKampioenschap:importeer-uitslag-teams',
+                                                       kwargs={'status_pk': status.pk})
                     status.url_uitslag = self._get_uitslag_url(comp, status.bestand, klasse)
                     match.status_list.append(status)
             # for

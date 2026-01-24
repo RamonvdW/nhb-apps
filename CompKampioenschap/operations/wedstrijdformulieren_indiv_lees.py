@@ -152,6 +152,7 @@ class LeesIndivWedstrijdFormulier:
         self._wedstrijd_voortgang = 'Geen invoer'
 
         if self._check_input(self.ranges['voorronde_1']):
+            self._data_heeft_scores = True
             self._wedstrijd_voortgang = 'Voorronde 1'
 
             if self._check_input(self.ranges['voorronde_2']):

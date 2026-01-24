@@ -5,9 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from CompBeheer import (views_bb, views_bko,
-                        view_stats, view_overzicht, view_wijzig_datums, view_tijdlijn,
-                        views_wf, views_wf_status)
+from CompBeheer import views_bb, views_bko, view_stats, view_overzicht, view_wijzig_datums, view_tijdlijn, views_wf
 
 app_name = 'CompBeheer'
 
@@ -45,10 +43,6 @@ urlpatterns = [
     path('wedstrijdformulieren/aanmaken/',
          views_wf.AanmakenView.as_view(),
          name='wf-aanmaken'),
-
-    path('wedstrijdformulieren/status/',
-         views_wf_status.StatusView.as_view(),
-         name='wf-status'),
 
     path('<comp_pk>/klassengrenzen-vaststellen/',
          views_bb.KlassengrenzenVaststellenView.as_view(),

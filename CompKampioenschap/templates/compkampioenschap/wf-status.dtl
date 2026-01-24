@@ -7,6 +7,7 @@
 {% load static %}
 {% load design_filters %}
 {% load design_knop %}
+{% load design_icons %}
 
 {% block title %}Status wedstrijdformulieren{% endblock %}
 
@@ -47,6 +48,7 @@
                         <th>Fase</th>
                         <th>Gewijzigd</th>
                         <th><span class="hide-on-small-only">Door</span></th>
+                        <th><!-- knop om te importeren --></th>
                         <th>Uitslag</th>
                     </tr>
 
@@ -61,7 +63,16 @@
                             <td><span class="hide-on-small-only">{{ status.aantal_deelnemers }}</span></td>
                             <td>{{ status.wedstrijd_fase }}</td>
                             <td>{{ status.gewijzigd_op }}</td>
-                            <td><span class="hide-on-small-only">{{ status.gewijzigd_door|wbr_email }}</span></td>
+                            <td>
+                                <span class="hide-on-small-only">{{ status.gewijzigd_door|wbr_email }}</span>
+                            </td>
+                            <td>
+                                {% if status.url_importeer %}
+                                    <a class="btn-sv-rood" href="{{ status.url_importeer }}">
+                                        {% sv-icon-op-button 'open ext' %}
+                                    </a>
+                                {% endif %}
+                            </td>
                             <td>
                                 {% sv-knop-ext kleur='blauw' url=status.url_uitslag tekst='' smal=True %}
                             </td>
