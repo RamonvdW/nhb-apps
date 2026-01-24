@@ -17,6 +17,7 @@ from Competitie.seizoenen import get_comp_pk
 from Functie.rol import rol_get_huidige_functie
 from Geo.models import Rayon
 from HistComp.operations import get_hist_url
+from Overig.helpers import make_valid_hashtag
 from Sporter.models import Sporter
 from Sporter.operations import get_request_rayon_nr
 import datetime
@@ -236,6 +237,7 @@ class UitslagenRayonIndivView(TemplateView):
 
                 indiv = deelnemer.indiv_klasse
                 deelnemer.klasse_str = indiv.beschrijving
+                deelnemer.klasse_hashtag = make_valid_hashtag(deelnemer.klasse_str)
                 try:
                     deelnemer.match = indiv2match[indiv.pk]
                 except KeyError:
@@ -548,6 +550,7 @@ class UitslagenRayonTeamsView(TemplateView):
                     teller.break_klasse = True
                     if teller.team_klasse:
                         teller.klasse_str = teller.team_klasse.beschrijving
+                        teller.klasse_hashtag = make_valid_hashtag(teller.klasse_str)
                         try:
                             teller.match = teamklasse2match[teller.team_klasse.pk]
                         except KeyError:
@@ -647,6 +650,7 @@ class UitslagenRayonTeamsView(TemplateView):
             teller.break_klasse = True
             if teller.team_klasse:
                 teller.klasse_str = teller.team_klasse.beschrijving
+                teller.klasse_hashtag = make_valid_hashtag(teller.klasse_str)
                 try:
                     teller.match = teamklasse2match[teller.team_klasse.pk]
                 except KeyError:

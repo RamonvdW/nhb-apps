@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -18,6 +18,7 @@ from Competitie.models import (Competitie, CompetitieMatch,
 from Competitie.seizoenen import get_comp_pk
 from Functie.rol import rol_get_huidige_functie
 from HistComp.operations import get_hist_url
+from Overig.helpers import make_valid_hashtag
 from Sporter.models import Sporter
 from types import SimpleNamespace
 import datetime
@@ -174,6 +175,7 @@ class UitslagenBKIndivView(TemplateView):
                         deelnemer.is_eerste_break = True
                     indiv = deelnemer.indiv_klasse
                     deelnemer.klasse_str = indiv.beschrijving
+                    deelnemer.klasse_hashtag = make_valid_hashtag(deelnemer.klasse_str)
                     try:
                         deelnemer.match = indiv2match[indiv.pk]
                     except KeyError:
@@ -447,6 +449,7 @@ class UitslagenBKTeamsView(TemplateView):
                     teller.break_klasse = True
                     if teller.team_klasse:
                         teller.klasse_str = teller.team_klasse.beschrijving
+                        teller.klasse_hashtag = make_valid_hashtag(teller.klasse_str)
                         try:
                             teller.match = teamklasse2match[teller.team_klasse.pk]
                         except KeyError:
@@ -560,6 +563,7 @@ class UitslagenBKTeamsView(TemplateView):
             teller.break_klasse = True
             if teller.team_klasse:
                 teller.klasse_str = teller.team_klasse.beschrijving
+                teller.klasse_hashtag = make_valid_hashtag(teller.klasse_str)
                 try:
                     teller.match = teamklasse2match[teller.team_klasse.pk]
                 except KeyError:

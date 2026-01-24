@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -15,6 +15,7 @@ from Competitie.seizoenen import get_comp_pk
 from Competitie.operations.poules import maak_poule_schema
 from Geo.models import Regio
 from HistComp.operations import get_hist_url
+from Overig.helpers import make_valid_hashtag
 from Sporter.operations import get_request_regio_nr
 from Vereniging.models import Vereniging
 from types import SimpleNamespace
@@ -67,7 +68,6 @@ class UitslagenRegioIndivView(TemplateView):
             boogtype.sel = 'boog_' + boogtype.afkorting
             if boogtype.afkorting.upper() == comp_boog.upper():
                 context['comp_boog'] = boogtype
-                comp_boog = boogtype.afkorting.lower()
                 # geen url --> knop disabled
                 boogtype.selected = True
 
@@ -131,6 +131,7 @@ class UitslagenRegioIndivView(TemplateView):
                 obj.break_klasse = True
                 obj.needs_closure = needs_closure
                 obj.klasse_str = klasse_str
+                obj.klasse_hashtag = make_valid_hashtag(obj.klasse_str)
                 obj.aantal_in_groep = 2 + len(objs1) + len(objs2)
                 is_first = False
         # for
@@ -518,6 +519,7 @@ class UitslagenRegioTeamsView(TemplateView):
             if team.team_klasse != prev_klasse:
                 team.break_klasse = True
                 team.klasse_str = team.team_klasse.beschrijving
+                team.klasse_hashtag = make_valid_hashtag(team.klasse_str)
                 team.aantal_in_groep = 3        # inclusief afsluitende blauwe regel
                 aantal_team = team
                 if prev_klasse:

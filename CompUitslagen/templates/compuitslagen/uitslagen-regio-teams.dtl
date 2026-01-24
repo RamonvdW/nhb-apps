@@ -1,6 +1,6 @@
 {% extends 'design/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2021-2025 Ramon van der Winkel.
+                Copyright (c) 2021-2026 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -228,7 +228,7 @@
                 {% endif %}
 
                 {% if team.break_klasse %}
-                    <tr class="sv-table-sectie-header">
+                    <tr class="sv-table-sectie-header" id="{{ team.klasse_hashtag }}">
                         <td colspan="20" class="center"><h5>Klasse: {{ team.klasse_str }}</h5></td>
                     </tr>
                     <tr class="sv-table-header">
