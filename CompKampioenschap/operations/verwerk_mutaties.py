@@ -17,10 +17,9 @@ from Competitie.models import (Kampioenschap, KampioenschapSporterBoog, Kampioen
                                KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet,
                                Competitie, CompetitieMutatie, CompetitieIndivKlasse, CompetitieTeamKlasse)
 from CompKampioenschap.operations import maak_mutatie_update_dirty_wedstrijdformulieren
-from CompKampioenschap.operations.wedstrijdformulieren_indiv import (iter_indiv_wedstrijdformulieren,
-                                                                     UpdateIndivWedstrijdFormulier)
-from CompKampioenschap.operations.wedstrijdformulieren_teams import (iter_teams_wedstrijdformulieren,
-                                                                     UpdateTeamsWedstrijdFormulier)
+from CompKampioenschap.operations import iter_indiv_wedstrijdformulieren, iter_teams_wedstrijdformulieren
+from CompKampioenschap.operations.wedstrijdformulieren_indiv_update import UpdateIndivWedstrijdFormulier
+from CompKampioenschap.operations.wedstrijdformulieren_teams import UpdateTeamsWedstrijdFormulier
 from CompKampioenschap.operations.storage_wedstrijdformulieren import (StorageWedstrijdformulieren,
                                                                        iter_dirty_wedstrijdformulieren, zet_dirty)
 from CompKampioenschap.operations.monitor_wedstrijdformulieren import MonitorGoogleSheetsWedstrijdformulieren

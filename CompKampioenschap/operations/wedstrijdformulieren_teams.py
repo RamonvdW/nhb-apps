@@ -17,37 +17,6 @@ from GoogleDrive.operations import StorageGoogleSheet
 from Sporter.models import SporterVoorkeuren
 
 
-def iter_teams_wedstrijdformulieren(comp: Competitie):
-    """ generator voor alle teams wedstrijdformulieren
-
-        generates tuples:
-            (afstand, is_bk, klasse_pk, rayon_nr, fname)
-    """
-    # uitgezet omdat we het Excel formulier nog gebruiken
-    return
-
-    afstand = int(comp.afstand)
-    rayon_nrs = list(Rayon.objects.all().values_list('rayon_nr', flat=True))
-
-    for klasse in CompetitieTeamKlasse.objects.filter(competitie=comp, is_voor_teams_rk_bk=True):
-        klasse_str = klasse.beschrijving.lower().replace(' ', '-')
-
-        # RK programma's
-        is_bk = False
-        for rayon_nr in rayon_nrs:
-            fname = "rk-programma_teams-rayon%s_" % rayon_nr
-            fname += klasse_str
-            yield afstand, is_bk, klasse.pk, rayon_nr, fname
-        # for
-
-        # BK programma's
-        is_bk = True
-        rayon_nr = 0
-        fname = "bk-programma_teams_" + klasse_str
-        yield afstand, is_bk, klasse.pk, rayon_nr, fname
-    # for
-
-
 class UpdateTeamsWedstrijdFormulier:
 
     def __init__(self, stdout, sheet: StorageGoogleSheet):

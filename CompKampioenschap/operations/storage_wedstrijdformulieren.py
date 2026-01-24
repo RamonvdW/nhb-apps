@@ -9,8 +9,7 @@
 from django.conf import settings
 from django.utils import timezone
 from Competitie.models import Competitie
-from CompKampioenschap.operations.wedstrijdformulieren_indiv import iter_indiv_wedstrijdformulieren
-from CompKampioenschap.operations.wedstrijdformulieren_teams import iter_teams_wedstrijdformulieren
+from CompKampioenschap.operations import iter_indiv_wedstrijdformulieren, iter_teams_wedstrijdformulieren
 from GoogleDrive.models import Bestand
 from GoogleDrive.operations import StorageGoogleDrive, StorageError
 from typing import Generator
