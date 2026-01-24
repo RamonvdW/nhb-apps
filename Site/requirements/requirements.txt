@@ -54,7 +54,7 @@ grpcio==1.76.0
     #   grpcio-status
 grpcio-status==1.76.0
     # via google-api-core
-httplib2==0.31.1
+httplib2==0.31.2
     # via
     #   google-api-python-client
     #   google-auth-httplib2
