@@ -15,7 +15,7 @@ from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
 from GoogleDrive.models import Bestand
 
-TEMPLATE_COMPBEHEER_WF_STATUS = 'compkampioenschap/wf-status.dtl'
+TEMPLATE_COMPKAMPIOENSCHAP_WF_STATUS = 'compkampioenschap/wf-status.dtl'
 
 
 class StatusView(UserPassesTestMixin, TemplateView):
@@ -23,7 +23,7 @@ class StatusView(UserPassesTestMixin, TemplateView):
     """ Deze view is voor de manager om het de status van de wedstrijdformulieren te zien """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_COMPBEHEER_WF_STATUS
+    template_name = TEMPLATE_COMPKAMPIOENSCHAP_WF_STATUS
     raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
     permission_denied_message = 'Geen toegang'
 
@@ -163,6 +163,7 @@ class StatusView(UserPassesTestMixin, TemplateView):
                 except KeyError:
                     pass
                 else:
+                    print(status.uitslag_is_compleet, status.uitslag_ingelezen_op, status.gewijzigd_op,)
                     if status.uitslag_is_compleet and status.uitslag_ingelezen_op < status.gewijzigd_op:
                         status.url_importeer = reverse('CompKampioenschap:importeer-uitslag-indiv',
                                                        kwargs={'status_pk': status.pk})

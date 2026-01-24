@@ -175,7 +175,12 @@ class LeesIndivWedstrijdFormulier:
         return self._data_heeft_uitslag
 
     def tel_deelnemers(self):
-        return len(self._data_deelnemers)
+        aantal = 0
+        for row in self._data_deelnemers:
+            if len(row) > 0:
+                aantal += 1
+        # for
+        return aantal
 
     def bepaal_wedstrijd_fase(self):
         return self._wedstrijd_voortgang
