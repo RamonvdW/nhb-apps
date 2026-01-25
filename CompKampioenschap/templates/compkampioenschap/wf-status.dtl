@@ -66,7 +66,15 @@
                                 <span class="hide-on-small-only">{{ status.aantal_deelnemers }}</span>
                             </td>
 
-                            <td>{{ status.wedstrijd_fase }}</td>
+                            <td>
+                                {% if status.uitslag_ingelezen_op > status.gewijzigd_op %}
+                                    <span class="green-text">Gepubliceerd</span>
+                                {% elif status.wedstrijd_fase == 'Geen invoer' %}
+                                    <span class="sv-rood-text">{{ status.wedstrijd_fase }}</span>
+                                {% else %}
+                                    <span>{{ status.wedstrijd_fase }}</span>
+                                {% endif %}
+                            </td>
 
                             <td>{{ status.gewijzigd_op }}</td>
 

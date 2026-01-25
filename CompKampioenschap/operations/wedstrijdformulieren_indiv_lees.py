@@ -171,7 +171,10 @@ class LeesIndivWedstrijdFormulier:
 
         self._wedstrijd_voortgang = 'Geen invoer'
 
-        if self._check_input('voorronde_1'):
+        if self.tel_deelnemers() == 0:
+            self._wedstrijd_voortgang = 'Buiten gebruik'
+
+        elif self._check_input('voorronde_1'):
             self._data_heeft_scores = True
             self._wedstrijd_voortgang = 'Voorronde 1'
 

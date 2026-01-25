@@ -114,7 +114,7 @@ class ImporteerSheetUitslagIndiv:
                 scores.extend(['', '', '', '', '', ''])
                 score1, score2, score_totaal, c10, c9, c8 = scores[:6]
 
-                # some stoppen mensen en 
+                # soms stoppen mensen en is er geen score ingevuld
                 if score2 == '' and score1 != '':
                     score2 = '0'
 
