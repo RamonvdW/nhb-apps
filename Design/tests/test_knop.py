@@ -49,7 +49,7 @@ class TestDesignTemplatetags(TestCase):
         self.assertTrue('<svg ' in out)
         self.assertTrue('btn-sv-rood' in out)
 
-        out = sv_knop_ext(kleur='blauw', icon='email', tekst='hello', url='//test.not', extra_stijl='stijl')
+        out = sv_knop_ext(kleur='blauw', icon='email', tekst='hello', url='//test.not', extra_style='stijl')
         self.assertTrue('stijl' in out)
         self.assertTrue('hello' in out)
         self.assertTrue('<svg ' in out)

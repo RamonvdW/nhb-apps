@@ -221,7 +221,9 @@ class UpdateIndivWedstrijdFormulier:
 
     def _hide_show_finale_sheets_indoor(self):
         # er zijn wedstrijd finale sheets met 4, 8 of 16 deelnemers
-        # toon alleen de het benodigde sheet
+        # toon alleen de (mogelijk) benodigde sheet
+        # in geval van 16 deelnemers, toon ook 8 (voor als er 1 of meer niet opdagen)
+        # in geval van 8 deelnemers, toon ook 4 (voor als er 1 of meer niet opdagen)
 
         # minimaal 16
         if self._max_naar_finales >= 16:
@@ -229,14 +231,14 @@ class UpdateIndivWedstrijdFormulier:
         else:
             self.sheet.hide_sheet('Finales 16')
 
-        # minimaal 8, minder dan 16
-        if 8 <= self._max_naar_finales < 16:
+        # minimaal 8
+        if self._max_naar_finales >= 8:
             self.sheet.toon_sheet('Finales 8')
         else:
             self.sheet.hide_sheet('Finales 8')
 
-        # minder dan 8
-        if self._max_naar_finales < 8:
+        # minimaal 4
+        if self._max_naar_finales >= 4:
             self.sheet.toon_sheet('Finales 4')
         else:
             self.sheet.hide_sheet('Finales 4')

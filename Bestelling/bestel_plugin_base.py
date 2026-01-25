@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2025 Ramon van der Winkel.
+#  Copyright (c) 2025-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from Bestelling.models import Bestelling, BestellingRegel, BestellingMandje
 from decimal import Decimal
-from typing import Tuple
 import sys
 
 
@@ -72,7 +71,7 @@ class BestelPluginBase:
         """
         raise NotImplementedError()             # pragma: no cover
 
-    def bereken_verzendkosten(self, obj: BestellingMandje | Bestelling) -> Tuple[Decimal, str, Decimal]:
+    def bereken_verzendkosten(self, obj: BestellingMandje | Bestelling) -> tuple[Decimal, str, Decimal]:
         """
             Bereken de verzendkosten van toepassing op het mandje of de bestelling
         """

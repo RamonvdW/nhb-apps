@@ -163,7 +163,6 @@ class StatusView(UserPassesTestMixin, TemplateView):
                 except KeyError:
                     pass
                 else:
-                    print(status.uitslag_is_compleet, status.uitslag_ingelezen_op, status.gewijzigd_op,)
                     if status.uitslag_is_compleet and status.uitslag_ingelezen_op < status.gewijzigd_op:
                         status.url_importeer = reverse('CompKampioenschap:importeer-uitslag-indiv',
                                                        kwargs={'status_pk': status.pk})

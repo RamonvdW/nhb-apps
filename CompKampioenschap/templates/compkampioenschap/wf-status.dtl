@@ -59,13 +59,21 @@
                                     {% sv-knop-ext url=status.url_open_wf tekst='' smal=True %}
                                 {% endif %}
                             </td>
+
                             <td>{{ status.bestand.afstand }}m: {{ status.bestand.fname }}</td>
-                            <td><span class="hide-on-small-only">{{ status.aantal_deelnemers }}</span></td>
+
+                            <td>
+                                <span class="hide-on-small-only">{{ status.aantal_deelnemers }}</span>
+                            </td>
+
                             <td>{{ status.wedstrijd_fase }}</td>
+
                             <td>{{ status.gewijzigd_op }}</td>
+
                             <td>
                                 <span class="hide-on-small-only">{{ status.gewijzigd_door|wbr_email }}</span>
                             </td>
+
                             <td>
                                 {% if status.url_importeer %}
                                     <form method="post" action="{{ status.url_importeer }}">
@@ -76,6 +84,7 @@
                                     </form>
                                 {% endif %}
                             </td>
+
                             <td>
                                 {% sv-knop-ext kleur='blauw' url=status.url_uitslag tekst='' smal=True %}
                             </td>

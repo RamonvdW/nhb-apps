@@ -59,7 +59,7 @@
                             <td class="right-align">
                                 <!-- button om pagina te openen -->
                                 {% if obj.volledige_url %}
-                                    {% sv-knop-ext url=obj.volledige_url tekst='' extra_stijl='margin-right:10px' %}
+                                    {% sv-knop-ext url=obj.volledige_url tekst='' extra_style='margin-right:10px' %}
                                 {% endif %}
 
                                 <!-- knop naar de admin site -->
