@@ -114,6 +114,10 @@ class ImporteerSheetUitslagIndiv:
                 scores.extend(['', '', '', '', '', ''])
                 score1, score2, score_totaal, c10, c9, c8 = scores[:6]
 
+                # some stoppen mensen en 
+                if score2 == '' and score1 != '':
+                    score2 = '0'
+
                 # converteer de telling van 10-en, 9-ens en 8-en voor de 25m1pijl
                 counts = list()
                 try:
@@ -189,10 +193,8 @@ class ImporteerSheetUitslagIndiv:
         foutmeldingen = stdout.getvalue().strip()
         if len(foutmeldingen) > 0:
             regels = foutmeldingen.split('\n')
-            regels = [regel
-                      for regel in regels
-                      if (regel != '[ERROR] {execute} HttpError from API:'
-                          and not regel.startswith('[DEBUG] {execute} Retrying in'))]
+            while len(regels) > 2 and regels[-1].startswith('[DEBUG] {execute} Retrying in'):
+                regels = regels[:-2]
             if len(regels) > 0:
                 regel = 'Fout: inlezen van Google Sheet is niet gelukt'
                 regels.insert(0, regel)

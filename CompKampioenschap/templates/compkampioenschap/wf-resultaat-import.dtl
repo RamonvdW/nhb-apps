@@ -7,14 +7,14 @@
 {% load design_filters %}       <!-- highlight -->
 {% load design_knop %}
 
-{% block title %}Importeer fouten{% endblock %}
+{% block title %}Importeer rapportage{% endblock %}
 
 {% block pagina %}
 
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Importeer fouten</h3>
+            <h3 class="page-banner">Importeer rapportage</h3>
 
             {% if bevat_fout %}
                 <p>Er zijn <span class="sv-rood-text">fouten</span> gevonden tijdens het importeren van de uitslag uit het Google Sheet.</p>
@@ -30,7 +30,7 @@
                 </p>
             {% endif %}
 
-            <p>Klasse: {{ klasse.beschrijving }}</p>
+            <p>Wedstrijd: {{ deelkamp }}, {{ klasse.beschrijving }}</p>
         </div>
     </div>
 
@@ -43,7 +43,7 @@
                     <tr>
                         <td>
                             {% for regel in regels %}
-                                <span>{{ regel|highlight:'Fout:' }}</span><br>
+                                <span>{{ regel|safe|highlight:'Fout:' }}</span><br>
                             {% endfor %}
                         </td>
                     </tr>

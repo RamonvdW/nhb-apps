@@ -63,6 +63,7 @@ class ImporteerUitslagIndivView(UserPassesTestMixin, View):
         # TODO: check competitie fase
 
         context = {
+            'deelkamp': deelkamp,
             'klasse': klasse,
             'url_terug': reverse('CompKampioenschap:wf-status'),
         }
@@ -124,6 +125,7 @@ class ImporteerUitslagTeamsView(UserPassesTestMixin, View):
             raise Http404('Kampioenschap niet gevonden')
 
         context = {
+            'deelkamp': deelkamp,
             'klasse': klasse,
             'url_terug': reverse('CompKampioenschap:wf-status'),
         }
