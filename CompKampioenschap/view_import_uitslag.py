@@ -4,9 +4,9 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.conf import settings
 from django.urls import reverse
-from django.http import HttpResponseRedirect, Http404
+from django.http import Http404
+from django.utils import timezone
 from django.shortcuts import render
 from django.views.generic import View
 from django.contrib.auth.mixins import UserPassesTestMixin
@@ -77,6 +77,10 @@ class ImporteerUitslagIndivView(UserPassesTestMixin, View):
             context['url_uitslag'] = maak_url_uitslag_rk_indiv(seizoen_url, bestand.rayon_nr, boog_type_url, klasse_str)
 
         context['bevat_fout'], context['blokjes_info'] = importeer_sheet_uitslag_indiv(deelkamp, klasse, status)
+
+        if not context['bevat_fout']:
+            status.uitslag_ingelezen_op = timezone.now()
+            status.save(update_fields=['uitslag_ingelezen_op'])
 
         return render(request, TEMPLATE_COMPKAMPIOENSCHAP_WF_RESULTAAT_IMPORT, context)
 

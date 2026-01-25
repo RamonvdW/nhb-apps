@@ -4,7 +4,9 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
+from django.utils import timezone
 from django.core.management.base import OutputWrapper
+from Competitie.definities import KAMP_RANK_NO_SHOW
 from Competitie.models import Kampioenschap, CompetitieIndivKlasse, KampioenschapSporterBoog
 from CompKampioenschap.models import SheetStatus
 from CompKampioenschap.operations.wedstrijdformulieren_indiv_lees import LeesIndivWedstrijdFormulier
@@ -26,12 +28,13 @@ class ImporteerSheetUitslagIndiv:
         self.afstand = 0
 
         self._data_deelnemers = list()
-        self._data_voorronde_uitslag = list()
+        self._data_voorronde_scores = list()    # list([1e, 2e, totaal, 10en, 9ens, 8en], ...)
+        self._data_voorronde_uitslag = list()   # list(125, 124.2, 124.1, ...)
         self._data_finales = list()
 
-        self._lid_nr2deelnemer = dict()  # [str(lid_nr)] = KampioenschapSporterBoog
-        self._lid_nr2voorronde = dict()  # [str(lid_nr)] = score voorronde
-        self._lid_nr2rank = dict()       # [str(lid_nr)] = int (1..23)
+        self._lid_nr2deelnemer = dict()         # [str(lid_nr)] = KampioenschapSporterBoog
+        self._lid_nr2voorronde = dict()         # [str(lid_nr)] = [totaal, aantallen_str, 1e, 2e]
+        self._lid_nr2rank_volgorde = dict()     # [str(lid_nr)] = (rank, volgorde)
 
     def _check_deelnemers(self):
         """ controleer dat iedereen die in de uitslag staat ook op de deelnemerslijst stond
@@ -95,25 +98,71 @@ class ImporteerSheetUitslagIndiv:
         self.blokjes_info.append(regels_deelnemers)
 
     def _bepaal_volgorde_voorronde(self):
-        uitslag = list()
-        for row, score in zip(self._data_deelnemers, self._data_voorronde_uitslag):
+        """ bepaal de ranking voor elke deelnemer als we naar het voorronde blad kijken
+
+            vult:
+                self._lid_nr2rank_volgorde
+                self._lid_nr2voorronde
+        """
+        uitslagen = list()
+        for row, uitslag, scores in zip(self._data_deelnemers, self._data_voorronde_uitslag, self._data_voorronde_scores):
             if len(row) > 0:
                 lid_nr = row[0]
-                tup = (score, lid_nr)
-                uitslag.append(tup)
+                tup = (uitslag, lid_nr)
+                uitslagen.append(tup)
+
+                scores.extend(['', '', '', '', '', ''])
+                score1, score2, score_totaal, c10, c9, c8 = scores[:6]
+
+                # converteer de telling van 10-en, 9-ens en 8-en voor de 25m1pijl
+                counts = list()
+                try:
+                    if c10:
+                        c10 = int(c10)
+                        counts.append('%sx10' % c10)
+                    else:
+                        c10 = 0
+                    if c9:
+                        c9 = int(c9)
+                        counts.append('%sx9' % c9)
+                    else:
+                        c9 = 0
+                    if c8:
+                        c8 = int(c8)
+                        counts.append('%sx8' % c8)
+                    else:
+                        c8 = 0
+                except (TypeError, ValueError) as err:
+                    regels = [
+                        'Fout: Probleem met 10/9/8 tellingen voor [%s]: %s' % (lid_nr, repr(scores))
+                    ]
+                    self.blokjes_info.append(regels)
+                    self.bevat_fout = True
+                    counts_str = ''
+                else:
+                    if c10 + c9 + c8 > (2 * 25):
+                        regels = [
+                            'Fout: Te veel 10/9/8-en voor [%s]: %s' % (lid_nr, repr(scores))
+                        ]
+                        self.blokjes_info.append(regels)
+                        self.bevat_fout = True
+                    counts_str = " ".join(counts)
+
+                tup = (score_totaal, counts_str, score1, score2)
+                self._lid_nr2voorronde[lid_nr] = tup
         # for
-        uitslag.sort(reverse=True)      # hoogste eerst
+        uitslagen.sort(reverse=True)      # hoogste eerst
 
         regels = [
             'Ranking uit voorronde:'
         ]
-        for i, tup in enumerate(uitslag):
+        for i, tup in enumerate(uitslagen):
             score, lid_nr = tup
             if score == 0:
                 rank = 99
             else:
                 rank = i + 1
-            self._lid_nr2rank[lid_nr] = rank
+            self._lid_nr2rank_volgorde[lid_nr] = (rank, rank)
             regel = '%s: %s %s' % (rank, score, lid_nr)
             regels.append(regel)
         # for
@@ -135,23 +184,36 @@ class ImporteerSheetUitslagIndiv:
 
         stdout = OutputWrapper(io.StringIO())
         sheets = StorageGoogleSheet(stdout)
-        lezer = LeesIndivWedstrijdFormulier(stdout, bestand, sheets)
+        lezer = LeesIndivWedstrijdFormulier(stdout, bestand, sheets, lees_oppervlakkig=False)
 
         foutmeldingen = stdout.getvalue().strip()
         if len(foutmeldingen) > 0:
             regels = foutmeldingen.split('\n')
-            regel = 'Fout: inlezen van Google Sheet is niet gelukt'
-            regels.insert(0, regel)
-            self.blokjes_info.append(regels)
-            self.bevat_fout = True
-            return
+            regels = [regel
+                      for regel in regels
+                      if (regel != '[ERROR] {execute} HttpError from API:'
+                          and not regel.startswith('[DEBUG] {execute} Retrying in'))]
+            if len(regels) > 0:
+                regel = 'Fout: inlezen van Google Sheet is niet gelukt'
+                regels.insert(0, regel)
+                self.blokjes_info.append(regels)
+                self.bevat_fout = True
+                return
 
         self._data_deelnemers = lezer.get_indiv_deelnemers()
         self._check_deelnemers()
         if self.bevat_fout:
             return
 
+        self._data_voorronde_scores = lezer.get_indiv_voorronde_scores()
         self._data_voorronde_uitslag = lezer.get_indiv_voorronde_uitslag()
+
+        # zorg dat de lijsten even lang zijn
+        while len(self._data_voorronde_scores) < len(self._data_deelnemers):
+            self._data_voorronde_scores.append([0, 0, 0, ''])
+
+        while len(self._data_voorronde_uitslag) < len(self._data_deelnemers):
+            self._data_voorronde_uitslag.append(0)
 
         if self.afstand == 18:
             # indoor heeft finales
@@ -190,29 +252,41 @@ class ImporteerSheetUitslagIndiv:
         lid_nrs_done = list()
 
         # begin bij de medailles
-        uitslag = self._data_finales[0]
-        finalisten = self._data_finales[1]
-        if len(uitslag) != len(finalisten):
+        finale_uitslag = self._data_finales[0]
+        finale_deelnemers = self._data_finales[1]
+
+        # geen bronzen finale?
+        if len(finale_uitslag) == 2 and finale_deelnemers[-2] == 'BYE' and finale_deelnemers[-1] == 'BYE':
+            finale_deelnemers = finale_deelnemers[:2]
+
+        if len(finale_uitslag) != len(finale_deelnemers):
             regels = [
                 'Fout: data van de medaille finales is niet compleet',
-                'Uitslag: %s' % repr(uitslag),
-                'Finalisten: %s' % repr(finalisten)
+                'Uitslag: %s' % repr(finale_uitslag),
+                'Finalisten: %s' % repr(finale_deelnemers)
             ]
             self.blokjes_info.append(regels)
             self.bevat_fout = True
             return
 
+        uitslag = list()
+
         regels = ['Ranking uit de medaille finales:']
-        for i in range(len(uitslag)):
-            lid_nr = self._extract_lid_nr(finalisten[i])
+        for i in range(len(finale_uitslag)):
+            lid_nr = self._extract_lid_nr(finale_deelnemers[i])
             if lid_nr:
-                rank = self._uitslag2rank(uitslag[i])
-                self._lid_nr2rank[lid_nr] = rank
+                rank = self._uitslag2rank(finale_uitslag[i])       # vertaalt "Zilver", "Brons", etc. naar 1/2/3/4
+                self._lid_nr2rank_volgorde[lid_nr] = (rank, rank)
+
+                scores = self._lid_nr2voorronde[lid_nr]
+                tup = (rank, -scores[0], scores, lid_nr)
+                uitslag.append(tup)
+
                 lid_nrs_done.append(lid_nr)
                 regel = '%s: %s' % (rank, lid_nr)
                 regels.append(regel)
             else:
-                regel = 'Finalist %s wordt overgeslagen' % repr(finalisten[i])
+                regel = 'Finalist %s wordt overgeslagen' % repr(finale_deelnemers[i])
                 regels.append(regel)
         # for
         self.blokjes_info.append(regels)
@@ -226,11 +300,15 @@ class ImporteerSheetUitslagIndiv:
                 lid_nr = self._extract_lid_nr(deelnemer)
                 if lid_nr:
                     if lid_nr not in lid_nrs_done:
-                        self._lid_nr2rank[lid_nr] = rank
+                        scores = self._lid_nr2voorronde[lid_nr]
+                        tup = (rank, -scores[0], scores, lid_nr)
+                        uitslag.append(tup)
+
                         lid_nrs_done.append(lid_nr)
-                        aantal += 1
                         regel = '%s: %s' % (rank, lid_nr)
                         regels.append(regel)
+
+                        aantal += 1
                 else:
                     regel = 'Finalist %s wordt overgeslagen' % repr(deelnemer)
                     regels.append(regel)
@@ -243,17 +321,34 @@ class ImporteerSheetUitslagIndiv:
             self.blokjes_info.append(regels)
         # for
 
+        uitslag.sort()      # rank 1 eerst, meest negative totaal score eerst
+
+        # vul de volgorde in van de overige deelnemers
         regels = ['Uitslag:']
-        uitslag = list()
-        for lid_nr, rank in self._lid_nr2rank.items():
-            tup = (rank, lid_nr)
-            uitslag.append(tup)
-        # for
-        uitslag.sort()
-        for rank, lid_nr in uitslag:
-            regel = '%s: %s' % (rank, lid_nr)
+        volgorde = 0
+        for rank, _min, scores, lid_nr in uitslag:
+            volgorde += 1
+            self._lid_nr2rank_volgorde[lid_nr] = (rank, volgorde)
+            totaal, aantal_str, score1, score2 = scores
+            regel = '%s #%s [%s] %s (%s+%s) %s' % (rank, volgorde, lid_nr, totaal, score1, score2, aantal_str)
             regels.append(regel)
         # for
+
+        # voeg de deelnemers toe die de finales niet gehaald hebben
+        for lid_nr, deelnemer in self._lid_nr2deelnemer.items():
+            if lid_nr not in lid_nrs_done:
+                if lid_nr not in self._lid_nr2rank_volgorde:
+                    self._lid_nr2rank_volgorde[lid_nr] = (99, 99)
+                    self._lid_nr2voorronde[lid_nr] = (0, '', 0, 0)
+
+                rank, volgorde = self._lid_nr2rank_volgorde[lid_nr]
+                scores = self._lid_nr2voorronde[lid_nr]
+
+                totaal, aantal_str, score1, score2 = scores
+                regel = '%s #%s [%s] %s (%s+%s) %s' % (rank, volgorde, lid_nr, totaal, score1, score2, aantal_str)
+                regels.append(regel)
+        # for
+
         self.blokjes_info.append(regels)
 
     def _bepaal_uitslag_25(self):
@@ -270,7 +365,43 @@ class ImporteerSheetUitslagIndiv:
             self._bepaal_uitslag_25()
 
     def uitslag_opslaan(self):
-        pass
+        stamp = timezone.localtime(timezone.now()).strftime('%Y-%m-%d om %H:%M:%S')
+
+        for lid_nr, deelnemer in self._lid_nr2deelnemer.items():
+            rank, volgorde = self._lid_nr2rank_volgorde[lid_nr]
+            score_totaal, counts_str, score1, score2 = self._lid_nr2voorronde[lid_nr]
+
+            if rank == 99:
+                rank = KAMP_RANK_NO_SHOW
+            else:
+                if deelnemer.result_score_1 != score1 or deelnemer.result_score_2 != score2 or deelnemer.result_counts != counts_str:
+                    deelnemer.logboek += '[%s] Scores bijgewerkt: %s, %s, %s --> %s, %s, %s\n' % (stamp,
+                                                                                                  deelnemer.result_score_1,
+                                                                                                  deelnemer.result_score_2,
+                                                                                                  repr(deelnemer.result_counts),
+                                                                                                  score1,
+                                                                                                  score2,
+                                                                                                  repr(counts_str))
+                    deelnemer.result_score_1 = score1
+                    deelnemer.result_score_2 = score2
+                    deelnemer.result_counts = counts_str
+
+            if deelnemer.result_rank != rank or deelnemer.result_volgorde != volgorde:
+                deelnemer.logboek += '[%s] Rank en volgorde bijgewerkt: %s, %s --> %s, %s\n' % (stamp,
+                                                                                                deelnemer.result_rank,
+                                                                                                deelnemer.result_volgorde,
+                                                                                                rank,
+                                                                                                volgorde)
+
+                deelnemer.result_rank = rank                # 0 = niet mee gedaan
+                deelnemer.result_volgorde = volgorde
+
+            # print(deelnemer.logboek)
+
+            deelnemer.save(update_fields=['result_score_1', 'result_score_2', 'result_counts',
+                                          'result_rank', 'result_volgorde',
+                                          'logboek'])
+        # for
 
 
 def importeer_sheet_uitslag_indiv(deelkamp: Kampioenschap, klasse: CompetitieIndivKlasse, status: SheetStatus) -> tuple[bool, list[str]]:

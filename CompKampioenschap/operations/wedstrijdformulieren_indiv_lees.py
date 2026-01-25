@@ -10,15 +10,17 @@ from GoogleDrive.operations import StorageGoogleSheet
 
 class LeesIndivWedstrijdFormulier:
 
-    def __init__(self, stdout, bestand: Bestand, sheet: StorageGoogleSheet):
+    def __init__(self, stdout, bestand: Bestand, sheet: StorageGoogleSheet, lees_oppervlakkig: bool):
         self.stdout = stdout
         self.sheet = sheet      # kan google sheets bijwerken
         self.afstand = bestand.afstand
+        self.lees_oppervlakkig = lees_oppervlakkig
 
         self.ranges = {
             'deelnemers': 'D11:I34',
             'voorronde_1': 'J11:J35',
             'voorronde_2': 'K11:K35',
+            'voorronde_scores': 'J11:O34',          # 1e, 2e, totaal, 10-en, 9-en, 8-en
             'voorronde_uitslag': 'S11:S34',
             'voorronde_25m_tellingen': 'M11:O34',   # 10-en, 9-ens, 8-en
             'finales16_8': 'C8:C53',                # 1/8 (laatste 16)
@@ -48,7 +50,8 @@ class LeesIndivWedstrijdFormulier:
         self._data_heeft_scores = False
         self._data_heeft_uitslag = False
         self.finales_blad = 0
-        self._data_scores_voorronde = list()
+        self._data_voorronde_scores = list()
+        self._data_voorronde_uitslag = list()
         self._data4range = dict()     # [range_name] = range_cells
         self._wedstrijd_voortgang = ''
 
@@ -86,10 +89,11 @@ class LeesIndivWedstrijdFormulier:
             self.finales_blad = 16       # de rest van het finales 16 blad halen
 
             # lees de rest van de uitslag
-            self._check_input('deelnemers_finales16_1')
-            self._check_input('deelnemers_finales16_2')
-            self._check_input('deelnemers_finales16_4')
-            self._check_input('deelnemers_finales16_8')
+            if not self.lees_oppervlakkig:
+                self._check_input('deelnemers_finales16_1')
+                self._check_input('deelnemers_finales16_2')
+                self._check_input('deelnemers_finales16_4')
+                self._check_input('deelnemers_finales16_8')
             return
 
         if self._check_input_on_sheet('Finales 8', 'finales8_uitslag'):
@@ -98,9 +102,10 @@ class LeesIndivWedstrijdFormulier:
             self.finales_blad = 8        # de rest van het finales 8 blad halen
 
             # lees de rest van de uitslag
-            self._check_input('deelnemers_finales8_1')
-            self._check_input('deelnemers_finales8_2')
-            self._check_input('deelnemers_finales8_4')
+            if not self.lees_oppervlakkig:
+                self._check_input('deelnemers_finales8_1')
+                self._check_input('deelnemers_finales8_2')
+                self._check_input('deelnemers_finales8_4')
             return
 
         if self._check_input_on_sheet('Finales 4', 'finales4_uitslag'):
@@ -109,8 +114,9 @@ class LeesIndivWedstrijdFormulier:
             self.finales_blad = 4        # de rest van het finales 4 blad halen
 
             # lees de rest van de uitslag
-            self._check_input('deelnemers_finales4_1')
-            self._check_input('deelnemers_finales4_2')
+            if not self.lees_oppervlakkig:
+                self._check_input('deelnemers_finales4_1')
+                self._check_input('deelnemers_finales4_2')
             return
 
         # zoek naar de medaille finales
@@ -172,6 +178,7 @@ class LeesIndivWedstrijdFormulier:
             if self._check_input('voorronde_2'):
                 self._wedstrijd_voortgang = 'Voorronde 2'
 
+                self._data_voorronde_scores = self.sheet.get_range(self.ranges['voorronde_scores'])
                 self._data_voorronde_uitslag = self.sheet.get_range(self.ranges['voorronde_uitslag'])
 
                 if self.afstand == 25:
@@ -206,7 +213,7 @@ class LeesIndivWedstrijdFormulier:
         return self._data_deelnemers
 
     def get_indiv_voorronde_uitslag(self):
-        """ geeft een lijst terug met op elke regel een mogelijke voorronde uitslag
+        """ geeft een lijst terug met op elke regel een mogelijke voorronde uitslag:
             dit is de som van de twee voorronde scores plus de eventuele shootoff als decimaal
 
             de volgorde komt overeen met get_deelnemers()
@@ -219,6 +226,19 @@ class LeesIndivWedstrijdFormulier:
                 data[i] = data[i][0]
         # for
         return data
+
+    def get_indiv_voorronde_scores(self):
+        """ geeft een lijst terug met op elke regel de mogelijke score van een deelnemer:
+            [
+                score ronde 1
+                score ronde 2
+                totaal score
+                aantal 10-en        # leeg voor de Indoor
+                aantal 9-ens        # leeg voor de Indoor
+                aantal 8-en         # leeg voor de Indoor
+            ]
+        """
+        return self._data_voorronde_scores
 
     def get_indiv_finales_uitslag(self):
         """ geeft de data van de finales terug, voor individuele Indoor wedstrijden
