@@ -207,6 +207,8 @@ class StorageGoogleSheet:
         # haal de values op in een specifieke range (format: A1:B20) in het huidige sheet
         # geeft een list(rows) terug, met elke row = list(cells)
 
+        # print('{get_range} %s!%s' % (self._sheet_name, range_a1))
+
         request = self._api_sheet_values.get(
                         spreadsheetId=self._file_id,
                         range=self._sheet_name + '!' + range_a1,
