@@ -13,13 +13,13 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.definities import DEEL_RK, DEEL_BK
 from Competitie.models import Competitie, CompetitieIndivKlasse, Kampioenschap
 from CompKampioenschap.models import SheetStatus
-from CompKampioenschap.operations import importeert_sheet_uitslag_indiv
+from CompKampioenschap.operations import importeer_sheet_uitslag_indiv
 from CompUitslagen.operations import (maak_url_uitslag_rk_indiv, maak_url_uitslag_bk_indiv,
                                       maak_url_uitslag_rk_teams, maak_url_uitslag_bk_teams)
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
 
-TEMPLATE_COMPKAMPIOENSCHAP_WF_FOUTEN = 'compkampioenschap/wf-fouten.dtl'
+TEMPLATE_COMPKAMPIOENSCHAP_WF_RESULTAAT_IMPORT = 'compkampioenschap/wf-resultaat-import.dtl'
 
 
 class ImporteerUitslagIndivView(UserPassesTestMixin, View):
@@ -35,7 +35,8 @@ class ImporteerUitslagIndivView(UserPassesTestMixin, View):
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
         return rol_nu == Rol.ROL_BB
 
-    def post(self, request, *args, **kwargs):
+    @staticmethod
+    def post(request, *args, **kwargs):
         """ wordt aangeroepen als de beheerder op de knop drukt om een uitslag te importeren """
         try:
             status_pk = int(str(kwargs['status_pk'])[:6])  # afkappen voor de veiligheid
@@ -61,23 +62,23 @@ class ImporteerUitslagIndivView(UserPassesTestMixin, View):
 
         # TODO: check competitie fase
 
-        fouten = importeert_sheet_uitslag_indiv(deelkamp, klasse, status)
-        if len(fouten) > 0:
-            context = {
-                'fouten': fouten,
-            }
-            return render(request, TEMPLATE_COMPKAMPIOENSCHAP_WF_FOUTEN, context)
+        context = {
+            'klasse': klasse,
+            'url_terug': reverse('CompKampioenschap:wf-status'),
+        }
 
         seizoen_url = comp.maak_seizoen_url()
         klasse_str = klasse.beschrijving
         boog_type_url = klasse.boogtype.afkorting.lower()
 
         if bestand.is_bk:
-            url = maak_url_uitslag_bk_indiv(seizoen_url, boog_type_url, klasse_str)
+            context['url_uitslag'] = maak_url_uitslag_bk_indiv(seizoen_url, boog_type_url, klasse_str)
         else:
-            url = maak_url_uitslag_rk_indiv(seizoen_url, bestand.rayon_nr, boog_type_url, klasse_str)
+            context['url_uitslag'] = maak_url_uitslag_rk_indiv(seizoen_url, bestand.rayon_nr, boog_type_url, klasse_str)
 
-        return HttpResponseRedirect(url)
+        context['bevat_fout'], context['blokjes_info'] = importeer_sheet_uitslag_indiv(deelkamp, klasse, status)
+
+        return render(request, TEMPLATE_COMPKAMPIOENSCHAP_WF_RESULTAAT_IMPORT, context)
 
 
 class ImporteerUitslagTeamsView(UserPassesTestMixin, View):
@@ -93,7 +94,8 @@ class ImporteerUitslagTeamsView(UserPassesTestMixin, View):
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
         return rol_nu == Rol.ROL_BB
 
-    def post(self, request, *args, **kwargs):
+    @staticmethod
+    def post(request, *args, **kwargs):
         """ wordt aangeroepen als de beheerder op de knop drukt om een uitslag te importeren """
         try:
             status_pk = int(kwargs['status_pk'][:6])  # afkappen voor de veiligheid
@@ -117,23 +119,24 @@ class ImporteerUitslagTeamsView(UserPassesTestMixin, View):
         if not deelkamp:
             raise Http404('Kampioenschap niet gevonden')
 
-        fouten = importeert_sheet_uitslag_teams(deelkamp, klasse, bestand)
-        if len(fouten) > 0:
-            context = {
-                'fouten': fouten,
-            }
-            return render(request, TEMPLATE_COMPKAMPIOENSCHAP_WF_FOUTEN, context)
+        context = {
+            'klasse': klasse,
+            'url_terug': reverse('CompKampioenschap:wf-status'),
+        }
 
         seizoen_url = comp.maak_seizoen_url()
         klasse_str = klasse.beschrijving
         team_type_url = klasse.team_type.afkorting.lower()
 
         if bestand.is_bk:
-            url = maak_url_uitslag_bk_teams(seizoen_url, team_type_url, klasse_str)
+            context['url_uitslag'] = maak_url_uitslag_bk_teams(seizoen_url, team_type_url, klasse_str)
         else:
-            url = maak_url_uitslag_rk_teams(seizoen_url, bestand.rayon_nr, team_type_url, klasse_str)
+            context['url_uitslag'] = maak_url_uitslag_rk_teams(seizoen_url, bestand.rayon_nr, team_type_url, klasse_str)
 
-        return HttpResponseRedirect(url)
+        raise Http404('Niet geïmplementeerd')
+        context['bevat_fout'], context['blokjes_info'] = importeer_sheet_uitslag_teams(deelkamp, klasse, bestand)
+
+        return render(request, TEMPLATE_COMPKAMPIOENSCHAP_WF_RESULTAAT_IMPORT, context)
 
 
 # end of file

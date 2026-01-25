@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -15,7 +15,7 @@ from Functie.rol.beschrijving import rol_get_beschrijving, rol_zet_beschrijving
 from Functie.rol.mag_wisselen import rol_zet_mag_wisselen
 from Functie.rol.scheids import rol_zet_is_scheids
 from Functie.rol.huidige import rol_get_huidige_functie
-from typing import Generator, Tuple
+from typing import Generator
 import typing
 
 
@@ -167,7 +167,7 @@ class RolBepaler:
             self._eigen.append(func)
         # for
 
-    def iter_directe_rollen(self) -> Generator[Tuple[Rol, Functie | None], None, None]:
+    def iter_directe_rollen(self) -> Generator[tuple[Rol, Functie | None], None, None]:
         """                                    yields,                        send, returns
             yields (Rollen, Functie) voor elke vaste rol
         """
@@ -181,7 +181,7 @@ class RolBepaler:
         yield Rol.ROL_SPORTER, None
 
     def iter_indirecte_rollen(self, rol: Rol, huidige_functie_pk: int) -> \
-            Generator[Tuple[Rol, Functie | None], None, None]:
+            Generator[tuple[Rol, Functie | None], None, None]:
         #             yields,                     send, returns
         """
             yields (Rollen, Functie) voor elke indirecte rol
@@ -297,7 +297,7 @@ class RolBepaler:
     #     # for
     #     return False
 
-    def mag_functie(self, request, functie_pk: int) -> (bool, Rol):
+    def mag_functie(self, request, functie_pk: int) -> tuple[bool, Rol]:
         """ Controleer of de gebruiker de gevraagde functie aan mag nemen
         """
 

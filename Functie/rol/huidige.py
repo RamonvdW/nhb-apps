@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -9,7 +9,6 @@
 from Account.operations import zet_sessionvar_if_changed
 from Functie.definities import Rol
 from Functie.models import Functie
-from typing import Tuple
 import logging
 
 my_logger = logging.getLogger('MH.Functie')
@@ -42,7 +41,7 @@ def rol_get_huidige(request):
     return rol
 
 
-def rol_get_huidige_functie(request) -> Tuple[Rol, Functie]:
+def rol_get_huidige_functie(request) -> tuple[Rol, Functie]:
     """ Retourneer de huidige rol en functie van de gebruiker.
         rol:     zie Functie.definities.Rollen.ROL_xxx
         functie: een van de Functie records

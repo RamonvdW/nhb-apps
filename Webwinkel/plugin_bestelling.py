@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2025 Ramon van der Winkel.
+#  Copyright (c) 2022-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -14,7 +14,6 @@ from Webwinkel.definities import (KEUZE_STATUS_RESERVERING_MANDJE, KEUZE_STATUS_
                                   KEUZE_STATUS_GEANNULEERD, VERZENDKOSTEN_BRIEFPOST, VERZENDKOSTEN_PAKKETPOST)
 from Webwinkel.models import WebwinkelKeuze
 from decimal import Decimal
-from typing import Tuple
 
 
 class WebwinkelBestelPlugin(BestelPluginBase):
@@ -181,7 +180,7 @@ class VerzendkostenBestelPlugin(BestelPluginBase):
 
     # TODO: ook een verklaring voor de transportkosten terug geven (tekst regel): gram + afstand
     # TODO: ook btw teruggeven, want sommige(!) pakketkosten zijn inclusief btw
-    def bereken_verzendkosten(self, obj: BestellingMandje | Bestelling) -> Tuple[Decimal, str, Decimal]:
+    def bereken_verzendkosten(self, obj: BestellingMandje | Bestelling) -> tuple[Decimal, str, Decimal]:
         """
             Bereken de verzendkosten van toepassing op het mandje of de bestelling
             0 = geen producten zijn die verstuurd hoeven te worden

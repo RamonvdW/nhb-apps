@@ -64,7 +64,6 @@ class MonitorGoogleSheetsWedstrijdformulieren:
 
     def _kijk_in_google_sheet(self, status: SheetStatus):
         self.stdout.write('[INFO] analyseer wedstrijdformulier %s' % repr(status.bestand.fname))
-        self._sheets.selecteer_file(status.bestand.file_id)
 
         if status.bestand.is_teams:
             lezer = LeesTeamsWedstrijdFormulier(self.stdout, self._sheets)

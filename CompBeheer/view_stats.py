@@ -16,7 +16,6 @@ from Competitie.models import (Competitie, Regiocompetitie, RegiocompetitieSport
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
 from Sporter.models import Sporter
-from typing import Tuple
 from decimal import Decimal
 
 TEMPLATE_COMPETITIE_STATISTIEK = 'compbeheer/statistiek.dtl'
@@ -52,7 +51,7 @@ class CompetitieStatistiekView(UserPassesTestMixin, TemplateView):
         age_group_counts[group] += 1
 
     @staticmethod
-    def _make_age_groups(age_group_counts: dict, titel) -> Tuple[str, int, list]:
+    def _make_age_groups(age_group_counts: dict, titel) -> tuple[str, int, list]:
         total = sum(age_group_counts.values())
         divider = max(1, total)   # prevent div by zero
 
