@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -49,7 +49,7 @@ class TestDesignTemplatetags(TestCase):
         self.assertTrue('<svg ' in out)
         self.assertTrue('btn-sv-rood' in out)
 
-        out = sv_knop_ext(kleur='blauw', icon='email', tekst='hello', url='//test.not', extra_stijl='stijl')
+        out = sv_knop_ext(kleur='blauw', icon='email', tekst='hello', url='//test.not', extra_style='stijl')
         self.assertTrue('stijl' in out)
         self.assertTrue('hello' in out)
         self.assertTrue('<svg ' in out)

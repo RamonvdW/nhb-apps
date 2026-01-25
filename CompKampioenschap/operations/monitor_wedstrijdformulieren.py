@@ -68,7 +68,7 @@ class MonitorGoogleSheetsWedstrijdformulieren:
         if status.bestand.is_teams:
             lezer = LeesTeamsWedstrijdFormulier(self.stdout, self._sheets)
         else:
-            lezer = LeesIndivWedstrijdFormulier(self.stdout, status.bestand, self._sheets)
+            lezer = LeesIndivWedstrijdFormulier(self.stdout, status.bestand, self._sheets, lees_oppervlakkig=True)
 
         aantal_deelnemers = lezer.tel_deelnemers()
         if aantal_deelnemers != status.aantal_deelnemers:

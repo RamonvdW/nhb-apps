@@ -10,10 +10,11 @@ from GoogleDrive.operations import StorageGoogleSheet
 
 class LeesIndivWedstrijdFormulier:
 
-    def __init__(self, stdout, bestand: Bestand, sheet: StorageGoogleSheet):
+    def __init__(self, stdout, bestand: Bestand, sheet: StorageGoogleSheet, lees_oppervlakkig: bool):
         self.stdout = stdout
         self.sheet = sheet      # kan google sheets bijwerken
         self.afstand = bestand.afstand
+        self.lees_oppervlakkig = lees_oppervlakkig
 
         self.ranges = {
             'deelnemers': 'D11:I34',
@@ -86,10 +87,11 @@ class LeesIndivWedstrijdFormulier:
             self.finales_blad = 16       # de rest van het finales 16 blad halen
 
             # lees de rest van de uitslag
-            self._check_input('deelnemers_finales16_1')
-            self._check_input('deelnemers_finales16_2')
-            self._check_input('deelnemers_finales16_4')
-            self._check_input('deelnemers_finales16_8')
+            if not self.lees_oppervlakkig:
+                self._check_input('deelnemers_finales16_1')
+                self._check_input('deelnemers_finales16_2')
+                self._check_input('deelnemers_finales16_4')
+                self._check_input('deelnemers_finales16_8')
             return
 
         if self._check_input_on_sheet('Finales 8', 'finales8_uitslag'):
@@ -98,9 +100,10 @@ class LeesIndivWedstrijdFormulier:
             self.finales_blad = 8        # de rest van het finales 8 blad halen
 
             # lees de rest van de uitslag
-            self._check_input('deelnemers_finales8_1')
-            self._check_input('deelnemers_finales8_2')
-            self._check_input('deelnemers_finales8_4')
+            if not self.lees_oppervlakkig:
+                self._check_input('deelnemers_finales8_1')
+                self._check_input('deelnemers_finales8_2')
+                self._check_input('deelnemers_finales8_4')
             return
 
         if self._check_input_on_sheet('Finales 4', 'finales4_uitslag'):
@@ -109,8 +112,9 @@ class LeesIndivWedstrijdFormulier:
             self.finales_blad = 4        # de rest van het finales 4 blad halen
 
             # lees de rest van de uitslag
-            self._check_input('deelnemers_finales4_1')
-            self._check_input('deelnemers_finales4_2')
+            if not self.lees_oppervlakkig:
+                self._check_input('deelnemers_finales4_1')
+                self._check_input('deelnemers_finales4_2')
             return
 
         # zoek naar de medaille finales
@@ -264,7 +268,8 @@ class LeesIndivWedstrijdFormulier:
             for i in reversed(range(len(block))):
                 deelnemer = block[i]
                 if len(deelnemer) < 8 or deelnemer[0] != '[' or deelnemer[7] != ']':
-                    del block[i]
+                    if deelnemer.upper() != 'BYE':
+                        del block[i]
             # for
         # for
         return data

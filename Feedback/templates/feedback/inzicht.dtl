@@ -1,6 +1,6 @@
 {% extends 'design/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2019-2025 Ramon van der Winkel.
+                Copyright (c) 2019-2026 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -59,7 +59,7 @@
                             <td class="right-align">
                                 <!-- button om pagina te openen -->
                                 {% if obj.volledige_url %}
-                                    {% sv-knop-ext url=obj.volledige_url tekst='' extra_stijl='margin-right:10px' %}
+                                    {% sv-knop-ext url=obj.volledige_url tekst='' extra_style='margin-right:10px' %}
                                 {% endif %}
 
                                 <!-- knop naar de admin site -->

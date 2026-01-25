@@ -135,7 +135,7 @@ class ImporteerSheetUitslagIndiv:
 
         stdout = OutputWrapper(io.StringIO())
         sheets = StorageGoogleSheet(stdout)
-        lezer = LeesIndivWedstrijdFormulier(stdout, bestand, sheets)
+        lezer = LeesIndivWedstrijdFormulier(stdout, bestand, sheets, lees_oppervlakkig=False)
 
         foutmeldingen = stdout.getvalue().strip()
         if len(foutmeldingen) > 0:
@@ -192,14 +192,28 @@ class ImporteerSheetUitslagIndiv:
         # begin bij de medailles
         uitslag = self._data_finales[0]
         finalisten = self._data_finales[1]
+        if len(uitslag) != len(finalisten):
+            regels = [
+                'Fout: data van de medaille finales is niet compleet',
+                'Uitslag: %s' % repr(uitslag),
+                'Finalisten: %s' % repr(finalisten)
+            ]
+            self.blokjes_info.append(regels)
+            self.bevat_fout = True
+            return
+
         regels = ['Ranking uit de medaille finales:']
         for i in range(len(uitslag)):
             lid_nr = self._extract_lid_nr(finalisten[i])
-            rank = self._uitslag2rank(uitslag[i])
-            self._lid_nr2rank[lid_nr] = rank
-            lid_nrs_done.append(lid_nr)
-            regel = '%s: %s' % (rank, lid_nr)
-            regels.append(regel)
+            if lid_nr:
+                rank = self._uitslag2rank(uitslag[i])
+                self._lid_nr2rank[lid_nr] = rank
+                lid_nrs_done.append(lid_nr)
+                regel = '%s: %s' % (rank, lid_nr)
+                regels.append(regel)
+            else:
+                regel = 'Finalist %s wordt overgeslagen' % repr(finalisten[i])
+                regels.append(regel)
         # for
         self.blokjes_info.append(regels)
 
@@ -210,11 +224,15 @@ class ImporteerSheetUitslagIndiv:
             aantal = 0
             for deelnemer in data:
                 lid_nr = self._extract_lid_nr(deelnemer)
-                if lid_nr not in lid_nrs_done:
-                    self._lid_nr2rank[lid_nr] = rank
-                    lid_nrs_done.append(lid_nr)
-                    aantal += 1
-                    regel = '%s: %s' % (rank, lid_nr)
+                if lid_nr:
+                    if lid_nr not in lid_nrs_done:
+                        self._lid_nr2rank[lid_nr] = rank
+                        lid_nrs_done.append(lid_nr)
+                        aantal += 1
+                        regel = '%s: %s' % (rank, lid_nr)
+                        regels.append(regel)
+                else:
+                    regel = 'Finalist %s wordt overgeslagen' % repr(deelnemer)
                     regels.append(regel)
             # for
 
@@ -239,8 +257,9 @@ class ImporteerSheetUitslagIndiv:
         self.blokjes_info.append(regels)
 
     def _bepaal_uitslag_25(self):
-        # TODO
-        pass
+        regels = ['Fout: 25m1pijl is nog niet ondersteund']
+        self.blokjes_info.append(regels)
+        self.bevat_fout = True
 
     def bepaal_uitslag(self):
         self._bepaal_volgorde_voorronde()
@@ -249,6 +268,9 @@ class ImporteerSheetUitslagIndiv:
             self._bepaal_uitslag_18()
         else:
             self._bepaal_uitslag_25()
+
+    def uitslag_opslaan(self):
+        pass
 
 
 def importeer_sheet_uitslag_indiv(deelkamp: Kampioenschap, klasse: CompetitieIndivKlasse, status: SheetStatus) -> tuple[bool, list[str]]:
@@ -278,6 +300,10 @@ def importeer_sheet_uitslag_indiv(deelkamp: Kampioenschap, klasse: CompetitieInd
     if not imp.bevat_fout:
         # geen fouten, ga door met importeren
         imp.bepaal_uitslag()
+
+    if not imp.bevat_fout:
+        # geen fouten, dus publiceer de uitslag
+        imp.uitslag_opslaan()
 
     return imp.bevat_fout, imp.blokjes_info
 
