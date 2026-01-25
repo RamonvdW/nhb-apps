@@ -5,6 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import models
+from django.utils import timezone
 from GoogleDrive.models import Bestand
 import datetime
 
@@ -63,7 +64,7 @@ class SheetStatus(models.Model):
 
     def __str__(self):
         return "[%s] gewijzigd op %s" % (self.pk,
-                                         self.gewijzigd_op.strftime('%Y-%m-%d %H:%M:%S'))
+                                         timezone.localtime(self.gewijzigd_op).strftime('%Y-%m-%d %H:%M:%S'))
 
     class Meta:
         verbose_name = verbose_name_plural = "Sheet status"
