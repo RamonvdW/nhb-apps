@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -818,7 +818,6 @@ class TestImportCRMImport(E2EHelpers, TestCase):
         self.assertEqual(diploma.beschrijving, 'Test code 42')
         self.assertTrue(diploma.toon_op_pas)
         self.assertEqual(str(diploma.datum_begin), '2009-04-05')
-        self.assertEqual(str(diploma.datum_einde), '2012-04-24')
 
         # gedrag bij opnieuw importeren
         with override_settings(OPLEIDING_CODES=test_opleiding_codes):
@@ -829,12 +828,10 @@ class TestImportCRMImport(E2EHelpers, TestCase):
         # print("f2: %s" % f2.getvalue())
         # controleer dat er geen mutaties zijn
         self.assertFalse('datum_begin' in f2.getvalue())
-        self.assertFalse('datum_einde' in f2.getvalue())
 
         self.assertEqual(OpleidingDiploma.objects.count(), 1)
         diploma.beschrijving = "oud"
         diploma.datum_begin = '2999-01-01'
-        diploma.datum_einde = '2999-02-02'
         diploma.save()
 
         with override_settings(OPLEIDING_CODES=test_opleiding_codes):
@@ -844,7 +841,6 @@ class TestImportCRMImport(E2EHelpers, TestCase):
         # print("f2: %s" % f2.getvalue())
         # controleer dat er mutaties zijn
         self.assertTrue('datum_begin' in f2.getvalue())
-        self.assertTrue('datum_einde' in f2.getvalue())
 
         self.assertEqual(OpleidingDiploma.objects.count(), 1)
         diploma = OpleidingDiploma.objects.first()
@@ -853,7 +849,6 @@ class TestImportCRMImport(E2EHelpers, TestCase):
         self.assertEqual(diploma.beschrijving, 'Test code 42')
         self.assertTrue(diploma.toon_op_pas)
         self.assertEqual(str(diploma.datum_begin), '2009-04-05')
-        self.assertEqual(str(diploma.datum_einde), '2012-04-24')
 
     def test_demo_club(self):
         # in settings.CRM_IMPORT_BEHOUD_CLUB kunnen we een clubnummer zetten dat niet verwijderd wordt

@@ -162,6 +162,7 @@ class Command(BaseCommand):
 
         for diploma in OpleidingDiploma.objects.select_related('sporter').all():
             tup = (diploma.sporter.lid_nr, diploma.code)
+            diploma.gezien_tijdens_import = False
             self._cache_diploma[tup] = diploma
         # for
 
@@ -1297,11 +1298,13 @@ class Command(BaseCommand):
                         else:
                             date_start = edu['date_start']
                             date_stop = edu['date_stop']
-                            tup = (code, beschrijving, toon_op_pas, date_start, date_stop)
-                            lid_edus.append(tup)
 
-                            if code in (CODE_SR_VER, CODE_SR_BOND, CODE_SR_INTERNATIONAAL):
-                                if date_stop == '9999-12-31':
+                            if date_stop.startswith('9999-'):
+                                # niet verlopen
+                                tup = (code, beschrijving, toon_op_pas, date_start)
+                                lid_edus.append(tup)
+
+                                if code in (CODE_SR_VER, CODE_SR_BOND, CODE_SR_INTERNATIONAAL):
                                     # scheidsrechter code en nog steeds valide
                                     lid_scheids = CODE2SCHEIDS[code]
                     # for
@@ -1672,7 +1675,7 @@ class Command(BaseCommand):
 
             if obj.is_actief_lid:
                 dupe_codes = list()
-                for code, beschrijving, toon_op_pas, date_start, date_stop in lid_edus:
+                for code, beschrijving, toon_op_pas, date_start in lid_edus:
                     # meld dubbele codes omdat we er niet tegen kunnen en het gejojo met de datums veroorzaakt
                     if code in dupe_codes:
                         self.stdout.write('[WARNING] Lid %s heeft een dubbele opleiding: code %s' % (lid_nr, code))
@@ -1690,9 +1693,10 @@ class Command(BaseCommand):
                                         code=code,
                                         beschrijving=beschrijving,
                                         toon_op_pas=toon_op_pas,
-                                        datum_begin=date_start,
-                                        datum_einde=date_stop)
+                                        datum_begin=date_start)
                     else:
+                        diploma.gezien_tijdens_import = True
+
                         if diploma.beschrijving != beschrijving:
                             diploma.beschrijving = beschrijving
 
@@ -1701,15 +1705,9 @@ class Command(BaseCommand):
                                                 obj.lid_nr, code, diploma.datum_begin, date_start))
                             diploma.datum_begin = date_start
 
-                        if str(diploma.datum_einde) != date_stop:
-                            self.stdout.write('[INFO] Lid %s: opleiding %s datum_einde: %s --> %s' % (
-                                                obj.lid_nr, code, diploma.datum_einde, date_stop))
-                            diploma.datum_einde = date_stop
-
                     if not self.dryrun:
                         diploma.save()
                 # for
-
         # for member
 
         # self.stdout.write('[DEBUG] Volgende %s bondsnummers moeten verwijderd worden: %s' % (len(lid_nrs),
@@ -1903,6 +1901,17 @@ class Command(BaseCommand):
         # FUTURE: zichtbaar=False zetten voor locatie zonder vereniging
         # FUTURE: zichtbaar=True zetten voor (revived) locatie met vereniging
 
+    def _verwijder_verlopen_diplomas(self):
+        # verwijder verlopen diplomas
+        pks = list()
+        for diploma in self._cache_diploma.values():
+            if not diploma.gezien_tijdens_import:
+                pks.append(diploma.pk)
+                self.stdout.write('[DEBUG] Opleiding diploma met pk=%s wordt verwijderd' % diploma.pk)
+        # for
+        if len(pks) > 0:
+            OpleidingDiploma.objects.filter(pk__in=pks).delete()
+
     def _import_bestand(self, fname):
         try:
             with open(fname, encoding='raw_unicode_escape') as f_handle:
@@ -1936,6 +1945,7 @@ class Command(BaseCommand):
         self._import_clubs_secretaris(data['clubs'])
         self._import_clubs_member_admin(data['clubs'])
         self._import_locaties(data['clubs'])
+        self._verwijder_verlopen_diplomas()
 
         self.stdout.write('Import van CRM data is klaar')
         # self.stdout.write("Read %s lines; skipped %s dupes; skipped %s errors; added %s records" % (
