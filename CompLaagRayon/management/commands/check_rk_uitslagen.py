@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023-2024 Ramon van der Winkel.
+#  Copyright (c) 2023-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -58,7 +58,6 @@ class Command(BaseCommand):
 
                 # controleer de volgorde van de ranking
                 nr = 0
-                exp_rank = 1
                 for kampioen in (KampioenschapSporterBoog
                                  .objects
                                  .filter(kampioenschap=deelkamp,

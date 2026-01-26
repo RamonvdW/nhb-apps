@@ -23,7 +23,6 @@ class TestCompLaagRayonCliOverig(E2EHelpers, TestCase):
 
     cli_check_rk_inschrijvingen = 'check_rk_inschrijvingen'
     cli_check_rk_uitslagen = 'check_rk_uitslagen'
-    cli_check_rk_downloads = 'check_rk_downloads'
     cli_email_rk_indiv_deelnemers = 'email_rk_indiv_deelnemers'
 
     testdata = None
@@ -151,40 +150,6 @@ class TestCompLaagRayonCliOverig(E2EHelpers, TestCase):
         _ = (f1, f2)
         # print('f1:', f1.getvalue())
         # print('f2:', f2.getvalue())
-
-    def test_check_rk_downloads(self):
-        deelkamp = self.testdata.deelkamp18_rk[1]
-        ver_nr = self.testdata.ver_nrs[0]
-        match = CompetitieMatch(
-                        competitie=deelkamp.competitie,
-                        beschrijving='Test',
-                        vereniging=self.testdata.vereniging[ver_nr],        # noodzakelijk
-                        datum_wanneer='2000-01-01',
-                        tijd_begin_wedstrijd='10:00')
-        match.save()
-        match.indiv_klassen.add(self.indiv_klasse)
-        match.team_klassen.add(self.team_klasse)
-        deelkamp.rk_bk_matches.add(match)
-
-        f1, f2 = self.run_management_command(self.cli_check_rk_downloads,
-                                             '18', 'indiv')
-        _ = (f1, f2)
-
-        f1, f2 = self.run_management_command(self.cli_check_rk_downloads,
-                                             '18', 'teams')
-        _ = (f1, f2)
-        # print('f1:', f1.getvalue())
-        # print('f2:', f2.getvalue())
-
-        # make nog een competitie aan
-        self.testdata.maak_bondscompetities(2018)
-
-        f1, f2 = self.run_management_command(self.cli_check_rk_downloads,
-                                             '25', 'indiv')
-        _ = (f1, f2)
-        f1, f2 = self.run_management_command(self.cli_check_rk_downloads,
-                                             '25', 'teams')
-        _ = (f1, f2)
 
     def test_email_rk_indiv_deelnemers(self):
         # 18m
