@@ -8,8 +8,12 @@ asgiref==3.11.0
     # via django
 certifi==2026.1.4
     # via requests
+cffi==2.0.0
+    # via cryptography
 charset-normalizer==3.4.4
     # via requests
+cryptography==46.0.4
+    # via google-auth
 django==5.2.10
     # via
     #   -c constraints.in
@@ -23,7 +27,7 @@ google-api-core==2.29.0
     #   google-maps-routing
 google-api-python-client==2.188.0
     # via -r requirements.in
-google-auth==2.47.0
+google-auth==2.48.0
     # via
     #   -r requirements.in
     #   google-api-core
@@ -91,13 +95,15 @@ pyasn1==0.6.2
     #   rsa
 pyasn1-modules==0.4.2
     # via google-auth
+pycparser==3.0
+    # via cffi
 pyotp==2.9.0
     # via -r requirements.in
 pyparsing==3.2.5
     # via
     #   -c constraints.in
     #   httplib2
-pypdf==6.6.0
+pypdf==6.6.2
     # via -r requirements.in
 qrcode==8.2
     # via -r requirements.in

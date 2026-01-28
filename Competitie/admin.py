@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -511,7 +511,8 @@ class KampioenschapTeamAdmin(CreateOnlyAdmin):
                    'deelname',
                    'vereniging__regio__rayon',
                    TeamKlassenFilter,
-                   IncompleetTeamFilter)
+                   IncompleetTeamFilter,
+                   'vereniging')
 
     list_select_related = ('kampioenschap',
                            'kampioenschap__rayon',

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2025 Ramon van der Winkel.
+#  Copyright (c) 2022-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -38,9 +38,8 @@ class OpleidingDiploma(models.Model):
     # 1990-01-01 = niet bekend, maar voor deze datum
     datum_begin = models.DateField(default='1990-01-01')
 
-    # wanneer is de opleiding afgerond
-    # 9999-12-31 = niet bekend
-    datum_einde = models.DateField(default='9999-12-31')        # FUTURE: wordt niet gebruikt en kan weg?
+    # note: in de import staan ook genoten opleidingen met einddatum.
+    # Deze zijn verlopen en worden niet geïmporteerd.
 
     def __str__(self):
         return "%s: %s (%s)" % (self.sporter.lid_nr, self.code, self.beschrijving)

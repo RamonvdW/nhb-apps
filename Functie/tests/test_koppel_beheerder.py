@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -191,7 +191,7 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('functie/koppel-beheerders.dtl', 'design/site_layout.dtl'))
 
         # controleer aanwezigheid van verwijder-knoppen
-        self.assertContains(resp, 'Verwijder</a>', count=2)
+        self.assertContains(resp, 'Verwijder</span>', count=2)
 
         # zoek maar niets gevonden
         with self.assert_max_queries(20):
@@ -229,7 +229,7 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
         # controleer aanwezigheid van toevoeg-knoppen
         self.assertContains(resp, '>Koppel<', count=2)         # 2 leden van de vereniging
         # controleer afwezigheid van verwijder-knoppen
-        self.assertContains(resp, 'Verwijder</a>', count=1)      # kan zichzelf verwijderen
+        self.assertContains(resp, 'Verwijder</span>', count=1)      # kan zichzelf verwijderen
 
     def test_koppel_ontkoppel_bb(self):
         self.e2e_login_and_pass_otp(self.testdata.account_admin)

@@ -1,6 +1,6 @@
 {% extends 'design/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2019-2025 Ramon van der Winkel.
+                Copyright (c) 2019-2026 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -979,7 +979,7 @@
         <div class="row center">
             <div class="col s12">
                 <h4>Opleidingen</h4>
-                <p>De volgende opleidingen zijn door jou gevolgd</p>
+                <p>De volgende opleidingen zijn door jou gevolgd en zijn nog steeds geldig</p>
             </div>
         </div>
 

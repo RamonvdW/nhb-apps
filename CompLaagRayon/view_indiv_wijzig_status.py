@@ -136,11 +136,6 @@ class WijzigStatusRkDeelnemerView(UserPassesTestMixin, TemplateView):
 
         self._check_toegang(deelnemer)      # kan 403 of 404 geven
 
-        comp = deelnemer.kampioenschap.competitie
-        comp.bepaal_fase()
-        if comp.fase_indiv not in ('J', 'K'):
-            raise Http404('Mag niet wijzigen')
-
         sporter = deelnemer.sporterboog.sporter
         deelnemer.naam_str = "[%s] %s" % (sporter.lid_nr, sporter.volledige_naam())
 
@@ -173,11 +168,6 @@ class WijzigStatusRkDeelnemerView(UserPassesTestMixin, TemplateView):
                          .get(pk=deelnemer_pk))
         except (ValueError, KampioenschapSporterBoog.DoesNotExist):
             raise Http404('Deelnemer niet gevonden')
-
-        comp = deelnemer.kampioenschap.competitie
-        comp.bepaal_fase()
-        if comp.fase_indiv not in ('J', 'K'):
-            raise Http404('Mag niet wijzigen')
 
         bevestig = str(request.POST.get('bevestig', ''))[:2]
         afmelden = str(request.POST.get('afmelden', ''))[:2]
