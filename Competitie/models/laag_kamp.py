@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -199,16 +199,19 @@ class KampioenschapSporterBoog(models.Model):
     def __str__(self):
         """ geef een tekstuele afkorting van dit object, voor in de admin interface """
         if self.kampioenschap.deel == DEEL_BK:
-            deel_str = "BK"
+            kamp_str = "BK"
         else:
-            deel_str = "RK rayon %s" % self.kampioenschap.rayon.rayon_nr
+            kamp_str = "RK rayon %s" % self.kampioenschap.rayon.rayon_nr
 
-        deel_str += ' (deelname=%s, rank=%s, volgorde=%s)' % (self.deelname, self.rank, self.volgorde)
+        deel_str = '%s, %s, %s, deelname=%s, rank=%s, volgorde=%s' % (self.sporterboog.boogtype.afkorting,
+                                                                      self.gemiddelde,
+                                                                      kamp_str,
+                                                                      self.deelname,
+                                                                      self.rank, self.volgorde)
 
-        return "[%s] %s (%s) %s" % (
+        return "[%s] %s, %s" % (
                     self.sporterboog.sporter.lid_nr,
                     self.sporterboog.sporter.volledige_naam(),
-                    self.sporterboog.boogtype.beschrijving,
                     deel_str)
 
     class Meta:
@@ -318,10 +321,11 @@ class KampioenschapTeam(models.Model):
 
     def __str__(self):
         """ geef een tekstuele afkorting van dit object, voor in de admin interface """
-        return "%s: %s (deelname=%s, rank=%s, volgorde=%s)" % (self.vereniging,
-                                                               self.team_naam,
-                                                               self.deelname,
-                                                               self.rank,
-                                                               self.volgorde)
+        return "%s: %s (teamtype=%s, deelname=%s, rank=%s, volgorde=%s)" % (self.vereniging,
+                                                                            self.team_naam,
+                                                                            self.team_type.afkorting,
+                                                                            self.deelname,
+                                                                            self.rank,
+                                                                            self.volgorde)
 
 # end of file
