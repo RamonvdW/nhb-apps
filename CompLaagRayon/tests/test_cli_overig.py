@@ -68,6 +68,7 @@ class TestCompLaagRayonCliOverig(E2EHelpers, TestCase):
                     kampioenschap=data.deelkamp18_rk[cls.rayon_nr])
         team.save()
         team.gekoppelde_leden.set(data.comp18_rk_deelnemers[:3])
+        cls.rk_team = team
 
         team = KampioenschapTeam(
                     kampioenschap=data.deelkamp18_rk[cls.rayon_nr],
@@ -133,6 +134,7 @@ class TestCompLaagRayonCliOverig(E2EHelpers, TestCase):
         self.assertTrue('Geen deelnemers gevonden' in f2.getvalue())
 
     def test_recalc(self):
+        self.assertTrue(str(self.rk_team) != '')
         f1, f2 = self.run_management_command('recalc_rkteam_sterkte')
         _ = (f1, f2)
         # print('f1:', f1.getvalue())

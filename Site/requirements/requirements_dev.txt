@@ -21,14 +21,22 @@ certifi==2026.1.4
     #   -r requirements.txt
     #   requests
     #   selenium
+cffi==2.0.0
+    # via
+    #   -r requirements.txt
+    #   cryptography
 charset-normalizer==3.4.4
     # via
     #   -r requirements.txt
     #   requests
-coverage==7.13.1
+coverage==7.13.2
     # via
     #   -r requirements_dev.in
     #   django-coverage-plugin
+cryptography==46.0.4
+    # via
+    #   -r requirements.txt
+    #   google-auth
 django==5.2.10
     # via
     #   -r requirements.txt
@@ -55,7 +63,7 @@ google-api-core==2.29.0
     #   google-maps-routing
 google-api-python-client==2.188.0
     # via -r requirements.txt
-google-auth==2.47.0
+google-auth==2.48.0
     # via
     #   -r requirements.txt
     #   google-api-core
@@ -160,13 +168,17 @@ pyasn1-modules==0.4.2
     # via
     #   -r requirements.txt
     #   google-auth
+pycparser==3.0
+    # via
+    #   -r requirements.txt
+    #   cffi
 pyotp==2.9.0
     # via -r requirements.txt
 pyparsing==3.2.5
     # via
     #   -r requirements.txt
     #   httplib2
-pypdf==6.6.0
+pypdf==6.6.2
     # via -r requirements.txt
 pysocks==1.7.1
     # via urllib3
@@ -233,7 +245,7 @@ urllib3==2.6.3
     #   mollie-api-python
     #   requests
     #   selenium
-wcwidth==0.3.3
+wcwidth==0.5.0
     # via prettytable
 websocket-client==1.9.0
     # via selenium
