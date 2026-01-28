@@ -321,9 +321,10 @@ class KampioenschapTeam(models.Model):
 
     def __str__(self):
         """ geef een tekstuele afkorting van dit object, voor in de admin interface """
+        afk = self.team_type.afkorting if self.team_type else '?'
         return "%s: %s (teamtype=%s, deelname=%s, rank=%s, volgorde=%s)" % (self.vereniging,
                                                                             self.team_naam,
-                                                                            self.team_type.afkorting,
+                                                                            afk,
                                                                             self.deelname,
                                                                             self.rank,
                                                                             self.volgorde)
