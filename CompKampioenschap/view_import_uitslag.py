@@ -11,7 +11,7 @@ from django.shortcuts import render
 from django.views.generic import View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.definities import DEEL_RK, DEEL_BK
-from Competitie.models import Competitie, CompetitieIndivKlasse, Kampioenschap
+from Competitie.models import Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse, Kampioenschap
 from CompKampioenschap.models import SheetStatus
 from CompKampioenschap.operations import importeer_sheet_uitslag_indiv
 from CompUitslagen.operations import (maak_url_uitslag_rk_indiv, maak_url_uitslag_bk_indiv,
@@ -39,7 +39,7 @@ class ImporteerUitslagIndivView(UserPassesTestMixin, View):
     def post(request, *args, **kwargs):
         """ wordt aangeroepen als de beheerder op de knop drukt om een uitslag te importeren """
         try:
-            status_pk = int(str(kwargs['status_pk'])[:6])  # afkappen voor de veiligheid
+            status_pk = kwargs['status_pk']     # guaranteed int
             status = SheetStatus.objects.select_related('bestand').get(pk=status_pk,
                                                                        bestand__is_teams=False)
         except (ValueError, SheetStatus.DoesNotExist):
@@ -47,7 +47,7 @@ class ImporteerUitslagIndivView(UserPassesTestMixin, View):
 
         bestand = status.bestand
         comp = Competitie.objects.filter(begin_jaar=bestand.begin_jaar, afstand=bestand.afstand).first()
-        klasse = CompetitieIndivKlasse.objects.select_related('boogtype').get(pk=bestand.klasse_pk)
+        klasse = CompetitieIndivKlasse.objects.select_related('boogtype').filter(pk=bestand.klasse_pk).first()
 
         if bestand.is_bk:
             deelkamp = Kampioenschap.objects.filter(competitie=comp,
@@ -57,7 +57,7 @@ class ImporteerUitslagIndivView(UserPassesTestMixin, View):
                                                     deel=DEEL_RK,
                                                     rayon__rayon_nr=bestand.rayon_nr).first()
 
-        if not deelkamp:
+        if not deelkamp or not klasse or not comp or klasse.competitie != comp:
             raise Http404('Kampioenschap niet gevonden')
 
         # TODO: check competitie fase
@@ -103,7 +103,7 @@ class ImporteerUitslagTeamsView(UserPassesTestMixin, View):
     def post(request, *args, **kwargs):
         """ wordt aangeroepen als de beheerder op de knop drukt om een uitslag te importeren """
         try:
-            status_pk = int(kwargs['status_pk'][:6])  # afkappen voor de veiligheid
+            status_pk = kwargs['status_pk']     # guaranteed int
             status = SheetStatus.objects.select_related('bestand').get(pk=status_pk,
                                                                        bestand__is_teams=True)
         except (ValueError, SheetStatus.DoesNotExist):
@@ -111,7 +111,7 @@ class ImporteerUitslagTeamsView(UserPassesTestMixin, View):
 
         bestand = status.bestand
         comp = Competitie.objects.filter(begin_jaar=bestand.begin_jaar, afstand=bestand.afstand).first()
-        klasse = CompetitieIndivKlasse.objects.select_related('boogtype').get(pk=bestand.klasse_pk)
+        klasse = CompetitieTeamKlasse.objects.select_related('team_type').filter(pk=bestand.klasse_pk).first()
 
         if bestand.is_bk:
             deelkamp = Kampioenschap.objects.filter(competitie=comp,
@@ -121,7 +121,7 @@ class ImporteerUitslagTeamsView(UserPassesTestMixin, View):
                                                     deel=DEEL_RK,
                                                     rayon__rayon_nr=bestand.rayon_nr).first()
 
-        if not deelkamp:
+        if not deelkamp or not klasse or not comp or klasse.competitie != comp:
             raise Http404('Kampioenschap niet gevonden')
 
         context = {
@@ -139,7 +139,7 @@ class ImporteerUitslagTeamsView(UserPassesTestMixin, View):
         else:
             context['url_uitslag'] = maak_url_uitslag_rk_teams(seizoen_url, bestand.rayon_nr, team_type_url, klasse_str)
 
-        raise Http404('Niet geïmplementeerd')
+        raise Http404('Not implemented')
         context['bevat_fout'], context['blokjes_info'] = importeer_sheet_uitslag_teams(deelkamp, klasse, bestand)
 
         return render(request, TEMPLATE_COMPKAMPIOENSCHAP_WF_RESULTAAT_IMPORT, context)

@@ -38,7 +38,7 @@
 
                     <tr>
                         <td colspan="6">
-                            <h6>{{ match.vereniging.ver_nr_en_naam }}</h6>
+                            <h6>{% if match.vereniging %}{{ match.vereniging.ver_nr_en_naam }}{% else %}???{% endif %}</h6>
                         </td>
                     </tr>
                     <tr>
