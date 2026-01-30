@@ -18,7 +18,7 @@ from unittest.mock import patch
 
 class TestCompKampioenschapImportUitslag(E2EHelpers, TestCase):
 
-    """ tests voor de CompKampioenschap module, view Import Uitslag """
+    """ tests voor de CompKampioenschap module, operations Import Uitslag (uit Google Sheet) """
 
     url_import_indiv = '/bondscompetities/kampioenschappen/importeer-uitslag/indiv/%s/'   # status_pk
     url_import_teams = '/bondscompetities/kampioenschappen/importeer-uitslag/teams/%s/'   # status_pk

@@ -17,7 +17,7 @@ from Vereniging.models import Vereniging
 
 class TestCompKampioenschapWfStatus(E2EHelpers, TestCase):
 
-    """ tests voor de CompKampioenschap module, operations Storage Wedstrijdformulieren """
+    """ tests voor de CompKampioenschap module, view Wedstrijdformulieren Status """
 
     url_wf_status = '/bondscompetities/kampioenschappen/wedstrijdformulieren/status/'
 

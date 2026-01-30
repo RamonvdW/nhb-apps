@@ -143,26 +143,25 @@ class MonitorGoogleSheetsWedstrijdformulieren:
 
         # zoek naar nieuwe revisies van de google drive bestanden
         bestand = self._get_bestand_todo()
-        if bestand:
-            # self.stdout.write('[INFO] bepaal laatste wijziging voor Bestand %s' % repr(bestand.fname))
-            status = self._get_sheetstatus(bestand)
+        # self.stdout.write('[INFO] bepaal laatste wijziging voor Bestand %s' % repr(bestand.fname))
 
-            # wanneer is het bestand voor het laatst gewijzigd?
-            op, door = self._drive.get_laatste_wijziging(bestand.file_id)
-            if op:
-                if op != status.gewijzigd_op or door != status.gewijzigd_door:
-                    status.gewijzigd_op, status.gewijzigd_door = op, door
-                    status.save(update_fields=['gewijzigd_op', 'gewijzigd_door'])
+        status = self._get_sheetstatus(bestand)
 
-                    self.stdout.write('[INFO] bestand %s is gewijzigd op %s door %s' % (repr(bestand.fname),
-                                                                                        timezone.localtime(status.gewijzigd_op).strftime('%Y-%m-%d %H:%M:%S'),
-                                                                                        repr(door)))
+        # wanneer is het bestand voor het laatst gewijzigd?
+        op, door = self._drive.get_laatste_wijziging(bestand.file_id)
+        if op:
+            if op != status.gewijzigd_op or door != status.gewijzigd_door:
+                status.gewijzigd_op, status.gewijzigd_door = op, door
+                status.save(update_fields=['gewijzigd_op', 'gewijzigd_door'])
 
+                self.stdout.write('[INFO] bestand %s is gewijzigd op %s door %s' % (repr(bestand.fname),
+                                                                                    timezone.localtime(status.gewijzigd_op).strftime('%Y-%m-%d %H:%M:%S'),
+                                                                                    repr(door)))
 
-            if status.gewijzigd_op > status.bekeken_op:
-                if status.keep_monitoring():
-                    if status not in self._sheetstatus_todo:
-                        self._sheetstatus_todo.append(status)
+        if status.gewijzigd_op > status.bekeken_op:
+            if status.keep_monitoring():
+                if status not in self._sheetstatus_todo:
+                    self._sheetstatus_todo.append(status)
 
 
 # end of file
