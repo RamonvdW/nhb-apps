@@ -140,7 +140,7 @@ proto-plus==1.27.0
     #   google-api-core
     #   google-geo-type
     #   google-maps-routing
-protobuf==6.33.4
+protobuf==6.33.5
     # via
     #   -r requirements.txt
     #   google-api-core
@@ -233,7 +233,7 @@ urllib3==2.6.3
     #   mollie-api-python
     #   requests
     #   selenium
-wcwidth==0.5.0
+wcwidth==0.5.2
     # via prettytable
 websocket-client==1.9.0
     # via selenium
