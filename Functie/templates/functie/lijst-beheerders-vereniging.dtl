@@ -1,6 +1,6 @@
 {% extends 'design/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2025 Ramon van der Winkel.
+                Copyright (c) 2020-2026 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -66,7 +66,7 @@
                                 {% if obj.email_url %}
                                     <i class="sv-rood-text">Geen</i>
                                 {% else %}
-                                    <i class="grey-text">Geen</i>
+                                    <i class="grey-text">{% if obj.rol == 'LA' %}n.v.t.{% else %}Geen{% endif %}</i>
                                 {% endif %}
                             {% endif %}
 
