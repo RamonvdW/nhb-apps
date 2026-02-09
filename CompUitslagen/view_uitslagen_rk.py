@@ -177,7 +177,7 @@ class UitslagenRayonIndivView(TemplateView):
                                           'sporterboog__sporter__bij_vereniging',
                                           'bij_vereniging')
                           .order_by('indiv_klasse__volgorde',
-                                    'result_rank',
+                                    'result_rank',                   # NO_SHOW is groot getal, dus onderaan de lijst
                                     'volgorde'))                     # inschrijf ranking
 
             for limiet in (KampioenschapIndivKlasseLimiet
