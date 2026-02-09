@@ -728,7 +728,7 @@ class KampioenschapSporterBoogAdmin(CreateOnlyAdmin):
     def formfield_for_foreignkey(self, db_field, request, **kwargs):    # pragma: no cover
         """ bepaal de relevante keuzemogelijkheden voor specifieke velden
         """
-        if db_field.name == 'indiv_klasse' and self.obj:
+        if db_field.name in ('indiv_klasse', 'indiv_klasse_volgende_ronde') and self.obj:
             # alleen klassen laten kiezen van deze competitie
             kwargs['queryset'] = (CompetitieIndivKlasse
                                   .objects
@@ -987,7 +987,7 @@ class RegiocompetitieTeamPouleAdmin(CreateOnlyAdmin):
                                       .objects
                                       .filter(regiocompetitie=self.deelcomp))
 
-        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+        return super().formfield_for_manytomany(db_field, request, **kwargs)
 
 
 class KlasseLimietBoogTypeFilter(admin.SimpleListFilter):
