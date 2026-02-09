@@ -6,7 +6,7 @@
 
 from django.utils import timezone
 from django.core.management.base import OutputWrapper
-from Competitie.definities import KAMP_RANK_NO_SHOW
+from Competitie.definities import KAMP_RANK_NO_SHOW, DEELNAME_JA, DEELNAME2STR
 from Competitie.models import Kampioenschap, CompetitieIndivKlasse, KampioenschapSporterBoog
 from CompKampioenschap.models import SheetStatus
 from CompKampioenschap.operations.wedstrijdformulieren_indiv_lees import LeesIndivWedstrijdFormulier
@@ -42,6 +42,8 @@ class ImporteerSheetUitslagIndiv:
 
             vult in: self._lid_nr2deelnemer
         """
+        stamp = timezone.localtime(timezone.now()).strftime('%Y-%m-%d om %H:%M:%S')
+
         deelnemers = dict()     # [lid_nr] = [KampioenschapSporterBoog, ...]
         for deelnemer in (KampioenschapSporterBoog
                           .objects
@@ -59,6 +61,10 @@ class ImporteerSheetUitslagIndiv:
 
         regels_deelnemers = [
             'Gevonden deelnemers:'
+        ]
+
+        regels_deelname = [
+            'Aanpassing status deelnemers:'
         ]
 
         for row in self._data_deelnemers:
@@ -93,9 +99,26 @@ class ImporteerSheetUitslagIndiv:
                                 deelnemer.sporterboog.boogtype.beschrijving,
                                 deelnemer.gemiddelde, ver)
                 regels_deelnemers.append(regel)
+
+                if deelnemer.deelname != DEELNAME_JA:
+                    regel = 'Deelname van %s aangepast van %s naar naar %s' % (
+                                    deelnemer.sporterboog.sporter.lid_nr_en_volledige_naam(),
+                                    DEELNAME2STR[deelnemer.deelname],
+                                    DEELNAME2STR[DEELNAME_JA])
+                    regels_deelname.append(regel)
+
+                    deelnemer.logboek += '[%s] Deelname aangepast van %s naar naar %s' % (
+                                                stamp,
+                                                DEELNAME2STR[deelnemer.deelname],
+                                                DEELNAME2STR[DEELNAME_JA])
+                    deelnemer.deelname = DEELNAME_JA
+                    deelnemer.save(update_fields=['deelname', 'logboek'])
         # for
 
         self.blokjes_info.append(regels_deelnemers)
+
+        if len(regels_deelname) > 1:
+            self.blokjes_info.append(regels_deelname)
 
     def _bepaal_volgorde_voorronde(self):
         """ bepaal de ranking voor elke deelnemer als we naar het voorronde blad kijken
@@ -337,10 +360,11 @@ class ImporteerSheetUitslagIndiv:
         # for
 
         # voeg de deelnemers toe die de finales niet gehaald hebben
+        # TODO: sorteer op rank
         for lid_nr, deelnemer in self._lid_nr2deelnemer.items():
             if lid_nr not in lid_nrs_done:
                 if lid_nr not in self._lid_nr2rank_volgorde:
-                    self._lid_nr2rank_volgorde[lid_nr] = (99, 99)
+                    self._lid_nr2rank_volgorde[lid_nr] = (99, 99)           # triggert result_rank = NO_SHOW
                     self._lid_nr2voorronde[lid_nr] = (0, '', 0, 0)
 
                 rank, volgorde = self._lid_nr2rank_volgorde[lid_nr]
