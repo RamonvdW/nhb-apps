@@ -193,6 +193,10 @@ OPLEIDINGEN_VERKOPER_VER_NRS = (1368,)
 GOOGLEMAPS_API_URL = None  
 GOOGLEMAPS_API_KEY = 'AIzaDummy'
 
+# hoe vaak de reistijd verversen?
+# 183 = 6 maanden
+REISTIJD_VERVERSEN_NA_DAGEN = 183
+
 # voor sommige adressen werkt de geocode API niet...
 # hier geven we het handmatige antwoord.
 GEOCODE_FALLBACK = {
