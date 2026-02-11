@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -158,7 +158,7 @@ then
     echo "[INFO] Running JS browser tests"
     ./browser_tests.sh --auto
     RES=$?
-    echo "[DEBUG] browser_test.sh exit status is $RES"
+    # echo "[DEBUG] browser_test.sh exit status is $RES"
     [ $RES -eq 0 ] || exit 1
 fi
 
