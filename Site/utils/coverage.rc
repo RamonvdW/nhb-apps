@@ -2,6 +2,13 @@
 plugins=
     django_coverage_plugin
     Site.js_cov
+include=./*
+
+# avoid this:
+#  CoverageWarning: Already imported a file that will be measured: Site/js_cov/instrument_js.py (already-imported)
+#  CoverageWarning: Already imported a file that will be measured: Site/js_cov/js_cov_plugin.py (already-imported)
+#  CoverageWarning: Already imported a file that will be measured: Site/js_cov/__init__.py (already-imported)
+disable_warnings=already-imported
 
 [django_coverage_plugin]
 template_extensions=dtl
