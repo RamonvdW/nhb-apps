@@ -154,7 +154,7 @@
                         <th>Team</th>
                         <th class="center hide-on-small-only">Team sterkte</th>
                         <th><!-- toekomstig label / reserve --></th>
-                        <th class="right-align" style="padding-right:10px">RK scores</th>
+                        <th class="center">Matchpunten</th>
                         <td rowspan="{{ team.aantal_regels }}" class="sv-table-zijrand"></td>
                     </tr>
                 {% endif %}
@@ -228,16 +228,11 @@
                     </td>
 
                     <!-- RK scores -->
-                    <td class="right-align" style="padding-right:10px">
+                    <td class="center">
                         {% if team.klasse_heeft_uitslag %}
-                            <b>{{ team.rk_score_str }}</b>
+                            <b>{{ team.rk_score_str }}</b><br>
                             {% for deelnemer in team.deelnemers %}
                                 <br>
-                                {% if deelnemer.is_uitvaller %}
-                                    <span class="grey-text">-</span>
-                                {% else %}
-                                    <span>{{ deelnemer.result_totaal }}</span>
-                                {% endif %}
                             {% endfor %}
                         {% else %}
                             <i class="grey-text">{% if team.niet_deelgenomen %}-{% else %}komt later{% endif %}</i>
