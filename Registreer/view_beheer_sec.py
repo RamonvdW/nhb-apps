@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023-2025 Ramon van der Winkel.
+#  Copyright (c) 2023-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -22,7 +22,7 @@ from Functie.rol import rol_get_huidige_functie
 from Mailer.operations import render_email_template, mailer_queue_email
 from Opleiding.models import OpleidingInschrijving, OpleidingAfgemeld
 from Overig.helpers import get_safe_from_ip
-from Registreer.definities import REGISTRATIE_FASE_AFGEWEZEN
+from Registreer.definities import REGISTRATIE_FASE_AFGEWEZEN, REGISTRATIE_FASE_BEKEND_LID
 from Registreer.models import GastRegistratie
 from Sporter.models import Sporter
 from Webwinkel.models import WebwinkelKeuze
@@ -208,7 +208,10 @@ class GastAccountsView(UserPassesTestMixin, TemplateView):
                     gast.geen_inlog = 2
             else:
                 # onvoltooid account
-                gast.geen_inlog = 1
+                if gast.fase == REGISTRATIE_FASE_BEKEND_LID:
+                    gast.geen_inlog = 3
+                else:
+                    gast.geen_inlog = 1
 
             gast.ophef = 0
 
