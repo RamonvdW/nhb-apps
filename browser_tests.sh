@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#  Copyright (c) 2025 Ramon van der Winkel.
+#  Copyright (c) 2025-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -207,7 +207,7 @@ then
         RES=${PIPESTATUS[0]}        # status of 'python3' instead of 'tee'
     fi
     [ $RES -eq 3 ] && ABORTED=1
-    echo "[DEBUG] Run result: $RES --> ABORTED=$ABORTED"
+    # echo "[DEBUG] Run result: $RES --> ABORTED=$ABORTED"
 
     echo >>"$LOG2"
     echo "[INFO] Finished browser tests run" >>"$LOG2"
