@@ -575,12 +575,17 @@ class UitslagenRayonTeamsView(TemplateView):
             team.ag_str = "%05.1f" % (team.aanvangsgemiddelde * aantal_pijlen)
             team.ag_str = team.ag_str.replace('.', ',')
             team.toon_team_leden = False
+            team.niet_deelgenomen = False
             aantal_regels += 1
 
             if team.result_rank > 0:
                 if team.result_rank == KAMP_RANK_BLANCO:
                     team.geen_rank = True
                     team.rk_score_str = '(blanco)'
+                elif team.result_rank in (KAMP_RANK_NO_SHOW, KAMP_RANK_RESERVE):
+                    team.niet_deelgenomen = True
+                    team.geen_rank = True
+                    team.rk_score_str = ''
                 else:
                     team.rank = team.result_rank
                     team.rk_score_str = str(team.result_teamscore)
@@ -590,32 +595,31 @@ class UitslagenRayonTeamsView(TemplateView):
                                          .gekoppelde_leden.all()
                                          .values_list('sporterboog__sporter__lid_nr', flat=True))
                 deelnemers = list()
-                lid_nrs = list()
-                for deelnemer in team.feitelijke_leden.select_related('sporterboog__sporter'):
-                    deelnemer.result_totaal = deelnemer.result_rk_teamscore_1 + deelnemer.result_rk_teamscore_2
-                    tup = (deelnemer.result_totaal, deelnemer.pk, deelnemer)
-                    deelnemers.append(tup)      # toevoegen voordat result_totaal een string wordt
-
-                    if deelnemer.result_totaal < 10:
-                        deelnemer.result_totaal = '-'
-                    deelnemer.naam_str = deelnemer.sporterboog.sporter.lid_nr_en_volledige_naam()
-                    lid_nr = deelnemer.sporterboog.sporter.lid_nr
-                    if lid_nr not in originele_lid_nrs:
-                        deelnemer.is_invaller = True
-
-                    lid_nrs.append(deelnemer.sporterboog.sporter.lid_nr)
-                # for
-                for deelnemer in team.gekoppelde_leden.select_related('sporterboog__sporter'):
-                    if deelnemer.sporterboog.sporter.lid_nr not in lid_nrs:
+                if not team.niet_deelgenomen:
+                    lid_nrs = list()
+                    for deelnemer in team.feitelijke_leden.select_related('sporterboog__sporter'):
                         tup = (deelnemer.gemiddelde, deelnemer.pk, deelnemer)
-                        deelnemers.append(tup)
+                        deelnemers.append(tup)      # toevoegen voordat result_totaal een string wordt
 
                         deelnemer.naam_str = deelnemer.sporterboog.sporter.lid_nr_en_volledige_naam()
-                        deelnemer.is_uitvaller = True
-                        deelnemer.result_totaal = '-'
-                # for
+                        lid_nr = deelnemer.sporterboog.sporter.lid_nr
+                        if lid_nr not in originele_lid_nrs:
+                            deelnemer.is_invaller = True
 
-                deelnemers.sort(reverse=True)       # hoogste eerst
+                        lid_nrs.append(deelnemer.sporterboog.sporter.lid_nr)
+                    # for
+                    for deelnemer in team.gekoppelde_leden.select_related('sporterboog__sporter'):
+                        if deelnemer.sporterboog.sporter.lid_nr not in lid_nrs:
+                            tup = (deelnemer.gemiddelde, deelnemer.pk, deelnemer)
+                            deelnemers.append(tup)
+
+                            deelnemer.naam_str = deelnemer.sporterboog.sporter.lid_nr_en_volledige_naam()
+                            deelnemer.is_uitvaller = True
+                            deelnemer.result_totaal = '-'
+                    # for
+
+                    deelnemers.sort(reverse=True)       # hoogste eerst
+
                 team.deelnemers = [deelnemer for _, _, deelnemer in deelnemers]
 
                 klasse_teams_done.append(team)
