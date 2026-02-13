@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023-2025 Ramon van der Winkel.
+#  Copyright (c) 2023-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -10,7 +10,7 @@ from django.utils import timezone
 from django.db.models import ProtectedError
 from Logboek.models import schrijf_in_logboek
 from Mailer.operations import mailer_queue_email, render_email_template
-from Registreer.definities import GAST_LID_NUMMER_FIXED_PK, REGISTRATIE_FASE_BEKEND_LID, REGISTRATIE_FASE_AFGEWEZEN
+from Registreer.definities import GAST_LID_NUMMER_FIXED_PK, REGISTRATIE_FASE_COMPLEET, REGISTRATIE_FASE_AFGEWEZEN
 from Registreer.models import GastLidNummer, GastRegistratie, GastRegistratieRateTracker
 import datetime
 
@@ -55,8 +55,8 @@ def registreer_opschonen_incompleet(stdout):
 
     for gast in (GastRegistratie
                  .objects
-                 .filter(fase__lt=REGISTRATIE_FASE_BEKEND_LID,        # skip BEKEND_LID, COMPLEET en AFGEWEZEN
-                         aangemaakt__lt=max_age)
+                 .filter(aangemaakt__lt=max_age)
+                 .exclude(fase__in=(REGISTRATIE_FASE_COMPLEET, REGISTRATIE_FASE_AFGEWEZEN))
                  .select_related('sporter',
                                  'account')):
 
