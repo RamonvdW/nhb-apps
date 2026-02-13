@@ -463,6 +463,42 @@ class KampioenschapTypeFilter(admin.SimpleListFilter):
         return queryset
 
 
+class VerenigingFilter(admin.SimpleListFilter):
+
+    title = "Vereniging"
+
+    parameter_name = 'ver_in_rayon'
+
+    default_value = None
+
+    def __init__(self, request, params, model, model_admin):
+        # print('init: q=%s' % list(request.GET.items()))
+        self.limit_rayon = request.GET.get('vereniging__regio__rayon__rayon_nr__exact', None)
+        super().__init__(request, params, model, model_admin)
+
+    def lookups(self, request, model_admin):                    # pragma: no cover
+        """ Return list of tuples for the sidebar """
+        lst = list()
+
+        qset = KampioenschapTeam.objects.all()
+        if self.limit_rayon:
+            qset = qset.filter(vereniging__regio__rayon_nr=self.limit_rayon)
+
+        for team in qset.distinct('vereniging').order_by('vereniging__ver_nr'):
+            ver = team.vereniging
+            tup = (str(ver.ver_nr), ver)
+            lst.append(tup)
+        # for
+
+        return lst
+
+    def queryset(self, request, queryset):      # pragma: no cover
+        selection = self.value()
+        if selection:
+            queryset = queryset.filter(vereniging__ver_nr=selection)
+        return queryset
+
+
 class KampioenschapTeamAdmin(CreateOnlyAdmin):
 
     fieldsets = (
@@ -512,7 +548,7 @@ class KampioenschapTeamAdmin(CreateOnlyAdmin):
                    'vereniging__regio__rayon',
                    TeamKlassenFilter,
                    IncompleetTeamFilter,
-                   'vereniging')
+                   VerenigingFilter)
 
     list_select_related = ('kampioenschap',
                            'kampioenschap__rayon',

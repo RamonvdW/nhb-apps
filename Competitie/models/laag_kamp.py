@@ -183,7 +183,8 @@ class KampioenschapSporterBoog(models.Model):
     result_volgorde = models.PositiveSmallIntegerField(default=99)   # gesorteerde uitslag, inclusief alle 5e plekken
 
     # individuele RK deelnemer wordt gekoppeld aan de RK/BK teams
-    # scores worden hier bijgehouden
+
+    # TODO: teamscores worden niet meer ingevuld (nieuwe format), dus velden kunnen weg
 
     # resultaat van de RK teams deelname van deze sporter
     result_rk_teamscore_1 = models.PositiveSmallIntegerField(default=0)         # max = 32767
