@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023-2025 Ramon van der Winkel.
+#  Copyright (c) 2023-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -194,9 +194,7 @@ class LijstBkSelectieView(UserPassesTestMixin, TemplateView):
 
 class LijstBkSelectieAlsBestandView(LijstBkSelectieView):
 
-    """ Deze klasse wordt gebruikt om de BK selectie lijst
-        te downloaden als csv bestand
-    """
+    """ BK selectie lijst downloaden als csv bestand """
 
     def get(self, request, *args, **kwargs):
 
@@ -248,7 +246,7 @@ class LijstBkSelectieAlsBestandView(LijstBkSelectieView):
 
         response.write(BOM_UTF8)
         writer = csv.writer(response, delimiter=";")      # ; is good for dutch regional settings
-        writer.writerow(['Rank', 'Bondsnummer', 'Naam', 'Vereniging', 'Label', 'Klasse', 'RK score', 'Notities'])
+        writer.writerow(['Rank', 'Bondsnummer', 'Naam', 'Vereniging', 'E-mail', 'Label', 'Klasse', 'RK score', 'Notities'])
 
         if deelkamp.competitie.is_indoor():
             aantal_pijlen = 2 * 30
@@ -297,6 +295,7 @@ class LijstBkSelectieAlsBestandView(LijstBkSelectieView):
                                  sporter.lid_nr,
                                  sporter.volledige_naam(),
                                  ver_str,                  # [nnnn] Naam
+                                 sporter.email,
                                  label,
                                  deelnemer.indiv_klasse.beschrijving,
                                  rk_score,
