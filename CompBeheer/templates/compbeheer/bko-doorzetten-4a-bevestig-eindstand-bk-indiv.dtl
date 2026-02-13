@@ -21,16 +21,33 @@
     <div class="row-sv-blauw">
         <div class="col s12">
             <div class="sv-kader center">
-                <p>Als BKO wil je de eindstand van de Bondskampioenschappen <b>individuele</b> bevestigen.</p>
+                <p>Als BKO wil je de eindstand van de <b>individuele</b> Bondskampioenschappen bevestigen.</p>
                 <p>Hiermee zet je de individuele competitie door naar de volgende fase.</p>
 
-                {% if url_doorzetten %}
-                    <br>
-                    <form action="{{ url_doorzetten }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
-                        {% csrf_token %}
-                        <input class="btn-sv-rood" name="doorzetten" id="submit_knop" type="submit" value="Doorzetten naar de volgende fase">
-                    </form>
-                    <br>
+                {% if verkeerde_fase %}
+
+                    <h4 class="sv-rood-text">Wacht</h4>
+                    <p>De competitie kan op dit moment nog niet doorgezet worden. Wacht tot de tijdlijn fase P bereikt heeft.</p>
+
+                {% elif url_doorzetten %}
+
+                    <div style="margin:30px">
+                        <form action="{{ url_doorzetten }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
+                            {% csrf_token %}
+                            <input class="btn-sv-rood" name="doorzetten" id="submit_knop" type="submit" value="Doorzetten naar de volgende fase">
+                        </form>
+                    </div>
+
+                {% elif problemen %}
+
+                    <h4 class="sv-rood-text">Wacht</h4>
+
+                    <p>Onderstaande problemen moeten eerst opgelost worden:</p>
+
+                    {% for regel in problemen %}
+                        <p>{{ regel }}</p>
+                    {% endfor %}
+
                 {% endif %}
             </div>
         </div>

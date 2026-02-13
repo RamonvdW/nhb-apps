@@ -24,7 +24,12 @@
                 <p>Als BKO wil je de <b>individuele</b> competitie doorzetten naar de volgende fase: van rayonkampioenschappen naar bondskampioenschappen.</p>
                 <p>Dit is een eenmalige maar belangrijke actie, waardoor de sporters die voldoen aan de vereisten doorgezet worden naar de BKs.</p>
 
-                {% if url_doorzetten %}
+                {% if verkeerde_fase %}
+
+                    <h4 class="sv-rood-text">Wacht</h4>
+                    <p>De rayonkampioenschappen kunnen op dit moment nog niet doorgezet worden. Wacht tot de tijdlijn fase N bereikt heeft.</p>
+
+                {% elif url_doorzetten %}
 
                     <div style="margin:30px">
                         <form action="{{ url_doorzetten }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
@@ -33,10 +38,15 @@
                         </form>
                     </div>
 
-                {% else %}
+                {% elif problemen %}
 
                     <h4 class="sv-rood-text">Wacht</h4>
-                    <p>De rayonkampioenschappen kunnen op dit moment nog niet doorgezet worden. Wacht tot de tijdlijn fase N bereikt heeft.</p>
+
+                    <p>Onderstaande problemen moeten eerst opgelost worden:</p>
+
+                    {% for regel in problemen %}
+                        <p>{{ regel }}</p>
+                    {% endfor %}
 
                 {% endif %}
             </div>
