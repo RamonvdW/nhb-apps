@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -414,7 +414,7 @@ class DoorzettenBasisView(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = None
     expected_fase = '?'
-    check_indiv_fase = True
+    fase_verkeerd_404 = True
     url_name = None             # naar POST handler, voor doorzetten
     is_teams = False
     is_afsluiten = False
@@ -425,6 +425,7 @@ class DoorzettenBasisView(UserPassesTestMixin, TemplateView):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.functie_nu = None
+        self.comp = None
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -446,31 +447,42 @@ class DoorzettenBasisView(UserPassesTestMixin, TemplateView):
             raise PermissionDenied('Niet de beheerder')
 
         comp.bepaal_fase()
+        self.comp = comp
 
-        if self.check_indiv_fase:
-            check_fase = comp.fase_indiv
-        else:
-            check_fase = comp.fase_teams
-
-        if check_fase != self.expected_fase:
-            raise Http404('Verkeerde competitie fase')
-
-        return comp
+    def _check_uitslag_compleet(self) -> list[str]:
+        problemen = list()
+        return problemen
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        comp = self._check_competitie_fase(kwargs['comp_pk'])
-        context['comp'] = comp
+        self._check_competitie_fase(kwargs['comp_pk'])      # kan 403 or 404 raisen
+        context['comp'] = self.comp
 
-        context['url_doorzetten'] = reverse('CompBeheer:%s' % self.url_name,
-                                            kwargs={'comp_pk': comp.pk})
+        if self.is_teams:
+            check_fase = self.comp.fase_teams
+        else:
+            check_fase = self.comp.fase_indiv
+
+        if check_fase != self.expected_fase:
+            if self.fase_verkeerd_404:
+                # mogelijk oneigenlijk gebruik van de site
+                raise Http404('Verkeerde competitie fase')
+
+            # geef alleen een foutmelding
+            context['verkeerde_fase'] = True
+        else:
+            context['problemen'] = self._check_uitslag_compleet()
+
+            if len(context['problemen']) == 0:
+                context['url_doorzetten'] = reverse('CompBeheer:%s' % self.url_name,
+                                                    kwargs={'comp_pk': self.comp.pk})
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
             (reverse('CompBeheer:overzicht',
-                     kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+                     kwargs={'comp_pk': self.comp.pk}), self.comp.beschrijving.replace(' competitie', '')),
             (None, 'Competitie doorzetten')
         )
 
@@ -498,12 +510,12 @@ class DoorzettenBasisView(UserPassesTestMixin, TemplateView):
     def post(self, request, *args, **kwargs):
         """ Deze functie wordt aangeroepen als de BKO de knop 'Doorzetten naar de volgende fase' gebruikt """
 
-        comp = self._check_competitie_fase(kwargs['comp_pk'])
+        self._check_competitie_fase(kwargs['comp_pk'])      # kan 403 or 404 raisen
 
         door_account = get_account(request)
-        self.doorzetten(door_account, comp)
+        self.doorzetten(door_account, self.comp)
 
-        url = reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk})
+        url = reverse('CompBeheer:overzicht', kwargs={'comp_pk': self.comp.pk})
         return HttpResponseRedirect(url)
 
 
@@ -513,7 +525,7 @@ class DoorzettenIndivRKNaarBKView(DoorzettenBasisView):
 
     template_name = TEMPLATE_COMPBEHEER_DOORZETTEN_RK_NAAR_BK_INDIV
     expected_fase = 'L'
-    check_indiv_fase = True
+    fase_verkeerd_404 = True
     url_name = 'bko-rk-indiv-doorzetten-naar-bk'
 
 
@@ -523,9 +535,24 @@ class DoorzettenTeamsRKNaarBKView(DoorzettenBasisView):
 
     template_name = TEMPLATE_COMPBEHEER_DOORZETTEN_RK_NAAR_BK_TEAMS
     expected_fase = 'L'
-    check_indiv_fase = False
+    fase_verkeerd_404 = False
     url_name = 'bko-rk-teams-doorzetten-naar-bk'
     is_teams = True
+
+    def _check_uitslag_compleet(self) -> list[str]:
+        problemen = list()
+
+        # kijk of er teams zijn zonder uitslag
+        qset = KampioenschapTeam.objects.filter(kampioenschap__competitie=self.comp, result_rank=0)
+        if qset.count() > 0:
+            # bepaal om welke klassen het gaat
+            for team in qset.distinct('team_klasse'):
+                probleem = 'Teams zonder uitslag in Rayon %s, %s' % (team.kampioenschap.rayon.rayon_nr,
+                                                                     team.team_klasse.beschrijving)
+                problemen.append(probleem)
+            # for
+
+        return problemen
 
 
 class KleineBKKlassenZijnSamengevoegdIndivView(DoorzettenBasisView):
@@ -534,7 +561,7 @@ class KleineBKKlassenZijnSamengevoegdIndivView(DoorzettenBasisView):
 
     template_name = TEMPLATE_COMPBEHEER_DOORZETTEN_BK_KLEINE_KLASSEN_INDIV
     expected_fase = 'N'
-    check_indiv_fase = True
+    fase_verkeerd_404 = True
     url_name = 'bko-bk-indiv-kleine-klassen'
 
     def doorzetten(self, account, comp):
@@ -548,7 +575,7 @@ class KleineBKKlassenZijnSamengevoegdTeamsView(DoorzettenBasisView):
 
     template_name = TEMPLATE_COMPBEHEER_DOORZETTEN_BK_KLEINE_KLASSEN_TEAMS
     expected_fase = 'N'
-    check_indiv_fase = False
+    fase_verkeerd_404 = False
     url_name = 'bko-bk-teams-kleine-klassen'
 
     def doorzetten(self, account, comp):
@@ -562,7 +589,7 @@ class BevestigEindstandBKIndivView(DoorzettenBasisView):
 
     template_name = TEMPLATE_COMPBEHEER_BEVESTIG_EINDSTAND_BK_INDIV
     expected_fase = 'P'
-    check_indiv_fase = True
+    fase_verkeerd_404 = True
     url_name = 'bko-bevestig-eindstand-bk-indiv'
     is_afsluiten = True
 
@@ -573,7 +600,7 @@ class BevestigEindstandBKTeamsView(DoorzettenBasisView):
 
     template_name = TEMPLATE_COMPBEHEER_BEVESTIG_EINDSTAND_BK_TEAMS
     expected_fase = 'P'
-    check_indiv_fase = False
+    fase_verkeerd_404 = False
     url_name = 'bko-bevestig-eindstand-bk-teams'
     is_teams = True
     is_afsluiten = True

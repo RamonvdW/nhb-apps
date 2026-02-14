@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -71,10 +71,6 @@ urlpatterns = [
 
 
     # BKO: download formulieren
-    path('formulieren/indiv/download/<match_pk>/<klasse_pk>/',
-         view_formulieren.FormulierBkIndivAlsBestandView.as_view(),
-         name='formulier-indiv-als-bestand'),
-
     path('formulieren/indiv/<deelkamp_pk>/',
          view_formulieren.DownloadBkIndivFormulierenView.as_view(),
          name='formulier-indiv-lijst'),
