@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023-2025 Ramon van der Winkel.
+#  Copyright (c) 2023-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.conf import settings
-from Competitie.definities import DEEL_RK, DEEL_BK, KAMP_RANK_BLANCO, KAMP_RANK_ALLEEN_TEAM, DEELNAME_NEE
+from Competitie.definities import (DEEL_RK, DEEL_BK, KAMP_RANK_BLANCO, KAMP_RANK_ALLEEN_TEAM, DEELNAME_NEE,
+                                   KAMP_RANK_NO_SHOW, KAMP_RANK_RESERVE)
 from Competitie.models import (Competitie, CompetitieIndivKlasse,
                                RegiocompetitieSporterBoog, RegiocompetitieRondeTeam,
                                KampioenschapSporterBoog, KampioenschapTeam)
@@ -52,7 +53,8 @@ def uitslag_regio_indiv_naar_histcomp(comp: Competitie):
                         comp_type=comp.afstand,
                         is_openbaar=False,
                         indiv_bogen=bogen,
-                        team_typen=teamtypen)
+                        team_typen=teamtypen,
+                        head_to_head_teams_format=True)     # vanaf 2025/2026
 
     if comp.is_indoor():
         hist_seizoen.aantal_beste_scores = settings.COMPETITIE_18M_MINIMUM_SCORES_VOOR_AG
@@ -428,11 +430,17 @@ def uitslag_rk_teams_naar_histcomp(comp: Competitie):
         indiv_klasse_lid_nr2hist[tup] = hist
     # for
 
+    # voorkom dubbele records bij re-publish
+    qset = HistKampTeam.objects.filter(seizoen=hist_seizoen, rk_of_bk=HISTCOMP_RK)
+    qset.delete()
+
     bulk = list()
     for team in (KampioenschapTeam
                  .objects
                  .filter(kampioenschap__competitie=comp,
                          kampioenschap__deel=DEEL_RK)
+                 .exclude(result_rank=KAMP_RANK_NO_SHOW)
+                 .exclude(result_rank=KAMP_RANK_RESERVE)
                  .select_related('team_klasse',
                                  'team_type',
                                  'vereniging',
@@ -464,61 +472,48 @@ def uitslag_rk_teams_naar_histcomp(comp: Competitie):
                         rank=team.result_rank,
                         titel_code=titel_code)
 
-            unsorted = list()
-            for team_lid in team.feitelijke_leden.select_related('indiv_klasse', 'sporterboog__sporter').all():
+            if team.result_rank == 100:
+                # blanco score
+                hist.team_score_is_blanco = True
+                hist.rank = 0
+            else:
+                unsorted = list()
+                for team_lid in team.feitelijke_leden.select_related('indiv_klasse', 'sporterboog__sporter').all():
 
-                s1 = team_lid.result_rk_teamscore_1
-                s2 = team_lid.result_rk_teamscore_2
+                    lid_nr = team_lid.sporterboog.sporter.lid_nr
+                    boogtype = team_lid.sporterboog.boogtype.afkorting
+                    tup = (team_lid.indiv_klasse.beschrijving, lid_nr, boogtype)
+                    try:
+                        hist_indiv = indiv_klasse_lid_nr2hist[tup]
+                    except KeyError:
+                        # sporter heeft niet individueel meegedaan
+                        # maak een lege sporter aan
+                        hist_indiv = HistKampIndivRK(
+                                        seizoen=hist_seizoen,
+                                        indiv_klasse='',
+                                        sporter_lid_nr=lid_nr,
+                                        sporter_naam=team_lid.sporterboog.sporter.volledige_naam(),
+                                        boogtype=boogtype,
+                                        vereniging_nr=ver.ver_nr,
+                                        vereniging_naam=ver.naam,
+                                        vereniging_plaats=ver.plaats,
+                                        rayon_nr=team.kampioenschap.rayon.rayon_nr,
+                                        rank_rk=0)
+                        hist_indiv.save()
 
-                lid_nr = team_lid.sporterboog.sporter.lid_nr
-                boogtype = team_lid.sporterboog.boogtype.afkorting
-                tup = (team_lid.indiv_klasse.beschrijving, lid_nr, boogtype)
-                try:
-                    hist_indiv = indiv_klasse_lid_nr2hist[tup]
-                except KeyError:
-                    # sporter heeft niet individueel meegedaan
-                    # maak een lege sporter aan
-                    hist_indiv = HistKampIndivRK(
-                                    seizoen=hist_seizoen,
-                                    indiv_klasse='',
-                                    sporter_lid_nr=lid_nr,
-                                    sporter_naam=team_lid.sporterboog.sporter.volledige_naam(),
-                                    boogtype=boogtype,
-                                    vereniging_nr=ver.ver_nr,
-                                    vereniging_naam=ver.naam,
-                                    vereniging_plaats=ver.plaats,
-                                    rayon_nr=team.kampioenschap.rayon.rayon_nr,
-                                    rank_rk=0)
-                    hist_indiv.save()
+                    tup = (lid_nr, hist_indiv)
+                    unsorted.append(tup)
+                # for
+                unsorted.sort()
 
-                hist_indiv.teams_rk_score_1 = s1
-                hist_indiv.teams_rk_score_2 = s2
-                hist_indiv.save(update_fields=['teams_rk_score_1', 'teams_rk_score_2'])
+                if len(unsorted) > 0:
+                    _, hist.lid_1 = unsorted[0]
 
-                tup = (s1, s2, max(s1, s2), min(s1, s2), lid_nr, hist_indiv)
-                unsorted.append(tup)
-            # for
-            unsorted.sort(reverse=True)     # hoogste eerst
+                if len(unsorted) > 1:
+                    _, hist.lid_2 = unsorted[1]
 
-            if len(unsorted) > 0:
-                s1, s2, _, _, _, hist_indiv = unsorted[0]
-                hist.score_lid_1 = s1 + s2
-                hist.lid_1 = hist_indiv
-
-            if len(unsorted) > 1:
-                s1, s2, _, _, _, hist_indiv = unsorted[1]
-                hist.score_lid_2 = s1 + s2
-                hist.lid_2 = hist_indiv
-
-            if len(unsorted) > 2:
-                s1, s2, _, _, _, hist_indiv = unsorted[2]
-                hist.score_lid_3 = s1 + s2
-                hist.lid_3 = hist_indiv
-
-            if len(unsorted) > 3:
-                s1, s2, _, _, _, hist_indiv = unsorted[3]
-                hist.score_lid_4 = s1 + s2
-                hist.lid_4 = hist_indiv
+                if len(unsorted) > 2:
+                    _, hist.lid_3 = unsorted[2]
 
             bulk.append(hist)
     # for

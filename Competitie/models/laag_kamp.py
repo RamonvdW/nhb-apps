@@ -184,16 +184,6 @@ class KampioenschapSporterBoog(models.Model):
 
     # individuele RK deelnemer wordt gekoppeld aan de RK/BK teams
 
-    # TODO: teamscores worden niet meer ingevuld (nieuwe format), dus velden kunnen weg
-
-    # resultaat van de RK teams deelname van deze sporter
-    result_rk_teamscore_1 = models.PositiveSmallIntegerField(default=0)         # max = 32767
-    result_rk_teamscore_2 = models.PositiveSmallIntegerField(default=0)
-
-    # resultaat van de BK teams deelname van deze sporter
-    result_bk_teamscore_1 = models.PositiveSmallIntegerField(default=0)         # max = 32767
-    result_bk_teamscore_2 = models.PositiveSmallIntegerField(default=0)
-
     # logboek voor bijhouden aanmelden/afmelden sporter
     logboek = models.TextField(blank=True)
 
@@ -261,10 +251,6 @@ class KampioenschapTeam(models.Model):
     # expliciete controle of dit team een reserve is of deelnemer mag worden
     is_reserve = models.BooleanField(default=False)
 
-    # kampioenen hebben een label
-    # TODO: kan weg (wordt niet gebruikt, de helft is rayonkampioen en de helft heeft blanco score)
-    rk_kampioen_label = models.CharField(max_length=50, default='', blank=True)
-
     # de berekende team sterkte
     # LET OP: dit is zonder de vermenigvuldiging met aantal pijlen, dus 30,000 voor Indoor i.p.v. 900,0
     aanvangsgemiddelde = models.DecimalField(max_digits=5, decimal_places=3, default=0.0)    # 10,000
@@ -315,11 +301,8 @@ class KampioenschapTeam(models.Model):
     result_rank = models.PositiveSmallIntegerField(default=0)               # 100=blanco, 32000=no show, 32001=reserve
     result_volgorde = models.PositiveSmallIntegerField(default=0)
 
+    # teamscore is het aantal matchpunten (max 14, bij 7 wedstrijdjes)
     result_teamscore = models.PositiveSmallIntegerField(default=0)          # max = 32767
-
-    # TODO: result_counts kan verwijderd worden: RK/BK teams 25m1p kijkt naar beste bijdrage sporter
-    #       nieuwe format heeft finale rondes
-    result_counts = models.CharField(max_length=20, default='', blank=True)     # 25m1pijl: 5x10 3x9
 
     def __str__(self):
         """ geef een tekstuele afkorting van dit object, voor in de admin interface """

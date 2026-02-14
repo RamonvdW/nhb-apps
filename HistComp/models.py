@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -42,6 +42,10 @@ class HistCompSeizoen(models.Model):
     heeft_uitslag_regio_teams = models.BooleanField(default=False)
     heeft_uitslag_rk_teams = models.BooleanField(default=False)
     heeft_uitslag_bk_teams = models.BooleanField(default=False)
+
+    # alle teams schieten tegen elkaar en verzamelen matchpunten (sinds: seizoen 2025/2026)
+    # bijdragen van teamschutters worden niet meer getoond
+    head_to_head_teams_format = models.BooleanField(default=False)
 
     def __str__(self):
         """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
@@ -322,6 +326,7 @@ class HistKampTeam(models.Model):
     team_nr = models.PositiveSmallIntegerField()
 
     # behaalde score, rank en bijbehorende titel
+    team_score_is_blanco = models.BooleanField(default=False)
     team_score = models.PositiveSmallIntegerField()
     team_score_counts = models.CharField(max_length=20, default='', blank=True)     # 25m1pijl: 5x10 3x9
 
