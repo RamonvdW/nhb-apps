@@ -211,7 +211,8 @@ class DownloadRkFormulierView(UserPassesTestMixin, TemplateView):
                 team.volg_nr = volg_nr
                 team.ver_nr = team.vereniging.ver_nr
                 team.ver_naam = team.vereniging.naam
-                team.sterkte_str = "%.1f" % (team.aanvangsgemiddelde * aantal_pijlen)
+                sterkte = float(team.aanvangsgemiddelde) * aantal_pijlen
+                team.sterkte_str = "%.1f" % sterkte
                 team.sterkte_str = team.sterkte_str.replace('.', ',')
 
                 team.gekoppelde_leden_lijst = list()

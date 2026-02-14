@@ -71,10 +71,6 @@ urlpatterns = [
 
 
     # BKO: download formulieren
-    path('formulieren/indiv/download/<match_pk>/<klasse_pk>/',
-         view_formulieren.FormulierBkIndivAlsBestandView.as_view(),
-         name='formulier-indiv-als-bestand'),
-
     path('formulieren/indiv/<deelkamp_pk>/',
          view_formulieren.DownloadBkIndivFormulierenView.as_view(),
          name='formulier-indiv-lijst'),

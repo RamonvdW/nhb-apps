@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023-2024 Ramon van der Winkel.
+#  Copyright (c) 2023-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -16,8 +16,6 @@ class TestCompLaagBondCliImportUitslagBkIndiv(E2EHelpers, TestCase):
 
     """ tests voor de CompLaagBond applicatie, import van de BK uitslag """
 
-    real_testfile_excel_25m1pijl = 'CompLaagBond/test-files/test_bk-25m1pijl-indiv.xlsx'
-    real_testfile_excel_indoor = 'CompLaagBond/test-files/test_bk-indoor-indiv.xlsx'
     real_testfile_ianseo_html_25m1pijl = 'CompLaagBond/test-files/ianseo_html_25m1pijl_indiv.txt'
     real_testfile_ianseo_pdf_25m1pijl = 'CompLaagBond/test-files/ianseo_pdf_25m1pijl_indiv.pdf'
 
@@ -80,55 +78,6 @@ class TestCompLaagBondCliImportUitslagBkIndiv(E2EHelpers, TestCase):
 
     def setUp(self):
         pass
-
-    def test_excel_25m(self):
-        # bestand NOK
-        f1, f2 = self.run_management_command('import_uitslag_bk_25m1pijl_indiv', 'bestand')
-        self.assertTrue('[ERROR] Kan het excel bestand niet openen' in f1.getvalue())
-
-        f1, f2 = self.run_management_command('import_uitslag_bk_25m1pijl_indiv',
-                                             self.real_testfile_excel_25m1pijl,
-                                             '--dryrun', '--verbose')
-        # print('\nf1: %s' % f1.getvalue())
-        # print('\nf2: %s' % f2.getvalue())
-        self.assertTrue('[ERROR] Probleem met scores op regel 26' in f1.getvalue())
-        self.assertTrue('[ERROR] Geen BK deelnemer op regel 24: 123456' in f1.getvalue())
-        self.assertTrue('[ERROR] Te hoge scores op regel 22: 251' in f1.getvalue())
-
-        # echte import
-        self.run_management_command('import_uitslag_bk_25m1pijl_indiv',
-                                    self.real_testfile_excel_25m1pijl)
-        # print('\nf1: %s' % f1.getvalue())
-        # print('\nf2: %s' % f2.getvalue())
-
-    def test_excel_18m(self):
-        # file NOK
-        f1, f2 = self.run_management_command('import_uitslag_bk_indoor_indiv', 'bestand')
-        self.assertTrue('[ERROR] Kan het excel bestand niet openen' in f1.getvalue())
-
-        f1, f2 = self.run_management_command('import_uitslag_bk_indoor_indiv',
-                                             self.real_testfile_excel_indoor,
-                                             '--dryrun', '--verbose')
-        _ = (f1, f2)
-        # print('f1:', f1.getvalue())
-        # print('f2:', f2.getvalue())
-        self.assertTrue('hoort in klasse: Longbow klasse 2' in f1.getvalue())
-        self.assertTrue('[ERROR] Geen BK deelnemer op regel 25: 123456' in f1.getvalue())
-        self.assertTrue("[ERROR] Probleem met scores op regel 27: 'n/a' en 'n/a'" in f1.getvalue())
-        self.assertTrue("[INFO] Klasse: Recurve klasse 6" in f2.getvalue())
-        self.assertTrue("[WARNING] Regel 26 wordt overgeslagen (geen scores)" in f2.getvalue())
-        self.assertTrue("Volgorde=1, Rank=1, Q-scores=204, 228, deelnemer=[301849]" in f2.getvalue())
-
-        f1, f2 = self.run_management_command('import_uitslag_bk_indoor_indiv', self.real_testfile_excel_indoor)
-        _ = (f1, f2)
-        # print('f1:', f1.getvalue())
-        # print('f2:', f2.getvalue())
-        kampioen = KampioenschapSporterBoog.objects.get(kampioenschap__competitie__afstand='18',
-                                                        sporterboog__sporter__lid_nr=301849)
-        self.assertEqual(kampioen.result_rank, 1)
-        self.assertEqual(kampioen.result_score_1, 204)
-        self.assertEqual(kampioen.result_score_2, 228)
-        self.assertEqual(kampioen.result_counts, '')        # alleen voor 25m1pijl
 
     def test_ianseo_html_25m(self):
         # bestand NOK
