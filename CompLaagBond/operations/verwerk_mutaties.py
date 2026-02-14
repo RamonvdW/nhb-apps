@@ -127,6 +127,8 @@ class VerwerkCompLaagBondMutaties:
             self.stdout.write('[INFO] Alle %s bestaande BK teams worden verwijderd' % aantal)
             qset.delete()
 
+        bulk = list()
+
         for klasse in (CompetitieTeamKlasse
                        .objects
                        .filter(competitie=comp,
@@ -138,20 +140,20 @@ class VerwerkCompLaagBondMutaties:
             # volgens het reglement doorzetten: de nummers 1 en 2 vanuit elk rayon, indien beschikbaar
 
             # haal alle teams uit de RK op
+            sterkte = list()
             for rk_team in (KampioenschapTeam
                             .objects
                             .filter(kampioenschap__deel=DEEL_RK,
                                     kampioenschap__competitie=comp,
                                     team_klasse_volgende_ronde=klasse,
-                                    result_rank__in=(1, 2))
+                                    result_rank__in=(1, 2, 100))         # assumption: nooit meer dan 2 per rayon
                             .select_related('vereniging',
                                             'team_type',
                                             'kampioenschap__rayon')
-                            .prefetch_related('gekoppelde_leden')):
+                            .prefetch_related('gekoppelde_leden')
+                            .order_by('result_rank')):
 
                 ag = rk_team.result_teamscore / aantal_pijlen
-
-                volgorde = rk_team.kampioenschap.rayon.rayon_nr * 10 + rk_team.result_rank
 
                 bk_team = KampioenschapTeam(
                                 kampioenschap=deelkamp_bk,
@@ -160,14 +162,8 @@ class VerwerkCompLaagBondMutaties:
                                 team_type=rk_team.team_type,
                                 team_naam=rk_team.team_naam,
                                 team_klasse=klasse,
-                                team_klasse_volgende_ronde=klasse,
                                 aanvangsgemiddelde=ag,
-                                rank=volgorde,
-                                volgorde=volgorde)
-
-                if rk_team.result_rank == 1:
-                    bk_team.rk_kampioen_label = 'Kampioen Rayon %s' % rk_team.kampioenschap.rayon.rayon_nr
-                    bk_team.deelname = DEELNAME_JA
+                                deelname=DEELNAME_JA)
 
                 bk_team.save()
                 self.stdout.write('[INFO] Maak BK team %s.%s (%s)' % (
@@ -176,6 +172,17 @@ class VerwerkCompLaagBondMutaties:
                 # koppel de RK deelnemers aan het BK team
                 pks = rk_team.gekoppelde_leden.values_list('pk', flat=True)
                 bk_team.gekoppelde_leden.set(pks)
+
+                tup = (rk_team.result_teamscore, len(sterkte), bk_team)
+                sterkte.append(tup)
+            # for
+
+            sterkte.sort(reverse=True)      # hoogste eerst
+            for rank in range(len(sterkte)):
+                tup = sterkte[rank]
+                team = tup[-1]
+                team.rank = team.volgorde = rank + 1
+                team.save(update_fields=['rank', 'volgorde'])
             # for
         # for
 

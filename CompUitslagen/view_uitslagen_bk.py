@@ -480,7 +480,7 @@ class UitslagenBKTeamsView(TemplateView):
 
             # teamsterkte vanuit de RK resultaten
             rk_score = round(team.aanvangsgemiddelde * aantal_pijlen)
-            if rk_score < 10:
+            if rk_score == 0:       # kan theoretisch fout gaan (kleine klasse, wel geschoten, 0 punten, toch door)
                 team.rk_score_str = '(blanco)'
             else:
                 team.rk_score_str = str(rk_score)

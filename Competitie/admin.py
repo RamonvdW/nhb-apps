@@ -510,7 +510,6 @@ class KampioenschapTeamAdmin(CreateOnlyAdmin):
             {'fields': ('team_naam',
                         'vereniging',
                         'volg_nr',
-                        'rk_kampioen_label',
                         'aanvangsgemiddelde')
              }),
         ('Deelname',
@@ -531,8 +530,7 @@ class KampioenschapTeamAdmin(CreateOnlyAdmin):
         ('Uitslag',
             {'fields': ('result_rank',
                         'result_volgorde',
-                        'result_teamscore',
-                        'result_counts')
+                        'result_teamscore')
              }),
     )
 
@@ -716,11 +714,7 @@ class KampioenschapSporterBoogAdmin(CreateOnlyAdmin):
                         'result_volgorde',
                         'result_score_1',
                         'result_score_2',
-                        'result_counts',
-                        'result_rk_teamscore_1',
-                        'result_rk_teamscore_2',
-                        'result_bk_teamscore_1',
-                        'result_bk_teamscore_2')
+                        'result_counts')
              }),
     )
 
