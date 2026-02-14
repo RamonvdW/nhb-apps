@@ -115,7 +115,7 @@
                 {% if team.break_klasse %}
                     {% if not forloop.first %}
                         <tr class="sv-table-onderrand">
-                            <td colspan="7" class="sv-table-onderrand"></td>
+                            <td colspan="8" class="sv-table-onderrand"></td>
                         </tr>
                     {% endif %}
 
@@ -141,9 +141,9 @@
                             <span class="hide-on-small-only">Vereniging</span>
                         </th>
                         <th>Team</th>
-                        <th class="center hide-on-small-only">{% if not team.klasse_heeft_uitslag %}RK score{% endif %}</th>
-                        <th class="right-align" style="padding-right:10px">BK scores</th>
-                        <th><!-- telling 10-en en 9-ens --></th>
+                        <th class="center hide-on-small-only">Rayon</th>
+                        <th class="center hide-on-small-only">{% if not team.klasse_heeft_uitslag %}RK matchpunten{% endif %}</th>
+                        <th class="center">BK matchpunten</th>
                         <th class="hide-on-small-only"></th>       <!-- label -->
                         <td rowspan="{{ team.aantal_regels }}" class="sv-table-zijrand"></td>
                     </tr>
@@ -189,6 +189,8 @@
                         {% endif %}
                     </td>
 
+                    <td class="center hide-on-small-only">Rayon {{ team.vereniging.regio.rayon_nr }}</td>
+
                     <!-- RK score (alleen op deelnemerslijst) -->
                     <td class="center hide-on-small-only">
                         {% if not team.klasse_heeft_uitslag %}
@@ -197,7 +199,7 @@
                     </td>
 
                     <!-- BK score (uitslag) -->
-                    <td class="right-align" style="padding-right:10px">
+                    <td class="center">
                         {% if team.klasse_heeft_uitslag %}
                             <b>{{ team.bk_score_str }}</b>
                             {% for deelnemer in team.deelnemers %}
@@ -226,29 +228,11 @@
                         {% endif %}
                     </td>
 
-                    <!-- telling 10-en en 9-ens -->
-                    <td>
-                        {% if team.klasse_heeft_uitslag %}
-                            <span>{{ team.result_counts }}</span><br>
-                            {% for deelnemer in team.deelnemers %}
-                                <br>
-                            {% endfor %}
-                        {% endif %}
-                    </td>
-
                     <!-- label -->
                     <td class="hide-on-small-only center">
                         {% if team.klasse_heeft_uitslag %}
                             {% if team.result_rank == 1 %}
                                 <span>{{ team.team_klasse.titel_bk }}</span>
-                            {% endif %}
-                        {% else %}
-                            {% if team.niet_deelgenomen %}
-                                <i>Afgemeld</i>
-                            {% elif team.is_reserve %}
-                                <i><!--Reserve--></i>
-                            {% else %}
-                                <span>{{ team.rk_kampioen_label }}</span>
                             {% endif %}
                         {% endif %}
                     </td>
@@ -258,7 +242,7 @@
             {% endfor %}
 
             <tr class="sv-table-onderrand">
-                <td colspan="7" class="sv-table-onderrand"></td>
+                <td colspan="8" class="sv-table-onderrand"></td>
             </tr>
         </table>
 

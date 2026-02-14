@@ -107,6 +107,7 @@ urlpatterns = [
          view_bko.ExtraDeelnemerView.as_view(),
          name='rayon-extra-deelnemer-toevoegen'),
 
+    # BKO
     path('<comp_pk>/blanco-resultaat/',
          view_bko.GeefBlancoResultaatView.as_view(),
          name='geef-blanco-resultaat'),

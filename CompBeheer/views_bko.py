@@ -13,6 +13,7 @@ from django.core.exceptions import PermissionDenied
 from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
+from Competitie.definities import DEEL_RK
 from Competitie.models import Competitie, CompetitieTeamKlasse, Regiocompetitie, KampioenschapTeam
 from CompBeheer.operations.maak_mutatie import (maak_mutatie_doorzetten_regio_naar_rk,
                                                 maak_mutatie_kamp_indiv_doorzetten_naar_bk,
@@ -542,15 +543,21 @@ class DoorzettenTeamsRKNaarBKView(DoorzettenBasisView):
     def _check_uitslag_compleet(self) -> list[str]:
         problemen = list()
 
-        # kijk of er teams zijn zonder uitslag
-        qset = KampioenschapTeam.objects.filter(kampioenschap__competitie=self.comp, result_rank=0)
-        if qset.count() > 0:
-            # bepaal om welke klassen het gaat
-            for team in qset.distinct('team_klasse'):
-                probleem = 'Teams zonder uitslag in Rayon %s, %s' % (team.kampioenschap.rayon.rayon_nr,
-                                                                     team.team_klasse.beschrijving)
-                problemen.append(probleem)
-            # for
+        # kijk of er klassen zijn zonder uitslag
+        for team in (KampioenschapTeam
+                     .objects
+                     .filter(kampioenschap__competitie=self.comp,
+                             kampioenschap__deel=DEEL_RK,
+                             result_rank=0)
+                     .order_by('kampioenschap__rayon__rayon_nr',
+                               'team_klasse__volgorde')
+                     .distinct('kampioenschap__rayon__rayon_nr',
+                               'team_klasse__volgorde')):
+
+            probleem = 'Teams zonder uitslag in Rayon %s, %s' % (team.kampioenschap.rayon.rayon_nr,
+                                                                 team.team_klasse.beschrijving)
+            problemen.append(probleem)
+        # for
 
         return problemen
 

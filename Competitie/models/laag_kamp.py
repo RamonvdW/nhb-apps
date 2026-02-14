@@ -262,6 +262,7 @@ class KampioenschapTeam(models.Model):
     is_reserve = models.BooleanField(default=False)
 
     # kampioenen hebben een label
+    # TODO: kan weg (wordt niet gebruikt, de helft is rayonkampioen en de helft heeft blanco score)
     rk_kampioen_label = models.CharField(max_length=50, default='', blank=True)
 
     # de berekende team sterkte
