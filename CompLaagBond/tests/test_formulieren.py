@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023-2025 Ramon van der Winkel.
+#  Copyright (c) 2023-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -24,7 +24,6 @@ class TestCompLaagBondFormulieren(E2EHelpers, TestCase):
 
     url_forms_indiv = '/bondscompetities/bk/formulieren/indiv/%s/'               # deelkamp_pk
     url_forms_teams = '/bondscompetities/bk/formulieren/teams/%s/'               # deelkamp_pk
-    url_forms_download_indiv = '/bondscompetities/bk/formulieren/indiv/download/%s/%s/'   # match_pk, klasse_pk
     url_forms_download_teams = '/bondscompetities/bk/formulieren/teams/download/%s/%s/'   # match_pk, klasse_pk
     url_sr_info = '/bondscompetities/bk/wedstrijd-informatie/%s/'                # match_pk
 
@@ -146,9 +145,6 @@ class TestCompLaagBondFormulieren(E2EHelpers, TestCase):
         resp = self.client.get(self.url_forms_teams % 999999)
         self.assert_is_redirect_login(resp)
 
-        resp = self.client.get(self.url_forms_download_indiv % (999999, 999999))
-        self.assert_is_redirect_login(resp)
-
         resp = self.client.get(self.url_forms_download_teams % (999999, 999999))
         self.assert_is_redirect_login(resp)
 
@@ -171,14 +167,8 @@ class TestCompLaagBondFormulieren(E2EHelpers, TestCase):
         resp = self.client.get(self.url_forms_teams % self.deelkamp25_bk.pk)
         self.assert404(resp, 'Niet de beheerder')
 
-        resp = self.client.get(self.url_forms_download_indiv % (999999, 999999))
-        self.assert404(resp, 'Wedstrijd niet gevonden')
-
         resp = self.client.get(self.url_forms_download_teams % (999999, 999999))
         self.assert404(resp, 'Wedstrijd niet gevonden')
-
-        resp = self.client.get(self.url_forms_download_indiv % (self.match.pk, 999999))
-        self.assert404(resp, 'Klasse niet gevonden')
 
         resp = self.client.get(self.url_forms_download_teams % (self.match.pk, 999999))
         self.assert404(resp, 'Klasse niet gevonden')
@@ -187,9 +177,6 @@ class TestCompLaagBondFormulieren(E2EHelpers, TestCase):
         # doe dit eenvoudig door het kampioenschap om te bouwen tot een RK
         self.deelkamp18_bk.deel = DEEL_RK
         self.deelkamp18_bk.save(update_fields=['deel'])
-
-        resp = self.client.get(self.url_forms_download_indiv % (self.match.pk, self.comp18_klassen_indiv_bk[0].pk))
-        self.assert404(resp, 'Geen kampioenschap')
 
         resp = self.client.get(self.url_forms_download_teams % (self.match.pk, self.comp18_klassen_teams_bk[0].pk))
         self.assert404(resp, 'Geen kampioenschap')
@@ -222,25 +209,7 @@ class TestCompLaagBondFormulieren(E2EHelpers, TestCase):
     def test_download(self):
         # BKO download een ingevuld BK programma
 
-        indiv_klasse = KampioenschapSporterBoog.objects.filter(kampioenschap=self.deelkamp18_bk)[0].indiv_klasse
         team_klasse = KampioenschapTeam.objects.filter(kampioenschap=self.deelkamp18_bk)[0].team_klasse
-
-        url = self.url_forms_download_indiv % (self.match.pk, indiv_klasse.pk)
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert200_is_bestand_xlsx(resp)
-
-        # niet bestaand BK programma
-        with override_settings(INSTALL_PATH='/tmp'):
-            resp = self.client.get(url)
-        self.assert404(resp, 'Kan BK programma niet vinden')
-
-        # kapot BK programma
-        self._make_bad_file(self.fpath_18_indiv)
-        with override_settings(INSTALL_PATH='/tmp'):
-            resp = self.client.get(url)
-        self.assert404(resp, 'Kan BK programma niet openen')
 
         url = self.url_forms_download_teams % (self.match.pk, team_klasse.pk)
         with self.assert_max_queries(20):

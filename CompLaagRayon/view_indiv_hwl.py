@@ -13,14 +13,14 @@ from Competitie.models import Kampioenschap, KampioenschapSporterBoog
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
 
-
 TEMPLATE_COMPRAYON_LIJST_RK = 'complaagrayon/hwl-rk-selectie.dtl'
 
 
 class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
 
-    """ Deze view laat de (kandidaat) deelnemers van en RK zien,
-        met mogelijkheid voor de HWL van de eigen vereniging om de deelname status aan te passen.
+    """ Deze view laat de (kandidaat) deelnemers van en RK zien aan een HWL,
+        met mogelijkheid voor de om de deelname status in te zien
+        (en eventueel aan te passen, maar dat zit in een andere view).
     """
 
     # class variables shared by all instances

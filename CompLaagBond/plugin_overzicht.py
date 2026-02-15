@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -62,7 +62,7 @@ def get_kaartjes_bond(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_indi
             kaartje = SimpleNamespace(
                         prio=5,
                         titel="BK selectie",
-                        sv_icon="comp doorzetten",
+                        sv_icon="comp bk selectie",
                         tekst="Selectie van sporters voor de Bondskampioenschappen.",
                         url=url)
             kaartjes_indiv.append(kaartje)
@@ -103,16 +103,16 @@ def get_kaartjes_bond(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_indi
         #                 tekst="Download de BK programma's om te versturen",
         #                 url=url)
         #     kaartjes_indiv.append(kaartje)
-        #
-        # if comp.fase_teams in ('O', 'P'):
-        #     url = reverse('CompLaagBond:formulier-teams-lijst', kwargs={'deelkamp_pk': deelkamp_bk.pk})
-        #     kaartje = SimpleNamespace(
-        #                 prio=2,
-        #                 titel="BK programma's",
-        #                 icoon="download_for_offline",
-        #                 tekst="Download de BK programma's om te versturen",
-        #                 url=url)
-        #     kaartjes_teams.append(kaartje)
+
+        if comp.fase_teams in ('O', 'P'):
+            url = reverse('CompLaagBond:formulier-teams-lijst', kwargs={'deelkamp_pk': deelkamp_bk.pk})
+            kaartje = SimpleNamespace(
+                        prio=2,
+                        titel="BK programma's",
+                        sv_icon="comp bk teams",
+                        tekst="Download de BK programma's om te versturen",
+                        url=url)
+            kaartjes_teams.append(kaartje)
 
         # Doorzetten BK individueel / bevestig uitslag
         if comp.fase_indiv == 'P':

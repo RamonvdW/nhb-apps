@@ -11,13 +11,13 @@ from django.utils import timezone
 from django.views.generic import TemplateView
 from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.definities import DEEL_BK, DEEL_RK, DEELNAME_NEE, DEELNAME2STR
-from Competitie.models import (CompetitieMatch, CompetitieIndivKlasse, CompetitieTeamKlasse,
+from Competitie.definities import DEEL_BK, DEEL_RK, DEELNAME_NEE
+from Competitie.models import (CompetitieMatch, CompetitieTeamKlasse,
                                Kampioenschap, KampioenschapSporterBoog, KampioenschapTeam,
-                               KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet)
+                               KampioenschapTeamKlasseLimiet)
+from CompKampioenschap.operations import get_url_wedstrijdformulier
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
-from Scheidsrechter.models import MatchScheidsrechters
 from Sporter.models import SporterVoorkeuren
 from tempfile import NamedTemporaryFile
 from types import SimpleNamespace
@@ -29,7 +29,6 @@ import os
 
 
 TEMPLATE_DOWNLOAD_BK_FORMULIEREN = 'complaagbond/bko-download-bk-formulieren.dtl'
-TEMPLATE_HWL_BK_MATCH_INFORMATIE = 'complaagbond/hwl-bk-match-info.dtl'
 
 CONTENT_TYPE_XLSX = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
 
@@ -74,6 +73,7 @@ class DownloadBkFormulierenView(TemplateView):
             raise Http404('Niet de beheerder')
 
         context['deelkamp'] = deelkamp
+        comp = deelkamp.competitie
 
         if self.geef_teams:
             context['bk_titel'] = 'BK teams'
@@ -85,20 +85,28 @@ class DownloadBkFormulierenView(TemplateView):
         for match in deelkamp.rk_bk_matches.prefetch_related('indiv_klassen', 'team_klassen'):
 
             if self.geef_teams:
-                klassen = match.team_klassen.all()
-                name = 'CompLaagBond:formulier-teams-als-bestand'
+                for teams_klasse in match.team_klassen.all():
+                    url = reverse('CompLaagBond:formulier-teams-als-bestand', kwargs={'match_pk': match.pk,
+                                                                                      'klasse_pk': teams_klasse.pk})
+                    regel = SimpleNamespace(
+                                match=match,
+                                klasse=teams_klasse,
+                                url=url)
+                    regels.append(regel)
+                # for
             else:
-                klassen = match.indiv_klassen.all()
-                name = 'CompLaagBond:formulier-indiv-als-bestand'
-
-            for klasse in klassen:
-                url = reverse(name, kwargs={'match_pk': match.pk, 'klasse_pk': klasse.pk})
-                regel = SimpleNamespace(
-                            match=match,
-                            klasse=klasse,
-                            url=url)
-                regels.append(regel)
-            # for
+                for indiv_klasse in match.indiv_klassen.all():
+                    url = get_url_wedstrijdformulier(comp.begin_jaar,
+                                                     int(comp.afstand),
+                                                     0,     # rayon_nr, not used for BK
+                                                     indiv_klasse.pk,
+                                                     is_bk=True, is_teams=False)
+                    regel = SimpleNamespace(
+                                match=match,
+                                klasse=indiv_klasse,
+                                url=url)
+                    regels.append(regel)
+                # for
         # for
 
         regels.sort(key=lambda x: x.klasse.volgorde)
@@ -279,7 +287,8 @@ class FormulierBkTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
             ws['F' + row] = team.team_naam
 
             # team sterkte
-            sterkte_str = "%.1f" % (team.aanvangsgemiddelde * aantal_pijlen)
+            sterkte = float(team.aanvangsgemiddelde) * aantal_pijlen
+            sterkte_str = "%.1f" % sterkte
             sterkte_str = sterkte_str.replace('.', ',')
             ws['G' + row] = sterkte_str
 
@@ -479,79 +488,6 @@ class FormulierBkTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
         tmp_file.close()
 
         return response
-
-
-class MatchInformatieView(UserPassesTestMixin, TemplateView):
-
-    """ Toon de HWL/WL informatie over de BK wedstrijd (geen deelnemerslijst) """
-
-    # class variables shared by all instances
-    template_name = TEMPLATE_HWL_BK_MATCH_INFORMATIE
-    raise_exception = True  # genereer PermissionDefined als test_func False terug geeft
-    permission_denied_message = 'Geen toegang'
-    geef_teams = False
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.functie_nu = None
-
-    def test_func(self):
-        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.functie_nu and rol_nu in (Rol.ROL_HWL, Rol.ROL_WL)
-
-    def get_context_data(self, **kwargs):
-        """ called by the template system to get the context data for the template """
-        context = super().get_context_data(**kwargs)
-
-        try:
-            match_pk = int(kwargs['match_pk'][:6])      # afkappen voor de veiligheid
-            match = (CompetitieMatch
-                     .objects
-                     .select_related('vereniging',
-                                     'locatie')
-                     .prefetch_related('indiv_klassen',
-                                       'team_klassen')
-                     .get(pk=match_pk))
-        except (ValueError, CompetitieMatch.DoesNotExist):
-            raise Http404('Wedstrijd niet gevonden')
-
-        if match.vereniging != self.functie_nu.vereniging:
-            raise Http404('Niet de beheerder')
-
-        context['wedstrijd'] = match
-        context['vereniging'] = match.vereniging        # als we hier komen is dit altijd bekend
-        context['locatie'] = match.locatie
-
-        comp = match.competitie
-        # TODO: begrens toegang ahv de fase
-        context['comp'] = comp
-
-        match.klassen_lijst = list()
-        for klasse in match.indiv_klassen.select_related('boogtype').all():
-            match.klassen_lijst.append(klasse.beschrijving)
-        # for
-        for klasse in match.team_klassen.all():
-            match.klassen_lijst.append(klasse.beschrijving)
-        # for
-
-        if match.aantal_scheids > 0:
-            match_sr = MatchScheidsrechters.objects.filter(match=match).first()
-            if match_sr:
-                aantal = 0
-                for sr in (match_sr.gekozen_hoofd_sr, match_sr.gekozen_sr1, match_sr.gekozen_sr2):
-                    if sr:
-                        aantal += 1
-                # for
-                if aantal > 0:
-                    context['aantal_sr_str'] = "%s scheidsrechter" % aantal
-                    if aantal > 1:
-                        context['aantal_sr_str'] += 's'
-
-                    context['url_sr_contact'] = reverse('Scheidsrechter:match-hwl-contact',
-                                                        kwargs={'match_pk': match.pk})
-
-        return context
 
 
 # end of file

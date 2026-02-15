@@ -1,12 +1,14 @@
 {% extends 'design/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2024-2025 Ramon van der Winkel.
+                Copyright (c) 2024-2026 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load design_icons %}
+{% load design_knop %}
 
-{% block title %}BK informatie{% endblock %}
+{% block title %}BK programma{% endblock %}
 
 {% block pagina %}
 
@@ -14,6 +16,7 @@
     <div class="row center">
         <div class="col s12">
             <h3 class="page-banner">BK informatie</h3>
+            <p>Deelnemerslijst(en) en wedstrijdformulier(en)</p>
         </div>
     </div>
 
@@ -28,7 +31,7 @@
                 </tr>
                 <tr>
                     <th>Wedstrijd</th>
-                    <td>Bondskampioenschappen</td>
+                    <td>{{ beschrijving }}</td>
                 </tr>
                 <tr>
                     <th>Wedstrijdklassen</th>
@@ -37,6 +40,10 @@
                 <tr>
                     <th>Bij vereniging</th>
                     <td>{{ vereniging }}</td>
+                </tr>
+                <tr>
+                    <th>Aantal banen</th>
+                    <td>{{ aantal_banen }}</td>
                 </tr>
                 <tr>
                     <th>Wanneer</th>
@@ -59,13 +66,162 @@
                     </tr>
                 {% endif %}
 
-                <tr>
-                    <th>BK programma</th>
-                    <td>Het BK programma wordt per e-mail toegestuurd vanuit het bondsbureau</td>
-                </tr>
             </table>
         </div>
     </div>
+
+    {% if heeft_indiv %}
+
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <h4>Individuele klassen</h4>
+                <p>Deze lijst is gebaseerd op de gegevens van: <b>{{ vastgesteld }}</b></p>
+            </div>
+        </div>
+
+        <!-- blauwe balk met informatie in een tabel -->
+        <div class="row-sv-blauw">
+            <div class="col s12">
+                <table class="sv-kader-tabel">
+
+                    {% for deelnemer in deelnemers_indiv %}
+                        {% if deelnemer.break_before %}
+                            {% if not forloop.first %}
+                                <tr class="sv-table-onderrand">
+                                    <td colspan="7" class="sv-table-onderrand" style="height:50px"></td>
+                                </tr>
+                            {% endif %}
+                            <tr class="sv-table-sectie-header">
+                                <td colspan="7" class="center">
+                                    <h5>{{ deelnemer.indiv_klasse.beschrijving }}</h5>
+                                    {% if deelnemer.url_open_indiv %}
+                                        <br>
+                                        {% sv-knop-ext url=deelnemer.url_open_indiv tekst='Wedstrijdformulier' %}
+                                    {% endif %}
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th class="center">Nr</th>
+                                <th>Vereniging</th>
+                                <th>Sporter</th>
+                                <th class="center">Gemiddelde</th>
+                                <th class="center">Status</th>
+                                <th></th>
+                                <th>Notitie</th>
+                            </tr>
+                        {% endif %}
+
+                        <tr>
+                            <td class="center">{{ deelnemer.rank }}</td>
+                            <td>[{{ deelnemer.ver_nr }}]<span class="hide-on-small-only">&nbsp;{{ deelnemer.ver_naam }}</span></td>
+                            <td>[{{ deelnemer.lid_nr }}] {{ deelnemer.volledige_naam }}</td>
+                            <td class="center">{{ deelnemer.gemiddelde_str }}</td>
+                            <td class="center">
+                                {% if deelnemer.deelname == 'J' %}
+                                    {% sv-icon 'comp kamp selectie status bevestigd' kleur='groen' %}
+                                {% elif deelnemer.deelname == 'N' %}
+                                    {% sv-icon 'comp kamp selectie status afgemeld' kleur='grijs' %}
+                                {% else %}
+                                    {% sv-icon 'comp kamp selectie status onbekend' kleur='blauw' %}
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if deelnemer.url_wijzig %}
+                                    {% sv-knop-nav url=deelnemer.url_wijzig icon='aanpassen' tekst='' %}
+                                {% endif %}
+                            </td>
+                            <td>{{ deelnemer.kampioen_label|linebreaksbr }}</td>
+                        </tr>
+
+                    {% empty %}
+                        <tr>
+                            <td colspan="7" class="center"><i>Geen sporters gevonden</i></td>
+                        </tr>
+                    {% endfor %}
+
+                </table>
+            </div>
+        </div>
+
+    {% endif %}     <!-- heeft_indiv -->
+
+    {% if heeft_teams %}
+
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <h4>Team klassen</h4>
+                <p>Deze lijst is gebaseerd op de gegevens van: <b>{{ vastgesteld }}</b></p>
+                {% if toon_para_uitleg %}
+                    <p>Sporters met ** achter hun naam hebben een para notitie.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- blauwe balk met informatie in een tabel -->
+        <div class="row-sv-blauw">
+            <div class="col s12">
+                <table class="sv-kader-tabel">
+
+                    {% if geen_klassengrenzen %}
+                        <tr class="white">
+                            <td colspan="5">
+                                <i class="sv-rood-text">De BKO heeft de teams klassengrenzen nog niet vastgesteld</i>
+                            </td>
+                        </tr>
+                    {% endif %}
+
+                    {% for team in deelnemers_teams %}
+                        {% if team.break_before %}
+                            {% if not forloop.first %}
+                                <tr class="sv-table-onderrand">
+                                    <td colspan="5" class="sv-table-onderrand" style="height:50px"></td>
+                                </tr>
+                            {% endif %}
+                            <tr class="sv-table-sectie-header">
+                                <td colspan="5" class="center">
+                                    <h5>{{ team.team_klasse.beschrijving }}</h5>
+                                    {% sv-knop-nav url=team.url_download_teams icon='download' tekst='Download excel' %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <th class="center">Nr</th>
+                                <th>Vereniging</th>
+                                <th>Team / Sporters<sup>*1</sup></th>
+                                <th class="center">Gemiddelde<sup>*2</sup></th>
+                                <th class="center">Team sterkte</th>
+                            </tr>
+                        {% endif %}
+
+                        <tr>
+                            <td class="center">{{ team.volg_nr }}</td>
+                            <td>[{{ team.ver_nr }}] {{ team.ver_naam }}</td>
+                            <td colspan="2">{{ team.team_naam }}</td>
+                            <td class="center">{{ team.sterkte_str }}</td>
+                        </tr>
+
+                        {% for deelnemer in team.gekoppelde_leden_lijst %}
+                            <tr>
+                                <td colspan="2"></td>
+                                <td style="padding-left: 30px">{{ deelnemer.naam_str }}{% if deelnemer.is_para %} **{% endif %}</td>
+                                <td class="center">{{ deelnemer.gem_str }}</td>
+                                <td></td>
+                            </tr>
+                        {% endfor %}
+                    {% endfor %}
+
+                </table>
+            </div>
+        </div>
+
+        {% if deelnemers_teams %}
+            <p class="center">*1: Para sporters hebben ** achter hun naam (details staan in de Excel).</p>
+            <p class="center">*2: Een invaller mag geen hoger gemiddelde hebben.</p>
+        {% endif %}
+
+    {% endif %}     <!-- heeft_teams -->
 
 
     {% include 'feedback/sidebar.dtl' with op_pagina="complaagbond-hwl-match-info" %}

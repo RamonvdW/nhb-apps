@@ -120,7 +120,7 @@ class PlanningView(UserPassesTestMixin, TemplateView):
                     .select_related('team_klasse')):
 
             # vertaal aantal teams naar aantal sporters
-            aantal_sporters = cut.limiet * 4
+            aantal_sporters = cut.limiet * 4                # TODO: moet nu zijn: 3 teams per team!
 
             try:
                 if team_klasse2count[cut.team_klasse.pk] > aantal_sporters:

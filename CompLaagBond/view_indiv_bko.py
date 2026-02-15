@@ -6,27 +6,24 @@
 
 from django.conf import settings
 from django.urls import reverse
-from django.http import HttpResponseRedirect, HttpResponse, Http404
+from django.http import HttpResponse, Http404
 from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Account.models import get_account
-from Competitie.definities import (DEEL_BK,
-                                   DEELNAME_JA, DEELNAME_NEE,
-                                   MUTATIE_KAMP_AFMELDEN_INDIV, MUTATIE_KAMP_AANMELDEN_INDIV)
-from Competitie.models import Kampioenschap, KampioenschapSporterBoog, KampioenschapIndivKlasseLimiet, CompetitieMutatie
+from Competitie.definities import DEEL_BK, DEELNAME_JA, DEELNAME_NEE
+from Competitie.models import Kampioenschap, KampioenschapSporterBoog, KampioenschapIndivKlasseLimiet
+from CompKampioenschap.operations import get_url_wedstrijdformulier
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
 from Site.core.background_sync import BackgroundSync
 from Sporter.models import SporterVoorkeuren
 from codecs import BOM_UTF8
 import textwrap
-import time
 import csv
 
 
-TEMPLATE_COMPBOND_BK_SELECTIE = 'complaagbond/bk-selectie.dtl'
+TEMPLATE_COMPBOND_BK_SELECTIE = 'complaagbond/bko-bk-selectie.dtl'
 TEMPLATE_COMPBOND_WIJZIG_STATUS_BK_DEELNEMER = 'complaagbond/wijzig-status-bk-deelnemer.dtl'
 
 CONTENT_TYPE_CSV = 'text/csv; charset=UTF-8'
@@ -124,6 +121,10 @@ class LijstBkSelectieView(UserPassesTestMixin, TemplateView):
             if deelnemer.break_klasse:
                 aantal_klassen += 1
                 deelnemer.klasse_str = deelnemer.indiv_klasse.beschrijving
+                deelnemer.url_open_indiv = get_url_wedstrijdformulier(comp.begin_jaar, int(comp.afstand),
+                                                                      0,        # rayon_nr wordt niet gebruikt
+                                                                      deelnemer.indiv_klasse.pk,
+                                                                      is_bk=True, is_teams=False)
                 klasse = deelnemer.indiv_klasse.volgorde
                 try:
                     limiet = wkl2limiet[deelnemer.indiv_klasse.pk]

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023-2025 Ramon van der Winkel.
+#  Copyright (c) 2023-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -116,7 +116,7 @@ class TestCompLaagBondIndiv(E2EHelpers, TestCase):
             resp = self.client.get(self.url_bk_selectie % self.testdata.deelkamp18_bk.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagbond/bk-selectie.dtl', 'design/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagbond/bko-bk-selectie.dtl', 'design/site_layout.dtl'))
 
         # verkeerde competitie fase
         zet_competitie_fase_rk_wedstrijden(self.testdata.comp18)

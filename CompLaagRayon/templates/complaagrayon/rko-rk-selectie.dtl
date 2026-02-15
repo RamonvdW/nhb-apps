@@ -154,7 +154,6 @@
                                 <td colspan="7" class="center">
                                     <h5>{{ obj.klasse_str }}</h5>
                                     {% if obj.url_open_indiv %}
-                                        <br>
                                         {% sv-knop-ext url=obj.url_open_indiv tekst='Wedstrijdformulier' %}
                                     {% endif %}
                                 </td>

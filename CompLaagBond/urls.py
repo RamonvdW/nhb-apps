@@ -5,8 +5,8 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from CompLaagBond import (view_planning, view_indiv, view_teams, view_formulieren, view_kleine_klassen,
-                          view_indiv_wijzig_status)
+from CompLaagBond import (view_planning, view_indiv_bko, view_teams_bko, view_formulieren, view_kleine_klassen,
+                          view_indiv_wijzig_status, view_bk_info_hwl)
 
 app_name = 'CompLaagBond'
 
@@ -34,11 +34,11 @@ urlpatterns = [
 
     # BKO: individueel
     path('selectie/<deelkamp_pk>/',
-         view_indiv.LijstBkSelectieView.as_view(),
+         view_indiv_bko.LijstBkSelectieView.as_view(),
          name='bk-selectie'),
 
     path('selectie/<deelkamp_pk>/bestand/',
-         view_indiv.LijstBkSelectieAlsBestandView.as_view(),
+         view_indiv_bko.LijstBkSelectieAlsBestandView.as_view(),
          name='bk-selectie-als-bestand'),
 
     path('kleine-klassen-samenvoegen/<deelkamp_pk>/indiv/',
@@ -62,11 +62,11 @@ urlpatterns = [
 
     # BKO: teams
     path('teams/wijzig-status-bk-team/',
-         view_teams.WijzigStatusBkTeamView.as_view(),
+         view_teams_bko.WijzigStatusBkTeamView.as_view(),
          name='bk-teams-wijzig-status'),
 
     path('teams/<deelkamp_pk>/',
-         view_teams.LijstBkTeamsView.as_view(),
+         view_teams_bko.LijstBkTeamsView.as_view(),
          name='bk-teams'),
 
 
@@ -79,14 +79,14 @@ urlpatterns = [
          view_formulieren.FormulierBkTeamsAlsBestandView.as_view(),
          name='formulier-teams-als-bestand'),
 
-    path('formulieren/teams/<deelkamp_pk>/',
-         view_formulieren.DownloadBkTeamsFormulierenView.as_view(),
-         name='formulier-teams-lijst'),
+    # path('formulieren/teams/<deelkamp_pk>/',
+    #      view_formulieren.DownloadBkTeamsFormulierenView.as_view(),
+    #      name='formulier-teams-lijst'),
 
 
     # HWL/WL: wedstrijd informatie
     path('wedstrijd-informatie/<match_pk>/',
-         view_formulieren.MatchInformatieView.as_view(),
+         view_bk_info_hwl.MatchInformatieView.as_view(),
          name='bk-match-informatie'),
 ]
 
