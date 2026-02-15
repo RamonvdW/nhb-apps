@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -105,9 +105,9 @@ def get_kaartjes_regio(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
                             prio=5,
                             titel="Medailles",
                             sv_icon="comp medailles",
-                            tekst="Toon de toegekende medailles voor elke klasse.",
+                            tekst="Toon de toegekende medailles voor elke klasse van de regiocompetitie.",
                             url=url)
-                kaartjes_teams.append(kaartje)
+                kaartjes_indiv.append(kaartje)
             else:
                 if comp.fase_teams <= 'F':
                     # planning regio wedstrijden
@@ -145,32 +145,18 @@ def get_kaartjes_regio(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
                                 url=url)
                     kaartjes_indiv.append(kaartje)
 
-                    # toon het medailles kaartje met een "beschikbaar vanaf"
-                    toon_binnenkort = True
-                    datum_vanaf = comp.einde_fase_F + datetime.timedelta(days=1)
+                    # toon het medailles kaartje 30 dagen voor het einde
+                    datum_vanaf = comp.einde_fase_F - datetime.timedelta(days=30)
                     datum_now = timezone.now().date()
-                    if datum_vanaf > datum_now:
-                        toon_binnenkort = False
-                        verschil = datum_vanaf - datum_now
-                        if verschil.days < 30:
-                            kaartje = SimpleNamespace(
-                                        prio=5,
-                                        titel="Medailles",
-                                        sv_icon="comp medailles",
-                                        tekst="Toon de toegekende medailles voor elke klasse" +
-                                              " (zodra de regiocompetitie afgesloten is).",
-                                        beschikbaar_vanaf=datum_vanaf)
-                            kaartjes_indiv.append(kaartje)
-
-                    if toon_binnenkort:
-                        # al voorbij de datum dus het is wachten op het afsluiten van de competitie
+                    if datum_now > datum_vanaf:
+                        # toon het medailles kaartje
+                        url = reverse('CompLaagRegio:medailles', kwargs={'regio': functie_nu.regio.regio_nr})
                         kaartje = SimpleNamespace(
-                            prio=10,
+                            prio=5,
                             titel="Medailles",
                             sv_icon="comp medailles",
-                            tekst="Toon de toegekende medailles voor elke klasse" +
-                                  " (zodra de regiocompetitie afgesloten is).",
-                            beschikbaar_binnenkort=True)
+                            tekst="Toon de toegekende medailles voor elke klasse van de regiocompetitie.",
+                            url=url)
                         kaartjes_indiv.append(kaartje)
 
                 if comp.fase_teams >= 'C' and regiocomp.regio_organiseert_teamcompetitie:
