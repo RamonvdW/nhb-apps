@@ -83,7 +83,7 @@ def sv_knop_mailto(kleur='rood', icon='email', email='', tekst=''):
     if icon:
         # button height is 36px
         new_text += '<span style="display:inline">\n'
-        new_text += sv_icon('email', kleur='rood', use='button', extra_style='vertical-align:text-bottom')
+        new_text += sv_icon('email', kleur='wit', use='button', extra_style='vertical-align:text-bottom')
         new_text += '</span>\n'
 
     new_text += '<span style="display:inline">' + tekst + '</span>\n'

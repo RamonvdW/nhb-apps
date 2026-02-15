@@ -1,13 +1,13 @@
 {% extends 'design/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2025 Ramon van der Winkel.
+                Copyright (c) 2020-2026 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
 {% load design_icons %}
 
-{% block title %}Uitslagen regiocompetitie{% endblock %}
+{% block title %}Medaillisten regiocompetitie{% endblock %}
 
 {% block pagina %}
 
@@ -19,14 +19,16 @@
                     row.style.display = "none";
                 }
             }
+
+            const el = document.getElementById("btn-verkort");
+            el.style.display = "none";
         }
     </script>
 
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Uitslagen regiocompetitie</h3>
-            <p>{% if comp.regiocompetitie_is_afgesloten %}Eindstand{% else %}Tussenstand{% endif %} van de individuele regiocompetities.</p>
+            <h3 class="page-banner">Medaillisten regiocompetitie</h3>
         </div>
     </div>
 
@@ -46,12 +48,27 @@
         </div>
     </div>
 
+    {% if not deelcomp.is_afgesloten %}
+        <!-- rood bordje -->
+        <div class="row">
+            <div style="padding:10px">
+                <div class="col s12 m8 offset-m2 l6 offset-l3 sv-rood white-text z-depth-3 center">
+                    <p>Deze regiocompetitie is nog niet afgesloten (door de RCL).<br>De scores en onderstaande lijst kunnen dus nog wijzigen!</b></p>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
             <h4>Medailles</h4>
             <p>Tot 4 deelnemers: 1 medaille<br>Tot 8 deelnemers: 2 medailles<br>9 of meer deelnemers: 3 medailles</p>
             <p>Sporters moeten <b>{{ min_aantal_scores }} of meer</b> scores hebben om in aanmerking te komen.</p>
+
+            <p>
+                <button class="btn-sv-blauw" id="btn-verkort" style="margin-left:10px" onclick="alleen_medailles()">Toon alleen medaillisten</button>
+            </p>
         </div>
     </div>
 
@@ -103,10 +120,6 @@
             </table>
         </div>
     </div>
-
-    <p>
-        <button class="btn-sv-blauw" style="margin-left:10px" onclick="alleen_medailles()">Alleen medaillisten tonen</button>
-    </p>
 
     {% include 'feedback/sidebar.dtl' with op_pagina="complaagregio-medailles" %}
 
