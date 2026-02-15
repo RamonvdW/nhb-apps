@@ -71,18 +71,9 @@ urlpatterns = [
 
 
     # BKO: download formulieren
-    path('formulieren/indiv/<deelkamp_pk>/',
-         view_formulieren.DownloadBkIndivFormulierenView.as_view(),
-         name='formulier-indiv-lijst'),
-
     path('formulieren/teams/download/<match_pk>/<klasse_pk>/',
          view_formulieren.FormulierBkTeamsAlsBestandView.as_view(),
          name='formulier-teams-als-bestand'),
-
-    # path('formulieren/teams/<deelkamp_pk>/',
-    #      view_formulieren.DownloadBkTeamsFormulierenView.as_view(),
-    #      name='formulier-teams-lijst'),
-
 
     # HWL/WL: wedstrijd informatie
     path('wedstrijd-informatie/<match_pk>/',

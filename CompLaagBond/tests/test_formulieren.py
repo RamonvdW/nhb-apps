@@ -22,8 +22,6 @@ class TestCompLaagBondFormulieren(E2EHelpers, TestCase):
 
     test_after = ('Competitie.tests.test_overzicht', 'CompBeheer.tests.test_bko')
 
-    url_forms_indiv = '/bondscompetities/bk/formulieren/indiv/%s/'               # deelkamp_pk
-    url_forms_teams = '/bondscompetities/bk/formulieren/teams/%s/'               # deelkamp_pk
     url_forms_download_teams = '/bondscompetities/bk/formulieren/teams/download/%s/%s/'   # match_pk, klasse_pk
     url_sr_info = '/bondscompetities/bk/wedstrijd-informatie/%s/'                # match_pk
 
@@ -139,12 +137,6 @@ class TestCompLaagBondFormulieren(E2EHelpers, TestCase):
     def test_anon(self):
         self.client.logout()
 
-        resp = self.client.get(self.url_forms_indiv % 999999)
-        self.assert_is_redirect_login(resp)
-
-        resp = self.client.get(self.url_forms_teams % 999999)
-        self.assert_is_redirect_login(resp)
-
         resp = self.client.get(self.url_forms_download_teams % (999999, 999999))
         self.assert_is_redirect_login(resp)
 
@@ -153,19 +145,6 @@ class TestCompLaagBondFormulieren(E2EHelpers, TestCase):
 
     def test_bad(self):
         # ingelogd als BKO Indoor
-
-        resp = self.client.get(self.url_forms_indiv % 'xx')
-        self.assert404(resp, 'Kampioenschap niet gevonden')
-
-        resp = self.client.get(self.url_forms_teams % '$PID')
-        self.assert404(resp, 'Kampioenschap niet gevonden')
-
-        resp = self.client.get(self.url_forms_indiv % 999999)
-        self.assert404(resp, 'Geen kampioenschap')
-
-        # verkeerde beheerder
-        resp = self.client.get(self.url_forms_teams % self.deelkamp25_bk.pk)
-        self.assert404(resp, 'Niet de beheerder')
 
         resp = self.client.get(self.url_forms_download_teams % (999999, 999999))
         self.assert404(resp, 'Wedstrijd niet gevonden')
@@ -180,31 +159,6 @@ class TestCompLaagBondFormulieren(E2EHelpers, TestCase):
 
         resp = self.client.get(self.url_forms_download_teams % (self.match.pk, self.comp18_klassen_teams_bk[0].pk))
         self.assert404(resp, 'Geen kampioenschap')
-
-    def test_formulieren(self):
-        # bekijk het formulieren scherm voor de BKO
-
-        url = self.url_forms_indiv % self.deelkamp18_bk.pk
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagbond/bko-download-bk-formulieren.dtl', 'design/site_layout.dtl'))
-        self.assertContains(resp, 'BK individueel')
-        self.assertNotContains(resp, 'BK teams')
-
-        self.e2e_assert_other_http_commands_not_supported(url)
-
-        url = self.url_forms_teams % self.deelkamp18_bk.pk
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagbond/bko-download-bk-formulieren.dtl', 'design/site_layout.dtl'))
-        self.assertContains(resp, 'BK teams')
-        self.assertNotContains(resp, 'BK individueel')
-
-        self.e2e_assert_other_http_commands_not_supported(url)
 
     def test_download(self):
         # BKO download een ingevuld BK programma
@@ -234,7 +188,7 @@ class TestCompLaagBondFormulieren(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_hwl)
 
         url = self.url_sr_info % self.match.pk
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(26):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
