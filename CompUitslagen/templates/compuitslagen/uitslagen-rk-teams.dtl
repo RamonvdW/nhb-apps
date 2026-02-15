@@ -153,8 +153,8 @@
                         </th>
                         <th>Team</th>
                         <th class="center hide-on-small-only">Team sterkte</th>
+                        <th class="center">RK score</th>
                         <th><!-- toekomstig label / reserve --></th>
-                        <th class="center">Matchpunten</th>
                         <td rowspan="{{ team.aantal_regels }}" class="sv-table-zijrand"></td>
                     </tr>
                 {% endif %}
@@ -220,22 +220,25 @@
                         {% endif %}
                     </td>
 
-                    <!-- label/reserve -->
-                    <td>
-                        {% if team.is_reserve %}
-                            <i>Reserve</i>
+                    <!-- RK score -->
+                    <td class="center">
+                        {% if team.klasse_heeft_uitslag %}
+                            <b>{{ team.rk_score_str }}</b>
+                            {% if team.rk_shootoff_str %}
+                                <br>
+                                <span>{{ team.rk_shootoff_str }}</span>
+                            {% endif %}
+                        {% else %}
+                            <i class="grey-text">{% if team.niet_deelgenomen %}-{% else %}komt later{% endif %}</i>
                         {% endif %}
                     </td>
 
-                    <!-- RK scores -->
-                    <td class="center">
-                        {% if team.klasse_heeft_uitslag %}
-                            <b>{{ team.rk_score_str }}</b><br>
-                            {% for deelnemer in team.deelnemers %}
-                                <br>
-                            {% endfor %}
-                        {% else %}
-                            <i class="grey-text">{% if team.niet_deelgenomen %}-{% else %}komt later{% endif %}</i>
+                    <!-- label/reserve -->
+                    <td>
+                        {% if team.result_rank == 1 %}
+                            <span>Rayonkampioen</span>
+                        {% elif team.is_reserve %}
+                            <i>Reserve</i>
                         {% endif %}
                     </td>
                 </tr>

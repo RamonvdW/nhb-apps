@@ -142,8 +142,8 @@
                         </th>
                         <th>Team</th>
                         <th class="center hide-on-small-only">Rayon</th>
-                        <th class="center hide-on-small-only">{% if not team.klasse_heeft_uitslag %}RK matchpunten{% endif %}</th>
-                        <th class="center">BK matchpunten</th>
+                        <th class="center hide-on-small-only">{% if not team.klasse_heeft_uitslag %}RK score{% endif %}</th>
+                        <th class="center">BK score</th>
                         <th class="hide-on-small-only"></th>       <!-- label -->
                         <td rowspan="{{ team.aantal_regels }}" class="sv-table-zijrand"></td>
                     </tr>

@@ -6,26 +6,22 @@
 
 from django.db import migrations, models
 
+
 class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
 
     # volgorde afdwingen
     dependencies = [
-        ('HistComp', 'm0017_squashed'),
+        ('Competitie', 'm0120_nieuwe_teams_format'),
     ]
 
     # migratie functies
     operations = [
         migrations.AddField(
-            model_name='histcompseizoen',
-            name='head_to_head_teams_format',
-            field=models.BooleanField(default=False),
-        ),
-        migrations.AddField(
-            model_name='histkampteam',
-            name='team_score_is_blanco',
-            field=models.BooleanField(default=False),
+            model_name='kampioenschapteam',
+            name='result_shootoff',
+            field=models.PositiveSmallIntegerField(default=0),
         ),
     ]
 

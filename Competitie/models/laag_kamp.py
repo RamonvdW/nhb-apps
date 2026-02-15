@@ -303,6 +303,7 @@ class KampioenschapTeam(models.Model):
 
     # teamscore is het aantal matchpunten (max 14, bij 7 wedstrijdjes)
     result_teamscore = models.PositiveSmallIntegerField(default=0)          # max = 32767
+    result_shootoff = models.PositiveSmallIntegerField(default=0)           # max = 32767
 
     def __str__(self):
         """ geef een tekstuele afkorting van dit object, voor in de admin interface """
