@@ -53,7 +53,7 @@ google-api-core==2.29.0
     #   google-api-python-client
     #   google-geo-type
     #   google-maps-routing
-google-api-python-client==2.189.0
+google-api-python-client==2.190.0
     # via -r requirements.txt
 google-auth==2.47.0
     # via
@@ -126,11 +126,11 @@ outcome==1.3.0.post0
     #   trio-websocket
 packaging==26.0
     # via trio-typing
-pillow==12.1.0
+pillow==12.1.1
     # via -r requirements.txt
-pip-licenses-cli==3.0.1
+pip-licenses-cli==4.0.0
     # via -r requirements_dev.in
-pip-licenses-lib==1.0.0
+pip-licenses-lib==1.1.0
     # via pip-licenses-cli
 prettytable==3.17.0
     # via pip-licenses-cli
@@ -203,7 +203,7 @@ sqlparse==0.5.5
     #   -r requirements.txt
     #   django
     #   django-debug-toolbar
-trio==0.32.0
+trio==0.33.0
     # via
     #   selenium
     #   trio-typing

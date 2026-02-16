@@ -21,7 +21,7 @@ google-api-core==2.29.0
     #   google-api-python-client
     #   google-geo-type
     #   google-maps-routing
-google-api-python-client==2.189.0
+google-api-python-client==2.190.0
     # via -r requirements.in
 google-auth==2.47.0
     # via
@@ -69,7 +69,7 @@ oauthlib==3.3.1
     # via requests-oauthlib
 openpyxl==3.1.5
     # via -r requirements.in
-pillow==12.1.0
+pillow==12.1.1
     # via -r requirements.in
 proto-plus==1.27.1
     # via
