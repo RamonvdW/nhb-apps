@@ -1,6 +1,6 @@
 {% extends 'design/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2021-2025 Ramon van der Winkel.
+                Copyright (c) 2021-2026 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -52,7 +52,7 @@
                     {% endif %}
 
                     <button class="btn-sv-blauw" id="id_filter_knop" style="float:right">
-                        {% sv-icon-op-button 'kalender filter' %}
+                        {% sv-icon-op-button 'kalender filter' usability_label='Filters' %}
                     </button>
                 </p>
             </div>
@@ -126,7 +126,7 @@
             <!-- knop -->
             <td class="right-align">
                 <button class="btn-sv-rood" onclick="stuur_keuzes_prev()" id="id_prev">
-                    {% sv-icon-op-button 'kalender vorige' %}
+                    {% sv-icon-op-button 'kalender vorige' usability_label='Vorige maand' %}
                 </button>
             </td>
 
@@ -137,7 +137,7 @@
             <!-- knop -->
             <td class="left-align">
                 <button class="btn-sv-rood" onclick="stuur_keuzes_next()" id="id_next">
-                    {% sv-icon-op-button 'kalender volgende' %}
+                    {% sv-icon-op-button 'kalender volgende' usability_label='Volgende maand' %}
                 </button>
             </td>
         </tr>

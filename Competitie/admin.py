@@ -530,7 +530,8 @@ class KampioenschapTeamAdmin(CreateOnlyAdmin):
         ('Uitslag',
             {'fields': ('result_rank',
                         'result_volgorde',
-                        'result_teamscore')
+                        'result_teamscore',
+                        'result_shootoff_str')
              }),
     )
 

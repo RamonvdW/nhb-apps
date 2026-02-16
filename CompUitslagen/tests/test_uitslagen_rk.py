@@ -306,9 +306,9 @@ class TestCompUitslagenRK(E2EHelpers, TestCase):
         # koppel feitelijke leden
         team.feitelijke_leden.set(team.gekoppelde_leden.order_by('sporterboog__sporter__lid_nr')[:3])
         deelnemer = team.feitelijke_leden.first()
-        deelnemer.result_rk_teamscore_1 = 100
-        deelnemer.result_rk_teamscore_2 = 110
-        deelnemer.save(update_fields=['result_rk_teamscore_1', 'result_rk_teamscore_2'])
+        #deelnemer.result_rk_teamscore_1 = 100
+        #deelnemer.result_rk_teamscore_2 = 110
+        #deelnemer.save(update_fields=['result_rk_teamscore_1', 'result_rk_teamscore_2'])
 
         team2 = KampioenschapTeam.objects.filter(volg_nr=2)[0]
         team2.result_rank = KAMP_RANK_BLANCO

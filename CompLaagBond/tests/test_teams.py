@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023-2025 Ramon van der Winkel.
+#  Copyright (c) 2023-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -82,7 +82,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         resp = self.client.get(self.url_lijst_bk_teams % self.testdata.deelkamp18_bk.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagbond/bk-teams.dtl', 'design/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagbond/bko-bk-teams.dtl', 'design/site_layout.dtl'))
 
         # verkeerde fase (niet BK)
         zet_competitie_fase_rk_wedstrijden(self.testdata.comp18)
@@ -105,7 +105,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         resp = self.client.get(self.url_lijst_bk_teams % self.testdata.deelkamp18_bk.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagbond/bk-teams.dtl', 'design/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagbond/bko-bk-teams.dtl', 'design/site_layout.dtl'))
 
         self.e2e_assert_other_http_commands_not_supported(self.url_lijst_bk_teams % self.testdata.deelkamp18_bk.pk)
 

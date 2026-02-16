@@ -469,6 +469,7 @@ def uitslag_rk_teams_naar_histcomp(comp: Competitie):
                         vereniging_plaats=ver.plaats,
                         team_nr=team.volg_nr,
                         team_score=team.result_teamscore,
+                        team_score_shootoff_str=team.result_shootoff_str,
                         rank=team.result_rank,
                         titel_code=titel_code)
 
@@ -501,19 +502,19 @@ def uitslag_rk_teams_naar_histcomp(comp: Competitie):
                                         rank_rk=0)
                         hist_indiv.save()
 
-                    tup = (lid_nr, hist_indiv)
+                    tup = (lid_nr, len(unsorted), hist_indiv)
                     unsorted.append(tup)
                 # for
                 unsorted.sort()
 
                 if len(unsorted) > 0:
-                    _, hist.lid_1 = unsorted[0]
+                    _, _, hist.lid_1 = unsorted[0]
 
                 if len(unsorted) > 1:
-                    _, hist.lid_2 = unsorted[1]
+                    _, _, hist.lid_2 = unsorted[1]
 
                 if len(unsorted) > 2:
-                    _, hist.lid_3 = unsorted[2]
+                    _, _, hist.lid_3 = unsorted[2]
 
             bulk.append(hist)
     # for
@@ -571,7 +572,7 @@ def uitslag_bk_teams_naar_histcomp(comp: Competitie):
                         vereniging_plaats=ver.plaats,
                         team_nr=team.volg_nr,
                         team_score=team.result_teamscore,
-                        team_score_counts=team.result_counts,
+                        team_score_shootoff_str=team.result_shootoff_str,
                         rank=team.result_rank,
                         titel_code=titel_code)
 
@@ -579,9 +580,6 @@ def uitslag_bk_teams_naar_histcomp(comp: Competitie):
             for team_lid in team.feitelijke_leden.select_related('indiv_klasse',
                                                                  'sporterboog__sporter',
                                                                  'sporterboog__boogtype').all():
-                s1 = team_lid.result_bk_teamscore_1
-                s2 = team_lid.result_bk_teamscore_2
-
                 sporter = team_lid.sporterboog.sporter
                 lid_nr = sporter.lid_nr
                 boogtype = team_lid.sporterboog.boogtype.afkorting
@@ -615,34 +613,22 @@ def uitslag_bk_teams_naar_histcomp(comp: Competitie):
                     hist_indiv.save()
                     indiv_klasse_lid_nr2hist[tup] = hist_indiv
 
-                hist_indiv.teams_bk_score_1 = s1
-                hist_indiv.teams_bk_score_2 = s2
-                hist_indiv.save(update_fields=['teams_bk_score_1', 'teams_bk_score_2'])
-
-                tup = (s1, s2, max(s1, s2), min(s1, s2), lid_nr, hist_indiv)
+                tup = (lid_nr, len(unsorted), hist_indiv)
                 unsorted.append(tup)
             # for
             unsorted.sort(reverse=True)     # hoogste eerst
 
             if len(unsorted) > 0:
-                s1, s2, _, _, _, hist_indiv = unsorted[0]
-                hist.score_lid_1 = s1 + s2
+                _, _, hist_indiv = unsorted[0]
                 hist.lid_1 = hist_indiv
 
             if len(unsorted) > 1:
-                s1, s2, _, _, _, hist_indiv = unsorted[1]
-                hist.score_lid_2 = s1 + s2
+                _, _, hist_indiv = unsorted[1]
                 hist.lid_2 = hist_indiv
 
             if len(unsorted) > 2:
-                s1, s2, _, _, _, hist_indiv = unsorted[2]
-                hist.score_lid_3 = s1 + s2
+                _, _, hist_indiv = unsorted[2]
                 hist.lid_3 = hist_indiv
-
-            if len(unsorted) > 3:
-                s1, s2, _, _, _, hist_indiv = unsorted[3]
-                hist.score_lid_4 = s1 + s2
-                hist.lid_4 = hist_indiv
 
             bulk.append(hist)
     # for

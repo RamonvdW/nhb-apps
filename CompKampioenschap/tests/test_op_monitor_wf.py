@@ -112,6 +112,6 @@ class TestCompKampioenschapImportUitslag(E2EHelpers, TestCase):
             monitor.doe_beetje_werk()       # bestand
             monitor.doe_beetje_werk()       # geen werk
 
-        print(out.getvalue())
+        #print(out.getvalue())
 
 # end of file

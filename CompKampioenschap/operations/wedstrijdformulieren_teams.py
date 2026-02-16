@@ -57,7 +57,7 @@ class UpdateTeamsWedstrijdFormulier:
         lim = KampioenschapTeamKlasseLimiet.objects.filter(kampioenschap=self.kampioenschap,
                                                            team_klasse=self.klasse).first()
         if lim:
-            self.limiet = lim.limiet
+            self.limiet = min(lim.limiet, self.limiet)
 
         if bestand.is_bk:
             self.titel = 'BK'

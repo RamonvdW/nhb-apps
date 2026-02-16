@@ -10,9 +10,8 @@ from django.http import Http404, HttpResponse
 from django.utils import timezone
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.definities import DEEL_RK, DEELNAME_NEE, DEELNAME2STR
-from Competitie.models import (CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMatch,
-                               KampioenschapIndivKlasseLimiet, KampioenschapSporterBoog, KampioenschapTeam)
+from Competitie.definities import DEEL_RK, DEELNAME_NEE
+from Competitie.models import CompetitieTeamKlasse, CompetitieMatch, KampioenschapSporterBoog, KampioenschapTeam
 from CompKampioenschap.operations import get_url_wedstrijdformulier
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
@@ -80,7 +79,9 @@ class DownloadRkFormulierView(UserPassesTestMixin, TemplateView):
         context['aantal_banen'] = '?'
 
         comp = deelkamp.competitie
+        comp.bepaal_fase()
         # TODO: check fase
+
         if comp.is_indoor():
             aantal_pijlen = 30
             if match.locatie:
@@ -176,8 +177,9 @@ class DownloadRkFormulierView(UserPassesTestMixin, TemplateView):
                             deelnemer.kampioen_label += ';\n'
                         deelnemer.kampioen_label += textwrap.fill(voorkeuren_opmerking_para_sporter, 30)
 
-                deelnemer.url_wijzig = reverse('CompLaagRayon:wijzig-status-rk-deelnemer',
-                                               kwargs={'deelnemer_pk': deelnemer.pk})
+                if 'J' <= comp.fase_indiv <= 'K':
+                    deelnemer.url_wijzig = reverse('CompLaagRayon:wijzig-status-rk-deelnemer',
+                                                   kwargs={'deelnemer_pk': deelnemer.pk})
             # for
 
         if heeft_teams:

@@ -1,6 +1,6 @@
 {% extends 'design/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2025 Ramon van der Winkel.
+                Copyright (c) 2020-2026 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -60,7 +60,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Sporters</h4>
+            <h4>Selectie per klasse</h4>
         </div>
     </div>
 

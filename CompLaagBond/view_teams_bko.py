@@ -19,7 +19,7 @@ from CompKampioenschap.operations import maak_mutatie_kamp_teams_nummeren
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
 
-TEMPLATE_COMPBOND_BK_TEAMS = 'complaagbond/bk-teams.dtl'
+TEMPLATE_COMPBOND_BK_TEAMS = 'complaagbond/bko-bk-teams.dtl'
 
 
 class LijstBkTeamsView(UserPassesTestMixin, TemplateView):

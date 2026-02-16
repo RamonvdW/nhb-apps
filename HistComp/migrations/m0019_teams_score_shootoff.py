@@ -12,20 +12,15 @@ class Migration(migrations.Migration):
 
     # volgorde afdwingen
     dependencies = [
-        ('HistComp', 'm0017_squashed'),
+        ('HistComp', 'm0018_nieuwe_teams_format'),
     ]
 
     # migratie functies
     operations = [
         migrations.AddField(
-            model_name='histcompseizoen',
-            name='head_to_head_teams_format',
-            field=models.BooleanField(default=False),
-        ),
-        migrations.AddField(
             model_name='histkampteam',
-            name='team_score_is_blanco',
-            field=models.BooleanField(default=False),
+            name='team_score_shootoff_str',
+            field=models.CharField(blank=True, default='', max_length=20),
         ),
     ]
 

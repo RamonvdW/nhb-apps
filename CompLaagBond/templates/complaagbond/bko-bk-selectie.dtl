@@ -1,6 +1,6 @@
 {% extends 'design/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2023-2025 Ramon van der Winkel.
+                Copyright (c) 2023-2026 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -73,7 +73,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Sporters</h4>
+            <h4>Selectie per klasse</h4>
             <p>In elke klasse wordt met maximaal 48 sporters gewerkt</p>
             {% if url_download %}
                 <p>
@@ -101,6 +101,9 @@
                         <tr class="sv-table-sectie-header">
                             <td colspan="7" class="center">
                                 <h5>{{ obj.klasse_str }}</h5>
+                                {% if obj.url_open_indiv %}
+                                    {% sv-knop-ext url=obj.url_open_indiv tekst='Wedstrijdformulier' %}
+                                {% endif %}
                             </td>
                         </tr>
 

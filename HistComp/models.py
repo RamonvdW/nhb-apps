@@ -230,10 +230,11 @@ class HistKampIndivRK(models.Model):
     rk_score_totaal = models.PositiveSmallIntegerField(default=0)
     rk_counts = models.CharField(max_length=20, default='', blank=True)     # 25m1pijl: 5x10 3x9
 
-    # bijdrage aan de het rk/bk teams
+    # persoonlijke bijdrage aan de het rk teams (alleen als seizoen.head_to_head_team_format=False)
     teams_rk_score_1 = models.PositiveSmallIntegerField(default=0)
     teams_rk_score_2 = models.PositiveSmallIntegerField(default=0)
 
+    # persoonlijke bijdrage aan de het bk teams (alleen als seizoen.head_to_head_team_format=False)
     teams_bk_score_1 = models.PositiveSmallIntegerField(default=0)
     teams_bk_score_2 = models.PositiveSmallIntegerField(default=0)
 
@@ -328,7 +329,8 @@ class HistKampTeam(models.Model):
     # behaalde score, rank en bijbehorende titel
     team_score_is_blanco = models.BooleanField(default=False)
     team_score = models.PositiveSmallIntegerField()
-    team_score_counts = models.CharField(max_length=20, default='', blank=True)     # 25m1pijl: 5x10 3x9
+    team_score_shootoff_str = models.CharField(max_length=20, default='', blank=True)   # "(SO: 27)"
+    team_score_counts = models.CharField(max_length=20, default='', blank=True)         # 25m1pijl: "5x10 3x9"
 
     rank = models.PositiveSmallIntegerField()
     titel_code = models.CharField(max_length=1, choices=HISTCOMP_TITEL_CHOICES, default=HISTCOMP_TITEL_NONE)

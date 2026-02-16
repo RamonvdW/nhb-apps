@@ -35,19 +35,19 @@
                 <br>
                 <div class="center" style="display:inline-flex">
                     <div>
-                        <a href="{{ url1 }}" target="_blank" rel="noopener noreferrer">
+                        <a href="{{ url1 }}" target="_blank" rel="noopener noreferrer" aria-label="Feedback: tevreden">
                             {% sv-icon 'feedback smiley tevreden' kleur='groen' use='feedback' extra_style='width:50px' %}
                         </a>
                     </div>
 
                     <div>
-                        <a href="{{ url2 }}" target="_blank" rel="noopener noreferrer">
+                        <a href="{{ url2 }}" target="_blank" rel="noopener noreferrer" aria-label="Feedback: bruikbaar">
                             {% sv-icon 'feedback smiley bruikbaar' kleur='blauw' use='feedback' extra_style='width:50px' %}
                         </a>
                     </div>
 
                     <div>
-                        <a href="{{ url3 }}" target="_blank" rel="noopener noreferrer">
+                        <a href="{{ url3 }}" target="_blank" rel="noopener noreferrer" aria-label="Feedback: moet beter">
                             {% sv-icon 'feedback smiley moet beter' kleur='rood' use='feedback' extra_style='width:50px' %}
                         </a>
                     </div>

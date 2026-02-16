@@ -137,7 +137,7 @@
 
                     <!-- RK scores -->
                     <td class="{% if toon_teamlid_scores %}right-align{% else %}center{% endif %}" style="padding-right:10px">
-                        <b>{{ team.team_score }}</b>
+                        <b>{{ team.team_score }}{% if team.heeft_shootoff_gewonnen %}&nbsp+{% endif %}</b>
                         {% if toon_teamlid_scores %}
                             {% for deelnemer in team.deelnemers %}
                                 <br>

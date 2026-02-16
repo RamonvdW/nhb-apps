@@ -382,7 +382,7 @@ class UitslagenRayonTeamsView(TemplateView):
             # for
 
     @staticmethod
-    def _finalize_klasse(deelkamp, done: list, plan: list, afgemeld: list):
+    def _finalize_klasse(deelkamp, done: list, plan: list, afgemeld: list, all_match_scores: list, alle_ranks: list):
         if len(done) > 0:
             # er is uitslag, dus overige teams hebben niet meegedaan
             for plan_team in plan:
@@ -398,6 +398,17 @@ class UitslagenRayonTeamsView(TemplateView):
                 afgemeld_team.klasse_heeft_uitslag = True
             # for
             teller = done[0]
+
+            for team in done:
+                if all_match_scores.count(team.result_teamscore) == 1:
+                    # shootoff resultaat is niet relevant
+                    # dit verwijdert de meeste "(SO: 0)"
+                    team.rk_shootoff_str = ''
+                elif alle_ranks.count(team.result_rank) > 1:
+                    # meerdere teams hebben dezelfde rank gekregen
+                    # shootoff resultaat is meestal "(SO: 0)" en dus niet relevant
+                    team.rk_shootoff_str = ''
+            # for
 
         elif len(plan) > 0:
             # er is geen uitslag, maar misschien hebben teams vrijstelling
@@ -528,6 +539,9 @@ class UitslagenRayonTeamsView(TemplateView):
         klasse_teams_plan = list()
         klasse_teams_afgemeld = list()
         aantal_regels = 0
+        alle_matchscores = list()        # voor bepalen "toon shootoff"
+        alle_ranks = list()
+
         for team in (KampioenschapTeam
                      .objects
                      .filter(kampioenschap=deelkamp,
@@ -543,7 +557,9 @@ class UitslagenRayonTeamsView(TemplateView):
                                '-aanvangsgemiddelde')):      # sterkste team eerst
 
             if team.team_klasse != prev_klasse:
-                teller = self._finalize_klasse(deelkamp, klasse_teams_done, klasse_teams_plan, klasse_teams_afgemeld)
+                teller = self._finalize_klasse(deelkamp,
+                                               klasse_teams_done, klasse_teams_plan, klasse_teams_afgemeld,
+                                               alle_matchscores, alle_ranks)
 
                 if teller:
                     teller.aantal_regels = aantal_regels
@@ -566,29 +582,40 @@ class UitslagenRayonTeamsView(TemplateView):
                 klasse_teams_done = list()
                 klasse_teams_plan = list()
                 klasse_teams_afgemeld = list()
+                alle_matchscores = list()
+                alle_ranks = list()
 
                 prev_klasse = team.team_klasse
                 aantal_regels = 2
 
             team.ver_nr = team.vereniging.ver_nr
             team.ver_str = str(team.vereniging)
-            team.ag_str = "%05.1f" % (team.aanvangsgemiddelde * aantal_pijlen)
+            ag = float(team.aanvangsgemiddelde) * aantal_pijlen
+            team.ag_str = "%05.1f" % ag
             team.ag_str = team.ag_str.replace('.', ',')
             team.toon_team_leden = False
             team.niet_deelgenomen = False
+            team.rk_score_str = ''
+            team.rk_shootoff_str = ''
             aantal_regels += 1
 
             if team.result_rank > 0:
+
                 if team.result_rank == KAMP_RANK_BLANCO:
                     team.geen_rank = True
                     team.rk_score_str = '(blanco)'
+
                 elif team.result_rank in (KAMP_RANK_NO_SHOW, KAMP_RANK_RESERVE):
                     team.niet_deelgenomen = True
                     team.geen_rank = True
-                    team.rk_score_str = ''
+
                 else:
                     team.rank = team.result_rank
                     team.rk_score_str = str(team.result_teamscore)
+                    team.rk_shootoff_str = team.result_shootoff_str
+                    alle_matchscores.append(team.result_teamscore)
+                    alle_ranks.append(team.result_rank)
+
                 team.klasse_heeft_uitslag = True
 
                 originele_lid_nrs = list(team
@@ -648,7 +675,9 @@ class UitslagenRayonTeamsView(TemplateView):
                     # for
         # for
 
-        teller = self._finalize_klasse(deelkamp, klasse_teams_done, klasse_teams_plan, klasse_teams_afgemeld)
+        teller = self._finalize_klasse(deelkamp,
+                                       klasse_teams_done, klasse_teams_plan, klasse_teams_afgemeld,
+                                       alle_matchscores, alle_ranks)
         if teller:
             teller.aantal_regels = aantal_regels
             teller.break_klasse = True

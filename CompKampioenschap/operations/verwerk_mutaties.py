@@ -622,7 +622,7 @@ class VerwerkCompKampMutaties:
 
         if cut_nieuw > cut_oud:
             # limiet verhogen is simpel, want deelnemers blijven deelnemers
-            if cut_nieuw == 24:
+            if cut_nieuw == 8:
                 # verwijder het limiet record
                 if not is_nieuw:
                     limiet.delete()

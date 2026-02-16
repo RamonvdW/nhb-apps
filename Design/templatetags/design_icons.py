@@ -68,7 +68,6 @@ ICON_NAME2MATERIAL_SYMBOL_NAME = {
     'comp ag vaststellen': 'how_to_reg',
     'comp beheer': 'store',
     'comp benodigde dagdelen': 'leaderboard',
-    'comp bk teams': 'rule',
     'comp blanco resultaat': 'fast_forward',
     'comp doorzetten': 'mediation',
     'comp gekozen wedstrijden': 'leaderboard',
@@ -101,7 +100,9 @@ ICON_NAME2MATERIAL_SYMBOL_NAME = {
     'medailles 3e plaats': 'looks_3',
     'comp rk extra deelnemer': 'person_add',
     'comp rk selectie': 'rule',
+    'comp bk selectie': 'rule',
     'comp rk teams': 'api',
+    'comp bk teams': 'api',
     'comp scores deelnemers': 'add',
     'comp seizoen afsluiten': 'waving_hand',
     'comp seizoen starten': 'playlist_add',
@@ -404,11 +405,17 @@ def sv_icon(icon_name, use='button', kleur='rood', icon_height=0, extra_style=''
 
 @register.simple_tag(name='sv-icon-op-button')
 @functools.cache
-def sv_icon_op_button(icon_name, tekst='', extra_class='', extra_style=''):
+def sv_icon_op_button(icon_name, tekst='', usability_label='', extra_class='', extra_style=''):
+    """ usability_label is voor screen readers, als er geen tekst is.
+    """
+
     new_text = '<span'
 
     if extra_class:
         new_text += ' class="%s"' % extra_class
+
+    if usability_label:
+        new_text += ' aria-label="%s"' % usability_label.replace('"', "'")
 
     new_text +=' style="display:inline-block; vertical-align:text-bottom; height:24px'
 

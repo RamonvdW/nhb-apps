@@ -4,7 +4,6 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.core.management.base import BaseCommand
 from Competitie.definities import DEEL_RK, KAMP_RANK_NO_SHOW
 from Competitie.models import KampioenschapSporterBoog, KampioenschapTeam
 from openpyxl.utils.exceptions import InvalidFileException
@@ -13,16 +12,19 @@ import openpyxl
 import zipfile
 
 
-class Command(BaseCommand):
-    help = "Importeer uitslag RK Indoor Teams"
+class ImporteerUitslagTeamsExcel:
 
-    def __init__(self, stdout=None, stderr=None, no_color=False, force_color=False):
-        super().__init__(stdout, stderr, no_color, force_color)
-        self.dryrun = True
-        self.verbose = False
+    def __init__(self, stdout, stderr, dryrun: bool, verbose: bool, afstand: str, deel: str):
+        self.stdout = stdout
+        self.stderr = stderr
+        self.dryrun = dryrun
+        self.verbose = verbose
+        self.afstand = afstand
+        self.deel = deel                    # DEEL_RK of DEEL_BK
+
         self.has_error = False
-        self.rayon_nr = 0
         self.team_klasse = None
+        self.rayon_nr = 0
 
         self.deelnemers = dict()            # [lid_nr] = [KampioenschapSporterBoog, ...]
         self.teams_cache = list()           # [KampioenschapTeam, ...]
@@ -32,12 +34,6 @@ class Command(BaseCommand):
         self.deelnemende_teams = dict()     # [team naam] = KampioenschapTeam
         self.toegestane_bogen = list()
 
-    def add_arguments(self, parser):
-        parser.add_argument('--dryrun', action='store_true')
-        parser.add_argument('--verbose', action='store_true')
-        parser.add_argument('bestand', type=str,
-                            help='Pad naar het Excel bestand')
-
     def _zet_team_klasse(self, klasse):
         self.team_klasse = klasse
         self.toegestane_bogen = list(klasse.boog_typen.values_list('afkorting', flat=True))
@@ -45,9 +41,11 @@ class Command(BaseCommand):
             self.stdout.write('[DEBUG] toegestane bogen: %s' % repr(self.toegestane_bogen))
 
     def _deelnemers_ophalen(self):
+        # teamleden zijn altijd de sporters gekwalificeerd voor het RK individueel
+        # ook voor het BK
         for deelnemer in (KampioenschapSporterBoog
                           .objects
-                          .filter(kampioenschap__competitie__afstand='18',
+                          .filter(kampioenschap__competitie__afstand=self.afstand,
                                   kampioenschap__deel=DEEL_RK)
                           .select_related('kampioenschap',
                                           'kampioenschap__rayon',
@@ -74,8 +72,8 @@ class Command(BaseCommand):
     def _teams_ophalen(self):
         for team in (KampioenschapTeam
                      .objects
-                     .filter(kampioenschap__competitie__afstand='18',
-                             kampioenschap__deel=DEEL_RK)
+                     .filter(kampioenschap__competitie__afstand=self.afstand,
+                             kampioenschap__deel=self.deel)
                      .select_related('kampioenschap',
                                      'kampioenschap__rayon',
                                      'vereniging',
@@ -104,7 +102,7 @@ class Command(BaseCommand):
                     self.has_error = True
                     continue
 
-                self.stderr.write('[WARNING] Neem de eerste want kan niet kiezen uit: %s' % repr(deelnemer_all))
+                self.stdout.write('[WARNING] Neem de eerste want kan niet kiezen uit: %s' % repr(deelnemer_all))
                 deelnemer = deelnemer_all[0]
 
             tup = (deelnemer.gemiddelde, lid_nr)
@@ -120,7 +118,7 @@ class Command(BaseCommand):
                 return deelnemer
         # for
 
-        self.stderr.write('[WARNING] TODO: bepaal juiste deelnemer met ag=%s uit\n%s' % (
+        self.stdout.write('[WARNING] TODO: bepaal juiste deelnemer met ag=%s uit\n%s' % (
                             lid_ag,
                             "\n".join(["%s / %s / %s" % (deelnemer,
                                                          deelnemer.sporterboog.boogtype.afkorting,
@@ -229,7 +227,9 @@ class Command(BaseCommand):
 
         self._zet_team_klasse(mogelijke_klassen[0])
 
-        self.stdout.write('[INFO] Rayon: %s' % self.rayon_nr)
+        if self.deel == DEEL_RK:
+            self.stdout.write('[INFO] Rayon: %s' % self.rayon_nr)
+
         self.stdout.write('[INFO] Klasse: %s' % self.team_klasse)
 
     def _importeer_teams_en_sporters(self, ws):
@@ -386,8 +386,7 @@ class Command(BaseCommand):
                 expected_teams.append(kamp_team)
         # for
 
-        rank = 0
-
+        eindstand = list()
         for row_nr in range(8, 15+1):
             # team naam
             team_naam = self._lees_team_naam(ws, 'B' + str(row_nr))
@@ -404,35 +403,64 @@ class Command(BaseCommand):
                 self.has_error = True
                 continue
 
-            rank += 1
-            self.stdout.write('[INFO] Rank %s: %s punten, team %s' % (rank,
-                                                                      matchpunten,
-                                                                      repr(team_naam)))
-
             # 100=blanco, 32000=no show, 32001=reserve
-            kamp_team.result_rank = rank
-            kamp_team.result_volgorde = rank
             kamp_team.result_teamscore = matchpunten
             expected_teams.remove(kamp_team)
 
+            shootoff_str = ws['F' + str(row_nr)].value
+            if shootoff_str:
+                try:
+                    shootoff = int(shootoff_str)
+                except ValueError:
+                    self.stderr.write('[ERROR] Geen valide shootoff %s op regel %s' % (repr(shootoff_str), row_nr))
+                    self.has_error = True
+                    continue
+                kamp_team.result_shootoff_str = '(SO: %s)' % shootoff
+            else:
+                shootoff = 0
+
+            tup = (matchpunten, shootoff, kamp_team.pk, kamp_team)
+            eindstand.append(tup)
+        # for
+
+        # zet de uiteindelijke ranking
+        eindstand.sort(reverse=True)        # hoogste eerst
+        rank = volgorde = 1
+        prev_score_tup = (-1, -1)
+        for tup in eindstand:
+            matchpunten, shootoff, _, kamp_team = tup
+
+            score_tup = (matchpunten, shootoff)
+            if score_tup != prev_score_tup:
+                rank = volgorde
+            prev_score_tup = score_tup
+
+            kamp_team.result_rank = rank
+            kamp_team.result_volgorde = volgorde
+
+            self.stdout.write('[INFO] Rank %s: %s punten, shootoff: %s, team %s' % (rank,
+                                                                                    matchpunten,
+                                                                                    shootoff,
+                                                                                    repr(kamp_team.team_naam)))
+
+
             if not (self.dryrun or self.has_error):
-                kamp_team.save(update_fields=['result_rank', 'result_volgorde', 'result_teamscore'])
+                kamp_team.save(update_fields=['result_rank', 'result_volgorde',
+                                              'result_teamscore', 'result_shootoff_str'])
+
+            volgorde += 1
         # for
 
         # rapporteer de no-shows
         for kamp_team in expected_teams:
-            self.stderr.write('[WARNING] Team %s van ver %s staat niet in de uitslag --> no-show' % (
+            self.stdout.write('[WARNING] Team %s van ver %s staat niet in de uitslag --> no-show' % (
                                 repr(kamp_team.team_naam), kamp_team.vereniging.ver_nr))
             if not (self.dryrun or self.has_error):
                 kamp_team.save(update_fields=['result_rank', 'result_volgorde', 'result_teamscore'])
         # for
 
-    def handle(self, *args, **options):
+    def importeer_bestand(self, fname: str):
 
-        self.dryrun = options['dryrun']
-        self.verbose = options['verbose']
-
-        fname = options['bestand']
         self.stdout.write('[INFO] Lees bestand %s' % repr(fname))
         try:
             prg = openpyxl.load_workbook(fname,
