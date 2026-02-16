@@ -387,6 +387,8 @@ class ImporteerUitslagTeamsExcel:
         # for
 
         eindstand = list()
+        alle_matchpunten = list()
+        toon_shootoff = dict()  # [matchpunten] = True
         for row_nr in range(8, 15+1):
             # team naam
             team_naam = self._lees_team_naam(ws, 'B' + str(row_nr))
@@ -406,41 +408,52 @@ class ImporteerUitslagTeamsExcel:
             # 100=blanco, 32000=no show, 32001=reserve
             kamp_team.result_teamscore = matchpunten
             expected_teams.remove(kamp_team)
+            alle_matchpunten.append(matchpunten)
 
-            shootoff_str = ws['F' + str(row_nr)].value
-            if shootoff_str:
+            shootoff_str = str(ws['F' + str(row_nr)].value)
+            if shootoff_str.upper() == 'NONE':
+                shootoff_str = ''
+            if shootoff_str != '':
+                toon_shootoff[matchpunten] = True
                 try:
                     shootoff = int(shootoff_str)
                 except ValueError:
                     self.stderr.write('[ERROR] Geen valide shootoff %s op regel %s' % (repr(shootoff_str), row_nr))
                     self.has_error = True
                     continue
-                kamp_team.result_shootoff_str = '(SO: %s)' % shootoff
-            else:
-                shootoff = 0
 
-            tup = (matchpunten, shootoff, kamp_team.pk, kamp_team)
+            tup = (matchpunten, shootoff_str, kamp_team.pk, kamp_team)
             eindstand.append(tup)
         # for
 
         # zet de uiteindelijke ranking
         eindstand.sort(reverse=True)        # hoogste eerst
         rank = volgorde = 1
-        prev_score_tup = (-1, -1)
+        prev_score_tup = (-1, '')
         for tup in eindstand:
-            matchpunten, shootoff, _, kamp_team = tup
+            matchpunten, shootoff_str, _, kamp_team = tup
 
-            score_tup = (matchpunten, shootoff)
+            score_tup = (matchpunten, shootoff_str)
             if score_tup != prev_score_tup:
                 rank = volgorde
             prev_score_tup = score_tup
 
             kamp_team.result_rank = rank
             kamp_team.result_volgorde = volgorde
+            kamp_team.result_shootoff_str = ''
+
+            if alle_matchpunten.count(matchpunten) == 1:
+                # niet nodig, dus niet tonen
+                pass
+            else:
+                if toon_shootoff.get(matchpunten, False):
+                    if shootoff_str == '':
+                        shootoff_str = '0'
+                    kamp_team.result_shootoff_str = '(SO: %s)' % shootoff_str
 
             self.stdout.write('[INFO] Rank %s: %s punten, shootoff: %s, team %s' % (rank,
-                                                                                    matchpunten,
-                                                                                    shootoff,
+                                                                                    kamp_team.result_teamscore,
+                                                                                    repr(kamp_team.result_shootoff_str),
                                                                                     repr(kamp_team.team_naam)))
 
 
