@@ -433,7 +433,7 @@ class DoorzettenBasisView(UserPassesTestMixin, TemplateView):
         rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
         return rol_nu == Rol.ROL_BKO
 
-    def _check_competitie_fase(self, comp_pk_str):
+    def _get_competitie(self, comp_pk_str):
         try:
             comp_pk = int(comp_pk_str[:6])  # afkappen voor de veiligheid
             comp = (Competitie
@@ -458,7 +458,7 @@ class DoorzettenBasisView(UserPassesTestMixin, TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        self._check_competitie_fase(kwargs['comp_pk'])      # kan 403 or 404 raisen
+        self._get_competitie(kwargs['comp_pk'])      # kan 403 or 404 raisen
         context['comp'] = self.comp
 
         if self.is_teams:
@@ -467,7 +467,7 @@ class DoorzettenBasisView(UserPassesTestMixin, TemplateView):
             check_fase = self.comp.fase_indiv
 
         if check_fase != self.expected_fase:
-            if self.fase_verkeerd_404:
+            if self.fase_verkeerd_404 or check_fase > self.expected_fase:
                 # mogelijk oneigenlijk gebruik van de site
                 raise Http404('Verkeerde competitie fase')
 
@@ -511,7 +511,16 @@ class DoorzettenBasisView(UserPassesTestMixin, TemplateView):
     def post(self, request, *args, **kwargs):
         """ Deze functie wordt aangeroepen als de BKO de knop 'Doorzetten naar de volgende fase' gebruikt """
 
-        self._check_competitie_fase(kwargs['comp_pk'])      # kan 403 or 404 raisen
+        self._get_competitie(kwargs['comp_pk'])      # kan 403 or 404 raisen
+
+        if self.is_teams:
+            check_fase = self.comp.fase_teams
+        else:
+            check_fase = self.comp.fase_indiv
+
+        if check_fase != self.expected_fase:
+            # mogelijk oneigenlijk gebruik van de site
+            raise Http404('Verkeerde competitie fase')
 
         door_account = get_account(request)
         self.doorzetten(door_account, self.comp)
@@ -584,6 +593,7 @@ class KleineBKKlassenZijnSamengevoegdTeamsView(DoorzettenBasisView):
     expected_fase = 'N'
     fase_verkeerd_404 = False
     url_name = 'bko-bk-teams-kleine-klassen'
+    is_teams = True
 
     def doorzetten(self, account, comp):
         comp.bk_teams_klassen_zijn_samengevoegd = True

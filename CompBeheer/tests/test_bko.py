@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2025 Ramon van der Winkel.
+#  Copyright (c) 2020-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -437,7 +437,9 @@ class TestCompBeheerBko(E2EHelpers, TestCase):
         self.assert404(resp, 'Verkeerde competitie fase')
 
         resp = self.client.get(self.url_doorzetten_rk_naar_bk_teams % self.comp_18.pk)
-        self.assert404(resp, 'Verkeerde competitie fase')
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assertContains(resp, 'De rayonkampioenschappen kunnen op dit moment nog niet doorgezet worden. Wacht tot de tijdlijn fase L bereikt heeft.')
 
         resp = self.client.post(self.url_doorzetten_rk_naar_bk_teams % self.comp_18.pk)
         self.assert404(resp, 'Verkeerde competitie fase')
@@ -449,7 +451,9 @@ class TestCompBeheerBko(E2EHelpers, TestCase):
         self.assert404(resp, 'Verkeerde competitie fase')
 
         resp = self.client.get(self.url_bevestig_eindstand_bk_teams % self.comp_18.pk)
-        self.assert404(resp, 'Verkeerde competitie fase')
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assertContains(resp, 'De competitie kan op dit moment nog niet doorgezet worden. Wacht tot de tijdlijn fase P bereikt heeft.')
 
         resp = self.client.post(self.url_bevestig_eindstand_bk_teams % self.comp_18.pk)
         self.assert404(resp, 'Verkeerde competitie fase')
@@ -684,6 +688,7 @@ class TestCompBeheerBko(E2EHelpers, TestCase):
         self.comp_25.bepaal_fase()
         self.assertEqual(self.comp_25.fase_teams, 'N')
 
+        # controleer dat nog een keer niet mogelijk is
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assert404(resp, "Verkeerde competitie fase")
@@ -816,14 +821,14 @@ class TestCompBeheerBko(E2EHelpers, TestCase):
         url = self.url_bevestig_eindstand_bk_teams % self.comp_25.pk
 
         # pagina ophalen in de verkeerde fase
-        self.comp_25 = Competitie.objects.get(pk=self.comp_25.pk)
+        self.comp_25.refresh_from_db()
         self.comp_25.bepaal_fase()
         self.assertNotEqual(self.comp_25.fase_teams, 'P')
         resp = self.client.get(url)
-        self.assert404(resp, 'Verkeerde competitie fase')
+        self.assertContains(resp, 'De competitie kan op dit moment nog niet doorgezet worden. Wacht tot de tijdlijn fase P bereikt heeft.')
 
         zet_competitie_fases(self.comp_25, 'P', 'P')
-        self.comp_25 = Competitie.objects.get(pk=self.comp_25.pk)
+        self.comp_25.refresh_from_db()
         self.comp_25.bepaal_fase()
         self.assertEqual(self.comp_25.fase_teams, 'P')
 
