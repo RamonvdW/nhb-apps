@@ -71,14 +71,19 @@ def sv_knop_nav(url='', kleur='rood', icon='', tekst='##BUG', knop_id='',
 
 @register.simple_tag(name='sv-knop-mailto')
 @functools.cache
-def sv_knop_mailto(kleur='rood', icon='email', email='', tekst=''):
+def sv_knop_mailto(kleur='rood', icon='email', email='', tekst='', usability_label='Stuur e-mail'):
 
     if kleur == 'rood':
         kleur_class = 'btn-sv-rood'
     else:
         kleur_class = 'btn-sv-blauw'
 
-    new_text = '<a class="%s" href="mailto:%s">\n' % (kleur_class, email)
+    new_text = '<a class="%s" href="mailto:%s"' % (kleur_class, email)
+
+    if usability_label:
+        new_text += ' aria-label="%s"' % usability_label.replace('"', "'")
+
+    new_text += '>\n'
 
     if icon:
         # button height is 36px

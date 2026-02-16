@@ -403,6 +403,10 @@ class ImporteerUitslagTeamsExcel:
                 self.has_error = True
                 continue
 
+            # 100=blanco, 32000=no show, 32001=reserve
+            kamp_team.result_teamscore = matchpunten
+            expected_teams.remove(kamp_team)
+
             shootoff_str = ws['F' + str(row_nr)].value
             if shootoff_str:
                 try:
@@ -411,13 +415,9 @@ class ImporteerUitslagTeamsExcel:
                     self.stderr.write('[ERROR] Geen valide shootoff %s op regel %s' % (repr(shootoff_str), row_nr))
                     self.has_error = True
                     continue
+                kamp_team.result_shootoff_str = '(SO: %s)' % shootoff
             else:
                 shootoff = 0
-
-            # 100=blanco, 32000=no show, 32001=reserve
-            kamp_team.result_teamscore = matchpunten
-            kamp_team.result_shootoff = shootoff
-            expected_teams.remove(kamp_team)
 
             tup = (matchpunten, shootoff, kamp_team.pk, kamp_team)
             eindstand.append(tup)
@@ -445,7 +445,8 @@ class ImporteerUitslagTeamsExcel:
 
 
             if not (self.dryrun or self.has_error):
-                kamp_team.save(update_fields=['result_rank', 'result_volgorde', 'result_teamscore', 'result_shootoff'])
+                kamp_team.save(update_fields=['result_rank', 'result_volgorde',
+                                              'result_teamscore', 'result_shootoff_str'])
 
             volgorde += 1
         # for

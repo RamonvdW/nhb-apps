@@ -531,7 +531,7 @@ class KampioenschapTeamAdmin(CreateOnlyAdmin):
             {'fields': ('result_rank',
                         'result_volgorde',
                         'result_teamscore',
-                        'result_shootoff')
+                        'result_shootoff_str')
              }),
     )
 

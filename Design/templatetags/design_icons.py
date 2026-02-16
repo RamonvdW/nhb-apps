@@ -405,11 +405,17 @@ def sv_icon(icon_name, use='button', kleur='rood', icon_height=0, extra_style=''
 
 @register.simple_tag(name='sv-icon-op-button')
 @functools.cache
-def sv_icon_op_button(icon_name, tekst='', extra_class='', extra_style=''):
+def sv_icon_op_button(icon_name, tekst='', usability_label='', extra_class='', extra_style=''):
+    """ usability_label is voor screen readers, als er geen tekst is.
+    """
+
     new_text = '<span'
 
     if extra_class:
         new_text += ' class="%s"' % extra_class
+
+    if usability_label:
+        new_text += ' aria-label="%s"' % usability_label.replace('"', "'")
 
     new_text +=' style="display:inline-block; vertical-align:text-bottom; height:24px'
 

@@ -612,7 +612,7 @@ class UitslagenRayonTeamsView(TemplateView):
                 else:
                     team.rank = team.result_rank
                     team.rk_score_str = str(team.result_teamscore)
-                    team.rk_shootoff_str = '(SO: %s)' % team.result_shootoff
+                    team.rk_shootoff_str = team.result_shootoff_str
                     alle_matchscores.append(team.result_teamscore)
                     alle_ranks.append(team.result_rank)
 

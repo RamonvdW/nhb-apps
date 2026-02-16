@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -43,16 +43,16 @@ class HistKampIndivBKAdmin(admin.ModelAdmin):
 
     search_fields = ('sporter_lid_nr',)
 
-    ordering = ['rank_bk', 'boogtype', 'bk_indiv_klasse']
+    ordering = ['-seizoen', 'rank_bk', 'boogtype', 'bk_indiv_klasse']
 
 
 class HistKampTeamAdmin(admin.ModelAdmin):
 
+    list_filter = ('seizoen__seizoen', 'seizoen__comp_type', 'rk_of_bk', 'team_type', 'rayon_nr', 'teams_klasse')
+
     autocomplete_fields = ('lid_1', 'lid_2', 'lid_3', 'lid_4')
 
-    list_filter = ('seizoen__seizoen', 'seizoen__comp_type', 'rk_of_bk', 'team_type')
-
-    ordering = ['rank', 'team_type', 'teams_klasse']
+    ordering = ['-seizoen', 'rank', 'team_type', 'teams_klasse']
 
     def __init__(self, model, admin_site):
         super().__init__(model, admin_site)
