@@ -16,7 +16,7 @@ django==5.2.11
     #   -r requirements.in
 et-xmlfile==2.0.0
     # via openpyxl
-google-api-core==2.29.0
+google-api-core==2.30.0
     # via
     #   google-api-python-client
     #   google-geo-type
@@ -47,13 +47,13 @@ googleapis-common-protos==1.72.0
     #   grpcio-status
 googlemaps==4.10.0
     # via -r requirements.in
-grpcio==1.78.0
+grpcio==1.78.1
     # via
     #   google-api-core
     #   google-geo-type
     #   google-maps-routing
     #   grpcio-status
-grpcio-status==1.78.0
+grpcio-status==1.78.1
     # via google-api-core
 httplib2==0.31.2
     # via
@@ -84,7 +84,7 @@ protobuf==6.33.5
     #   googleapis-common-protos
     #   grpcio-status
     #   proto-plus
-psycopg==3.3.2
+psycopg==3.3.3
     # via -r requirements.in
 pyasn1==0.6.2
     # via
@@ -98,7 +98,7 @@ pyparsing==3.2.5
     # via
     #   -c constraints.in
     #   httplib2
-pypdf==6.7.0
+pypdf==6.7.1
     # via -r requirements.in
 qrcode==8.2
     # via -r requirements.in
