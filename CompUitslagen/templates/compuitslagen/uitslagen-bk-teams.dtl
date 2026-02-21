@@ -115,7 +115,7 @@
                 {% if team.break_klasse %}
                     {% if not forloop.first %}
                         <tr class="sv-table-onderrand">
-                            <td colspan="8" class="sv-table-onderrand"></td>
+                            <td colspan="7" class="sv-table-onderrand"></td>
                         </tr>
                     {% endif %}
 
@@ -242,7 +242,7 @@
             {% endfor %}
 
             <tr class="sv-table-onderrand">
-                <td colspan="8" class="sv-table-onderrand"></td>
+                <td colspan="7" class="sv-table-onderrand"></td>
             </tr>
         </table>
 

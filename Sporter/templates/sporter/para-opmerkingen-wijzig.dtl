@@ -31,7 +31,7 @@
                     <table>
 
                         <tr>
-                            <td colspan="2">
+                            <td>
                                 <h5>Voorkeuren voor para-sporters</h5>
                                 <br>
                                 <span>De ingevoerde informatie wordt gedeeld met de wedstrijdleiding zodat ze, indien mogelijk, hier rekening mee houden.</span>
@@ -39,7 +39,7 @@
                         </tr>
 
                         <tr>
-                            <td colspan="2">
+                            <td>
                                 <label>
                                     <input type="checkbox" class="filled-in" name="para_voorwerpen"{% if voorkeuren.para_voorwerpen %} checked{% endif %}>
                                     <span class="black-text">Ik blijf op de schietlijn zitten of gebruik voorwerpen die op de schietlijn blijven staan.</span>
@@ -57,7 +57,7 @@
                         </tr>
 
                         <tr>
-                            <td colspan="2" class="input-field">
+                            <td class="input-field">
                                 <span>Korte toelichting over jouw para situatie:</span>
                                 <div>
                                     <input type="text" maxlength="256" name="para_notitie" placeholder="Hier invoeren" value="{{ voorkeuren.opmerking_para_sporter }}">
