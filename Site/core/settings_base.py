@@ -128,6 +128,10 @@ INSTALLED_APPS = [
 # - Referrer-Policy header (='same-origin')
 # - Cross-Origin-Opener-Policy header (='same-origin')
 # - X-Content-Type-Options header (='nosniff')
+#
+# TODO: ContentSecurityPolicyMiddleware provides: (see https://docs.djangoproject.com/en/6.0/ref/csp/)
+# - Content-Security-Policy header ('default-src=self')
+#
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',                # security (https improvements)
     'django.contrib.sessions.middleware.SessionMiddleware',         # manage sessions across requests
@@ -191,8 +195,8 @@ CSRF_COOKIE_NAME = 'mh_csrf_token'
 WSGI_APPLICATION = 'Site.core.wsgi.application'
 
 # let browsers remember to connect with https
-# security analysis recommends at least 180 days
-SECURE_HSTS_SECONDS = 17280000      # 17280000 = 200 days
+# security analysis recommends at least 365 days
+SECURE_HSTS_SECONDS = 34567890      # 34567890 = 400 days
 
 
 # Password validation
