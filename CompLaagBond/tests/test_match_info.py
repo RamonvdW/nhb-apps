@@ -4,25 +4,23 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.test import TestCase, override_settings
+from django.test import TestCase
 from django.utils import timezone
-from Competitie.definities import DEEL_RK
-from Competitie.models import CompetitieMatch, KampioenschapSporterBoog, KampioenschapTeam
+from Competitie.models import CompetitieMatch
 from Competitie.test_utils.tijdlijn import zet_competitie_fase_bk_prep
 from Locatie.models import WedstrijdLocatie
+from Scheidsrechter.models import MatchScheidsrechters
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
-import zipfile
-import os
 
 
-class TestCompLaagBondFormulieren(E2EHelpers, TestCase):
+class TestCompLaagMatchInfo(E2EHelpers, TestCase):
 
-    """ tests voor de CompLaagBond applicatie, Formulieren functie """
+    """ tests voor de CompLaagBond applicatie, Match Info view """
 
     test_after = ('Competitie.tests.test_overzicht', 'CompBeheer.tests.test_bko')
 
-    url_forms_download_teams = '/bondscompetities/bk/download-formulier-teams/%s/%s/'   # match_pk, klasse_pk
+    url_match_info = '/bondscompetities/bk/wedstrijd-informatie/%s/'     # match_pk
 
     testdata = None
     ver_nr = 0
@@ -47,10 +45,10 @@ class TestCompLaagBondFormulieren(E2EHelpers, TestCase):
         data.maak_bk_deelnemers(18)
         data.maak_bk_teams(18)
 
-        ver_nr = data.regio_ver_nrs[111][0]
-        cls.ver = data.vereniging[ver_nr]
+        cls.ver_nr = data.regio_ver_nrs[111][0]
+        cls.ver = data.vereniging[cls.ver_nr]
 
-        cls.functie_hwl = data.functie_hwl[ver_nr]
+        cls.functie_hwl = data.functie_hwl[cls.ver_nr]
 
         s2 = timezone.now()
         d = s2 - s1
@@ -81,6 +79,7 @@ class TestCompLaagBondFormulieren(E2EHelpers, TestCase):
                                adres='De Spanning 1, Houtdorp')
         loc.save()
         loc.verenigingen.add(self.ver)
+        self.loc = loc
 
         # maak een BK wedstrijd aan
         self.match = CompetitieMatch(
@@ -113,68 +112,76 @@ class TestCompLaagBondFormulieren(E2EHelpers, TestCase):
 
         self.deelkamp25_bk = self.testdata.deelkamp25_bk
 
-        bad_path = '/tmp/CompKampioenschap/files/'
-        os.makedirs(bad_path, exist_ok=True)
-
-        self.xlsx_fpath_teams = bad_path + 'template-excel-teams.xlsx'
-        try:
-            os.remove(self.xlsx_fpath_teams)
-        except FileNotFoundError:
-            pass
-
-    @staticmethod
-    def _make_bad_file(fpath):
-        with zipfile.ZipFile(fpath, 'w') as xlsx:
-            xlsx.writestr('hello.txt', 'Hello World')
-
     def test_anon(self):
         self.client.logout()
 
-        resp = self.client.get(self.url_forms_download_teams % (999999, 999999))
+        resp = self.client.get(self.url_match_info % 999999)
         self.assert_is_redirect_login(resp)
 
-    def test_bad(self):
-        # ingelogd als BKO Indoor
+    def test_match_info(self):
         self.e2e_wissel_naar_functie(self.functie_hwl)
 
-        resp = self.client.get(self.url_forms_download_teams % (999999, 999999))
-        self.assert404(resp, 'Wedstrijd niet gevonden')
-
-        resp = self.client.get(self.url_forms_download_teams % (self.match.pk, 999999))
-        self.assert404(resp, 'Klasse niet gevonden')
-
-        # verander de match in een RK
-        # doe dit eenvoudig door het kampioenschap om te bouwen tot een RK
-        self.deelkamp18_bk.deel = DEEL_RK
-        self.deelkamp18_bk.save(update_fields=['deel'])
-
-        resp = self.client.get(self.url_forms_download_teams % (self.match.pk, self.comp18_klassen_teams_bk[0].pk))
-        self.assert404(resp, 'Geen kampioenschap')
-
-    def test_download(self):
-        # BKO download een ingevuld BK programma
-
-        # ingelogd als BKO Indoor
-        self.e2e_wissel_naar_functie(self.functie_hwl)
-
-        team_klasse = KampioenschapTeam.objects.filter(kampioenschap=self.deelkamp18_bk)[0].team_klasse
-        url = self.url_forms_download_teams % (self.match.pk, team_klasse.pk)
-
-        with self.assert_max_queries(23):
+        url = self.url_match_info % self.match.pk
+        with self.assert_max_queries(26):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert200_is_bestand_xlsx(resp)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('complaagbond/hwl-bk-match-info.dtl', 'design/site_layout.dtl'))
 
-        # niet bestaand BK programma
-        with override_settings(INSTALL_PATH='/tmp'):
-            resp = self.client.get(url)
-        self.assert404(resp, 'Kan teams programma template bestand niet vinden')
+        # SR nodig
+        self.match.aantal_scheids = 1
+        self.match.locatie = None
+        self.match.save(update_fields=['aantal_scheids', 'locatie'])
 
-        # kapot BK programma
-        self._make_bad_file(self.xlsx_fpath_teams)
-        with override_settings(INSTALL_PATH='/tmp'):
+        with self.assert_max_queries(27):
             resp = self.client.get(url)
-        self.assert404(resp, 'Kan zojuist aangemaakte programma niet laden')
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('complaagbond/hwl-bk-match-info.dtl', 'design/site_layout.dtl'))
+
+        # 25m1p
+        self.match.competitie = self.testdata.comp25
+        self.match.save(update_fields=['competitie'])
+
+        msr = MatchScheidsrechters.objects.create(match=self.match,
+                                                  gekozen_hoofd_sr=self.testdata.ver_sporters[self.ver_nr][0])
+
+        with self.assert_max_queries(27):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('complaagbond/hwl-bk-match-info.dtl', 'design/site_layout.dtl'))
+
+        self.match.locatie = self.loc
+        self.match.save(update_fields=['locatie'])
+
+        msr.gekozen_sr1 = self.testdata.ver_sporters[self.ver_nr][1]
+        msr.save(update_fields=['gekozen_sr1'])
+
+        with self.assert_max_queries(27):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('complaagbond/hwl-bk-match-info.dtl', 'design/site_layout.dtl'))
+
+        # niet bestaande match
+        resp = self.client.get(self.url_match_info % 999999)
+        self.assert404(resp, "Wedstrijd niet gevonden")
+
+        # niet een BK match
+        match = CompetitieMatch.objects.create(
+                        competitie=self.match.competitie,
+                        beschrijving='test',
+                        vereniging=self.functie_hwl.vereniging,
+                        datum_wanneer='2000-01-01',
+                        tijd_begin_wedstrijd='00:00')
+        resp = self.client.get(self.url_match_info % match.pk)
+        self.assert404(resp, "Geen kampioenschap")
+
+        # verkeerde HWL
+        self.e2e_wissel_naar_functie(self.testdata.functie_hwl[self.ver.ver_nr + 1])
+        resp = self.client.get(self.url_match_info % self.match.pk)
+        self.assert404(resp, 'Niet de beheerder')
 
 
 # end of file

@@ -1,16 +1,18 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2025 Ramon van der Winkel.
+#  Copyright (c) 2020-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import reverse
+from django.utils import timezone
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.definities import DEEL_RK, DEEL_BK
 from Competitie.models import CompetitieMatch, RegiocompetitieRonde, Kampioenschap
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
+import datetime
 
 TEMPLATE_WEDSTRIJDEN = 'compscores/wedstrijden.dtl'
 
@@ -61,8 +63,6 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
 
         pks = list(pks1) + list(pks2)
 
-        is_mix = len(pks1) > 0 and len(pks2) > 0
-
         matches = (CompetitieMatch
                    .objects
                    .filter(pk__in=pks)
@@ -70,6 +70,8 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
                                      'regiocompetitieronde_set')
                    .order_by('datum_wanneer',
                              'tijd_begin_wedstrijd'))
+
+        in_verleden_datum = (timezone.now() - datetime.timedelta(days=5)).date()
 
         for match in matches:
 
@@ -81,6 +83,9 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
             else:
                 match.deelkamp = None
 
+            match.is_rk = (match.deelkamp and match.deelkamp.deel == DEEL_RK)
+            match.is_bk = (match.deelkamp and match.deelkamp.deel == DEEL_BK)
+
             # voor competitiewedstrijden wordt de beschrijving ingevuld
             # als de instellingen van de ronde opgeslagen worden
             # dit is slechts fall-back
@@ -91,6 +96,7 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
                     match.beschrijving1 = ronde.regiocompetitie.competitie.beschrijving
                     match.beschrijving2 = ronde.beschrijving
                 else:
+                    # TODO: onderstaande is niet meer nodig
                     if match.deelkamp:          # pragma: no branch
                         match.beschrijving1 = match.deelkamp.competitie.beschrijving
                         if match.deelkamp.deel == DEEL_RK:
@@ -98,24 +104,32 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
                         else:
                             match.beschrijving2 = "Bondskampioenschappen"
             else:
-                msg = match.beschrijving
-                pos = msg.find(' - ')           # TODO: is dit nog actueel?
-                if pos > 0:
-                    match.beschrijving1 = msg[:pos].strip()
-                    match.beschrijving2 = msg[pos+3:].strip()
-                else:
-                    match.beschrijving1 = msg
-                    match.beschrijving2 = ''
+                match.beschrijving1 = match.beschrijving
+                match.beschrijving2 = ''
 
-            match.is_rk = (match.deelkamp and match.deelkamp.deel == DEEL_RK)
-            match.is_bk = (match.deelkamp and match.deelkamp.deel == DEEL_BK)
-            match.opvallen = (match.is_rk or match.is_bk) and is_mix
+                if match.is_rk or match.is_bk:
+                    is_indiv = match.indiv_klassen.count() > 0
+                    is_teams = match.team_klassen.count() > 0
+
+                    if is_indiv and is_teams:
+                        match.beschrijving2 = 'individueel en teams'
+                    elif is_indiv:
+                        match.beschrijving2 = 'individueel'
+                    else:
+                        match.beschrijving2 = 'teams'
+
+            if match.datum_wanneer <= in_verleden_datum:
+                match.is_historisch = True
+                match.knop_kleur = 'blauw'
+            else:
+                match.knop_kleur = 'rood'
 
             match.toon_geen_uitslag = True
 
             if match.is_rk or match.is_bk:
                 # geen knop nodig om de uitslag in te voeren
                 match.toon_nvt = True
+
             else:
                 match.toon_nvt = False
                 heeft_uitslag = (match.uitslag and match.uitslag.scores.count() > 0)
@@ -135,20 +149,23 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
                                                              kwargs={'match_pk': match.pk})
                         match.toon_geen_uitslag = False
 
-            # link naar de waarschijnlijke deelnemerslijst
+            # link naar de deelnemerslijst
             if self.rol_nu in (Rol.ROL_HWL, Rol.ROL_WL) and not (match.uitslag and match.uitslag.is_bevroren):
                 if match.is_rk:
                     match.url_lijst = reverse('CompLaagRayon:download-formulier',
                                               kwargs={'match_pk': match.pk})
+                    match.titel_lijst = "RK programma's"
+
                 elif match.is_bk:
                     match.url_lijst = reverse('CompLaagBond:bk-match-informatie',
                                               kwargs={'match_pk': match.pk})
-                    # geen knoppen - formulier wordt door BKO opgestuurd
-                    pass
+                    match.titel_lijst = "BK programma's"
 
                 else:
+                    # link naar de waarschijnlijke deelnemerslijst
                     match.url_lijst = reverse('CompLaagRegio:waarschijnlijke-deelnemers',
                                               kwargs={'match_pk': match.pk})
+                    match.titel_lijst = 'Toon lijst'
 
             context['geen_wedstrijden'] = False
         # for

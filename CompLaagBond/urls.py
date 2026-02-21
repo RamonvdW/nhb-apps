@@ -6,7 +6,7 @@
 
 from django.urls import path
 from CompLaagBond import (view_planning, view_indiv_bko, view_teams_bko, view_formulieren, view_kleine_klassen,
-                          view_indiv_wijzig_status, view_bk_info_hwl)
+                          view_indiv_wijzig_status, view_match_info_hwl)
 
 app_name = 'CompLaagBond'
 
@@ -54,7 +54,7 @@ urlpatterns = [
          view_indiv_wijzig_status.WijzigStatusBkDeelnemerView.as_view(),
          name='wijzig-status-bk-deelnemer'),
 
-    # Sporter: deelname bevestigen
+    # Sporter: wijzig deelname status voor BK
     path('wijzig-status-bk-deelname/',
          view_indiv_wijzig_status.SporterWijzigStatusBkDeelnameView.as_view(),
          name='wijzig-status-bk-deelname'),
@@ -69,16 +69,15 @@ urlpatterns = [
          view_teams_bko.LijstBkTeamsView.as_view(),
          name='bk-teams'),
 
-
-    # BKO: download formulieren
-    path('formulieren/teams/download/<match_pk>/<klasse_pk>/',
-         view_formulieren.FormulierBkTeamsAlsBestandView.as_view(),
-         name='formulier-teams-als-bestand'),
-
     # HWL/WL: wedstrijd informatie
     path('wedstrijd-informatie/<match_pk>/',
-         view_bk_info_hwl.MatchInformatieView.as_view(),
+         view_match_info_hwl.BkMatchInfoView.as_view(),
          name='bk-match-informatie'),
+
+    # BKO/HWL: download formulieren
+    path('download-formulier-teams/<match_pk>/<klasse_pk>/',
+         view_formulieren.FormulierBkTeamsAlsBestandView.as_view(),
+         name='formulier-teams-als-bestand'),
 ]
 
 # end of file

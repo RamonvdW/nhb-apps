@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from CompLaagRayon import (view_planning, view_formulieren,
+from CompLaagRayon import (view_planning, view_formulieren, view_match_info_hwl,
                            view_indiv_rko, view_indiv_hwl, view_indiv_wijzig_status,
                            view_teams_rko, view_teams_hwl, view_bko)
 
@@ -89,8 +89,8 @@ urlpatterns = [
 
 
     # HWL: download lijsten
-    path('download-formulier/<match_pk>/',
-         view_formulieren.DownloadRkFormulierView.as_view(),
+    path('wedstrijd-informatie/<match_pk>/',
+         view_match_info_hwl.RkMatchInfoView.as_view(),
          name='download-formulier'),
 
     path('download-formulier-teams/<match_pk>/<klasse_pk>/',

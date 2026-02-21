@@ -16,14 +16,14 @@ import zipfile
 import os
 
 
-class TestCompLaagRayonFormulieren(E2EHelpers, TestCase):
+class TestCompLaagRayonMatchInfo(E2EHelpers, TestCase):
 
-    """ tests voor de CompLaagRayon applicatie, Formulieren functie """
+    """ tests voor de CompLaagRayon applicatie, Match Info view """
 
     test_after = ('Competitie.tests.test_overzicht', 'CompBeheer.tests.test_bko', 'CompLaagRayon.tests.test_teams_rko',
                   'CompLaagRayon.tests.test_teams_rko')
 
-    url_forms_download_teams = '/bondscompetities/rk/download-formulier-teams/%s/%s/'     # match_pk, klasse_pk
+    url_match_info = '/bondscompetities/rk/wedstrijd-informatie/%s/'     # match_pk
 
     testdata = None
     regio_nr = 113
@@ -106,23 +106,78 @@ class TestCompLaagRayonFormulieren(E2EHelpers, TestCase):
 
         self.deelkamp_25 = self.testdata.deelkamp25_rk[self.rayon_nr]
 
-        bad_path = '/tmp/CompKampioenschap/files/'
-        os.makedirs(bad_path, exist_ok=True)
+    def test_match_info(self):
+        url = self.url_match_info % self.match.pk
 
-        self.xlsx_fpath_teams = bad_path + 'template-excel-teams.xlsx'
-        try:
-            os.remove(self.xlsx_fpath_teams)
-        except FileNotFoundError:
-            pass
+        self.e2e_login_and_pass_otp(self.testdata.account_hwl[self.ver_nr])
+        self.e2e_wissel_naar_functie(self.testdata.functie_hwl[self.ver_nr])
 
-    @staticmethod
-    def _make_bad_file(fpath):
-        with zipfile.ZipFile(fpath, 'w') as xlsx:
-            xlsx.writestr('hello.txt', 'Hello World')
+        # geen klassen
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_template_used(resp, ('complaagrayon/hwl-rk-match-info.dtl', 'design/site_layout.dtl'))
+        self.assert_html_ok(resp)
 
-    def test_download_teams(self):
-        klasse = self.testdata.comp18_klassen_teams['R2'][1]     # Recurve A met 2 teams
-        url = self.url_forms_download_teams % (self.match.pk, klasse.pk)
+        # alleen indiv klassen
+        self.match.indiv_klassen.set([self.comp18_klassen_indiv_rk[0],
+                                      self.comp18_klassen_indiv_rk[-1]])
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_template_used(resp, ('complaagrayon/hwl-rk-match-info.dtl', 'design/site_layout.dtl'))
+        self.assert_html_ok(resp)
+
+        # indiv + teams klassen
+        self.match.team_klassen.set([self.testdata.comp18_klassen_teams['R2'][0],
+                                     self.testdata.comp18_klassen_teams['R2'][1]])       # Recurve A met 2 teams
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_template_used(resp, ('complaagrayon/hwl-rk-match-info.dtl', 'design/site_layout.dtl'))
+        self.assert_html_ok(resp)
+
+        # alleen teams klassen
+        self.match.indiv_klassen.set([])
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_template_used(resp, ('complaagrayon/hwl-rk-match-info.dtl', 'design/site_layout.dtl'))
+        self.assert_html_ok(resp)
+
+        # wedstrijd niet in een plan
+        self.deelkamp_18.rk_bk_matches.remove(self.match.pk)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assert404(resp, 'Geen kampioenschap')
+
+        # 25m1p plan
+        self.deelkamp_25.rk_bk_matches.add(self.match.pk)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+
+        # zonder locatie
+        self.match.locatie = None
+        self.match.save(update_fields=['locatie'])
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.deelkamp_25.rk_bk_matches.remove(self.match.pk)
+
+        # wedstrijd van een niet-RK kampioenschap
+        self.testdata.deelkamp18_bk.rk_bk_matches.add(self.match.pk)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assert404(resp, 'Geen kampioenschap')
+
+        # niet bestaande wedstrijd
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_match_info % 'xxx')
+        self.assert404(resp, 'Wedstrijd niet gevonden')
+
+    def test_bad(self):
+        url = self.url_match_info % self.match.pk
 
         # ophalen zonder inlog
         self.client.logout()
@@ -133,61 +188,24 @@ class TestCompLaagRayonFormulieren(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.testdata.account_hwl[self.ver_nr])
         self.e2e_wissel_naar_functie(self.testdata.functie_hwl[self.ver_nr])
 
-        # normaal
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert200_is_bestand_xlsx(resp)
-
-        # zonder locatie
+        # creëer wat corner-cases
         self.match.locatie = None
         self.match.save(update_fields=['locatie'])
+
+        # enable teams
+        self.match.team_klassen.set([self.testdata.comp18_klassen_teams['R2'][0],
+                                     self.testdata.comp18_klassen_teams['R2'][1]])       # Recurve A met 2 teams
+
+        # geen klassengrenzen vastgesteld
+        self.testdata.comp18.klassengrenzen_vastgesteld_rk_bk = False
+        self.testdata.comp18.save(update_fields=['klassengrenzen_vastgesteld_rk_bk'])
+
+        # ophalen met alle corner-cases
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assert200_is_bestand_xlsx(resp)
-
-        # template niet te vinden
-        with override_settings(INSTALL_PATH='/tmp'):
-            resp = self.client.get(url)
-        self.assert404(resp, 'Kan teams programma template bestand niet vinden')
-
-        # slechte template
-        self._make_bad_file(self.xlsx_fpath_teams)
-        with override_settings(INSTALL_PATH='/tmp'):
-            resp = self.client.get(url)
-        self.assert404(resp, 'Kan zojuist aangemaakte programma niet laden')
-
-        # niet bestaande wedstrijd
-        resp = self.client.get(self.url_forms_download_teams % (999999, 'xxx'))
-        self.assert404(resp, 'Wedstrijd niet gevonden')
-
-        # niet bestaande klasse
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_forms_download_teams % (self.match.pk, 'xxx'))
-        self.assert404(resp, 'Klasse niet gevonden')
-
-        # wedstrijd niet in een plan
-        self.deelkamp_18.rk_bk_matches.remove(self.match.pk)
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert404(resp, 'Geen kampioenschap')
-
-        # wedstrijd van een niet-RK kampioenschap
-        self.testdata.deelkamp18_bk.rk_bk_matches.add(self.match.pk)
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert404(resp, 'Geen kampioenschap')
-        self.testdata.deelkamp18_bk.rk_bk_matches.clear()
-
-        # 25m
-        self.testdata.maak_rk_deelnemers(25, self.ver_nr, self.regio_nr, limit_boogtypen=['R', 'BB'])
-        self.testdata.maak_rk_teams(25, self.ver_nr, per_team=3, limit_teamtypen=['R2'])
-        self.deelkamp_25.rk_bk_matches.add(self.match)
-        klasse = self.testdata.comp25_klassen_teams['R2'][0]
-        self.match.team_klassen.add(klasse)
-        url = self.url_forms_download_teams % (self.match.pk, klasse.pk)
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert200_is_bestand_xlsx(resp)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_template_used(resp, ('complaagrayon/hwl-rk-match-info.dtl', 'design/site_layout.dtl'))
+        self.assert_html_ok(resp)
 
 
 # end of file

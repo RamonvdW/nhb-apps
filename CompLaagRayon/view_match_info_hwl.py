@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023-2026 Ramon van der Winkel.
+#  Copyright (c) 2020-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -9,7 +9,7 @@ from django.http import Http404
 from django.utils import timezone
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.definities import DEEL_BK, DEELNAME_NEE
+from Competitie.definities import DEEL_RK, DEELNAME_NEE
 from Competitie.models import CompetitieMatch, KampioenschapSporterBoog, KampioenschapTeam
 from CompKampioenschap.operations import get_url_wedstrijdformulier
 from Functie.definities import Rol
@@ -18,27 +18,28 @@ from Scheidsrechter.models import MatchScheidsrechters
 from Sporter.models import SporterVoorkeuren
 import textwrap
 
-TEMPLATE_HWL_BK_MATCH_INFORMATIE = 'complaagbond/hwl-bk-match-info.dtl'
+TEMPLATE_RK_MATCH_INFO = 'complaagrayon/hwl-rk-match-info.dtl'
 
 
-class MatchInformatieView(UserPassesTestMixin, TemplateView):
+class RkMatchInfoView(UserPassesTestMixin, TemplateView):
 
-    """ Toon de HWL/WL informatie over de BK wedstrijd (geen deelnemerslijst) """
+    """ Toon de HWL of WL de waarschijnlijke deelnemerslijst voor een wedstrijd bij deze vereniging
+        met knoppen om de deelnemerslijsten voor elke klasse te downloaden
+    """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_HWL_BK_MATCH_INFORMATIE
+    template_name = TEMPLATE_RK_MATCH_INFO
     raise_exception = True  # genereer PermissionDefined als test_func False terug geeft
     permission_denied_message = 'Geen toegang'
-    geef_teams = False
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.functie_nu = None
+        self.rol_nu, self.functie_nu = None, None
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.functie_nu and rol_nu in (Rol.ROL_HWL, Rol.ROL_WL)
+        self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
+        return self.functie_nu and self.rol_nu in (Rol.ROL_SEC, Rol.ROL_HWL, Rol.ROL_WL)
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -52,27 +53,25 @@ class MatchInformatieView(UserPassesTestMixin, TemplateView):
                                      'locatie')
                      .prefetch_related('indiv_klassen',
                                        'team_klassen')
-                     .get(pk=match_pk))
+                     .get(pk=match_pk,
+                          vereniging=self.functie_nu.vereniging))
         except (ValueError, CompetitieMatch.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
-        if match.vereniging != self.functie_nu.vereniging:
-            raise Http404('Niet de beheerder')
-
-        context['wedstrijd'] = match
-        context['vereniging'] = match.vereniging        # als we hier komen is dit altijd bekend
-        context['locatie'] = match.locatie
-
-        comp = match.competitie
-        comp.bepaal_fase()
-        # TODO: begrens toegang ahv de fase
-        context['comp'] = comp
-
-        deelkamps = match.kampioenschap_set.filter(deel=DEEL_BK)
+        deelkamps = match.kampioenschap_set.filter(deel=DEEL_RK)
         if len(deelkamps) == 0:
             raise Http404('Geen kampioenschap')
         deelkamp = deelkamps[0]
+
         context['deelkamp'] = deelkamp
+        context['wedstrijd'] = match
+        context['vereniging'] = match.vereniging        # als we hier komen is dit altijd bekend
+        context['locatie'] = match.locatie
+        context['aantal_banen'] = '?'
+
+        comp = deelkamp.competitie
+        comp.bepaal_fase()
+        # TODO: check fase
 
         if comp.is_indoor():
             aantal_pijlen = 30
@@ -82,6 +81,9 @@ class MatchInformatieView(UserPassesTestMixin, TemplateView):
             aantal_pijlen = 25
             if match.locatie:
                 context['aantal_banen'] = match.locatie.banen_25m
+
+        match.is_rk = True
+        match.beschrijving = "Rayonkampioenschap"
 
         heeft_indiv = heeft_teams = False
         beschr = list()
@@ -117,7 +119,7 @@ class MatchInformatieView(UserPassesTestMixin, TemplateView):
 
         context['heeft_indiv'] = heeft_indiv
         context['heeft_teams'] = heeft_teams
-        context['beschrijving'] = "Bondskampioenschappen %s" % " en ".join(beschr)
+        context['beschrijving'] = "%s %s" % (match.beschrijving, " en ".join(beschr))
 
         # zoek de deelnemers erbij
         if heeft_indiv:
@@ -139,9 +141,9 @@ class MatchInformatieView(UserPassesTestMixin, TemplateView):
                 if deelnemer.indiv_klasse != prev_klasse:
                     deelnemer.break_before = True
                     deelnemer.url_open_indiv = get_url_wedstrijdformulier(comp.begin_jaar, int(comp.afstand),
-                                                                          0,        # rayon_nr n.v.t.
+                                                                          deelkamp.rayon.rayon_nr,
                                                                           deelnemer.indiv_klasse.pk,
-                                                                          is_bk=True, is_teams=False)
+                                                                          is_bk=False, is_teams=False)
                     prev_klasse = deelnemer.indiv_klasse
 
                 deelnemer.ver_nr = deelnemer.bij_vereniging.ver_nr
@@ -219,7 +221,6 @@ class MatchInformatieView(UserPassesTestMixin, TemplateView):
                     else:
                         if voorkeuren_para_voorwerpen or len(voorkeuren_opmerking_para_sporter) > 1:
                             lid.is_para = True
-                            context['toon_para_uitleg'] = True
 
                     team.gekoppelde_leden_lijst.append(lid)
                 # for
@@ -244,7 +245,7 @@ class MatchInformatieView(UserPassesTestMixin, TemplateView):
         context['kruimels'] = (
             (reverse('Vereniging:overzicht'), 'Beheer vereniging'),
             (reverse('CompScores:wedstrijden'), 'Competitiewedstrijden'),
-            (None, 'BK programma')
+            (None, "RK programma's")
         )
 
         return context

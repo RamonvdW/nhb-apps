@@ -162,9 +162,6 @@
             <div class="col s12">
                 <h4>Team klassen</h4>
                 <p>Deze lijst is gebaseerd op de gegevens van: <b>{{ vastgesteld }}</b></p>
-                {% if toon_para_uitleg %}
-                    <p>Sporters met ** achter hun naam hebben een para notitie.</p>
-                {% endif %}
             </div>
         </div>
 

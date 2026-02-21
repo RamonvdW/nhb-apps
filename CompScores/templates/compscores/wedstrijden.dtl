@@ -1,6 +1,6 @@
 {% extends 'design/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2025 Ramon van der Winkel.
+                Copyright (c) 2020-2026 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -46,15 +46,13 @@
                     {% for obj in wedstrijden %}
                         <tr>
                             <td>{{ obj.datum_wanneer }} om {{ obj.tijd_begin_wedstrijd }}</td>
-                            <td>{{ obj.beschrijving1 }}<br>{% if obj.opvallen %}<b>{{ obj.beschrijving2 }}</b>{% else %}{{ obj.beschrijving2 }}{% endif %}</td>
+                            <td>{{ obj.beschrijving1 }}<br>{{ obj.beschrijving2 }}</td>
 
                             <!-- knop om de (waarschijnlijke) deelnemerslijst te zien -->
                             {% if not uitslag_invoeren %}
                                 <td>
                                     {% if obj.url_lijst %}
-                                        <a class="btn-sv-rood" href="{{ obj.url_lijst }}">{% if obj.is_rk %}RK programma{% elif obj.is_bk %}BK programma{% else %}Toon lijst{% endif %}</a>
-                                    {% elif obj.is_bk %}
-                                        <i>BK programma wordt toegestuurd</i>
+                                        <a class="{% if obj.is_historisch %}btn-sv-blauw{% else %}btn-sv-rood{% endif %}" href="{{ obj.url_lijst }}">{{ obj.titel_lijst }}</a>
                                     {% endif %}
                                 </td>
                             {% endif %}
@@ -62,11 +60,11 @@
                             <!-- knop om uitslagen te zien / in te voeren -->
                             <td>
                                 {% if obj.url_uitslag_aanpassen %}
-                                    {% sv-knop-nav url=obj.url_uitslag_aanpassen icon='volgende' tekst='Aanpassen' %}
+                                    {% sv-knop-nav url=obj.url_uitslag_aanpassen icon='volgende' tekst='Aanpassen' kleur=obj.knop_kleur %}
                                 {% elif obj.url_score_invoeren %}
-                                    {% sv-knop-nav url=obj.url_score_invoeren icon='volgende' tekst='Invoeren' %}
+                                    {% sv-knop-nav url=obj.url_score_invoeren icon='volgende' tekst='Invoeren' kleur=obj.knop_kleur %}
                                 {% elif obj.url_uitslag_bekijken %}
-                                    {% sv-knop-nav url=obj.url_uitslag_bekijken icon='volgende' tekst='Bekijken' %}
+                                    {% sv-knop-nav url=obj.url_uitslag_bekijken icon='volgende' tekst='Bekijken' kleur=obj.knop_kleur %}
                                 {% endif %}
 
                                 {% if obj.toon_nvt %}
