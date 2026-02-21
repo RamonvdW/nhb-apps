@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -485,9 +485,9 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
         begin_jaar = ronde.regiocompetitie.competitie.begin_jaar
 
         last_week_in_year = 52
-        when_wk53 = competitie_week_nr_to_date(begin_jaar, 53)
+        when_wk53 = competitie_week_nr_to_date(begin_jaar, 53)      # can return None
         when_wk1 = competitie_week_nr_to_date(begin_jaar, 1)
-        if when_wk53 != when_wk1:
+        if when_wk53 and when_wk53 != when_wk1:
             # wk53 does exist
             last_week_in_year = 53
 
@@ -662,6 +662,7 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
             eind_week = settings.COMPETITIE_25M_LAATSTE_WEEK
             if ronde.regiocompetitie.competitie.is_indoor():
                 eind_week = settings.COMPETITIE_18M_LAATSTE_WEEK
+            # TODO: begrens verder met competitie.datum_einde_fase_F (regio wedstrijden)
 
             if eind_week < settings.COMPETITIES_START_WEEK:
                 # typisch voor 25m: week 11..37 mogen niet

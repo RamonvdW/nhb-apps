@@ -1,6 +1,6 @@
 {% extends 'design/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2025 Ramon van der Winkel.
+                Copyright (c) 2020-2026 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -29,14 +29,14 @@
                 <table class="sv-kader-tabel">
                     <thead>
                         <tr>
-                            <th>Beschrijving</th>
-                            <th>Week notatie</th>
-                            <th>Datum</th>
+                            <th style="width:40%">Beschrijving</th>
+                            <th class="center">Week notatie</th>
+                            <th style="width:40%">Datum</th>
                         </tr>
                     </thead>
                     <tr>
                         <td>Inschrijving openen</td>    <!-- begin_fase_C -->
-                        <td id="week_nr1"></td>
+                        <td id="week_nr1" class="center"></td>
                         <td><input type="text" class="nl_datepicker" id="datum1" onchange="gewijzigd()"></td>
                     </tr>
 
@@ -46,12 +46,12 @@
 
                     <tr>
                         <td>Eerste wedstrijddag regiocompetitie</td>        <!-- begin_fase_F -->
-                        <td id="week_nr2"></td>
+                        <td id="week_nr2" class="center"></td>
                         <td><input type="text" class="nl_datepicker" id="datum2" onchange="gewijzigd()"></td>
                     </tr>
                     <tr>
-                        <td>Laatste wedstrijddag regiocompetitie</td>       <!-- einde_fase_F -->
-                        <td id="week_nr3"></td>
+                        <td>Laatste wedstrijddag regiocompetitie<br>(RCLs mogen plannen tot {{ limiet_fase_F }})</td>       <!-- einde_fase_F -->
+                        <td id="week_nr3" class="center"></td>
                         <td><input type="text" class="nl_datepicker" id="datum3" onchange="gewijzigd()"></td>
                     </tr>
 
@@ -61,31 +61,31 @@
 
                     <tr>
                         <td>Einde inschrijven RK teams (indicatief)</td>
-                        <td id="week_nr4"></td>
+                        <td id="week_nr4" class="center"></td>
                         <td><input type="text" class="nl_datepicker" id="datum4" onchange="gewijzigd()"></td>
                     </tr>
 
                     <tr>
                         <td>Eerste wedstrijddag RK individueel</td>         <!-- begin_fase_L_indiv -->
-                        <td id="week_nr5"></td>
+                        <td id="week_nr5" class="center"></td>
                         <td><input type="text" class="nl_datepicker" id="datum5" onchange="gewijzigd()"></td>
                     </tr>
 
                     <tr>
                         <td>Laatste wedstrijddag RK individueel</td>        <!-- einde_fase_L_indiv -->
-                        <td id="week_nr6"></td>
+                        <td id="week_nr6" class="center"></td>
                         <td><input type="text" class="nl_datepicker" id="datum6" onchange="gewijzigd()"></td>
                     </tr>
 
                     <tr>
                         <td>Eerste wedstrijddag RK teams</td>               <!-- begin_fase_L_teams -->
-                        <td id="week_nr7"></td>
+                        <td id="week_nr7" class="center"></td>
                         <td><input type="text" class="nl_datepicker" id="datum7" onchange="gewijzigd()"></td>
                     </tr>
 
                     <tr>
                         <td>Laatste wedstrijddag RK teams</td>              <!-- einde_fase_L_indiv -->
-                        <td id="week_nr8"></td>
+                        <td id="week_nr8" class="center"></td>
                         <td><input type="text" class="nl_datepicker" id="datum8" onchange="gewijzigd()"></td>
                     </tr>
 
@@ -95,25 +95,25 @@
 
                     <tr>
                         <td>Eerste wedstrijddag BK individueel</td>         <!-- begin_fase_P_indiv -->
-                        <td id="week_nr9"></td>
+                        <td id="week_nr9" class="center"></td>
                         <td><input type="text" class="nl_datepicker" id="datum9" onchange="gewijzigd()"></td>
                     </tr>
 
                     <tr>
                         <td>Laatste wedstrijddag BK individueel</td>        <!-- einde_fase_P_indiv -->
-                        <td id="week_nr10"></td>
+                        <td id="week_nr10" class="center"></td>
                         <td><input type="text" class="nl_datepicker" id="datum10" onchange="gewijzigd()"></td>
                     </tr>
 
                     <tr>
                         <td>Eerste wedstrijddag BK teams</td>               <!-- begin_fase_P_teams -->
-                        <td id="week_nr11"></td>
+                        <td id="week_nr11" class="center"></td>
                         <td><input type="text" class="nl_datepicker" id="datum11" onchange="gewijzigd()"></td>
                     </tr>
 
                     <tr>
                         <td>Laatste wedstrijddag BK teams</td>              <!-- einde_fase_P_indiv -->
-                        <td id="week_nr12"></td>
+                        <td id="week_nr12" class="center"></td>
                         <td><input type="text" class="nl_datepicker" id="datum12" onchange="gewijzigd()"></td>
                     </tr>
 

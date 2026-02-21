@@ -62,7 +62,7 @@ APPS_DIR = os.path.dirname(BASE_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2026-02-16'
+SITE_VERSIE = '2026-02-21'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -294,7 +294,7 @@ INTERLAND_25M_MINIMUM_SCORES_VOOR_DEELNAME = 6
 # week waarin de laatste wedstrijden geschoten mogen worden
 COMPETITIES_START_WEEK = 37
 COMPETITIE_18M_LAATSTE_WEEK = 50        # week 37 t/m week 50
-COMPETITIE_25M_LAATSTE_WEEK = 11        # week 37 t/m week 11
+COMPETITIE_25M_LAATSTE_WEEK = 7         # week 37 t/m week 7
 
 COMPETITIES_OPEN_RK_TEAMS_DAYS_AFTER = 4*7      # open 4 weeks after start week
 

@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
+from django.conf import settings
 from django.http import HttpResponseRedirect, Http404
 from django.urls import reverse
 from django.views.generic import TemplateView
@@ -43,6 +44,15 @@ class WijzigDatumsView(UserPassesTestMixin, TemplateView):
             raise Http404('Competitie niet gevonden')
 
         context['comp'] = comp
+
+        if comp.is_25m1pijl():
+            laatste_week = settings.COMPETITIE_25M_LAATSTE_WEEK
+        else:
+            laatste_week = settings.COMPETITIE_18M_LAATSTE_WEEK
+        jaar = comp.begin_jaar
+        if laatste_week < 26:
+            jaar += 1
+        context['limiet_fase_F'] = 'wk' + str(jaar)[-2:] + "%02d" % laatste_week + '.7'
 
         context['url_wijzig'] = reverse('CompBeheer:wijzig-datums',
                                         kwargs={'comp_pk': comp.pk})
