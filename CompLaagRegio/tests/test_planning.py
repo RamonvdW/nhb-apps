@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -737,11 +737,11 @@ class TestCompLaagRegioPlanning(E2EHelpers, TestCase):
         self.assertEqual(str(wedstrijd_datum), "2019-12-09")
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_planning_regio_ronde % ronde_pk,
-                                    {'ronde_week_nr': 10,
+                                    {'ronde_week_nr': 7,
                                      'ronde_naam': 'tweede rondje gaat snel'})
         self.assert_is_redirect(resp, url_regio_planning)
         wedstrijd_datum = CompetitieMatch.objects.get(pk=match_pk).datum_wanneer
-        self.assertEqual(str(wedstrijd_datum), "2020-03-02")
+        self.assertEqual(str(wedstrijd_datum), "2020-02-10")
 
         # haal de wedstrijd op
         with self.assert_max_queries(26):
