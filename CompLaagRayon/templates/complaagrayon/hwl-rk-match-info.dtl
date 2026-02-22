@@ -51,7 +51,7 @@
                 </tr>
                 <tr>
                     <th>Aantal banen</th>
-                    <td>{{ aantal_banen }}</td>
+                    <td>{% if aantal_banen %}{{ aantal_banen }}{% else %}<i>Locatie nog niet bekend</i>{% endif %}</td>
                 </tr>
                 <tr>
                     <th>Wanneer</th>
@@ -73,10 +73,10 @@
                         </td>
                     </tr>
                 {% endif %}
+
             </table>
         </div>
     </div>
-
 
     {% if heeft_indiv %}
 
@@ -228,6 +228,6 @@
 
     {% endif %}     <!-- heeft_teams -->
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="complaagrayon-hwl-download-rk-formulier" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="complaagrayon-hwl-rk-match-info" %}
 
 {% endblock %}

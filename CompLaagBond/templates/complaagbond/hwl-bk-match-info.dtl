@@ -15,7 +15,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">BK informatie</h3>
+            <h3 class="page-banner">BK programma</h3>
             <p>Deelnemerslijst(en) en wedstrijdformulier(en)</p>
         </div>
     </div>
@@ -221,6 +221,6 @@
     {% endif %}     <!-- heeft_teams -->
 
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="complaagbond-hwl-match-info" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="complaagbond-hwl-bk-match-info" %}
 
 {% endblock %}

@@ -103,6 +103,6 @@
         </div>
     </div>
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="compbeheer-wf-status" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="compkampioenschap-wf-status" %}
 
 {% endblock %}
