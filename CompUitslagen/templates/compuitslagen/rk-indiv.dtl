@@ -13,7 +13,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Uitslag RK individueel</h3>
+            <h3 class="page-banner">RK individueel</h3>
             <p>{% if deelkamp.is_klaar_indiv %}Eindstand van{% else %}Deelnemerslijst en tussenstand voor{% endif %} de individuele rayonkampioenschappen</p>
         </div>
     </div>

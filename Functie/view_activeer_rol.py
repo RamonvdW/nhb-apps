@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2025 Ramon van der Winkel.
+#  Copyright (c) 2020-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -77,6 +77,7 @@ class ActiveerRolView(UserPassesTestMixin, View):
             rol_activeer_functie(request, account, functie)
 
         else:
+            # activeer functie HWL
             ver_nr = request.POST.get('ver_nr', '')[:4]     # afkappen voor de veiligheid
             try:
                 ver_nr = int(ver_nr)

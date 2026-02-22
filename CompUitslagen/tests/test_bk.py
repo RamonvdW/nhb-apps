@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2025 Ramon van der Winkel.
+#  Copyright (c) 2020-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
 from django.utils import timezone
-from Competitie.models import CompetitieIndivKlasse, CompetitieMatch, KampioenschapIndivKlasseLimiet
+from Competitie.definities import KAMP_RANK_BLANCO, DEELNAME_NEE
+from Competitie.models import (CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMatch,
+                               KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet)
 from Competitie.test_utils.tijdlijn import zet_competitie_fase_bk_prep
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers.testdata import TestData
@@ -40,10 +42,15 @@ class TestCompUitslagenBK(E2EHelpers, TestCase):
         data.maak_bk_deelnemers(18)
         data.maak_bk_teams(18)
 
-        KampioenschapIndivKlasseLimiet(
+        KampioenschapIndivKlasseLimiet.objects.create(
                 kampioenschap=data.deelkamp18_bk,
                 indiv_klasse=data.comp18_klassen_indiv['R'][0],
-                limiet=4).save()
+                limiet=4)
+
+        KampioenschapTeamKlasseLimiet.objects.create(
+                kampioenschap=data.deelkamp18_bk,
+                team_klasse=data.comp18_klassen_teams['R2'][0],
+                limiet=7)
 
         s2 = timezone.now()
         d = s2 - s1
@@ -55,7 +62,7 @@ class TestCompUitslagenBK(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compuitslagen/uitslagen-bk-indiv.dtl', 'design/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/bk-indiv.dtl', 'design/site_layout.dtl'))
 
         # maak een locatie aan
         locatie = self.testdata.maak_wedstrijd_locatie(self.ver_nr)
@@ -85,14 +92,17 @@ class TestCompUitslagenBK(E2EHelpers, TestCase):
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compuitslagen/uitslagen-bk-indiv.dtl', 'design/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/bk-indiv.dtl', 'design/site_layout.dtl'))
+
+        match.locatie = None
+        match.save(update_fields=['locatie'])
 
         url = self.url_uitslagen_bond_indiv % (self.testdata.comp25.pk, 'R')
         #with self.assert_max_queries(20):
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compuitslagen/uitslagen-bk-indiv.dtl', 'design/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/bk-indiv.dtl', 'design/site_layout.dtl'))
 
         # zet een paar resultaten
         kamp = self.testdata.comp18_bk_deelnemers[0]
@@ -109,7 +119,7 @@ class TestCompUitslagenBK(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compuitslagen/uitslagen-bk-indiv.dtl', 'design/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/bk-indiv.dtl', 'design/site_layout.dtl'))
 
         # onbekend boogtype
         url = self.url_uitslagen_bond_indiv % (self.testdata.comp18.pk, 'X')
@@ -134,13 +144,13 @@ class TestCompUitslagenBK(E2EHelpers, TestCase):
         resp = self.client.get(url)
         self.assert404(resp, 'Kampioenschap niet gevonden')
 
-    def test_bk_teams(self):
+    def test_bk_teams_prep(self):
         url = self.url_uitslagen_bond_teams % (self.testdata.comp18.pk, 'C')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compuitslagen/uitslagen-bk-teams.dtl', 'design/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/bk-teams.dtl', 'design/site_layout.dtl'))
 
         # ingelogd geeft teamleden van eigen vereniging
         functie_hwl = list(self.testdata.functie_hwl.values())[5]
@@ -152,7 +162,7 @@ class TestCompUitslagenBK(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compuitslagen/uitslagen-bk-teams.dtl', 'design/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/bk-teams.dtl', 'design/site_layout.dtl'))
 
         # in de functie HWL krijg je de teamleden van de vereniging die je beheert
         # (dit hoeft niet hetzelfde te zijn als je eigen vereniging)
@@ -163,7 +173,7 @@ class TestCompUitslagenBK(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compuitslagen/uitslagen-bk-teams.dtl', 'design/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/bk-teams.dtl', 'design/site_layout.dtl'))
 
         url = self.url_uitslagen_bond_teams % (self.testdata.comp18.pk, 'X')
         with self.assert_max_queries(20):
@@ -187,6 +197,56 @@ class TestCompUitslagenBK(E2EHelpers, TestCase):
         resp = self.client.get(url)
         self.assert404(resp, 'Kampioenschap niet gevonden')
 
+    def test_uitslag_bk_teams(self):
+        # maak een locatie aan
+        locatie = self.testdata.maak_wedstrijd_locatie(self.ver_nr)
+
+        # maak een BK match aan
+        teams_klasse = CompetitieTeamKlasse.objects.filter(competitie=self.testdata.comp18, is_voor_teams_rk_bk=True)[0]
+
+        match = CompetitieMatch(
+                    competitie=self.testdata.comp18,
+                    beschrijving='test match 2',
+                    vereniging=self.testdata.vereniging[self.ver_nr],
+                    locatie=locatie,
+                    datum_wanneer="2000-01-01",
+                    tijd_begin_wedstrijd="10:00")
+        match.save()
+        match.team_klassen.add(teams_klasse)
+
+        self.testdata.deelkamp18_bk.rk_bk_matches.add(match)
+
+        bk_team = self.testdata.comp18_bk_teams[0]
+        bk_team.result_rank = 1
+        bk_team.result_teamscore = 10
+        bk_team.result_shootoff_str = '(SO:1)'
+        bk_team.save(update_fields=['result_rank', 'result_teamscore', 'result_shootoff_str'])
+
+        url = self.url_uitslagen_bond_teams % (self.testdata.comp18.pk, bk_team.team_type.afkorting)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('compuitslagen/bk-teams.dtl', 'design/site_layout.dtl'))
+
+        match.locatie = None
+        match.save(update_fields=['locatie'])
+
+        bk_team.result_rank = KAMP_RANK_BLANCO
+        bk_team.save(update_fields=['result_rank'])
+
+        bk_team = self.testdata.comp18_bk_teams[1]
+        bk_team.deelname = DEELNAME_NEE
+        bk_team.save(update_fields=['deelname'])
+
+        bk_team.feitelijke_leden.add(self.testdata.comp18_rk_deelnemers[0])
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('compuitslagen/bk-teams.dtl', 'design/site_layout.dtl'))
+
     def test_anon(self):
         self.client.logout()
 
@@ -194,13 +254,13 @@ class TestCompUitslagenBK(E2EHelpers, TestCase):
             resp = self.client.get(self.url_uitslagen_bond_indiv % (self.testdata.comp18.pk, 'r'))
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compuitslagen/uitslagen-bk-indiv.dtl', 'design/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/bk-indiv.dtl', 'design/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_uitslagen_bond_teams % (self.testdata.comp18.pk, 'c'))
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compuitslagen/uitslagen-bk-teams.dtl', 'design/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/bk-teams.dtl', 'design/site_layout.dtl'))
 
     def test_hist(self):
         # test redirect naar HistComp uitslag

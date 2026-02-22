@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2025 Ramon van der Winkel.
+#  Copyright (c) 2020-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -57,7 +57,7 @@ class TestCompUitslagenRegio(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compuitslagen/uitslagen-regio-indiv.dtl', 'design/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/regio-indiv.dtl', 'design/site_layout.dtl'))
 
         # lijst met onze deelnemers
         url = self.url_uitslagen_regio_indiv_n % (self.testdata.comp18.pk, 101, 'TR')
@@ -65,14 +65,14 @@ class TestCompUitslagenRegio(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compuitslagen/uitslagen-regio-indiv.dtl', 'design/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/regio-indiv.dtl', 'design/site_layout.dtl'))
 
         url = self.url_uitslagen_regio_teams % (self.testdata.comp18.pk, 'R2')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compuitslagen/uitslagen-regio-teams.dtl', 'design/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/regio-teams.dtl', 'design/site_layout.dtl'))
 
         # lijst met onze deelnemers
         url = self.url_uitslagen_regio_teams_n % (self.testdata.comp18.pk, 101, 'TR')
@@ -80,7 +80,7 @@ class TestCompUitslagenRegio(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compuitslagen/uitslagen-regio-teams.dtl', 'design/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/regio-teams.dtl', 'design/site_layout.dtl'))
 
         # als BKO
         self.e2e_wissel_naar_functie(self.testdata.comp18_functie_bko)
@@ -89,7 +89,7 @@ class TestCompUitslagenRegio(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compuitslagen/uitslagen-regio-indiv.dtl', 'design/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/regio-indiv.dtl', 'design/site_layout.dtl'))
 
         # als RKO
         self.e2e_wissel_naar_functie(self.testdata.comp18_functie_rko[1])
@@ -98,7 +98,7 @@ class TestCompUitslagenRegio(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compuitslagen/uitslagen-regio-indiv.dtl', 'design/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/regio-indiv.dtl', 'design/site_layout.dtl'))
 
         # als RCL
         self.e2e_wissel_naar_functie(self.testdata.comp18_functie_rcl[102])
@@ -107,7 +107,7 @@ class TestCompUitslagenRegio(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compuitslagen/uitslagen-regio-indiv.dtl', 'design/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/regio-indiv.dtl', 'design/site_layout.dtl'))
 
         # als HWL
         self.e2e_wissel_naar_functie(self.testdata.functie_hwl[self.ver_nr])
@@ -116,7 +116,7 @@ class TestCompUitslagenRegio(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compuitslagen/uitslagen-regio-indiv.dtl', 'design/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/regio-indiv.dtl', 'design/site_layout.dtl'))
 
         # als bezoeker
         self.client.logout()
@@ -125,7 +125,7 @@ class TestCompUitslagenRegio(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compuitslagen/uitslagen-regio-indiv.dtl', 'design/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/regio-indiv.dtl', 'design/site_layout.dtl'))
 
         # als Sporter
         sporter = self.testdata.ver_sporters_met_account[self.ver_nr][0]
@@ -135,7 +135,7 @@ class TestCompUitslagenRegio(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compuitslagen/uitslagen-regio-indiv.dtl', 'design/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/regio-indiv.dtl', 'design/site_layout.dtl'))
 
         # slecht boog type
         url = self.url_uitslagen_regio_indiv % (self.testdata.comp25.pk, 'XXX')
@@ -148,14 +148,14 @@ class TestCompUitslagenRegio(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compuitslagen/uitslagen-regio-indiv.dtl', 'design/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/regio-indiv.dtl', 'design/site_layout.dtl'))
 
         url = self.url_uitslagen_regio_indiv_n % (self.testdata.comp25.pk, 116, 'LB')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compuitslagen/uitslagen-regio-indiv.dtl', 'design/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/regio-indiv.dtl', 'design/site_layout.dtl'))
 
         # regio 100 is valide, maar heeft geen regiocompetitie
         url = self.url_uitslagen_regio_indiv_n % (self.testdata.comp18.pk, 100, 'R')
@@ -163,7 +163,7 @@ class TestCompUitslagenRegio(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compuitslagen/uitslagen-regio-indiv.dtl', 'design/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/regio-indiv.dtl', 'design/site_layout.dtl'))
 
         # bad
         url = self.url_uitslagen_regio_indiv_n % (self.testdata.comp18.pk, 999, 'R')
@@ -192,7 +192,7 @@ class TestCompUitslagenRegio(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compuitslagen/uitslagen-regio-teams.dtl', 'design/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/regio-teams.dtl', 'design/site_layout.dtl'))
 
         # bad
         url = self.url_uitslagen_regio_teams % ('X', 'R')
@@ -205,7 +205,7 @@ class TestCompUitslagenRegio(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compuitslagen/uitslagen-regio-teams.dtl', 'design/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/regio-teams.dtl', 'design/site_layout.dtl'))
 
         # bad regio nr
         url = self.url_uitslagen_regio_teams_n % (self.testdata.comp18.pk, "NaN", 'R2')
@@ -228,7 +228,7 @@ class TestCompUitslagenRegio(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compuitslagen/uitslagen-regio-teams.dtl', 'design/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/regio-teams.dtl', 'design/site_layout.dtl'))
 
     def test_hist(self):
         # test redirect naar HistComp uitslag

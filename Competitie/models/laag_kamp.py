@@ -90,6 +90,8 @@ class KampioenschapTeamKlasseLimiet(models.Model):
         wedstrijdklasse. De RKO/BKO kan dit bijstellen specifiek voor zijn kampioenschap.
     """
 
+    # TODO: niet meer nodig. Met het nieuwe format (2025) is het altijd limiet=8.
+
     # voor welk kampioenschap (i.v.m. scheiding RKs)
     kampioenschap = models.ForeignKey(Kampioenschap, on_delete=models.CASCADE)
 
@@ -253,6 +255,7 @@ class KampioenschapTeam(models.Model):
 
     # de berekende team sterkte
     # LET OP: dit is zonder de vermenigvuldiging met aantal pijlen, dus 30,000 voor Indoor i.p.v. 900,0
+    # LET OP: voor BK is dit de RK score as-is
     aanvangsgemiddelde = models.DecimalField(max_digits=5, decimal_places=3, default=0.0)    # 10,000
 
     # Positie van dit team in de lijst zoals vastgesteld aan het begin van het BK

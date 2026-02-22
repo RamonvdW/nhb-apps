@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -141,7 +141,7 @@ class TestCompLaagRayonTeams(E2EHelpers, TestCase):
         self.assert_is_redirect_not_plein(resp)
 
         # verpruts de klasse van 1 team
-        team = KampioenschapTeam.objects.get(pk=self.testdata.comp25_kampioenschapteams[0].pk)
+        team = KampioenschapTeam.objects.get(pk=self.testdata.comp25_rk_teams[0].pk)
         for klasse in self.testdata.comp25_klassen_teams['R2']:         # pragma: no branch
             if not klasse.is_voor_teams_rk_bk:                          # pragma: no branch
                 team.team_klasse = klasse

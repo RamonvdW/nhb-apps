@@ -210,7 +210,8 @@ class WijzigStatusBkTeamView(UserPassesTestMixin, View):
         elif status == "maak_deelnemer":
             # roep het reserve-team op
             team.is_reserve = False
-            team.save(update_fields=['is_reserve'])
+            team.deelname = DEELNAME_JA
+            team.save(update_fields=['deelname', 'is_reserve'])
             opnieuw_nummeren = True
 
         if opnieuw_nummeren:

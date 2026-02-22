@@ -25,7 +25,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Uitslagen BK teams</h3>
+            <h3 class="page-banner">BK teams</h3>
             <p>{% if deelkamp_bk.is_klaar_teams %}Eindstand van{% else %}Deelnemerslijst voor{% endif %} de bonds<wbr>kampioenschappen teams</p>
         </div>
     </div>
@@ -152,7 +152,7 @@
                 <tr{% if team.niet_deelgenomen %} class="grey-text"{% endif %}>
 
                     <!-- rank -->
-                    <td class="center">{% if not team.niet_deelgenomen %}{{ team.rank }}{% endif %}</td>
+                    <td class="center">{% if not team.niet_deelgenomen and not team.is_reserve %}{{ team.rank }}{% endif %}</td>
 
                     <!-- vereniging -->
                     <td>
@@ -208,7 +208,6 @@
                                     <span class="grey-text">-</span>
                                 {% else %}
                                     <br>
-                                    <span>{% if deelnemer.result_totaal < 10 %}-{% else %}{{ deelnemer.result_totaal }}{% endif %}</span>
                                 {% endif %}
                             {% empty %}
                                 {% if team.toon_team_leden %}

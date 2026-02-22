@@ -218,11 +218,11 @@ class TestData(object):
         self.comp18_deelnemers_team = list()
         self.comp25_deelnemers_team = list()
 
-        # aangemaakte teams
+        # aangemaakte regio teams
         self.comp18_regioteams = list()
         self.comp25_regioteams = list()
 
-        # aangemaakte poules
+        # aangemaakte regio poules
         self.comp18_poules = list()
         self.comp25_poules = list()
 
@@ -235,12 +235,16 @@ class TestData(object):
         self.comp25_rk_deelnemers = list()      # [KampioenschapSporterBoog, ...]
 
         # aangemaakte RK teams
-        self.comp18_kampioenschapteams = list()
-        self.comp25_kampioenschapteams = list()
+        self.comp18_rk_teams = list()
+        self.comp25_rk_teams = list()
 
         # aangemaakte BK sporters
         self.comp18_bk_deelnemers = list()
         self.comp25_bk_deelnemers = list()
+
+        # aangemaakte BK teams
+        self.comp18_bk_teams = list()
+        self.comp25_bk_teams = list()
 
         self._accounts_beheerders = list()      # 1 per vereniging, voor BKO, RKO, RCL
 
@@ -1368,11 +1372,11 @@ class TestData(object):
         if afstand == 18:                                                           # pragma: no cover
             deelkamp = self.deelkamp18_rk[rayon_nr]
             deelnemers = self.comp18_deelnemers
-            rk_teams = self.comp18_kampioenschapteams
+            rk_teams = self.comp18_rk_teams
         else:
             deelkamp = self.deelkamp25_rk[rayon_nr]
             deelnemers = self.comp25_deelnemers
-            rk_teams = self.comp25_kampioenschapteams
+            rk_teams = self.comp25_rk_teams
 
         # verdeel de deelnemers per boogtype
         deelnemers_per_boog = dict()   # [boogtype.afkorting] = list(deelnemer)
@@ -1453,9 +1457,9 @@ class TestData(object):
 
     def geef_rk_team_tijdelijke_sporters_genoeg_scores(self, afstand, ver_nr):
         if afstand == 18:                                                           # pragma: no cover
-            rk_teams = self.comp18_kampioenschapteams       # list of KampioenschapTeam
+            rk_teams = self.comp18_rk_teams       # list of KampioenschapTeam
         else:
-            rk_teams = self.comp25_kampioenschapteams
+            rk_teams = self.comp25_rk_teams
 
         gem = 7.0
         step = 0.12
@@ -1512,12 +1516,12 @@ class TestData(object):
 
         if afstand == 18:
             deelkamp = self.deelkamp18_rk[rayon_nr]
-            rk_teams = self.comp18_kampioenschapteams
+            rk_teams = self.comp18_rk_teams
             team_klassen = self.comp18_klassen_rk_bk_teams
             rk_deelnemers = self.comp18_rk_deelnemers
         else:
             deelkamp = self.deelkamp25_rk[rayon_nr]
-            rk_teams = self.comp25_kampioenschapteams
+            rk_teams = self.comp25_rk_teams
             team_klassen = self.comp25_klassen_rk_bk_teams
             rk_deelnemers = self.comp25_rk_deelnemers
 
@@ -1741,10 +1745,12 @@ class TestData(object):
 
         if afstand == 18:
             deelkamp_bk = self.deelkamp18_bk
+            bk_teams = self.comp18_bk_teams
             rk_pks = [deelkamp_rk.pk for deelkamp_rk in self.deelkamp18_rk.values()]
             pijlen = 30.0
         else:
             deelkamp_bk = self.deelkamp25_bk
+            bk_teams = self.comp25_bk_teams
             rk_pks = [deelkamp_rk.pk for deelkamp_rk in self.deelkamp25_rk.values()]
             pijlen = 25.0
 
@@ -1797,6 +1803,7 @@ class TestData(object):
             tup = (bk_team.vereniging.ver_nr, bk_team.volg_nr, bk_team.team_type.afkorting)
             leden = rk_team_leden[tup]
             bk_team.gekoppelde_leden.set(leden)
+            bk_teams.append(bk_team)
         # for
 
 

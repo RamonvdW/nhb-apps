@@ -13,7 +13,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Uitslag RK teams</h3>
+            <h3 class="page-banner">RK teams</h3>
             <p>{% if deelkamp.is_klaar_teams %}Eindstand van{% else %}Deelnemerslijst voor{% endif %} de rayon<wbr>kampioenschappen voor teams</p>
         </div>
     </div>

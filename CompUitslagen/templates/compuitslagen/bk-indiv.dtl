@@ -25,7 +25,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Uitslag BK individueel</h3>
+            <h3 class="page-banner">BK individueel</h3>
             <p>{% if deelkamp_bk.is_klaar_indiv %}Eindstand van{% else %}Deelnemerslijst voor{% endif %} de individuele bondskampioenschappen</p>
         </div>
     </div>

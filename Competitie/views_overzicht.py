@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -96,7 +96,7 @@ class CompetitieOverzichtView(TemplateView):
             tussen_eind = "Eindstand"
         context['text_rayon_indiv'] = tussen_eind + ' voor de rayonkampioenschappen individueel'
 
-        tussen_eind = "Tussen" if self.comp.fase_teams <= 'N' else "Eind"
+        tussen_eind = "Tussen" if self.comp.fase_teams <= 'L' else "Eind"
         context['text_rayon_teams'] = tussen_eind + 'stand voor de rayonkampioenschappen teams'
 
         tussen_eind = "Tussen" if self.comp.fase_indiv <= 'P' else "Eind"

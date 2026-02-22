@@ -689,24 +689,39 @@ class VerwerkCompKampMutaties:
         self.stdout.write('[INFO] Teams opnieuw nummeren voor kampioenschap %s team klasse %s' % (deelkamp,
                                                                                                   team_klasse))
 
-        # zorg dat het google sheet bijgewerkt worden
-        self._zet_dirty(deelkamp, team_klasse.pk, is_team=True)
-
         # alleen de rank aanpassen
         rank = 0
         for team in (KampioenschapTeam
                      .objects
                      .filter(kampioenschap=deelkamp,
-                             team_klasse=team_klasse)
-                     .order_by('volgorde')):           # originele volgorde aanhouden
+                             team_klasse=team_klasse,
+                             deelname=DEELNAME_JA)
+                     .order_by('-aanvangsgemiddelde',       # hoogste eerst
+                               'volgorde')):                # originele volgorde aanhouden
 
-            if team.deelname == DEELNAME_NEE:
-                team.rank = 0
-            else:
-                rank += 1
+            rank += 1
+            if rank != team.rank:
                 team.rank = rank
-            team.save(update_fields=['rank'])
+                team.save(update_fields=['rank'])
         # for
+
+        for team in (KampioenschapTeam
+                     .objects
+                     .filter(kampioenschap=deelkamp,
+                             team_klasse=team_klasse)
+                     .exclude(deelname=DEELNAME_JA)
+                     .order_by('vereniging__regio__rayon_nr',    # rayon 1,2,3,4
+                               '-aanvangsgemiddelde',            # hoogste eerst
+                               'volgorde')):                     # originele volgorde aanhouden
+
+            rank += 1
+            if team.rank != rank:
+                team.rank = rank
+                team.save(update_fields=['rank'])
+        # for
+
+        # zorg dat het google sheet bijgewerkt worden
+        self._zet_dirty(deelkamp, team_klasse.pk, is_team=True)
 
     def _verwerk_mutatie_extra_rk_deelnemer(self, mutatie: CompetitieMutatie):
         self.stdout.write('[INFO] Verwerk mutatie %s: extra RK deelnemer' % mutatie.pk)

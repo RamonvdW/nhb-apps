@@ -5,8 +5,8 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.utils import timezone
-from Competitie.definities import DEEL_RK, DEEL_BK, DEELNAME_JA, DEELNAME_NEE, KAMP_RANK_BLANCO
-from Competitie.models import (Competitie, CompetitieTeamKlasse, KampioenschapTeamKlasseLimiet,
+from Competitie.definities import DEEL_RK, DEEL_BK, DEELNAME_JA, DEELNAME_NEE, DEELNAME_ONBEKEND, KAMP_RANK_BLANCO
+from Competitie.models import (Competitie, CompetitieTeamKlasse,
                                Kampioenschap, KampioenschapSporterBoog, KampioenschapTeam)
 from CompKampioenschap.operations import VerwerkCompKampMutaties
 
@@ -107,12 +107,6 @@ class VerwerkCompLaagBondMutaties:
         qset.delete()
 
     def maak_deelnemerslijst_bk_teams(self, comp):
-        # deelfactor om van RK uitslag (60 of 50 pijlen) naar gemiddelde te gaan
-        if comp.is_indoor():
-            aantal_pijlen = 2.0 * 30
-        else:
-            aantal_pijlen = 2.0 * 25
-
         # zoek het BK erbij
         deelkamp_bk = (Kampioenschap
                        .objects
@@ -126,8 +120,6 @@ class VerwerkCompLaagBondMutaties:
         if aantal > 0:
             self.stdout.write('[INFO] Alle %s bestaande BK teams worden verwijderd' % aantal)
             qset.delete()
-
-        bulk = list()
 
         for klasse in (CompetitieTeamKlasse
                        .objects
@@ -146,26 +138,23 @@ class VerwerkCompLaagBondMutaties:
                             .filter(kampioenschap__deel=DEEL_RK,
                                     kampioenschap__competitie=comp,
                                     team_klasse_volgende_ronde=klasse,
-                                    result_rank__in=(1, 2, 100))         # assumption: nooit meer dan 2 per rayon
+                                    result_rank__in=(1, 2, 100))            # 2 per rayon
                             .select_related('vereniging',
                                             'team_type',
                                             'kampioenschap__rayon')
                             .prefetch_related('gekoppelde_leden')
                             .order_by('result_rank')):
 
-                ag = rk_team.result_teamscore / aantal_pijlen
-
-                bk_team = KampioenschapTeam(
+                bk_team = KampioenschapTeam.objects.create(
                                 kampioenschap=deelkamp_bk,
                                 vereniging=rk_team.vereniging,
                                 volg_nr=rk_team.volg_nr,
                                 team_type=rk_team.team_type,
                                 team_naam=rk_team.team_naam,
                                 team_klasse=klasse,
-                                aanvangsgemiddelde=ag,
+                                aanvangsgemiddelde=rk_team.result_teamscore,
                                 deelname=DEELNAME_JA)
 
-                bk_team.save()
                 self.stdout.write('[INFO] Maak BK team %s.%s (%s)' % (
                                     rk_team.vereniging.ver_nr, rk_team.volg_nr, rk_team.team_naam))
 
@@ -177,13 +166,65 @@ class VerwerkCompLaagBondMutaties:
                 sterkte.append(tup)
             # for
 
+            rank = 0
             sterkte.sort(reverse=True)      # hoogste eerst
-            for rank in range(len(sterkte)):
-                tup = sterkte[rank]
+            for tup in sterkte:
+                rank += 1
                 team = tup[-1]
-                team.rank = team.volgorde = rank + 1
+                team.rank = team.volgorde = rank
                 team.save(update_fields=['rank', 'volgorde'])
             # for
+
+            # voeg de reserve teams toe: 2 per rayon
+            # haal alle teams uit de RK op
+            sterkte = list()
+            for rk_team in (KampioenschapTeam
+                            .objects
+                            .filter(kampioenschap__deel=DEEL_RK,
+                                    kampioenschap__competitie=comp,
+                                    team_klasse_volgende_ronde=klasse,
+                                    result_rank__in=(3, 4))            # 2 per rayon
+                            .select_related('vereniging',
+                                            'team_type',
+                                            'kampioenschap__rayon')
+                            .prefetch_related('gekoppelde_leden')
+                            .order_by('result_rank')):
+
+                ag = rk_team.result_teamscore
+
+                bk_team = KampioenschapTeam.objects.create(
+                                kampioenschap=deelkamp_bk,
+                                vereniging=rk_team.vereniging,
+                                volg_nr=rk_team.volg_nr,
+                                team_type=rk_team.team_type,
+                                team_naam=rk_team.team_naam,
+                                team_klasse=klasse,
+                                aanvangsgemiddelde=ag,
+                                is_reserve=True,
+                                deelname=DEELNAME_ONBEKEND)
+
+                self.stdout.write('[INFO] Maak reserve BK team %s.%s (%s)' % (
+                                    rk_team.vereniging.ver_nr, rk_team.volg_nr, rk_team.team_naam))
+
+                # koppel de RK deelnemers aan het BK team
+                pks = rk_team.gekoppelde_leden.values_list('pk', flat=True)
+                bk_team.gekoppelde_leden.set(pks)
+
+                rayon_nr = rk_team.kampioenschap.rayon.rayon_nr
+
+                tup = (0-rayon_nr, rk_team.result_teamscore, len(sterkte), bk_team)
+                sterkte.append(tup)
+            # for
+
+            sterkte.sort(reverse=True)      # hoogste eerst
+            for tup in sterkte:
+                rank += 1
+                team = tup[-1]
+                team.rank = team.volgorde = rank
+                team.save(update_fields=['rank', 'volgorde'])
+            # for
+
         # for
+
 
 # end of file
