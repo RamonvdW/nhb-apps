@@ -1747,12 +1747,10 @@ class TestData(object):
             deelkamp_bk = self.deelkamp18_bk
             bk_teams = self.comp18_bk_teams
             rk_pks = [deelkamp_rk.pk for deelkamp_rk in self.deelkamp18_rk.values()]
-            pijlen = 30.0
         else:
             deelkamp_bk = self.deelkamp25_bk
             bk_teams = self.comp25_bk_teams
             rk_pks = [deelkamp_rk.pk for deelkamp_rk in self.deelkamp25_rk.values()]
-            pijlen = 25.0
 
         rk_team_leden = dict()   # [(ver_nr, volg_nr, team_type_afkorting)] = rk_team gekoppelde_leden
 
@@ -1778,7 +1776,7 @@ class TestData(object):
 
             volgorde += 1
 
-            ag = rk_team.result_teamscore / pijlen
+            ag = rk_team.result_teamscore
 
             # print('[%s] bk_team: %s, klasse=%s' % (afstand, rk_team.team_naam, rk_team.team_klasse))
             # print('     team_leden: %s' % repr(rk_team_leden[tup]))

@@ -369,7 +369,7 @@ class TestCompBeheerBko(E2EHelpers, TestCase):
                     team_klasse_volgende_ronde=self.comp25_teamklasse_rk_ere_r,
                     result_rank=1,          # moet >= 1 zijn
                     result_volgorde=1,
-                    result_teamscore=123)
+                    result_teamscore=12)
         team.save()
 
         leden = KampioenschapSporterBoog.objects.filter(bij_vereniging=self.ver_101)
