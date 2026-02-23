@@ -499,8 +499,8 @@ class TestCompetitieOperationsVulHistComp(E2EHelpers, TestCase):
                             sporterboog=sb,
                             indiv_klasse=self.indiv_klasse1,
                             bij_vereniging=sb.sporter.bij_vereniging,
-                            result_rk_teamscore_1=100 + lp*10,
-                            result_rk_teamscore_2=150 + lp*10,
+                            #result_rk_teamscore_1=100 + lp*10,
+                            #result_rk_teamscore_2=150 + lp*10,
                             result_rank=0)
             deelnemer.save()
             team.feitelijke_leden.add(deelnemer)
@@ -575,8 +575,8 @@ class TestCompetitieOperationsVulHistComp(E2EHelpers, TestCase):
                             sporterboog=sb,
                             indiv_klasse=self.indiv_klasse1,
                             bij_vereniging=sb.sporter.bij_vereniging,
-                            result_bk_teamscore_1=100 + lp*10,
-                            result_bk_teamscore_2=150 + lp*10,
+                            #result_bk_teamscore_1=100 + lp*10,
+                            #result_bk_teamscore_2=150 + lp*10,
                             result_rank=0)
             deelnemer.save()
             team.feitelijke_leden.add(deelnemer)
