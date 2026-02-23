@@ -158,8 +158,16 @@ class MaakTeamsExcel:
             volg_nr += 1
         # for
 
-        # 5 of meer teams?
-        ws['D5'] = "Ja" if volg_nr > 4 else "Nee"
+        # aantal aangemelde teams
+        if volg_nr <= 2:
+            aantal = "2"
+        elif volg_nr <= 4:
+            aantal = "3 of 4"
+        elif volg_nr <= 6:
+            aantal = "5 of 6"
+        else:
+            aantal = "7 of 8"
+        ws['D5'] = aantal
 
         while volg_nr < 8:
             row_nr = 8 + volg_nr * 5
