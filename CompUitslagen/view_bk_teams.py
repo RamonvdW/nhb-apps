@@ -206,6 +206,8 @@ class UitslagenBKTeamsView(TemplateView):
         klasse_teams_done = list()
         klasse_teams_plan = list()
         klasse_teams_afgemeld = list()
+        eerste_reserve = True
+
         aantal_regels = 0
         limiet = 8
         for team in (KampioenschapTeam
@@ -243,6 +245,7 @@ class UitslagenBKTeamsView(TemplateView):
                 klasse_teams_done = list()
                 klasse_teams_plan = list()
                 klasse_teams_afgemeld = list()
+                eerste_reserve = True
 
                 try:
                     limiet = wkl2limiet[team.team_klasse.pk]
@@ -315,6 +318,11 @@ class UitslagenBKTeamsView(TemplateView):
                     klasse_teams_plan.append(team)
                     if team.rank > limiet:
                         team.is_reserve = True
+
+                if eerste_reserve and team.is_reserve:
+                    eerste_reserve = False
+                    team.break_reserve = True
+                    aantal_regels += 1
 
                 # laat vereniging weten wie waar naartoe moet
                 if team.ver_nr == toon_team_leden_van_ver_nr:

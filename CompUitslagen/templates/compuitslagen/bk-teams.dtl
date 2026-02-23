@@ -120,7 +120,7 @@
                     {% endif %}
 
                     <tr class="sv-table-sectie-header" id="{{ team.klasse_hashtag }}">
-                        <td colspan="9" class="center">
+                        <td colspan="7" class="center">
                             <h5>{{ team.klasse_str }}</h5>
                             {% if team.match %}
                                 {% if comp.bk_is_afgelast %}<s>{% endif %}
@@ -146,6 +146,12 @@
                         <th class="center">BK score</th>
                         <th class="hide-on-small-only"></th>       <!-- label -->
                         <td rowspan="{{ team.aantal_regels }}" class="sv-table-zijrand"></td>
+                    </tr>
+                {% endif %}
+
+                {% if team.break_reserve %}
+                    <tr>
+                        <td colspan="7" class="sv-table-onderrand"></td>
                     </tr>
                 {% endif %}
 
