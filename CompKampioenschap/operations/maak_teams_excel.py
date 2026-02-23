@@ -83,15 +83,16 @@ class MaakTeamsExcel:
                  .objects
                  .filter(kampioenschap=self.deelkamp,
                          team_klasse=self.team_klasse.pk)
+                 .exclude(deelname=DEELNAME_NEE)            # skip afgemelde teams
                  .select_related('vereniging',
                                  'vereniging__regio')
                  .prefetch_related('gekoppelde_leden')
-                 .order_by('-aanvangsgemiddelde'))      # sterkste team bovenaan
+                 .order_by('rank'))
 
         self.deelnemers_ver_nrs = list()
 
         volg_nr = 0
-        for team in teams:
+        for team in teams[:8]:
             row_nr = 8 + volg_nr * 5
             row = str(row_nr)
 

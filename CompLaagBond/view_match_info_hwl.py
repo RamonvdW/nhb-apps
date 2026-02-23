@@ -175,12 +175,14 @@ class BkMatchInfoView(UserPassesTestMixin, TemplateView):
             teams = (KampioenschapTeam
                      .objects
                      .filter(kampioenschap=deelkamp,
-                             team_klasse__pk__in=klasse_team_pks)
+                             team_klasse__pk__in=klasse_team_pks,
+                             rank__lte=8)
+                     .exclude(deelname=DEELNAME_NEE)
                      .select_related('vereniging',
                                      'team_klasse')
                      .prefetch_related('gekoppelde_leden')
-                     .order_by('team_klasse',               # TODO: volgorde?
-                               '-aanvangsgemiddelde'))      # sterkste team bovenaan
+                     .order_by('team_klasse__volgorde',
+                               'rank'))
             context['deelnemers_teams'] = teams
 
             if not comp.klassengrenzen_vastgesteld_rk_bk:
@@ -202,9 +204,7 @@ class BkMatchInfoView(UserPassesTestMixin, TemplateView):
                 team.volg_nr = volg_nr
                 team.ver_nr = team.vereniging.ver_nr
                 team.ver_naam = team.vereniging.naam
-                sterkte = float(team.aanvangsgemiddelde) * aantal_pijlen
-                team.sterkte_str = "%.1f" % sterkte
-                team.sterkte_str = team.sterkte_str.replace('.', ',')
+                team.sterkte_str = str(round(team.aanvangsgemiddelde))      # RK score
 
                 team.gekoppelde_leden_lijst = list()
                 for lid in team.gekoppelde_leden.select_related('sporterboog__sporter').order_by('-gemiddelde'):
