@@ -133,7 +133,7 @@ class TestCompLaagMatchInfo(E2EHelpers, TestCase):
         self.match.locatie = None
         self.match.save(update_fields=['aantal_scheids', 'locatie'])
 
-        with self.assert_max_queries(27):
+        with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -146,7 +146,7 @@ class TestCompLaagMatchInfo(E2EHelpers, TestCase):
         msr = MatchScheidsrechters.objects.create(match=self.match,
                                                   gekozen_hoofd_sr=self.testdata.ver_sporters[self.ver_nr][0])
 
-        with self.assert_max_queries(27):
+        with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -158,7 +158,7 @@ class TestCompLaagMatchInfo(E2EHelpers, TestCase):
         msr.gekozen_sr1 = self.testdata.ver_sporters[self.ver_nr][1]
         msr.save(update_fields=['gekozen_sr1'])
 
-        with self.assert_max_queries(27):
+        with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
