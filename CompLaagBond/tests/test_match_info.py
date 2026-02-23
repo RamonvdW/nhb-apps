@@ -122,7 +122,7 @@ class TestCompLaagMatchInfo(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_hwl)
 
         url = self.url_match_info % self.match.pk
-        with self.assert_max_queries(26):
+        with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)

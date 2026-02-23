@@ -160,7 +160,7 @@ class TestCompLaagBondFormulieren(E2EHelpers, TestCase):
         team_klasse = KampioenschapTeam.objects.filter(kampioenschap=self.deelkamp18_bk)[0].team_klasse
         url = self.url_forms_download_teams % (self.match.pk, team_klasse.pk)
 
-        with self.assert_max_queries(23):
+        with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert200_is_bestand_xlsx(resp)
