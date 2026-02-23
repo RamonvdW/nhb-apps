@@ -9,7 +9,7 @@ from django.http import Http404
 from django.utils import timezone
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.definities import DEEL_BK, DEELNAME_NEE
+from Competitie.definities import DEEL_BK, DEELNAME_JA, DEELNAME_NEE
 from Competitie.models import CompetitieMatch, KampioenschapSporterBoog, KampioenschapTeam
 from CompKampioenschap.operations import get_url_wedstrijdformulier
 from Functie.definities import Rol
@@ -176,8 +176,8 @@ class BkMatchInfoView(UserPassesTestMixin, TemplateView):
                      .objects
                      .filter(kampioenschap=deelkamp,
                              team_klasse__pk__in=klasse_team_pks,
+                             deelname=DEELNAME_JA,                  # reserve teams staan nog op ?
                              rank__lte=8)
-                     .exclude(deelname=DEELNAME_NEE)
                      .select_related('vereniging',
                                      'team_klasse')
                      .prefetch_related('gekoppelde_leden')

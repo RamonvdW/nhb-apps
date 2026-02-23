@@ -7,7 +7,7 @@
 from django.conf import settings
 from django.utils import timezone
 from django.http import HttpResponse
-from Competitie.definities import DEEL_RK, DEELNAME_NEE
+from Competitie.definities import DEEL_RK, DEELNAME_JA
 from Competitie.models import Kampioenschap, CompetitieTeamKlasse, CompetitieMatch, KampioenschapSporterBoog, KampioenschapTeam
 from Sporter.models import SporterVoorkeuren
 from tempfile import NamedTemporaryFile
@@ -82,8 +82,8 @@ class MaakTeamsExcel:
         teams = (KampioenschapTeam
                  .objects
                  .filter(kampioenschap=self.deelkamp,
-                         team_klasse=self.team_klasse.pk)
-                 .exclude(deelname=DEELNAME_NEE)            # skip afgemelde teams
+                         team_klasse=self.team_klasse.pk,
+                         deelname=DEELNAME_JA)              # reserve teams staan nog op ?
                  .select_related('vereniging',
                                  'vereniging__regio')
                  .prefetch_related('gekoppelde_leden')
