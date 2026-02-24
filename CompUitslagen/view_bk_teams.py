@@ -206,7 +206,7 @@ class UitslagenBKTeamsView(TemplateView):
         klasse_teams_done = list()
         klasse_teams_plan = list()
         klasse_teams_afgemeld = list()
-        eerste_reserve = True
+        reserve_rayon = 0
 
         aantal_regels = 0
         limiet = 8
@@ -215,7 +215,8 @@ class UitslagenBKTeamsView(TemplateView):
                      .filter(kampioenschap=deelkamp_bk,
                              team_klasse__team_type=teamtype)
                      .select_related('team_klasse',
-                                     'vereniging')
+                                     'vereniging',
+                                     'vereniging__regio')
                      .prefetch_related('gekoppelde_leden',
                                        'feitelijke_leden')
                      .order_by('team_klasse__volgorde',      # klassen in de uitslag
@@ -258,6 +259,8 @@ class UitslagenBKTeamsView(TemplateView):
             team.ver_nr = team.vereniging.ver_nr
             team.ver_str = str(team.vereniging)
             team.toon_team_leden = False
+
+            team.rayon_nr = team.vereniging.regio.rayon_nr
 
             # RK score is opgeslagen in aanvangsgemiddelde
             rk_score = round(team.aanvangsgemiddelde)
@@ -319,8 +322,8 @@ class UitslagenBKTeamsView(TemplateView):
                     if team.rank > limiet:
                         team.is_reserve = True
 
-                if eerste_reserve and team.is_reserve:
-                    eerste_reserve = False
+                if team.is_reserve and reserve_rayon != team.rayon_nr:
+                    reserve_rayon = team.rayon_nr
                     team.break_reserve = True
                     aantal_regels += 1
 

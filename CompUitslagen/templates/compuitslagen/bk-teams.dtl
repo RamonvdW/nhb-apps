@@ -96,17 +96,6 @@
                 </div>
             </div>
         </div>
-
-    {% endif %}
-
-    {% if not deelkamp_bk.is_klaar_teams %}
-        <!-- witruimte -->
-        <div class="row center" style="margin-bottom:0">
-            <div class="col s12">
-                <h4>Geplaatste teams</h4>
-                <p>Aantal teams: {{ bk_teams|length }}</p>
-            </div>
-        </div>
     {% endif %}
 
     {% if not geen_teams %}
@@ -195,7 +184,7 @@
                         {% endif %}
                     </td>
 
-                    <td class="center hide-on-small-only">Rayon {{ team.vereniging.regio.rayon_nr }}</td>
+                    <td class="center hide-on-small-only">Rayon {{ team.rayon_nr }}</td>
 
                     <!-- RK score (alleen op deelnemerslijst) -->
                     <td class="center hide-on-small-only">
@@ -251,7 +240,10 @@
             </tr>
         </table>
 
-        <p class="center">Sporter met ** achter de naam is invaller</p>
+        <div class="center">
+        <p>Sporter met ** achter de naam is invaller</p>
+        <p>Reserve teams kunnen alleen een uitvallend team van het eigen rayon vervangen.</p>
+        </div>
 
     {% endif %}
 
