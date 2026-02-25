@@ -13,7 +13,6 @@ from GoogleDrive.models import Bestand
 from GoogleDrive.operations import StorageGoogleSheet
 from TestHelpers.e2ehelpers import E2EHelpers
 from unittest.mock import patch
-import datetime
 import io
 
 
