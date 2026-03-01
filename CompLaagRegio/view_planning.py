@@ -13,12 +13,12 @@ from django.core.exceptions import PermissionDenied
 from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
-from Competitie.definities import DEEL_RK, INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2
+from Competitie.definities import INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2
 from Competitie.models import (CompetitieMatch, CompetitieIndivKlasse, CompetitieTeamKlasse,
                                Regiocompetitie, RegiocompetitieRonde,
-                               RegiocompetitieSporterBoog, RegiocompetitieTeam,
-                               Kampioenschap)
+                               RegiocompetitieSporterBoog, RegiocompetitieTeam)
 from Competitie.operations import maak_regiocompetitie_ronde, competitie_week_nr_to_date
+from CompLaagRayon.models import KampRK
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie
 from Geo.models import Cluster
@@ -240,9 +240,8 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
                 context['inschrijfmethode'] = '3 (sporter voorkeur dagdeel)'
 
         if self.rol_nu in (Rol.ROL_BB, Rol.ROL_BKO, Rol.ROL_RKO):
-            rayon = Kampioenschap.objects.get(competitie=deelcomp.competitie,
-                                              deel=DEEL_RK,
-                                              rayon=deelcomp.regio.rayon)
+            rayon = KampRK.objects.get(competitie=deelcomp.competitie,
+                                       rayon=deelcomp.regio.rayon)
             context['url_rayon'] = reverse('CompLaagRayon:planning',
                                            kwargs={'deelkamp_pk': rayon.pk})
 
@@ -1434,9 +1433,8 @@ class AfsluitenRegiocompView(UserPassesTestMixin, TemplateView):
             taak_log = "[%s] Taak aangemaakt" % stamp_str
 
             # maak een taak aan voor de RKO
-            deelkamp = Kampioenschap.objects.get(competitie=deelcomp.competitie,
-                                                 deel=DEEL_RK,
-                                                 rayon=deelcomp.regio.rayon)
+            deelkamp = KampRK.objects.get(competitie=deelcomp.competitie,
+                                          rayon=deelcomp.regio.rayon)
             functie_rko = deelkamp.functie
             maak_taak(toegekend_aan_functie=functie_rko,
                       deadline=taak_deadline,

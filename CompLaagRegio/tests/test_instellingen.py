@@ -1,17 +1,19 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
 from BasisTypen.models import BoogType
-from Competitie.definities import DEEL_RK, DEEL_BK, INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3
-from Competitie.models import Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse, Regiocompetitie, Kampioenschap
+from Competitie.definities import INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3
+from Competitie.models import Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse, Regiocompetitie
 from Competitie.operations import competities_aanmaken
 from Competitie.test_utils.tijdlijn import (evaluatie_datum, zet_competitie_fases,
                                             zet_competitie_fase_regio_wedstrijden,
                                             zet_competitie_fase_regio_inschrijven)
+from CompLaagBond.models import KampBK
+from CompLaagRayon.models import KampRK
 from Functie.tests.helpers import maak_functie
 from Geo.models import Rayon, Regio, Cluster
 from Locatie.models import WedstrijdLocatie
@@ -154,11 +156,9 @@ class TestCompLaagRegioInstellingen(E2EHelpers, TestCase):
                                                 is_onbekend=True)
                                         .all())[0]
 
-        self.deelcomp_bond_18 = Kampioenschap.objects.filter(competitie=self.comp_18, deel=DEEL_BK).first()
-        self.deelcomp_rayon1_18 = Kampioenschap.objects.filter(competitie=self.comp_18,
-                                                               deel=DEEL_RK, rayon=self.rayon_1).first()
-        self.deelcomp_rayon2_18 = Kampioenschap.objects.filter(competitie=self.comp_18,
-                                                               deel=DEEL_RK, rayon=self.rayon_2).first()
+        self.deelcomp_bond_18 = KampBK.objects.filter(competitie=self.comp_18).first()
+        self.deelcomp_rayon1_18 = KampRK.objects.filter(competitie=self.comp_18, rayon=self.rayon_1).first()
+        self.deelcomp_rayon2_18 = KampRK.objects.filter(competitie=self.comp_18, rayon=self.rayon_2).first()
         self.deelcomp_regio101_18 = Regiocompetitie.objects.filter(competitie=self.comp_18,
                                                                    regio=self.regio_101).first()
         self.deelcomp_regio101_25 = Regiocompetitie.objects.filter(competitie=self.comp_25,

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2025 Ramon van der Winkel.
+#  Copyright (c) 2020-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -86,12 +86,12 @@ class Command(BaseCommand):
 
         # 1. Sporter.bij_vereniging komt overeen met informatie uit CRM
 
-        # 2. Schutters in regiocompetitie kunnen elk moment overstappen
+        # 2. deelnemers in regiocompetitie kunnen elk moment overstappen
         #    RegioCompetitieSporterBoog.bij_vereniging
         # FUTURE: voor de teamcompetitie moet dit pas gebeuren nadat de teamscores vastgesteld zijn
 
         # 3. Bij vaststellen RK/BK deelname/reserve wordt vereniging bevroren (afsluiten fase G)
-        #    KampioenschapSporterBoog.bij_vereniging
+        #    DeelnemerRK/BK.bij_vereniging
         #    overstappen is daarna niet meer mogelijk
 
         regio_comp_pks = list()

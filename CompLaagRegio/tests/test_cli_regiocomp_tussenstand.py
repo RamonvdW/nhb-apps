@@ -1,17 +1,16 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2025 Ramon van der Winkel.
+#  Copyright (c) 2020-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
 from BasisTypen.models import BoogType
-from Competitie.definities import DEEL_BK
 from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieMatch,
-                               Regiocompetitie, RegiocompetitieRonde, RegiocompetitieSporterBoog,
-                               Kampioenschap)
+                               Regiocompetitie, RegiocompetitieRonde, RegiocompetitieSporterBoog)
 from Competitie.operations import competities_aanmaken, competitie_klassengrenzen_vaststellen
 from Competitie.test_utils.tijdlijn import zet_competitie_fases
+from CompLaagBond.models import KampBK
 from Geo.models import Regio
 from Score.definities import SCORE_WAARDE_VERWIJDERD
 from Score.models import Score, ScoreHist
@@ -239,9 +238,8 @@ class TestCompLaagRegioCliRegiocompTussenstand(E2EHelpers, TestCase):
                          self.sporterboog_100004, self.sporterboog_100005]
         self._schrijf_in_voor_competitie(self.deelcomp_r101, schuttersboog)
 
-        self.functie_bko = Kampioenschap.objects.get(competitie=self.comp,
-                                                     deel=DEEL_BK,
-                                                     competitie__afstand=18).functie
+        self.functie_bko = KampBK.objects.get(competitie=self.comp,
+                                              competitie__afstand=18).functie
 
         self.client.logout()
 
