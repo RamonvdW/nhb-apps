@@ -13,12 +13,12 @@ from django.core.exceptions import PermissionDenied
 from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
-from Competitie.definities import DEEL_RK
-from Competitie.models import Competitie, CompetitieTeamKlasse, Regiocompetitie, KampioenschapTeam
+from Competitie.models import Competitie, CompetitieTeamKlasse, Regiocompetitie
 from CompBeheer.operations.maak_mutatie import (maak_mutatie_doorzetten_regio_naar_rk,
                                                 maak_mutatie_kamp_indiv_doorzetten_naar_bk,
                                                 maak_mutatie_kamp_teams_doorzetten_naar_bk,
                                                 maak_mutatie_kamp_indiv_afsluiten, maak_mutatie_kamp_teams_afsluiten)
+from CompLaagRayon.models import TeamRK
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
 from Site.core.background_sync import BackgroundSync
@@ -204,9 +204,9 @@ class KlassengrenzenVaststellenRkBkTeamsView(UserPassesTestMixin, TemplateView):
 
         niet_compleet_team = False
 
-        for rk_team in (KampioenschapTeam
+        for rk_team in (TeamRK
                         .objects
-                        .filter(kampioenschap__competitie=comp)
+                        .filter(kamp__competitie=comp)
                         .select_related('team_type')
                         .annotate(sporter_count=Count('tijdelijke_leden'))
                         .order_by('team_type__volgorde',
@@ -375,9 +375,9 @@ class KlassengrenzenVaststellenRkBkTeamsView(UserPassesTestMixin, TemplateView):
         # for
 
         # plaats elk RK team in een wedstrijdklasse
-        for team in (KampioenschapTeam
+        for team in (TeamRK
                      .objects
-                     .filter(kampioenschap__competitie=comp)
+                     .filter(kamp__competitie=comp)
                      .annotate(sporter_count=Count('gekoppelde_leden'))):
 
             team.team_klasse = None
@@ -553,17 +553,16 @@ class DoorzettenTeamsRKNaarBKView(DoorzettenBasisView):
         problemen = list()
 
         # kijk of er klassen zijn zonder uitslag
-        for team in (KampioenschapTeam
+        for team in (TeamRK
                      .objects
-                     .filter(kampioenschap__competitie=self.comp,
-                             kampioenschap__deel=DEEL_RK,
+                     .filter(kamp__competitie=self.comp,
                              result_rank=0)
-                     .order_by('kampioenschap__rayon__rayon_nr',
+                     .order_by('kamp__rayon__rayon_nr',
                                'team_klasse__volgorde')
-                     .distinct('kampioenschap__rayon__rayon_nr',
+                     .distinct('kamp__rayon__rayon_nr',
                                'team_klasse__volgorde')):
 
-            probleem = 'Teams zonder uitslag in Rayon %s, %s' % (team.kampioenschap.rayon.rayon_nr,
+            probleem = 'Teams zonder uitslag in Rayon %s, %s' % (team.kamp.rayon.rayon_nr,
                                                                  team.team_klasse.beschrijving)
             problemen.append(probleem)
         # for

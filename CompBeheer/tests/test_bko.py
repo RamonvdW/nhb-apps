@@ -7,12 +7,13 @@
 from django.test import TestCase
 from django.utils import timezone
 from BasisTypen.models import BoogType
-from Competitie.definities import DEEL_RK, DEEL_BK, DEELNAME_NEE, DEELNAME_JA, KAMP_RANK_BLANCO, KAMP_RANK_NO_SHOW
+from Competitie.definities import DEELNAME_NEE, DEELNAME_JA, KAMP_RANK_BLANCO, KAMP_RANK_NO_SHOW
 from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse, Regiocompetitie,
-                               RegiocompetitieSporterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam, Kampioenschap,
-                               KampioenschapSporterBoog, KampioenschapTeam)
+                               RegiocompetitieSporterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam)
 from Competitie.test_utils.tijdlijn import (zet_competitie_fases, zet_competitie_fase_regio_inschrijven,
                                             zet_competitie_fase_regio_wedstrijden, zet_competitie_fase_regio_afsluiten)
+from CompLaagBond.models import KampBK, DeelnemerBK
+from CompLaagRayon.models import KampRK, DeelnemerRK, TeamRK
 from Functie.tests.helpers import maak_functie
 from Geo.models import Rayon, Regio
 from HistComp.models import HistCompSeizoen, HistCompRegioTeam
@@ -189,22 +190,19 @@ class TestCompBeheerBko(E2EHelpers, TestCase):
         resp = self.client.post(url_klassengrenzen_vaststellen_18)
         self.assert_is_redirect_not_plein(resp)  # check for success
 
-        self.deelkamp_rayon1_25 = Kampioenschap.objects.filter(competitie=self.comp_25,
-                                                               deel=DEEL_RK,
-                                                               rayon=self.rayon_1).first()
+        self.deelkamp_rayon1_25 = KampRK.objects.filter(competitie=self.comp_25,
+                                                        rayon=self.rayon_1).first()
         self.regiocomp25_101 = Regiocompetitie.objects.filter(competitie=self.comp_25,
                                                               regio=self.regio_101).first()
         self.regiocomp25_105 = Regiocompetitie.objects.filter(competitie=self.comp_25,
                                                               regio=self.regio_105).first()
 
-        self.deelkamp_bk_18 = Kampioenschap.objects.filter(competitie=self.comp_18,
-                                                           deel=DEEL_BK).first()
+        self.deelkamp_bk_18 = KampBK.objects.filter(competitie=self.comp_18).first()
 
         self.functie_bko_18 = self.deelkamp_bk_18.functie
         self.functie_bko_18.accounts.add(self.account_bko_18)
 
-        self.deelkamp_bk_25 = Kampioenschap.objects.filter(competitie=self.comp_25,
-                                                           deel=DEEL_BK).first()
+        self.deelkamp_bk_25 = KampBK.objects.filter(competitie=self.comp_25).first()
         self.functie_bko_25 = self.deelkamp_bk_25.functie
         self.functie_bko_25.accounts.add(self.account_bko_25)
 
@@ -303,62 +301,112 @@ class TestCompBeheerBko(E2EHelpers, TestCase):
                 team_score=90,
                 team_punten=0).save()
 
-    def _inschrijven_kamp_indiv(self, kampioenschap):
+    def _inschrijven_kamp_rk_indiv(self, kamp_rk: KampRK):
         # recurve, lid 1
-        KampioenschapSporterBoog(kampioenschap=kampioenschap,
-                                 sporterboog=self.sporterboog_1r,
-                                 bij_vereniging=self.sporterboog_1r.sporter.bij_vereniging,
-                                 indiv_klasse=self.comp25_klasse_r,
-                                 indiv_klasse_volgende_ronde=self.comp25_klasse_r,
-                                 result_rank=1,                 # titel: BK
-                                 deelname=DEELNAME_JA).save()
+        DeelnemerRK(kamp=kamp_rk,
+                    sporterboog=self.sporterboog_1r,
+                    bij_vereniging=self.sporterboog_1r.sporter.bij_vereniging,
+                    indiv_klasse=self.comp25_klasse_r,
+                    indiv_klasse_volgende_ronde=self.comp25_klasse_r,
+                    result_rank=1,  # titel: BK
+                    deelname=DEELNAME_JA).save()
 
         # recurve, lid 2
-        KampioenschapSporterBoog(kampioenschap=kampioenschap,
-                                 sporterboog=self.sporterboog_1r,
-                                 bij_vereniging=self.sporterboog_1r.sporter.bij_vereniging,
-                                 indiv_klasse=self.comp25_klasse_r,
-                                 indiv_klasse_volgende_ronde=self.comp25_klasse_r,
-                                 deelname=DEELNAME_NEE).save()
+        DeelnemerRK(kamp=kamp_rk,
+                    sporterboog=self.sporterboog_1r,
+                    bij_vereniging=self.sporterboog_1r.sporter.bij_vereniging,
+                    indiv_klasse=self.comp25_klasse_r,
+                    indiv_klasse_volgende_ronde=self.comp25_klasse_r,
+                    deelname=DEELNAME_NEE).save()
 
         # recurve, lid 2
-        KampioenschapSporterBoog(kampioenschap=kampioenschap,
-                                 sporterboog=self.sporterboog_1r,
-                                 bij_vereniging=self.sporterboog_1r.sporter.bij_vereniging,
-                                 indiv_klasse=self.comp25_klasse_r,
-                                 indiv_klasse_volgende_ronde=self.comp25_klasse_r,
-                                 result_rank=2).save()
+        DeelnemerRK(kamp=kamp_rk,
+                    sporterboog=self.sporterboog_1r,
+                    bij_vereniging=self.sporterboog_1r.sporter.bij_vereniging,
+                    indiv_klasse=self.comp25_klasse_r,
+                    indiv_klasse_volgende_ronde=self.comp25_klasse_r,
+                    result_rank=2).save()
 
         # compound, lid 1
-        KampioenschapSporterBoog(kampioenschap=kampioenschap,
-                                 sporterboog=self.sporterboog_1c,
-                                 bij_vereniging=self.sporterboog_1c.sporter.bij_vereniging,
-                                 indiv_klasse=self.comp25_klasse_c,
-                                 indiv_klasse_volgende_ronde=self.comp25_klasse_c,
-                                 result_rank=1).save()          # titel: NK
+        DeelnemerRK(kamp=kamp_rk,
+                    sporterboog=self.sporterboog_1c,
+                    bij_vereniging=self.sporterboog_1c.sporter.bij_vereniging,
+                    indiv_klasse=self.comp25_klasse_c,
+                    indiv_klasse_volgende_ronde=self.comp25_klasse_c,
+                    result_rank=1).save()          # titel: NK
 
         # compound, lid 2
-        KampioenschapSporterBoog(kampioenschap=kampioenschap,
-                                 sporterboog=self.sporterboog_2c,
-                                 bij_vereniging=self.sporterboog_2c.sporter.bij_vereniging,
-                                 indiv_klasse=self.comp25_klasse_c,
-                                 indiv_klasse_volgende_ronde=self.comp25_klasse_c,
-                                 result_rank=KAMP_RANK_BLANCO).save()
+        DeelnemerRK(kamp=kamp_rk,
+                    sporterboog=self.sporterboog_2c,
+                    bij_vereniging=self.sporterboog_2c.sporter.bij_vereniging,
+                    indiv_klasse=self.comp25_klasse_c,
+                    indiv_klasse_volgende_ronde=self.comp25_klasse_c,
+                    result_rank=KAMP_RANK_BLANCO).save()
 
         # compound, lid 2
-        KampioenschapSporterBoog(kampioenschap=kampioenschap,
-                                 sporterboog=self.sporterboog_2c,
-                                 bij_vereniging=self.sporterboog_2c.sporter.bij_vereniging,
-                                 indiv_klasse=self.comp25_klasse_c,
-                                 indiv_klasse_volgende_ronde=self.comp25_klasse_c,
-                                 result_rank=KAMP_RANK_NO_SHOW).save()         # komt niet in aanmerking
+        DeelnemerRK(kamp=kamp_rk,
+                    sporterboog=self.sporterboog_2c,
+                    bij_vereniging=self.sporterboog_2c.sporter.bij_vereniging,
+                    indiv_klasse=self.comp25_klasse_c,
+                    indiv_klasse_volgende_ronde=self.comp25_klasse_c,
+                    result_rank=KAMP_RANK_NO_SHOW).save()         # komt niet in aanmerking
 
-    def _maak_rk_teams(self, kampioenschap):
+    def _inschrijven_kamp_bk_indiv(self, kamp_bk: KampBK):
+        # recurve, lid 1
+        DeelnemerBK(kamp=kamp_bk,
+                    sporterboog=self.sporterboog_1r,
+                    bij_vereniging=self.sporterboog_1r.sporter.bij_vereniging,
+                    indiv_klasse=self.comp25_klasse_r,
+                    indiv_klasse_volgende_ronde=self.comp25_klasse_r,
+                    result_rank=1,  # titel: BK
+                    deelname=DEELNAME_JA).save()
 
-        self._inschrijven_kamp_indiv(kampioenschap)
+        # recurve, lid 2
+        DeelnemerBK(kamp=kamp_bk,
+                    sporterboog=self.sporterboog_1r,
+                    bij_vereniging=self.sporterboog_1r.sporter.bij_vereniging,
+                    indiv_klasse=self.comp25_klasse_r,
+                    indiv_klasse_volgende_ronde=self.comp25_klasse_r,
+                    deelname=DEELNAME_NEE).save()
 
-        team = KampioenschapTeam(
-                    kampioenschap=kampioenschap,
+        # recurve, lid 2
+        DeelnemerBK(kamp=kamp_bk,
+                    sporterboog=self.sporterboog_1r,
+                    bij_vereniging=self.sporterboog_1r.sporter.bij_vereniging,
+                    indiv_klasse=self.comp25_klasse_r,
+                    indiv_klasse_volgende_ronde=self.comp25_klasse_r,
+                    result_rank=2).save()
+
+        # compound, lid 1
+        DeelnemerBK(kamp=kamp_bk,
+                    sporterboog=self.sporterboog_1c,
+                    bij_vereniging=self.sporterboog_1c.sporter.bij_vereniging,
+                    indiv_klasse=self.comp25_klasse_c,
+                    indiv_klasse_volgende_ronde=self.comp25_klasse_c,
+                    result_rank=1).save()          # titel: NK
+
+        # compound, lid 2
+        DeelnemerBK(kamp=kamp_bk,
+                    sporterboog=self.sporterboog_2c,
+                    bij_vereniging=self.sporterboog_2c.sporter.bij_vereniging,
+                    indiv_klasse=self.comp25_klasse_c,
+                    indiv_klasse_volgende_ronde=self.comp25_klasse_c,
+                    result_rank=KAMP_RANK_BLANCO).save()
+
+        # compound, lid 2
+        DeelnemerBK(kamp=kamp_bk,
+                    sporterboog=self.sporterboog_2c,
+                    bij_vereniging=self.sporterboog_2c.sporter.bij_vereniging,
+                    indiv_klasse=self.comp25_klasse_c,
+                    indiv_klasse_volgende_ronde=self.comp25_klasse_c,
+                    result_rank=KAMP_RANK_NO_SHOW).save()         # komt niet in aanmerking
+
+    def _maak_rk_teams(self, kamp_rk: KampRK):
+
+        self._inschrijven_kamp_rk_indiv(kamp_rk)
+
+        team = TeamRK.objects.create(
+                    kamp=kamp_rk,
                     vereniging=self.ver_101,
                     volg_nr=1,
                     team_type=self.testdata.afkorting2teamtype_khsn['R2'],
@@ -370,9 +418,8 @@ class TestCompBeheerBko(E2EHelpers, TestCase):
                     result_rank=1,          # moet >= 1 zijn
                     result_volgorde=1,
                     result_teamscore=12)
-        team.save()
 
-        leden = KampioenschapSporterBoog.objects.filter(bij_vereniging=self.ver_101)
+        leden = DeelnemerRK.objects.filter(bij_vereniging=self.ver_101)
         team.gekoppelde_leden.set(leden)
 
     def test_bad(self):
@@ -511,7 +558,7 @@ class TestCompBeheerBko(E2EHelpers, TestCase):
         self._inschrijven_regio_teams()
 
         self.assertEqual(4, RegiocompetitieSporterBoog.objects.count())
-        self.assertEqual(0, KampioenschapSporterBoog.objects.count())
+        self.assertEqual(0, DeelnemerRK.objects.count())
         self.assertEqual(0, HistCompRegioTeam.objects.count())
 
         with self.assert_max_queries(20):
@@ -521,7 +568,7 @@ class TestCompBeheerBko(E2EHelpers, TestCase):
         # laat de mutatie verwerken
         self.verwerk_competitie_mutaties()
 
-        self.assertEqual(3, KampioenschapSporterBoog.objects.count())
+        self.assertEqual(3, DeelnemerRK.objects.count())
         self.assertEqual(2, HistCompRegioTeam.objects.count())
 
         # verkeerde competitie/BKO
@@ -536,7 +583,7 @@ class TestCompBeheerBko(E2EHelpers, TestCase):
         self._inschrijven_regio_indiv()
 
         self.assertEqual(4, RegiocompetitieSporterBoog.objects.count())
-        self.assertEqual(0, KampioenschapSporterBoog.objects.count())
+        self.assertEqual(0, DeelnemerRK.objects.count())
 
         zet_competitie_fase_regio_afsluiten(self.comp_25)       # fase G
 
@@ -555,7 +602,7 @@ class TestCompBeheerBko(E2EHelpers, TestCase):
             "[WARNING] Sporter 100005 - Compound is geen RK deelnemer want heeft geen vereniging" in f2.getvalue())
 
         # het lid zonder vereniging komt NIET in de RK selectie
-        self.assertEqual(2, KampioenschapSporterBoog.objects.count())
+        self.assertEqual(2, DeelnemerRK.objects.count())
 
         # verdere tests in test_planning_rayon.test_geen_vereniging check
 
@@ -620,7 +667,7 @@ class TestCompBeheerBko(E2EHelpers, TestCase):
         seizoen = "%s/%s" % (comp.begin_jaar, comp.begin_jaar + 1)
         HistCompSeizoen(seizoen=seizoen, comp_type=comp.afstand).save()
 
-        self._inschrijven_kamp_indiv(self.deelkamp_rayon1_25)
+        self._inschrijven_kamp_rk_indiv(self.deelkamp_rayon1_25)
 
         url = self.url_doorzetten_rk_naar_bk_indiv % self.comp_25.pk
 
@@ -653,7 +700,7 @@ class TestCompBeheerBko(E2EHelpers, TestCase):
 
         self.assertTrue(str(self.deelkamp_bk_25) != '')
 
-        objs = KampioenschapSporterBoog.objects.filter(kampioenschap=self.deelkamp_bk_25)
+        objs = DeelnemerBK.objects.filter(kamp=self.deelkamp_bk_25)
         self.assertEqual(objs.count(), 4)
 
     def test_doorzetten_2b(self):
@@ -770,7 +817,7 @@ class TestCompBeheerBko(E2EHelpers, TestCase):
         seizoen = "%s/%s" % (comp.begin_jaar, comp.begin_jaar + 1)
         HistCompSeizoen(seizoen=seizoen, comp_type=comp.afstand).save()
 
-        self._inschrijven_kamp_indiv(self.deelkamp_bk_25)
+        self._inschrijven_kamp_bk_indiv(self.deelkamp_bk_25)
 
         url = self.url_bevestig_eindstand_bk_indiv % self.comp_25.pk
 

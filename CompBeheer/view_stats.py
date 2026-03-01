@@ -10,9 +10,10 @@ from django.db.models import Count
 from django.views.generic import TemplateView
 from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.definities import DEEL_BK, DEEL_RK, DEELNAME_NEE
-from Competitie.models import (Competitie, Regiocompetitie, RegiocompetitieSporterBoog, RegiocompetitieTeam,
-                               KampioenschapSporterBoog, KampioenschapTeam)
+from Competitie.definities import DEELNAME_NEE
+from Competitie.models import Competitie, Regiocompetitie, RegiocompetitieSporterBoog, RegiocompetitieTeam
+from CompLaagBond.models import DeelnemerBK, TeamBK
+from CompLaagRayon.models import DeelnemerRK, TeamRK
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
 from Sporter.models import Sporter
@@ -369,23 +370,21 @@ class CompetitieStatistiekView(UserPassesTestMixin, TemplateView):
             context['in_uitslag_rk_%sm' % afstand] = in_uitslag_rk = list()
             context['teams_rk_%sm' % afstand] = teams_rk = list()
 
-            qset = (KampioenschapSporterBoog
+            qset = (DeelnemerRK
                     .objects
-                    .filter(kampioenschap__competitie__afstand=afstand,
-                            kampioenschap__competitie__pk__in=self.comp_pks,
-                            kampioenschap__deel=DEEL_RK)
+                    .filter(kamp__competitie__afstand=afstand,
+                            kamp__competitie__pk__in=self.comp_pks)
                     .select_related('sporterboog__sporter')
                     .prefetch_related('kampioenschapteam'))
 
-            qset_teams = (KampioenschapTeam
+            qset_teams = (TeamRK
                           .objects
-                          .filter(kampioenschap__competitie__afstand=afstand,
-                                  kampioenschap__competitie__pk__in=self.comp_pks,
-                                  kampioenschap__deel=DEEL_RK))
+                          .filter(kamp__competitie__afstand=afstand,
+                                  kamp__competitie__pk__in=self.comp_pks))
 
             totaal1 = totaal2 = totaal3 = totaal4 = 0
             for rayon_nr in range(1, 4+1):
-                qset_rayon = qset.filter(kampioenschap__rayon__rayon_nr=rayon_nr)
+                qset_rayon = qset.filter(kamp__rayon__rayon_nr=rayon_nr)
 
                 aantal = qset_rayon.count()
                 geplaatst_rk.append(aantal)
@@ -400,7 +399,7 @@ class CompetitieStatistiekView(UserPassesTestMixin, TemplateView):
                 in_uitslag_rk.append(aantal)
                 totaal3 += aantal
 
-                aantal = qset_teams.filter(kampioenschap__rayon__rayon_nr=rayon_nr).count()
+                aantal = qset_teams.filter(kamp__rayon__rayon_nr=rayon_nr).count()
                 teams_rk.append(aantal)
                 totaal4 += aantal
             # for
@@ -426,28 +425,26 @@ class CompetitieStatistiekView(UserPassesTestMixin, TemplateView):
                 age_group_counts = age_group_counts_25m_teams_rk
 
             for values in (qset
-                           .annotate(c=Count('kampioenschapteam_gekoppelde_leden'))
+                           .annotate(c=Count('teamrk_gekoppelde_leden') + Count('teambk_gekoppelde_leden'))
                            .exclude(c=0)
                            .values_list('sporterboog__sporter__geboorte_datum')):
                 geboorte_datum = values[0]
                 self._add_to_age_group(age_group_counts, geboorte_datum.year)
             # for
 
-            qset_bk = (KampioenschapSporterBoog
+            qset_bk = (DeelnemerBK
                        .objects
-                       .filter(kampioenschap__competitie__afstand=afstand,
-                               kampioenschap__competitie__pk__in=self.comp_pks,
-                               kampioenschap__deel=DEEL_BK))
+                       .filter(kamp__competitie__afstand=afstand,
+                               kamp__competitie__pk__in=self.comp_pks))
             context['deelnemers_bk_%sm' % afstand] = qset_bk.count()
 
             qset_bk = qset_bk.filter(result_rank__gte=1, result_rank__lt=100)
             context['uitslag_bk_%sm' % afstand] = qset_bk.count()
 
-            qset_bk = (KampioenschapTeam
+            qset_bk = (TeamBK
                        .objects
-                       .filter(kampioenschap__competitie__afstand=afstand,
-                               kampioenschap__competitie__pk__in=self.comp_pks,
-                               kampioenschap__deel=DEEL_BK))
+                       .filter(kamp__competitie__afstand=afstand,
+                               kamp__competitie__pk__in=self.comp_pks))
             context['teams_bk_%sm' % afstand] = qset_bk.count()
 
             qset_bk = qset_bk.filter(result_rank__gte=1, result_rank__lt=100)

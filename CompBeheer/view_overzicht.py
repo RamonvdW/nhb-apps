@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -10,12 +10,14 @@ from django.views.generic import TemplateView
 from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from CompBeheer.operations.toegang import is_competitie_openbaar_voor_rol
-from Competitie.models import Competitie, Regiocompetitie, Kampioenschap
+from Competitie.models import Competitie, Regiocompetitie
 from Competitie.tijdlijn import maak_comp_fase_beschrijvingen
 from CompBeheer.plugin_overzicht import get_kaartjes_beheer
-from CompLaagRegio.plugin_overzicht import get_kaartjes_regio
-from CompLaagRayon.plugin_overzicht import get_kaartjes_rayon
+from CompLaagBond.models import KampBK
 from CompLaagBond.plugin_overzicht import get_kaartjes_bond
+from CompLaagRegio.plugin_overzicht import get_kaartjes_regio
+from CompLaagRayon.models import KampRK
+from CompLaagRayon.plugin_overzicht import get_kaartjes_rayon
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
 from Taken.operations import eval_open_taken
@@ -76,13 +78,22 @@ class CompetitieBeheerView(UserPassesTestMixin, TemplateView):
             # for
 
             # toon de competitie waar de functie een rol in heeft of had (BKO/RKO/RCL)
-            for deelcomp in (Kampioenschap
+            for deelcomp in (KampRK
                              .objects
                              .filter(competitie=comp,
                                      functie=self.functie_nu)):
                 if not deelcomp.is_afgesloten:
                     context['rol_is_klaar'] = False
             # for
+
+            for deelcomp in (KampBK
+                             .objects
+                             .filter(competitie=comp,
+                                     functie=self.functie_nu)):
+                if not deelcomp.is_afgesloten:
+                    context['rol_is_klaar'] = False
+            # for
+
         else:
             # toon alle competities (BB)
             context['rol_is_klaar'] = False

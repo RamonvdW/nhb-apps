@@ -1,16 +1,18 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
 from BasisTypen.models import BoogType
 from Competitie.definities import INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2, INSCHRIJF_METHODE_3, DAGDEEL_AFKORTINGEN
-from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse, Regiocompetitie, Kampioenschap,
+from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse, Regiocompetitie,
                                CompetitieMutatie)
 from Competitie.operations import competities_aanmaken, aanvangsgemiddelden_vaststellen_voor_afstand
 from Competitie.test_utils.tijdlijn import zet_competitie_fase_regio_prep, zet_competitie_fase_afsluiten
+from CompLaagBond.models import KampBK
+from CompLaagRayon.models import KampRK
 from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
 from HistComp.definities import HISTCOMP_TYPE_18, HIST_BOGEN_DEFAULT
@@ -379,7 +381,8 @@ class TestCompBeheerBB(E2EHelpers, TestCase):
 
         self.assertEqual(Competitie.objects.count(), 2)
         self.assertEqual(Regiocompetitie.objects.count(), 2 * 16)
-        self.assertEqual(Kampioenschap.objects.count(), 2 * 5)
+        self.assertEqual(KampBK.objects.count(), 2)
+        self.assertEqual(KampRK.objects.count(), 2 * 4)
 
     def test_regio_settings_overnemen(self):
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
