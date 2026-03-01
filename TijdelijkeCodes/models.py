@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -8,7 +8,6 @@ from django.db import models
 from django.utils import timezone
 from datetime import timedelta
 from Account.models import Account
-from Competitie.models import KampioenschapSporterBoog
 from Functie.models import Functie
 from Sporter.models import Sporter
 from Registreer.models import GastRegistratie
@@ -49,11 +48,6 @@ class TijdelijkeCode(models.Model):
                                         on_delete=models.CASCADE,
                                         blank=True, null=True)          # optional
 
-    hoort_bij_kampioen = models.ForeignKey(
-                                        KampioenschapSporterBoog,
-                                        on_delete=models.CASCADE,
-                                        blank=True, null=True)          # optioneel
-
     # in de toekomst meer mogelijkheden, zoals taken
 
     objects = models.Manager()      # for the editor only
@@ -68,15 +62,13 @@ class TijdelijkeCode(models.Model):
             hoort_bij. append('gast registratie: %s' % self.hoort_bij_gast_reg)
         if self.hoort_bij_functie:
             hoort_bij.append('functie: %s' % self.hoort_bij_functie)
-        if self.hoort_bij_kampioen:
-            hoort_bij.append('kampioen: %s' % self.hoort_bij_kampioen)
         msg += ' (%s)' % ", ".join(hoort_bij)
         return msg
 
 
 def save_tijdelijke_code(url_code, dispatch_to,
                          geldig_dagen=0, geldig_seconden=0,
-                         account=None, gast=None, functie=None, kampioen=None):
+                         account=None, gast=None, functie=None):
 
     if geldig_seconden > 0:
         delta = timedelta(seconds=geldig_seconden)
@@ -95,8 +87,7 @@ def save_tijdelijke_code(url_code, dispatch_to,
                             dispatch_to=dispatch_to,
                             hoort_bij_account=account,
                             hoort_bij_gast_reg=gast,
-                            hoort_bij_functie=functie,
-                            hoort_bij_kampioen=kampioen)
+                            hoort_bij_functie=functie)
     obj.save()
 
     return obj

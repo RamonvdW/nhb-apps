@@ -1,19 +1,17 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import reverse
 from django.conf import settings
 from Account.models import Account
-from Competitie.models import KampioenschapSporterBoog
 from Functie.models import Functie
 from Registreer.models import GastRegistratie
 from TijdelijkeCodes.definities import (RECEIVER_BEVESTIG_EMAIL_ACCOUNT, RECEIVER_BEVESTIG_EMAIL_FUNCTIE,
                                         RECEIVER_BEVESTIG_EMAIL_REG_GAST, RECEIVER_BEVESTIG_EMAIL_REG_LID,
-                                        RECEIVER_ACCOUNT_WISSEL, RECEIVER_WACHTWOORD_VERGETEN,
-                                        RECEIVER_DEELNAME_KAMPIOENSCHAP)
+                                        RECEIVER_ACCOUNT_WISSEL, RECEIVER_WACHTWOORD_VERGETEN)
 from TijdelijkeCodes.models import TijdelijkeCode
 from uuid import uuid5, NAMESPACE_URL
 
@@ -147,16 +145,6 @@ def maak_tijdelijke_code_wachtwoord_vergeten(account: Account, **kwargs):
     return settings.SITE_URL + reverse('TijdelijkeCodes:tijdelijke-url', args=[url_code])
 
 
-def maak_tijdelijke_code_deelname_kampioenschap(kampioen: KampioenschapSporterBoog, **kwargs):
-    """ Maak een tijdelijke URL aan die gebruikt kan worden om deelname aan een kampioenschap
-        door een specifieke KampioenschapSporterBoog te bevestigen of af te melden.
-    """
-    url_code = _maak_unieke_code(**kwargs, pk=kampioen.pk)
-    func = tijdelijke_code_dispatcher.get_saver()
-    func(url_code, dispatch_to=RECEIVER_DEELNAME_KAMPIOENSCHAP, geldig_dagen=7, kampioen=kampioen)
-    return settings.SITE_URL + reverse('TijdelijkeCodes:tijdelijke-url', args=[url_code])
-
-
 def do_dispatch(request, obj: TijdelijkeCode):
     """ Deze functie wordt aangeroepen vanuit de POST handler die de ontvangen url_code opgezocht heeft in de database.
             obj is een TijdelijkeCode
@@ -182,11 +170,6 @@ def do_dispatch(request, obj: TijdelijkeCode):
         func = tijdelijke_code_dispatcher.get_receiver(obj.dispatch_to)
         redirect = func(request, obj.hoort_bij_functie)
 
-    elif obj.dispatch_to == RECEIVER_DEELNAME_KAMPIOENSCHAP:
-        # referentie = KampioenschapSporterBoog
-        func = tijdelijke_code_dispatcher.get_receiver(obj.dispatch_to)
-        redirect = func(request, obj.hoort_bij_kampioen)
-
     return redirect
 
 
@@ -209,9 +192,6 @@ def beschrijving_activiteit(obj):
 
     if obj.dispatch_to == RECEIVER_WACHTWOORD_VERGETEN:
         return "een nieuw wachtwoord in te stellen"
-
-    if obj.dispatch_to == RECEIVER_DEELNAME_KAMPIOENSCHAP:
-        return "je beschikbaarheid voor een kampioenschap door te geven"
 
     return "????"
 
