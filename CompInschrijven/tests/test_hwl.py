@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2025 Ramon van der Winkel.
+#  Copyright (c) 2020-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -10,12 +10,12 @@ from BasisTypen.definities import BOOGTYPE_AFKORTING_RECURVE
 from Functie.models import Functie
 from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
-from Competitie.definities import DEEL_RK, INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3
+from Competitie.definities import INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3
 from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieMatch,
-                               Regiocompetitie, RegiocompetitieSporterBoog, RegiocompetitieRonde,
-                               Kampioenschap)
+                               Regiocompetitie, RegiocompetitieSporterBoog, RegiocompetitieRonde)
 from Competitie.operations import competities_aanmaken
 from Competitie.test_utils.tijdlijn import zet_competitie_fases, zet_competitie_fase_regio_inschrijven
+from CompLaagRayon.models import KampRK
 from HistComp.definities import HISTCOMP_TYPE_18, HIST_BOGEN_DEFAULT
 from HistComp.models import HistCompSeizoen, HistCompRegioIndiv
 from Score.operations import score_indiv_ag_opslaan, score_teams_ag_opslaan
@@ -176,9 +176,8 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         self._create_competitie()
 
         # fake een deelnemerslijst voor de RK
-        deelkamp_rk = Kampioenschap.objects.get(competitie=self.comp_25,
-                                                deel=DEEL_RK,
-                                                rayon=self.regio_111.rayon)
+        deelkamp_rk = KampRK.objects.get(competitie=self.comp_25,
+                                         rayon=self.regio_111.rayon)
         deelkamp_rk.heeft_deelnemerslijst = True
         deelkamp_rk.save()
 

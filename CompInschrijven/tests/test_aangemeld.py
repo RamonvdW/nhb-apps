@@ -1,15 +1,17 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
 from BasisTypen.models import BoogType
-from Competitie.definities import DEEL_RK, DEEL_BK, INSCHRIJF_METHODE_3
-from Competitie.models import Competitie, Regiocompetitie, RegiocompetitieSporterBoog, Kampioenschap
+from Competitie.definities import INSCHRIJF_METHODE_3
+from Competitie.models import Competitie, Regiocompetitie, RegiocompetitieSporterBoog
 from Competitie.operations import competities_aanmaken
 from Competitie.test_utils.tijdlijn import zet_competitie_fases, zet_competitie_fase_regio_inschrijven
+from CompLaagBond.models import KampBK
+from CompLaagRayon.models import KampRK
 from Functie.tests.helpers import maak_functie
 from Geo.models import Rayon, Regio
 from Sporter.models import Sporter
@@ -91,11 +93,11 @@ class TestCompInschrijvenAangemeld(E2EHelpers, TestCase):
         self.comp_18 = Competitie.objects.get(afstand='18')
         self.comp_25 = Competitie.objects.get(afstand='25')
 
-        for deelkamp in Kampioenschap.objects.filter(deel=DEEL_BK).all():
+        for deelkamp in KampBK.objects.all():
             deelkamp.functie.accounts.add(self.account_bko)
         # for
 
-        for deelkamp in Kampioenschap.objects.filter(deel=DEEL_RK, rayon=self.rayon_2).all():
+        for deelkamp in KampRK.objects.filter(rayon=self.rayon_2).all():
             deelkamp.functie.accounts.add(self.account_rko)
         # for
 
@@ -278,7 +280,7 @@ class TestCompInschrijvenAangemeld(E2EHelpers, TestCase):
 
     def test_overzicht_bko(self):
         comp = Competitie.objects.get(afstand='18')
-        functie_bko = Kampioenschap.objects.get(competitie=comp, deel=DEEL_BK).functie
+        functie_bko = KampBK.objects.get(competitie=comp).functie
 
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self._doe_inschrijven(comp)         # wisselt naar HWL rol
@@ -311,7 +313,7 @@ class TestCompInschrijvenAangemeld(E2EHelpers, TestCase):
 
     def test_overzicht_rko(self):
         comp = Competitie.objects.get(afstand='25')
-        functie_rko = Kampioenschap.objects.get(competitie=comp, deel=DEEL_RK, rayon=self.rayon_2).functie
+        functie_rko = KampRK.objects.get(competitie=comp, rayon=self.rayon_2).functie
 
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self._doe_inschrijven(comp)         # wisselt naar HWL rol
