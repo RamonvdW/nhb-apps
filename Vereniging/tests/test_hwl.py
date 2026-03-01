@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2025 Ramon van der Winkel.
+#  Copyright (c) 2020-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -8,13 +8,13 @@ from django.test import TestCase
 from django.utils import timezone
 from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
-from Competitie.definities import DEEL_RK, INSCHRIJF_METHODE_1
+from Competitie.definities import INSCHRIJF_METHODE_1
 from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieMatch,
-                               Regiocompetitie, RegiocompetitieRonde,
-                               Kampioenschap)
+                               Regiocompetitie, RegiocompetitieRonde)
 from Competitie.operations import competities_aanmaken
 from Competitie.test_utils.tijdlijn import (zet_competitie_fase_regio_wedstrijden, zet_competitie_fase_rk_prep,
                                             zet_competitie_fase_regio_inschrijven, zet_competitie_fase_afsluiten)
+from CompLaagRayon.models import KampRK
 from HistComp.definities import HISTCOMP_TYPE_18, HIST_BOGEN_DEFAULT
 from HistComp.models import HistCompSeizoen, HistCompRegioIndiv
 from Locatie.models import WedstrijdLocatie
@@ -179,9 +179,8 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self._create_competitie()
 
         # fake een deelnemerslijst voor de RK
-        deelkamp = Kampioenschap.objects.get(competitie=self.comp_25,
-                                             deel=DEEL_RK,
-                                             rayon=self.regio_111.rayon)
+        deelkamp = KampRK.objects.get(competitie=self.comp_25,
+                                      rayon=self.regio_111.rayon)
         deelkamp.heeft_deelnemerslijst = True
         deelkamp.save()
         self.deelcomp_rk = deelkamp

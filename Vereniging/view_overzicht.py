@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -9,9 +9,10 @@ from django.conf import settings
 from django.utils.formats import localize
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.definities import DEEL_RK, INSCHRIJF_METHODE_1
-from Competitie.models import Competitie, Regiocompetitie, RegiocompetitieRonde, Kampioenschap
+from Competitie.definities import INSCHRIJF_METHODE_1
+from Competitie.models import Competitie, Regiocompetitie, RegiocompetitieRonde
 from Competitie.tijdlijn import maak_comp_fase_beschrijvingen, is_open_voor_inschrijven_rk_teams
+from CompLaagRayon.models import KampRK
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
 from Locatie.definities import BAAN_TYPE_EXTERN
@@ -71,10 +72,9 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                                  regio=self.ver.regio)
                          .select_related('competitie'))
 
-            deelkamps_rk = (Kampioenschap
+            deelkamps_rk = (KampRK
                             .objects
-                            .filter(deel=DEEL_RK,
-                                    competitie__is_afgesloten=False,
+                            .filter(competitie__is_afgesloten=False,
                                     rayon=self.ver.regio.rayon)
                             .select_related('competitie'))
 

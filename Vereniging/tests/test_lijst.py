@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from Competitie.definities import DEEL_RK, DEEL_BK
-from Competitie.models import Regiocompetitie, Kampioenschap
+from Competitie.models import Regiocompetitie
 from Competitie.operations import competities_aanmaken
+from CompLaagBond.models import KampBK
+from CompLaagRayon.models import KampRK
 from Functie.tests.helpers import maak_functie
 from Geo.models import Rayon, Regio, Cluster
 from Locatie.definities import (BAAN_TYPE_BUITEN, BAAN_TYPE_EXTERN, BAAN_TYPE_ONBEKEND,
@@ -110,9 +111,9 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
         # creëer een competitie met regiocompetities
         competities_aanmaken(jaar=2019)
 
-        self.functie_bko = Kampioenschap.objects.filter(deel=DEEL_BK)[0].functie
-        self.functie_rko = Kampioenschap.objects.filter(deel=DEEL_RK, rayon=self.rayon_2)[0].functie
-        self.functie_rcl = Regiocompetitie.objects.filter(regio=self.regio_101)[0].functie
+        self.functie_bko = KampBK.objects.first().functie
+        self.functie_rko = KampRK.objects.filter(rayon=self.rayon_2).first().functie
+        self.functie_rcl = Regiocompetitie.objects.filter(regio=self.regio_101).first().functie
 
         self.functie_bko.accounts.add(self.account_bko)
         self.functie_rko.accounts.add(self.account_rko)
