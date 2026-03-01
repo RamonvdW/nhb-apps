@@ -1,16 +1,19 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import models
 from django.utils import timezone
-from Competitie.definities import (MUTATIE_TO_STR, MUTATIE_KAMP_AANMELDEN_INDIV, MUTATIE_KAMP_AFMELDEN_INDIV,
+from Competitie.definities import (MUTATIE_TO_STR,
+                                   MUTATIE_KAMP_AANMELDEN_RK_INDIV, MUTATIE_KAMP_AFMELDEN_RK_INDIV,
+                                   MUTATIE_KAMP_AANMELDEN_BK_INDIV, MUTATIE_KAMP_AFMELDEN_BK_INDIV,
                                    MUTATIE_KAMP_CUT)
 from Competitie.models.competitie import Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse
 from Competitie.models.laag_regio import Regiocompetitie
-from Competitie.models.laag_kamp import Kampioenschap, KampioenschapSporterBoog
+from CompLaagBond.models import KampBK, DeelnemerBK
+from CompLaagRayon.models import KampRK, DeelnemerRK
 from Score.models import ScoreHist
 
 
@@ -44,9 +47,12 @@ class CompetitieMutatie(models.Model):
                                         null=True, blank=True)
 
     # op welke kampioenschap heeft deze mutatie betrekking?
-    kampioenschap = models.ForeignKey(Kampioenschap,
-                                      on_delete=models.CASCADE,
-                                      null=True, blank=True)
+    kamp_rk = models.ForeignKey(KampRK,
+                                on_delete=models.CASCADE,
+                                null=True, blank=True)
+    kamp_bk = models.ForeignKey(KampBK,
+                                on_delete=models.CASCADE,
+                                null=True, blank=True)
 
     # op welke klasse heeft deze mutatie betrekking?
     indiv_klasse = models.ForeignKey(CompetitieIndivKlasse,
@@ -56,10 +62,13 @@ class CompetitieMutatie(models.Model):
                                     on_delete=models.CASCADE,
                                     null=True, blank=True)
 
-    # op welke kampioenschap deelnemer heeft de mutatie betrekking (aanmelden/afmelden)
-    deelnemer = models.ForeignKey(KampioenschapSporterBoog,
-                                  on_delete=models.CASCADE,
-                                  null=True, blank=True)
+    # op welke RK/BK deelnemer heeft de mutatie betrekking (aanmelden/afmelden)
+    deelnemer_rk = models.ForeignKey(DeelnemerRK,
+                                     on_delete=models.CASCADE,
+                                     null=True, blank=True)
+    deelnemer_bk = models.ForeignKey(DeelnemerBK,
+                                     on_delete=models.CASCADE,
+                                     null=True, blank=True)
 
     # alleen voor MUTATIE_CUT
     cut_oud = models.PositiveSmallIntegerField(default=0)
@@ -78,8 +87,11 @@ class CompetitieMutatie(models.Model):
         except KeyError:
             msg += " %s (???)" % self.mutatie
 
-        if self.mutatie in (MUTATIE_KAMP_AANMELDEN_INDIV, MUTATIE_KAMP_AFMELDEN_INDIV):
-            msg += " - %s" % self.deelnemer
+        if self.mutatie in (MUTATIE_KAMP_AANMELDEN_RK_INDIV, MUTATIE_KAMP_AFMELDEN_RK_INDIV):
+            msg += " - %s" % self.deelnemer_rk
+
+        if self.mutatie in (MUTATIE_KAMP_AANMELDEN_BK_INDIV, MUTATIE_KAMP_AFMELDEN_BK_INDIV):
+            msg += " - %s" % self.deelnemer_bk
 
         if self.mutatie == MUTATIE_KAMP_CUT:
             msg += " (%s --> %s)" % (self.cut_oud, self.cut_nieuw)
