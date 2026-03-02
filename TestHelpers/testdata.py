@@ -208,16 +208,16 @@ class TestData(object):
         self.comp25_klassen_rk_bk_teams = dict()    # [teamtype afkorting] = [klasse, ...]
 
         # all inschrijvingen
-        self.comp18_deelnemers = list()
-        self.comp25_deelnemers = list()
+        self.comp18_deelnemers = list()             # [RegiocompetitieSporterBoog, ...]
+        self.comp25_deelnemers = list()             # [RegiocompetitieSporterBoog, ...]
 
         # inschrijvingen zonder team voorkeur
-        self.comp18_deelnemers_geen_team = list()
-        self.comp25_deelnemers_geen_team = list()
+        self.comp18_deelnemers_geen_team = list()   # [RegiocompetitieSporterBoog, ...]
+        self.comp25_deelnemers_geen_team = list()   # [RegiocompetitieSporterBoog, ...]
 
         # inschrijvingen met team voorkeur
-        self.comp18_deelnemers_team = list()
-        self.comp25_deelnemers_team = list()
+        self.comp18_deelnemers_team = list()        # [RegiocompetitieSporterBoog, ...]
+        self.comp25_deelnemers_team = list()        # [RegiocompetitieSporterBoog, ...]
 
         # aangemaakte regio teams
         self.comp18_regioteams = list()
@@ -1781,8 +1781,6 @@ class TestData(object):
 
             volgorde += 1
 
-            ag = rk_team.result_teamscore
-
             # print('[%s] bk_team: %s, klasse=%s' % (afstand, rk_team.team_naam, rk_team.team_klasse))
             # print('     team_leden: %s' % repr(rk_team_leden[tup]))
 
@@ -1794,7 +1792,7 @@ class TestData(object):
                             team_naam=rk_team.team_naam,
                             volgorde=volgorde,
                             team_klasse=rk_team.team_klasse,
-                            aanvangsgemiddelde=ag)
+                            rk_score=rk_team.result_teamscore)
 
             bulk.append(bk_team)
         # for

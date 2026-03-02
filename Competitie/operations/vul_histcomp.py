@@ -5,11 +5,11 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.conf import settings
-from Competitie.definities import (DEEL_RK, DEEL_BK, KAMP_RANK_BLANCO, KAMP_RANK_ALLEEN_TEAM, DEELNAME_NEE,
-                                   KAMP_RANK_NO_SHOW, KAMP_RANK_RESERVE)
-from Competitie.models import (Competitie, CompetitieIndivKlasse,
-                               RegiocompetitieSporterBoog, RegiocompetitieRondeTeam,
-                               KampioenschapSporterBoog, KampioenschapTeam)
+from Competitie.definities import (KAMP_RANK_BLANCO, KAMP_RANK_ALLEEN_TEAM, KAMP_RANK_NO_SHOW, KAMP_RANK_RESERVE,
+                                   DEELNAME_NEE)
+from Competitie.models import Competitie, CompetitieIndivKlasse, RegiocompetitieSporterBoog, RegiocompetitieRondeTeam
+from CompLaagBond.models import DeelnemerBK, TeamBK
+from CompLaagRayon.models import DeelnemerRK, TeamRK
 from HistComp.definities import (HISTCOMP_RK, HISTCOMP_BK,
                                  HISTCOMP_TITEL_NONE, HISTCOMP_TITEL_RK, HISTCOMP_TITEL_BK, HISTCOMP_TITEL_NK)
 from HistComp.models import (HistCompSeizoen,
@@ -205,22 +205,20 @@ def uitslag_rk_indiv_naar_histcomp(comp: Competitie):
     # for
 
     bulk = list()
-    for deelnemer in (KampioenschapSporterBoog
+    for deelnemer in (DeelnemerRK
                       .objects
-                      .filter(kampioenschap__competitie=comp,
-                              kampioenschap__deel=DEEL_RK)
-                      .prefetch_related('kampioenschapteam_feitelijke_leden')
+                      .filter(kamp__competitie=comp)
+                      .prefetch_related('teamrk_feitelijke_leden')
                       .select_related('sporterboog__sporter',
                                       'sporterboog__boogtype',
-                                      'kampioenschap__rayon',
+                                      'kamp__rayon',
                                       'bij_vereniging',
                                       'indiv_klasse')):
 
         # sporters met rank=0 toch opnemen ivm mogelijk koppeling aan team
-        is_in_team = deelnemer.kampioenschapteam_feitelijke_leden.count() > 0
+        is_in_team = deelnemer.teamrk_feitelijke_leden.count() > 0
 
         if 0 < deelnemer.result_rank <= KAMP_RANK_BLANCO or is_in_team:
-            kampioenschap = deelnemer.kampioenschap
             sporter = deelnemer.sporterboog.sporter
             boogtype = deelnemer.sporterboog.boogtype
             ver = deelnemer.bij_vereniging
@@ -241,7 +239,7 @@ def uitslag_rk_indiv_naar_histcomp(comp: Competitie):
                             vereniging_nr=ver.ver_nr,
                             vereniging_naam=ver.naam,
                             vereniging_plaats=ver.plaats,
-                            rayon_nr=kampioenschap.rayon.rayon_nr,
+                            rayon_nr=deelnemer.kamp.rayon.rayon_nr,
                             rank_rk=deelnemer.result_rank,
                             titel_code_rk=titel_code,
                             rk_score_is_blanco=(deelnemer.result_rank == KAMP_RANK_BLANCO),
@@ -266,10 +264,9 @@ def uitslag_bk_indiv_naar_histcomp(comp: Competitie):
         return
 
     bulk = list()
-    for deelnemer in (KampioenschapSporterBoog
+    for deelnemer in (DeelnemerBK
                       .objects
-                      .filter(kampioenschap__competitie=comp,
-                              kampioenschap__deel=DEEL_BK)
+                      .filter(kamp__competitie=comp)
                       .select_related('sporterboog__sporter',
                                       'sporterboog__boogtype',
                                       'bij_vereniging',
@@ -435,17 +432,16 @@ def uitslag_rk_teams_naar_histcomp(comp: Competitie):
     qset.delete()
 
     bulk = list()
-    for team in (KampioenschapTeam
+    for team in (TeamRK
                  .objects
-                 .filter(kampioenschap__competitie=comp,
-                         kampioenschap__deel=DEEL_RK)
+                 .filter(kamp__competitie=comp)
                  .exclude(result_rank=KAMP_RANK_NO_SHOW)
                  .exclude(result_rank=KAMP_RANK_RESERVE)
                  .select_related('team_klasse',
                                  'team_type',
                                  'vereniging',
-                                 'kampioenschap',
-                                 'kampioenschap__rayon')
+                                 'kamp',
+                                 'kamp__rayon')
                  .prefetch_related('feitelijke_leden')):
 
         if team.result_rank > 0:
@@ -461,7 +457,7 @@ def uitslag_rk_teams_naar_histcomp(comp: Competitie):
             hist = HistKampTeam(
                         seizoen=hist_seizoen,
                         rk_of_bk=HISTCOMP_RK,
-                        rayon_nr=team.kampioenschap.rayon.rayon_nr,
+                        rayon_nr=team.kamp.rayon.rayon_nr,
                         teams_klasse=team.team_klasse.beschrijving,
                         team_type=team_type,
                         vereniging_nr=ver.ver_nr,
@@ -498,7 +494,7 @@ def uitslag_rk_teams_naar_histcomp(comp: Competitie):
                                         vereniging_nr=ver.ver_nr,
                                         vereniging_naam=ver.naam,
                                         vereniging_plaats=ver.plaats,
-                                        rayon_nr=team.kampioenschap.rayon.rayon_nr,
+                                        rayon_nr=team.kamp.rayon.rayon_nr,
                                         rank_rk=0)
                         hist_indiv.save()
 
@@ -539,10 +535,9 @@ def uitslag_bk_teams_naar_histcomp(comp: Competitie):
     # for
 
     bulk = list()
-    for team in (KampioenschapTeam
+    for team in (TeamBK
                  .objects
-                 .filter(kampioenschap__competitie=comp,
-                         kampioenschap__deel=DEEL_BK)
+                 .filter(kamp__competitie=comp)
                  .select_related('team_klasse',
                                  'team_type',
                                  'vereniging')

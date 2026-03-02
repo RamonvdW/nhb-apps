@@ -8,10 +8,10 @@ from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.views.generic import TemplateView, View
 from CompBeheer.operations.toegang import is_competitie_openbaar_voor_rol
-from CompKampioenschap.operations import aanmaken_wedstrijdformulieren_is_pending
 from Competitie.models import Competitie
 from Competitie.operations import bepaal_startjaar_nieuwe_competitie
-from CompKampioenschap.operations import aantal_ontbrekende_wedstrijdformulieren_rk_bk
+from CompKampioenschap.operations import (aantal_ontbrekende_wedstrijdformulieren_rk_bk,
+                                          aanmaken_wedstrijdformulieren_is_pending)
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige, rol_get_beschrijving
 from GoogleDrive.operations import check_heeft_toestemming

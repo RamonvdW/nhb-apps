@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2024 Ramon van der Winkel.
+#  Copyright (c) 2022-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-# verwijder onnodige (oude) data van voorgaande competities
-
 from django.core.management.base import BaseCommand
-from Competitie.definities import DEEL_BK, DEEL_RK
-from Competitie.models import CompetitieMatch, Kampioenschap
+from Competitie.models import CompetitieMatch
+from CompLaagBond.models import KampBK
+from CompLaagRayon.models import KampRK
 from Vereniging.models import Vereniging
 
 
@@ -21,26 +20,26 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
 
-        deel = None
+        qset = None
         if options['bk']:
-            deel = DEEL_BK
+            qset = KampBK.objects.all()
         if options['rk']:
-            deel = DEEL_RK
+            qset = KampRK.objects.all()
 
         match2deelcomp = dict()     # [wedstrijd.pk] = deelcomp
 
         match_pks = list()
-        if deel:
-            for deelkamp in Kampioenschap.objects.filter(deel=deel).prefetch_related('rk_bk_matches'):
-                if deelkamp.rk_bk_matches.count() == 0:
-                    self.stdout.write('[WARNING] Geen rk_bk_matches voor %s' % deelkamp)
+        if qset:
+            for deelkamp in qset.prefetch_related('matches'):
+                if deelkamp.matches.count() == 0:
+                    self.stdout.write('[WARNING] Geen matches voor %s' % deelkamp)
+                else:
+                    pks = list(deelkamp.matches.values_list('pk', flat=True))
+                    match_pks.extend(pks)
 
-                pks = list(deelkamp.rk_bk_matches.values_list('pk', flat=True))
-                match_pks.extend(pks)
-
-                for pk in pks:
-                    match2deelcomp[pk] = deelkamp
-                # for
+                    for pk in pks:
+                        match2deelcomp[pk] = deelkamp
+                    # for
             # for
 
         ver2locs = dict()   # [ver_nr] = (loc, loc, ..)
@@ -61,7 +60,7 @@ class Command(BaseCommand):
                    .prefetch_related('indiv_klassen',
                                      'team_klassen')
                    .all())
-        if deel:
+        if qset:
             matches = matches.filter(pk__in=match_pks)
 
         for match in matches:

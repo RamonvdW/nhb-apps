@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2025 Ramon van der Winkel.
+#  Copyright (c) 2022-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
 from django.core import management
-from Competitie.definities import DEEL_RK, DEEL_BK
-from Competitie.models import Competitie, CompetitieMatch, CompetitieIndivKlasse, CompetitieTeamKlasse, Kampioenschap
+from Competitie.models import Competitie, CompetitieMatch, CompetitieIndivKlasse, CompetitieTeamKlasse
 from Competitie.operations import competities_aanmaken
+from CompLaagBond.models import KampBK
+from CompLaagRayon.models import KampRK
 from Geo.models import Regio, Rayon
 from Locatie.models import WedstrijdLocatie
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -128,24 +129,17 @@ class TestCompetitieCliCheckWedstrijdlocaties(E2EHelpers, TestCase):
         wed4.indiv_klassen.add(indiv2)
         wed4.team_klassen.add(team2)
 
-        deelkamp_bk = Kampioenschap.objects.get(
-                        competitie=comp,
-                        deel=DEEL_BK)
-        deelkamp_bk.rk_bk_matches.add(wed1)
+        deelkamp_bk = KampBK.objects.get(competitie=comp)
+        deelkamp_bk.matches.add(wed1)
 
-        deelkamp_rk = Kampioenschap.objects.get(
-                        competitie=comp,
-                        rayon=rayon_3,
-                        deel=DEEL_RK)
-        deelkamp_rk.rk_bk_matches.set([wed2, wed3, wed4])
+        deelkamp_rk = KampRK.objects.get(competitie=comp, rayon=rayon_3)
+        deelkamp_rk.matches.set([wed2, wed3, wed4])
 
         # deelcomp zonder wedstrijden
         # geen wijzigingen nodig
-        deelkamp_rk = Kampioenschap.objects.get(
-                        competitie=comp,
-                        rayon=rayon_1,
-                        deel=DEEL_RK)
+        deelkamp_rk = KampRK.objects.get(competitie=comp, rayon=rayon_1)
         self.assertIsNotNone(deelkamp_rk)
+        self.assertEqual(deelkamp_rk.matches.count(), 0)
 
     def test_basis(self):
         # no args
@@ -156,11 +150,11 @@ class TestCompetitieCliCheckWedstrijdlocaties(E2EHelpers, TestCase):
 
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(23):
+        with self.assert_max_queries(24):
             management.call_command('check_wedstrijdlocaties', '--rk', stderr=f1, stdout=f2)
         # print("f2: %s" % f2.getvalue())
-        self.assertTrue("[WARNING] Geen rk_bk_matches voor comp1 - RK Rayon 1" in f2.getvalue())
-        self.assertTrue("[WARNING] Geen rk_bk_matches voor comp1 - RK Rayon 2" in f2.getvalue())
+        self.assertTrue("[WARNING] Geen matches voor comp1 Rayon 1" in f2.getvalue())
+        self.assertTrue("[WARNING] Geen matches voor comp1 Rayon 2" in f2.getvalue())
         self.assertTrue("zonder banen 18m/25m opgaaf en zonder discipline_indoor en geen vereniging" in f2.getvalue())
 
         # bk (geen fouten)
@@ -178,7 +172,7 @@ class TestCompetitieCliCheckWedstrijdlocaties(E2EHelpers, TestCase):
         self.loc2.save(update_fields=['zichtbaar'])
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(23):
+        with self.assert_max_queries(24):
             management.call_command('check_wedstrijdlocaties', '--rk', stderr=f1, stdout=f2)
         self.assertTrue('met zichtbaar=False' in f2.getvalue())
 

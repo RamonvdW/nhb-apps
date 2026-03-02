@@ -110,14 +110,21 @@ class Command(BaseCommand):
                        .select_related('competitie',
                                        'regiocompetitie',
                                        'regiocompetitie__competitie',
-                                       'kampioenschap',
-                                       'kampioenschap__competitie',
+                                       'kamp_rk',
+                                       'kamp_rk__competitie',
+                                       'kamp_bk',
+                                       'kamp_bk__competitie',
                                        'indiv_klasse',
                                        'team_klasse',
-                                       'deelnemer',
-                                       'deelnemer__kampioenschap',
-                                       'deelnemer__sporterboog__sporter',
-                                       'deelnemer__indiv_klasse')
+                                       'deelnemer_rk',
+                                       'deelnemer_rk__kamp',
+                                       'deelnemer_rk__kamp__rayon',
+                                       'deelnemer_rk__sporterboog__sporter',
+                                       'deelnemer_rk__indiv_klasse',
+                                       'deelnemer_bk',
+                                       'deelnemer_bk__kamp',
+                                       'deelnemer_bk__sporterboog__sporter',
+                                       'deelnemer_bk__indiv_klasse')
                        .get(pk=pk))
             if not mutatie.is_verwerkt:     # pragma: no branch
                 self._verwerk_mutatie(mutatie)

@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2025 Ramon van der Winkel.
+#  Copyright (c) 2021-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
 from BasisTypen.models import BoogType
-from Competitie.models import Competitie, CompetitieMatch, Kampioenschap
+from Competitie.models import Competitie, CompetitieMatch
 from Competitie.tests.test_helpers import maak_competities_en_zet_fase_c
+from CompLaagRayon.models import KampRK
 from Score.definities import SCORE_TYPE_GEEN
 from Score.models import Score, ScoreHist
 from Sporter.models import SporterBoog
@@ -48,8 +49,8 @@ class TestCompetitieCliRegiocompVerwijderOudeData(E2EHelpers, TestCase):
                         datum_wanneer='2000-01-01',
                         tijd_begin_wedstrijd='00:00')
         match.save()
-        deelkamp = Kampioenschap.objects.first()
-        deelkamp.rk_bk_matches.add(match)
+        deelkamp = KampRK.objects.first()
+        deelkamp.matches.add(match)
 
         Score(waarde=0, afstand_meter=18, sporterboog=sb, type=SCORE_TYPE_GEEN).save()
         Score(waarde=123, afstand_meter=18, sporterboog=sb).save()      # 'dode' sporterboog

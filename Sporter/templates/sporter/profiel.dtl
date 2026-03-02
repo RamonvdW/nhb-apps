@@ -215,7 +215,7 @@
                                     {% elif deelnemer.is_fase_rk %}
                                         {% if deelnemer.rk_inschrijving %}
                                             <!-- is al doorgestroomd naar het RK -->
-                                            <span>Je hebt je gekwalificeerd voor het RK in Rayon {{ deelnemer.rk_inschrijving.kampioenschap.rayon.rayon_nr }}</span>
+                                            <span>Je hebt je gekwalificeerd voor het RK in Rayon {{ deelnemer.rk_inschrijving.kamp.rayon.rayon_nr }}</span>
                                             {% if deelnemer.rk_inschrijving.rank > 0 %}
                                                 <br>
                                                 <span>Op de RK lijst sta je op plaats {{ deelnemer.rk_inschrijving.rank }}</span>
@@ -301,7 +301,7 @@
                                                 <div class="modal" id="{{ deelnemer.id_deelname_rk }}">
                                                     <div class="modal-content center">
                                                         <h5>Toch meedoen met het RK?</h5>
-                                                        <p>Je hebt je gekwalificeerd voor de Rayonkampioenschappen van de <b>{{ deelnemer.rk_inschrijving.kampioenschap.competitie.beschrijving }}</b>, maar je bent afgemeld.</p>
+                                                        <p>Je hebt je gekwalificeerd voor de Rayonkampioenschappen van de <b>{{ deelnemer.rk_inschrijving.kamp.competitie.beschrijving }}</b>, maar je bent afgemeld.</p>
                                                         <p>Wil je toch meedoen?</p>
 
                                                         <div class="modal-footer" style="text-align:center; display:block">
@@ -486,7 +486,7 @@
                                                 <div class="modal" id="{{ deelnemer.id_deelname_bk }}">
                                                     <div class="modal-content center">
                                                         <h5>Meedoen met het BK?</h5>
-                                                        <p>We willen graag weten of je mee kan doen met de Bondskampioenschappen van de <b>{{ deelnemer.bk_inschrijving.kampioenschap.competitie.beschrijving }}</b>.</p>
+                                                        <p>We willen graag weten of je mee kan doen met de Bondskampioenschappen van de <b>{{ deelnemer.bk_inschrijving.kamp.competitie.beschrijving }}</b>.</p>
                                                         <p>Kan je meedoen?</p>
 
                                                         <div class="modal-footer" style="text-align:center; display:block">
@@ -510,7 +510,7 @@
                                                 <div class="modal" id="{{ deelnemer.id_deelname_bk }}">
                                                     <div class="modal-content center">
                                                         <h5>Toch meedoen met het BK?</h5>
-                                                        <p>Je hebt je gekwalificeerd voor de Bondskampioenschappen van de <b>{{ deelnemer.bk_inschrijving.kampioenschap.competitie.beschrijving }}</b>, maar je bent afgemeld.</p>
+                                                        <p>Je hebt je gekwalificeerd voor de Bondskampioenschappen van de <b>{{ deelnemer.bk_inschrijving.kamp.competitie.beschrijving }}</b>, maar je bent afgemeld.</p>
                                                         <p>Wil je toch meedoen?</p>
 
                                                         <div class="modal-footer" style="text-align:center; display:block">
@@ -536,7 +536,7 @@
                                                 <div class="modal" id="{{ deelnemer.id_deelname_bk }}">
                                                     <div class="modal-content center">
                                                         <h5>Afmelden voor het BK?</h5>
-                                                        <p>Je hebt je gekwalificeerd voor de Bondskampioenschappen van de <b>{{ deelnemer.bk_inschrijving.kampioenschap.competitie.beschrijving }}</b> en staat op de deelnemerslijst.</p>
+                                                        <p>Je hebt je gekwalificeerd voor de Bondskampioenschappen van de <b>{{ deelnemer.bk_inschrijving.kamp.competitie.beschrijving }}</b> en staat op de deelnemerslijst.</p>
                                                         <p>Als je niet deel kan nemen, meld je dan af. Daarmee geef je ruimte aan een andere sporters om deel te nemen.</p>
                                                         <p>Wil je je afmelden?</p>
 

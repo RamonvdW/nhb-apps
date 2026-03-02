@@ -8,10 +8,10 @@ from django.urls import reverse
 from django.http import Http404, HttpResponseRedirect
 from django.views.generic import TemplateView
 from django.utils.safestring import mark_safe
-from Competitie.definities import DEEL_RK, DEELNAME_NEE, KAMP_RANK_RESERVE, KAMP_RANK_NO_SHOW, KAMP_RANK_BLANCO
-from Competitie.models import (Competitie, CompetitieMatch, Regiocompetitie, RegiocompetitieSporterBoog,
-                               Kampioenschap, KampioenschapSporterBoog, KampioenschapIndivKlasseLimiet)
+from Competitie.definities import DEELNAME_NEE, KAMP_RANK_RESERVE, KAMP_RANK_NO_SHOW, KAMP_RANK_BLANCO
+from Competitie.models import Competitie, CompetitieMatch, Regiocompetitie, RegiocompetitieSporterBoog
 from Competitie.seizoenen import get_comp_pk
+from CompLaagRayon.models import KampRK, DeelnemerRK, CutRK
 from Geo.models import Rayon
 from HistComp.operations import get_hist_url
 from Overig.helpers import make_valid_hashtag
@@ -124,23 +124,22 @@ class UitslagenRayonIndivView(TemplateView):
             raise Http404('Boogtype niet bekend')
 
         try:
-            deelkamp = (Kampioenschap
+            deelkamp = (KampRK
                         .objects
                         .select_related('competitie',
                                         'rayon')
-                        .prefetch_related('rk_bk_matches')
+                        .prefetch_related('matches')
                         .get(competitie=self.comp,
                              competitie__is_afgesloten=False,
-                             deel=DEEL_RK,
                              rayon__rayon_nr=rayon_nr))
-        except Kampioenschap.DoesNotExist:
+        except KampRK.DoesNotExist:
             raise Http404('Kampioenschap niet gevonden')
 
         context['deelkamp'] = deelkamp
 
         # haal de planning erbij: competitie klasse --> competitie match
         indiv2match = dict()    # [indiv_pk] = CompetitieMatch
-        match_pks = list(deelkamp.rk_bk_matches.values_list('pk', flat=True))
+        match_pks = list(deelkamp.matches.values_list('pk', flat=True))
         for match in (CompetitieMatch
                       .objects
                       .prefetch_related('indiv_klassen')
@@ -160,11 +159,11 @@ class UitslagenRayonIndivView(TemplateView):
 
         if deelkamp.heeft_deelnemerslijst:
             # deelnemers/reserveschutters van het RK tonen
-            deelnemers = (KampioenschapSporterBoog
+            deelnemers = (DeelnemerRK
                           .objects
                           .exclude(bij_vereniging__isnull=True)      # attentie gevallen
                           .exclude(deelname=DEELNAME_NEE)            # geen sporters die zich afgemeld hebben
-                          .filter(kampioenschap=deelkamp,
+                          .filter(kamp=deelkamp,
                                   indiv_klasse__boogtype=boogtype,
                                   rank__lte=48)                      # toon tot 48 sporters per klasse
                           .select_related('indiv_klasse',
@@ -175,10 +174,10 @@ class UitslagenRayonIndivView(TemplateView):
                                     'result_rank',                   # NO_SHOW is groot getal, dus onderaan de lijst
                                     'volgorde'))                     # inschrijf ranking
 
-            for limiet in (KampioenschapIndivKlasseLimiet
+            for limiet in (CutRK
                            .objects
                            .select_related('indiv_klasse')
-                           .filter(kampioenschap=deelkamp)):
+                           .filter(kamp=deelkamp)):
                 wkl2limiet[limiet.indiv_klasse.pk] = limiet.limiet
             # for
 
@@ -224,7 +223,7 @@ class UitslagenRayonIndivView(TemplateView):
         for deelnemer in deelnemers:
             # deelnemer kan zijn:
             #   is_lijst_rk == False --> RegiocompetitieSporterBoog
-            #   is_lijst_rk == True  --> KampioenschapSporterBoog
+            #   is_lijst_rk == True  --> DeelkampRK
             deelnemer.break_klasse = (klasse != deelnemer.indiv_klasse.volgorde)
             if deelnemer.break_klasse:
                 if klasse == -1:

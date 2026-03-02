@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2024 Ramon van der Winkel.
+#  Copyright (c) 2021-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -107,9 +107,10 @@ class Command(BaseCommand):
     def _verwijder_orphan_matches(self):
         orphan_pks = list()
         for match in CompetitieMatch.objects.all():
-            in_plans1 = match.kampioenschap_set.all()
-            in_plans2 = match.regiocompetitieronde_set.all()
-            count = in_plans1.count() + in_plans2.count()
+            in_plans1 = match.kamprk_set.all()
+            in_plans2 = match.kampbk_set.all()
+            in_plans3 = match.regiocompetitieronde_set.all()
+            count = in_plans1.count() + in_plans2.count() + in_plans3.count()
             if count == 0:
                 orphan_pks.append(match.pk)
         # for

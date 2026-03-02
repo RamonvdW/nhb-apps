@@ -1,15 +1,17 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.utils import timezone
 from BasisTypen.models import TemplateCompetitieIndivKlasse, TemplateCompetitieTeamKlasse
-from Competitie.definities import AFSTANDEN, DEEL_RK, DEEL_BK
+from Competitie.definities import AFSTANDEN
 from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
-                               Regiocompetitie, RegiocompetitieRonde, Kampioenschap)
+                               Regiocompetitie, RegiocompetitieRonde)
 from Competitie.seizoenen import seizoen_cache
+from CompLaagBond.models import KampBK
+from CompLaagRayon.models import KampRK
 from Functie.models import Functie
 from Geo.models import Rayon, Regio
 from Score.definities import AG_NUL
@@ -160,28 +162,24 @@ def _maak_kampioenschappen(comp, rayons, functies):
 
     """ Maak de Kampioenschappen voor een competitie aan """
 
-    bulk = list()
-
-    # RK individueel en teams
-    for rayon in rayons:
-        functie = functies[("RKO", comp.afstand, rayon.rayon_nr)]
-        deelkamp = Kampioenschap(
-                            deel=DEEL_RK,
-                            competitie=comp,
-                            rayon=rayon,
-                            functie=functie)
-        bulk.append(deelkamp)
-    # for
-
     # BK individueel en teams
     functie = functies[("BKO", comp.afstand, 0)]
-    deelkamp = Kampioenschap(
-                    deel=DEEL_BK,
+    KampBK.objects.create(
                     competitie=comp,
                     functie=functie)
-    bulk.append(deelkamp)
 
-    Kampioenschap.objects.bulk_create(bulk)
+    # RK individueel en teams
+    bulk = list()
+    for rayon in rayons:
+        functie = functies[("RKO", comp.afstand, rayon.rayon_nr)]
+        deelkamp = KampRK(
+                        competitie=comp,
+                        rayon=rayon,
+                        functie=functie)
+        bulk.append(deelkamp)
+    # for
+    KampRK.objects.bulk_create(bulk)
+    del bulk
 
 
 def _maak_competitieklassen(comp):

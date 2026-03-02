@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2024-2025 Ramon van der Winkel.
+#  Copyright (c) 2024-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -12,8 +12,10 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.formats import localize
 from BasisTypen.models import BoogType
-from Competitie.definities import INSCHRIJF_METHODE_1, DEEL_RK, DEELNAME_NEE
-from Competitie.models import Competitie, Regiocompetitie, RegiocompetitieSporterBoog, KampioenschapSporterBoog
+from Competitie.definities import INSCHRIJF_METHODE_1, DEELNAME_NEE
+from Competitie.models import Competitie, Regiocompetitie, RegiocompetitieSporterBoog
+from CompLaagBond.models import DeelnemerBK
+from CompLaagRayon.models import DeelnemerRK
 from Sporter.models import Sporter
 import copy
 
@@ -74,13 +76,13 @@ def get_sporter_competities(sporter: Sporter,
         .is_afgemeld_voor_rk: True als sporter alvast afgemeld is voor RK
         .url_voorkeur_rk: POST URL om voorkeur RK in te stellen tijdens regio fase
         .url_schietmomenten: URL om 7 schietmomenten te kiezen (inschrijfmethode 1)
-        .rk_inschrijving: KampioenschapSporterBoog voor RK waar sporter voor gekwalificeerd is
+        .rk_inschrijving: DeelnemerRK voor RK waar sporter voor gekwalificeerd is
         .rk_inschrijving.indiv_klasse: sporter wedstrijdklasse voor het RK (kan samengevoegd zijn)
         .rk_locatie: locatie waar de RK wedstrijd gehouden wordt
         .url_rk_deelnemers: URL naar pagina met hele RK deelnemers lijst
         .url_status_rk_deelname: URL om deelname RK aan te passen (gebruik POST)
         .id_deelname_rk: unieke identificatie string voor gebruik als html "id"
-        .bk_inschrijving: KampioenschapSporterBoog voor BK waar sporter individueel voor gekwalificeerd is
+        .bk_inschrijving: DeelnemerBK voor BK waar sporter individueel voor gekwalificeerd is
         .bk_inschrijving.indiv_klasse: sporter wedstrijdklasse voor het BK (kan samengevoegd zijn)
         .bk_locatie: locatie waar de BK wedstrijd gehouden wordt
     """
@@ -252,20 +254,20 @@ def get_sporter_competities(sporter: Sporter,
     # for
 
     # RK en BK
-    for deelnemer in (KampioenschapSporterBoog
+    for deelnemer in (DeelnemerRK
                       .objects
-                      .select_related('kampioenschap',
-                                      'kampioenschap__competitie',
-                                      'kampioenschap__rayon',
+                      .select_related('kamp',
+                                      'kamp__competitie',
+                                      'kamp__rayon',
                                       'sporterboog',
                                       'indiv_klasse')
                       .filter(sporterboog__sporter=sporter,
-                              kampioenschap__competitie__in=lijst_competities)
-                      .order_by('kampioenschap__competitie__afstand',
+                              kamp__competitie__in=lijst_competities)
+                      .order_by('kamp__competitie__afstand',
                                 'sporterboog__boogtype__afkorting')):
 
         try:
-            kamp = deelnemer.kampioenschap
+            kamp = deelnemer.kamp
             tup = (deelnemer.sporterboog.pk, kamp.competitie.pk)
             inschrijving = sb2inschrijving[tup]
         except KeyError:
@@ -273,62 +275,80 @@ def get_sporter_competities(sporter: Sporter,
             pass
         else:
             comp = inschrijving.competitie
-            if kamp.deel == DEEL_RK:
-                # RK
-                inschrijving.rk_inschrijving = deelnemer
-                inschrijving.rk_locatie = None
+            inschrijving.rk_inschrijving = deelnemer
+            inschrijving.rk_locatie = None
 
-                if deelnemer.deelname != DEELNAME_NEE:
-                    boog_afk = deelnemer.sporterboog.boogtype.afkorting
-                    inschrijving.url_rk_deelnemers = reverse('CompUitslagen:uitslagen-rk-indiv-n',
-                                                             kwargs={
-                                                                 'comp_pk_of_seizoen': comp.maak_seizoen_url(),
-                                                                 'comp_boog': boog_afk.lower(),
-                                                                 'rayon_nr': kamp.rayon.rayon_nr})
+            if deelnemer.deelname != DEELNAME_NEE:
+                boog_afk = deelnemer.sporterboog.boogtype.afkorting
+                inschrijving.url_rk_deelnemers = reverse('CompUitslagen:uitslagen-rk-indiv-n',
+                                                         kwargs={
+                                                             'comp_pk_of_seizoen': comp.maak_seizoen_url(),
+                                                             'comp_boog': boog_afk.lower(),
+                                                             'rayon_nr': kamp.rayon.rayon_nr})
 
-                    # zoek de match en locatie gegevens erbij
-                    for match in kamp.rk_bk_matches.all():
-                        if match.indiv_klassen.filter(pk=deelnemer.indiv_klasse.pk).count() > 0:
-                            # found "the" match
-                            inschrijving.rk_locatie = match.locatie
-                            inschrijving.rk_locatie.vereniging = match.locatie.verenigingen.filter(plaats=match.locatie.plaats).first()
-                            if inschrijving.rk_locatie.vereniging is None:
-                                inschrijving.rk_locatie.vereniging = match.locatie.verenigingen.first()
-                            break
-                    # for
+                # zoek de match en locatie gegevens erbij
+                for match in kamp.matches.all():
+                    if match.indiv_klassen.filter(pk=deelnemer.indiv_klasse.pk).count() > 0:
+                        # found "the" match
+                        inschrijving.rk_locatie = match.locatie
+                        inschrijving.rk_locatie.vereniging = match.locatie.verenigingen.filter(plaats=match.locatie.plaats).first()
+                        if inschrijving.rk_locatie.vereniging is None:
+                            inschrijving.rk_locatie.vereniging = match.locatie.verenigingen.first()
+                        break
+                # for
 
-                inschrijving.url_status_rk_deelname = reverse('CompLaagRayon:wijzig-status-rk-deelname')
-                inschrijving.id_deelname_rk = 'deelname_rk_%s' % deelnemer.pk
+            inschrijving.url_status_rk_deelname = reverse('CompLaagRayon:wijzig-status-rk-deelname')
+            inschrijving.id_deelname_rk = 'deelname_rk_%s' % deelnemer.pk
 
-                # TODO: team
+            # TODO: team
+    # for
 
-            else:
-                # BK
-                inschrijving.bk_inschrijving = deelnemer
-                inschrijving.bk_locatie = None
+    # BK
+    for deelnemer in (DeelnemerBK
+                      .objects
+                      .select_related('kamp',
+                                      'kamp__competitie',
+                                      'sporterboog',
+                                      'indiv_klasse')
+                      .filter(sporterboog__sporter=sporter,
+                              kamp__competitie__in=lijst_competities)
+                      .order_by('kamp__competitie__afstand',
+                                'sporterboog__boogtype__afkorting')):
 
-                if deelnemer.deelname != DEELNAME_NEE:
-                    boog_afk = deelnemer.sporterboog.boogtype.afkorting
-                    inschrijving.url_bk_deelnemers = reverse('CompUitslagen:uitslagen-bk-indiv',
-                                                             kwargs={
-                                                                 'comp_pk_of_seizoen': comp.maak_seizoen_url(),
-                                                                 'comp_boog': boog_afk.lower()})
+        try:
+            kamp = deelnemer.kamp
+            tup = (deelnemer.sporterboog.pk, kamp.competitie.pk)
+            inschrijving = sb2inschrijving[tup]
+        except KeyError:
+            # unexpected
+            pass
+        else:
+            comp = inschrijving.competitie
+            inschrijving.bk_inschrijving = deelnemer
+            inschrijving.bk_locatie = None
 
-                    # zoek de match en locatie gegevens erbij
-                    for match in kamp.rk_bk_matches.all():
-                        if match.indiv_klassen.filter(pk=deelnemer.indiv_klasse.pk).count() > 0:
-                            # found "the" match
-                            inschrijving.bk_locatie = match.locatie
-                            inschrijving.bk_locatie.vereniging = match.locatie.verenigingen.filter(plaats=match.locatie.plaats).first()
-                            if inschrijving.bk_locatie.vereniging is None:
-                                inschrijving.bk_locatie.vereniging = match.locatie.verenigingen.first()
-                            break
-                    # for
+            if deelnemer.deelname != DEELNAME_NEE:
+                boog_afk = deelnemer.sporterboog.boogtype.afkorting
+                inschrijving.url_bk_deelnemers = reverse('CompUitslagen:uitslagen-bk-indiv',
+                                                         kwargs={
+                                                             'comp_pk_of_seizoen': comp.maak_seizoen_url(),
+                                                             'comp_boog': boog_afk.lower()})
 
-                inschrijving.url_status_bk_deelname = reverse('CompLaagBond:wijzig-status-bk-deelname')
-                inschrijving.id_deelname_bk = 'deelname_bk_%s' % deelnemer.pk
+                # zoek de match en locatie gegevens erbij
+                for match in kamp.matches.all():
+                    if match.indiv_klassen.filter(pk=deelnemer.indiv_klasse.pk).count() > 0:
+                        # found "the" match
+                        inschrijving.bk_locatie = match.locatie
+                        inschrijving.bk_locatie.vereniging = match.locatie.verenigingen.filter(plaats=match.locatie.plaats).first()
+                        if inschrijving.bk_locatie.vereniging is None:
+                            inschrijving.bk_locatie.vereniging = match.locatie.verenigingen.first()
+                        break
+                # for
 
-                # TODO: team
+            inschrijving.url_status_bk_deelname = reverse('CompLaagBond:wijzig-status-bk-deelname')
+            inschrijving.id_deelname_bk = 'deelname_bk_%s' % deelnemer.pk
+
+            # TODO: team
     # for
 
     for inschrijving in lijst_inschrijvingen:

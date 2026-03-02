@@ -7,8 +7,8 @@
 """ Ondersteuning voor de rollen binnen de applicatie """
 
 from Account.models import Account
-from Competitie.definities import DEEL_RK, DEEL_BK
-from Competitie.models import Kampioenschap
+from CompLaagBond.models import KampBK
+from CompLaagRayon.models import KampRK
 from Functie.definities import Rol, functie_rol_str2rol
 from Functie.models import Functie
 from Functie.rol.beschrijving import rol_get_beschrijving, rol_zet_beschrijving
@@ -212,16 +212,15 @@ class RolBepaler:
             # for
 
             # expandeer naar de HWL van verenigingen gekozen voor de BK's
-            qset = (Kampioenschap
+            qset = (KampBK
                     .objects
-                    .filter(competitie__afstand=func_nu.comp_type,
-                            deel=DEEL_BK)
-                    .prefetch_related('rk_bk_matches'))
+                    .filter(competitie__afstand=func_nu.comp_type)
+                    .prefetch_related('matches'))
 
             ver_nrs = list()
             for deelkamp in qset:
                 ver_nrs.extend(list(deelkamp
-                                    .rk_bk_matches
+                                    .matches
                                     .select_related('vereniging')
                                     .values_list('vereniging__ver_nr', flat=True)))
             # for
@@ -242,17 +241,16 @@ class RolBepaler:
             # for
 
             # expandeer naar de HWL van verenigingen gekozen voor de RK's
-            qset = (Kampioenschap
+            qset = (KampRK
                     .objects
                     .filter(competitie__afstand=func_nu.comp_type,
-                            deel=DEEL_RK,
                             rayon__rayon_nr=func_nu.rko_rayon_nr)
-                    .prefetch_related('rk_bk_matches'))
+                    .prefetch_related('matches'))
 
             ver_nrs = list()
             for deelkamp in qset:
                 ver_nrs.extend(list(deelkamp
-                                    .rk_bk_matches
+                                    .matches
                                     .select_related('vereniging')
                                     .values_list('vereniging__ver_nr', flat=True)))
             # for

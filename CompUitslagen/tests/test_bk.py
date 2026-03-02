@@ -7,9 +7,9 @@
 from django.test import TestCase
 from django.utils import timezone
 from Competitie.definities import KAMP_RANK_BLANCO, DEELNAME_NEE
-from Competitie.models import (CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMatch,
-                               KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet)
+from Competitie.models import CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMatch
 from Competitie.test_utils.tijdlijn import zet_competitie_fase_bk_prep
+from CompLaagBond.models import CutBK
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers.testdata import TestData
 
@@ -42,15 +42,10 @@ class TestCompUitslagenBK(E2EHelpers, TestCase):
         data.maak_bk_deelnemers(18)
         data.maak_bk_teams(18)
 
-        KampioenschapIndivKlasseLimiet.objects.create(
-                kampioenschap=data.deelkamp18_bk,
+        CutBK.objects.create(
+                kamp=data.deelkamp18_bk,
                 indiv_klasse=data.comp18_klassen_indiv['R'][0],
                 limiet=4)
-
-        KampioenschapTeamKlasseLimiet.objects.create(
-                kampioenschap=data.deelkamp18_bk,
-                team_klasse=data.comp18_klassen_teams['R2'][0],
-                limiet=7)
 
         s2 = timezone.now()
         d = s2 - s1
@@ -80,7 +75,7 @@ class TestCompUitslagenBK(E2EHelpers, TestCase):
         match.save()
         match.indiv_klassen.add(indiv_klasse)
 
-        self.testdata.deelkamp18_bk.rk_bk_matches.add(match)
+        self.testdata.deelkamp18_bk.matches.add(match)
 
         # fase O
         zet_competitie_fase_bk_prep(self.testdata.comp18)
@@ -214,7 +209,7 @@ class TestCompUitslagenBK(E2EHelpers, TestCase):
         match.save()
         match.team_klassen.add(teams_klasse)
 
-        self.testdata.deelkamp18_bk.rk_bk_matches.add(match)
+        self.testdata.deelkamp18_bk.matches.add(match)
 
         bk_team = self.testdata.comp18_bk_teams[0]
         bk_team.result_rank = 1

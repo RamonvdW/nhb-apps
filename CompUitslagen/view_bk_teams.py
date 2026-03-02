@@ -9,10 +9,11 @@ from django.http import Http404, HttpResponseRedirect
 from django.views.generic import TemplateView
 from django.utils.safestring import mark_safe
 from Account.models import get_account
-from Competitie.definities import DEEL_RK, DEEL_BK, DEELNAME_NEE, KAMP_RANK_BLANCO
-from Competitie.models import (Competitie, CompetitieMatch, Kampioenschap, KampioenschapSporterBoog, KampioenschapTeam,
-                               KampioenschapTeamKlasseLimiet)
+from Competitie.definities import DEELNAME_NEE, KAMP_RANK_BLANCO
+from Competitie.models import Competitie, CompetitieMatch
 from Competitie.seizoenen import get_comp_pk
+from CompLaagBond.models import KampBK, TeamBK
+from CompLaagRayon.models import DeelnemerRK
 from Functie.rol import rol_get_huidige_functie
 from HistComp.operations import get_hist_url
 from Overig.helpers import make_valid_hashtag
@@ -134,13 +135,12 @@ class UitslagenBKTeamsView(TemplateView):
             raise Http404('Team type niet bekend')
 
         try:
-            deelkamp_bk = (Kampioenschap
+            deelkamp_bk = (KampBK
                            .objects
                            .select_related('competitie')
-                           .get(deel=DEEL_BK,
-                                competitie__is_afgesloten=False,
+                           .get(competitie__is_afgesloten=False,
                                 competitie=self.comp))
-        except Kampioenschap.DoesNotExist:
+        except KampBK.DoesNotExist:
             raise Http404('Kampioenschap niet gevonden')
 
         context['deelkamp_bk'] = deelkamp_bk
@@ -161,7 +161,7 @@ class UitslagenBKTeamsView(TemplateView):
 
         # haal de planning erbij: team klasse --> match
         teamklasse2match = dict()     # [team_klasse.pk] = competitiematch
-        match_pks = list(deelkamp_bk.rk_bk_matches.values_list('pk', flat=True))
+        match_pks = list(deelkamp_bk.matches.values_list('pk', flat=True))
         for match in (CompetitieMatch
                       .objects
                       .prefetch_related('team_klassen')
@@ -175,25 +175,11 @@ class UitslagenBKTeamsView(TemplateView):
                 teamklasse2match[klasse.pk] = match
         # for
 
-        # voor conversie team gemiddelde naar RK score
-        if self.comp.is_indoor():
-            aantal_pijlen = 2 * 30
-        else:
-            aantal_pijlen = 2 * 25
-
-        wkl2limiet = dict()  # [pk] = aantal
-        for limiet in (KampioenschapTeamKlasseLimiet
-                       .objects
-                       .select_related('team_klasse')
-                       .filter(kampioenschap=deelkamp_bk)):
-            wkl2limiet[limiet.team_klasse.pk] = limiet.limiet
-        # for
-
-        bk_cache = dict()      # [pk] = KampioenschapSporterBoog()
-        for deelnemer in (KampioenschapSporterBoog
+        bk_cache = dict()      # [pk] = DeelnemerRK()
+        # Let op: RK sporters in BK teams!
+        for deelnemer in (DeelnemerRK
                           .objects
-                          .filter(kampioenschap__competitie=deelkamp_bk.competitie,
-                                  kampioenschap__deel=DEEL_RK)      # RK sporters in BK teams!
+                          .filter(kamp__competitie=deelkamp_bk.competitie)
                           .select_related('sporterboog',
                                           'sporterboog__sporter')):
             deelnemer.naam_str = deelnemer.sporterboog.sporter.lid_nr_en_volledige_naam()
@@ -210,9 +196,9 @@ class UitslagenBKTeamsView(TemplateView):
 
         aantal_regels = 0
         limiet = 8
-        for team in (KampioenschapTeam
+        for team in (TeamBK
                      .objects
-                     .filter(kampioenschap=deelkamp_bk,
+                     .filter(kamp=deelkamp_bk,
                              team_klasse__team_type=teamtype)
                      .select_related('team_klasse',
                                      'vereniging',
@@ -248,10 +234,7 @@ class UitslagenBKTeamsView(TemplateView):
                 klasse_teams_afgemeld = list()
                 eerste_reserve = True
 
-                try:
-                    limiet = wkl2limiet[team.team_klasse.pk]
-                except KeyError:
-                    limiet = 8
+                limiet = 8
 
                 prev_klasse = team.team_klasse
                 aantal_regels = 2
@@ -262,11 +245,9 @@ class UitslagenBKTeamsView(TemplateView):
 
             team.rayon_nr = team.vereniging.regio.rayon_nr
 
-            # RK score is opgeslagen in aanvangsgemiddelde
-            rk_score = round(team.aanvangsgemiddelde)
-            team.rk_score_str = str(rk_score)
-
+            team.rk_score_str = str(team.rk_score)
             team.bk_score_str = '-'
+
             aantal_regels += 1
 
             if team.result_rank > 0:

@@ -148,6 +148,8 @@ def registreer_opschonen(stdout):
     registreer_opschonen_incompleet(stdout)
     registreer_opschonen_afgewezen(stdout)
 
+    # TODO: gast-account opruimen 2 jaar na laatste gebruik
+
     # alle rate trackers opruimen
     GastRegistratieRateTracker.objects.all().delete()
 

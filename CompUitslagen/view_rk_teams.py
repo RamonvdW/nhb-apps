@@ -9,10 +9,10 @@ from django.http import Http404, HttpResponseRedirect
 from django.views.generic import TemplateView
 from django.utils.safestring import mark_safe
 from Account.models import get_account
-from Competitie.definities import DEEL_RK, DEELNAME_NEE, KAMP_RANK_RESERVE, KAMP_RANK_NO_SHOW, KAMP_RANK_BLANCO
-from Competitie.models import (Competitie, CompetitieMatch,
-                               Kampioenschap, KampioenschapTeam, KampioenschapTeamKlasseLimiet)
+from Competitie.definities import DEELNAME_NEE, KAMP_RANK_RESERVE, KAMP_RANK_NO_SHOW, KAMP_RANK_BLANCO
+from Competitie.models import Competitie, CompetitieMatch
 from Competitie.seizoenen import get_comp_pk
+from CompLaagRayon.models import KampRK, TeamRK
 from Functie.rol import rol_get_huidige_functie
 from Geo.models import Rayon
 from HistComp.operations import get_hist_url
@@ -183,29 +183,20 @@ class UitslagenRayonTeamsView(TemplateView):
             raise Http404('Team type niet bekend')
 
         try:
-            deelkamp = (Kampioenschap
+            deelkamp = (KampRK
                         .objects
                         .select_related('competitie',
                                         'rayon')
-                        .prefetch_related('rk_bk_matches')
+                        .prefetch_related('matches')
                         .get(competitie=self.comp,
                              competitie__is_afgesloten=False,
-                             deel=DEEL_RK,
                              rayon__rayon_nr=rayon_nr))
-        except Kampioenschap.DoesNotExist:
+        except KampRK.DoesNotExist:
             raise Http404('Competitie niet gevonden')
 
         context['deelkamp'] = deelkamp
         comp = deelkamp.competitie
         comp.bepaal_fase()
-
-        wkl2limiet = dict()   # [pk] = limiet
-        for limiet in (KampioenschapTeamKlasseLimiet
-                       .objects
-                       .select_related('team_klasse')
-                       .filter(kampioenschap=deelkamp)):
-            wkl2limiet[limiet.team_klasse.pk] = limiet.limiet
-        # for
 
         # als de gebruiker ingelogd is, laat dan de voor de teams van zijn vereniging zien wie er in de teams zitten
         toon_team_leden_van_ver_nr = None
@@ -223,7 +214,7 @@ class UitslagenRayonTeamsView(TemplateView):
 
         # haal de planning erbij: team klasse --> match
         teamklasse2match = dict()     # [team_klasse.pk] = competitiematch
-        match_pks = list(deelkamp.rk_bk_matches.values_list('pk', flat=True))
+        match_pks = list(deelkamp.matches.values_list('pk', flat=True))
         for match in (CompetitieMatch
                       .objects
                       .prefetch_related('team_klassen')
@@ -253,9 +244,9 @@ class UitslagenRayonTeamsView(TemplateView):
         alle_matchscores = list()        # voor bepalen "toon shootoff"
         alle_ranks = list()
 
-        for team in (KampioenschapTeam
+        for team in (TeamRK
                      .objects
-                     .filter(kampioenschap=deelkamp,
+                     .filter(kamp=deelkamp,
                              team_type=teamtype)
                      .exclude(team_klasse=None)
                      .select_related('team_klasse',
@@ -282,7 +273,7 @@ class UitslagenRayonTeamsView(TemplateView):
                             teller.match = teamklasse2match[teller.team_klasse.pk]
                         except KeyError:
                             pass
-                        limiet = wkl2limiet.get(team.team_klasse.pk, 8)
+                        limiet = 8
                     else:
                         teller.klasse_str = team.team_type.beschrijving + " - Nog niet ingedeeld in een wedstrijdklasse"
                         limiet = 99

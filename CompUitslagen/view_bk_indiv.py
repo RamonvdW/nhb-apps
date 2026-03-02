@@ -8,19 +8,12 @@ from django.urls import reverse
 from django.http import Http404, HttpResponseRedirect
 from django.views.generic import TemplateView
 from django.utils.safestring import mark_safe
-from Account.models import get_account
-from Competitie.definities import (DEEL_RK, DEEL_BK,
-                                   DEELNAME_NEE,
-                                   KAMP_RANK_RESERVE, KAMP_RANK_NO_SHOW, KAMP_RANK_BLANCO)
-from Competitie.models import (Competitie, CompetitieMatch,
-                               KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet,
-                               Kampioenschap, KampioenschapSporterBoog, KampioenschapTeam)
+from Competitie.definities import DEELNAME_NEE, KAMP_RANK_RESERVE, KAMP_RANK_NO_SHOW
+from Competitie.models import Competitie, CompetitieMatch
 from Competitie.seizoenen import get_comp_pk
-from Functie.rol import rol_get_huidige_functie
+from CompLaagBond.models import KampBK, DeelnemerBK, CutBK
 from HistComp.operations import get_hist_url
 from Overig.helpers import make_valid_hashtag
-from Sporter.models import Sporter
-from types import SimpleNamespace
 import datetime
 
 TEMPLATE_COMPUITSLAGEN_BK_INDIV = 'compuitslagen/bk-indiv.dtl'
@@ -94,13 +87,12 @@ class UitslagenBKIndivView(TemplateView):
             raise Http404('Boogtype niet bekend')
 
         try:
-            deelkamp_bk = (Kampioenschap
+            deelkamp_bk = (KampBK
                            .objects
                            .select_related('competitie')
-                           .get(deel=DEEL_BK,
-                                competitie__is_afgesloten=False,
+                           .get(competitie__is_afgesloten=False,
                                 competitie=self.comp))
-        except Kampioenschap.DoesNotExist:
+        except KampBK.DoesNotExist:
             raise Http404('Kampioenschap niet gevonden')
 
         context['deelkamp_bk'] = deelkamp_bk
@@ -110,7 +102,7 @@ class UitslagenBKIndivView(TemplateView):
 
         # haal de planning erbij: competitie klasse --> competitie match
         indiv2match = dict()    # [indiv_pk] = CompetitieMatch
-        match_pks = list(deelkamp_bk.rk_bk_matches.values_list('pk', flat=True))
+        match_pks = list(deelkamp_bk.matches.values_list('pk', flat=True))
         for match in (CompetitieMatch
                       .objects
                       .prefetch_related('indiv_klassen')
@@ -134,11 +126,11 @@ class UitslagenBKIndivView(TemplateView):
 
         if deelkamp_bk.heeft_deelnemerslijst:
             # deelnemers/reserveschutters van het BK tonen
-            deelnemers = (KampioenschapSporterBoog
+            deelnemers = (DeelnemerBK
                           .objects
                           .exclude(bij_vereniging__isnull=True)      # attentie gevallen
                           .exclude(deelname=DEELNAME_NEE)            # geen sporters die zich afgemeld hebben
-                          .filter(kampioenschap=deelkamp_bk,
+                          .filter(kamp=deelkamp_bk,
                                   indiv_klasse__boogtype=boogtype,
                                   rank__lte=48)                      # toon tot 48 sporters per klasse
                           .select_related('indiv_klasse',
@@ -149,10 +141,10 @@ class UitslagenBKIndivView(TemplateView):
                                     'result_volgorde',               # zet niet meegedaan (99) onderaan
                                     'volgorde'))                     # inschrijf ranking
 
-            for limiet in (KampioenschapIndivKlasseLimiet
+            for limiet in (CutBK
                            .objects
                            .select_related('indiv_klasse')
-                           .filter(kampioenschap=deelkamp_bk)):
+                           .filter(kamp=deelkamp_bk)):
                 wkl2limiet[limiet.indiv_klasse.pk] = limiet.limiet
             # for
 

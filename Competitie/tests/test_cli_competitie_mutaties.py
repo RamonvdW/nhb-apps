@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2025 Ramon van der Winkel.
+#  Copyright (c) 2021-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from Competitie.definities import MUTATIE_KAMP_REINIT_TEST
+from Competitie.definities import MUTATIE_KAMP_RK_REINIT_TEST
 from Competitie.models import CompetitieMutatie
 from Mailer.models import MailQueue
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -21,7 +21,7 @@ class TestCompetitieCliCompetitieMutaties(E2EHelpers, TestCase):
     def test_basis(self):
 
         # maak een verzoek aan dat een crash veroorzaakt
-        CompetitieMutatie(mutatie=MUTATIE_KAMP_REINIT_TEST).save()
+        CompetitieMutatie(mutatie=MUTATIE_KAMP_RK_REINIT_TEST).save()
 
         self.assertEqual(0, MailQueue.objects.count())
 

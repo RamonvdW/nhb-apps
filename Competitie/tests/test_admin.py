@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023-2025 Ramon van der Winkel.
+#  Copyright (c) 2023-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase, RequestFactory
 from BasisTypen.models import TeamType
 from Competitie import admin
-from Competitie.models import (RegiocompetitieSporterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam,
-                               KampioenschapTeam, KampioenschapIndivKlasseLimiet)
+from Competitie.models import RegiocompetitieSporterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 
@@ -81,23 +80,23 @@ class TestCompetitieAdmin(E2EHelpers, TestCase):
         _ = worker.queryset(None, RegiocompetitieSporterBoog.objects.all())
 
         # IncompleetTeamFilter
-        worker = admin.IncompleetTeamFilter(None,
-                                            {'incompleet': [None]},
-                                            KampioenschapTeam,
-                                            admin.KampioenschapTeamAdmin)
-        _ = worker.queryset(None, KampioenschapTeam.objects.all())
+        # worker = admin.IncompleetTeamFilter(None,
+        #                                     {'incompleet': [None]},
+        #                                     KampioenschapTeam,
+        #                                     admin.KampioenschapTeamAdmin)
+        # _ = worker.queryset(None, KampioenschapTeam.objects.all())
 
-        worker = admin.IncompleetTeamFilter(None,
-                                            {'incompleet': ['incompleet']},
-                                            KampioenschapTeam,
-                                            admin.KampioenschapTeamAdmin)
-        _ = worker.queryset(None, KampioenschapTeam.objects.all())
+        # worker = admin.IncompleetTeamFilter(None,
+        #                                     {'incompleet': ['incompleet']},
+        #                                     KampioenschapTeam,
+        #                                     admin.KampioenschapTeamAdmin)
+        # _ = worker.queryset(None, KampioenschapTeam.objects.all())
 
-        worker = admin.IncompleetTeamFilter(None,
-                                            {'incompleet': ['compleet']},
-                                            KampioenschapTeam,
-                                            admin.KampioenschapTeamAdmin)
-        _ = worker.queryset(None, KampioenschapTeam.objects.all())
+        # worker = admin.IncompleetTeamFilter(None,
+        #                                     {'incompleet': ['compleet']},
+        #                                     KampioenschapTeam,
+        #                                     admin.KampioenschapTeamAdmin)
+        # _ = worker.queryset(None, KampioenschapTeam.objects.all())
 
         # TeamTypeFilter
         worker = admin.TeamTypeFilter(None,
@@ -170,16 +169,16 @@ class TestCompetitieAdmin(E2EHelpers, TestCase):
         _ = worker.queryset(None, RegiocompetitieRondeTeam.objects.all())
 
         # KlasseLimietBoogTypeFilter
-        worker = admin.KlasseLimietBoogTypeFilter(None,
-                                                  {'BoogType': [None]},
-                                                  KampioenschapIndivKlasseLimiet,
-                                                  admin.KampioenschapIndivKlasseLimietAdmin)
-        _ = worker.queryset(None, KampioenschapIndivKlasseLimiet.objects.all())
+        # worker = admin.KlasseLimietBoogTypeFilter(None,
+        #                                           {'BoogType': [None]},
+        #                                           KampioenschapIndivKlasseLimiet,
+        #                                           admin.KampioenschapIndivKlasseLimietAdmin)
+        # _ = worker.queryset(None, KampioenschapIndivKlasseLimiet.objects.all())
 
-        worker = admin.KlasseLimietBoogTypeFilter(None,
-                                                  {'BoogType': ['TR']},
-                                                  KampioenschapIndivKlasseLimiet,
-                                                  admin.KampioenschapIndivKlasseLimietAdmin)
-        _ = worker.queryset(None, KampioenschapIndivKlasseLimiet.objects.all())
+        # worker = admin.KlasseLimietBoogTypeFilter(None,
+        #                                           {'BoogType': ['TR']},
+        #                                           KampioenschapIndivKlasseLimiet,
+        #                                           admin.KampioenschapIndivKlasseLimietAdmin)
+        # _ = worker.queryset(None, KampioenschapIndivKlasseLimiet.objects.all())
 
 # end of file

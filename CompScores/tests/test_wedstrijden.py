@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2025 Ramon van der Winkel.
+#  Copyright (c) 2020-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -8,12 +8,11 @@ from django.test import TestCase
 from BasisTypen.models import BoogType
 from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
-from Competitie.definities import DEEL_RK, DEEL_BK
-from Competitie.models import (CompetitieMatch, CompetitieIndivKlasse,
-                               Regiocompetitie, RegiocompetitieSporterBoog,
-                               Kampioenschap)
+from Competitie.models import CompetitieMatch, CompetitieIndivKlasse, Regiocompetitie, RegiocompetitieSporterBoog
 from Competitie.operations import maak_regiocompetitie_ronde
 from Competitie.tests.test_helpers import maak_competities_en_zet_fase_c
+from CompLaagBond.models import KampBK
+from CompLaagRayon.models import KampRK
 from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
 from Score.models import Score, Uitslag
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -189,8 +188,8 @@ class TestCompScoresWedstrijden(E2EHelpers, TestCase):
         self.deelcomp_regio_25 = Regiocompetitie.objects.get(regio=self.regio_111,
                                                              competitie__afstand='25')
 
-        self.deelkamp18_rk1 = Kampioenschap.objects.filter(deel=DEEL_RK, competitie__afstand='18').order_by('rayon__rayon_nr')[0]
-        self.deelkamp18_bk = Kampioenschap.objects.get(deel=DEEL_BK, competitie__afstand='18')
+        self.deelkamp18_rk1 = KampRK.objects.filter(competitie__afstand='18').order_by('rayon__rayon_nr').first()
+        self.deelkamp18_bk = KampBK.objects.get(competitie__afstand='18')
 
     def _maak_wedstrijden(self):
         self.wedstrijden = list()
@@ -237,7 +236,7 @@ class TestCompScoresWedstrijden(E2EHelpers, TestCase):
                     datum_wanneer=datetime.date(year=2020, month=2, day=1),
                     tijd_begin_wedstrijd=de_tijd)
         match.save()
-        self.deelkamp18_rk1.rk_bk_matches.add(match)
+        self.deelkamp18_rk1.matches.add(match)
 
         # maak een BK wedstrijd
         match = CompetitieMatch(
@@ -246,7 +245,7 @@ class TestCompScoresWedstrijden(E2EHelpers, TestCase):
                     datum_wanneer=datetime.date(year=2020, month=5, day=1),
                     tijd_begin_wedstrijd=de_tijd)
         match.save()
-        self.deelkamp18_bk.rk_bk_matches.add(match)
+        self.deelkamp18_bk.matches.add(match)
 
     def _maak_inschrijvingen(self):
         # schrijf iemand in
@@ -415,8 +414,8 @@ class TestCompScoresWedstrijden(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('compscores/wedstrijden.dtl', 'design/site_layout.dtl'))
 
         # trigger het "er zijn geen kampioenschappen" in de view code
-        self.deelkamp18_rk1.rk_bk_matches.clear()
-        self.deelkamp18_bk.rk_bk_matches.clear()
+        self.deelkamp18_rk1.matches.clear()
+        self.deelkamp18_bk.matches.clear()
 
         self.e2e_assert_other_http_commands_not_supported(self.url_wedstrijden)
 

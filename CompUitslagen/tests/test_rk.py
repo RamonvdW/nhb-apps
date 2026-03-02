@@ -7,9 +7,9 @@
 from django.test import TestCase
 from django.utils import timezone
 from Competitie.definities import DEELNAME_NEE, KAMP_RANK_BLANCO
-from Competitie.models import (Competitie, CompetitieMatch, CompetitieIndivKlasse, CompetitieTeamKlasse,
-                               KampioenschapIndivKlasseLimiet, KampioenschapSporterBoog, KampioenschapTeam)
+from Competitie.models import Competitie, CompetitieMatch, CompetitieIndivKlasse, CompetitieTeamKlasse
 from Competitie.test_utils.tijdlijn import zet_competitie_fases
+from CompLaagRayon.models import DeelnemerRK, TeamRK, CutRK
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers.testdata import TestData
 
@@ -117,12 +117,12 @@ class TestCompUitslagenRK(E2EHelpers, TestCase):
         match.indiv_klassen.add(indiv_klasse)
 
         deelkamp = self.testdata.deelkamp18_rk[1]
-        deelkamp.rk_bk_matches.add(match)
+        deelkamp.matches.add(match)
 
-        KampioenschapIndivKlasseLimiet(
-                kampioenschap=deelkamp,
+        CutRK.objects.create(
+                kamp=deelkamp,
                 indiv_klasse=indiv_klasse,
-                limiet=8).save()
+                limiet=8)
 
         # als BKO: doorzetten naar RK fase (G --> J) en bepaal de klassengrenzen (fase J --> K)
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
@@ -159,7 +159,7 @@ class TestCompUitslagenRK(E2EHelpers, TestCase):
         comp.bepaal_fase()
         self.assertEqual(comp.fase_teams, 'K')
 
-        deelnemer = KampioenschapSporterBoog.objects.filter(kampioenschap__competitie=self.testdata.comp18)[0]
+        deelnemer = DeelnemerRK.objects.filter(kamp__competitie=self.testdata.comp18)[0]
         deelnemer.result_rank = KAMP_RANK_BLANCO
         deelnemer.save(update_fields=['result_rank'])
 
@@ -194,7 +194,7 @@ class TestCompUitslagenRK(E2EHelpers, TestCase):
                     datum_wanneer='2000-01-01',
                     tijd_begin_wedstrijd='10:00')
         match.save()
-        self.testdata.deelkamp25_rk[1].rk_bk_matches.add(match)
+        self.testdata.deelkamp25_rk[1].matches.add(match)
 
         url = self.url_uitslagen_rk_teams % (self.testdata.comp18.pk, 'R2')
         with self.assert_max_queries(20):
@@ -265,7 +265,7 @@ class TestCompUitslagenRK(E2EHelpers, TestCase):
         self.assertEqual(comp.fase_teams, 'J')
 
         # zet 1 team in de Recurve ERE klasse
-        team = KampioenschapTeam.objects.filter(volg_nr=1)[0]
+        team = TeamRK.objects.filter(volg_nr=1).first()
         team.team_klasse = CompetitieTeamKlasse.objects.get(competitie=self.testdata.comp25, volgorde=15)
         team.save(update_fields=['team_klasse'])
 
@@ -299,7 +299,7 @@ class TestCompUitslagenRK(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('compuitslagen/rk-teams.dtl', 'design/site_layout.dtl'))
 
         # zet wat resultaten
-        team = KampioenschapTeam.objects.filter(volg_nr=1)[0]
+        team = TeamRK.objects.filter(volg_nr=1).first()
         team.result_rank = 1
         team.save(update_fields=['result_rank'])
 
@@ -310,7 +310,7 @@ class TestCompUitslagenRK(E2EHelpers, TestCase):
         #deelnemer.result_rk_teamscore_2 = 110
         #deelnemer.save(update_fields=['result_rk_teamscore_1', 'result_rk_teamscore_2'])
 
-        team2 = KampioenschapTeam.objects.filter(volg_nr=2)[0]
+        team2 = TeamRK.objects.filter(volg_nr=2).first()
         team2.result_rank = KAMP_RANK_BLANCO
         team2.save(update_fields=['result_rank'])
 
@@ -318,7 +318,7 @@ class TestCompUitslagenRK(E2EHelpers, TestCase):
         deelnemer = team2.gekoppelde_leden.order_by('sporterboog__sporter__lid_nr')[0]
         team.feitelijke_leden.add(deelnemer)
 
-        team = KampioenschapTeam.objects.filter(volg_nr=3)[0]
+        team = TeamRK.objects.filter(volg_nr=3).first()
         team.deelname = DEELNAME_NEE
         team.save(update_fields=['deelname'])
 

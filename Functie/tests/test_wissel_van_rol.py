@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -8,8 +8,9 @@ from django.conf import settings
 from django.test import TestCase
 from django.utils import timezone
 from Account.operations.otp import SESSIONVAR_ACCOUNT_OTP_CONTROL_IS_GELUKT
-from Competitie.definities import DEEL_RK, DEEL_BK
-from Competitie.models import Competitie, CompetitieMatch, Kampioenschap
+from Competitie.models import Competitie, CompetitieMatch
+from CompLaagBond.models import KampBK
+from CompLaagRayon.models import KampRK
 from Functie.definities import Rol
 from Functie.models import Functie
 from Functie.operations import account_needs_vhpg
@@ -840,12 +841,8 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
                     tijd_begin_wedstrijd='10:00')
         match.save()
 
-        deelkamp = Kampioenschap(
-                        competitie=comp,
-                        deel=DEEL_BK,
-                        functie=self.functie_bko)
-        deelkamp.save()
-        deelkamp.rk_bk_matches.add(match)
+        deelkamp = KampBK.objects.create(competitie=comp, functie=self.functie_bko)
+        deelkamp.matches.add(match)
 
         self.e2e_account_accepteert_vhpg(self.account_admin)
         self.e2e_login_and_pass_otp(self.account_admin)
@@ -876,13 +873,11 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
                     tijd_begin_wedstrijd='10:00')
         match.save()
 
-        deelkamp = Kampioenschap(
+        deelkamp = KampRK.objects.create(
                         competitie=comp,
-                        deel=DEEL_RK,
                         rayon=self.functie_rko.rayon,
                         functie=self.functie_rko)
-        deelkamp.save()
-        deelkamp.rk_bk_matches.add(match)
+        deelkamp.matches.add(match)
 
         self.e2e_account_accepteert_vhpg(self.account_admin)
         self.e2e_login_and_pass_otp(self.account_admin)

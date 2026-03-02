@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2024 Ramon van der Winkel.
+#  Copyright (c) 2024-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -27,6 +27,7 @@ class TestCompetitieOperationsOverstappen(E2EHelpers, TestCase):
 
         regio_nr = 111
         data.maak_rk_deelnemers(25, data.regio_ver_nrs[regio_nr][0], regio_nr)
+        data.maak_bk_deelnemers(25)
 
     def setUp(self):
         """ eenmalige setup voor alle tests
@@ -45,10 +46,10 @@ class TestCompetitieOperationsOverstappen(E2EHelpers, TestCase):
 
         deelkamp_bk = self.testdata.deelkamp25_bk
         ver_nr = self.testdata.regio_ver_nrs[101][0]        # ander rayon
-        self.deelnemer3 = self.testdata.comp25_rk_deelnemers[2]
-        self.deelnemer3.kampioenschap = deelkamp_bk
+        self.deelnemer3 = self.testdata.comp25_bk_deelnemers[2]
+        self.deelnemer3.kamp = deelkamp_bk
         self.deelnemer3.bij_vereniging = self.testdata.vereniging[ver_nr]
-        self.deelnemer3.save(update_fields=['kampioenschap', 'bij_vereniging'])
+        self.deelnemer3.save(update_fields=['kamp', 'bij_vereniging'])
 
     def test_overstappen_regio(self):
         # verkeerde fase

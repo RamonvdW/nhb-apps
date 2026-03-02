@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2025 Ramon van der Winkel.
+#  Copyright (c) 2020-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -408,7 +408,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
             json_data[sporterboog.pk] = waarde
             waarde += 1
         # for
-        with self.assert_max_queries(34):
+        with self.assert_max_queries(20):
             resp = self.client.post(self.url_uitslag_opslaan,
                                     json.dumps(json_data),
                                     content_type='application/json')
@@ -420,7 +420,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
         self.assertFalse(wed.uitslag.is_bevroren)
 
         # haal de uitslag op en controleer aanwezigheid 'accorderen' knop
-        with self.assert_max_queries(22):
+        with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('compscores/scores-invoeren.dtl', 'design/site_layout.dtl'))
@@ -436,7 +436,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
         self.assertTrue(wed.uitslag.is_bevroren)
 
         # haal de uitslag op en controleer afwezigheid 'accorderen' knop
-        with self.assert_max_queries(22):
+        with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         urls = self.extract_all_urls(resp, skip_menu=True)
@@ -683,7 +683,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
             waarde += 1
         # for
 
-        with self.assert_max_queries(252):
+        with self.assert_max_queries(71):
             resp = self.client.post(self.url_uitslag_opslaan,
                                     json.dumps(json_data),
                                     content_type='application/json')

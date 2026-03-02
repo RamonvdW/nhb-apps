@@ -62,7 +62,7 @@ APPS_DIR = os.path.dirname(BASE_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2026-02-25'
+SITE_VERSIE = '2026-03-02'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -304,9 +304,6 @@ COMPETITIES_OPEN_RK_TEAMS_DAYS_AFTER = 4*7      # open 4 weeks after start week
 
 COMPETITIE_18M_INDIV_LIMIETEN = (24, 20, 16, 12, 8, 4)
 COMPETITIE_25M_INDIV_LIMIETEN = (64, 56, 52, 48, 44, 40, 36, 32, 28, 24, 20, 16, 12, 8, 4)
-
-COMPETITIE_18M_TEAMS_LIMIETEN = (12, 11, 10, 9, 8, 7, 6, 5, 4)
-COMPETITIE_25M_TEAMS_LIMIETEN = (32, 16, 12, 11, 10, 9, 8, 7, 6, 5, 4)
 
 # maximum aantal resultaten dat een doorzoeking van de records terug geeft
 # dit voorkomt honderden resultaten bij het zoeken naar de letter e

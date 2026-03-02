@@ -8,8 +8,9 @@ from django.urls import reverse
 from django.utils import timezone
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.definities import DEEL_RK, DEEL_BK
-from Competitie.models import CompetitieMatch, RegiocompetitieRonde, Kampioenschap
+from Competitie.models import CompetitieMatch, RegiocompetitieRonde
+from CompLaagBond.models import KampBK
+from CompLaagRayon.models import KampRK
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
 import datetime
@@ -52,21 +53,30 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
                     .values_list('matches', flat=True))
 
         if self.toon_rk_bk:
-            pks2 = list(Kampioenschap
+            pks2 = list(KampRK
                         .objects
                         .filter(is_afgesloten=False,
-                                rk_bk_matches__vereniging=self.functie_nu.vereniging)
-                        .exclude(rk_bk_matches=None)                # excludes when ManyToMany is empty
-                        .values_list('rk_bk_matches', flat=True))
+                                matches__vereniging=self.functie_nu.vereniging)
+                        .exclude(matches=None)                # excludes when ManyToMany is empty
+                        .values_list('matches', flat=True))
+
+            pks3 = list(KampBK
+                        .objects
+                        .filter(is_afgesloten=False,
+                                matches__vereniging=self.functie_nu.vereniging)
+                        .exclude(matches=None)                # excludes when ManyToMany is empty
+                        .values_list('matches', flat=True))
         else:
             pks2 = list()
+            pks3 = list()
 
-        pks = list(pks1) + list(pks2)
+        pks = list(pks1) + list(pks2) + list(pks3)
 
         matches = (CompetitieMatch
                    .objects
                    .filter(pk__in=pks)
-                   .prefetch_related('kampioenschap_set',
+                   .prefetch_related('kamprk_set',
+                                     'kampbk_set',
                                      'regiocompetitieronde_set')
                    .order_by('datum_wanneer',
                              'tijd_begin_wedstrijd'))
@@ -77,14 +87,19 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
 
             rondes = match.regiocompetitieronde_set.all()
 
-            deelkamps = match.kampioenschap_set.all()
-            if len(deelkamps) > 0:
-                match.deelkamp = deelkamps[0]
-            else:
-                match.deelkamp = None
+            match.deelkamp = None
+            match.is_rk = False
+            match.is_bk = False
 
-            match.is_rk = (match.deelkamp and match.deelkamp.deel == DEEL_RK)
-            match.is_bk = (match.deelkamp and match.deelkamp.deel == DEEL_BK)
+            deelkamp = match.kamprk_set.first()
+            if deelkamp:
+                match.deelkamp = deelkamp
+                match.is_rk = True
+            else:
+                deelkamp = match.kampbk_set.first()
+                if deelkamp:
+                    match.deelkamp = deelkamp
+                    match.is_bk = True
 
             # voor competitiewedstrijden wordt de beschrijving ingevuld
             # als de instellingen van de ronde opgeslagen worden
@@ -99,7 +114,7 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
                     # TODO: onderstaande is niet meer nodig
                     if match.deelkamp:          # pragma: no branch
                         match.beschrijving1 = match.deelkamp.competitie.beschrijving
-                        if match.deelkamp.deel == DEEL_RK:
+                        if match.is_rk:
                             match.beschrijving2 = "Rayonkampioenschappen"
                         else:
                             match.beschrijving2 = "Bondskampioenschappen"
