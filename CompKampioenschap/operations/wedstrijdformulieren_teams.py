@@ -7,11 +7,10 @@
 """ helper functies """
 
 from django.utils import timezone
-from Competitie.definities import DEEL_BK, DEEL_RK, DEELNAME_NEE
-from Competitie.models import (Competitie, CompetitieTeamKlasse, CompetitieMatch,
-                               Kampioenschap, KampioenschapTeamKlasseLimiet,
-                               KampioenschapTeam, KampioenschapSporterBoog)
-from Geo.models import Rayon
+from Competitie.definities import DEELNAME_NEE
+from Competitie.models import CompetitieTeamKlasse, CompetitieMatch
+from CompLaagBond.models import KampBK, TeamBK
+from CompLaagRayon.models import KampRK, DeelnemerRK, TeamRK
 from GoogleDrive.models import Bestand
 from GoogleDrive.operations import StorageGoogleSheet
 from Sporter.models import SporterVoorkeuren
@@ -26,7 +25,7 @@ class UpdateTeamsWedstrijdFormulier:
         self.klasse = None
         self.boog_pks = list()          # toegestane bogen in deze klasse
         self.competitie = None
-        self.kampioenschap = None
+        self.deelkamp : KampRK | KampBK = None
         self.limiet = 0                 # maximaal aantal teams
         self.teams = list()
         self.ver_nrs = list()
@@ -47,17 +46,13 @@ class UpdateTeamsWedstrijdFormulier:
 
         self.competitie = self.klasse.competitie
         if bestand.is_bk:
-            self.kampioenschap = Kampioenschap.objects.filter(competitie=self.competitie, deel=DEEL_BK).first()
+            self.deelkamp = KampBK.objects.filter(competitie=self.competitie).first()
         else:
-            self.kampioenschap = Kampioenschap.objects.filter(competitie=self.competitie, deel=DEEL_RK,
-                                                              rayon__rayon_nr=bestand.rayon_nr).first()
+            self.deelkamp = KampRK.objects.filter(competitie=self.competitie,
+                                                  rayon__rayon_nr=bestand.rayon_nr).first()
 
         # haal de limiet op (maximum aantal deelnemers)
         self.limiet = 8
-        lim = KampioenschapTeamKlasseLimiet.objects.filter(kampioenschap=self.kampioenschap,
-                                                           team_klasse=self.klasse).first()
-        if lim:
-            self.limiet = min(lim.limiet, self.limiet)
 
         if bestand.is_bk:
             self.titel = 'BK'
@@ -69,14 +64,24 @@ class UpdateTeamsWedstrijdFormulier:
             # benoem het rayon
             self.titel += ', Rayon %s' % bestand.rayon_nr
 
-        self.teams = (KampioenschapTeam
-                      .objects
-                      .filter(kampioenschap=self.kampioenschap,
-                              team_klasse=self.klasse)
-                      .exclude(deelname=DEELNAME_NEE)
-                      .select_related('vereniging')
-                      .prefetch_related('gekoppelde_leden')
-                      .order_by('-aanvangsgemiddelde'))         # sterkste team bovenaan
+        if bestand.is_bk:
+            self.teams = (TeamBK
+                          .objects
+                          .filter(kamp=self.deelkamp,
+                                  team_klasse=self.klasse)
+                          .exclude(deelname=DEELNAME_NEE)
+                          .select_related('vereniging')
+                          .prefetch_related('gekoppelde_leden')
+                          .order_by('-rk_score'))                   # sterkste team bovenaan
+        else:
+            self.teams = (TeamRK
+                          .objects
+                          .filter(kamp=self.deelkamp,
+                                  team_klasse=self.klasse)
+                          .exclude(deelname=DEELNAME_NEE)
+                          .select_related('vereniging')
+                          .prefetch_related('gekoppelde_leden')
+                          .order_by('-aanvangsgemiddelde'))         # sterkste team bovenaan
 
         # maximaal 8 teams in het google sheet zetten
         self.teams = list(self.teams)[:8]
@@ -155,10 +160,9 @@ class UpdateTeamsWedstrijdFormulier:
 
         # op het BK mogen alle RK deelnemers schieten in het team
         # (sporter hoeft niet persoonlijk geplaatst te zijn voor het BK)
-        for deelnemer in (KampioenschapSporterBoog
+        for deelnemer in (DeelnemerRK
                           .objects
-                          .filter(kampioenschap__competitie=self.competitie,
-                                  kampioenschap__deel=DEEL_RK,
+                          .filter(kamp__competitie=self.competitie,
                                   bij_vereniging__ver_nr__in=self.ver_nrs,
                                   sporterboog__boogtype__pk__in=self.boog_pks)     # filter op toegestane boogtypen
                           .select_related('bij_vereniging',

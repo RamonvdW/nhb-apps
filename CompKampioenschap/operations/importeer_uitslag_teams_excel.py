@@ -4,8 +4,9 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from Competitie.definities import DEEL_RK, KAMP_RANK_NO_SHOW
-from Competitie.models import KampioenschapSporterBoog, KampioenschapTeam
+from Competitie.definities import KAMP_RANK_NO_SHOW
+from CompLaagBond.models import TeamBK
+from CompLaagRayon.models import DeelnemerRK, TeamRK
 from openpyxl.utils.exceptions import InvalidFileException
 from decimal import Decimal, InvalidOperation
 import openpyxl
@@ -14,24 +15,24 @@ import zipfile
 
 class ImporteerUitslagTeamsExcel:
 
-    def __init__(self, stdout, stderr, dryrun: bool, verbose: bool, afstand: str, deel: str):
+    def __init__(self, stdout, stderr, dryrun: bool, verbose: bool, afstand: str, is_bk: bool):
         self.stdout = stdout
         self.stderr = stderr
         self.dryrun = dryrun
         self.verbose = verbose
         self.afstand = afstand
-        self.deel = deel                    # DEEL_RK of DEEL_BK
+        self.is_bk = True
 
         self.has_error = False
         self.team_klasse = None
         self.rayon_nr = 0
 
-        self.deelnemers = dict()            # [lid_nr] = [KampioenschapSporterBoog, ...]
-        self.teams_cache = list()           # [KampioenschapTeam, ...]
+        self.deelnemers = dict()            # [lid_nr] = [DeelnemerRK of DeelnemerBK, ...]
+        self.teams_cache = list()           # [TeamRK/TeamBK, ...]
         self.team_lid_nrs = dict()          # [team.pk] = [lid_nr, ...]
         self.ver_lid_nrs = dict()           # [ver_nr] = [lid_nr, ...]
         self.kamp_lid_nrs = list()          # [lid_nr, ...]     iedereen die geplaatst is voor de kampioenschappen
-        self.deelnemende_teams = dict()     # [team naam] = KampioenschapTeam
+        self.deelnemende_teams = dict()     # [team naam] = TeamRK/TeamBK
         self.toegestane_bogen = list()
 
     def _zet_team_klasse(self, klasse):
@@ -43,12 +44,11 @@ class ImporteerUitslagTeamsExcel:
     def _deelnemers_ophalen(self):
         # teamleden zijn altijd de sporters gekwalificeerd voor het RK individueel
         # ook voor het BK
-        for deelnemer in (KampioenschapSporterBoog
+        for deelnemer in (DeelnemerRK
                           .objects
-                          .filter(kampioenschap__competitie__afstand=self.afstand,
-                                  kampioenschap__deel=DEEL_RK)
-                          .select_related('kampioenschap',
-                                          'kampioenschap__rayon',
+                          .filter(kamp__competitie__afstand=self.afstand)
+                          .select_related('kamp',
+                                          'kamp__rayon',
                                           'sporterboog__sporter',
                                           'sporterboog__boogtype',
                                           'indiv_klasse')):
@@ -70,13 +70,13 @@ class ImporteerUitslagTeamsExcel:
         # for
 
     def _teams_ophalen(self):
-        for team in (KampioenschapTeam
-                     .objects
-                     .filter(kampioenschap__competitie__afstand=self.afstand,
-                             kampioenschap__deel=self.deel)
-                     .select_related('kampioenschap',
-                                     'kampioenschap__rayon',
-                                     'vereniging',
+        if self.is_bk:
+            qset = TeamBK.objects.filter(kamp__competitie__afstand=self.afstand).select_related('kamp')
+        else:
+            qset = TeamRK.objects.filter(kamp__competitie__afstand=self.afstand).select_related('kamp', 'kamp__rayon')
+
+        for team in (qset
+                     .select_related('vereniging',
                                      'team_type',
                                      'team_klasse')
                      .prefetch_related('gekoppelde_leden',
@@ -227,7 +227,7 @@ class ImporteerUitslagTeamsExcel:
 
         self._zet_team_klasse(mogelijke_klassen[0])
 
-        if self.deel == DEEL_RK:
+        if not self.is_bk:
             self.stdout.write('[INFO] Rayon: %s' % self.rayon_nr)
 
         self.stdout.write('[INFO] Klasse: %s' % self.team_klasse)
@@ -370,14 +370,14 @@ class ImporteerUitslagTeamsExcel:
             return
 
         first_team = next(iter(self.deelnemende_teams.values()))
-        deelkamp = first_team.kampioenschap
+        deelkamp = first_team.kamp
         self.stdout.write('[INFO] Rayon: %s' % deelkamp.rayon.rayon_nr)
 
         # begin met alle teams in deze klasse op "no-show" te zetten
         # let op: dit kunnen ook reserve teams zijn (>8 deelnemers)
         expected_teams = list()
         for kamp_team in self.teams_cache:
-            if kamp_team.kampioenschap == deelkamp and kamp_team.team_klasse == self.team_klasse:
+            if kamp_team.kamp == deelkamp and kamp_team.team_klasse == self.team_klasse:
                 if self.verbose:
                     self.stdout.write('[DEBUG] Verwacht team in deze klasse: %s' % kamp_team)
                 kamp_team.result_rank = KAMP_RANK_NO_SHOW

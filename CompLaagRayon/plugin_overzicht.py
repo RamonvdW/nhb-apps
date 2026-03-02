@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import reverse
-from Competitie.definities import DEEL_RK
-from Competitie.models import Kampioenschap
+from CompLaagRayon.models import KampRK
 from Functie.definities import Rol
 from types import SimpleNamespace
 
@@ -91,15 +90,14 @@ def get_kaartjes_rayon(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
 
         # zoek het RK kampioenschap erbij
         try:
-            deelkamp_rk = (Kampioenschap
+            deelkamp_rk = (KampRK
                            .objects
                            .select_related('competitie',
                                            'rayon')
-                           .get(deel=DEEL_RK,
-                                competitie=comp,
+                           .get(competitie=comp,
                                 functie=functie_nu,
                                 is_afgesloten=False))
-        except Kampioenschap.DoesNotExist:
+        except KampRK.DoesNotExist:
             # verkeerde RKO (Indoor / 25m1pijl mix-up)
             pass
         else:

@@ -5,8 +5,9 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management.base import BaseCommand
-from Competitie.definities import DEEL_RK, DEELNAME_NEE
-from Competitie.models import CompetitieIndivKlasse, Kampioenschap, KampioenschapSporterBoog
+from Competitie.definities import DEELNAME_NEE
+from Competitie.models import CompetitieIndivKlasse
+from CompLaagRayon.models import KampRK, DeelnemerRK
 
 
 class Command(BaseCommand):
@@ -26,10 +27,9 @@ class Command(BaseCommand):
         afstand = options['afstand']
         verbose = options['verbose']
 
-        for deelkamp in (Kampioenschap
+        for deelkamp in (KampRK
                          .objects
-                         .filter(competitie__afstand=afstand,
-                                 deel=DEEL_RK)
+                         .filter(competitie__afstand=afstand)
                          .order_by('rayon__rayon_nr')):
 
             self.stdout.write('[INFO] %s' % deelkamp)
@@ -41,13 +41,13 @@ class Command(BaseCommand):
                                 competitie=deelkamp.competitie)
                         .order_by('volgorde')):
 
-                kampioenen = (KampioenschapSporterBoog
+                deelnemers = (DeelnemerRK
                               .objects
-                              .filter(kampioenschap=deelkamp,
+                              .filter(kamp=deelkamp,
                                       indiv_klasse=wkl)
                               .exclude(deelname=DEELNAME_NEE))
-                heeft_kampioen = 1 == kampioenen.filter(result_rank=1).count()
-                aantal = kampioenen.count()
+                heeft_kampioen = 1 == deelnemers.filter(result_rank=1).count()
+                aantal = deelnemers.count()
 
                 if verbose:
                     self.stdout.write('[INFO] %2d deelnemers in %s' % (aantal, wkl.beschrijving))
@@ -58,24 +58,24 @@ class Command(BaseCommand):
 
                 # controleer de volgorde van de ranking
                 nr = 0
-                for kampioen in (KampioenschapSporterBoog
+                for deelnemer in (DeelnemerRK
                                  .objects
-                                 .filter(kampioenschap=deelkamp,
+                                 .filter(kamp=deelkamp,
                                          indiv_klasse=wkl)
                                  .exclude(deelname=DEELNAME_NEE)
                                  .exclude(result_rank__gte=100)
                                  .order_by('result_volgorde')):
 
                     nr += 1
-                    rank = kampioen.result_rank
-                    volgorde = kampioen.result_volgorde
+                    rank = deelnemer.result_rank
+                    volgorde = deelnemer.result_volgorde
 
                     if verbose:
                         self.stdout.write('[DEBUG] nr=%s, rank=%s, volgorde=%s' % (nr, rank, volgorde))
 
                     if nr != volgorde:
                         self.stdout.write('[WARNING] Onverwachte result_volgorde: %s voor deelnemer %s' % (
-                                            volgorde, kampioen))
+                                            volgorde, deelnemer))
 
                     if nr == 1:
                         check_rank = (1,)
@@ -95,7 +95,7 @@ class Command(BaseCommand):
                     if rank not in check_rank:
                         self.stdout.write(
                             '[WARNING] Onverwachte result_rank: %s (verwacht: %s) voor deelnemer %s in klasse %s' % (
-                                rank, "/".join([str(rank) for rank in check_rank]), kampioen, kampioen.indiv_klasse))
+                                rank, "/".join([str(rank) for rank in check_rank]), deelnemer, deelnemer.indiv_klasse))
                 # for
             # for
         # for

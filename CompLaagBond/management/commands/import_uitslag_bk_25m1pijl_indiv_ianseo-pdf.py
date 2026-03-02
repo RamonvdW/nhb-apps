@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2024 Ramon van der Winkel.
+#  Copyright (c) 2022-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management.base import BaseCommand
-from Competitie.definities import DEEL_BK
-from Competitie.models import KampioenschapSporterBoog
+from CompLaagRayon.models import DeelnemerRK
 import pypdf
 
 
@@ -101,7 +100,7 @@ class Command(BaseCommand):
         super().__init__(stdout, stderr, no_color, force_color)
         self.dryrun = True
         self.verbose = False
-        self.deelnemers = dict()            # [NAAM VOOR ACHTER | NAAM ACHTER VOOR] = [KampioenschapSporterBoog, ...]
+        self.deelnemers = dict()            # [NAAM VOOR ACHTER | NAAM ACHTER VOOR] = [DeelnemerBK, ...]
         self.indiv_klasse = None
         self.uitslag = list()
 
@@ -113,12 +112,10 @@ class Command(BaseCommand):
 
     def _deelnemers_ophalen(self):
         # alle deelnemers van de RK individueel mogen meedoen met de BK teams
-        # daarom halen we de DEEL_RK sporters op
-        for deelnemer in (KampioenschapSporterBoog
+        for deelnemer in (DeelnemerRK
                           .objects
-                          .filter(kampioenschap__competitie__afstand='25',
-                                  kampioenschap__deel=DEEL_BK)
-                          .select_related('kampioenschap',
+                          .filter(kamp__competitie__afstand='25')
+                          .select_related('kamp',
                                           'sporterboog__sporter',
                                           'indiv_klasse')):
 
@@ -193,7 +190,7 @@ class Command(BaseCommand):
         self.indiv_klasse = top_klasse
 
     def _bepaal_deelnemer(self, naam, ver_nr):
-        """ zoek een KampioenschapSporterBoog die het beste bij de naam van de sporter past """
+        """ zoek een DeelnemerBK die het beste bij de naam van de sporter past """
 
         try:
             deelnemers = self.deelnemers[naam.upper()]

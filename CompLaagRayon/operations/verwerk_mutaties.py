@@ -5,11 +5,10 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.utils import timezone
-from Competitie.definities import DEEL_RK, DEELNAME_NEE, DEELNAME_ONBEKEND
-from Competitie.models import (Competitie,
-                               Regiocompetitie, RegiocompetitieSporterBoog,
-                               Kampioenschap, KampioenschapSporterBoog, KampioenschapTeam)
+from Competitie.definities import DEELNAME_NEE, DEELNAME_ONBEKEND
+from Competitie.models import Competitie, Regiocompetitie, RegiocompetitieSporterBoog
 from CompKampioenschap.operations import VerwerkCompKampMutaties
+from CompLaagRayon.models import KampRK, DeelnemerRK, TeamRK
 from Logboek.models import schrijf_in_logboek
 from Taken.operations import maak_taak
 
@@ -124,19 +123,17 @@ class VerwerkCompLaagRayonMutaties:
 
         # sporters moeten in het rayon van hun huidige vereniging geplaatst worden
         rayon_nr2deelkamp = dict()
-        for deelkamp in (Kampioenschap
+        for deelkamp in (KampRK
                          .objects
                          .select_related('rayon')
-                         .filter(competitie=comp,
-                                 deel=DEEL_RK)):
+                         .filter(competitie=comp)):
             rayon_nr2deelkamp[deelkamp.rayon.rayon_nr] = deelkamp
         # for
 
-        for deelkamp in (Kampioenschap
+        for deelkamp in (KampRK
                          .objects
                          .select_related('rayon')
-                         .filter(competitie=comp,
-                                 deel=DEEL_RK)):
+                         .filter(competitie=comp)):
 
             deelnemers = self._get_regio_sporters_rayon(comp, deelkamp.rayon.rayon_nr)
 
@@ -151,8 +148,8 @@ class VerwerkCompLaagRayonMutaties:
                     # schrijf de sporter in het juiste rayon in
                     deelkamp = rayon_nr2deelkamp[ver.regio.rayon_nr]
 
-                    kampioen = KampioenschapSporterBoog(
-                                    kampioenschap=deelkamp,
+                    kampioen = DeelnemerRK(
+                                    kamp=deelkamp,
                                     sporterboog=deelnemer.sporterboog,
                                     indiv_klasse=deelnemer.indiv_klasse,
                                     indiv_klasse_volgende_ronde=deelnemer.indiv_klasse,
@@ -169,7 +166,7 @@ class VerwerkCompLaagRayonMutaties:
 
                     bulk_lijst.append(kampioen)
                     if len(bulk_lijst) > 150:       # pragma: no cover
-                        KampioenschapSporterBoog.objects.bulk_create(bulk_lijst)
+                        DeelnemerRK.objects.bulk_create(bulk_lijst)
                         bulk_lijst = list()
                 else:
                     self.stdout.write(
@@ -177,15 +174,14 @@ class VerwerkCompLaagRayonMutaties:
             # for
 
             if len(bulk_lijst) > 0:
-                KampioenschapSporterBoog.objects.bulk_create(bulk_lijst)
+                DeelnemerRK.objects.bulk_create(bulk_lijst)
             del bulk_lijst
         # for
 
-        for deelkamp in (Kampioenschap
+        for deelkamp in (KampRK
                          .objects
                          .select_related('rayon')
-                         .filter(competitie=comp,
-                                 deel=DEEL_RK)
+                         .filter(competitie=comp)
                          .order_by('rayon__rayon_nr')):
 
             deelkamp.heeft_deelnemerslijst = True
@@ -238,10 +234,10 @@ class VerwerkCompLaagRayonMutaties:
         # for
 
         regiocompetitiesporterboog_pk2kampioenschapsporterboog = dict()
-        for deelnemer in (KampioenschapSporterBoog
+        for deelnemer in (DeelnemerRK
                           .objects
                           .select_related('bij_vereniging')
-                          .filter(kampioenschap__competitie=comp)):
+                          .filter(kamp__competitie=comp)):
             try:
                 regio_deelnemer = sporterboog_pk2regiocompetitiesporterboog[deelnemer.sporterboog.pk]
             except KeyError:
@@ -255,11 +251,11 @@ class VerwerkCompLaagRayonMutaties:
         # sporters mogen maar aan 1 team gekoppeld worden
         gekoppelde_deelnemer_pks = list()
 
-        for team in (KampioenschapTeam
+        for team in (TeamRK
                      .objects
+                     .filter(kamp__competitie=comp)
                      .select_related('vereniging')
-                     .prefetch_related('tijdelijke_leden')
-                     .filter(kampioenschap__competitie=comp)):
+                     .prefetch_related('tijdelijke_leden')):
 
             team_ver_nr = team.vereniging.ver_nr
             deelnemer_pks = list()
@@ -308,10 +304,10 @@ class VerwerkCompLaagRayonMutaties:
 
         # verwijder alle eerder aangemaakte KampioenschapSporterBoog
         # verwijder eerst alle eerder gekoppelde team leden
-        for team in KampioenschapTeam.objects.filter(kampioenschap__competitie=comp):
+        for team in TeamRK.objects.filter(kamp__competitie=comp):
             team.gekoppelde_leden.clear()
         # for
-        KampioenschapSporterBoog.objects.filter(kampioenschap__competitie=comp).all().delete()
+        DeelnemerRK.objects.filter(kamp__competitie=comp).all().delete()
 
         # gerechtigde RK deelnemers aanmaken
         self._maak_deelnemerslijst_rks(comp)

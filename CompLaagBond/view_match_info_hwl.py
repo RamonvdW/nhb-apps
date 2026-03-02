@@ -9,9 +9,10 @@ from django.http import Http404
 from django.utils import timezone
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.definities import DEEL_BK, DEELNAME_JA, DEELNAME_NEE
-from Competitie.models import CompetitieMatch, KampioenschapSporterBoog, KampioenschapTeam
+from Competitie.definities import DEELNAME_JA, DEELNAME_NEE
+from Competitie.models import CompetitieMatch
 from CompKampioenschap.operations import get_url_wedstrijdformulier
+from CompLaagBond.models import KampBK, DeelnemerBK, TeamBK
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
 from Scheidsrechter.models import MatchScheidsrechters
@@ -68,18 +69,14 @@ class BkMatchInfoView(UserPassesTestMixin, TemplateView):
         # TODO: begrens toegang ahv de fase
         context['comp'] = comp
 
-        deelkamps = match.kampioenschap_set.filter(deel=DEEL_BK)
-        if len(deelkamps) == 0:
+        context['deelkamp'] = deelkamp = match.kampbk_set.first()
+        if not deelkamp:
             raise Http404('Geen kampioenschap')
-        deelkamp = deelkamps[0]
-        context['deelkamp'] = deelkamp
 
         if comp.is_indoor():
-            aantal_pijlen = 30
             if match.locatie:
                 context['aantal_banen'] = match.locatie.banen_18m
         else:
-            aantal_pijlen = 25
             if match.locatie:
                 context['aantal_banen'] = match.locatie.banen_25m
 
@@ -121,9 +118,9 @@ class BkMatchInfoView(UserPassesTestMixin, TemplateView):
 
         # zoek de deelnemers erbij
         if heeft_indiv:
-            deelnemers = (KampioenschapSporterBoog
+            deelnemers = (DeelnemerBK
                           .objects
-                          .filter(kampioenschap=deelkamp,
+                          .filter(kamp=deelkamp,
                                   indiv_klasse__pk__in=klasse_indiv_pks)
                           .exclude(deelname=DEELNAME_NEE)
                           .select_related('sporterboog',
@@ -172,9 +169,9 @@ class BkMatchInfoView(UserPassesTestMixin, TemplateView):
             # for
 
         if heeft_teams:
-            teams = (KampioenschapTeam
+            teams = (TeamBK
                      .objects
-                     .filter(kampioenschap=deelkamp,
+                     .filter(kamp=deelkamp,
                              team_klasse__pk__in=klasse_team_pks,
                              deelname=DEELNAME_JA,                  # reserve teams staan nog op ?
                              rank__lte=8)

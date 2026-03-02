@@ -5,12 +5,11 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from Competitie.definities import MUTATIE_KAMP_REINIT_TEST
-from Competitie.models import (Competitie, Kampioenschap,
-                               CompetitieIndivKlasse, CompetitieTeamKlasse,
-                               CompetitieMutatie, CompetitieMatch,
-                               KampioenschapIndivKlasseLimiet, KampioenschapSporterBoog, KampioenschapTeam)
+from Competitie.definities import MUTATIE_KAMP_RK_REINIT_TEST
+from Competitie.models import (Competitie, CompetitieMutatie, CompetitieMatch,
+                               CompetitieIndivKlasse, CompetitieTeamKlasse)
 from Competitie.test_utils.tijdlijn import zet_competitie_fase_rk_prep
+from CompLaagRayon.models import KampRK, DeelnemerRK, TeamRK, CutRK
 from Functie.models import Functie
 from Mailer.models import MailQueue
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -52,10 +51,10 @@ class TestCompLaagRayonCliOverig(E2EHelpers, TestCase):
         cls.indiv_klasse = klasse
 
         # zet de cut op 16 voor de gekozen klasse
-        KampioenschapIndivKlasseLimiet(
-                kampioenschap=data.deelkamp18_rk[cls.rayon_nr],
+        CutRK.objects.create(
+                kamp=data.deelkamp18_rk[cls.rayon_nr],
                 indiv_klasse=klasse,
-                limiet=cls.cut).save()
+                limiet=cls.cut)
 
         klasse = (CompetitieTeamKlasse
                   .objects
@@ -64,27 +63,25 @@ class TestCompLaagRayonCliOverig(E2EHelpers, TestCase):
                   .first())
         cls.team_klasse = klasse
 
-        team = KampioenschapTeam(
-                    kampioenschap=data.deelkamp18_rk[cls.rayon_nr])
-        team.save()
+        team = TeamRK.objects.create(
+                    kamp=data.deelkamp18_rk[cls.rayon_nr])
         team.gekoppelde_leden.set(data.comp18_rk_deelnemers[:3])
         cls.rk_team = team
 
-        team = KampioenschapTeam(
-                    kampioenschap=data.deelkamp18_rk[cls.rayon_nr],
+        team = TeamRK.objects.create(
+                    kamp=data.deelkamp18_rk[cls.rayon_nr],
                     volg_nr=2)
-        team.save()
 
     def setUp(self):
         pass
 
     def test_check_rk(self):
-        CompetitieMutatie(mutatie=MUTATIE_KAMP_REINIT_TEST,
-                          kampioenschap=self.testdata.deelkamp18_rk[self.rayon_nr]).save()
+        CompetitieMutatie(mutatie=MUTATIE_KAMP_RK_REINIT_TEST,
+                          kamp_rk=self.testdata.deelkamp18_rk[self.rayon_nr]).save()
         self.verwerk_competitie_mutaties()
 
         # verpruts een ranking/volgorde
-        deelnemer = (KampioenschapSporterBoog
+        deelnemer = (DeelnemerRK
                      .objects
                      .filter(sporterboog__boogtype__afkorting='R',
                              volgorde=self.cut)
@@ -93,7 +90,7 @@ class TestCompLaagRayonCliOverig(E2EHelpers, TestCase):
         deelnemer.volgorde = 2
         deelnemer.save(update_fields=['volgorde'])
 
-        deelnemer = (KampioenschapSporterBoog
+        deelnemer = (DeelnemerRK
                      .objects
                      .filter(sporterboog__boogtype__afkorting='R',
                              volgorde=1)
@@ -118,7 +115,7 @@ class TestCompLaagRayonCliOverig(E2EHelpers, TestCase):
         self.assertTrue('klassen hebben geen afwijkingen' in f2.getvalue())
 
         # alle klassen hebben fouten
-        KampioenschapSporterBoog.objects.exclude(indiv_klasse=deelnemer.indiv_klasse).delete()
+        DeelnemerRK.objects.exclude(indiv_klasse=deelnemer.indiv_klasse).delete()
         with self.assert_max_queries(20):
             f1, f2 = self.run_management_command(self.cli_check_rk_inschrijvingen,
                                                  '18', self.rayon_nr, '--verbose')
@@ -150,14 +147,15 @@ class TestCompLaagRayonCliOverig(E2EHelpers, TestCase):
         # 18m
         _, f2 = self.run_management_command(self.cli_email_rk_indiv_deelnemers,
                                              '18', '1')
-        self.assertTrue('[INFO] Kampioenschap: Indoor competitie' in f2.getvalue())
-        self.assertTrue(' - RK Rayon 1' in f2.getvalue())
+        # print('f2:', f2.getvalue())
+        self.assertTrue('[INFO] KampRK: Indoor competitie' in f2.getvalue())
+        self.assertTrue(' Rayon 1' in f2.getvalue())
         self.assertTrue('[INFO] 0 RK wedstrijden gevonden' in f2.getvalue())
 
         # 25m, zonder deelkamp
         self.testdata.comp25.regiocompetitie_is_afgesloten = True
         self.testdata.comp25.save()
-        Kampioenschap.objects.filter(competitie=self.testdata.comp25).delete()
+        KampRK.objects.filter(competitie=self.testdata.comp25).delete()
         _, f2 = self.run_management_command(self.cli_email_rk_indiv_deelnemers,
                                              '25', '1', '--stuur')
         self.assertTrue('[ERROR] Competitie niet gevonden' in f2.getvalue())
@@ -178,7 +176,7 @@ class TestCompLaagRayonCliOverig(E2EHelpers, TestCase):
                     locatie=loc)
         match.save()
         match.indiv_klassen.add(deelnemer.indiv_klasse)
-        deelkamp.rk_bk_matches.add(match)
+        deelkamp.matches.add(match)
 
         # zet functie e-mail
         Functie.objects.filter(rol='HWL', vereniging=ver).update(bevestigde_email='hwl@org_ver.nl')
@@ -196,7 +194,7 @@ class TestCompLaagRayonCliOverig(E2EHelpers, TestCase):
                     tijd_begin_wedstrijd='12:34',
                     vereniging=ver)
         match.save()
-        deelkamp.rk_bk_matches.add(match)
+        deelkamp.matches.add(match)
 
         pks = [deelnemer.indiv_klasse.pk]
         for deelnemer in self.testdata.comp18_rk_deelnemers:

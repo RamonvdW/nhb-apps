@@ -5,7 +5,6 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management.base import BaseCommand
-from Competitie.definities import DEEL_BK
 from CompKampioenschap.operations import ImporteerUitslagTeamsExcel
 
 
@@ -25,7 +24,7 @@ class Command(BaseCommand):
         afstand = options['afstand']
         fname = options['bestand']
 
-        importeer = ImporteerUitslagTeamsExcel(self.stdout, self.stderr, dryrun, verbose, afstand, DEEL_BK)
+        importeer = ImporteerUitslagTeamsExcel(self.stdout, self.stderr, dryrun, verbose, afstand, is_bk=True)
         importeer.importeer_bestand(fname)
 
 # end of file

@@ -11,9 +11,9 @@ from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.definities import DEEL_BK, DEELNAME_JA, DEELNAME_NEE
-from Competitie.models import Kampioenschap, KampioenschapSporterBoog, KampioenschapIndivKlasseLimiet
+from Competitie.definities import DEELNAME_JA, DEELNAME_NEE
 from CompKampioenschap.operations import get_url_wedstrijdformulier
+from CompLaagBond.models import KampBK, DeelnemerBK, CutBK
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
 from Site.core.background_sync import BackgroundSync
@@ -57,12 +57,11 @@ class LijstBkSelectieView(UserPassesTestMixin, TemplateView):
 
         try:
             deelkamp_pk = int(kwargs['deelkamp_pk'][:6])  # afkappen voor de veiligheid
-            deelkamp = (Kampioenschap
+            deelkamp = (KampBK
                         .objects
                         .select_related('competitie')
-                        .get(pk=deelkamp_pk,
-                             deel=DEEL_BK))
-        except (ValueError, Kampioenschap.DoesNotExist):
+                        .get(pk=deelkamp_pk))
+        except (ValueError, KampBK.DoesNotExist):
             raise Http404('Kampioenschap niet gevonden')
 
         # controleer dat de juiste BKO aan de knoppen zit
@@ -79,14 +78,14 @@ class LijstBkSelectieView(UserPassesTestMixin, TemplateView):
 
         # TODO: wel inzichtelijk maar readonly maken tijdens fase P
 
-        deelnemers = (KampioenschapSporterBoog
+        deelnemers = (DeelnemerBK
                       .objects
-                      .select_related('kampioenschap',
+                      .select_related('kamp',
                                       'indiv_klasse',
                                       'sporterboog',
                                       'sporterboog__sporter',
                                       'bij_vereniging')
-                      .filter(kampioenschap=deelkamp,
+                      .filter(kamp=deelkamp,
                               volgorde__lte=48)             # max 48 schutters per klasse tonen
                       .order_by('indiv_klasse__volgorde',   # groepeer per klasse
                                 'volgorde',                 # oplopend op volgorde (dubbelen mogelijk)
@@ -101,10 +100,10 @@ class LijstBkSelectieView(UserPassesTestMixin, TemplateView):
         # for
 
         wkl2limiet = dict()    # [pk] = aantal
-        for limiet in (KampioenschapIndivKlasseLimiet
+        for limiet in (CutBK
                        .objects
                        .select_related('indiv_klasse')
-                       .filter(kampioenschap=deelkamp)):
+                       .filter(kamp=deelkamp)):
             wkl2limiet[limiet.indiv_klasse.pk] = limiet.limiet
         # for
 
@@ -201,12 +200,11 @@ class LijstBkSelectieAlsBestandView(LijstBkSelectieView):
 
         try:
             deelkamp_pk = int(kwargs['deelkamp_pk'][:6])  # afkappen voor de veiligheid
-            deelkamp = (Kampioenschap
+            deelkamp = (KampBK
                         .objects
                         .select_related('competitie')
-                        .get(pk=deelkamp_pk,
-                             deel=DEEL_BK))
-        except (ValueError, Kampioenschap.DoesNotExist):
+                        .get(pk=deelkamp_pk))
+        except (ValueError, KampBK.DoesNotExist):
             raise Http404('Kampioenschap niet gevonden')
 
         # laat alleen de juiste BKO de lijst ophalen
@@ -216,14 +214,14 @@ class LijstBkSelectieAlsBestandView(LijstBkSelectieView):
         if not deelkamp.heeft_deelnemerslijst:
             raise Http404('Geen deelnemerslijst')
 
-        deelnemers = (KampioenschapSporterBoog
+        deelnemers = (DeelnemerBK
                       .objects
-                      .select_related('kampioenschap',
+                      .select_related('kamp',
                                       'indiv_klasse',
                                       'sporterboog__sporter',
                                       'bij_vereniging')
                       .exclude(deelname=DEELNAME_NEE)
-                      .filter(kampioenschap=deelkamp,
+                      .filter(kamp=deelkamp,
                               volgorde__lte=48)             # max 48 schutters
                       .order_by('indiv_klasse__volgorde',   # groepeer per klasse
                                 'volgorde',                 # oplopend op volgorde (dubbelen mogelijk)
@@ -235,10 +233,10 @@ class LijstBkSelectieAlsBestandView(LijstBkSelectieView):
         # for
 
         wkl2limiet = dict()    # [pk] = aantal
-        for limiet in (KampioenschapIndivKlasseLimiet
+        for limiet in (CutBK
                        .objects
                        .select_related('indiv_klasse')
-                       .filter(kampioenschap=deelkamp)):
+                       .filter(kamp=deelkamp)):
             wkl2limiet[limiet.indiv_klasse.pk] = limiet.limiet
         # for
 

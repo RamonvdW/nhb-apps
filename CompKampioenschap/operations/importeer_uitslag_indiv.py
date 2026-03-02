@@ -7,9 +7,11 @@
 from django.utils import timezone
 from django.core.management.base import OutputWrapper
 from Competitie.definities import KAMP_RANK_NO_SHOW, DEELNAME_JA, DEELNAME2STR
-from Competitie.models import Kampioenschap, CompetitieIndivKlasse, KampioenschapSporterBoog
+from Competitie.models import CompetitieIndivKlasse
 from CompKampioenschap.models import SheetStatus
 from CompKampioenschap.operations.wedstrijdformulieren_indiv_lees import LeesIndivWedstrijdFormulier
+from CompLaagBond.models import KampBK, DeelnemerBK
+from CompLaagRayon.models import KampRK, DeelnemerRK
 from GoogleDrive.operations import StorageGoogleSheet
 import io
 
@@ -20,10 +22,11 @@ class ImporteerSheetUitslagIndiv:
         Lees de uitslag uit een Google Sheet
     """
 
-    def __init__(self, deelkamp: Kampioenschap, indiv_klasse: CompetitieIndivKlasse):
+    def __init__(self, deelkamp: KampRK | KampBK, indiv_klasse: CompetitieIndivKlasse):
         self.bevat_fout = False
         self.blokjes_info = list()
         self.deelkamp = deelkamp
+        self.is_rk = isinstance(self.deelkamp, KampRK)
         self.indiv_klasse = indiv_klasse
         self.afstand = 0
 
@@ -32,7 +35,7 @@ class ImporteerSheetUitslagIndiv:
         self._data_voorronde_uitslag = list()   # list(125, 124.2, 124.1, ...)
         self._data_finales = list()
 
-        self._lid_nr2deelnemer = dict()         # [str(lid_nr)] = KampioenschapSporterBoog
+        self._lid_nr2deelnemer = dict()         # [str(lid_nr)] = DeelnemerRK of DeelnemerBK
         self._lid_nr2voorronde = dict()         # [str(lid_nr)] = [totaal, aantallen_str, 1e, 2e]
         self._lid_nr2rank_volgorde = dict()     # [str(lid_nr)] = (rank, volgorde)
 
@@ -44,11 +47,13 @@ class ImporteerSheetUitslagIndiv:
         """
         stamp = timezone.localtime(timezone.now()).strftime('%Y-%m-%d om %H:%M:%S')
 
-        deelnemers = dict()     # [lid_nr] = [KampioenschapSporterBoog, ...]
-        for deelnemer in (KampioenschapSporterBoog
-                          .objects
-                          .filter(kampioenschap=self.deelkamp,
-                                  indiv_klasse=self.indiv_klasse)
+        deelnemers = dict()     # [lid_nr] = [DeelnemerRK of DeelnemerBK, ...]
+        if self.is_rk:
+            qset = DeelnemerRK.objects.filter(kamp=self.deelkamp, indiv_klasse=self.indiv_klasse)
+        else:
+            qset = DeelnemerBK.objects.filter(kamp=self.deelkamp, indiv_klasse=self.indiv_klasse)
+
+        for deelnemer in (qset
                           .select_related('sporterboog',
                                           'sporterboog__boogtype',
                                           'sporterboog__sporter',
@@ -430,7 +435,9 @@ class ImporteerSheetUitslagIndiv:
         # for
 
 
-def importeer_sheet_uitslag_indiv(deelkamp: Kampioenschap, klasse: CompetitieIndivKlasse, status: SheetStatus) -> tuple[bool, list[str]]:
+def importeer_sheet_uitslag_indiv(deelkamp: KampRK | KampBK,
+                                  klasse: CompetitieIndivKlasse,
+                                  status: SheetStatus) -> tuple[bool, list[str]]:
     """
         Lees de uitslag uit een Google Sheet en sla deze op in de database
 

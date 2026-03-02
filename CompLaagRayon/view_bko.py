@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -13,11 +13,10 @@ from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
 from BasisTypen.definities import GESLACHT_ALLE
-from Competitie.definities import MUTATIE_EXTRA_RK_DEELNEMER, DEEL_RK, DEELNAME_JA, DEELNAME_NEE, KAMP_RANK_BLANCO
-from Competitie.models import (Competitie, CompetitieMutatie,
-                               RegiocompetitieSporterBoog,
-                               Kampioenschap, KampioenschapSporterBoog)
+from Competitie.definities import MUTATIE_EXTRA_RK_DEELNEMER, DEELNAME_JA, DEELNAME_NEE, KAMP_RANK_BLANCO
+from Competitie.models import Competitie, CompetitieMutatie, RegiocompetitieSporterBoog
 from Competitie.operations import KlasseBepaler
+from CompLaagRayon.models import KampRK, DeelnemerRK
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
 from Logboek.models import schrijf_in_logboek
@@ -81,9 +80,9 @@ class ExtraDeelnemerView(UserPassesTestMixin, TemplateView):
         wedstrijdgeslacht = GESLACHT_ALLE       # competitie RK/BK is allemaal gender-neutraal
 
         # bepaal de SporterBoog die al in het RK zitten
-        sb_pks = list(KampioenschapSporterBoog
+        sb_pks = list(DeelnemerRK
                       .objects
-                      .filter(kampioenschap__competitie=comp)
+                      .filter(kamp__competitie=comp)
                       .values_list('sporterboog__pk', flat=True))
 
         # zoek kandidaten met genoeg scores
@@ -184,12 +183,11 @@ class ExtraDeelnemerView(UserPassesTestMixin, TemplateView):
             raise Http404('Geen vereniging')
 
         try:
-            kampioenschap = (Kampioenschap
-                             .objects
-                             .get(competitie=comp,
-                                  deel=DEEL_RK,
-                                  rayon=ver.regio.rayon))
-        except Kampioenschap.DoesNotExist:
+            kamp_rk = (KampRK
+                       .objects
+                       .get(competitie=comp,
+                            rayon=ver.regio.rayon))
+        except KampRK.DoesNotExist:
             raise Http404('Geen RK')
 
         # bepaal de wedstrijdklasse voor het RK
@@ -206,8 +204,8 @@ class ExtraDeelnemerView(UserPassesTestMixin, TemplateView):
         scores.sort(reverse=True)      # beste score eerst
         regio_scores = "%03d%03d%03d%03d%03d%03d%03d" % tuple(scores)
 
-        kampioen, created = KampioenschapSporterBoog.objects.get_or_create(
-                                    kampioenschap=kampioenschap,
+        deelnemer_rk, created = DeelnemerRK.objects.get_or_create(
+                                    kamp=kamp_rk,
                                     sporterboog=sporterboog,
                                     indiv_klasse=deelnemer.indiv_klasse,
                                     bij_vereniging=ver,
@@ -222,7 +220,7 @@ class ExtraDeelnemerView(UserPassesTestMixin, TemplateView):
             # laat de achtergrondtaak de volgorde bijwerken
             mutatie = CompetitieMutatie(
                             mutatie=MUTATIE_EXTRA_RK_DEELNEMER,
-                            deelnemer=kampioen,
+                            deelnemer_rk=deelnemer_rk,
                             door="BKO %s" % account.volledige_naam())
             mutatie.save()
 
@@ -292,9 +290,9 @@ class GeefBlancoResultaatView(UserPassesTestMixin, TemplateView):
         # zoek kandidaten zonder resultaat
         context['kandidaten'] = kandidaten = list()
         prev_klasse = None
-        for deelnemer in (KampioenschapSporterBoog
+        for deelnemer in (DeelnemerRK
                           .objects
-                          .filter(kampioenschap__competitie=comp,
+                          .filter(kamp__competitie=comp,
                                   result_rank=0)
                           .exclude(deelname=DEELNAME_NEE)
                           .select_related('sporterboog',
@@ -303,7 +301,7 @@ class GeefBlancoResultaatView(UserPassesTestMixin, TemplateView):
                                           'sporterboog__sporter__bij_vereniging__regio',
                                           'sporterboog__sporter__bij_vereniging__regio__rayon',
                                           'indiv_klasse')
-                          .order_by('kampioenschap__rayon',
+                          .order_by('kamp__rayon',
                                     'indiv_klasse__volgorde',
                                     'volgorde')):
 
@@ -359,12 +357,12 @@ class GeefBlancoResultaatView(UserPassesTestMixin, TemplateView):
 
         try:
             deelnemer_pk = int(kwargs['deelnemer_pk'][:6])  # afkappen voor de veiligheid
-            deelnemer = (KampioenschapSporterBoog
+            deelnemer = (DeelnemerRK
                          .objects
                          .exclude(deelname=DEELNAME_NEE)
                          .get(pk=deelnemer_pk,
                               result_rank=0))
-        except (KeyError, ValueError, KampioenschapSporterBoog.DoesNotExist):
+        except (KeyError, ValueError, DeelnemerRK.DoesNotExist):
             raise Http404('Deelnemer niet gevonden')
 
         sporterboog = deelnemer.sporterboog

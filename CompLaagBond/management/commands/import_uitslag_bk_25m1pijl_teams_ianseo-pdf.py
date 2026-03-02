@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2024 Ramon van der Winkel.
+#  Copyright (c) 2022-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management.base import BaseCommand
-from Competitie.definities import DEEL_BK, DEEL_RK
-from Competitie.models import KampioenschapSporterBoog, KampioenschapTeam
+from Competitie.models import DeelnemerRK
+from CompLaagBond.models import TeamBK
 from pypdf import PdfReader
 import sys
 
@@ -108,10 +108,10 @@ class Command(BaseCommand):
         super().__init__(stdout, stderr, no_color, force_color)
         self.dryrun = True
         self.verbose = False
-        self.deelnemers = dict()            # [lid_nr] = [KampioenschapSporterBoog, ...]
-        self.teams_cache = list()           # [KampioenschapTeam, ...]
-        self.pk2team: dict[int, KampioenschapTeam] = dict()    # [team.pk] = KampioenschapTeam
-        self.team_gekoppelde_pks = dict()   # [team.pk] = [KampioenschapSporterBoog.pk, ...]
+        self.deelnemers = dict()            # [lid_nr] = [DeelnemerRK, ...]
+        self.teams_cache = list()           # [TeamRK, ...]
+        self.pk2team: dict[int, TeamBK] = dict()    # [team.pk] = TeamBK
+        self.team_gekoppelde_pks = dict()   # [team.pk] = [DeelnemerRK.pk, ...]
         self.ver_lid_nrs = dict()           # [ver_nr] = [lid_nr, ...]
         self.kamp_lid_nrs = list()          # [lid_nr, ...]     iedereen die geplaatst is voor de kampioenschappen
 
@@ -123,13 +123,11 @@ class Command(BaseCommand):
 
     def _deelnemers_ophalen(self):
         # alle deelnemers van de RK individueel mogen meedoen met de BK teams
-        # daarom halen we de DEEL_RK sporters op
-        for deelnemer in (KampioenschapSporterBoog
+        for deelnemer in (DeelnemerRK
                           .objects
-                          .filter(kampioenschap__competitie__afstand='25',
-                                  kampioenschap__deel=DEEL_RK)
-                          .select_related('kampioenschap',
-                                          'kampioenschap__rayon',
+                          .filter(kamp__competitie__afstand='25')
+                          .select_related('kamp',
+                                          'kamp__rayon',
                                           'sporterboog__sporter',
                                           'sporterboog__boogtype',
                                           'indiv_klasse',
@@ -153,7 +151,7 @@ class Command(BaseCommand):
         # for
 
     def _filter_deelnemers(self, team_klasse):
-        # reduceer aantal KampioenschapSporterBoog aan de hand van de toegestaan bogen in deze wedstrijdklasse
+        # reduceer aantal DeelnemerRK aan de hand van de toegestaan bogen in deze wedstrijdklasse
         afkortingen = list(team_klasse.boog_typen.values_list('afkorting', flat=True))
         self.stdout.write('[INFO] Toegestane bogen: %s' % ",".join(afkortingen))
 
@@ -167,15 +165,14 @@ class Command(BaseCommand):
         # for
 
         # count2 = sum([len(deelnemers) for deelnemers in self.deelnemers.values()])
-        # self.stdout.write('[INFO] Aantal KampioenschapSporterBoog verwijderd: %s' % (count1 - count2))
+        # self.stdout.write('[INFO] Aantal DeelnemerRK verwijderd: %s' % (count1 - count2))
 
     def _teams_ophalen(self):
-        for team in (KampioenschapTeam
+        for team in (TeamBK
                      .objects
-                     .filter(kampioenschap__competitie__afstand='25',
-                             kampioenschap__deel=DEEL_BK)
-                     .select_related('kampioenschap',
-                                     'kampioenschap__rayon',
+                     .filter(kamp__competitie__afstand='25')
+                     .select_related('kamp',
+                                     'kamp__rayon',
                                      'vereniging',
                                      'team_type',
                                      'team_klasse')
@@ -253,7 +250,7 @@ class Command(BaseCommand):
         return team_klasse
 
     def _bepaal_deelnemer(self, team, sporter_naam):
-        """ zoek een KampioenschapSporterBoog die het beste bij de naam van de sporter past """
+        """ zoek een DeelnemerRK die het beste bij de naam van de sporter past """
 
         gekoppelde_deelnemer_pks = self.team_gekoppelde_pks[team.pk]
 

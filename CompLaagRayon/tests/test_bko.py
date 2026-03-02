@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2025 Ramon van der Winkel.
+#  Copyright (c) 2020-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from Competitie.models import KampioenschapSporterBoog, CompetitieMutatie
+from Competitie.models import CompetitieMutatie
 from Competitie.test_utils.tijdlijn import (zet_competitie_fase_rk_prep, zet_competitie_fase_regio_afsluiten,
                                             zet_competitie_fase_rk_wedstrijden)
+from CompLaagRayon.models import DeelnemerRK
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 
@@ -52,17 +53,17 @@ class TestCompLaagRayonBko(E2EHelpers, TestCase):
         deelnemer2 = data.comp18_deelnemers[27]         # 27=Sen22 (R)
         # print('deelnemer2: %s' % repr(deelnemer2))
 
-        KampioenschapSporterBoog(
-                    kampioenschap=data.deelkamp18_rk[cls.rayon_nr],
+        DeelnemerRK.objects.create(
+                    kamp=data.deelkamp18_rk[cls.rayon_nr],
                     sporterboog=deelnemer1.sporterboog,
                     indiv_klasse=klasse,
-                    bij_vereniging=deelnemer1.bij_vereniging).save()
+                    bij_vereniging=deelnemer1.bij_vereniging)
 
-        KampioenschapSporterBoog(
-                    kampioenschap=data.deelkamp18_rk[cls.rayon_nr],
+        DeelnemerRK.objects.create(
+                    kamp=data.deelkamp18_rk[cls.rayon_nr],
                     sporterboog=deelnemer2.sporterboog,
                     indiv_klasse=klasse,
-                    bij_vereniging=None).save()     # deelnemer2.bij_vereniging
+                    bij_vereniging=None) # deelnemer2.bij_vereniging
         deelnemer2.sporterboog.sporter.bij_vereniging = None
         deelnemer2.sporterboog.sporter.save(update_fields=['bij_vereniging'])
 
@@ -192,10 +193,9 @@ class TestCompLaagRayonBko(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('complaagrayon/bko-blanco-resultaat.dtl', 'design/site_layout.dtl'))
 
         # aanpassing doorvoeren
-        kamp = KampioenschapSporterBoog.objects.exclude(bij_vereniging=None).first()
-        # print('kamp: %s' % kamp)
+        deelnemer = DeelnemerRK.objects.exclude(bij_vereniging=None).first()
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_blanco_toevoegen % (self.testdata.comp18.pk, kamp.pk))
+            resp = self.client.post(self.url_blanco_toevoegen % (self.testdata.comp18.pk, deelnemer.pk))
         self.assert_is_redirect(resp, self.url_blanco % self.testdata.comp18.pk)
 
         resp = self.client.post(self.url_blanco_toevoegen % (self.testdata.comp18.pk, 99999))
@@ -206,9 +206,9 @@ class TestCompLaagRayonBko(E2EHelpers, TestCase):
         self.assert404(resp, 'Deelnemer niet gevonden')
 
         # geen ver
-        kamp = KampioenschapSporterBoog.objects.filter(bij_vereniging=None).first()
+        deelnemer = DeelnemerRK.objects.filter(bij_vereniging=None).first()
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_blanco_toevoegen % (self.testdata.comp18.pk, kamp.pk))
+            resp = self.client.post(self.url_blanco_toevoegen % (self.testdata.comp18.pk, deelnemer.pk))
         self.assert404(resp, 'Geen vereniging')
 
         self.e2e_assert_other_http_commands_not_supported(self.url_blanco, post=False)

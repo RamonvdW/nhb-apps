@@ -13,9 +13,9 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
 from BasisTypen.definities import ORGANISATIE_WA
 from BasisTypen.models import BoogType
-from Competitie.definities import DEEL_BK, DEELNAME_JA, DEELNAME_NEE
-from Competitie.models import Kampioenschap, KampioenschapTeam
-from CompKampioenschap.operations import maak_mutatie_kamp_teams_nummeren
+from Competitie.definities import DEELNAME_JA, DEELNAME_NEE
+from CompKampioenschap.operations import maak_mutatie_kamp_bk_teams_nummeren
+from CompLaagBond.models import KampBK, TeamBK
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
 
@@ -47,12 +47,11 @@ class LijstBkTeamsView(UserPassesTestMixin, TemplateView):
 
         try:
             deelkamp_pk = int(kwargs['deelkamp_pk'][:6])  # afkappen voor de veiligheid
-            deelkamp = (Kampioenschap
+            deelkamp = (KampBK
                         .objects
                         .select_related('competitie')
-                        .get(pk=deelkamp_pk,
-                             deel=DEEL_BK))
-        except (ValueError, Kampioenschap.DoesNotExist):
+                        .get(pk=deelkamp_pk))
+        except (ValueError, KampBK.DoesNotExist):
             raise Http404('Kampioenschap niet gevonden')
 
         # controleer dat de juiste BKO aan de knoppen zit
@@ -82,12 +81,12 @@ class LijstBkTeamsView(UserPassesTestMixin, TemplateView):
         aantal_aangemeld = 0
         aantal_afgemeld = 0
 
-        teams = (KampioenschapTeam
+        teams = (TeamBK
                  .objects
-                 .select_related('kampioenschap',
+                 .select_related('kamp',
                                  'team_klasse',
                                  'vereniging')
-                 .filter(kampioenschap=deelkamp)
+                 .filter(kamp=deelkamp)
                  .order_by('team_klasse__volgorde',    # groepeer per klasse
                            'volgorde'))
 
@@ -174,22 +173,22 @@ class WijzigStatusBkTeamView(UserPassesTestMixin, View):
 
         try:
             team_pk = int(team_pk)
-            team = (KampioenschapTeam
+            team = (TeamBK
                     .objects
-                    .select_related('kampioenschap',
-                                    'kampioenschap__competitie')
+                    .select_related('kamp',
+                                    'kamp__competitie')
                     .get(pk=team_pk))
-        except (ValueError, KampioenschapTeam.DoesNotExist):
+        except (ValueError, TeamBK.DoesNotExist):
             raise Http404('Kan team niet vinden')
 
         # print(status, team)
 
-        comp = team.kampioenschap.competitie
+        comp = team.kamp.competitie
         comp.bepaal_fase()
         if comp.fase_teams not in ('N', 'O'):
             raise Http404('Mag niet meer wijzigen')
 
-        if self.functie_nu != team.kampioenschap.functie:
+        if self.functie_nu != team.kamp.functie:
             raise PermissionDenied('Niet de beheerder')
 
         opnieuw_nummeren = False
@@ -221,10 +220,10 @@ class WijzigStatusBkTeamView(UserPassesTestMixin, View):
 
             snel = str(request.POST.get('snel', ''))[:1]        # voor autotest
 
-            maak_mutatie_kamp_teams_nummeren(comp, team.kampioenschap, team.team_klasse, door_str, snel == '1')
+            maak_mutatie_kamp_bk_teams_nummeren(comp, team.kamp, team.team_klasse, door_str, snel == '1')
 
         url = reverse('CompLaagBond:bk-teams',
-                      kwargs={'deelkamp_pk': team.kampioenschap.pk})
+                      kwargs={'deelkamp_pk': team.kamp.pk})
 
         return HttpResponseRedirect(url)
 

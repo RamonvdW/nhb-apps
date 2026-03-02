@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023-2024 Ramon van der Winkel.
+#  Copyright (c) 2023-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management.base import BaseCommand
-from Competitie.definities import DEEL_BK
-from Competitie.models import Kampioenschap, KampioenschapSporterBoog, KampioenschapIndivKlasseLimiet
+from CompLaagBond.models import KampBK, DeelnemerBK, CutBK
 
 
 class Command(BaseCommand):
@@ -51,13 +50,13 @@ class Command(BaseCommand):
         self.verbose = options['verbose']
 
         try:
-            kampioenschap = Kampioenschap.objects.get(competitie__afstand=afstand, deel=DEEL_BK)
-        except Kampioenschap.DoesNotExist:
+            kamp_bk = KampBK.objects.get(competitie__afstand=afstand)
+        except KampBK.DoesNotExist:
             self.stderr.write('[ERROR] BK niet gevonden')
             return
 
         klasse_pk2limiet = dict()       # [indiv_klasse.pk] = limiet
-        for limiet in KampioenschapIndivKlasseLimiet.objects.filter(kampioenschap=kampioenschap):
+        for limiet in CutBK.objects.filter(kamp=kamp_bk):
             klasse_pk2limiet[limiet.indiv_klasse.pk] = limiet.limiet
         # for
 
@@ -70,9 +69,9 @@ class Command(BaseCommand):
         limiet = 0
         block = list()
 
-        for kampioen in (KampioenschapSporterBoog
+        for kampioen in (DeelnemerBK
                          .objects
-                         .filter(kampioenschap=kampioenschap)
+                         .filter(kamp=kamp_bk)
                          .select_related('sporterboog',
                                          'sporterboog__sporter',
                                          'sporterboog__boogtype',

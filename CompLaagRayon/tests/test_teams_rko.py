@@ -6,9 +6,8 @@
 
 from django.test import TestCase
 from django.utils import timezone
-from Competitie.definities import DEEL_RK
-from Competitie.models import KampioenschapTeam, Kampioenschap
 from Competitie.test_utils.tijdlijn import zet_competitie_fase_rk_prep
+from CompLaagRayon.models import KampRK, TeamRK
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers.testdata import TestData
 
@@ -45,7 +44,7 @@ class TestCompLaagRayonTeams(E2EHelpers, TestCase):
         """ eenmalige setup voor alle tests
             wordt als eerste aangeroepen
         """
-        self.deelkamp_rk1 = Kampioenschap.objects.get(deel=DEEL_RK, competitie=self.testdata.comp18, rayon__rayon_nr=1)
+        self.deelkamp_rk1 = KampRK.objects.get(competitie=self.testdata.comp18, rayon__rayon_nr=1)
 
     def test_rk_teams_alle(self):
         # BB en BKO mogen deze pagina ophalen
@@ -141,7 +140,7 @@ class TestCompLaagRayonTeams(E2EHelpers, TestCase):
         self.assert_is_redirect_not_plein(resp)
 
         # verpruts de klasse van 1 team
-        team = KampioenschapTeam.objects.get(pk=self.testdata.comp25_rk_teams[0].pk)
+        team = TeamRK.objects.get(pk=self.testdata.comp25_rk_teams[0].pk)
         for klasse in self.testdata.comp25_klassen_teams['R2']:         # pragma: no branch
             if not klasse.is_voor_teams_rk_bk:                          # pragma: no branch
                 team.team_klasse = klasse

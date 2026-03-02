@@ -7,10 +7,12 @@
 from django.test import TestCase
 from BasisTypen.models import BoogType, TeamType
 from Competitie.definities import MUTATIE_UPDATE_DIRTY_WEDSTRIJDFORMULIEREN, DEELNAME_NEE
-from Competitie.models import (CompetitieMutatie, Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
-                               CompetitieMatch, Kampioenschap, KampioenschapSporterBoog, KampioenschapTeam)
+from Competitie.models import (CompetitieMutatie, Competitie, CompetitieMatch,
+                               CompetitieIndivKlasse, CompetitieTeamKlasse)
 from CompKampioenschap.operations import (aanmaken_wedstrijdformulieren_is_pending,
                                           maak_mutatie_wedstrijdformulieren_aanmaken)
+from CompLaagBond.models import KampBK, TeamBK
+from CompLaagRayon.models import KampRK, DeelnemerRK
 from Functie.tests.helpers import maak_functie
 from Geo.models import Regio, Rayon
 from GoogleDrive.models import Bestand
@@ -122,19 +124,17 @@ class TestCompKampioenschapMutaties(E2EHelpers, TestCase):
 
         self.functie_bko = maak_functie('BKO', 'BKO')
 
-        kamp = Kampioenschap.objects.create(
-                            deel='BK',
+        kamp_bk = KampBK.objects.create(
                             competitie=self.comp_18,
                             functie=self.functie_bko)
-        kamp.rk_bk_matches.add(match)
+        kamp_bk.matches.add(match)
 
         rayon1 = Rayon.objects.get(rayon_nr=1)
-        kamp_rk = Kampioenschap.objects.create(
-                            deel='RK',
+        kamp_rk = KampRK.objects.create(
                             rayon=rayon1,
                             competitie=self.comp_18,
                             functie=self.functie_bko)
-        kamp_rk.rk_bk_matches.add(match)
+        kamp_rk.matches.add(match)
 
         regio_106 = Regio.objects.get(regio_nr=106)
 
@@ -166,8 +166,8 @@ class TestCompKampioenschapMutaties(E2EHelpers, TestCase):
                                 boogtype=boog_r,
                                 voor_wedstrijd=True)
 
-        deelnemer_1 = KampioenschapSporterBoog.objects.create(
-                                kampioenschap=kamp_rk,
+        deelnemer_1 = DeelnemerRK.objects.create(
+                                kamp=kamp_rk,
                                 sporterboog=sporterboog,
                                 bij_vereniging=sporter.bij_vereniging,
                                 indiv_klasse=self.kl_indiv,
@@ -198,8 +198,8 @@ class TestCompKampioenschapMutaties(E2EHelpers, TestCase):
                                 boogtype=boog_r,
                                 voor_wedstrijd=True)
 
-        deelnemer_2 = KampioenschapSporterBoog.objects.create(
-                                kampioenschap=kamp_rk,
+        deelnemer_2 = DeelnemerRK.objects.create(
+                                kamp=kamp_rk,
                                 sporterboog=sporterboog,
                                 bij_vereniging=sporter.bij_vereniging,
                                 indiv_klasse=self.kl_indiv,
@@ -229,8 +229,8 @@ class TestCompKampioenschapMutaties(E2EHelpers, TestCase):
                                 boogtype=boog_r,
                                 voor_wedstrijd=True)
 
-        deelnemer_3 = KampioenschapSporterBoog.objects.create(
-                                kampioenschap=kamp_rk,
+        deelnemer_3 = DeelnemerRK.objects.create(
+                                kamp=kamp_rk,
                                 sporterboog=sporterboog,
                                 bij_vereniging=sporter.bij_vereniging,
                                 indiv_klasse=self.kl_indiv,
@@ -238,13 +238,13 @@ class TestCompKampioenschapMutaties(E2EHelpers, TestCase):
                                 rank=1,
                                 gemiddelde=9)
 
-        team = KampioenschapTeam.objects.create(
-                            kampioenschap=kamp,
+        team = TeamBK.objects.create(
+                            kamp=kamp_bk,
                             vereniging=ver,
                             volg_nr=1,
                             team_type=team_r2,
                             team_naam='test',
-                            aanvangsgemiddelde=15,
+                            rk_score=15,
                             volgorde=1,
                             rank=1,
                             team_klasse=self.kl_teams)
@@ -252,24 +252,24 @@ class TestCompKampioenschapMutaties(E2EHelpers, TestCase):
         team.gekoppelde_leden.add(deelnemer_2)
         team.gekoppelde_leden.add(deelnemer_3)
 
-        team = KampioenschapTeam.objects.create(
-                            kampioenschap=kamp,
+        TeamBK.objects.create(
+                            kamp=kamp_bk,
                             vereniging=ver,
                             volg_nr=2,
                             team_type=team_r2,
                             team_naam='test',
-                            aanvangsgemiddelde=10,
+                            rk_score=10,
                             volgorde=2,
                             rank=2,
                             team_klasse=self.kl_teams)
 
-        team = KampioenschapTeam.objects.create(
-                            kampioenschap=kamp,
+        TeamBK.objects.create(
+                            kamp=kamp_bk,
                             vereniging=ver,
                             volg_nr=3,
                             team_type=team_r2,
                             team_naam='test',
-                            aanvangsgemiddelde=5,
+                            rk_score=5,
                             volgorde=3,
                             rank=3,
                             team_klasse=self.kl_teams)

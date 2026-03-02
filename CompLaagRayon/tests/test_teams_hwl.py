@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2025 Ramon van der Winkel.
+#  Copyright (c) 2020-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -8,12 +8,10 @@ from django.test import TestCase, override_settings
 from django.utils import timezone
 from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
-from Competitie.definities import DEEL_RK
-from Competitie.models import (CompetitieIndivKlasse,
-                               Regiocompetitie, RegiocompetitieSporterBoog,
-                               KampioenschapTeam, Kampioenschap)
+from Competitie.models import CompetitieIndivKlasse, Regiocompetitie, RegiocompetitieSporterBoog
 from Competitie.test_utils.tijdlijn import evaluatie_datum, zet_competitie_fase_regio_wedstrijden
 from Competitie.tests.test_helpers import maak_competities_en_zet_fase_c
+from CompLaagRayon.models import KampRK, TeamRK
 from HistComp.definities import HISTCOMP_TYPE_18, HIST_BOGEN_DEFAULT
 from HistComp.models import HistCompSeizoen, HistCompRegioIndiv
 from Sporter.models import Sporter, SporterBoog
@@ -324,10 +322,9 @@ class TestCompLaagRayonVerenigingTeams(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_hwl)
         self.e2e_check_rol('HWL')
 
-        deelkamp_rk3 = (Kampioenschap
+        deelkamp_rk3 = (KampRK
                         .objects
                         .get(competitie=self.comp_18,
-                             deel=DEEL_RK,
                              rayon__rayon_nr=3))     # regio 111 is in rayon 3
 
         # competitie in de verkeerde fase
@@ -377,14 +374,14 @@ class TestCompLaagRayonVerenigingTeams(E2EHelpers, TestCase):
                 self.assert404(resp, 'Onbekend team type')
 
             # maak een team aan
-            self.assertEqual(KampioenschapTeam.objects.count(), 0)
+            self.assertEqual(TeamRK.objects.count(), 0)
             with self.assert_max_queries(20):
                 url = self.url_rk_teams_wijzig % (deelkamp_rk3.pk, 0)  # 0 = nieuw team
                 resp = self.client.post(url, {'team_type': 'R2'})
                 self.assert_is_redirect_not_plein(resp)     # is redirect naar 'koppelen'
-            self.assertEqual(KampioenschapTeam.objects.count(), 1)
+            self.assertEqual(TeamRK.objects.count(), 1)
 
-            team = KampioenschapTeam.objects.first()
+            team = TeamRK.objects.first()
 
             # coverage
             self.assertTrue(str(team) != "")
@@ -423,10 +420,9 @@ class TestCompLaagRayonVerenigingTeams(E2EHelpers, TestCase):
             self.assert404(resp, 'Kampioenschap niet gevonden')
 
         # repeat voor de 25m
-        deelkamp_rk3 = (Kampioenschap
+        deelkamp_rk3 = (KampRK
                         .objects
                         .get(competitie=self.comp_25,
-                             deel=DEEL_RK,
                              rayon__rayon_nr=3))     # regio 111 is in rayon 3
 
         # zet competitie in fase E
@@ -449,10 +445,9 @@ class TestCompLaagRayonVerenigingTeams(E2EHelpers, TestCase):
 
         self._create_deelnemers()
 
-        deelkamp_rk3 = (Kampioenschap
+        deelkamp_rk3 = (KampRK
                         .objects
                         .get(competitie=self.comp_18,
-                             deel=DEEL_RK,
                              rayon__rayon_nr=3))     # regio 111 is in rayon 3
 
         # zet competitie in fase F (nodig om een team aan te maken)
@@ -460,14 +455,14 @@ class TestCompLaagRayonVerenigingTeams(E2EHelpers, TestCase):
 
         with override_settings(COMPETITIES_OPEN_RK_TEAMS_DAYS_AFTER=0):
             # maak een team aan
-            self.assertEqual(KampioenschapTeam.objects.count(), 0)
+            self.assertEqual(TeamRK.objects.count(), 0)
             with self.assert_max_queries(20):
                 url = self.url_rk_teams_wijzig % (deelkamp_rk3.pk, 0)  # 0 = nieuw team
                 resp = self.client.post(url, {'team_type': 'R2'})
                 self.assert_is_redirect_not_plein(resp)     # is redirect naar 'koppelen'
-            self.assertEqual(KampioenschapTeam.objects.count(), 1)
+            self.assertEqual(TeamRK.objects.count(), 1)
 
-            team = KampioenschapTeam.objects.first()
+            team = TeamRK.objects.first()
             url = self.url_rk_teams_koppelen % team.pk
 
             with self.assert_max_queries(20):
@@ -487,10 +482,9 @@ class TestCompLaagRayonVerenigingTeams(E2EHelpers, TestCase):
             self.assert404(resp, 'Team niet gevonden')
 
             # herhaal voor 25m1p
-            deelkamp_rk3 = (Kampioenschap
+            deelkamp_rk3 = (KampRK
                             .objects
                             .get(competitie=self.comp_25,
-                                 deel=DEEL_RK,
                                  rayon__rayon_nr=3))     # regio 111 is in rayon 3
 
             # zet competitie in fase E (nodig om een team aan te maken)
@@ -498,14 +492,14 @@ class TestCompLaagRayonVerenigingTeams(E2EHelpers, TestCase):
 
             # maak een team aan
             team.delete()
-            self.assertEqual(KampioenschapTeam.objects.count(), 0)
+            self.assertEqual(TeamRK.objects.count(), 0)
             with self.assert_max_queries(20):
                 url = self.url_rk_teams_wijzig % (deelkamp_rk3.pk, 0)  # 0 = nieuw team
                 resp = self.client.post(url, {'team_type': 'R2'})
                 self.assert_is_redirect_not_plein(resp)     # is redirect naar 'koppelen'
-            self.assertEqual(KampioenschapTeam.objects.count(), 1)
+            self.assertEqual(TeamRK.objects.count(), 1)
 
-            team = KampioenschapTeam.objects.first()
+            team = TeamRK.objects.first()
             url = self.url_rk_teams_koppelen % team.pk
 
             with self.assert_max_queries(20):

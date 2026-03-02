@@ -8,8 +8,8 @@ from django.urls import reverse
 from django.http import Http404
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.definities import DEEL_RK, DEELNAME_JA, DEELNAME_NEE
-from Competitie.models import Kampioenschap, KampioenschapSporterBoog
+from Competitie.definities import DEELNAME_JA, DEELNAME_NEE
+from CompLaagRayon.models import KampRK, DeelnemerRK
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
 
@@ -46,14 +46,13 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
 
         try:
             deelkamp_pk = int(kwargs['deelkamp_pk'][:6])  # afkappen voor de veiligheid
-            deelkamp = (Kampioenschap
+            deelkamp = (KampRK
                         .objects
                         .select_related('competitie',
                                         'rayon')
                         .get(pk=deelkamp_pk,
-                             rayon=rayon,
-                             deel=DEEL_RK))
-        except (ValueError, Kampioenschap.DoesNotExist):
+                             rayon=rayon))
+        except (ValueError, KampRK.DoesNotExist):
             raise Http404('Competitie niet gevonden')
 
         context['deelcomp_rk'] = deelkamp
@@ -66,13 +65,13 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
 
         mag_wijzigen = ('J' <= comp.fase_indiv <= 'K')
 
-        deelnemers = (KampioenschapSporterBoog
+        deelnemers = (DeelnemerRK
                       .objects
-                      .select_related('kampioenschap',
+                      .select_related('kamp',
                                       'indiv_klasse',
                                       'sporterboog__sporter',
                                       'bij_vereniging')
-                      .filter(kampioenschap=deelkamp,
+                      .filter(kamp=deelkamp,
                               bij_vereniging=ver)
                       .order_by('indiv_klasse__volgorde',   # groepeer per klasse
                                 'volgorde',                 # oplopend op volgorde

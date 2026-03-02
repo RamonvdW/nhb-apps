@@ -6,8 +6,7 @@
 
 from django.test import TestCase, override_settings
 from django.utils import timezone
-from Competitie.definities import DEELNAME_NEE
-from Competitie.models import CompetitieMatch, KampioenschapSporterBoog, KampioenschapIndivKlasseLimiet
+from Competitie.models import CompetitieMatch
 from Competitie.test_utils.tijdlijn import zet_competitie_fase_rk_prep, zet_competitie_fase_rk_wedstrijden
 from Locatie.models import WedstrijdLocatie
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -102,7 +101,7 @@ class TestCompLaagRayonFormulieren(E2EHelpers, TestCase):
         self.comp18_klassen_indiv_rk = match_klassen
 
         self.deelkamp_18 = self.testdata.deelkamp18_rk[self.rayon_nr]
-        self.deelkamp_18.rk_bk_matches.add(self.match.pk)
+        self.deelkamp_18.matches.add(self.match.pk)
 
         self.deelkamp_25 = self.testdata.deelkamp25_rk[self.rayon_nr]
 
@@ -166,22 +165,22 @@ class TestCompLaagRayonFormulieren(E2EHelpers, TestCase):
         self.assert404(resp, 'Klasse niet gevonden')
 
         # wedstrijd niet in een plan
-        self.deelkamp_18.rk_bk_matches.remove(self.match.pk)
+        self.deelkamp_18.matches.remove(self.match.pk)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assert404(resp, 'Geen kampioenschap')
 
         # wedstrijd van een niet-RK kampioenschap
-        self.testdata.deelkamp18_bk.rk_bk_matches.add(self.match.pk)
+        self.testdata.deelkamp18_bk.matches.add(self.match.pk)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assert404(resp, 'Geen kampioenschap')
-        self.testdata.deelkamp18_bk.rk_bk_matches.clear()
+        self.testdata.deelkamp18_bk.matches.clear()
 
         # 25m
         self.testdata.maak_rk_deelnemers(25, self.ver_nr, self.regio_nr, limit_boogtypen=['R', 'BB'])
         self.testdata.maak_rk_teams(25, self.ver_nr, per_team=3, limit_teamtypen=['R2'])
-        self.deelkamp_25.rk_bk_matches.add(self.match)
+        self.deelkamp_25.matches.add(self.match)
         klasse = self.testdata.comp25_klassen_teams['R2'][0]
         self.match.team_klassen.add(klasse)
         url = self.url_forms_download_teams % (self.match.pk, klasse.pk)

@@ -108,7 +108,7 @@ class TestCompLaagMatchInfo(E2EHelpers, TestCase):
         self.comp18_klassen_teams_bk = match_klassen
 
         self.deelkamp18_bk = self.testdata.deelkamp18_bk
-        self.deelkamp18_bk.rk_bk_matches.add(self.match.pk)
+        self.deelkamp18_bk.matches.add(self.match.pk)
 
         self.deelkamp25_bk = self.testdata.deelkamp25_bk
 

@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2025 Ramon van der Winkel.
+#  Copyright (c) 2020-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
 from django.utils import timezone
-from Competitie.definities import DEEL_RK, DEEL_BK
-from Competitie.models import (CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMatch, Regiocompetitie,
-                               Kampioenschap, KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet)
+from Competitie.models import CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMatch, Regiocompetitie
+from CompLaagBond.models import KampBK
+from CompLaagRayon.models import KampRK
 from Functie.tests.helpers import maak_functie
 from Locatie.models import WedstrijdLocatie
 from Score.models import Uitslag
@@ -27,7 +27,6 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
 
     url_competitie_overzicht = '/bondscompetities/%s/'                                          # comp_pk
     url_planning = '/bondscompetities/bk/planning/%s/'                                          # deelkamp_pk
-    url_limieten = '/bondscompetities/bk/planning/%s/limieten/'                                 # deelkamp_pk
     url_wijzig_wedstrijd = '/bondscompetities/bk/planning/wedstrijd/wijzig/%s/'                 # match.pk
     url_verwijder_wedstrijd = '/bondscompetities/bk/planning/wedstrijd/verwijder/%s/'           # match.pk
     url_klassengrenzen_vaststellen = '/bondscompetities/beheer/%s/klassengrenzen-vaststellen/'  # comp.pk
@@ -134,21 +133,18 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         self.testdata.comp18.save(update_fields=['begin_fase_P_indiv', 'einde_fase_P_indiv',
                                                  'begin_fase_P_teams', 'einde_fase_P_teams'])
 
-        self.deelkamp_bk_18 = Kampioenschap.objects.filter(competitie=self.testdata.comp18,
-                                                           deel=DEEL_BK)[0]
-        self.deelcomp_rayon1_18 = Kampioenschap.objects.filter(competitie=self.testdata.comp18,
-                                                               deel=DEEL_RK,
-                                                               rayon=self.rayon_1)[0]
+        self.deelkamp_bk_18 = KampBK.objects.filter(competitie=self.testdata.comp18).first()
+        self.deelcomp_rayon1_18 = KampRK.objects.filter(competitie=self.testdata.comp18,
+                                                        rayon=self.rayon_1).first()
         self.deelcomp_regio_101 = Regiocompetitie.objects.filter(competitie=self.testdata.comp18,
-                                                                 regio=self.regio_101)[0]
+                                                                 regio=self.regio_101).first()
         self.deelcomp_regio_105 = Regiocompetitie.objects.filter(competitie=self.testdata.comp18,
-                                                                 regio=self.regio_105)[0]
+                                                                 regio=self.regio_105).first()
 
         self.functie_bko_18 = self.deelkamp_bk_18.functie
         self.functie_bko_18.accounts.add(self.account_bko_18)
 
-        self.deelkamp_bk_25 = Kampioenschap.objects.filter(competitie=self.testdata.comp25,
-                                                           deel=DEEL_BK)[0]
+        self.deelkamp_bk_25 = KampBK.objects.filter(competitie=self.testdata.comp25).first()
         self.functie_bko_25 = self.deelkamp_bk_25.functie
         self.functie_bko_25.accounts.add(self.account_bko_25)
 
@@ -174,23 +170,12 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         self.klasse_team_c0 = qset[0]
         self.klasse_team_c1 = qset[1]
 
-        KampioenschapIndivKlasseLimiet(
-            kampioenschap=self.deelkamp_bk_18,
-            indiv_klasse=self.klasse_indiv_r0,
-            limiet=24).save()
-
-        KampioenschapTeamKlasseLimiet(
-            kampioenschap=self.deelkamp_bk_18,
-            team_klasse=self.klasse_team_c0,
-            limiet=8).save()
-
         self.match = CompetitieMatch(
                         competitie=self.testdata.comp18,
                         beschrijving='test',
                         datum_wanneer='2000-01-01',
                         tijd_begin_wedstrijd='01:01')
         self.match.save()
-        # add to Kampioenschap.rk_bk_matches ?
 
     def test_anon(self):
         self.client.logout()
@@ -202,9 +187,6 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         self.assert403(resp)
 
         resp = self.client.get(self.url_planning % 999999)
-        self.assert403(resp)
-
-        resp = self.client.get(self.url_limieten % 999999)
         self.assert403(resp)
 
     def test_planning(self):
@@ -261,7 +243,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wissel_naar_functie(self.functie_bko_18)
 
-        self.deelkamp_bk_18.rk_bk_matches.add(self.match)
+        self.deelkamp_bk_18.matches.add(self.match)
 
         url = self.url_wijzig_wedstrijd % self.match.pk
         url_redir_expected = self.url_planning % self.deelkamp_bk_18.pk
@@ -349,58 +331,12 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         self.assert404(resp, 'Niet de beheerder')
 
         # geen BK match
-        self.deelkamp_bk_18.rk_bk_matches.clear()
+        self.deelkamp_bk_18.matches.clear()
         resp = self.client.get(url)
         self.assert404(resp, 'Geen BK wedstrijd')
 
         resp = self.client.post(url)
         self.assert404(resp, 'Geen BK wedstrijd')
-
-    def test_limieten(self):
-        self.e2e_login_and_pass_otp(self.testdata.account_bb)
-        self.e2e_wissel_naar_functie(self.functie_bko_18)
-
-        # verkeerde BKO
-        url = self.url_limieten % self.deelkamp_bk_25.pk
-        resp = self.client.get(url)
-        self.assert404(resp, 'Niet de beheerder')
-
-        resp = self.client.post(url)
-        self.assert404(resp, 'Niet de beheerder')
-
-        url = self.url_limieten % self.deelkamp_bk_18.pk
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagbond/wijzig-limieten.dtl', 'design/site_layout.dtl'))
-
-        isel_r0 = 'isel_%s' % self.klasse_indiv_r0.pk
-        isel_r1 = 'isel_%s' % self.klasse_indiv_r1.pk
-        tsel_c0 = 'tsel_%s' % self.klasse_team_c0.pk
-        tsel_c1 = 'tsel_%s' % self.klasse_team_c1.pk
-
-        # wijzig limieten
-        with self.assert_max_queries(20):
-            resp = self.client.post(url, {isel_r0: 24, isel_r1: 8, tsel_c0: 8, tsel_c1: 10, 'snel': '1'})
-        self.assert_is_redirect_not_plein(resp)
-
-        # corner cases
-        resp = self.client.post(url, {isel_r0: 0})
-        self.assert404(resp, 'Geen valide keuze voor indiv')
-
-        resp = self.client.post(url, {tsel_c0: 0})
-        self.assert404(resp, 'Geen valide keuze voor team')
-
-        resp = self.client.post(url, {isel_r0: 'xx', tsel_c0: 'xx'})
-        self.assert_is_redirect_not_plein(resp)
-
-        url = self.url_limieten % 999999
-        resp = self.client.get(url)
-        self.assert404(resp, 'Kampioenschap niet gevonden')
-
-        resp = self.client.post(url)
-        self.assert404(resp, 'Kampioenschap niet gevonden')
 
     def test_verwijder_wedstrijd(self):
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
@@ -415,12 +351,12 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         self.assert404(resp, 'Geen BK wedstrijd')
 
         # verkeerde BKO
-        self.deelkamp_bk_25.rk_bk_matches.add(self.match)
+        self.deelkamp_bk_25.matches.add(self.match)
         resp = self.client.post(url)
         self.assert404(resp, 'Niet de beheerder')
-        self.deelkamp_bk_25.rk_bk_matches.clear()
+        self.deelkamp_bk_25.matches.clear()
 
-        self.deelkamp_bk_18.rk_bk_matches.add(self.match)
+        self.deelkamp_bk_18.matches.add(self.match)
 
         uitslag = Uitslag(
                     max_score=300,
@@ -434,7 +370,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         self.assert404(resp, 'Uitslag mag niet meer gewijzigd worden')
 
         # echt verwijderen
-        resp = self.client.post(url)
+        self.client.post(url)
         uitslag.is_bevroren = False
         uitslag.save(update_fields=['is_bevroren'])
         resp = self.client.post(url)
@@ -443,7 +379,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         self.match.uitslag = None
         self.match.pk = 0
         self.match.save()
-        self.deelkamp_bk_18.rk_bk_matches.add(self.match)
+        self.deelkamp_bk_18.matches.add(self.match)
 
         url = self.url_verwijder_wedstrijd % self.match.pk
         resp = self.client.post(url)

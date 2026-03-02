@@ -6,9 +6,9 @@
 
 from django.test import TestCase, override_settings
 from django.utils import timezone
-from Competitie.definities import DEEL_RK
-from Competitie.models import CompetitieMatch, KampioenschapSporterBoog, KampioenschapTeam
+from Competitie.models import CompetitieMatch
 from Competitie.test_utils.tijdlijn import zet_competitie_fase_bk_prep
+from CompLaagBond.models import TeamBK
 from Locatie.models import WedstrijdLocatie
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
@@ -109,7 +109,7 @@ class TestCompLaagBondFormulieren(E2EHelpers, TestCase):
         self.comp18_klassen_teams_bk = match_klassen
 
         self.deelkamp18_bk = self.testdata.deelkamp18_bk
-        self.deelkamp18_bk.rk_bk_matches.add(self.match.pk)
+        self.deelkamp18_bk.matches.add(self.match.pk)
 
         self.deelkamp25_bk = self.testdata.deelkamp25_bk
 
@@ -144,9 +144,9 @@ class TestCompLaagBondFormulieren(E2EHelpers, TestCase):
         self.assert404(resp, 'Klasse niet gevonden')
 
         # verander de match in een RK
-        # doe dit eenvoudig door het kampioenschap om te bouwen tot een RK
-        self.deelkamp18_bk.deel = DEEL_RK
-        self.deelkamp18_bk.save(update_fields=['deel'])
+        self.deelkamp18_bk.matches.clear()
+        kamp_rk = self.testdata.deelkamp18_rk[1]
+        kamp_rk.matches.add(self.match)
 
         resp = self.client.get(self.url_forms_download_teams % (self.match.pk, self.comp18_klassen_teams_bk[0].pk))
         self.assert404(resp, 'Geen kampioenschap')
@@ -157,7 +157,7 @@ class TestCompLaagBondFormulieren(E2EHelpers, TestCase):
         # ingelogd als BKO Indoor
         self.e2e_wissel_naar_functie(self.functie_hwl)
 
-        team_klasse = KampioenschapTeam.objects.filter(kampioenschap=self.deelkamp18_bk)[0].team_klasse
+        team_klasse = TeamBK.objects.filter(kamp=self.deelkamp18_bk)[0].team_klasse
         url = self.url_forms_download_teams % (self.match.pk, team_klasse.pk)
 
         with self.assert_max_queries(20):

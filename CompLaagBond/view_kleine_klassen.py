@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023-2025 Ramon van der Winkel.
+#  Copyright (c) 2023-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -12,8 +12,9 @@ from django.core.exceptions import PermissionDenied
 from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
-from Competitie.definities import DEEL_BK, MUTATIE_KAMP_VERPLAATS_KLASSE_INDIV
-from Competitie.models import CompetitieIndivKlasse, Kampioenschap, KampioenschapSporterBoog, CompetitieMutatie
+from Competitie.definities import MUTATIE_KAMP_VERPLAATS_KLASSE_INDIV
+from Competitie.models import CompetitieIndivKlasse, CompetitieMutatie
+from CompLaagBond.models import KampBK, DeelnemerBK
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
 from Logboek.models import schrijf_in_logboek
@@ -52,13 +53,12 @@ class KleineKlassenIndivView(UserPassesTestMixin, TemplateView):
 
         try:
             deelkamp_pk = int(kwargs['deelkamp_pk'][:6])  # afkappen voor de veiligheid
-            deelkamp = (Kampioenschap
+            deelkamp = (KampBK
                         .objects
                         .select_related('competitie',
                                         'functie')
-                        .get(pk=deelkamp_pk,
-                             deel=DEEL_BK))
-        except (ValueError, Kampioenschap.DoesNotExist):
+                        .get(pk=deelkamp_pk))
+        except (ValueError, KampBK.DoesNotExist):
             raise Http404('Kampioenschap niet gevonden')
 
         # controleer dat de juiste BKO aan de knoppen zit
@@ -88,14 +88,15 @@ class KleineKlassenIndivView(UserPassesTestMixin, TemplateView):
 
         alle_deelnemers = list()
         klasse = -1
-        for deelnemer in (KampioenschapSporterBoog
+        for deelnemer in (DeelnemerBK
                           .objects
-                          .select_related('kampioenschap',
+                          .select_related('kamp',
+                                          'kamp__competitie',
                                           'indiv_klasse',
                                           'sporterboog',
                                           'sporterboog__sporter',
                                           'bij_vereniging')
-                          .filter(kampioenschap=deelkamp)
+                          .filter(kamp=deelkamp)
                           .order_by('indiv_klasse__volgorde',   # groepeer per klasse
                                     'volgorde',                 # oplopend op volgorde (dubbelen mogelijk)
                                     '-gemiddelde')):            # aflopend op gemiddelde
@@ -190,17 +191,17 @@ class VerplaatsDeelnemerView(UserPassesTestMixin, View):
 
         try:
             deelnemer_pk = int(str(data['deelnemer'])[:6])       # afkappen voor de veiligheid
-            deelnemer = (KampioenschapSporterBoog
+            deelnemer = (DeelnemerBK
                          .objects
-                         .select_related('kampioenschap',
-                                         'kampioenschap__functie',
-                                         'kampioenschap__competitie',
+                         .select_related('kamp',
+                                         'kamp__functie',
+                                         'kamp__competitie',
                                          'indiv_klasse')
                          .get(pk=deelnemer_pk))
-        except (KeyError, ValueError, KampioenschapSporterBoog.DoesNotExist):
+        except (KeyError, ValueError, DeelnemerBK.DoesNotExist):
             raise Http404("Deelnemer niet gevonden")
 
-        deelkamp = deelnemer.kampioenschap
+        deelkamp = deelnemer.kamp
 
         # controleer dat de juiste BKO aan de knoppen zit
         if self.functie_nu != deelkamp.functie:
@@ -232,7 +233,7 @@ class VerplaatsDeelnemerView(UserPassesTestMixin, View):
         CompetitieMutatie(
                 mutatie=MUTATIE_KAMP_VERPLAATS_KLASSE_INDIV,
                 door=door_str,
-                deelnemer=deelnemer,
+                deelnemer_bk=deelnemer,
                 indiv_klasse=klasse).save()
 
         mutatie_ping.ping()

@@ -13,12 +13,11 @@ from django.core.exceptions import PermissionDenied
 from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
-from Competitie.definities import DEEL_RK, INSCHRIJF_METHODE_1, DEELNAME_NEE
+from Competitie.definities import INSCHRIJF_METHODE_1, DEELNAME_NEE
 from Competitie.models import (CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMatch,
-                               Regiocompetitie, RegiocompetitieRonde,
-                               Kampioenschap, KampioenschapSporterBoog, KampioenschapTeam,
-                               KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet)
-from CompKampioenschap.operations import maak_mutatie_kamp_cut
+                               Regiocompetitie, RegiocompetitieRonde)
+from CompKampioenschap.operations import maak_mutatie_kamp_rk_cut
+from CompLaagRayon.models import KampRK, DeelnemerRK, TeamRK, CutRK
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
 from Locatie.models import WedstrijdLocatie
@@ -62,13 +61,12 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
 
         try:
             deelkamp_pk = int(kwargs['deelkamp_pk'][:6])  # afkappen voor de veiligheid
-            deelkamp = (Kampioenschap
+            deelkamp = (KampRK
                         .objects
                         .select_related('competitie',
                                         'rayon')
-                        .get(pk=deelkamp_pk,
-                             deel=DEEL_RK))
-        except (ValueError, Kampioenschap.DoesNotExist):
+                        .get(pk=deelkamp_pk))
+        except (ValueError, KampRK.DoesNotExist):
             raise Http404('Kampioenschap niet gevonden')
 
         context['deelkamp'] = deelkamp
@@ -77,9 +75,9 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
         indiv_klasse2count = dict()
         team_klasse2count = dict()
         niet_gebruikt = dict()
-        for obj in (KampioenschapSporterBoog
+        for obj in (DeelnemerRK
                     .objects
-                    .filter(kampioenschap=deelkamp)
+                    .filter(kamp=deelkamp)
                     .filter(rank__lte=24)   # 24 = standaard limiet voor een individuele klasse
                     .exclude(rank=0)        # afgemeld
                     .select_related('indiv_klasse')):
@@ -89,9 +87,9 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
                 indiv_klasse2count[obj.indiv_klasse.pk] = 1
         # for
 
-        for cut in (KampioenschapIndivKlasseLimiet
+        for cut in (CutRK
                     .objects
-                    .filter(kampioenschap=deelkamp)
+                    .filter(kamp=deelkamp)
                     .select_related('indiv_klasse')):
 
             try:
@@ -102,33 +100,15 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
                 pass
         # for
 
-        for obj in (KampioenschapTeam
+        for obj in (TeamRK
                     .objects
-                    .filter(kampioenschap=deelkamp)
+                    .filter(kamp=deelkamp)
                     .exclude(team_klasse=None)
                     .select_related('team_klasse')):
             try:
                 team_klasse2count[obj.team_klasse.pk] += 4
             except KeyError:
                 team_klasse2count[obj.team_klasse.pk] = 4
-        # for
-
-        # FUTURE: standaard begrenzing aantal teams: ERE=12, rest=8
-
-        for cut in (KampioenschapTeamKlasseLimiet
-                    .objects
-                    .filter(kampioenschap=deelkamp)
-                    .select_related('team_klasse')):
-
-            # vertaal aantal teams naar aantal sporters
-            aantal_sporters = cut.limiet * 4
-
-            try:
-                if team_klasse2count[cut.team_klasse.pk] > aantal_sporters:
-                    team_klasse2count[cut.team_klasse.pk] = aantal_sporters
-
-            except KeyError:
-                pass
         # for
 
         for wkl in (CompetitieIndivKlasse
@@ -138,15 +118,8 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
             niet_gebruikt[100000 + wkl.pk] = wkl.beschrijving
         # for
 
-        for wkl in (CompetitieTeamKlasse
-                    .objects
-                    .filter(competitie=deelkamp.competitie,
-                            is_voor_teams_rk_bk=True)):
-            niet_gebruikt[200000 + wkl.pk] = wkl.beschrijving
-        # for
-
         # haal de RK wedstrijden op
-        context['wedstrijden_rk'] = (deelkamp.rk_bk_matches
+        context['wedstrijden_rk'] = (deelkamp.matches
                                      .select_related('vereniging',
                                                      'locatie')
                                      .prefetch_related('indiv_klassen',
@@ -248,14 +221,13 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
 
         try:
             deelkamp_pk = int(kwargs['deelkamp_pk'][:6])  # afkappen voor de veiligheid
-            deelkamp = (Kampioenschap
+            deelkamp = (KampRK
                         .objects
                         .select_related('competitie',
                                         'rayon')
                         .get(pk=deelkamp_pk,
-                             deel=DEEL_RK,
                              rayon=self.functie_nu.rayon))  # moet juiste rayon zijn
-        except (ValueError, Kampioenschap.DoesNotExist):
+        except (ValueError, KampRK.DoesNotExist):
             raise Http404('Kampioenschap niet gevonden')
 
         match = CompetitieMatch(
@@ -265,7 +237,7 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
                     beschrijving='RK Rayon %s, %s' % (deelkamp.rayon.rayon_nr, deelkamp.competitie.beschrijving))
         match.save()
 
-        deelkamp.rk_bk_matches.add(match)
+        deelkamp.matches.add(match)
 
         return HttpResponseRedirect(reverse('CompLaagRayon:wijzig-wedstrijd',
                                             kwargs={'match_pk': match.pk}))
@@ -296,7 +268,7 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
         """
 
         # voorkom dubbel koppelen: zoek uit welke klassen al gekoppeld zijn aan een andere wedstrijd
-        match_pks = list(deelkamp.rk_bk_matches.all().values_list('pk', flat=True))
+        match_pks = list(deelkamp.matches.all().values_list('pk', flat=True))
         if match.pk in match_pks:
             match_pks.remove(match.pk)
 
@@ -315,10 +287,10 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
         # for
 
         klasse2schutters = dict()
-        for obj in (KampioenschapSporterBoog
+        for obj in (DeelnemerRK
                     .objects
                     .exclude(deelname=DEELNAME_NEE)         # afgemelde sporters niet tellen
-                    .filter(kampioenschap=deelkamp)
+                    .filter(kamp=deelkamp)
                     .select_related('indiv_klasse')):
             try:
                 klasse2schutters[obj.indiv_klasse.pk] += 1
@@ -357,9 +329,9 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
         # for
 
         klasse_count = dict()   # [klasse.pk] = count
-        for klasse_pk in (KampioenschapTeam
+        for klasse_pk in (TeamRK
                           .objects
-                          .filter(kampioenschap=deelkamp)
+                          .filter(kamp=deelkamp)
                           .values_list('team_klasse__pk', flat=True)):
             try:
                 klasse_count[klasse_pk] += 1
@@ -428,10 +400,10 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
             raise Http404('Wedstrijd niet gevonden')
 
         # zoek het weeknummer waarin deze wedstrijd gehouden moet worden
-        deelkamps = match.kampioenschap_set.all()
-        if len(deelkamps) == 0:
+        deelkamp = match.kamprk_set.first()
+        if not deelkamp:
             raise Http404('Geen RK wedstrijd')
-        deelkamp = deelkamps[0]
+
         comp = deelkamp.competitie
         is_25m = (comp.is_25m1pijl())
 
@@ -524,10 +496,9 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
         except (ValueError, CompetitieMatch.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
-        deelkamps = match.kampioenschap_set.all()
-        if len(deelkamps) == 0:
+        deelkamp = match.kamprk_set.first()
+        if not deelkamp:
             raise Http404('Geen RK wedstrijd')
-        deelkamp = deelkamps[0]
 
         # is dit de beheerder?
         if deelkamp.functie != self.functie_nu:
@@ -707,12 +678,11 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
 
         try:
             deelkamp_pk = int(kwargs['deelkamp_pk'][:6])  # afkappen voor de veiligheid
-            deelkamp = (Kampioenschap
+            deelkamp = (KampRK
                         .objects
                         .select_related('competitie')
-                        .get(pk=deelkamp_pk,
-                             deel=DEEL_RK))
-        except (ValueError, Kampioenschap.DoesNotExist):
+                        .get(pk=deelkamp_pk))
+        except (ValueError, KampRK.DoesNotExist):
             raise Http404('Kampioenschap niet gevonden')
 
         # controleer dat de juiste RKO aan de knoppen zit
@@ -748,21 +718,12 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
         # for
 
         # aanvullen met de opgeslagen limieten
-        for limiet in (KampioenschapIndivKlasseLimiet
+        for limiet in (CutRK
                        .objects
                        .select_related('indiv_klasse')
-                       .filter(kampioenschap=deelkamp,
+                       .filter(kamp=deelkamp,
                                indiv_klasse__in=pk2wkl_indiv.keys())):
             wkl = pk2wkl_indiv[limiet.indiv_klasse.pk]
-            wkl.limiet = limiet.limiet
-        # for
-
-        for limiet in (KampioenschapTeamKlasseLimiet
-                       .objects
-                       .select_related('team_klasse')
-                       .filter(kampioenschap=deelkamp,
-                               team_klasse__in=pk2wkl_team.keys())):
-            wkl = pk2wkl_team[limiet.team_klasse.pk]
             wkl.limiet = limiet.limiet
         # for
 
@@ -784,12 +745,11 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
 
         try:
             deelkamp_pk = int(kwargs['deelkamp_pk'][:6])  # afkappen voor de veiligheid
-            deelkamp = (Kampioenschap
+            deelkamp = (KampRK
                         .objects
                         .select_related('competitie')
-                        .get(pk=deelkamp_pk,
-                             deel=DEEL_RK))
-        except (ValueError, Kampioenschap.DoesNotExist):
+                        .get(pk=deelkamp_pk))
+        except (ValueError, KampRK.DoesNotExist):
             raise Http404('Kampioenschap niet gevonden')
 
         # controleer dat de juiste RKO aan de knoppen zit
@@ -843,10 +803,10 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
         wijzig_limiet_indiv = list()     # list of tup(indiv_klasse, nieuwe_limiet, oude_limiet)
         wijzig_limiet_team = list()      # list of tup(team_klasse, nieuwe_limiet, oude_limiet)
 
-        for limiet in (KampioenschapIndivKlasseLimiet
+        for limiet in (CutRK
                        .objects
                        .select_related('indiv_klasse')
-                       .filter(kampioenschap=deelkamp,
+                       .filter(kamp=deelkamp,
                                indiv_klasse__in=list(pk2keuze_indiv.keys()))):
 
             pk = limiet.indiv_klasse.pk
@@ -855,20 +815,6 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
 
             tup = (limiet.indiv_klasse, keuze, limiet.limiet)
             wijzig_limiet_indiv.append(tup)
-        # for
-
-        for limiet in (KampioenschapTeamKlasseLimiet
-                       .objects
-                       .select_related('team_klasse')
-                       .filter(kampioenschap=deelkamp,
-                               team_klasse__in=list(pk2keuze_team.keys()))):
-
-            pk = limiet.team_klasse.pk
-            keuze = pk2keuze_team[pk]
-            del pk2keuze_team[pk]
-
-            tup = (limiet.team_klasse, keuze, limiet.limiet)
-            wijzig_limiet_team.append(tup)
         # for
 
         # verwerk de overgebleven keuzes waar nog geen limiet voor was
@@ -912,24 +858,13 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
                         str(indiv_klasse), str(deelkamp), oude_limiet, nieuwe_limiet)
                 schrijf_in_logboek(door_account, "Competitie", msg)
 
-                tup = (indiv_klasse, None, oude_limiet, nieuwe_limiet)
-                mutaties.append(tup)
-        # for
-
-        for team_klasse, nieuwe_limiet, oude_limiet in wijzig_limiet_team:
-            # schrijf in het logboek
-            if oude_limiet != nieuwe_limiet:
-                msg = "De limiet (cut) voor klasse %s van de %s is aangepast van %s naar %s." % (
-                        str(team_klasse), str(deelkamp), oude_limiet, nieuwe_limiet)
-                schrijf_in_logboek(door_account, "Competitie", msg)
-
-                tup = (None, team_klasse, oude_limiet, nieuwe_limiet)
+                tup = (indiv_klasse, oude_limiet, nieuwe_limiet)
                 mutaties.append(tup)
         # for
 
         snel = str(request.POST.get('snel', ''))[:1]        # voor autotest
 
-        maak_mutatie_kamp_cut(deelkamp, door_str, mutaties, snel == '1')
+        maak_mutatie_kamp_rk_cut(deelkamp, door_str, mutaties, snel == '1')
 
         url = reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk})
         return HttpResponseRedirect(url)
@@ -964,11 +899,9 @@ class VerwijderWedstrijdView(UserPassesTestMixin, View):
         except (ValueError, CompetitieMatch.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
-        deelkamps = match.kampioenschap_set.filter(deel=DEEL_RK)
-        if len(deelkamps) == 0:
+        deelkamp = match.kamprk_set.first()
+        if not deelkamp:
             raise Http404('Geen RK wedstrijd')
-
-        deelkamp = deelkamps[0]
 
         # correcte beheerder?
         if deelkamp.functie != self.functie_nu:

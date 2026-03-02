@@ -6,7 +6,7 @@
 
 from django.urls import path
 from CompLaagBond import (view_planning, view_indiv_bko, view_teams_bko, view_formulieren, view_kleine_klassen,
-                          view_indiv_wijzig_status, view_match_info_hwl)
+                          view_indiv_wijzig_status, view_match_info_hwl, view_limieten)
 
 app_name = 'CompLaagBond'
 
@@ -16,7 +16,7 @@ urlpatterns = [
 
     # BK planning
     path('planning/<deelkamp_pk>/limieten/',
-         view_planning.WijzigLimietenView.as_view(),
+         view_limieten.WijzigLimietenView.as_view(),
          name='wijzig-limieten'),
 
     path('planning/<deelkamp_pk>/',

@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023-2025 Ramon van der Winkel.
+#  Copyright (c) 2023-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
 from django.utils import timezone
-from Competitie.models import CompetitieIndivKlasse, KampioenschapSporterBoog, CompetitieMutatie
+from Competitie.models import CompetitieIndivKlasse, CompetitieMutatie
 from Competitie.test_utils.tijdlijn import zet_competitie_fase_bk_klein, zet_competitie_fase_rk_wedstrijden
+from CompLaagBond.models import DeelnemerBK
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 import json
@@ -45,10 +46,10 @@ class TestCompLaagBondKleineKlassen(E2EHelpers, TestCase):
 
         # verplaats 4 van 6 sporters in 1111 (R O21 kl 2) naar 1110 (R O21 kl 1)
         cls.klasse1 = CompetitieIndivKlasse.objects.get(competitie=data.comp18, volgorde=1110)
-        for deelnemer in (KampioenschapSporterBoog
+        for deelnemer in (DeelnemerBK
                           .objects
                           .filter(indiv_klasse__volgorde=1111,
-                                  kampioenschap=data.deelkamp18_bk)
+                                  kamp=data.deelkamp18_bk)
                           .order_by('sporterboog__sporter__lid_nr'))[:4]:
             deelnemer.indiv_klasse = cls.klasse1
             deelnemer.save(update_fields=['indiv_klasse'])

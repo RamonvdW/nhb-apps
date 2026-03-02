@@ -12,9 +12,8 @@ from django.core.exceptions import PermissionDenied
 from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
-from Competitie.definities import DEEL_BK
-from Competitie.models import KampioenschapSporterBoog
-from CompKampioenschap.operations import maak_mutatie_kamp_aanmelden_indiv, maak_mutatie_kamp_afmelden_indiv
+from CompKampioenschap.operations import maak_mutatie_kamp_aanmelden_bk_indiv, maak_mutatie_kamp_afmelden_bk_indiv
+from CompLaagBond.models import DeelnemerBK
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie, rol_get_huidige
 from Site.core.background_sync import BackgroundSync
@@ -50,22 +49,21 @@ class WijzigStatusBkDeelnemerView(UserPassesTestMixin, TemplateView):
 
         try:
             deelnemer_pk = int(kwargs['deelnemer_pk'][:6])  # afkappen voor de veiligheid
-            deelnemer = (KampioenschapSporterBoog
+            deelnemer = (DeelnemerBK
                          .objects
-                         .select_related('kampioenschap',
-                                         'kampioenschap__functie',
-                                         'kampioenschap__competitie',
+                         .select_related('kamp',
+                                         'kamp__functie',
+                                         'kamp__competitie',
                                          'sporterboog__sporter',
                                          'bij_vereniging')
-                         .get(pk=deelnemer_pk,
-                              kampioenschap__deel=DEEL_BK))
-        except (ValueError, KampioenschapSporterBoog.DoesNotExist):
+                         .get(pk=deelnemer_pk))
+        except (ValueError, DeelnemerBK.DoesNotExist):
             raise Http404('Deelnemer niet gevonden')
 
-        if self.functie_nu != deelnemer.kampioenschap.functie:
+        if self.functie_nu != deelnemer.kamp.functie:
             raise PermissionDenied('Niet de beheerder')
 
-        comp = deelnemer.kampioenschap.competitie
+        comp = deelnemer.kamp.competitie
         comp.bepaal_fase()
         if comp.fase_indiv not in ('N', 'O', 'P'):
             raise Http404('Mag nog niet wijzigen')
@@ -88,7 +86,7 @@ class WijzigStatusBkDeelnemerView(UserPassesTestMixin, TemplateView):
             (reverse('CompBeheer:overzicht',
                      kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (reverse('CompLaagBond:bk-selectie',
-                     kwargs={'deelkamp_pk': deelnemer.kampioenschap.pk}), 'BK selectie'),
+                     kwargs={'deelkamp_pk': deelnemer.kamp.pk}), 'BK selectie'),
             (None, 'Wijzig sporter status')
         )
 
@@ -98,20 +96,19 @@ class WijzigStatusBkDeelnemerView(UserPassesTestMixin, TemplateView):
         """ wordt aangeroepen als de beheerder op de knop OPSLAAN drukt """
         try:
             deelnemer_pk = int(kwargs['deelnemer_pk'][:6])  # afkappen voor de veiligheid
-            deelnemer = (KampioenschapSporterBoog
+            deelnemer = (DeelnemerBK
                          .objects
-                         .select_related('kampioenschap',
-                                         'kampioenschap__functie',
-                                         'kampioenschap__competitie')
-                         .get(pk=deelnemer_pk,
-                              kampioenschap__deel=DEEL_BK))
-        except (ValueError, KampioenschapSporterBoog.DoesNotExist):
+                         .select_related('kamp',
+                                         'kamp__functie',
+                                         'kamp__competitie')
+                         .get(pk=deelnemer_pk))
+        except (ValueError, DeelnemerBK.DoesNotExist):
             raise Http404('Deelnemer niet gevonden')
 
-        if self.functie_nu != deelnemer.kampioenschap.functie:
+        if self.functie_nu != deelnemer.kamp.functie:
             raise PermissionDenied('Niet de beheerder')
 
-        comp = deelnemer.kampioenschap.competitie
+        comp = deelnemer.kamp.competitie
         comp.bepaal_fase()
         if comp.fase_indiv not in ('N', 'O', 'P'):
             raise Http404('Mag niet meer wijzigen')
@@ -129,13 +126,13 @@ class WijzigStatusBkDeelnemerView(UserPassesTestMixin, TemplateView):
                 # kan niet bevestigen zonder verenigingslid te zijn
                 raise Http404('Sporter moet lid zijn bij een vereniging')
 
-            maak_mutatie_kamp_aanmelden_indiv(deelnemer, door_str, snel == '1')
+            maak_mutatie_kamp_aanmelden_bk_indiv(deelnemer, door_str, snel == '1')
 
         elif afmelden == "1":
-            maak_mutatie_kamp_afmelden_indiv(deelnemer, door_str, snel == '1')
+            maak_mutatie_kamp_afmelden_bk_indiv(deelnemer, door_str, snel == '1')
 
         url = reverse('CompLaagBond:bk-selectie',
-                      kwargs={'deelkamp_pk': deelnemer.kampioenschap.pk})
+                      kwargs={'deelkamp_pk': deelnemer.kamp.pk})
 
         return HttpResponseRedirect(url)
 
@@ -167,17 +164,16 @@ class SporterWijzigStatusBkDeelnameView(UserPassesTestMixin, TemplateView):
 
         try:
             pk = int(pk)
-            deelnemer = (KampioenschapSporterBoog
+            deelnemer = (DeelnemerBK
                          .objects
-                         .select_related('kampioenschap',
-                                         'kampioenschap__competitie')
+                         .select_related('kamp',
+                                         'kamp__competitie')
                          .get(pk=pk,
-                              sporterboog__sporter=sporter,
-                              kampioenschap__deel=DEEL_BK))
-        except (ValueError, KampioenschapSporterBoog.DoesNotExist):
+                              sporterboog__sporter=sporter))
+        except (ValueError, DeelnemerBK.DoesNotExist):
             raise Http404('Deelnemer niet gevonden')
 
-        comp = deelnemer.kampioenschap.competitie
+        comp = deelnemer.kamp.competitie
         comp.bepaal_fase()
         if comp.fase_indiv not in ('N', 'O', 'P'):
             raise Http404('Mag niet wijzigen')
@@ -193,10 +189,10 @@ class SporterWijzigStatusBkDeelnameView(UserPassesTestMixin, TemplateView):
                 # kan niet bevestigen zonder verenigingslid te zijn
                 raise Http404('Je moet lid zijn bij een vereniging')
 
-            maak_mutatie_kamp_aanmelden_indiv(deelnemer, door_str, snel =='1')
+            maak_mutatie_kamp_aanmelden_bk_indiv(deelnemer, door_str, snel =='1')
 
         elif keuze == "N":
-            maak_mutatie_kamp_afmelden_indiv(deelnemer, door_str, snel =='1')
+            maak_mutatie_kamp_afmelden_bk_indiv(deelnemer, door_str, snel =='1')
 
         url = reverse('Sporter:profiel')
         return HttpResponseRedirect(url)

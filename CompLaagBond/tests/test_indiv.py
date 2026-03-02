@@ -7,8 +7,9 @@
 from django.test import TestCase
 from django.utils import timezone
 from Competitie.definities import DEELNAME_ONBEKEND
-from Competitie.models import KampioenschapIndivKlasseLimiet, KampioenschapSporterBoog, CompetitieMutatie
+from Competitie.models import CompetitieMutatie
 from Competitie.test_utils.tijdlijn import zet_competitie_fase_bk_wedstrijden, zet_competitie_fase_rk_wedstrijden
+from CompLaagBond.models import DeelnemerBK, CutBK
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 
@@ -49,21 +50,24 @@ class TestCompLaagBondIndiv(E2EHelpers, TestCase):
 
         # we hebben heel veel sporters in Recurve klasse 6
         # (waarschijnlijk omdat de klassengrenzen niet vastgesteld zijn)
-        kamp = KampioenschapSporterBoog.objects.filter(kampioenschap=data.deelkamp18_bk, volgorde=20).first()
-        grote_klasse = kamp.indiv_klasse
-        KampioenschapIndivKlasseLimiet(kampioenschap=data.deelkamp18_bk, indiv_klasse=grote_klasse, limiet=8).save()
+        deelnemer = DeelnemerBK.objects.filter(kamp=data.deelkamp18_bk, volgorde=20).first()
+        grote_klasse = deelnemer.indiv_klasse
+        CutBK.objects.create(
+                kamp=data.deelkamp18_bk,
+                indiv_klasse=grote_klasse,
+                limiet=8)
 
         # zet een sporter met kampioen label op 'deelname onzeker'
-        kampioen = KampioenschapSporterBoog.objects.exclude(kampioen_label='').order_by('pk')[0]
+        kampioen = DeelnemerBK.objects.exclude(kampioen_label='').order_by('pk').first()
         kampioen.deelname = DEELNAME_ONBEKEND
         kampioen.save(update_fields=['deelname'])
 
         # zet de competities in fase P
         zet_competitie_fase_bk_wedstrijden(data.comp18)
 
-        kamp = KampioenschapSporterBoog.objects.filter(kampioenschap=data.deelkamp18_bk).exclude(sporterboog__sporter__account=None).first()
-        cls.kampioen = kamp
-        cls.account_sporter = kamp.sporterboog.sporter.account
+        deelnemer = DeelnemerBK.objects.filter(kamp=data.deelkamp18_bk).exclude(sporterboog__sporter__account=None).first()
+        cls.deelnemer = deelnemer
+        cls.account_sporter = deelnemer.sporterboog.sporter.account
 
         s2 = timezone.now()
         d = s2 - s1
@@ -235,38 +239,38 @@ class TestCompLaagBondIndiv(E2EHelpers, TestCase):
         resp = self.client.post(self.url_wijzig_status_sporter)
         self.assert404(resp, 'Deelnemer niet gevonden')
 
-        resp = self.client.post(self.url_wijzig_status_sporter, data={'deelnemer': self.kampioen.pk})
+        resp = self.client.post(self.url_wijzig_status_sporter, data={'deelnemer': self.deelnemer.pk})
         self.assert_is_redirect(resp, '/sporter/')
         self.assertEqual(CompetitieMutatie.objects.count(), 0)
 
-        resp = self.client.post(self.url_wijzig_status_sporter, data={'deelnemer': self.kampioen.pk,
+        resp = self.client.post(self.url_wijzig_status_sporter, data={'deelnemer': self.deelnemer.pk,
                                                                       'snel': 1,
                                                                       'keuze': 'J'})
         self.assert_is_redirect(resp, '/sporter/')
         self.assertEqual(CompetitieMutatie.objects.count(), 1)
 
-        resp = self.client.post(self.url_wijzig_status_sporter, data={'deelnemer': self.kampioen.pk,
+        resp = self.client.post(self.url_wijzig_status_sporter, data={'deelnemer': self.deelnemer.pk,
                                                                       'snel': 1,
                                                                       'keuze': 'N'})
         self.assert_is_redirect(resp, '/sporter/')
         self.assertEqual(CompetitieMutatie.objects.count(), 2)
 
         # maak de sporter niet meer lid bij een vereniging
-        self.kampioen.refresh_from_db()
-        self.kampioen.bij_vereniging = None
-        self.kampioen.save(update_fields=['bij_vereniging'])
+        self.deelnemer.refresh_from_db()
+        self.deelnemer.bij_vereniging = None
+        self.deelnemer.save(update_fields=['bij_vereniging'])
 
-        resp = self.client.post(self.url_wijzig_status_sporter, data={'deelnemer': self.kampioen.pk,
+        resp = self.client.post(self.url_wijzig_status_sporter, data={'deelnemer': self.deelnemer.pk,
                                                                       'snel': 1,
                                                                       'keuze': 'J'})
         self.assert404(resp, 'Je moet lid zijn bij een vereniging')
         self.assertEqual(CompetitieMutatie.objects.count(), 2)
 
         # zet de competitie door, zodat aanmelden/afmelden niet meer mag
-        comp = self.kampioen.kampioenschap.competitie
+        comp = self.deelnemer.kamp.competitie
         zet_competitie_fase_rk_wedstrijden(comp)
 
-        resp = self.client.post(self.url_wijzig_status_sporter, data={'deelnemer': self.kampioen.pk})
+        resp = self.client.post(self.url_wijzig_status_sporter, data={'deelnemer': self.deelnemer.pk})
         self.assert404(resp, 'Mag niet wijzigen')
 
 

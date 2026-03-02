@@ -9,8 +9,9 @@ from django.conf import settings
 from django.urls import reverse
 from django.utils import timezone
 from django.core.management.base import BaseCommand
-from Competitie.definities import DEEL_RK, DEELNAME_ONBEKEND
-from Competitie.models import Competitie, Kampioenschap, CompetitieMatch, KampioenschapSporterBoog
+from Competitie.definities import DEELNAME_ONBEKEND
+from Competitie.models import Competitie, CompetitieMatch
+from CompLaagRayon.models import KampRK, DeelnemerRK
 from Functie.models import Functie
 from Mailer.operations import mailer_queue_email, render_email_template
 from Vereniging.models import Vereniging
@@ -59,17 +60,16 @@ class Command(BaseCommand):
         else:
             self.rk_kort = 'RK 25m 1pijl'
 
-        self.deelkamp = (Kampioenschap
+        self.deelkamp = (KampRK
                          .objects
                          .filter(competitie=self.competitie,
-                                 deel=DEEL_RK,
                                  rayon__rayon_nr=rayon)
                          .select_related('rayon',
                                          'competitie')
-                         .prefetch_related('rk_bk_matches')
+                         .prefetch_related('matches')
                          .first())
         if self.deelkamp:
-            self.stdout.write('[INFO] Kampioenschap: %s' % self.deelkamp)
+            self.stdout.write('[INFO] KampRK: %s' % self.deelkamp)
             self.rk_kort += ' rayon %s' % self.deelkamp.rayon.rayon_nr
 
     @functools.cache
@@ -82,7 +82,7 @@ class Command(BaseCommand):
     def _zoek_matches(self):
         # verzamel de match voor elke klasse
         for match in (self.deelkamp
-                      .rk_bk_matches
+                      .matches
                       .exclude(vereniging=None)
                       .select_related('vereniging',
                                       'locatie')
@@ -108,13 +108,13 @@ class Command(BaseCommand):
 
         # doorloop de sporters
         self.error_msgs = list()
-        for deelnemer in (KampioenschapSporterBoog
+        for deelnemer in (DeelnemerRK
                           .objects
-                          .filter(kampioenschap=self.deelkamp,
+                          .filter(kamp=self.deelkamp,
                                   deelname=DEELNAME_ONBEKEND)
                           .exclude(sporterboog__sporter__bij_vereniging=None)
                           .exclude(bevestiging_gevraagd_op__gt=cut_off_date)
-                          .select_related('kampioenschap__rayon',
+                          .select_related('kamp__rayon',
                                           'sporterboog__sporter',
                                           'sporterboog__sporter__account',
                                           'indiv_klasse')):
@@ -136,7 +136,7 @@ class Command(BaseCommand):
                 self.deelname_onbekend.append(tup)
         # for
 
-    def _stuur_email(self, deelnemer: KampioenschapSporterBoog, match: CompetitieMatch, url_deelnemerslijst):
+    def _stuur_email(self, deelnemer: DeelnemerRK, match: CompetitieMatch, url_deelnemerslijst):
         """ Stuur een e-mail """
 
         sporter = deelnemer.sporterboog.sporter

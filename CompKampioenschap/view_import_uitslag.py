@@ -10,10 +10,11 @@ from django.utils import timezone
 from django.shortcuts import render
 from django.views.generic import View
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.definities import DEEL_RK, DEEL_BK
-from Competitie.models import Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse, Kampioenschap
+from Competitie.models import Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse
 from CompKampioenschap.models import SheetStatus
 from CompKampioenschap.operations import importeer_sheet_uitslag_indiv
+from CompLaagBond.models import KampBK
+from CompLaagRayon.models import KampRK
 from CompUitslagen.operations import (maak_url_uitslag_rk_indiv, maak_url_uitslag_bk_indiv,
                                       maak_url_uitslag_rk_teams, maak_url_uitslag_bk_teams)
 from Functie.definities import Rol
@@ -50,12 +51,10 @@ class ImporteerUitslagIndivView(UserPassesTestMixin, View):
         klasse = CompetitieIndivKlasse.objects.select_related('boogtype').filter(pk=bestand.klasse_pk).first()
 
         if bestand.is_bk:
-            deelkamp = Kampioenschap.objects.filter(competitie=comp,
-                                                    deel=DEEL_BK).first()
+            deelkamp = KampBK.objects.filter(competitie=comp).first()
         else:
-            deelkamp = Kampioenschap.objects.filter(competitie=comp,
-                                                    deel=DEEL_RK,
-                                                    rayon__rayon_nr=bestand.rayon_nr).first()
+            deelkamp = KampRK.objects.filter(competitie=comp,
+                                             rayon__rayon_nr=bestand.rayon_nr).first()
 
         if not deelkamp or not klasse or not comp or klasse.competitie != comp:
             raise Http404('Kampioenschap niet gevonden')
@@ -114,12 +113,10 @@ class ImporteerUitslagTeamsView(UserPassesTestMixin, View):
         klasse = CompetitieTeamKlasse.objects.select_related('team_type').filter(pk=bestand.klasse_pk).first()
 
         if bestand.is_bk:
-            deelkamp = Kampioenschap.objects.filter(competitie=comp,
-                                                    deel=DEEL_BK).first()
+            deelkamp = KampBK.objects.filter(competitie=comp).first()
         else:
-            deelkamp = Kampioenschap.objects.filter(competitie=comp,
-                                                    deel=DEEL_RK,
-                                                    rayon__rayon_nr=bestand.rayon_nr).first()
+            deelkamp = KampRK.objects.filter(competitie=comp,
+                                             rayon__rayon_nr=bestand.rayon_nr).first()
 
         if not deelkamp or not klasse or not comp or klasse.competitie != comp:
             raise Http404('Kampioenschap niet gevonden')

@@ -6,9 +6,10 @@
 from django.urls import reverse
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.definities import DEEL_BK
-from Competitie.models import Competitie, CompetitieMatch, Kampioenschap, CompetitieIndivKlasse, CompetitieTeamKlasse
+from Competitie.models import Competitie, CompetitieMatch, CompetitieIndivKlasse, CompetitieTeamKlasse
 from CompKampioenschap.models import SheetStatus
+from CompLaagBond.models import KampBK
+from CompLaagRayon.models import KampRK
 from CompUitslagen.operations import (maak_url_uitslag_bk_indiv, maak_url_uitslag_bk_teams,
                                       maak_url_uitslag_rk_indiv, maak_url_uitslag_rk_teams)
 from Functie.definities import Rol
@@ -91,19 +92,32 @@ class StatusView(UserPassesTestMixin, TemplateView):
 
         werk = self._get_werk()
 
-        match_pk2deelkamp = dict()
-        for deelkamp in (Kampioenschap
+        match_pk2kamprk = dict()
+        for deelkamp in (KampRK
                          .objects
                          .select_related('competitie',
                                          'rayon')
-                         .prefetch_related('rk_bk_matches')):
+                         .prefetch_related('matches')):
 
-            match_pks = list(deelkamp.rk_bk_matches.all().values_list('pk', flat=True))
+            match_pks = list(deelkamp.matches.all().values_list('pk', flat=True))
             for pk in match_pks:
-                match_pk2deelkamp[pk] = deelkamp
+                match_pk2kamprk[pk] = deelkamp
             # for
         # for
-        all_match_pks = list(match_pk2deelkamp.keys())
+
+        match_pk2kampbk = dict()
+        for deelkamp in (KampBK
+                         .objects
+                         .select_related('competitie')
+                         .prefetch_related('matches')):
+
+            match_pks = list(deelkamp.matches.all().values_list('pk', flat=True))
+            for pk in match_pks:
+                match_pk2kampbk[pk] = deelkamp
+            # for
+        # for
+
+        all_match_pks = list(match_pk2kamprk.keys()) + list(match_pk2kampbk.keys())
 
         tup2status = dict()
         for status in (SheetStatus
@@ -127,7 +141,9 @@ class StatusView(UserPassesTestMixin, TemplateView):
                 status.bestand.fname = status.bestand.fname.replace('-jeugd', ' jeugd')
                 status.bestand.fname = status.bestand.fname.replace('-klasse', ' klasse')
 
-                tup = (bestand.begin_jaar, bestand.afstand, bestand.is_bk, bestand.is_teams, bestand.rayon_nr, bestand.klasse_pk)
+                tup = (bestand.begin_jaar, bestand.afstand,
+                       bestand.is_bk, bestand.is_teams,
+                       bestand.rayon_nr, bestand.klasse_pk)
                 tup2status[tup] = status
         # for
 
@@ -145,14 +161,17 @@ class StatusView(UserPassesTestMixin, TemplateView):
                                 'vereniging__regio__rayon_nr',
                                 'vereniging__ver_nr')):
 
-            deelkamp = match_pk2deelkamp[match.pk]
+            deelkamp = match_pk2kamprk.get(match.pk, None)
+            if deelkamp:
+                is_bk = False
+                rayon_nr = deelkamp.rayon.rayon_nr
+            else:
+                deelkamp = match_pk2kampbk.get(match.pk, None)
+                is_bk = True
+                rayon_nr = 0
+
             comp = deelkamp.competitie
             afstand = int(comp.afstand)
-            is_bk = deelkamp.deel == DEEL_BK
-            if is_bk:
-                rayon_nr = 0
-            else:
-                rayon_nr = deelkamp.rayon.rayon_nr
 
             match.status_list = list()
 

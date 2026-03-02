@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -11,8 +11,9 @@ from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.definities import DEEL_RK, DEELNAME_JA, DEELNAME_NEE
-from Competitie.models import Competitie, CompetitieTeamKlasse, KampioenschapTeam, Kampioenschap
+from Competitie.definities import DEELNAME_JA, DEELNAME_NEE
+from Competitie.models import Competitie, CompetitieTeamKlasse
+from CompLaagRayon.models import KampRK, TeamRK
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
 from Geo.models import Rayon
@@ -63,10 +64,9 @@ class RayonTeamsTemplateView(TemplateView):
             if subset == 'alle':
                 # alle rayons
                 context['rayon'] = 'Alle'
-                deelkamp_pks = (Kampioenschap
+                deelkamp_pks = (KampRK
                                 .objects
-                                .filter(competitie=comp,
-                                        deel=DEEL_RK)
+                                .filter(competitie=comp)
                                 .values_list('pk', flat=True))
             else:
                 # alleen het gekozen rayon
@@ -76,7 +76,7 @@ class RayonTeamsTemplateView(TemplateView):
                 except (ValueError, Rayon.DoesNotExist):
                     raise Http404('Selectie wordt niet ondersteund')
 
-                deelkamp_pks = (Kampioenschap
+                deelkamp_pks = (KampRK
                                 .objects
                                 .filter(competitie=comp,
                                         rayon=context['rayon'])
@@ -104,12 +104,11 @@ class RayonTeamsTemplateView(TemplateView):
             # RKO mode
             try:
                 deelkamp_pk = int(kwargs['deelkamp_pk'][:6])    # afkappen voor de veiligheid
-                deelkamp = (Kampioenschap
+                deelkamp = (KampRK
                             .objects
                             .select_related('competitie')
-                            .get(pk=deelkamp_pk,
-                                 deel=DEEL_RK))
-            except (ValueError, Kampioenschap.DoesNotExist):
+                            .get(pk=deelkamp_pk))
+            except (ValueError, KampRK.DoesNotExist):
                 raise Http404('Kampioenschap niet gevonden')
 
             if deelkamp.functie != self.functie_nu:
@@ -167,15 +166,15 @@ class RayonTeamsTemplateView(TemplateView):
         else:
             tel_dit = 'gekoppelde_leden'
 
-        rk_teams = (KampioenschapTeam
+        rk_teams = (TeamRK
                     .objects
                     .select_related('vereniging',
                                     'vereniging__regio',
                                     'team_type',
                                     'team_klasse',
-                                    'kampioenschap')
+                                    'kamp')
                     .exclude(team_klasse=None)
-                    .filter(kampioenschap__in=deelkamp_pks)
+                    .filter(kamp__in=deelkamp_pks)
                     .annotate(sporter_count=Count(tel_dit))
                     .order_by('team_klasse__volgorde',
                               '-aanvangsgemiddelde',
@@ -218,13 +217,13 @@ class RayonTeamsTemplateView(TemplateView):
         context['rk_teams'] = klasse2teams
 
         # zoek de teams die niet 'af' zijn
-        rk_teams = (KampioenschapTeam
+        rk_teams = (TeamRK
                     .objects
                     .select_related('vereniging',
                                     'vereniging__regio',
                                     'team_type',
-                                    'kampioenschap')
-                    .filter(kampioenschap__in=deelkamp_pks,
+                                    'kamp')
+                    .filter(kamp__in=deelkamp_pks,
                             team_klasse=None)
                     .annotate(sporter_count=Count(tel_dit))
                     .order_by('team_type__volgorde',

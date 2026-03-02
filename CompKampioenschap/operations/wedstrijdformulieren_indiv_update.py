@@ -8,9 +8,10 @@
 
 from django.utils import timezone
 from django.templatetags.l10n import localize
-from Competitie.definities import DEEL_BK, DEEL_RK, DEELNAME_NEE, DEELNAME2STR
-from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieMatch,
-                               Kampioenschap, KampioenschapIndivKlasseLimiet, KampioenschapSporterBoog)
+from Competitie.definities import DEELNAME_NEE, DEELNAME2STR
+from Competitie.models import Competitie, CompetitieIndivKlasse, CompetitieMatch
+from CompLaagBond.models import KampBK, DeelnemerBK, CutBK
+from CompLaagRayon.models import KampRK, DeelnemerRK, CutRK
 from Geo.models import Rayon
 from GoogleDrive.models import Bestand
 from GoogleDrive.operations import StorageGoogleSheet
@@ -55,7 +56,7 @@ class UpdateIndivWedstrijdFormulier:
 
         self.klasse = None
         self.haalbare_titel = 'Kampioen'            # wordt bijgewerkt in laad_klasse
-        self.kampioenschap = None
+        self.deelkamp : KampRK | KampBK | None = None
         self.limiet = 0                             # maximaal aantal deelnemers
         self.aantal_ingeschreven = 0
         self._max_naar_finales = 0
@@ -78,20 +79,19 @@ class UpdateIndivWedstrijdFormulier:
 
         competitie = self.klasse.competitie
         if bestand.is_bk:
-            self.kampioenschap = Kampioenschap.objects.filter(competitie=competitie, deel=DEEL_BK).first()
+            self.deelkamp = KampBK.objects.filter(competitie=competitie).first()
+            qset_deelnemers = DeelnemerBK.objects.filter(kamp=self.deelkamp)
+            limiet = CutBK.objects.filter(kamp=self.deelkamp, indiv_klasse=self.klasse).first()
         else:
-            self.kampioenschap = Kampioenschap.objects.filter(competitie=competitie, deel=DEEL_RK,
-                                                              rayon__rayon_nr=bestand.rayon_nr).first()
+            self.deelkamp = KampRK.objects.filter(competitie=competitie,
+                                                  rayon__rayon_nr=bestand.rayon_nr).first()
+            qset_deelnemers = DeelnemerRK.objects.filter(kamp=self.deelkamp)
+            limiet = CutRK.objects.filter(kamp=self.deelkamp, indiv_klasse=self.klasse).first()
 
-        self.aantal_ingeschreven = KampioenschapSporterBoog.objects.filter(kampioenschap=self.kampioenschap,
-                                                                           indiv_klasse=self.klasse).count()
+        # neem de limiet aan, of gebruik de default
+        self.limiet = limiet.limiet if limiet else 24
 
-        # haal de limiet op (maximum aantal deelnemers)
-        self.limiet = 24
-        lim = KampioenschapIndivKlasseLimiet.objects.filter(kampioenschap=self.kampioenschap,
-                                                            indiv_klasse=self.klasse).first()
-        if lim:
-            self.limiet = lim.limiet
+        self.aantal_ingeschreven = qset_deelnemers.filter(indiv_klasse=self.klasse).count()
 
         # pas de range aan zodat we niet onnodig veel data hoeven te sturen
         self.aantal_regels_reserves = self.aantal_ingeschreven      # iedereen kan afgemeld zijn
@@ -149,10 +149,13 @@ class UpdateIndivWedstrijdFormulier:
         deelnemers = list()
         afgemeld = list()
 
-        for deelnemer in (KampioenschapSporterBoog
-                          .objects
-                          .filter(kampioenschap=self.kampioenschap,
-                                  indiv_klasse=self.klasse)
+        if isinstance(self.deelkamp, KampRK):
+            qset_deelnemers = DeelnemerRK.objects.filter(kamp=self.deelkamp)
+        else:
+            qset_deelnemers = DeelnemerBK.objects.filter(kamp=self.deelkamp)
+
+        for deelnemer in (qset_deelnemers
+                          .filter(indiv_klasse=self.klasse)
                           .exclude(bij_vereniging=None)
                           .select_related('sporterboog__sporter',
                                           'bij_vereniging',

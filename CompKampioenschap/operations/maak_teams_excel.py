@@ -7,8 +7,10 @@
 from django.conf import settings
 from django.utils import timezone
 from django.http import HttpResponse
-from Competitie.definities import DEEL_RK, DEELNAME_JA
-from Competitie.models import Kampioenschap, CompetitieTeamKlasse, CompetitieMatch, KampioenschapSporterBoog, KampioenschapTeam
+from Competitie.definities import DEELNAME_JA
+from Competitie.models import CompetitieTeamKlasse, CompetitieMatch
+from CompLaagBond.models import KampBK, TeamBK
+from CompLaagRayon.models import KampRK, DeelnemerRK, TeamRK
 from Sporter.models import SporterVoorkeuren
 from tempfile import NamedTemporaryFile
 from copy import copy
@@ -27,7 +29,7 @@ class MaakTeamsExcel:
 
     """ Maak en kopie van de teams excel template en vul deze met een deelnemerslijst """
 
-    def __init__(self, deelkamp: Kampioenschap,
+    def __init__(self, deelkamp: KampRK | KampBK,
                        team_klasse: CompetitieTeamKlasse,
                        match: CompetitieMatch):
         """
@@ -35,14 +37,16 @@ class MaakTeamsExcel:
             team_klasse,
             match:       Voor deze wedstrijd de excel vullen.
         """
-        self.match = match
+        self.deelkamp : KampRK | KampBK = deelkamp
+        self.is_rk = isinstance(deelkamp, KampRK)
+
+        self.match : CompetitieMatch = match
         self.team_klasse = team_klasse
-        self.deelkamp = deelkamp
         self.klasse_str = self.team_klasse.beschrijving
         self.vastgesteld = timezone.localtime(timezone.now())
 
         comp = deelkamp.competitie
-        if deelkamp.deel == DEEL_RK:
+        if self.is_rk:
             rayon = deelkamp.rayon
             self.titel = 'RK Teams Rayon %s, %s' % (rayon.rayon_nr, comp.beschrijving)
             self.deelkamp_titel = 'Rayonkampioen'
@@ -79,11 +83,14 @@ class MaakTeamsExcel:
 
         ws['B4'] = self.match.datum_wanneer.strftime('%Y-%m-%d')
 
-        teams = (KampioenschapTeam
-                 .objects
-                 .filter(kampioenschap=self.deelkamp,
-                         team_klasse=self.team_klasse.pk,
-                         deelname=DEELNAME_JA)              # reserve teams staan nog op ?
+        if self.is_rk:
+            qset = TeamRK.objects.filter(kamp=self.deelkamp)
+        else:
+            qset = TeamBK.objects.filter(kamp=self.deelkamp)
+
+        teams = (qset
+                 .filter(team_klasse=self.team_klasse.pk,
+                         deelname=DEELNAME_JA)              # reserve teams staan nog op ONBEKEND
                  .select_related('vereniging',
                                  'vereniging__regio')
                  .prefetch_related('gekoppelde_leden')
@@ -220,9 +227,9 @@ class MaakTeamsExcel:
 
         row_nr = 16
         prev_ver = None
-        for deelnemer in (KampioenschapSporterBoog
+        for deelnemer in (DeelnemerRK
                           .objects
-                          .filter(kampioenschap=self.deelkamp,
+                          .filter(kamp__competitie=self.deelkamp.competitie,
                                   bij_vereniging__ver_nr__in=self.deelnemers_ver_nrs,
                                   sporterboog__boogtype__pk__in=boog_pks)       # filter op toegestane boogtypen
                           .select_related('bij_vereniging__regio',
@@ -320,7 +327,7 @@ class MaakTeamsExcel:
         template_fpath = os.path.join(settings.INSTALL_PATH, TEMPLATE_FPATH)
 
         # bepaal de naam van het terug te geven bestand
-        if self.deelkamp.deel == DEEL_RK:
+        if self.is_rk:
             fname = "rk-programma_teams-rayon%s_%s.xlsx" % (self.deelkamp.rayon.rayon_nr,
                                                             self.klasse_str.lower().replace(' ', '-'))
         else:

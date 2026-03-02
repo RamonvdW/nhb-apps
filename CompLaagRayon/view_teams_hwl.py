@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2025 Ramon van der Winkel.
+#  Copyright (c) 2021-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -12,8 +12,8 @@ from django.views.generic import TemplateView
 from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.models import TeamType
-from Competitie.definities import DEEL_RK
-from Competitie.models import RegiocompetitieSporterBoog, Kampioenschap, KampioenschapSporterBoog, KampioenschapTeam
+from Competitie.models import RegiocompetitieSporterBoog
+from CompLaagRayon.models import KampRK, DeelnemerRK, TeamRK
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
 from Score.definities import AG_NUL
@@ -88,19 +88,18 @@ class TeamsRkView(UserPassesTestMixin, TemplateView):
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
         return self.rol_nu == Rol.ROL_HWL
 
-    def _get_deelkamp_rk(self, deelkamp_pk) -> Kampioenschap:
+    def _get_deelkamp_rk(self, deelkamp_pk) -> KampRK:
         # haal de gevraagde kampioenschap op
         try:
             deelkamp_pk = int(deelkamp_pk[:6])  # afkappen voor de veiligheid
-            deelkamp = (Kampioenschap
+            deelkamp = (KampRK
                         .objects
                         .select_related('competitie',
                                         'rayon')
                         .get(pk=deelkamp_pk,
                              is_afgesloten=False,
-                             deel=DEEL_RK,
                              rayon=self.functie_nu.vereniging.regio.rayon))
-        except (ValueError, Kampioenschap.DoesNotExist):
+        except (ValueError, KampRK.DoesNotExist):
             raise Http404('Kampioenschap niet gevonden')
 
         comp = deelkamp.competitie
@@ -120,7 +119,7 @@ class TeamsRkView(UserPassesTestMixin, TemplateView):
 
         return deelkamp
 
-    def _get_rk_teams(self, deelkamp: Kampioenschap, is_vastgesteld):
+    def _get_rk_teams(self, deelkamp: KampRK, is_vastgesteld):
 
         if deelkamp.competitie.is_indoor():
             aantal_pijlen = 30
@@ -129,23 +128,23 @@ class TeamsRkView(UserPassesTestMixin, TemplateView):
 
         if deelkamp.open_inschrijving:
             # open inschrijving RK
-            rk_teams = (KampioenschapTeam
+            rk_teams = (TeamRK
                         .objects
+                        .filter(kamp=deelkamp,
+                                vereniging=self.functie_nu.vereniging)
                         .select_related('vereniging',
                                         'team_type')
-                        .filter(kampioenschap=deelkamp,
-                                vereniging=self.functie_nu.vereniging)
                         .annotate(schutters_count=Count('tijdelijke_leden'))
                         .order_by('volg_nr'))
 
         else:
             # team deelnemers bestaat uit gerechtigde RK deelnemers
-            rk_teams = (KampioenschapTeam
+            rk_teams = (TeamRK
                         .objects
+                        .filter(kamp=deelkamp,
+                                vereniging=self.functie_nu.vereniging)
                         .select_related('vereniging',
                                         'team_type')
-                        .filter(kampioenschap=deelkamp,
-                                vereniging=self.functie_nu.vereniging)
                         .annotate(schutters_count=Count('gekoppelde_leden'))
                         .order_by('volg_nr'))
 
@@ -214,19 +213,18 @@ class WijzigRKTeamsView(UserPassesTestMixin, TemplateView):
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
         return self.functie_nu and self.rol_nu == Rol.ROL_HWL
 
-    def _get_deelkamp_rk(self, deelkamp_pk) -> Kampioenschap:
+    def _get_deelkamp_rk(self, deelkamp_pk) -> KampRK:
         # haal de gevraagde kampioenschap op
         try:
             deelkamp_pk = int(deelkamp_pk[:6])     # afkappen voor de veiligheid
-            deelkamp = (Kampioenschap
+            deelkamp = (KampRK
                         .objects
                         .select_related('competitie',
                                         'rayon')
                         .get(pk=deelkamp_pk,
                              is_afgesloten=False,
-                             deel=DEEL_RK,
                              rayon=self.functie_nu.vereniging.regio.rayon))
-        except (ValueError, Kampioenschap.DoesNotExist):
+        except (ValueError, KampRK.DoesNotExist):
             raise Http404('Kampioenschap niet gevonden')
 
         comp = deelkamp.competitie
@@ -261,16 +259,16 @@ class WijzigRKTeamsView(UserPassesTestMixin, TemplateView):
 
         try:
             rk_team_pk = int(kwargs['rk_team_pk'][:6])      # afkappen voor de veiligheid
-            rk_team = (KampioenschapTeam
+            rk_team = (TeamRK
                        .objects
                        .get(pk=rk_team_pk,
-                            kampioenschap=deelkamp,
+                            kamp=deelkamp,
                             vereniging=ver))
-        except (ValueError, KampioenschapTeam.DoesNotExist):
+        except (ValueError, TeamRK.DoesNotExist):
             raise Http404('Team niet gevonden of niet van jouw vereniging')
         except KeyError:
             # dit is een nieuw rk_team
-            rk_team = KampioenschapTeam(
+            rk_team = TeamRK(
                             pk=0,
                             vereniging=self.functie_nu.vereniging,
                             team_type=teamtype_default)
@@ -316,9 +314,9 @@ class WijzigRKTeamsView(UserPassesTestMixin, TemplateView):
 
         if rk_team_pk == 0:
             # nieuw rk_team
-            volg_nrs = (KampioenschapTeam
+            volg_nrs = (TeamRK
                         .objects
-                        .filter(kampioenschap=deelkamp,
+                        .filter(kamp=deelkamp,
                                 vereniging=ver)
                         .values_list('volg_nr', flat=True))
             volg_nrs = list(volg_nrs)
@@ -335,8 +333,8 @@ class WijzigRKTeamsView(UserPassesTestMixin, TemplateView):
             except (IndexError, TeamType.DoesNotExist):
                 raise Http404('Onbekend team type')
 
-            rk_team = KampioenschapTeam(
-                            kampioenschap=deelkamp,
+            rk_team = TeamRK(
+                            kamp=deelkamp,
                             vereniging=ver,
                             volg_nr=next_nr,
                             team_type=team_type,
@@ -350,12 +348,12 @@ class WijzigRKTeamsView(UserPassesTestMixin, TemplateView):
                           kwargs={'rk_team_pk': rk_team.pk})
         else:
             try:
-                rk_team = (KampioenschapTeam
+                rk_team = (TeamRK
                            .objects
                            .select_related('team_type')
                            .get(pk=rk_team_pk,
-                                kampioenschap=deelkamp))
-            except KampioenschapTeam.DoesNotExist:
+                                kamp=deelkamp))
+            except TeamRK.DoesNotExist:
                 raise Http404('Team bestaat niet')
 
             if rk_team.vereniging != self.functie_nu.vereniging:
@@ -422,14 +420,14 @@ class RKTeamsKoppelLedenView(UserPassesTestMixin, TemplateView):
         # zoek het rk_team erbij en controleer dat deze bij de vereniging van de beheerder hoort
         try:
             rk_team_pk = int(kwargs['rk_team_pk'][:6])      # afkappen voor de veiligheid
-            rk_team = (KampioenschapTeam
+            rk_team = (TeamRK
                        .objects
-                       .select_related('kampioenschap',
-                                       'kampioenschap__competitie',
+                       .select_related('kamp',
+                                       'kamp__competitie',
                                        'team_type')
                        .prefetch_related('team_type__boog_typen')
                        .get(pk=rk_team_pk))
-        except (ValueError, KampioenschapTeam.DoesNotExist):
+        except (ValueError, TeamRK.DoesNotExist):
             raise Http404('Team niet gevonden')
 
         if self.rol_nu == Rol.ROL_HWL:
@@ -441,7 +439,7 @@ class RKTeamsKoppelLedenView(UserPassesTestMixin, TemplateView):
 
         context['rk_team'] = rk_team
 
-        deelkamp = rk_team.kampioenschap
+        deelkamp = rk_team.kamp
 
         comp = deelkamp.competitie
         comp.bepaal_fase()
@@ -469,7 +467,7 @@ class RKTeamsKoppelLedenView(UserPassesTestMixin, TemplateView):
 
             pks = rk_team.tijdelijke_leden.values_list('pk', flat=True)
 
-            bezet_pks = (KampioenschapTeam
+            bezet_pks = (TeamRK
                          .objects
                          .filter(vereniging=ver)
                          .exclude(pk=rk_team_pk)
@@ -507,17 +505,17 @@ class RKTeamsKoppelLedenView(UserPassesTestMixin, TemplateView):
             # alleen gerechtigde RK deelnemers mogen gekozen worden
             pks = rk_team.gekoppelde_leden.values_list('pk', flat=True)
 
-            bezet_pks = (KampioenschapTeam
+            bezet_pks = (TeamRK
                          .objects
-                         .filter(kampioenschap=deelkamp,
+                         .filter(kamp=deelkamp,
                                  vereniging=ver)
                          .exclude(pk=rk_team_pk)
                          .prefetch_related('gekoppelde_leden')
                          .values_list('gekoppelde_leden__pk', flat=True))
 
-            deelnemers = (KampioenschapSporterBoog
+            deelnemers = (DeelnemerRK
                           .objects
-                          .filter(kampioenschap=deelkamp,
+                          .filter(kamp=deelkamp,
                                   bij_vereniging=ver,
                                   sporterboog__boogtype__in=boog_pks)
                           .select_related('sporterboog',
@@ -572,13 +570,13 @@ class RKTeamsKoppelLedenView(UserPassesTestMixin, TemplateView):
         # zoek het team erbij en controleer dat deze bij de vereniging van de beheerder hoort
         try:
             rk_team_pk = int(kwargs['rk_team_pk'][:6])      # afkappen voor de veiligheid
-            rk_team = (KampioenschapTeam
+            rk_team = (TeamRK
                        .objects
-                       .select_related('kampioenschap',
+                       .select_related('kamp',
                                        'team_type')
                        .prefetch_related('team_type__boog_typen')
                        .get(pk=rk_team_pk))
-        except (ValueError, KampioenschapTeam.DoesNotExist):
+        except (ValueError, TeamRK.DoesNotExist):
             raise Http404('Team niet gevonden')
 
         if self.rol_nu == Rol.ROL_HWL:
@@ -588,7 +586,7 @@ class RKTeamsKoppelLedenView(UserPassesTestMixin, TemplateView):
         else:
             ver = rk_team.vereniging
 
-        deelkamp = rk_team.kampioenschap
+        deelkamp = rk_team.kamp
 
         comp = deelkamp.competitie
         comp.bepaal_fase()
@@ -601,9 +599,9 @@ class RKTeamsKoppelLedenView(UserPassesTestMixin, TemplateView):
         boog_pks = rk_team.team_type.boog_typen.values_list('pk', flat=True)
 
         if open_inschrijving:
-            bezet_pks = (KampioenschapTeam
+            bezet_pks = (TeamRK
                          .objects
-                         .filter(kampioenschap=deelkamp,
+                         .filter(kamp=deelkamp,
                                  vereniging=ver)
                          .exclude(pk=rk_team_pk)
                          .prefetch_related('tijdelijke_leden')
@@ -617,17 +615,17 @@ class RKTeamsKoppelLedenView(UserPassesTestMixin, TemplateView):
                       .values_list('pk', flat=True))
 
         else:
-            bezet_pks = (KampioenschapTeam
+            bezet_pks = (TeamRK
                          .objects
-                         .filter(kampioenschap=deelkamp,
+                         .filter(kamp=deelkamp,
                                  vereniging=ver)
                          .exclude(pk=rk_team_pk)
                          .prefetch_related('gekoppelde_leden')
                          .values_list('gekoppelde_leden__pk', flat=True))
 
-            ok_pks = (KampioenschapSporterBoog
+            ok_pks = (DeelnemerRK
                       .objects
-                      .filter(kampioenschap=deelkamp,
+                      .filter(kamp=deelkamp,
                               bij_vereniging=ver,
                               sporterboog__boogtype__in=boog_pks)
                       .values_list('pk', flat=True))

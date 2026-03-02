@@ -92,7 +92,7 @@ class TestCompKampioenschapWfStatus(E2EHelpers, TestCase):
                                     tijd_begin_wedstrijd='02:22',
                                     vereniging=ver)
         match.indiv_klassen.add(indiv_klasse)
-        deelkamp.rk_bk_matches.add(match)
+        deelkamp.matches.add(match)
 
         deelkamp = self.testdata.deelkamp25_bk
         match = CompetitieMatch.objects.create(
@@ -100,7 +100,7 @@ class TestCompKampioenschapWfStatus(E2EHelpers, TestCase):
                                     beschrijving='test 2',
                                     datum_wanneer='2022-02-23',
                                     tijd_begin_wedstrijd='02:22')
-        deelkamp.rk_bk_matches.add(match)
+        deelkamp.matches.add(match)
         match.indiv_klassen.add(indiv_klasse)
 
     def test_anon(self):

@@ -84,7 +84,7 @@ class TestCompKampioenschapImportUitslag(E2EHelpers, TestCase):
                                     tijd_begin_wedstrijd='02:22',
                                     vereniging=ver)
         match.indiv_klassen.add(indiv_klasse18)
-        deelkamp.rk_bk_matches.add(match)
+        deelkamp.matches.add(match)
 
         deelkamp = self.testdata.deelkamp25_bk
         match = CompetitieMatch.objects.create(
@@ -94,7 +94,7 @@ class TestCompKampioenschapImportUitslag(E2EHelpers, TestCase):
                                     tijd_begin_wedstrijd='02:22')
         match.indiv_klassen.add(indiv_klasse25)
         match.team_klassen.add(team_klasse25)
-        deelkamp.rk_bk_matches.add(match)
+        deelkamp.matches.add(match)
 
         bestand3 = Bestand.objects.create(
                                     begin_jaar=self.testdata.comp25.begin_jaar,

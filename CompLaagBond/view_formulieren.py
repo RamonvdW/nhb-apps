@@ -7,7 +7,6 @@
 from django.http import Http404
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.definities import DEEL_BK
 from Competitie.models import CompetitieMatch, CompetitieTeamKlasse
 from CompKampioenschap.operations import MaakTeamsExcel
 from Functie.definities import Rol
@@ -52,7 +51,7 @@ class FormulierBkTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
         except (ValueError, CompetitieTeamKlasse.DoesNotExist):
             raise Http404('Klasse niet gevonden')
 
-        deelkamp = match.kampioenschap_set.filter(deel=DEEL_BK).first()
+        deelkamp = match.kampbk_set.first()
         if not deelkamp:
             raise Http404('Geen kampioenschap')
 

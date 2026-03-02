@@ -6,8 +6,9 @@
 
 from django.test import TestCase
 from Competitie.definities import DEELNAME_NEE
-from Competitie.models import KampioenschapSporterBoog
 from Competitie.test_utils.tijdlijn import zet_competitie_fase_bk_wedstrijden
+from CompLaagBond.models import DeelnemerBK
+from CompLaagRayon.models import DeelnemerRK
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 
@@ -34,43 +35,59 @@ class TestCompLaagBondCliImportUitslagBkIndiv(E2EHelpers, TestCase):
         data.maak_rk_deelnemers(25, ver_nr, cls.regio_nr)
         data.maak_rk_deelnemers(18, ver_nr, cls.regio_nr)
 
+        data.maak_bk_deelnemers(25)
+        data.maak_bk_deelnemers(18)
+
         # meld een paar deelnemers af
-        for deelnemer in KampioenschapSporterBoog.objects.filter(kampioenschap__competitie__afstand='25',
-                                                                 sporterboog__sporter__lid_nr__in=(301826, 301831)):
+        for deelnemer in DeelnemerBK.objects.filter(kamp__competitie__afstand='25',
+                                                    sporterboog__sporter__lid_nr__in=(301826, 301831)):
             deelnemer.deelname = DEELNAME_NEE
             deelnemer.save(update_fields=['deelname'])
         # for
 
-        deelnemer = KampioenschapSporterBoog.objects.get(kampioenschap__competitie__afstand='18',
-                                                         sporterboog__sporter__lid_nr=301826,
-                                                         indiv_klasse__boogtype__afkorting='C')
-        deelnemer.deelname = DEELNAME_NEE
-        deelnemer.save(update_fields=['deelname'])
+        DeelnemerBK.objects.filter(kamp__competitie__afstand='18',
+                                   sporterboog__sporter__lid_nr=301826,
+                                   indiv_klasse__boogtype__afkorting='C').update(deelname=DEELNAME_NEE)
 
         # geef een sporter alvast een rank
-        deelnemer = KampioenschapSporterBoog.objects.get(kampioenschap__competitie__afstand='18',
-                                                         sporterboog__sporter__lid_nr=301842)
-        deelnemer.result_rank = 5
-        deelnemer.save(update_fields=['result_rank'])
+        DeelnemerBK.objects.filter(kamp__competitie__afstand='18',
+                                   sporterboog__sporter__lid_nr=301842).update(result_rank=5)
 
-        deelnemer = KampioenschapSporterBoog.objects.get(kampioenschap__competitie__afstand='25',
-                                                         sporterboog__sporter__lid_nr=301842)
-        cls.deelnemer_25a = deelnemer
+        cls.deelnemer_25a = DeelnemerBK.objects.get(kamp__competitie__afstand='25',
+                                                    sporterboog__sporter__lid_nr=301842)
 
-        deelnemer = KampioenschapSporterBoog.objects.get(kampioenschap__competitie__afstand='25',
-                                                         sporterboog__sporter__lid_nr=301844)
-        cls.deelnemer_25b = deelnemer
+        cls.deelnemer_25b = DeelnemerBK.objects.get(kamp__competitie__afstand='25',
+                                                    sporterboog__sporter__lid_nr=301844)
 
         # verander de RK deelnemers in BK deelnemers
-        for deelnemer in KampioenschapSporterBoog.objects.filter(kampioenschap__competitie__afstand='18'):
-            deelnemer.kampioenschap = data.deelkamp18_bk
-            deelnemer.save(update_fields=['kampioenschap'])
+        bulk = list()
+        for deelnemer in DeelnemerRK.objects.filter(kamp__competitie__afstand='18'):
+            bulk.append(
+                DeelnemerBK(
+                    kamp=data.deelkamp18_bk,
+                    sporterboog=deelnemer.sporterboog,
+                    indiv_klasse=deelnemer.indiv_klasse,
+                    indiv_klasse_volgende_ronde=deelnemer.indiv_klasse_volgende_ronde,
+                    bij_vereniging=deelnemer.bij_vereniging,
+                    gemiddelde=deelnemer.gemiddelde
+                )
+            )
         # for
 
-        for deelnemer in KampioenschapSporterBoog.objects.filter(kampioenschap__competitie__afstand='25'):
-            deelnemer.kampioenschap = data.deelkamp25_bk
-            deelnemer.save(update_fields=['kampioenschap'])
+        for deelnemer in DeelnemerRK.objects.filter(kamp__competitie__afstand='25'):
+            bulk.append(
+                DeelnemerBK(
+                    kamp=data.deelkamp25_bk,
+                    sporterboog=deelnemer.sporterboog,
+                    indiv_klasse=deelnemer.indiv_klasse,
+                    indiv_klasse_volgende_ronde=deelnemer.indiv_klasse_volgende_ronde,
+                    bij_vereniging=deelnemer.bij_vereniging,
+                    gemiddelde=deelnemer.gemiddelde
+                )
+            )
         # for
+        DeelnemerBK.objects.bulk_create(bulk)
+        del bulk
 
         # zet de competities in fase P
         zet_competitie_fase_bk_wedstrijden(data.comp18)

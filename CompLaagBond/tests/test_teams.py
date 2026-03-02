@@ -7,9 +7,9 @@
 from django.test import TestCase
 from django.utils import timezone
 from Competitie.definities import DEELNAME_JA, DEELNAME_NEE, DEELNAME_ONBEKEND
-from Competitie.models import KampioenschapTeam
 from Competitie.test_utils.tijdlijn import (zet_competitie_fase_bk_wedstrijden, zet_competitie_fase_bk_prep,
                                             zet_competitie_fase_rk_wedstrijden)
+from CompLaagBond.models import TeamBK
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 
@@ -90,7 +90,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         self.assert404(resp, 'Verkeerde competitie fase')
 
         # pas een paar team statussen aan
-        teams = list(KampioenschapTeam.objects.filter(kampioenschap=self.testdata.deelkamp18_bk))
+        teams = list(TeamBK.objects.filter(kamp=self.testdata.deelkamp18_bk))
         teams[0].deelname = DEELNAME_NEE
         teams[0].save(update_fields=['deelname'])
 
@@ -113,7 +113,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wissel_naar_functie(self.testdata.comp18_functie_bko)
 
-        team = KampioenschapTeam.objects.filter(kampioenschap=self.testdata.deelkamp18_bk).first()
+        team = TeamBK.objects.filter(kamp=self.testdata.deelkamp18_bk).first()
         team.deelname = DEELNAME_ONBEKEND
         team.is_reserve = True
         team.save(update_fields=['deelname', 'is_reserve'])
@@ -131,33 +131,33 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         # geen wijziging
         resp = self.client.post(self.url_wijzig_status_bk_team, data={'team_pk': team.pk})
         self.assert_is_redirect(resp, self.url_lijst_bk_teams % self.testdata.deelkamp18_bk.pk)
-        team = KampioenschapTeam.objects.get(pk=team.pk)
+        team.refresh_from_db()
         self.assertEqual(team.deelname, DEELNAME_ONBEKEND)
         self.assertTrue(team.is_reserve)
 
         # zet NEE
         resp = self.client.post(self.url_wijzig_status_bk_team, data={'team_pk': team.pk, 'status': 'afmelden'})
         self.assert_is_redirect(resp, self.url_lijst_bk_teams % self.testdata.deelkamp18_bk.pk)
-        team = KampioenschapTeam.objects.get(pk=team.pk)
+        team.refresh_from_db()
         self.assertEqual(team.deelname, DEELNAME_NEE)
         self.assertTrue(team.is_reserve)
 
         # zet JA
         resp = self.client.post(self.url_wijzig_status_bk_team, data={'team_pk': team.pk, 'status': 'toch_ja'})
         self.assert_is_redirect(resp, self.url_lijst_bk_teams % self.testdata.deelkamp18_bk.pk)
-        team = KampioenschapTeam.objects.get(pk=team.pk)
+        team.refresh_from_db()
         self.assertEqual(team.deelname, DEELNAME_JA)
         self.assertTrue(team.is_reserve)
 
         # reserve oproepen
         resp = self.client.post(self.url_wijzig_status_bk_team, data={'team_pk': team.pk, 'status': 'maak_deelnemer'})
         self.assert_is_redirect(resp, self.url_lijst_bk_teams % self.testdata.deelkamp18_bk.pk)
-        team = KampioenschapTeam.objects.get(pk=team.pk)
+        team.refresh_from_db()
         self.assertFalse(team.is_reserve)
 
         # verkeerde beheerder
-        team.kampioenschap = self.testdata.deelkamp25_bk
-        team.save(update_fields=['kampioenschap'])
+        team.kamp = self.testdata.deelkamp25_bk
+        team.save(update_fields=['kamp'])
         zet_competitie_fase_bk_prep(self.testdata.comp25)
 
         resp = self.client.post(self.url_wijzig_status_bk_team, data={'team_pk': team.pk})

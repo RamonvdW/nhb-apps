@@ -5,8 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import reverse
-from Competitie.definities import DEEL_BK
-from Competitie.models import Kampioenschap
+from CompLaagBond.models import KampBK
 from Functie.definities import Rol
 from types import SimpleNamespace
 
@@ -21,7 +20,7 @@ def get_kaartjes_bond(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_indi
     if rol_nu == Rol.ROL_BKO:
 
         # BK erbij pakken
-        deelkamp_bk = Kampioenschap.objects.select_related('competitie').get(competitie=comp, deel=DEEL_BK)
+        deelkamp_bk = KampBK.objects.select_related('competitie').get(competitie=comp)
 
         # Planning BK wedstrijden
         if not deelkamp_bk.is_afgesloten:

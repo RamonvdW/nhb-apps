@@ -9,9 +9,10 @@ from django.http import Http404
 from django.utils import timezone
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.definities import DEEL_RK, DEELNAME_NEE
-from Competitie.models import CompetitieMatch, KampioenschapSporterBoog, KampioenschapTeam
+from Competitie.definities import DEELNAME_NEE
+from Competitie.models import CompetitieMatch
 from CompKampioenschap.operations import get_url_wedstrijdformulier
+from CompLaagRayon.models import DeelnemerRK, TeamRK
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
 from Scheidsrechter.models import MatchScheidsrechters
@@ -58,10 +59,9 @@ class RkMatchInfoView(UserPassesTestMixin, TemplateView):
         except (ValueError, CompetitieMatch.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
-        deelkamps = match.kampioenschap_set.filter(deel=DEEL_RK)
-        if len(deelkamps) == 0:
+        deelkamp = match.kamprk_set.first()
+        if not deelkamp:
             raise Http404('Geen kampioenschap')
-        deelkamp = deelkamps[0]
 
         context['deelkamp'] = deelkamp
         context['wedstrijd'] = match
@@ -123,9 +123,9 @@ class RkMatchInfoView(UserPassesTestMixin, TemplateView):
 
         # zoek de deelnemers erbij
         if heeft_indiv:
-            deelnemers = (KampioenschapSporterBoog
+            deelnemers = (DeelnemerRK
                           .objects
-                          .filter(kampioenschap=deelkamp,
+                          .filter(kamp=deelkamp,
                                   indiv_klasse__pk__in=klasse_indiv_pks)
                           .exclude(deelname=DEELNAME_NEE)
                           .select_related('sporterboog',
@@ -174,9 +174,9 @@ class RkMatchInfoView(UserPassesTestMixin, TemplateView):
             # for
 
         if heeft_teams:
-            teams = (KampioenschapTeam
+            teams = (TeamRK
                      .objects
-                     .filter(kampioenschap=deelkamp,
+                     .filter(kamp=deelkamp,
                              team_klasse__pk__in=klasse_team_pks)
                      .select_related('vereniging',
                                      'team_klasse')

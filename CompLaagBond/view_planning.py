@@ -11,11 +11,11 @@ from django.views.generic import TemplateView, View
 from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
-from Competitie.definities import DEEL_RK, DEEL_BK, DEELNAME_NEE
-from Competitie.models import (CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMatch, CompetitieMutatie,
-                               Kampioenschap, KampioenschapSporterBoog, KampioenschapTeam,
-                               KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet)
-from CompKampioenschap.operations import maak_mutatie_kamp_cut
+from Competitie.definities import DEELNAME_NEE
+from Competitie.models import CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMatch
+from CompKampioenschap.operations import maak_mutatie_kamp_bk_cut
+from CompLaagBond.models import KampBK, DeelnemerBK, TeamBK, CutBK
+from CompLaagRayon.models import KampRK
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
 from Locatie.models import WedstrijdLocatie
@@ -25,7 +25,6 @@ from Scheidsrechter.mutaties import scheids_mutatieverzoek_bepaal_reistijd_naar_
 from Vereniging.models import Vereniging
 from types import SimpleNamespace
 import datetime
-import time
 
 
 TEMPLATE_COMPLAAGBOND_PLANNING_LANDELIJK = 'complaagbond/planning-landelijk.dtl'
@@ -59,12 +58,11 @@ class PlanningView(UserPassesTestMixin, TemplateView):
 
         try:
             deelkamp_pk = int(kwargs['deelkamp_pk'][:6])  # afkappen voor de veiligheid
-            deelkamp = (Kampioenschap
+            deelkamp = (KampBK
                         .objects
                         .select_related('competitie')
-                        .get(pk=deelkamp_pk,
-                             deel=DEEL_BK))
-        except (KeyError, Kampioenschap.DoesNotExist):
+                        .get(pk=deelkamp_pk))
+        except (KeyError, KampBK.DoesNotExist):
             raise Http404('Kampioenschap niet gevonden')
 
         if self.rol_nu == Rol.ROL_BKO:
@@ -76,9 +74,9 @@ class PlanningView(UserPassesTestMixin, TemplateView):
         indiv_klasse2count = dict()
         team_klasse2count = dict()
         niet_gebruikt = dict()
-        for obj in (KampioenschapSporterBoog
+        for obj in (DeelnemerBK
                     .objects
-                    .filter(kampioenschap=deelkamp)
+                    .filter(kamp=deelkamp)
                     .filter(rank__lte=24)   # 24 = standaard limiet voor een individuele klasse
                     .exclude(rank=0)        # afgemeld
                     .select_related('indiv_klasse')):
@@ -88,9 +86,9 @@ class PlanningView(UserPassesTestMixin, TemplateView):
                 indiv_klasse2count[obj.indiv_klasse.pk] = 1
         # for
 
-        for cut in (KampioenschapIndivKlasseLimiet
+        for cut in (CutBK
                     .objects
-                    .filter(kampioenschap=deelkamp)
+                    .filter(kamp=deelkamp)
                     .select_related('indiv_klasse')):
 
             try:
@@ -101,33 +99,15 @@ class PlanningView(UserPassesTestMixin, TemplateView):
                 pass
         # for
 
-        for obj in (KampioenschapTeam
+        for obj in (TeamBK
                     .objects
-                    .filter(kampioenschap=deelkamp)
+                    .filter(kamp=deelkamp)
                     # .exclude(rank=0)        # afgemeld
                     .select_related('team_klasse')):
             try:
-                team_klasse2count[obj.team_klasse.pk] += 4
+                team_klasse2count[obj.team_klasse.pk] += 3
             except KeyError:
-                team_klasse2count[obj.team_klasse.pk] = 4
-        # for
-
-        # FUTURE: standaard begrenzing aantal teams: ERE=12, rest=8
-
-        for cut in (KampioenschapTeamKlasseLimiet
-                    .objects
-                    .filter(kampioenschap=deelkamp)
-                    .select_related('team_klasse')):
-
-            # vertaal aantal teams naar aantal sporters
-            aantal_sporters = cut.limiet * 4                # TODO: moet nu zijn: 3 teams per team!
-
-            try:
-                if team_klasse2count[cut.team_klasse.pk] > aantal_sporters:
-                    team_klasse2count[cut.team_klasse.pk] = aantal_sporters
-
-            except KeyError:
-                pass
+                team_klasse2count[obj.team_klasse.pk] = 3
         # for
 
         for wkl in (CompetitieIndivKlasse
@@ -145,7 +125,7 @@ class PlanningView(UserPassesTestMixin, TemplateView):
         # for
 
         # haal de BK wedstrijden op
-        context['wedstrijden'] = (deelkamp.rk_bk_matches
+        context['wedstrijden'] = (deelkamp.matches
                                   .select_related('vereniging',
                                                   'locatie')
                                   .prefetch_related('indiv_klassen',
@@ -160,22 +140,13 @@ class PlanningView(UserPassesTestMixin, TemplateView):
             for wkl in obj.indiv_klassen.order_by('volgorde'):    # FUTURE: order_by zorgt voor extra database accesses
                 obj.wkl_namen.append(wkl.beschrijving)
                 niet_gebruikt[100000 + wkl.pk] = None
-
-                try:
-                    obj.sporters_count += indiv_klasse2count[wkl.pk]
-                except KeyError:
-                    # geen sporters in deze klasse
-                    pass
+                obj.sporters_count += indiv_klasse2count.get(wkl.pk, 0)
             # for
 
             for wkl in obj.team_klassen.order_by('volgorde'):     # FUTURE: order_by zorgt voor extra database accesses
                 obj.wkl_namen.append(wkl.beschrijving)
                 niet_gebruikt[200000 + wkl.pk] = None
-
-                try:
-                    obj.sporters_count += team_klasse2count[wkl.pk]
-                except KeyError:
-                    pass
+                obj.sporters_count += team_klasse2count.get(wkl.pk, 0)
             # for
 
             obj.is_overbelast = False
@@ -204,12 +175,10 @@ class PlanningView(UserPassesTestMixin, TemplateView):
                                                kwargs={'match_pk': wedstrijd.pk})
             # for
 
-        context['rayon_deelkamps'] = (Kampioenschap
+        context['rayon_deelkamps'] = (KampRK
                                       .objects
-                                      .filter(deel=DEEL_RK,
-                                              competitie=deelkamp.competitie)
-                                      .order_by('rayon__rayon_nr',
-                                                'deel'))
+                                      .filter(competitie=deelkamp.competitie)
+                                      .order_by('rayon__rayon_nr'))
 
         comp = deelkamp.competitie
 
@@ -228,12 +197,11 @@ class PlanningView(UserPassesTestMixin, TemplateView):
         """
         try:
             deelkamp_pk = int(kwargs['deelkamp_pk'][:6])  # afkappen voor de veiligheid
-            deelkamp = (Kampioenschap
+            deelkamp = (KampBK
                         .objects
                         .select_related('competitie')
-                        .get(pk=deelkamp_pk,
-                             deel=DEEL_BK))
-        except (ValueError, Kampioenschap.DoesNotExist):
+                        .get(pk=deelkamp_pk))
+        except (ValueError, KampBK.DoesNotExist):
             raise Http404('Kampioenschap niet gevonden')
 
         # alleen de BKO mag de planning uitbreiden
@@ -247,7 +215,7 @@ class PlanningView(UserPassesTestMixin, TemplateView):
                     beschrijving='BK, ' + deelkamp.competitie.beschrijving)
         match.save()
 
-        deelkamp.rk_bk_matches.add(match)
+        deelkamp.matches.add(match)
 
         return HttpResponseRedirect(reverse('CompLaagBond:wijzig-wedstrijd',
                                             kwargs={'match_pk': match.pk}))
@@ -278,7 +246,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
         """
 
         # voorkom dubbel koppelen: zoek uit welke klassen al gekoppeld zijn aan een andere wedstrijd
-        match_pks = list(deelkamp.rk_bk_matches.all().values_list('pk', flat=True))
+        match_pks = list(deelkamp.matches.all().values_list('pk', flat=True))
         if match.pk in match_pks:
             match_pks.remove(match.pk)
 
@@ -297,10 +265,10 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
         # for
 
         klasse2schutters = dict()
-        for obj in (KampioenschapSporterBoog
+        for obj in (DeelnemerBK
                     .objects
                     .exclude(deelname=DEELNAME_NEE)         # afgemelde sporters niet tellen
-                    .filter(kampioenschap=deelkamp)
+                    .filter(kamp=deelkamp)
                     .select_related('indiv_klasse')):
             try:
                 klasse2schutters[obj.indiv_klasse.pk] += 1
@@ -339,9 +307,9 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
         # for
 
         klasse_count = dict()   # [klasse.pk] = count
-        for klasse_pk in (KampioenschapTeam
+        for klasse_pk in (TeamBK
                           .objects
-                          .filter(kampioenschap=deelkamp)
+                          .filter(kamp=deelkamp)
                           .values_list('team_klasse__pk', flat=True)):
             try:
                 klasse_count[klasse_pk] += 1
@@ -430,10 +398,10 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
             raise Http404('Wedstrijd niet gevonden')
 
         # zoek het weeknummer waarin deze wedstrijd gehouden moet worden
-        deelkamps = match.kampioenschap_set.all()
-        if len(deelkamps) == 0:
+        deelkamp = match.kampbk_set.first()
+        if not deelkamp:
             raise Http404('Geen BK wedstrijd')
-        deelkamp = deelkamps[0]
+
         comp = deelkamp.competitie
         is_25m = (comp.is_25m1pijl())
 
@@ -524,10 +492,9 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
         except (ValueError, CompetitieMatch.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
-        deelkamps = match.kampioenschap_set.all()
-        if len(deelkamps) == 0:
+        deelkamp = match.kampbk_set.first()
+        if not deelkamp:
             raise Http404('Geen BK wedstrijd')
-        deelkamp = deelkamps[0]
 
         # is dit de beheerder?
         if deelkamp.functie != self.functie_nu:
@@ -695,278 +662,6 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
         return HttpResponseRedirect(url)
 
 
-class WijzigLimietenView(UserPassesTestMixin, TemplateView):
-
-    """ Deze view laat de BKO de status van een BK selectie aanpassen """
-
-    # class variables shared by all instances
-    template_name = TEMPLATE_COMPLAAGBOND_WIJZIG_LIMIETEN
-    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
-    permission_denied_message = 'Geen toegang'
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.rol_nu, self.functie_nu = None, None
-
-    def test_func(self):
-        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu == Rol.ROL_BKO
-
-    def get_context_data(self, **kwargs):
-        """ called by the template system to get the context data for the template """
-        context = super().get_context_data(**kwargs)
-
-        try:
-            deelkamp_pk = int(kwargs['deelkamp_pk'][:6])  # afkappen voor de veiligheid
-            deelkamp = (Kampioenschap
-                        .objects
-                        .select_related('competitie')
-                        .get(pk=deelkamp_pk,
-                             deel=DEEL_BK))
-        except (ValueError, Kampioenschap.DoesNotExist):
-            raise Http404('Kampioenschap niet gevonden')
-
-        # controleer dat de juiste BKO aan de knoppen zit
-        if self.functie_nu != deelkamp.functie:
-            raise Http404('Niet de beheerder')
-
-        comp = deelkamp.competitie
-        if comp.is_25m1pijl():
-            indiv_limieten = settings.COMPETITIE_25M_INDIV_LIMIETEN
-            teams_limieten = settings.COMPETITIE_25M_TEAMS_LIMIETEN
-        else:
-            indiv_limieten = settings.COMPETITIE_18M_INDIV_LIMIETEN
-            teams_limieten = settings.COMPETITIE_18M_TEAMS_LIMIETEN
-
-        context['indiv_limieten'] = indiv_limieten
-        context['teams_limieten'] = teams_limieten
-
-        context['wkl_indiv'] = wkl_indiv = (CompetitieIndivKlasse
-                                            .objects
-                                            .filter(competitie=deelkamp.competitie,
-                                                    is_ook_voor_rk_bk=True)
-                                            .select_related('boogtype')
-                                            .order_by('volgorde'))
-
-        context['wkl_teams'] = wkl_teams = (CompetitieTeamKlasse
-                                            .objects
-                                            .filter(competitie=deelkamp.competitie,
-                                                    is_voor_teams_rk_bk=True)
-                                            .order_by('volgorde'))
-
-        # zet de default limieten
-        pk2wkl_indiv = dict()
-        for wkl in wkl_indiv:
-            wkl.limiet = 24     # default limiet
-            wkl.sel = 'isel_%s' % wkl.pk
-            pk2wkl_indiv[wkl.pk] = wkl
-        # for
-
-        pk2wkl_team = dict()
-        for wkl in wkl_teams:
-            # ERE klasse: 12 teams
-            # overige: 8 teams
-            wkl.limiet = 12 if "ERE" in wkl.beschrijving else 8
-            wkl.sel = 'tsel_%s' % wkl.pk
-            pk2wkl_team[wkl.pk] = wkl
-        # for
-
-        # aanvullen met de opgeslagen limieten
-        for limiet in (KampioenschapIndivKlasseLimiet
-                       .objects
-                       .select_related('indiv_klasse')
-                       .filter(kampioenschap=deelkamp,
-                               indiv_klasse__in=pk2wkl_indiv.keys())):
-            wkl = pk2wkl_indiv[limiet.indiv_klasse.pk]
-            wkl.limiet = limiet.limiet
-        # for
-
-        for limiet in (KampioenschapTeamKlasseLimiet
-                       .objects
-                       .select_related('team_klasse')
-                       .filter(kampioenschap=deelkamp,
-                               team_klasse__in=pk2wkl_team.keys())):
-            wkl = pk2wkl_team[limiet.team_klasse.pk]
-            wkl.limiet = limiet.limiet
-        # for
-
-        context['url_opslaan'] = reverse('CompLaagBond:wijzig-limieten',
-                                         kwargs={'deelkamp_pk': deelkamp.pk})
-
-        comp = deelkamp.competitie
-        context['kruimels'] = (
-            (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
-            (reverse('CompBeheer:overzicht',
-                     kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
-            (None, 'BK limieten')
-        )
-
-        return context
-
-    def post(self, request, *args, **kwargs):
-        """ wordt aangeroepen als de gebruik op de knop OPSLAAN druk """
-
-        try:
-            deelkamp_pk = int(kwargs['deelkamp_pk'][:6])  # afkappen voor de veiligheid
-            deelkamp = (Kampioenschap
-                        .objects
-                        .select_related('competitie')
-                        .get(pk=deelkamp_pk,
-                             deel=DEEL_BK))
-        except (ValueError, Kampioenschap.DoesNotExist):
-            raise Http404('Kampioenschap niet gevonden')
-
-        # controleer dat de BKO aan de knoppen zit
-        if self.functie_nu != deelkamp.functie:
-            raise Http404('Niet de beheerder')
-
-        comp = deelkamp.competitie
-        if comp.is_25m1pijl():
-            indiv_limieten = settings.COMPETITIE_25M_INDIV_LIMIETEN
-            teams_limieten = settings.COMPETITIE_25M_TEAMS_LIMIETEN
-        else:
-            indiv_limieten = settings.COMPETITIE_18M_INDIV_LIMIETEN
-            teams_limieten = settings.COMPETITIE_18M_TEAMS_LIMIETEN
-
-        pk2ckl_indiv = dict()
-        pk2ckl_team = dict()
-        pk2keuze_indiv = dict()
-        pk2keuze_team = dict()
-
-        for ckl in (CompetitieIndivKlasse
-                    .objects
-                    .filter(competitie=comp,
-                            is_ook_voor_rk_bk=True)):
-
-            sel = 'isel_%s' % ckl.pk
-            keuze = request.POST.get(sel, None)
-            if keuze:
-                try:
-                    pk2keuze_indiv[ckl.pk] = int(keuze[:2])   # afkappen voor de veiligheid
-                    pk2ckl_indiv[ckl.pk] = ckl
-                except ValueError:
-                    pass
-                else:
-                    if pk2keuze_indiv[ckl.pk] not in indiv_limieten:
-                        raise Http404('Geen valide keuze voor indiv limiet')
-        # for
-
-        for ckl in (CompetitieTeamKlasse
-                    .objects
-                    .filter(competitie=comp,
-                            is_voor_teams_rk_bk=True)):
-
-            sel = 'tsel_%s' % ckl.pk
-            keuze = request.POST.get(sel, None)
-            if keuze:
-                try:
-                    pk2keuze_team[ckl.pk] = int(keuze[:2])   # afkappen voor de veiligheid
-                    pk2ckl_team[ckl.pk] = ckl
-                except ValueError:
-                    pass
-                else:
-                    if pk2keuze_team[ckl.pk] not in teams_limieten:
-                        raise Http404('Geen valide keuze voor teams limiet')
-        # for
-
-        wijzig_limiet_indiv = list()     # list of tup(indiv_klasse, nieuwe_limiet, oude_limiet)
-        wijzig_limiet_team = list()      # list of tup(team_klasse, nieuwe_limiet, oude_limiet)
-
-        for limiet in (KampioenschapIndivKlasseLimiet
-                       .objects
-                       .select_related('indiv_klasse')
-                       .filter(kampioenschap=deelkamp,
-                               indiv_klasse__in=list(pk2keuze_indiv.keys()))):
-
-            pk = limiet.indiv_klasse.pk
-            keuze = pk2keuze_indiv[pk]
-            del pk2keuze_indiv[pk]
-
-            tup = (limiet.indiv_klasse, keuze, limiet.limiet)
-            wijzig_limiet_indiv.append(tup)
-        # for
-
-        for limiet in (KampioenschapTeamKlasseLimiet
-                       .objects
-                       .select_related('team_klasse')
-                       .filter(kampioenschap=deelkamp,
-                               team_klasse__in=list(pk2keuze_team.keys()))):
-
-            pk = limiet.team_klasse.pk
-            keuze = pk2keuze_team[pk]
-            del pk2keuze_team[pk]
-
-            tup = (limiet.team_klasse, keuze, limiet.limiet)
-            wijzig_limiet_team.append(tup)
-        # for
-
-        # verwerk de overgebleven keuzes waar nog geen limiet voor was
-        for pk, keuze in pk2keuze_indiv.items():
-            try:
-                indiv_klasse = pk2ckl_indiv[pk]
-            except KeyError:        # pragma: no cover
-                pass
-            else:
-                # indiv klasse
-                default = 24
-                tup = (indiv_klasse, keuze, default)
-                wijzig_limiet_indiv.append(tup)
-        # for
-
-        # verwerk de overgebleven keuzes waar nog geen limiet voor was
-        for pk, keuze in pk2keuze_team.items():
-            try:
-                team_klasse = pk2ckl_team[pk]
-            except KeyError:        # pragma: no cover
-                pass
-            else:
-                # ERE klasse: 12 teams
-                # overige: 8 teams
-                default = 12 if "ERE" in team_klasse.beschrijving else 8
-                tup = (team_klasse, keuze, default)
-                wijzig_limiet_team.append(tup)
-        # for
-
-        # laat opnieuw de deelnemers boven de cut bepalen en sorteer op gemiddelde
-        door_account = get_account(request)
-        door_str = "BKO %s" % door_account.volledige_naam()
-        door_str = door_str[:149]
-
-        mutatie_lijst = list()
-
-        mutatie = None
-        for indiv_klasse, nieuwe_limiet, oude_limiet in wijzig_limiet_indiv:
-            # schrijf in het logboek
-            if oude_limiet != nieuwe_limiet:
-                msg = "De limiet (cut) voor klasse %s van de %s is aangepast van %s naar %s." % (
-                        str(indiv_klasse), str(deelkamp), oude_limiet, nieuwe_limiet)
-                schrijf_in_logboek(door_account, "Competitie", msg)
-
-                tup = (indiv_klasse, None, oude_limiet, nieuwe_limiet)
-                mutatie_lijst.append(tup)
-        # for
-
-        for team_klasse, nieuwe_limiet, oude_limiet in wijzig_limiet_team:
-            # schrijf in het logboek
-            if oude_limiet != nieuwe_limiet:
-                msg = "De limiet (cut) voor klasse %s van de %s is aangepast van %s naar %s." % (
-                        str(team_klasse), str(deelkamp), oude_limiet, nieuwe_limiet)
-                schrijf_in_logboek(door_account, "Competitie", msg)
-
-                tup = (None, team_klasse, oude_limiet, nieuwe_limiet)
-                mutatie_lijst.append(tup)
-        # for
-
-        snel = str(request.POST.get('snel', ''))[:1]  # voor autotest
-
-        maak_mutatie_kamp_cut(deelkamp, door_str, mutatie_lijst, snel == '1')
-
-        url = reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk})
-
-        return HttpResponseRedirect(url)
-
-
 class VerwijderWedstrijdView(UserPassesTestMixin, View):
 
     """ Deze view laat een BK wedstrijd verwijderen """
@@ -996,11 +691,9 @@ class VerwijderWedstrijdView(UserPassesTestMixin, View):
         except (ValueError, CompetitieMatch.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
-        deelkamps = match.kampioenschap_set.filter(deel=DEEL_BK)
-        if len(deelkamps) == 0:
+        deelkamp = match.kampbk_set.first()
+        if not deelkamp:
             raise Http404('Geen BK wedstrijd')
-
-        deelkamp = deelkamps[0]
 
         # correcte beheerder?
         if deelkamp.functie != self.functie_nu:

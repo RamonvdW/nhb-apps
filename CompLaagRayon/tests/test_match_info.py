@@ -4,16 +4,13 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.test import TestCase, override_settings
+from django.test import TestCase
 from django.utils import timezone
-from Competitie.definities import DEELNAME_NEE
-from Competitie.models import CompetitieMatch, KampioenschapSporterBoog, KampioenschapIndivKlasseLimiet
+from Competitie.models import CompetitieMatch
 from Competitie.test_utils.tijdlijn import zet_competitie_fase_rk_prep, zet_competitie_fase_rk_wedstrijden
 from Locatie.models import WedstrijdLocatie
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
-import zipfile
-import os
 
 
 class TestCompLaagRayonMatchInfo(E2EHelpers, TestCase):
@@ -102,7 +99,7 @@ class TestCompLaagRayonMatchInfo(E2EHelpers, TestCase):
         self.comp18_klassen_indiv_rk = match_klassen
 
         self.deelkamp_18 = self.testdata.deelkamp18_rk[self.rayon_nr]
-        self.deelkamp_18.rk_bk_matches.add(self.match.pk)
+        self.deelkamp_18.matches.add(self.match.pk)
 
         self.deelkamp_25 = self.testdata.deelkamp25_rk[self.rayon_nr]
 
@@ -146,13 +143,13 @@ class TestCompLaagRayonMatchInfo(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
 
         # wedstrijd niet in een plan
-        self.deelkamp_18.rk_bk_matches.remove(self.match.pk)
+        self.deelkamp_18.matches.remove(self.match.pk)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assert404(resp, 'Geen kampioenschap')
 
         # 25m1p plan
-        self.deelkamp_25.rk_bk_matches.add(self.match.pk)
+        self.deelkamp_25.matches.add(self.match.pk)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -163,10 +160,10 @@ class TestCompLaagRayonMatchInfo(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.deelkamp_25.rk_bk_matches.remove(self.match.pk)
+        self.deelkamp_25.matches.remove(self.match.pk)
 
         # wedstrijd van een niet-RK kampioenschap
-        self.testdata.deelkamp18_bk.rk_bk_matches.add(self.match.pk)
+        self.testdata.deelkamp18_bk.matches.add(self.match.pk)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assert404(resp, 'Geen kampioenschap')

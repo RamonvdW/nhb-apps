@@ -5,10 +5,11 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.utils import timezone
-from Competitie.definities import DEEL_RK, DEEL_BK, DEELNAME_JA, DEELNAME_NEE, DEELNAME_ONBEKEND, KAMP_RANK_BLANCO
-from Competitie.models import (Competitie, CompetitieTeamKlasse,
-                               Kampioenschap, KampioenschapSporterBoog, KampioenschapTeam)
+from Competitie.definities import DEELNAME_JA, DEELNAME_NEE, DEELNAME_ONBEKEND, KAMP_RANK_BLANCO
+from Competitie.models import Competitie, CompetitieTeamKlasse
 from CompKampioenschap.operations import VerwerkCompKampMutaties
+from CompLaagBond.models import KampBK, DeelnemerBK, TeamBK
+from CompLaagRayon.models import DeelnemerRK, TeamRK
 
 
 class VerwerkCompLaagBondMutaties:
@@ -37,59 +38,56 @@ class VerwerkCompLaagBondMutaties:
         else:
             aantal_pijlen = 2.0 * 25
 
-        deelkamp_bk = Kampioenschap.objects.get(deel=DEEL_BK, competitie=comp)
+        deelkamp_bk = KampBK.objects.get(competitie=comp)
 
         # verwijder alle deelnemers van een voorgaande run
-        KampioenschapSporterBoog.objects.filter(kampioenschap=deelkamp_bk).delete()
+        DeelnemerBK.objects.filter(kamp=deelkamp_bk).delete()
 
         bulk = list()
-        for kampioen in (KampioenschapSporterBoog
+        for deelnemer_rk in (DeelnemerRK
                          .objects
-                         .filter(kampioenschap__competitie=comp,
-                                 kampioenschap__deel=DEEL_RK,
+                         .filter(kamp__competitie=comp,
                                  result_rank__lte=KAMP_RANK_BLANCO)
                          .exclude(deelname=DEELNAME_NEE)
                          .exclude(result_rank=0)
-                         .select_related('kampioenschap',
-                                         'kampioenschap__rayon',
+                         .select_related('kamp',
+                                         'kamp__rayon',
                                          'indiv_klasse_volgende_ronde',
                                          'bij_vereniging',
                                          'sporterboog')):
 
-            som_scores = kampioen.result_score_1 + kampioen.result_score_2
+            som_scores = deelnemer_rk.result_score_1 + deelnemer_rk.result_score_2
             gemiddelde = som_scores / aantal_pijlen
 
-            if kampioen.result_score_1 > kampioen.result_score_2:
-                gemiddelde_scores = "%03d%03d" % (kampioen.result_score_1, kampioen.result_score_2)
+            if deelnemer_rk.result_score_1 > deelnemer_rk.result_score_2:
+                gemiddelde_scores = "%03d%03d" % (deelnemer_rk.result_score_1, deelnemer_rk.result_score_2)
             else:
-                gemiddelde_scores = "%03d%03d" % (kampioen.result_score_2, kampioen.result_score_1)
+                gemiddelde_scores = "%03d%03d" % (deelnemer_rk.result_score_2, deelnemer_rk.result_score_1)
 
-            # print('kampioen:', kampioen.result_rank, som_scores, gemiddelde_scores, "%.3f" % gemiddelde, kampioen)
-
-            nieuw = KampioenschapSporterBoog(
-                        kampioenschap=deelkamp_bk,
-                        sporterboog=kampioen.sporterboog,
-                        indiv_klasse=kampioen.indiv_klasse_volgende_ronde,
-                        indiv_klasse_volgende_ronde=kampioen.indiv_klasse_volgende_ronde,
-                        bij_vereniging=kampioen.bij_vereniging,
+            nieuw = DeelnemerBK(
+                        kamp=deelkamp_bk,
+                        sporterboog=deelnemer_rk.sporterboog,
+                        indiv_klasse=deelnemer_rk.indiv_klasse_volgende_ronde,
+                        indiv_klasse_volgende_ronde=deelnemer_rk.indiv_klasse_volgende_ronde,
+                        bij_vereniging=deelnemer_rk.bij_vereniging,
                         gemiddelde=gemiddelde,
                         gemiddelde_scores=gemiddelde_scores,
                         logboek=msg)
 
-            if kampioen.result_rank == 1:
-                nieuw.kampioen_label = 'Kampioen %s' % kampioen.kampioenschap.rayon.naam
+            if deelnemer_rk.result_rank == 1:
+                nieuw.kampioen_label = 'Kampioen %s' % deelnemer_rk.kamp.rayon.naam
                 nieuw.deelname = DEELNAME_JA
                 nieuw.logboek += '[%s] Deelname op Ja gezet, want kampioen RK\n' % stamp_str
 
             bulk.append(nieuw)
 
             if len(bulk) >= 250:
-                KampioenschapSporterBoog.objects.bulk_create(bulk)
+                DeelnemerBK.objects.bulk_create(bulk)
                 bulk = list()
         # for
 
         if len(bulk):
-            KampioenschapSporterBoog.objects.bulk_create(bulk)
+            DeelnemerBK.objects.bulk_create(bulk)
         del bulk
 
         deelkamp_bk.heeft_deelnemerslijst = True
@@ -103,19 +101,18 @@ class VerwerkCompLaagBondMutaties:
         # TODO: verstuur uitnodigingen per e-mail
 
         # behoud maximaal 48 sporters in elke klasse: 24 deelnemers en 24 reserves
-        qset = KampioenschapSporterBoog.objects.filter(kampioenschap=deelkamp_bk, volgorde__gt=48)
+        qset = DeelnemerBK.objects.filter(kamp=deelkamp_bk, volgorde__gt=48)
         qset.delete()
 
     def maak_deelnemerslijst_bk_teams(self, comp):
         # zoek het BK erbij
-        deelkamp_bk = (Kampioenschap
+        deelkamp_bk = (KampBK
                        .objects
                        .select_related('competitie')
-                       .get(deel=DEEL_BK,
-                            competitie=comp))
+                       .get(competitie=comp))
 
         # verwijder de al aangemaakte teams
-        qset = KampioenschapTeam.objects.filter(kampioenschap=deelkamp_bk).all()
+        qset = TeamBK.objects.filter(kamp=deelkamp_bk).all()
         aantal = qset.count()
         if aantal > 0:
             self.stdout.write('[INFO] Alle %s bestaande BK teams worden verwijderd' % aantal)
@@ -133,26 +130,25 @@ class VerwerkCompLaagBondMutaties:
 
             # haal alle teams uit de RK op
             sterkte = list()
-            for rk_team in (KampioenschapTeam
+            for rk_team in (TeamRK
                             .objects
-                            .filter(kampioenschap__deel=DEEL_RK,
-                                    kampioenschap__competitie=comp,
+                            .filter(kamp__competitie=comp,
                                     team_klasse_volgende_ronde=klasse,
                                     result_rank__in=(1, 2, 100))            # 2 per rayon
                             .select_related('vereniging',
                                             'team_type',
-                                            'kampioenschap__rayon')
+                                            'kamp__rayon')
                             .prefetch_related('gekoppelde_leden')
                             .order_by('result_rank')):
 
-                bk_team = KampioenschapTeam.objects.create(
-                                kampioenschap=deelkamp_bk,
+                bk_team = TeamBK.objects.create(
+                                kamp=deelkamp_bk,
                                 vereniging=rk_team.vereniging,
                                 volg_nr=rk_team.volg_nr,
                                 team_type=rk_team.team_type,
                                 team_naam=rk_team.team_naam,
                                 team_klasse=klasse,
-                                aanvangsgemiddelde=rk_team.result_teamscore,
+                                rk_score=rk_team.result_teamscore,
                                 deelname=DEELNAME_JA)
 
                 self.stdout.write('[INFO] Maak BK team %s.%s (%s)' % (
@@ -178,28 +174,25 @@ class VerwerkCompLaagBondMutaties:
             # voeg de reserve teams toe: 2 per rayon
             # haal alle teams uit de RK op
             sterkte = list()
-            for rk_team in (KampioenschapTeam
+            for rk_team in (TeamRK
                             .objects
-                            .filter(kampioenschap__deel=DEEL_RK,
-                                    kampioenschap__competitie=comp,
+                            .filter(kamp__competitie=comp,
                                     team_klasse_volgende_ronde=klasse,
                                     result_rank__in=(3, 4))            # 2 per rayon
                             .select_related('vereniging',
                                             'team_type',
-                                            'kampioenschap__rayon')
+                                            'kamp__rayon')
                             .prefetch_related('gekoppelde_leden')
                             .order_by('result_rank')):
 
-                ag = rk_team.result_teamscore
-
-                bk_team = KampioenschapTeam.objects.create(
-                                kampioenschap=deelkamp_bk,
+                bk_team = TeamBK.objects.create(
+                                kamp=deelkamp_bk,
                                 vereniging=rk_team.vereniging,
                                 volg_nr=rk_team.volg_nr,
                                 team_type=rk_team.team_type,
                                 team_naam=rk_team.team_naam,
                                 team_klasse=klasse,
-                                aanvangsgemiddelde=ag,
+                                rk_score=rk_team.result_teamscore,
                                 is_reserve=True,
                                 deelname=DEELNAME_ONBEKEND)
 
@@ -210,7 +203,7 @@ class VerwerkCompLaagBondMutaties:
                 pks = rk_team.gekoppelde_leden.values_list('pk', flat=True)
                 bk_team.gekoppelde_leden.set(pks)
 
-                rayon_nr = rk_team.kampioenschap.rayon.rayon_nr
+                rayon_nr = rk_team.kamp.rayon.rayon_nr
 
                 tup = (0-rayon_nr, rk_team.result_teamscore, len(sterkte), bk_team)
                 sterkte.append(tup)

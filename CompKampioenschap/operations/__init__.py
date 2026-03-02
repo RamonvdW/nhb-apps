@@ -7,8 +7,11 @@
 from .iter_wedstrijdformulieren import iter_indiv_wedstrijdformulieren, iter_teams_wedstrijdformulieren
 from .importeer_uitslag_indiv import importeer_sheet_uitslag_indiv
 from .importeer_uitslag_teams_excel import ImporteerUitslagTeamsExcel
-from .maak_mutatie import (maak_mutatie_kamp_aanmelden_indiv, maak_mutatie_kamp_afmelden_indiv, maak_mutatie_kamp_cut,
-                           maak_mutatie_kamp_teams_nummeren, maak_mutatie_wedstrijdformulieren_aanmaken,
+from .maak_mutatie import (maak_mutatie_kamp_aanmelden_bk_indiv, maak_mutatie_kamp_afmelden_bk_indiv,
+                           maak_mutatie_kamp_aanmelden_rk_indiv, maak_mutatie_kamp_afmelden_rk_indiv,
+                           maak_mutatie_kamp_bk_cut, maak_mutatie_kamp_rk_cut,
+                           maak_mutatie_kamp_bk_teams_nummeren, maak_mutatie_kamp_rk_teams_nummeren,
+                           maak_mutatie_wedstrijdformulieren_aanmaken,
                            aanmaken_wedstrijdformulieren_is_pending, maak_mutatie_update_dirty_wedstrijdformulieren)
 from .maak_teams_excel import MaakTeamsExcel
 from .storage_wedstrijdformulieren import (StorageWedstrijdformulieren, StorageError,
@@ -22,8 +25,11 @@ from .wedstrijdformulieren_teams import (UpdateTeamsWedstrijdFormulier, LeesTeam
 
 __all__ = ['iter_indiv_wedstrijdformulieren', 'iter_teams_wedstrijdformulieren',
            'importeer_sheet_uitslag_indiv', 'ImporteerUitslagTeamsExcel',
-           'maak_mutatie_kamp_aanmelden_indiv', 'maak_mutatie_kamp_afmelden_indiv', 'maak_mutatie_kamp_cut',
-           'maak_mutatie_kamp_teams_nummeren', 'maak_mutatie_wedstrijdformulieren_aanmaken',
+           'maak_mutatie_kamp_aanmelden_bk_indiv', 'maak_mutatie_kamp_afmelden_bk_indiv',
+           'maak_mutatie_kamp_aanmelden_rk_indiv', 'maak_mutatie_kamp_afmelden_rk_indiv',
+           'maak_mutatie_kamp_bk_cut', 'maak_mutatie_kamp_rk_cut',
+           'maak_mutatie_kamp_bk_teams_nummeren', 'maak_mutatie_kamp_rk_teams_nummeren',
+           'maak_mutatie_wedstrijdformulieren_aanmaken',
            'aanmaken_wedstrijdformulieren_is_pending', 'maak_mutatie_update_dirty_wedstrijdformulieren',
            'StorageWedstrijdformulieren', 'StorageError', 'aantal_ontbrekende_wedstrijdformulieren_rk_bk',
            'get_url_wedstrijdformulier', 'zet_dirty', 'iter_dirty_wedstrijdformulieren',

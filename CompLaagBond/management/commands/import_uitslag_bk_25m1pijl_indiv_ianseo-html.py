@@ -1,20 +1,21 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023-2024 Ramon van der Winkel.
+#  Copyright (c) 2023-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management.base import BaseCommand
-from Competitie.definities import DEEL_BK, DEELNAME_NEE, KAMP_RANK_NO_SHOW, KAMP_RANK_RESERVE
-from Competitie.models import KampioenschapSporterBoog
+from Competitie.definities import DEELNAME_NEE, KAMP_RANK_NO_SHOW, KAMP_RANK_RESERVE
+from CompLaagBond.models import KampBK, DeelnemerBK
 
 
 class Command(BaseCommand):
+    
     help = "Importeer uitslag 25m1pijl BK individueel uit Ianseo download"
 
     def __init__(self, stdout=None, stderr=None, no_color=False, force_color=False):
         super().__init__(stdout, stderr, no_color, force_color)
-        self.ver2deelnemers = dict()     # [ver_nr] = [KampioenschapSporterBoog, ...]
+        self.ver2deelnemers = dict()     # [ver_nr] = [DeelnemerBK, ...]
         self.klasse_pk = None
         self.dryrun = True
         self.verbose = False
@@ -26,11 +27,10 @@ class Command(BaseCommand):
                             help='Pad naar het HTML bestand')
 
     def deelnemers_ophalen(self):
-        for deelnemer in (KampioenschapSporterBoog
+        for deelnemer in (DeelnemerBK
                           .objects
-                          .filter(kampioenschap__competitie__afstand='25',
-                                  kampioenschap__deel=DEEL_BK)
-                          .select_related('kampioenschap',
+                          .filter(kamp__competitie__afstand='25')
+                          .select_related('kamp',
                                           'sporterboog__sporter',
                                           'sporterboog__boogtype',
                                           'bij_vereniging',

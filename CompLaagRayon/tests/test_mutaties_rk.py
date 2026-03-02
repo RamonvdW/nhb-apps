@@ -7,13 +7,13 @@
 from django.test import TestCase
 from django.core import management
 from BasisTypen.models import BoogType
-from Competitie.definities import (MUTATIE_KAMP_REINIT_TEST, MUTATIE_COMPETITIE_OPSTARTEN, MUTATIE_AG_VASTSTELLEN,
-                                   MUTATIE_KAMP_CUT, MUTATIE_KAMP_AFMELDEN_INDIV,
+from Competitie.definities import (MUTATIE_KAMP_RK_REINIT_TEST, MUTATIE_COMPETITIE_OPSTARTEN, MUTATIE_AG_VASTSTELLEN,
+                                   MUTATIE_KAMP_CUT, MUTATIE_KAMP_AFMELDEN_RK_INDIV,
                                    DEELNAME_ONBEKEND, DEELNAME_JA, DEELNAME_NEE)
-from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieMutatie,
-                               KampioenschapSporterBoog, KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet)
+from Competitie.models import Competitie, CompetitieIndivKlasse, CompetitieMutatie
 from Competitie.test_utils.tijdlijn import (zet_competitie_fases, zet_competitie_fase_regio_wedstrijden,
                                             zet_competitie_fase_rk_prep, zet_competitie_fase_rk_wedstrijden)
+from CompLaagRayon.models import DeelnemerRK, CutRK
 from Sporter.models import SporterVoorkeuren
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
@@ -86,9 +86,9 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
                                beschrijving__contains="Recurve klasse 6"))[0]
 
         # zet de cut op 16 voor de gekozen klasse
-        self.cut = KampioenschapIndivKlasseLimiet(kampioenschap=self.deelkamp_rk,
-                                                  indiv_klasse=self.klasse,
-                                                  limiet=16)
+        self.cut = CutRK(kamp=self.deelkamp_rk,
+                         indiv_klasse=self.klasse,
+                         limiet=16)
         self.cut.save()
 
     @staticmethod
@@ -97,7 +97,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         print('====================================================================')
         print('Klasse: %s' % klasse)
         print('Deelnemers:')
-        for obj in (KampioenschapSporterBoog
+        for obj in (DeelnemerRK
                     .objects
                     .filter(indiv_klasse=klasse)
                     .select_related('sporterboog__sporter')
@@ -112,7 +112,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
 
     def _dump_deelnemers(self, alle_klassen=False, para_info=False):                # pragma: no cover
         if alle_klassen:
-            for temp in KampioenschapSporterBoog.objects.distinct('klasse'):
+            for temp in DeelnemerRK.objects.distinct('klasse'):
                 self._dump_klasse_deelnemers(temp.klasse, para_info)
             # for
         else:
@@ -121,13 +121,13 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
     def _get_rank_volg(self, alleen_kampioenen=False, alle=False):
         if alleen_kampioenen:
             # verwijder iedereen zonder kampioen label
-            objs = KampioenschapSporterBoog.objects.exclude(kampioen_label='')
+            objs = DeelnemerRK.objects.exclude(kampioen_label='')
         elif alle:                          # pragma: no branch
             # all deelnemers
-            objs = KampioenschapSporterBoog.objects.all()
+            objs = DeelnemerRK.objects.all()
         else:
             # verwijder de kampioenen
-            objs = KampioenschapSporterBoog.objects.filter(kampioen_label='')  # pragma: no cover
+            objs = DeelnemerRK.objects.filter(kampioen_label='')  # pragma: no cover
 
         objs = objs.filter(indiv_klasse=self.klasse).order_by('volgorde')
 
@@ -171,10 +171,10 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_bko)
         self.e2e_wissel_naar_functie(self.functie_rko)
 
-        self.assertTrue(KampioenschapSporterBoog.objects.count() > 0)
+        self.assertTrue(DeelnemerRK.objects.count() > 0)
         # self._dump_deelnemers()
 
-        self.assertEqual(60, KampioenschapSporterBoog.objects.filter(indiv_klasse=self.klasse).count())
+        self.assertEqual(60, DeelnemerRK.objects.filter(indiv_klasse=self.klasse).count())
 
         self._check_volgorde_en_rank()
 
@@ -197,11 +197,11 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_bko)
         self.e2e_wissel_naar_functie(self.functie_bko)
         self.e2e_wissel_naar_functie(self.functie_rko)
-        self.assertTrue(KampioenschapSporterBoog.objects.count() > 0)
+        self.assertTrue(DeelnemerRK.objects.count() > 0)
         # self._dump_deelnemers()
 
         # meld een paar sporters af: 1 kampioen + 1 sporter boven de cut
-        deelnemer = KampioenschapSporterBoog.objects.filter(indiv_klasse=self.klasse).get(volgorde=1)
+        deelnemer = DeelnemerRK.objects.filter(indiv_klasse=self.klasse).get(volgorde=1)
         url = self.url_wijzig_stat % deelnemer.pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
@@ -213,13 +213,13 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('complaagrayon/wijzig-status-rk-deelnemer.dtl', 'design/site_layout.dtl'))
 
-        deelnemer = KampioenschapSporterBoog.objects.filter(indiv_klasse=self.klasse).get(volgorde=3)
+        deelnemer = DeelnemerRK.objects.filter(indiv_klasse=self.klasse).get(volgorde=3)
         url = self.url_wijzig_stat % deelnemer.pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
         self.assert_is_redirect(resp, self.url_lijst_rko)        # 302 = redirect = success
 
-        deelnemer = KampioenschapSporterBoog.objects.filter(indiv_klasse=self.klasse).get(volgorde=18)
+        deelnemer = DeelnemerRK.objects.filter(indiv_klasse=self.klasse).get(volgorde=18)
         url = self.url_wijzig_stat % deelnemer.pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
@@ -228,17 +228,16 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         self.verwerk_competitie_mutaties()
         # self._dump_deelnemers()
 
-        CompetitieMutatie(mutatie=MUTATIE_KAMP_REINIT_TEST,
-                          kampioenschap=self.deelkamp_rk).save()
+        CompetitieMutatie(mutatie=MUTATIE_KAMP_RK_REINIT_TEST,
+                          kamp_rk=self.deelkamp_rk).save()
         self.verwerk_competitie_mutaties()
         # self._dump_deelnemers()
         self._check_volgorde_en_rank()
 
         # nu zonder limiet
-        KampioenschapIndivKlasseLimiet.objects.all().delete()
-        KampioenschapTeamKlasseLimiet.objects.all().delete()
-        CompetitieMutatie(mutatie=MUTATIE_KAMP_REINIT_TEST,
-                          kampioenschap=self.deelkamp_rk).save()
+        CutRK.objects.all().delete()
+        CompetitieMutatie(mutatie=MUTATIE_KAMP_RK_REINIT_TEST,
+                          kamp_rk=self.deelkamp_rk).save()
         self.verwerk_competitie_mutaties()
 
     def test_rko_bevestigen(self):
@@ -246,9 +245,9 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_bko)
         self.e2e_wissel_naar_functie(self.functie_bko)
         self.e2e_wissel_naar_functie(self.functie_rko)
-        self.assertTrue(KampioenschapSporterBoog.objects.count() > 0)
+        self.assertTrue(DeelnemerRK.objects.count() > 0)
 
-        deelnemer = KampioenschapSporterBoog.objects.filter(indiv_klasse=self.klasse).get(volgorde=4)
+        deelnemer = DeelnemerRK.objects.filter(indiv_klasse=self.klasse).get(volgorde=4)
         self.assertEqual(deelnemer.rank, 4)
         url = self.url_wijzig_stat % deelnemer.pk
         with self.assert_max_queries(20):
@@ -257,7 +256,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
 
         self.verwerk_competitie_mutaties()
 
-        deelnemer = KampioenschapSporterBoog.objects.filter(indiv_klasse=self.klasse).get(pk=deelnemer.pk)
+        deelnemer = DeelnemerRK.objects.filter(indiv_klasse=self.klasse).get(pk=deelnemer.pk)
         self.assertEqual(deelnemer.deelname, DEELNAME_JA)
         self.assertEqual(deelnemer.rank, 4)
         self.assertEqual(deelnemer.volgorde, 4)
@@ -270,10 +269,10 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_bko)
         self.e2e_wissel_naar_functie(self.functie_bko)
         self.e2e_wissel_naar_functie(self.functie_rko)
-        self.assertTrue(KampioenschapSporterBoog.objects.count() > 0)
+        self.assertTrue(DeelnemerRK.objects.count() > 0)
 
         # self._dump_deelnemers()
-        deelnemer = KampioenschapSporterBoog.objects.filter(indiv_klasse=self.klasse).get(volgorde=10)
+        deelnemer = DeelnemerRK.objects.filter(indiv_klasse=self.klasse).get(volgorde=10)
         url = self.url_wijzig_stat % deelnemer.pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
@@ -282,7 +281,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         self.verwerk_competitie_mutaties()
 
         # self._dump_deelnemers()
-        deelnemer = KampioenschapSporterBoog.objects.get(pk=deelnemer.pk)
+        deelnemer = DeelnemerRK.objects.get(pk=deelnemer.pk)
         self.assertEqual(deelnemer.deelname, DEELNAME_NEE)
         self.assertEqual(deelnemer.rank, 0)
         self.assertEqual(deelnemer.volgorde, 10)
@@ -295,30 +294,30 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_bko)
         self.e2e_wissel_naar_functie(self.functie_bko)
         self.e2e_wissel_naar_functie(self.functie_rko)
-        self.assertTrue(KampioenschapSporterBoog.objects.count() > 0)
+        self.assertTrue(DeelnemerRK.objects.count() > 0)
         # self._dump_deelnemers()
 
         nr = 16 + 1   # cut ligt op 16
-        reserve = KampioenschapSporterBoog.objects.filter(indiv_klasse=self.klasse).get(volgorde=nr)
+        reserve = DeelnemerRK.objects.filter(indiv_klasse=self.klasse).get(volgorde=nr)
         self.assertEqual(reserve.deelname, DEELNAME_ONBEKEND)
         self.assertEqual(reserve.rank, nr)
         self.assertEqual(reserve.volgorde, nr)
 
-        deelnemer = KampioenschapSporterBoog.objects.filter(indiv_klasse=self.klasse).get(volgorde=4)
+        deelnemer = DeelnemerRK.objects.filter(indiv_klasse=self.klasse).get(volgorde=4)
         url = self.url_wijzig_stat % deelnemer.pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
         self.assert_is_redirect(resp, self.url_lijst_rko)        # 302 = redirect = success
 
-        self.verwerk_competitie_mutaties()
+        self.verwerk_competitie_mutaties(show_all=True)
 
         # self._dump_deelnemers()
-        deelnemer = KampioenschapSporterBoog.objects.get(pk=deelnemer.pk)
+        deelnemer.refresh_from_db()
         self.assertEqual(deelnemer.deelname, DEELNAME_NEE)
         self.assertEqual(deelnemer.rank, 0)
         self.assertEqual(deelnemer.volgorde, 4)
 
-        reserve = KampioenschapSporterBoog.objects.get(pk=reserve.pk)
+        reserve = DeelnemerRK.objects.get(pk=reserve.pk)
         self.assertEqual(reserve.deelname, DEELNAME_ONBEKEND)
         self.assertEqual(reserve.rank, nr - 1)
         self.assertEqual(reserve.volgorde, nr)
@@ -332,14 +331,14 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_bko)
         self.e2e_wissel_naar_functie(self.functie_bko)
         self.e2e_wissel_naar_functie(self.functie_rko)
-        self.assertTrue(KampioenschapSporterBoog.objects.count() > 0)
+        self.assertTrue(DeelnemerRK.objects.count() > 0)
 
         nr = 14     # cut ligt op 16
-        weghalen = KampioenschapSporterBoog.objects.filter(indiv_klasse=self.klasse, volgorde__gt=nr)
+        weghalen = DeelnemerRK.objects.filter(indiv_klasse=self.klasse, volgorde__gt=nr)
         weghalen.delete()
         # self._dump_deelnemers()
 
-        deelnemer = KampioenschapSporterBoog.objects.get(indiv_klasse=self.klasse, volgorde=4)
+        deelnemer = DeelnemerRK.objects.get(indiv_klasse=self.klasse, volgorde=4)
         url = self.url_wijzig_stat % deelnemer.pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
@@ -347,7 +346,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
 
         self.verwerk_competitie_mutaties()
 
-        deelnemer = KampioenschapSporterBoog.objects.get(pk=deelnemer.pk)
+        deelnemer = DeelnemerRK.objects.get(pk=deelnemer.pk)
         self.assertEqual(deelnemer.deelname, DEELNAME_NEE)
         self.assertEqual(deelnemer.rank, 0)
         self.assertEqual(deelnemer.volgorde, 4)
@@ -361,7 +360,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         self._check_volgorde_en_rank()
 
         # special case: de 1e deelnemer afmelden en weer aanmelden
-        deelnemer = KampioenschapSporterBoog.objects.get(indiv_klasse=self.klasse, volgorde=1)
+        deelnemer = DeelnemerRK.objects.get(indiv_klasse=self.klasse, volgorde=1)
         url = self.url_wijzig_stat % deelnemer.pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
@@ -370,7 +369,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         self.verwerk_competitie_mutaties()
         # self._dump_deelnemers()
 
-        deelnemer = KampioenschapSporterBoog.objects.get(pk=deelnemer.pk)
+        deelnemer = DeelnemerRK.objects.get(pk=deelnemer.pk)
         self.assertEqual(deelnemer.deelname, DEELNAME_NEE)
         self.assertEqual(deelnemer.rank, 0)
         self.assertEqual(deelnemer.volgorde, 1)
@@ -390,11 +389,11 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_bko)
         self.e2e_wissel_naar_functie(self.functie_bko)
         self.e2e_wissel_naar_functie(self.functie_rko)
-        self.assertTrue(KampioenschapSporterBoog.objects.count() > 0)
+        self.assertTrue(DeelnemerRK.objects.count() > 0)
 
         # self._dump_deelnemers()
         nr = 18     # cut ligt op 16
-        reserve = KampioenschapSporterBoog.objects.filter(indiv_klasse=self.klasse).get(rank=nr)
+        reserve = DeelnemerRK.objects.filter(indiv_klasse=self.klasse).get(rank=nr)
         self.assertEqual(reserve.volgorde, nr)
         url = self.url_wijzig_stat % reserve.pk
         with self.assert_max_queries(20):
@@ -404,7 +403,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         self.verwerk_competitie_mutaties()
 
         # self._dump_deelnemers()
-        reserve = KampioenschapSporterBoog.objects.get(pk=reserve.pk)
+        reserve = DeelnemerRK.objects.get(pk=reserve.pk)
         self.assertEqual(reserve.deelname, DEELNAME_NEE)
         self.assertEqual(reserve.rank, 0)
         self.assertEqual(reserve.volgorde, nr)
@@ -417,7 +416,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         self.verwerk_competitie_mutaties()
 
         # self._dump_deelnemers()
-        reserve = KampioenschapSporterBoog.objects.get(pk=reserve.pk)
+        reserve = DeelnemerRK.objects.get(pk=reserve.pk)
         self.assertEqual(reserve.deelname, DEELNAME_JA)
         self.assertEqual(reserve.rank, nr)
         self.assertEqual(reserve.volgorde, nr)
@@ -429,10 +428,10 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_bko)
         self.e2e_wissel_naar_functie(self.functie_bko)
         self.e2e_wissel_naar_functie(self.functie_rko)
-        self.assertTrue(KampioenschapSporterBoog.objects.count() > 0)
+        self.assertTrue(DeelnemerRK.objects.count() > 0)
 
         # self._dump_deelnemers()
-        pk = KampioenschapSporterBoog.objects.order_by('-rank')[0].pk
+        pk = DeelnemerRK.objects.order_by('-rank')[0].pk
         url = self.url_wijzig_stat % pk
 
         with self.assert_max_queries(20):
@@ -453,11 +452,11 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_bko)
         self.e2e_wissel_naar_functie(self.functie_bko)
         self.e2e_wissel_naar_functie(self.functie_rko)
-        self.assertTrue(KampioenschapSporterBoog.objects.count() > 0)
+        self.assertTrue(DeelnemerRK.objects.count() > 0)
         # self._dump_deelnemers()
 
         # plaats een afmelding onder de cut
-        deelnemer = KampioenschapSporterBoog.objects.filter(indiv_klasse=self.klasse).get(rank=20)    # cut ligt op 16
+        deelnemer = DeelnemerRK.objects.filter(indiv_klasse=self.klasse).get(rank=20)    # cut ligt op 16
         self.assertEqual(deelnemer.volgorde, 20)
         url = self.url_wijzig_stat % deelnemer.pk
         with self.assert_max_queries(20):
@@ -468,7 +467,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         # self._dump_deelnemers()
         # self._check_volgorde_en_rank()
 
-        deelnemer = KampioenschapSporterBoog.objects.filter(indiv_klasse=self.klasse).get(rank=3)    # cut ligt op 16
+        deelnemer = DeelnemerRK.objects.filter(indiv_klasse=self.klasse).get(rank=3)    # cut ligt op 16
         self.assertEqual(deelnemer.volgorde, 3)
         url = self.url_wijzig_stat % deelnemer.pk
         with self.assert_max_queries(20):
@@ -479,7 +478,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         # self._dump_deelnemers()
         self._check_volgorde_en_rank()
 
-        reserve = KampioenschapSporterBoog.objects.get(pk=deelnemer.pk)
+        reserve = DeelnemerRK.objects.get(pk=deelnemer.pk)
         del deelnemer
         self.assertEqual(reserve.deelname, DEELNAME_NEE)
         self.assertEqual(reserve.rank, 0)
@@ -494,7 +493,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         self.verwerk_competitie_mutaties()
         # self._dump_deelnemers()
 
-        reserve = KampioenschapSporterBoog.objects.get(pk=reserve.pk)
+        reserve = DeelnemerRK.objects.get(pk=reserve.pk)
         self.assertEqual(reserve.deelname, DEELNAME_JA)
         self.assertEqual(reserve.rank, 16+1)
         self.assertEqual(reserve.volgorde, 16+1)
@@ -508,10 +507,10 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_bko)
         self.e2e_wissel_naar_functie(self.functie_bko)
         self.e2e_wissel_naar_functie(self.functie_rko)
-        self.assertTrue(KampioenschapSporterBoog.objects.count() > 0)
+        self.assertTrue(DeelnemerRK.objects.count() > 0)
 
         # bereik dit effect door nr 3 af te melden en daarna weer aan te melden
-        deelnemer = KampioenschapSporterBoog.objects.filter(indiv_klasse=self.klasse).get(rank=3)
+        deelnemer = DeelnemerRK.objects.filter(indiv_klasse=self.klasse).get(rank=3)
         url = self.url_wijzig_stat % deelnemer.pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
@@ -522,12 +521,12 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
 
         self.verwerk_competitie_mutaties()
 
-        reserve = KampioenschapSporterBoog.objects.get(pk=deelnemer.pk)
+        reserve = DeelnemerRK.objects.get(pk=deelnemer.pk)
         self.assertEqual(reserve.volgorde, 17)
         del deelnemer
 
         # meld nu iemand anders af zodat de eerste reserve opgeroepen wordt
-        afmelden = KampioenschapSporterBoog.objects.filter(indiv_klasse=self.klasse).get(rank=4)    # cut ligt op 16
+        afmelden = DeelnemerRK.objects.filter(indiv_klasse=self.klasse).get(rank=4)    # cut ligt op 16
         url = self.url_wijzig_stat % afmelden.pk
         # self._dump_deelnemers()
         self.client.post(url, {'afmelden': 1, 'snel': 1})
@@ -535,13 +534,13 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
 
         self.verwerk_competitie_mutaties()
 
-        ex_reserve = KampioenschapSporterBoog.objects.get(pk=reserve.pk)
+        ex_reserve = DeelnemerRK.objects.get(pk=reserve.pk)
         self.assertEqual(ex_reserve.volgorde, 3)
         self.assertEqual(ex_reserve.rank, 3)
 
         # de zojuist afgemelde sporter staat nog steeds waar hij stond
         # maar is 1 omlaag geschoven door de ingeschoven reserve sporter
-        afmelden = KampioenschapSporterBoog.objects.get(pk=afmelden.pk)
+        afmelden = DeelnemerRK.objects.get(pk=afmelden.pk)
         self.assertEqual(afmelden.rank, 0)
         self.assertEqual(afmelden.volgorde, 5)
 
@@ -553,12 +552,12 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_bko)
         self.e2e_wissel_naar_functie(self.functie_bko)
         self.e2e_wissel_naar_functie(self.functie_rko)
-        self.assertTrue(KampioenschapSporterBoog.objects.count() > 0)
+        self.assertTrue(DeelnemerRK.objects.count() > 0)
 
         # bereik dit effect door nr 14 af te melden en daarna weer aan te melden
         # dit is een regiokampioen met het laagste gemiddelde
         # self._dump_deelnemers()
-        kampioen = KampioenschapSporterBoog.objects.filter(indiv_klasse=self.klasse).get(rank=14)
+        kampioen = DeelnemerRK.objects.filter(indiv_klasse=self.klasse).get(rank=14)
         url = self.url_wijzig_stat % kampioen.pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
@@ -571,7 +570,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         # self._dump_deelnemers()
 
         # kijk wat er met de kampioen gebeurd is
-        kampioen = KampioenschapSporterBoog.objects.get(pk=kampioen.pk)
+        kampioen = DeelnemerRK.objects.get(pk=kampioen.pk)
         self.assertEqual(kampioen.deelname, DEELNAME_JA)
         self.assertEqual(kampioen.rank, 17)
         self.assertEqual(kampioen.volgorde, 17)
@@ -582,10 +581,10 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_bko)
         self.e2e_wissel_naar_functie(self.functie_bko)
         self.e2e_wissel_naar_functie(self.functie_rko)
-        self.assertTrue(KampioenschapSporterBoog.objects.count() > 0)
+        self.assertTrue(DeelnemerRK.objects.count() > 0)
 
         # zoek de sporters met regiokampioen label op
-        pks = (KampioenschapSporterBoog
+        pks = (DeelnemerRK
                .objects
                .exclude(kampioen_label='')
                .filter(indiv_klasse=self.klasse)
@@ -604,7 +603,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         # self._dump_deelnemers()
 
         # de laatste regiokampioen staat nog steeds onderaan in de lijst
-        kampioen = KampioenschapSporterBoog.objects.get(pk=pks[3])
+        kampioen = DeelnemerRK.objects.get(pk=pks[3])
         self.assertEqual(kampioen.rank, 10)
         self.assertEqual(kampioen.volgorde, 13)
 
@@ -628,15 +627,15 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         # self._dump_deelnemers()
 
         # controleer dat ze in de reserve sporters lijst staan, gesorteerd op gemiddelde
-        kampioen = KampioenschapSporterBoog.objects.get(pk=pks[0])
+        kampioen = DeelnemerRK.objects.get(pk=pks[0])
         self.assertEqual(kampioen.rank, 17)
         self.assertEqual(kampioen.volgorde, 17)
 
-        kampioen = KampioenschapSporterBoog.objects.get(pk=pks[1])
+        kampioen = DeelnemerRK.objects.get(pk=pks[1])
         self.assertEqual(kampioen.rank, 18)
         self.assertEqual(kampioen.volgorde, 18)
 
-        kampioen = KampioenschapSporterBoog.objects.get(pk=pks[2])
+        kampioen = DeelnemerRK.objects.get(pk=pks[2])
         self.assertEqual(kampioen.rank, 19)
         self.assertEqual(kampioen.volgorde, 19)
 
@@ -646,13 +645,13 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_bko)
         self.e2e_wissel_naar_functie(self.functie_bko)
         self.e2e_wissel_naar_functie(self.functie_rko)
-        self.assertTrue(KampioenschapSporterBoog.objects.count() > 0)
+        self.assertTrue(DeelnemerRK.objects.count() > 0)
         # self._dump_deelnemers()
 
         self.cut.delete()       # verwijder de cut van 16
 
         # zoek de sporters met regiokampioen label op
-        pks = (KampioenschapSporterBoog
+        pks = (DeelnemerRK
                .objects
                .exclude(kampioen_label='')
                .filter(indiv_klasse=self.klasse)
@@ -670,7 +669,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         # self._dump_deelnemers()
 
         # de laatste kampioen staat nog steeds in de lijst en boven de cut
-        kampioen = KampioenschapSporterBoog.objects.get(pk=pks[3])
+        kampioen = DeelnemerRK.objects.get(pk=pks[3])
         self.assertEqual(kampioen.rank, 10)
         self.assertEqual(kampioen.volgorde, 13)
 
@@ -694,15 +693,15 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         # self._dump_deelnemers()
 
         # controleer dat de kampioenen nu als reserve in de lijst staan
-        kampioen = KampioenschapSporterBoog.objects.get(pk=pks[0])
+        kampioen = DeelnemerRK.objects.get(pk=pks[0])
         self.assertEqual(kampioen.rank, 25)
         self.assertEqual(kampioen.volgorde, 25)
 
-        kampioen = KampioenschapSporterBoog.objects.get(pk=pks[1])
+        kampioen = DeelnemerRK.objects.get(pk=pks[1])
         self.assertEqual(kampioen.rank, 26)
         self.assertEqual(kampioen.volgorde, 26)
 
-        kampioen = KampioenschapSporterBoog.objects.get(pk=pks[2])
+        kampioen = DeelnemerRK.objects.get(pk=pks[2])
         self.assertEqual(kampioen.rank, 27)
         self.assertEqual(kampioen.volgorde, 27)
 
@@ -710,7 +709,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
 
         # meld nu 3 sporters af, boven de cut
         # en controleer dat de regiokampioenen weer deelnemer zijn, op de juiste plek
-        temp_pks = (KampioenschapSporterBoog
+        temp_pks = (DeelnemerRK
                     .objects
                     .filter(indiv_klasse=self.klasse,
                             rank__gte=10)
@@ -727,15 +726,15 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         # self._dump_deelnemers()
 
         # controleer dat de kampioenen nu als deelnemer in de lijst staan
-        kampioen = KampioenschapSporterBoog.objects.get(pk=pks[0])
+        kampioen = DeelnemerRK.objects.get(pk=pks[0])
         self.assertEqual(kampioen.rank, 1)
         self.assertEqual(kampioen.volgorde, 1)
 
-        kampioen = KampioenschapSporterBoog.objects.get(pk=pks[1])
+        kampioen = DeelnemerRK.objects.get(pk=pks[1])
         self.assertEqual(kampioen.rank, 11)
         self.assertEqual(kampioen.volgorde, 11)
 
-        kampioen = KampioenschapSporterBoog.objects.get(pk=pks[2])
+        kampioen = DeelnemerRK.objects.get(pk=pks[2])
         self.assertEqual(kampioen.rank, 12)
         self.assertEqual(kampioen.volgorde, 12)
 
@@ -744,7 +743,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_bko)
         self.e2e_wissel_naar_functie(self.functie_bko)
         self.e2e_wissel_naar_functie(self.functie_rko)
-        self.assertTrue(KampioenschapSporterBoog.objects.count() > 0)
+        self.assertTrue(DeelnemerRK.objects.count() > 0)
 
         # self._dump_deelnemers()
         rank, volg = self._get_rank_volg(alleen_kampioenen=True)
@@ -754,19 +753,19 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         # meld 3 sporters af: 1 kampioen en 1 niet-kampioen boven de cut + 1 onder cut
 
         # onder de cut
-        url = self.url_wijzig_stat % KampioenschapSporterBoog.objects.filter(indiv_klasse=self.klasse).get(rank=17).pk
+        url = self.url_wijzig_stat % DeelnemerRK.objects.filter(indiv_klasse=self.klasse).get(rank=17).pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
         self.assert_is_redirect(resp, self.url_lijst_rko)  # 302 = redirect = success
 
         # normale deelnemer
-        url = self.url_wijzig_stat % KampioenschapSporterBoog.objects.filter(indiv_klasse=self.klasse).get(rank=2).pk
+        url = self.url_wijzig_stat % DeelnemerRK.objects.filter(indiv_klasse=self.klasse).get(rank=2).pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
         self.assert_is_redirect(resp, self.url_lijst_rko)  # 302 = redirect = success
 
         # kampioen
-        url = self.url_wijzig_stat % KampioenschapSporterBoog.objects.filter(indiv_klasse=self.klasse).get(rank=1).pk
+        url = self.url_wijzig_stat % DeelnemerRK.objects.filter(indiv_klasse=self.klasse).get(rank=1).pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
         self.assert_is_redirect(resp, self.url_lijst_rko)  # 302 = redirect = success
@@ -794,7 +793,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_bko)
         self.e2e_wissel_naar_functie(self.functie_bko)
         self.e2e_wissel_naar_functie(self.functie_rko)
-        self.assertTrue(KampioenschapSporterBoog.objects.count() > 0)
+        self.assertTrue(DeelnemerRK.objects.count() > 0)
 
         # default cut is 16
         # verhoog de cut naar 24
@@ -807,7 +806,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         self.verwerk_competitie_mutaties()
 
         # meld iemand af
-        url = self.url_wijzig_stat % KampioenschapSporterBoog.objects.filter(indiv_klasse=self.klasse).get(rank=2).pk
+        url = self.url_wijzig_stat % DeelnemerRK.objects.filter(indiv_klasse=self.klasse).get(rank=2).pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
         self.assert_is_redirect(resp, self.url_lijst_rko)  # 302 = redirect = success
@@ -831,9 +830,9 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
     # def test_rko_allemaal_afmelden(self):
     #     self.e2e_login_and_pass_otp(self.account_bko)
     #     self.e2e_wissel_naar_functie(self.functie_rko)
-    #     self.assertTrue(KampioenschapSporterBoog.objects.count() > 0)
+    #     self.assertTrue(DeelnemerRK.objects.count() > 0)
     #
-    #     pks = list(KampioenschapSporterBoog.objects.filter(indiv_klasse=self.klasse).values_list('pk', flat=True))
+    #     pks = list(DeelnemerRK.objects.filter(indiv_klasse=self.klasse).values_list('pk', flat=True))
     #     for pk in pks:
     #         url = self.url_wijzig_status % pk
     #         with self.assert_max_queries(20):
@@ -849,10 +848,10 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_bko)
         self.e2e_wissel_naar_functie(self.functie_bko)
         self.e2e_wissel_naar_functie(self.functie_rko)
-        self.assertTrue(KampioenschapSporterBoog.objects.count() > 0)
+        self.assertTrue(DeelnemerRK.objects.count() > 0)
 
         # dubbel afmelden
-        url = self.url_wijzig_stat % KampioenschapSporterBoog.objects.filter(indiv_klasse=self.klasse).get(rank=2).pk
+        url = self.url_wijzig_stat % DeelnemerRK.objects.filter(indiv_klasse=self.klasse).get(rank=2).pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
         self.assert_is_redirect(resp, self.url_lijst_rko)  # 302 = redirect = success
@@ -876,22 +875,22 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_bko)
         self.e2e_wissel_naar_functie(self.functie_bko)
         self.e2e_wissel_naar_functie(self.functie_rko)
-        self.assertTrue(KampioenschapSporterBoog.objects.count() > 0)
+        self.assertTrue(DeelnemerRK.objects.count() > 0)
 
         # slechte mutatie code
         mutatie = CompetitieMutatie(mutatie=0,
-                                    deelnemer=KampioenschapSporterBoog.objects.first(),
+                                    deelnemer_rk=DeelnemerRK.objects.first(),
                                     door='Tester')
         mutatie.save()
 
         self.assertTrue("???" in str(mutatie))  # geen beschrijving beschikbaar
-        mutatie.mutatie = MUTATIE_KAMP_REINIT_TEST
+        mutatie.mutatie = MUTATIE_KAMP_RK_REINIT_TEST
         self.assertTrue(str(mutatie) != "")     # wel een beschrijving
 
         mutatie.mutatie = MUTATIE_KAMP_CUT
         self.assertTrue(str(mutatie) != "")     # wel een beschrijving
 
-        mutatie.mutatie = MUTATIE_KAMP_AFMELDEN_INDIV
+        mutatie.mutatie = MUTATIE_KAMP_AFMELDEN_RK_INDIV
         self.assertTrue(str(mutatie) != "")     # wel een beschrijving
 
         mutatie.is_verwerkt = True
@@ -900,19 +899,19 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         # mutatie die al verwerkt is
         CompetitieMutatie(mutatie=0,
                           is_verwerkt=True,
-                          deelnemer=KampioenschapSporterBoog.objects.first(),
+                          deelnemer_rk=DeelnemerRK.objects.first(),
                           door='Tester').save()
 
         # mutatie nieuw record van 24 wordt niet opgeslagen
         CompetitieMutatie(mutatie=MUTATIE_KAMP_CUT,
-                          kampioenschap=self.deelkamp_rk,
+                          kamp_rk=self.deelkamp_rk,
                           indiv_klasse=self.klasse,
                           cut_oud=23,
                           cut_nieuw=24,  # verwijder oude record
                           door='Tester').save()
 
         CompetitieMutatie(mutatie=MUTATIE_KAMP_CUT,
-                          kampioenschap=self.deelkamp_rk,
+                          kamp_rk=self.deelkamp_rk,
                           indiv_klasse=self.klasse,
                           cut_oud=23,
                           cut_nieuw=24,
@@ -920,7 +919,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
 
         # mutatie die geen wijziging is
         CompetitieMutatie(mutatie=MUTATIE_KAMP_CUT,
-                          kampioenschap=self.deelkamp_rk,
+                          kamp_rk=self.deelkamp_rk,
                           indiv_klasse=self.klasse,
                           cut_oud=24,
                           cut_nieuw=24,
@@ -957,7 +956,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
     def test_hwl_mutaties(self):
         # de HWL meldt leden van zijn eigen vereniging aan/af
 
-        deelnemer_pks = (KampioenschapSporterBoog
+        deelnemer_pks = (DeelnemerRK
                          .objects
                          .filter(bij_vereniging__ver_nr=self.hwl_ver_nr,
                                  deelname=DEELNAME_ONBEKEND)
@@ -1054,7 +1053,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         # sporter van andere vereniging
         zet_competitie_fases(comp, 'K', 'K')
         andere_ver = self.ver_nrs[0]
-        andere_deelnemer_pk = (KampioenschapSporterBoog
+        andere_deelnemer_pk = (DeelnemerRK
                                .objects
                                .filter(bij_vereniging__ver_nr=andere_ver,
                                        deelname=DEELNAME_ONBEKEND))[0].pk
