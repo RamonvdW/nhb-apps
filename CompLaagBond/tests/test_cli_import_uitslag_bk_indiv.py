@@ -59,36 +59,6 @@ class TestCompLaagBondCliImportUitslagBkIndiv(E2EHelpers, TestCase):
         cls.deelnemer_25b = DeelnemerBK.objects.get(kamp__competitie__afstand='25',
                                                     sporterboog__sporter__lid_nr=301844)
 
-        # verander de RK deelnemers in BK deelnemers
-        bulk = list()
-        for deelnemer in DeelnemerRK.objects.filter(kamp__competitie__afstand='18'):
-            bulk.append(
-                DeelnemerBK(
-                    kamp=data.deelkamp18_bk,
-                    sporterboog=deelnemer.sporterboog,
-                    indiv_klasse=deelnemer.indiv_klasse,
-                    indiv_klasse_volgende_ronde=deelnemer.indiv_klasse_volgende_ronde,
-                    bij_vereniging=deelnemer.bij_vereniging,
-                    gemiddelde=deelnemer.gemiddelde
-                )
-            )
-        # for
-
-        for deelnemer in DeelnemerRK.objects.filter(kamp__competitie__afstand='25'):
-            bulk.append(
-                DeelnemerBK(
-                    kamp=data.deelkamp25_bk,
-                    sporterboog=deelnemer.sporterboog,
-                    indiv_klasse=deelnemer.indiv_klasse,
-                    indiv_klasse_volgende_ronde=deelnemer.indiv_klasse_volgende_ronde,
-                    bij_vereniging=deelnemer.bij_vereniging,
-                    gemiddelde=deelnemer.gemiddelde
-                )
-            )
-        # for
-        DeelnemerBK.objects.bulk_create(bulk)
-        del bulk
-
         # zet de competities in fase P
         zet_competitie_fase_bk_wedstrijden(data.comp18)
         zet_competitie_fase_bk_wedstrijden(data.comp25)

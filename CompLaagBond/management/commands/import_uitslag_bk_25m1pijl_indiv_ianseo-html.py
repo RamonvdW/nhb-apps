@@ -6,7 +6,7 @@
 
 from django.core.management.base import BaseCommand
 from Competitie.definities import DEELNAME_NEE, KAMP_RANK_NO_SHOW, KAMP_RANK_RESERVE
-from CompLaagBond.models import KampBK, DeelnemerBK
+from CompLaagBond.models import DeelnemerBK
 
 
 class Command(BaseCommand):

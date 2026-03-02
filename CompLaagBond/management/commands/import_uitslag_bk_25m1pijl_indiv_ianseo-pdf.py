@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management.base import BaseCommand
-from CompLaagRayon.models import DeelnemerRK
+from CompLaagBond.models import DeelnemerBK
 import pypdf
 
 
@@ -111,8 +111,7 @@ class Command(BaseCommand):
                             help='Pad naar het pdf bestand')
 
     def _deelnemers_ophalen(self):
-        # alle deelnemers van de RK individueel mogen meedoen met de BK teams
-        for deelnemer in (DeelnemerRK
+        for deelnemer in (DeelnemerBK
                           .objects
                           .filter(kamp__competitie__afstand='25')
                           .select_related('kamp',
