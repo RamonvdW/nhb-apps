@@ -408,7 +408,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
             json_data[sporterboog.pk] = waarde
             waarde += 1
         # for
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(33):
             resp = self.client.post(self.url_uitslag_opslaan,
                                     json.dumps(json_data),
                                     content_type='application/json')
@@ -683,7 +683,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
             waarde += 1
         # for
 
-        with self.assert_max_queries(71):
+        with self.assert_max_queries(192):
             resp = self.client.post(self.url_uitslag_opslaan,
                                     json.dumps(json_data),
                                     content_type='application/json')

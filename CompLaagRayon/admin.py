@@ -424,8 +424,8 @@ class DeelnemerRKAdmin(CreateOnlyAdmin):
 
 class CutRKAdmin(CreateOnlyAdmin):
 
-    list_select_related = ('indiv_klasse',
-                           'team_klasse')
+    list_select_related = ('kamp',
+                           'indiv_klasse')
 
 
 admin.site.register(KampRK, KampRKAdmin)

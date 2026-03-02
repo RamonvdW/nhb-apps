@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2025 Ramon van der Winkel.
+#  Copyright (c) 2020-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -38,16 +38,21 @@ BEHEER_URLS = (
     '/beheer/Betaal/betaalinstellingenvereniging/',
     '/beheer/Betaal/betaalmutatie/',
     '/beheer/Betaal/betaaltransactie/',
+    '/beheer/Bondspas/bondspasjaar/',
+    '/beheer/CompKampioenschap/sheetstatus/',
+    '/beheer/CompLaagBond/cutbk/',
+    '/beheer/CompLaagBond/deelnemerbk/',
+    '/beheer/CompLaagBond/kampbk/',
+    '/beheer/CompLaagBond/teambk/',
+    '/beheer/CompLaagRayon/cutrk/',
+    '/beheer/CompLaagRayon/deelnemerrk/',
+    '/beheer/CompLaagRayon/kamprk/',
+    '/beheer/CompLaagRayon/teamrk/',
     '/beheer/Competitie/competitie/',
     '/beheer/Competitie/competitieindivklasse/',
     '/beheer/Competitie/competitiematch/',
     '/beheer/Competitie/competitiemutatie/',
     '/beheer/Competitie/competitieteamklasse/',
-    '/beheer/Competitie/kampioenschap/',
-    '/beheer/Competitie/kampioenschapindivklasselimiet/',
-    '/beheer/Competitie/kampioenschapsporterboog/',
-    '/beheer/Competitie/kampioenschapteam/',
-    '/beheer/Competitie/kampioenschapteamklasselimiet/',
     '/beheer/Competitie/regiocompetitie/',
     '/beheer/Competitie/regiocompetitieronde/',
     '/beheer/Competitie/regiocompetitierondeteam/',
@@ -312,14 +317,16 @@ class TestBeheer(E2EHelpers, TestCase):
             '/beheer/Competitie/regiocompetitieteam/?TeamType=R2',
             '/beheer/Competitie/regiocompetitierondeteam/?RondeTeamType=R2',
             '/beheer/Competitie/regiocompetitierondeteam/?RondeTeamVer=1350',
-            '/beheer/Competitie/kampioenschapteam/?rk_bk_type=RK',
-            '/beheer/Competitie/kampioenschapteam/?rk_bk_type=BK',
-            '/beheer/Competitie/kampioenschapteam/?incompleet=incompleet',
-            '/beheer/Competitie/kampioenschapteam/?incompleet=compleet',
-            '/beheer/Competitie/kampioenschapsporterboog/',
-            '/beheer/Competitie/kampioenschapsporterboog/?indiv_klasse_rk_bk=1100',
-            '/beheer/Competitie/kampioenschapsporterboog/?mismatch=Geen',
-            '/beheer/Competitie/kampioenschapsporterboog/?mismatch=Ja',
+            '/beheer/CompLaagRayon/deelnemerrk/',
+            '/beheer/CompLaagRayon/deelnemerrk/?indiv_klasse_rk_bk=1100',
+            '/beheer/CompLaagRayon/deelnemerrk/?mismatch=Geen',
+            '/beheer/CompLaagRayon/deelnemerrk/?mismatch=Ja',
+            '/beheer/CompLaagRayon/teamrk/?incompleet=incompleet',
+            '/beheer/CompLaagRayon/teamrk/?incompleet=compleet',
+            '/beheer/CompLaagBond/deelnemerbk/',
+            '/beheer/CompLaagBond/deelnemerbk/?indiv_klasse_rk_bk=1100',
+            '/beheer/CompLaagBond/deelnemerbk/?mismatch=Geen',
+            '/beheer/CompLaagBond/deelnemerbk/?mismatch=Ja',
 
             # Scheidsrechter
             '/beheer/Scheidsrechter/scheidsbeschikbaarheid/?opgaaf__exact=J',

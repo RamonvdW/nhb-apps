@@ -75,30 +75,6 @@ class TeamKlassenFilter(admin.SimpleListFilter):
         return queryset
 
 
-class IncompleetTeamFilter(admin.SimpleListFilter):
-
-    title = "Incompleet Team"
-
-    parameter_name = 'incompleet'
-
-    default_value = None
-
-    def lookups(self, request, model_admin):                    # pragma: no cover
-        """ Return list of tuples for the sidebar """
-        return [
-            ('incompleet', 'Incomplete teams'),
-            ('compleet', 'Volledige teams')
-        ]
-
-    def queryset(self, request, queryset):
-        selection = self.value()
-        if selection == 'incompleet':
-            queryset = queryset.filter(aanvangsgemiddelde__lt=1)
-        elif selection == 'compleet':
-            queryset = queryset.filter(aanvangsgemiddelde__gte=1)
-        return queryset
-
-
 class VerenigingFilter(admin.SimpleListFilter):
 
     title = "Vereniging"
@@ -169,7 +145,6 @@ class TeamBKAdmin(CreateOnlyAdmin):
                    'is_reserve',
                    'deelname',
                    TeamKlassenFilter,
-                   IncompleetTeamFilter,
                    VerenigingFilter)
 
     list_select_related = ('kamp',
@@ -368,8 +343,8 @@ class DeelnemerBKAdmin(CreateOnlyAdmin):
 
 class CutBKAdmin(CreateOnlyAdmin):
 
-    list_select_related = ('indiv_klasse',
-                           'team_klasse')
+    list_select_related = ('kamp',
+                           'indiv_klasse',)
 
 
 admin.site.register(KampBK, KampBKAdmin)
