@@ -41,7 +41,7 @@ class VerwerkCompLaagRayonMutaties:
             pks.append(deelcomp.pk)
         # for
 
-        # TODO: sorteren en kampioenen eerst zetten kan allemaal weg
+        # TODO: sorteren en kampioenen eerst zetten kan allemaal weg, want: ...??
         deelnemers = (RegiocompetitieSporterBoog
                       .objects
                       .select_related('indiv_klasse',

@@ -1,0 +1,115 @@
+{% extends 'design/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2026 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+{% load design_knop %}
+
+{% block title %}Teams BK{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Teams BK</h3>
+            <p>Dit zijn de teams die doorgestroomd zijn naar de <b>Bondskampioenschappen (BK)</b><br>van de <b>{{ deelkamp }}</b></p>
+        </div>
+    </div>
+
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Teams</h4>
+        </div>
+    </div>
+
+    <!-- blauwe balk met informatie in een tabel -->
+    <div class="row-sv-blauw">
+        <div class="col s12">
+            <table class="sv-kader-tabel">
+
+                <thead>
+                    <tr>
+                        <th>Team naam</th>
+                        <th>Wedstrijd<wbr>klasse BK</th>
+                        <th>Gekoppelde sporters</th>
+                        <th class="center">Gemiddelde</th>
+                    </tr>
+                </thead>
+
+                {% for bk_team in bk_teams %}
+                    <tr>
+                        <td>{{ bk_team.team_naam }}</td>
+                        <td>{{ bk_team.team_klasse.beschrijving }}</td>
+                        <td>
+                            {% for lid in bk_team.leden %}
+                                <span class="hide-on-small-only">{{ lid.sporterboog.sporter.lid_nr_en_volledige_naam }}</span>
+                                <span class="hide-on-med-and-up">[{{ lid.sporterboog.sporter.lid_nr }}]</span>
+                                <br>
+                            {% endfor %}
+                        </td>
+                        <td class="center">
+                            {% for lid in bk_team.leden %}
+                                {{ lid.gemiddelde }}<br>
+                            {% endfor %}
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="4" class="center">
+                            <i>Geen teams gevonden</i>
+                        </td>
+                    </tr>
+                {% endfor %}
+
+            </table>
+        </div>
+    </div>
+
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Toegestane invallers</h4>
+            <p>De volgende leden mogen invallen in een BK team<br>als ze een lager gemiddelde hebben dan de uitvaller.</p>
+        </div>
+    </div>
+
+    <!-- blauwe balk met informatie in een tabel -->
+    <div class="row-sv-blauw">
+        <div class="col s12">
+            <table class="sv-kader-tabel">
+
+                <thead>
+                    <tr>
+                        <th>Sporter</th>
+                        <th>Boog</th>
+                        <th class="center">Gemiddelde</th>
+                    </tr>
+                </thead>
+
+                {% for deelnemer in invallers %}
+                    <tr>
+                        <td>{{ deelnemer.sporterboog.sporter.lid_nr_en_volledige_naam }}</td>
+                        <td>{{ deelnemer.sporterboog.boogtype.beschrijving }}</td>
+                        <td class="center">{{ deelnemer.gemiddelde }}</td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="3" class="center">
+                            <i>Geen invallers gevonden</i>
+                        </td>
+                    </tr>
+                {% endfor %}
+
+            </table>
+        </div>
+    </div>
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="complaagbond-hwl-teams" %}
+
+{% endblock %}

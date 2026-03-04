@@ -20,7 +20,7 @@ def do_migrate(apps, _):
         kampioenschap_klas = apps.get_model('Competitie', 'Kampioenschap')
         kamp_rk_klas = apps.get_model('CompLaagRayon', 'KampRK')
 
-        for deelkamp in (kampioenschap_klas
+        for deelkamp in (kampioenschap_klas                         # pragma: no cover
                               .objects
                               .filter(deel=DEEL_RK)
                               .select_related('competitie',
@@ -47,7 +47,7 @@ def do_migrate(apps, _):
         kampioenschapsporterboog_klas = apps.get_model('Competitie', 'KampioenschapSporterBoog')
         deelnemer_rk_klas = apps.get_model('CompLaagRayon', 'DeelnemerRK')
 
-        for deelnemer in (kampioenschapsporterboog_klas
+        for deelnemer in (kampioenschapsporterboog_klas                     # pragma: no cover
                           .objects
                           .filter(kampioenschap__deel=DEEL_RK)
                           .select_related('kampioenschap',
@@ -86,7 +86,7 @@ def do_migrate(apps, _):
         kampioenschapteam_klas = apps.get_model('Competitie', 'KampioenschapTeam')
         team_rk_klas = apps.get_model('CompLaagRayon', 'TeamRK')
 
-        for team in (kampioenschapteam_klas
+        for team in (kampioenschapteam_klas                             # pragma: no cover
                      .objects
                      .filter(kampioenschap__deel=DEEL_RK)
                      .prefetch_related('tijdelijke_leden',
@@ -142,7 +142,7 @@ def do_migrate(apps, _):
         cut_klas = apps.get_model('CompLaagRayon', 'CutRK')
 
         bulk = list()
-        for limiet in limiet_klas.objects.filter(kampioenschap__deel=DEEL_RK):
+        for limiet in limiet_klas.objects.filter(kampioenschap__deel=DEEL_RK):      # pragma: no cover
             bulk.append(
                 cut_klas(
                     kamp=kamp2new[limiet.kampioenschap.pk],

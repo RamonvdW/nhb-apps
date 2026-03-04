@@ -12,7 +12,8 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.definities import INSCHRIJF_METHODE_1
 from Competitie.models import Competitie, Regiocompetitie, RegiocompetitieRonde
 from Competitie.tijdlijn import maak_comp_fase_beschrijvingen, is_open_voor_inschrijven_rk_teams
-from CompLaagRayon.models import KampRK
+from CompLaagBond.models import KampBK, TeamBK
+from CompLaagRayon.models import KampRK, TeamRK
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
 from Locatie.definities import BAAN_TYPE_EXTERN
@@ -49,9 +50,8 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
     def _zoek_wedstrijden(self, context):
         """ maak de kaartjes voor elke competitie """
         # TODO: verplaats naar plug-in in CompLaag*
-        comps = list()
-        deelcomps = list()
-        deelkamps_rk = list()
+        comps = deelcomps = deelkamps_rk = deelkamps_bk = list()
+        heeft_rk_teams = heeft_bk_teams = False
 
         # HWL of WL
         if self.rol_nu == Rol.ROL_HWL:
@@ -77,6 +77,14 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                             .filter(competitie__is_afgesloten=False,
                                     rayon=self.ver.regio.rayon)
                             .select_related('competitie'))
+
+            deelkamps_bk = (KampBK
+                            .objects
+                            .filter(competitie__is_afgesloten=False)
+                            .select_related('competitie'))
+
+            heeft_rk_teams = TeamRK.objects.filter(kamp__competitie__is_afgesloten=False).count() > 0
+            heeft_bk_teams = TeamBK.objects.filter(kamp__competitie__is_afgesloten=False).count() > 0
 
             if (RegiocompetitieRonde
                 .objects
@@ -170,6 +178,21 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
             # for
             del deelcomp
 
+            # teams BK
+            for deelkamp_bk in deelkamps_bk:
+                if deelkamp_bk.competitie == comp:
+                    if self.rol_nu != Rol.ROL_WL:
+                        if 'N' <= comp.fase_teams <= 'P':
+                            # RK voorbereidende fase
+                            kaartje = SimpleNamespace(
+                                            titel="Teams BK",
+                                            tekst="Verenigingsteams voor de bondskampioenschappen inzien.",
+                                            url=reverse('CompLaagBond:teams-bk',
+                                                         kwargs={'deelkamp_pk': deelkamp_bk.pk}),
+                                            sv_icon='ver bk teams')
+                            kaartjes.append(kaartje)
+            # for
+
             # 3 - teams RK
             deelkamp_rk = None
             for deelkamp_rk in deelkamps_rk:
@@ -200,7 +223,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                                 kaartje.beschikbaar_vanaf = localize(vanaf_datum)
                             kaartjes.append(kaartje)
                         else:
-                            if 'J' <= comp.fase_indiv <= 'K':
+                            if 'J' <= comp.fase_teams <= 'K':
                                 # RK voorbereidende fase
                                 kaartje = SimpleNamespace(
                                                 titel="Teams RK",

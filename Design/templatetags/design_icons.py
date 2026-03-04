@@ -242,6 +242,7 @@ ICON_NAME2MATERIAL_SYMBOL_NAME = {
     'ver overboekingen': 'euro_symbol',
     'ver regio teams': 'gamepad',
     'ver rk teams': 'api',
+    'ver bk teams': 'api',
     'ver team invallers': 'how_to_reg',
     'ver voorkeuren leden': 'tune',
     'ver voorwaarden': 'article',

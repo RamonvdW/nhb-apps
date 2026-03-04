@@ -6,7 +6,7 @@
 
 from django.urls import path
 from CompLaagBond import (view_planning, view_indiv_bko, view_teams_bko, view_formulieren, view_kleine_klassen,
-                          view_indiv_wijzig_status, view_match_info_hwl, view_limieten)
+                          view_indiv_wijzig_status, view_match_info_hwl, view_limieten, view_teams_hwl)
 
 app_name = 'CompLaagBond'
 
@@ -78,6 +78,11 @@ urlpatterns = [
     path('download-formulier-teams/<match_pk>/<klasse_pk>/',
          view_formulieren.FormulierBkTeamsAlsBestandView.as_view(),
          name='formulier-teams-als-bestand'),
+
+    # HWL ver: BK teams eigen vereniging
+    path('teams-vereniging/<deelkamp_pk>/',
+         view_teams_hwl.TeamsBkView.as_view(),
+         name='teams-bk'),
 ]
 
 # end of file

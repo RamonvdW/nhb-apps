@@ -165,6 +165,19 @@ class TeamsRkView(UserPassesTestMixin, TemplateView):
 
         return rk_teams
 
+    def _get_rk_team_invallers(self, deelkamp: KampRK):
+        # BK team bestaat uit gerechtigde RK deelnemers
+        deelnemers = (DeelnemerRK
+                      .objects
+                      .filter(kamp=deelkamp,
+                              bij_vereniging=self.functie_nu.vereniging)
+                      .select_related('sporterboog',
+                                      'sporterboog__sporter')
+                      .order_by('sporterboog__boogtype__volgorde',
+                                '-gemiddelde'))                     # sterkste bovenaan
+
+        return deelnemers
+
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
@@ -177,6 +190,9 @@ class TeamsRkView(UserPassesTestMixin, TemplateView):
         context['rk_bk_klassen_vastgesteld'] = is_vastgesteld = deelkamp.competitie.klassengrenzen_vastgesteld_rk_bk
 
         context['rk_teams'] = self._get_rk_teams(deelkamp, is_vastgesteld)
+
+        if not deelkamp.open_inschrijving and is_vastgesteld:
+            context['invallers'] = self._get_rk_team_invallers(deelkamp)
 
         if not is_vastgesteld:
             context['url_nieuw_team'] = reverse('CompLaagRayon:teams-rk-nieuw',
