@@ -169,42 +169,42 @@ class BkMatchInfoView(UserPassesTestMixin, TemplateView):
             # for
 
         if heeft_teams:
-            teams = (TeamBK
-                     .objects
-                     .filter(kamp=deelkamp,
-                             team_klasse__pk__in=klasse_team_pks,
-                             deelname=DEELNAME_JA,                  # reserve teams staan nog op ?
-                             rank__lte=8)
-                     .select_related('vereniging',
-                                     'team_klasse')
-                     .prefetch_related('gekoppelde_leden')
-                     .order_by('team_klasse__volgorde',
-                               'rank'))
-            context['deelnemers_teams'] = teams
+            bk_teams = (TeamBK
+                        .objects
+                        .filter(kamp=deelkamp,
+                                team_klasse__pk__in=klasse_team_pks,
+                                deelname=DEELNAME_JA,                  # reserve teams staan nog op ?
+                                rank__lte=8)
+                        .select_related('vereniging',
+                                        'team_klasse')
+                        .prefetch_related('gekoppelde_leden')
+                        .order_by('team_klasse__volgorde',
+                                  'rank'))
+            context['deelnemers_teams'] = bk_teams
 
             if not comp.klassengrenzen_vastgesteld_rk_bk:
                 context['geen_klassengrenzen'] = True
 
             volg_nr = 0
             prev_klasse = None
-            for team in teams:
-                if team.team_klasse != prev_klasse:
-                    team.break_before = True
-                    team.url_download_teams = reverse('CompLaagBond:formulier-teams-als-bestand',
-                                                      kwargs={'match_pk': match.pk,
-                                                              'klasse_pk': team.team_klasse.pk})
+            for bk_team in bk_teams:
+                if bk_team.team_klasse != prev_klasse:
+                    bk_team.break_before = True
+                    bk_team.url_download_teams = reverse('CompLaagBond:formulier-teams-als-bestand',
+                                                         kwargs={'match_pk': match.pk,
+                                                                 'klasse_pk': bk_team.team_klasse.pk})
 
-                    prev_klasse = team.team_klasse
+                    prev_klasse = bk_team.team_klasse
                     volg_nr = 0
 
                 volg_nr += 1
-                team.volg_nr = volg_nr
-                team.ver_nr = team.vereniging.ver_nr
-                team.ver_naam = team.vereniging.naam
-                team.sterkte_str = str(round(team.aanvangsgemiddelde))      # RK score
+                bk_team.volg_nr = volg_nr
+                bk_team.ver_nr = bk_team.vereniging.ver_nr
+                bk_team.ver_naam = bk_team.vereniging.naam
+                bk_team.sterkte_str = bk_team.rk_score
 
-                team.gekoppelde_leden_lijst = list()
-                for lid in team.gekoppelde_leden.select_related('sporterboog__sporter').order_by('-gemiddelde'):
+                bk_team.gekoppelde_leden_lijst = list()
+                for lid in bk_team.gekoppelde_leden.select_related('sporterboog__sporter').order_by('-gemiddelde'):
                     sporter = lid.sporterboog.sporter
                     lid.naam_str = "[%s] %s" % (sporter.lid_nr, sporter.volledige_naam())
                     lid.gem_str = '%.3f' % lid.gemiddelde
@@ -217,7 +217,7 @@ class BkMatchInfoView(UserPassesTestMixin, TemplateView):
                         if voorkeuren_para_voorwerpen or len(voorkeuren_opmerking_para_sporter) > 1:
                             lid.is_para = True
 
-                    team.gekoppelde_leden_lijst.append(lid)
+                    bk_team.gekoppelde_leden_lijst.append(lid)
                 # for
             # for
 

@@ -187,7 +187,7 @@ class RayonTeamsTemplateView(TemplateView):
                 prev_klasse = team.team_klasse
 
             # team AG is 0.0 - 30.0 --> toon als score: 000.0 .. 900.0
-            ag_str = "%05.1f" % (team.aanvangsgemiddelde * aantal_pijlen)
+            ag_str = "%05.1f" % (float(team.aanvangsgemiddelde) * aantal_pijlen)
             team.ag_str = ag_str.replace('.', ',')
 
             if team.deelname == DEELNAME_NEE:
