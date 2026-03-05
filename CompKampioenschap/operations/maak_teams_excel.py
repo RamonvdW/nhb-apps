@@ -86,11 +86,11 @@ class MaakTeamsExcel:
         if self.is_rk:
             qset = TeamRK.objects.filter(kamp=self.deelkamp)
         else:
-            qset = TeamBK.objects.filter(kamp=self.deelkamp)
+            qset = TeamBK.objects.filter(kamp=self.deelkamp,
+                                         deelname=DEELNAME_JA)      # reserve teams staan nog op ONBEKEND
 
         teams = (qset
-                 .filter(team_klasse=self.team_klasse.pk,
-                         deelname=DEELNAME_JA)              # reserve teams staan nog op ONBEKEND
+                 .filter(team_klasse=self.team_klasse.pk)
                  .select_related('vereniging',
                                  'vereniging__regio')
                  .prefetch_related('gekoppelde_leden')
