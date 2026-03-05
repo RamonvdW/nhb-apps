@@ -1511,7 +1511,7 @@ class TestData(object):
             gem = round(gem, 3)
         # for
 
-    def maak_rk_teams(self, afstand, ver_nr, per_team=4, limit_teamtypen=('R2', 'C'), zet_klasse=False):
+    def maak_rk_teams(self, afstand, ver_nr, per_team=3, limit_teamtypen=('R2', 'C'), zet_klasse=False):
         """ maak voor deze vereniging een paar teams aan voor de RK teams inschrijving
             en koppel er meteen een aantal RK deelnemers van de vereniging aan.
         """
