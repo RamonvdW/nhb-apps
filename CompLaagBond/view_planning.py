@@ -4,34 +4,25 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.conf import settings
 from django.urls import reverse
 from django.http import HttpResponseRedirect, Http404
 from django.views.generic import TemplateView, View
 from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Account.models import get_account
 from Competitie.definities import DEELNAME_NEE
 from Competitie.models import CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMatch
-from CompKampioenschap.operations import maak_mutatie_kamp_bk_cut
 from CompLaagBond.models import KampBK, DeelnemerBK, TeamBK, CutBK
 from CompLaagRayon.models import KampRK
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
 from Locatie.models import WedstrijdLocatie
-from Logboek.models import schrijf_in_logboek
-from Site.core.background_sync import BackgroundSync
 from Scheidsrechter.mutaties import scheids_mutatieverzoek_bepaal_reistijd_naar_alle_wedstrijdlocaties
 from Vereniging.models import Vereniging
 from types import SimpleNamespace
 import datetime
 
-
 TEMPLATE_COMPLAAGBOND_PLANNING_LANDELIJK = 'complaagbond/planning-landelijk.dtl'
 TEMPLATE_COMPLAAGBOND_WIJZIG_WEDSTRIJD = 'complaagbond/wijzig-wedstrijd.dtl'
-TEMPLATE_COMPLAAGBOND_WIJZIG_LIMIETEN = 'complaagbond/wijzig-limieten.dtl'
-
-mutatie_ping = BackgroundSync(settings.BACKGROUND_SYNC__COMPETITIE_MUTATIES)
 
 
 class PlanningView(UserPassesTestMixin, TemplateView):

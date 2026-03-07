@@ -4,23 +4,14 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.conf import settings
-from django.http import HttpResponseRedirect, Http404
+from django.http import Http404
 from django.urls import reverse
-from django.db.models import Count
 from django.views.generic import TemplateView
-from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
-from BasisTypen.models import TeamType
-from Competitie.models import RegiocompetitieSporterBoog
 from CompLaagBond.models import KampBK, TeamBK
 from CompLaagRayon.models import DeelnemerRK
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
-from Score.definities import AG_NUL
-from Vereniging.models import Vereniging
-import datetime
-
 
 TEMPLATE_COMPBOND_VERTEAMS = 'complaagbond/hwl-teams.dtl'
 
@@ -45,7 +36,8 @@ class TeamsBkView(UserPassesTestMixin, TemplateView):
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
         return self.rol_nu == Rol.ROL_HWL
 
-    def _get_deelkamp_bk(self, deelkamp_pk) -> KampBK:
+    @staticmethod
+    def _get_deelkamp_bk(deelkamp_pk) -> KampBK:
         # haal de gevraagde kampioenschap op
         try:
             deelkamp_pk = int(deelkamp_pk[:6])  # afkappen voor de veiligheid

@@ -4,7 +4,6 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.conf import settings
 from django.urls import reverse
 from django.http import HttpResponseRedirect, Http404
 from django.views.generic import TemplateView
@@ -12,17 +11,13 @@ from django.core.exceptions import PermissionDenied
 from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
-from CompKampioenschap.operations import maak_mutatie_kamp_aanmelden_bk_indiv, maak_mutatie_kamp_afmelden_bk_indiv
 from CompLaagBond.models import DeelnemerBK
+from CompLaagBond.operations import maak_mutatie_kamp_aanmelden_bk_indiv, maak_mutatie_kamp_afmelden_bk_indiv
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie, rol_get_huidige
-from Site.core.background_sync import BackgroundSync
 from Sporter.operations import get_sporter
 
-
 TEMPLATE_COMPBOND_WIJZIG_STATUS_BK_DEELNEMER = 'complaagbond/wijzig-status-bk-deelnemer.dtl'
-
-mutatie_ping = BackgroundSync(settings.BACKGROUND_SYNC__COMPETITIE_MUTATIES)
 
 
 class WijzigStatusBkDeelnemerView(UserPassesTestMixin, TemplateView):

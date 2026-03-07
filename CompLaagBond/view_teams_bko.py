@@ -14,7 +14,7 @@ from Account.models import get_account
 from BasisTypen.definities import ORGANISATIE_WA
 from BasisTypen.models import BoogType
 from Competitie.definities import DEELNAME_JA, DEELNAME_NEE
-from CompKampioenschap.operations import maak_mutatie_kamp_bk_teams_nummeren
+from CompLaagBond.operations import maak_mutatie_kamp_bk_teams_nummeren
 from CompLaagBond.models import KampBK, TeamBK
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
@@ -220,7 +220,7 @@ class WijzigStatusBkTeamView(UserPassesTestMixin, View):
 
             snel = str(request.POST.get('snel', ''))[:1]        # voor autotest
 
-            maak_mutatie_kamp_bk_teams_nummeren(comp, team.kamp, team.team_klasse, door_str, snel == '1')
+            maak_mutatie_kamp_bk_teams_nummeren(team.kamp, team.team_klasse, door_str, snel == '1')
 
         url = reverse('CompLaagBond:bk-teams',
                       kwargs={'deelkamp_pk': team.kamp.pk})

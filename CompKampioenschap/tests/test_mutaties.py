@@ -5,13 +5,16 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
+from django.core.management.base import OutputWrapper
 from BasisTypen.models import BoogType, TeamType
 from Competitie.definities import MUTATIE_UPDATE_DIRTY_WEDSTRIJDFORMULIEREN, DEELNAME_NEE
 from Competitie.models import (CompetitieMutatie, Competitie, CompetitieMatch,
                                CompetitieIndivKlasse, CompetitieTeamKlasse)
 from CompKampioenschap.operations import (aanmaken_wedstrijdformulieren_is_pending,
-                                          maak_mutatie_wedstrijdformulieren_aanmaken)
-from CompLaagBond.models import KampBK, TeamBK
+                                          maak_mutatie_wedstrijdformulieren_aanmaken,
+                                          maak_mutatie_update_dirty_wedstrijdformulieren,
+                                          VerwerkCompKampMutaties)
+from CompLaagBond.models import KampBK, DeelnemerBK, TeamBK
 from CompLaagRayon.models import KampRK, DeelnemerRK
 from Functie.tests.helpers import maak_functie
 from Geo.models import Regio, Rayon
@@ -20,11 +23,12 @@ from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
 from unittest.mock import patch
+import io
 
 
 class StorageMock:
 
-    def __init__(self, stdout, begin_jaar: int, share_with_emails: list):
+    def __init__(self, _stdout, _begin_jaar, _share_with_emails):
         pass
 
     @staticmethod
@@ -39,7 +43,7 @@ class StorageMock:
 
 class SheetMock:
 
-    def __init__(self, stdout):
+    def __init__(self, _stdout):
         self.file_id = ''
 
     def selecteer_file(self, file_id: str):
@@ -49,7 +53,7 @@ class SheetMock:
     def selecteer_sheet(sheet_name: str):
         pass
 
-    def get_range(self, range_a1: str):
+    def get_range(self, _range_a1):
         if self.file_id.startswith('rk_'):
             values = [[None, 'cell']]
         else:
@@ -128,6 +132,7 @@ class TestCompKampioenschapMutaties(E2EHelpers, TestCase):
                             competitie=self.comp_18,
                             functie=self.functie_bko)
         kamp_bk.matches.add(match)
+        self.kamp_bk = kamp_bk
 
         rayon1 = Rayon.objects.get(rayon_nr=1)
         kamp_rk = KampRK.objects.create(
@@ -135,6 +140,7 @@ class TestCompKampioenschapMutaties(E2EHelpers, TestCase):
                             competitie=self.comp_18,
                             functie=self.functie_bko)
         kamp_rk.matches.add(match)
+        self.kamp_rk = kamp_rk
 
         regio_106 = Regio.objects.get(regio_nr=106)
 
@@ -175,6 +181,7 @@ class TestCompKampioenschapMutaties(E2EHelpers, TestCase):
                                 rank=1,
                                 gemiddelde=9,
                                 deelname=DEELNAME_NEE)
+        self.deelnemer_rk = deelnemer_1
 
         # nog een deelnemer, met para voorkeuren
         sporter = Sporter.objects.create(
@@ -274,6 +281,24 @@ class TestCompKampioenschapMutaties(E2EHelpers, TestCase):
                             rank=3,
                             team_klasse=self.kl_teams)
 
+        self.deelnemer_bk = DeelnemerBK.objects.create(
+                                kamp=kamp_bk,
+                                sporterboog=sporterboog,
+                                bij_vereniging=sporter.bij_vereniging,
+                                indiv_klasse=self.kl_indiv,
+                                volgorde=1,
+                                rank=1,
+                                gemiddelde=9)
+
+    def test_verwerk(self):
+        stdout = OutputWrapper(io.StringIO())
+        verwerk = VerwerkCompKampMutaties(stdout)
+
+        # 1e aanroep maakt alles aan
+        verwerk.verwerk_in_achtergrond()
+
+        verwerk.verwerk_in_achtergrond()
+
     def test_wf_aanmaken(self):
         self.assertEqual(CompetitieMutatie.objects.count(), 0)
 
@@ -295,8 +320,8 @@ class TestCompKampioenschapMutaties(E2EHelpers, TestCase):
         mutatie.is_verwerkt = False
         mutatie.save(update_fields=['is_verwerkt'])
 
-        with patch('CompKampioenschap.operations.verwerk_mutaties.time.sleep', return_value=None):
-            with patch('CompKampioenschap.operations.verwerk_mutaties.StorageWedstrijdformulieren', new=StorageMock):
+        with patch('CompKampioenschap.operations.verwerk_mutaties_kamp.time.sleep', return_value=None):
+            with patch('CompKampioenschap.operations.verwerk_mutaties_kamp.StorageWedstrijdformulieren', new=StorageMock):
                 _, f2, = self.verwerk_competitie_mutaties()
                 self.assertTrue("""[INFO] Maak rk-programma_individueel-rayon1_indiv-1
 [INFO] Maak rk-programma_individueel-rayon2_indiv-1
@@ -368,8 +393,8 @@ class TestCompKampioenschapMutaties(E2EHelpers, TestCase):
                             competitie=self.comp_18)      # alleen nodig voor begin_jaar
 
         # geen match op bestand.klasse_pk
-        with patch('CompKampioenschap.operations.verwerk_mutaties.time.sleep', return_value=None):
-            with patch('CompKampioenschap.operations.verwerk_mutaties.StorageGoogleSheet', new=SheetMock):
+        with patch('CompKampioenschap.operations.verwerk_mutaties_kamp.time.sleep', return_value=None):
+            with patch('CompKampioenschap.operations.verwerk_mutaties_kamp.StorageGoogleSheet', new=SheetMock):
                 _, f2, = self.verwerk_competitie_mutaties()
 
     def test_update_dirty_25(self):
@@ -399,9 +424,19 @@ class TestCompKampioenschapMutaties(E2EHelpers, TestCase):
                             mutatie=MUTATIE_UPDATE_DIRTY_WEDSTRIJDFORMULIEREN,
                             competitie=self.comp_25)      # alleen nodig voor begin_jaar
 
-        with patch('CompKampioenschap.operations.verwerk_mutaties.time.sleep', return_value=None):
-            with patch('CompKampioenschap.operations.verwerk_mutaties.StorageGoogleSheet', new=SheetMock):
+        with patch('CompKampioenschap.operations.verwerk_mutaties_kamp.time.sleep', return_value=None):
+            with patch('CompKampioenschap.operations.verwerk_mutaties_kamp.StorageGoogleSheet', new=SheetMock):
                 _, f2, = self.verwerk_competitie_mutaties()
 
+    def test_maak_mutatie(self):
+        # cover simpele functies
+        maak_mutatie_update_dirty_wedstrijdformulieren(self.comp_18)
 
-# end of file
+        stdout = OutputWrapper(io.StringIO())
+        verwerk = VerwerkCompKampMutaties(stdout)
+
+        for mutatie in CompetitieMutatie.objects.all():
+            verwerk.verwerk(mutatie)
+        print(stdout.getvalue())
+
+        # end of file

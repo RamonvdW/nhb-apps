@@ -8,7 +8,7 @@ from django.test import TestCase
 from django.core import management
 from BasisTypen.models import BoogType
 from Competitie.definities import (MUTATIE_KAMP_RK_REINIT_TEST, MUTATIE_COMPETITIE_OPSTARTEN, MUTATIE_AG_VASTSTELLEN,
-                                   MUTATIE_KAMP_CUT, MUTATIE_KAMP_AFMELDEN_RK_INDIV,
+                                   MUTATIE_KAMP_RK_WIJZIG_CUT, MUTATIE_KAMP_AFMELDEN_RK_INDIV,
                                    DEELNAME_ONBEKEND, DEELNAME_JA, DEELNAME_NEE)
 from Competitie.models import Competitie, CompetitieIndivKlasse, CompetitieMutatie
 from Competitie.test_utils.tijdlijn import (zet_competitie_fases, zet_competitie_fase_regio_wedstrijden,
@@ -887,7 +887,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         mutatie.mutatie = MUTATIE_KAMP_RK_REINIT_TEST
         self.assertTrue(str(mutatie) != "")     # wel een beschrijving
 
-        mutatie.mutatie = MUTATIE_KAMP_CUT
+        mutatie.mutatie = MUTATIE_KAMP_RK_WIJZIG_CUT
         self.assertTrue(str(mutatie) != "")     # wel een beschrijving
 
         mutatie.mutatie = MUTATIE_KAMP_AFMELDEN_RK_INDIV
@@ -903,14 +903,14 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
                           door='Tester').save()
 
         # mutatie nieuw record van 24 wordt niet opgeslagen
-        CompetitieMutatie(mutatie=MUTATIE_KAMP_CUT,
+        CompetitieMutatie(mutatie=MUTATIE_KAMP_RK_WIJZIG_CUT,
                           kamp_rk=self.deelkamp_rk,
                           indiv_klasse=self.klasse,
                           cut_oud=23,
                           cut_nieuw=24,  # verwijder oude record
                           door='Tester').save()
 
-        CompetitieMutatie(mutatie=MUTATIE_KAMP_CUT,
+        CompetitieMutatie(mutatie=MUTATIE_KAMP_RK_WIJZIG_CUT,
                           kamp_rk=self.deelkamp_rk,
                           indiv_klasse=self.klasse,
                           cut_oud=23,
@@ -918,7 +918,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
                           door='Tester').save()
 
         # mutatie die geen wijziging is
-        CompetitieMutatie(mutatie=MUTATIE_KAMP_CUT,
+        CompetitieMutatie(mutatie=MUTATIE_KAMP_RK_WIJZIG_CUT,
                           kamp_rk=self.deelkamp_rk,
                           indiv_klasse=self.klasse,
                           cut_oud=24,

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2025 Ramon van der Winkel.
+#  Copyright (c) 2022-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -15,7 +15,7 @@ from Bestelling.definities import (BESTELLING_STATUS_BETALING_ACTIEF, BESTELLING
 from Bestelling.models import Bestelling
 from Betaal.definities import TRANSACTIE_TYPE_MOLLIE_RESTITUTIE, TRANSACTIE_TYPE_HANDMATIG
 from Betaal.format import format_bedrag_euro
-from Betaal.mutaties import betaal_mutatieverzoek_start_ontvangst
+from Betaal.maak_mutaties_betaal import betaal_mutatieverzoek_start_ontvangst
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
 from decimal import Decimal

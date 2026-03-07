@@ -21,7 +21,6 @@ from codecs import BOM_UTF8
 import textwrap
 import csv
 
-
 TEMPLATE_COMPRAYON_LIJST_RK = 'complaagrayon/rko-rk-selectie.dtl'
 
 CONTENT_TYPE_CSV = 'text/csv; charset=UTF-8'

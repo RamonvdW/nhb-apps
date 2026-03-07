@@ -11,13 +11,12 @@ from django.views.generic import TemplateView, View
 from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
-from Competitie.models import CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMatch
-from CompKampioenschap.operations import maak_mutatie_kamp_bk_cut
+from Competitie.models import CompetitieIndivKlasse, CompetitieTeamKlasse
 from CompLaagBond.models import KampBK, CutBK
+from CompLaagBond.operations import maak_mutatie_kamp_bk_wijzig_cut
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
 from Logboek.models import schrijf_in_logboek
-
 
 TEMPLATE_COMPLAAGBOND_WIJZIG_LIMIETEN = 'complaagbond/wijzig-limieten.dtl'
 
@@ -210,7 +209,7 @@ class WijzigLimietenView(UserPassesTestMixin, TemplateView):
 
         snel = str(request.POST.get('snel', ''))[:1]  # voor autotest
 
-        maak_mutatie_kamp_bk_cut(deelkamp, door_str, mutatie_lijst, snel == '1')
+        maak_mutatie_kamp_bk_wijzig_cut(deelkamp, mutatie_lijst, door_str, snel == '1')
 
         url = reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk})
 

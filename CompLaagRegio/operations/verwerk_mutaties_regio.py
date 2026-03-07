@@ -15,7 +15,7 @@ from Taken.operations import maak_taak
 import datetime
 
 
-class VerwerkCompLaagRegioMutaties:
+class VerwerkMutatiesRegio:
 
     """
         Afhandeling van de mutatie verzoeken voor de CompLaagRegio applicatie.

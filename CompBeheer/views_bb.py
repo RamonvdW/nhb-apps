@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -17,7 +17,7 @@ from BasisTypen.models import TemplateCompetitieIndivKlasse, TemplateCompetitieT
 from Competitie.models import Competitie
 from Competitie.operations import (bepaal_startjaar_nieuwe_competitie, bepaal_klassengrenzen_indiv,
                                    bepaal_klassengrenzen_teams, competitie_klassengrenzen_vaststellen)
-from CompBeheer.operations.maak_mutatie import maak_mutatie_competitie_opstarten, maak_mutatie_ag_vaststellen
+from CompBeheer.operations.maak_mutaties_beheer import maak_mutatie_competitie_opstarten, maak_mutatie_ag_vaststellen
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
 from HistComp.models import HistCompSeizoen

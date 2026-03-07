@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2025 Ramon van der Winkel.
+#  Copyright (c) 2022-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -15,6 +15,7 @@ import datetime
 start = datetime.datetime.now()
 number = 0
 expected = 0
+format_str = '%d / %d'
 
 for line in sys.stdin:
 
@@ -26,8 +27,11 @@ for line in sys.stdin:
         time_str = str(elapsed)[-5:]    # mm:ss
 
         if expected > 1:
-            perc_str = '%.2f' % ((number * 100) / expected)
-            print('%s / %s (%s%%) %s %s' % (number, expected, perc_str, time_str, line.rstrip()))
+            if number == expected:
+                perc_str = '99.99'
+            else:
+                perc_str = '%.2f' % ((number * 100) / expected)
+            print((format_str + ' (%5s%%) %s %s') % (number, expected, perc_str, time_str, line.rstrip()))
         else:
             print('%s %s %s' % (number, time_str, line.rstrip()))
 
@@ -36,6 +40,8 @@ for line in sys.stdin:
             # line = "Found 123 test(s).\n"
             nr = int(line.split(' ')[1])
             expected = number + nr
+            expected_len = len(str(expected))
+            format_str = '%%%dd / %%%dd' % (expected_len, expected_len)
 
         print(line.rstrip())
     else:

@@ -4,7 +4,6 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.conf import settings
 from django.urls import reverse
 from django.http import HttpResponseRedirect, Http404
 from django.db.models import Count
@@ -16,13 +15,12 @@ from Account.models import get_account
 from Competitie.definities import INSCHRIJF_METHODE_1, DEELNAME_NEE
 from Competitie.models import (CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMatch,
                                Regiocompetitie, RegiocompetitieRonde)
-from CompKampioenschap.operations import maak_mutatie_kamp_rk_cut
 from CompLaagRayon.models import KampRK, DeelnemerRK, TeamRK, CutRK
+from CompLaagRayon.operations import maak_mutatie_kamp_rk_wijzig_cut
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
 from Locatie.models import WedstrijdLocatie
 from Logboek.models import schrijf_in_logboek
-from Site.core.background_sync import BackgroundSync
 from Scheidsrechter.mutaties import scheids_mutatieverzoek_bepaal_reistijd_naar_alle_wedstrijdlocaties
 from Vereniging.models import Vereniging
 from types import SimpleNamespace
@@ -33,8 +31,6 @@ TEMPLATE_COMPRAYON_WIJZIG_WEDSTRIJD = 'complaagrayon/wijzig-wedstrijd-rk.dtl'
 TEMPLATE_COMPRAYON_LIJST_RK = 'complaagrayon/rko-rk-selectie.dtl'
 TEMPLATE_COMPRAYON_WIJZIG_STATUS_RK_DEELNEMER = 'complaagrayon/wijzig-status-rk-deelnemer.dtl'
 TEMPLATE_COMPRAYON_WIJZIG_LIMIETEN_RK = 'complaagrayon/wijzig-limieten-rk.dtl'
-
-mutatie_ping = BackgroundSync(settings.BACKGROUND_SYNC__COMPETITIE_MUTATIES)
 
 
 class RayonPlanningView(UserPassesTestMixin, TemplateView):
@@ -864,7 +860,7 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
 
         snel = str(request.POST.get('snel', ''))[:1]        # voor autotest
 
-        maak_mutatie_kamp_rk_cut(deelkamp, door_str, mutaties, snel == '1')
+        maak_mutatie_kamp_rk_wijzig_cut(deelkamp, mutaties, door_str, snel == '1')
 
         url = reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk})
         return HttpResponseRedirect(url)

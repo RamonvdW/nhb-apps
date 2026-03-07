@@ -42,11 +42,11 @@ urlpatterns = [
          name='bk-selectie-als-bestand'),
 
     path('kleine-klassen-samenvoegen/<deelkamp_pk>/indiv/',
-         view_kleine_klassen.KleineKlassenIndivView.as_view(),
+         view_kleine_klassen.KleineKlassenBkIndivView.as_view(),
          name='kleine-klassen-samenvoegen-indiv'),
 
     path('verplaats-deelnemer/',
-         view_kleine_klassen.VerplaatsDeelnemerView.as_view(),
+         view_kleine_klassen.VerplaatsDeelnemerBkView.as_view(),
          name='verplaats-deelnemer'),
 
     # BKO

@@ -4,7 +4,6 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.conf import settings
 from django.urls import reverse
 from django.http import Http404, HttpResponseRedirect
 from django.views.generic import TemplateView
@@ -13,21 +12,17 @@ from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
 from BasisTypen.definities import GESLACHT_ALLE
-from Competitie.definities import MUTATIE_EXTRA_RK_DEELNEMER, DEELNAME_JA, DEELNAME_NEE, KAMP_RANK_BLANCO
-from Competitie.models import Competitie, CompetitieMutatie, RegiocompetitieSporterBoog
+from Competitie.definities import DEELNAME_JA, DEELNAME_NEE, KAMP_RANK_BLANCO
+from Competitie.models import Competitie, RegiocompetitieSporterBoog
 from Competitie.operations import KlasseBepaler
 from CompLaagRayon.models import KampRK, DeelnemerRK
+from CompLaagRayon.operations import maak_mutatie_extra_rk_deelnemer
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
 from Logboek.models import schrijf_in_logboek
-from Site.core.background_sync import BackgroundSync
-import time
-
 
 TEMPLATE_COMPRAYON_EXTRA_DEELNEMER = 'complaagrayon/bko-extra-deelnemer.dtl'
 TEMPLATE_COMPRAYON_BLANCO_RESULTAAT = 'complaagrayon/bko-blanco-resultaat.dtl'
-
-competitie_mutaties_ping = BackgroundSync(settings.BACKGROUND_SYNC__COMPETITIE_MUTATIES)
 
 
 class ExtraDeelnemerView(UserPassesTestMixin, TemplateView):
@@ -217,27 +212,10 @@ class ExtraDeelnemerView(UserPassesTestMixin, TemplateView):
             account = get_account(request)
             schrijf_in_logboek(account, 'Competitie', 'Extra RK deelnemer %s toevoegen aan %s' % (deelnemer, comp))
 
-            # laat de achtergrondtaak de volgorde bijwerken
-            mutatie = CompetitieMutatie(
-                            mutatie=MUTATIE_EXTRA_RK_DEELNEMER,
-                            deelnemer_rk=deelnemer_rk,
-                            door="BKO %s" % account.volledige_naam())
-            mutatie.save()
-
-            # ping de achtergrondtaak
-            competitie_mutaties_ping.ping()
-
+            door_str = "BKO %s" % account.volledige_naam()
             snel = str(request.POST.get('snel', ''))[:1]
-            if snel != '1':         # pragma: no cover
-                # wacht maximaal 3 seconden tot de mutatie uitgevoerd is
-                interval = 0.2  # om steeds te verdubbelen
-                total = 0.0  # om een limiet te stellen
-                while not mutatie.is_verwerkt and total + interval <= 3.0:
-                    time.sleep(interval)
-                    total += interval  # 0.0 --> 0.2, 0.6, 1.4, 3.0
-                    interval *= 2  # 0.2 --> 0.4, 0.8, 1.6, 3.2
-                    mutatie = CompetitieMutatie.objects.get(pk=mutatie.pk)
-                # while
+
+            maak_mutatie_extra_rk_deelnemer(deelnemer_rk, door_str, snel == '1')
 
         url = reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk})
         return HttpResponseRedirect(url)

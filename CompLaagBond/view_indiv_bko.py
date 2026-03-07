@@ -4,7 +4,6 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.conf import settings
 from django.urls import reverse
 from django.http import HttpResponse, Http404
 from django.views.generic import TemplateView
@@ -16,19 +15,15 @@ from CompKampioenschap.operations import get_url_wedstrijdformulier
 from CompLaagBond.models import KampBK, DeelnemerBK, CutBK
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
-from Site.core.background_sync import BackgroundSync
 from Sporter.models import SporterVoorkeuren
 from codecs import BOM_UTF8
 import textwrap
 import csv
 
-
 TEMPLATE_COMPBOND_BK_SELECTIE = 'complaagbond/bko-bk-selectie.dtl'
 TEMPLATE_COMPBOND_WIJZIG_STATUS_BK_DEELNEMER = 'complaagbond/wijzig-status-bk-deelnemer.dtl'
 
 CONTENT_TYPE_CSV = 'text/csv; charset=UTF-8'
-
-mutatie_ping = BackgroundSync(settings.BACKGROUND_SYNC__COMPETITIE_MUTATIES)
 
 
 class LijstBkSelectieView(UserPassesTestMixin, TemplateView):

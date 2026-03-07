@@ -16,7 +16,7 @@ from TestHelpers.e2ehelpers import E2EHelpers
 import io
 
 
-class TestCompKampioenschapStorage(E2EHelpers, TestCase):
+class TestCompKampioenschapOpStorageWf(E2EHelpers, TestCase):
 
     """ tests voor de CompKampioenschap module, operations Storage Wedstrijdformulieren """
 

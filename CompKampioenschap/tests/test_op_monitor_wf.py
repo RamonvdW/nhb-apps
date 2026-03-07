@@ -50,7 +50,7 @@ class MockLeesIndivWedstrijdFormulier:
         return 'hoi'
 
 
-class TestCompKampioenschapImportUitslag(E2EHelpers, TestCase):
+class TestCompKampioenschapOpMonitorWf(E2EHelpers, TestCase):
 
     """ tests voor de CompKampioenschap module, operations Monitor Wedstrijdformulieren """
 

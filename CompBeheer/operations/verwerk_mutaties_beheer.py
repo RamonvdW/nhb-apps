@@ -19,8 +19,9 @@ from Competitie.operations import (competities_aanmaken,
                                    uitslag_regio_indiv_naar_histcomp, uitslag_regio_teams_naar_histcomp,
                                    uitslag_rk_indiv_naar_histcomp, uitslag_rk_teams_naar_histcomp,
                                    uitslag_bk_indiv_naar_histcomp, uitslag_bk_teams_naar_histcomp)
-from CompLaagBond.operations.verwerk_mutaties import VerwerkCompLaagBondMutaties
-from CompLaagRayon.operations.verwerk_mutaties import VerwerkCompLaagRayonMutaties
+from CompKampioenschap.operations import maak_mutatie_update_dirty_wedstrijdformulieren
+from CompLaagBond.operations import maak_deelnemerslijst_bk_indiv, maak_deelnemerslijst_bk_teams
+from CompLaagRayon.operations import bepaal_deelnemers_rk_indiv, converteer_rk_teams_tijdelijke_leden
 
 
 class VerwerkCompBeheerMutaties:
@@ -58,8 +59,13 @@ class VerwerkCompBeheerMutaties:
             comp.regiocompetitie_is_afgesloten = True
             comp.save(update_fields=['regiocompetitie_is_afgesloten'])
 
-            rk_mutaties = VerwerkCompLaagRayonMutaties(self.stdout, self.my_logger)
-            rk_mutaties.verwerk_mutatie_regio_naar_rk(comp)
+            # gerechtigde RK deelnemers aanmaken
+            bepaal_deelnemers_rk_indiv(self.stdout, comp)
+
+            # RK teams opzetten en RK deelnemers koppelen
+            converteer_rk_teams_tijdelijke_leden(self.stdout, comp)
+
+            maak_mutatie_update_dirty_wedstrijdformulieren(comp)
 
             # eindstand individuele regiocompetitie naar historisch uitslag overzetten
             # (ook nodig voor AG's nieuwe competitie)
@@ -84,12 +90,13 @@ class VerwerkCompBeheerMutaties:
             uitslag_rk_indiv_naar_histcomp(comp)
 
             # individuele deelnemers vaststellen
-            bk_mutaties = VerwerkCompLaagBondMutaties(self.stdout, self.my_logger)
-            bk_mutaties.maak_deelnemerslijst_bk_indiv(comp)
+            maak_deelnemerslijst_bk_indiv(self.stdout, comp)
 
             # ga door naar fase N
             comp.rk_indiv_afgesloten = True
             comp.save(update_fields=['rk_indiv_afgesloten'])
+
+            maak_mutatie_update_dirty_wedstrijdformulieren(comp)
 
     def _verwerk_mutatie_opstarten_bk_teams(self, mutatie: CompetitieMutatie):
         """ de BKO heeft gevraagd alles klaar te maken voor het BK teams """
@@ -103,12 +110,13 @@ class VerwerkCompBeheerMutaties:
             uitslag_rk_teams_naar_histcomp(comp)
 
             # individuele deelnemers vaststellen
-            bk_mutaties = VerwerkCompLaagBondMutaties(self.stdout, self.my_logger)
-            bk_mutaties.maak_deelnemerslijst_bk_teams(comp)
+            maak_deelnemerslijst_bk_teams(self.stdout, comp)
 
             # ga door naar fase N
             comp.rk_teams_afgesloten = True
             comp.save(update_fields=['rk_teams_afgesloten'])
+
+            maak_mutatie_update_dirty_wedstrijdformulieren(comp)
 
     def _verwerk_mutatie_afsluiten_bk_indiv(self, mutatie: CompetitieMutatie):
         """ BK individueel afsluiten """

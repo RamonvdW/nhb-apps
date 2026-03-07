@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2025 Ramon van der Winkel.
+#  Copyright (c) 2025-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -12,7 +12,7 @@ import time
 competitie_mutatie_ping = BackgroundSync(settings.BACKGROUND_SYNC__COMPETITIE_MUTATIES)
 
 
-def ping_achtergrondtaak(mutatie: CompetitieMutatie, snel: bool):
+def ping_competitie_achtergrondtaak(mutatie: CompetitieMutatie, snel: bool):
     """ wekt de achtergrondtaak en wacht (tenzij snel=True) tot de mutatie afgehandeld is """
 
     # ping de achtergrondtaak

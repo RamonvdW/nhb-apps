@@ -9,7 +9,7 @@ from django.utils import timezone
 from Competitie.definities import (MUTATIE_TO_STR,
                                    MUTATIE_KAMP_AANMELDEN_RK_INDIV, MUTATIE_KAMP_AFMELDEN_RK_INDIV,
                                    MUTATIE_KAMP_AANMELDEN_BK_INDIV, MUTATIE_KAMP_AFMELDEN_BK_INDIV,
-                                   MUTATIE_KAMP_CUT)
+                                   MUTATIE_KAMP_RK_WIJZIG_CUT, MUTATIE_KAMP_BK_WIJZIG_CUT)
 from Competitie.models.competitie import Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse
 from Competitie.models.laag_regio import Regiocompetitie
 from CompLaagBond.models import KampBK, DeelnemerBK
@@ -93,7 +93,7 @@ class CompetitieMutatie(models.Model):
         if self.mutatie in (MUTATIE_KAMP_AANMELDEN_BK_INDIV, MUTATIE_KAMP_AFMELDEN_BK_INDIV):
             msg += " - %s" % self.deelnemer_bk
 
-        if self.mutatie == MUTATIE_KAMP_CUT:
+        if self.mutatie in (MUTATIE_KAMP_RK_WIJZIG_CUT, MUTATIE_KAMP_BK_WIJZIG_CUT):
             msg += " (%s --> %s)" % (self.cut_oud, self.cut_nieuw)
 
         return msg

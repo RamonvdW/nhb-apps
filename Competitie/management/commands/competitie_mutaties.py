@@ -12,9 +12,11 @@ from django.db.utils import DataError, OperationalError, IntegrityError, DEFAULT
 from django.core.management.base import BaseCommand
 from Competitie.models import CompetitieMutatie, CompetitieTaken
 from Competitie.operations import competitie_hanteer_overstap_sporter
-from CompLaagRegio.operations.verwerk_mutaties import VerwerkCompLaagRegioMutaties
+from CompLaagBond.operations import VerwerkMutatiesBond
+from CompLaagRayon.operations import VerwerkMutatiesRayon
+from CompLaagRegio.operations.verwerk_mutaties_regio import VerwerkMutatiesRegio
 from CompKampioenschap.operations import VerwerkCompKampMutaties
-from CompBeheer.operations.verwerk_mutaties import VerwerkCompBeheerMutaties
+from CompBeheer.operations.verwerk_mutaties_beheer import VerwerkCompBeheerMutaties
 from Mailer.operations import mailer_notify_internal_error
 from Site.core.background_sync import BackgroundSync
 import traceback
@@ -126,6 +128,7 @@ class Command(BaseCommand):
                                        'deelnemer_bk__sporterboog__sporter',
                                        'deelnemer_bk__indiv_klasse')
                        .get(pk=pk))
+
             if not mutatie.is_verwerkt:     # pragma: no branch
                 self._verwerk_mutatie(mutatie)
                 mutatie.is_verwerkt = True
@@ -206,10 +209,10 @@ class Command(BaseCommand):
 
         self.verwerk_mutaties = [
             VerwerkCompBeheerMutaties(self.stdout, my_logger),
-            VerwerkCompLaagRegioMutaties(self.stdout, my_logger),
-            VerwerkCompKampMutaties(self.stdout, my_logger),
-            # VerwerkCompLaagRayonMutaties(self.stdout, my_logger),
-            # VerwerkCompLaagBondMutaties(self.stdout, my_logger),
+            VerwerkMutatiesRegio(self.stdout, my_logger),
+            VerwerkCompKampMutaties(self.stdout),
+            VerwerkMutatiesRayon(self.stdout),
+            VerwerkMutatiesBond(self.stdout),
         ]
 
         self._set_stop_time(**options)

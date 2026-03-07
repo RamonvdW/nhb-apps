@@ -179,7 +179,7 @@ class StatusView(UserPassesTestMixin, TemplateView):
                 tup = (comp.begin_jaar, afstand, is_bk, False, rayon_nr, klasse.pk)
                 try:
                     status = tup2status[tup]
-                except KeyError:
+                except KeyError:        # pragma: no cover
                     pass
                 else:
                     if status.uitslag_is_compleet and status.uitslag_ingelezen_op < status.gewijzigd_op:
@@ -189,20 +189,20 @@ class StatusView(UserPassesTestMixin, TemplateView):
                     match.status_list.append(status)
             # for
 
-            for klasse in match.team_klassen.select_related('team_type'):
-                tup = (comp.begin_jaar, afstand, is_bk, True, rayon_nr, klasse.pk)
-                try:
-                    # TODO: no SheetStatus records exist for teams, right now
-                    status = tup2status[tup]
-                except KeyError:
-                    pass
-                else:
-                    if status.uitslag_is_compleet and status.uitslag_ingelezen_op < status.gewijzigd_op:
-                        status.url_importeer = reverse('CompKampioenschap:importeer-uitslag-teams',
-                                                       kwargs={'status_pk': status.pk})
-                    status.url_uitslag = self._get_uitslag_url(comp, status.bestand, klasse)
-                    match.status_list.append(status)
-            # for
+            # for klasse in match.team_klassen.select_related('team_type'):
+            #     tup = (comp.begin_jaar, afstand, is_bk, True, rayon_nr, klasse.pk)
+            #     try:
+            #         # TODO: no SheetStatus records exist for teams, right now
+            #         status = tup2status[tup]
+            #     except KeyError:      # pragma: no cover
+            #         pass
+            #     else:
+            #         if status.uitslag_is_compleet and status.uitslag_ingelezen_op < status.gewijzigd_op:
+            #             status.url_importeer = reverse('CompKampioenschap:importeer-uitslag-teams',
+            #                                            kwargs={'status_pk': status.pk})
+            #         status.url_uitslag = self._get_uitslag_url(comp, status.bestand, klasse)
+            #         match.status_list.append(status)
+            # # for
 
             if len(match.status_list) > 0:
                 if prev_datum != match.datum_wanneer:

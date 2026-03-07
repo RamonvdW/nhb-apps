@@ -4,7 +4,6 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.conf import settings
 from django.urls import reverse
 from django.http import HttpResponseRedirect, Http404
 from django.db.models import Count
@@ -14,16 +13,13 @@ from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
 from Competitie.models import Competitie, CompetitieTeamKlasse, Regiocompetitie
-from CompBeheer.operations.maak_mutatie import (maak_mutatie_doorzetten_regio_naar_rk,
-                                                maak_mutatie_kamp_indiv_doorzetten_naar_bk,
-                                                maak_mutatie_kamp_teams_doorzetten_naar_bk,
-                                                maak_mutatie_kamp_indiv_afsluiten, maak_mutatie_kamp_teams_afsluiten)
+from CompBeheer.operations.maak_mutaties_beheer import (maak_mutatie_doorzetten_regio_naar_rk,
+                                                        maak_mutatie_kamp_indiv_doorzetten_naar_bk,
+                                                        maak_mutatie_kamp_teams_doorzetten_naar_bk,
+                                                        maak_mutatie_kamp_indiv_afsluiten, maak_mutatie_kamp_teams_afsluiten)
 from CompLaagRayon.models import TeamRK
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
-from Site.core.background_sync import BackgroundSync
-
-mutatie_ping = BackgroundSync(settings.BACKGROUND_SYNC__COMPETITIE_MUTATIES)
 
 TEMPLATE_COMPBEHEER_DOORZETTEN_REGIO_NAAR_RK = 'compbeheer/bko-doorzetten-1a-regio-naar-rk.dtl'
 TEMPLATE_COMPBEHEER_DOORZETTEN_KLASSENGRENZEN_KAMP_TEAMS = 'compbeheer/bko-doorzetten-1b-klassengrenzen-rk-bk-teams.dtl'

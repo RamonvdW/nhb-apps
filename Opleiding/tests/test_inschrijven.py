@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2025 Ramon van der Winkel.
+#  Copyright (c) 2025-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -10,7 +10,7 @@ from django.utils import timezone
 from Bestelling.models import Bestelling, BestellingMandje
 from Bestelling.operations import bestel_mutatieverzoek_maak_bestellingen
 from Betaal.models import BetaalMutatie, BetaalInstellingenVereniging
-from Betaal.mutaties import betaal_mutatieverzoek_start_ontvangst
+from Betaal.maak_mutaties_betaal import betaal_mutatieverzoek_start_ontvangst
 from Functie.models import Functie
 from Geo.models import Regio
 from Instaptoets.models import Vraag, Instaptoets

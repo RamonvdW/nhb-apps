@@ -4,7 +4,6 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.conf import settings
 from django.urls import reverse
 from django.http import JsonResponse, Http404, UnreadablePostError
 from django.views.generic import TemplateView, View
@@ -12,24 +11,20 @@ from django.core.exceptions import PermissionDenied
 from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
-from Competitie.definities import MUTATIE_KAMP_VERPLAATS_KLASSE_INDIV
-from Competitie.models import CompetitieIndivKlasse, CompetitieMutatie
+from Competitie.models import CompetitieIndivKlasse
 from CompLaagBond.models import KampBK, DeelnemerBK
+from CompLaagBond.operations import maak_mutatie_verplaats_bk_deelnemer_kleine_klasse
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
 from Logboek.models import schrijf_in_logboek
-from Site.core.background_sync import BackgroundSync
 import json
 
 
 TEMPLATE_COMPBOND_KLEINE_KLASSEN_INDIV = 'complaagbond/kleine-klassen-indiv.dtl'
 
-mutatie_ping = BackgroundSync(settings.BACKGROUND_SYNC__COMPETITIE_MUTATIES)
+class KleineKlassenBkIndivView(UserPassesTestMixin, TemplateView):
 
-
-class KleineKlassenIndivView(UserPassesTestMixin, TemplateView):
-
-    """ Met deze view kan de BKO deelnemers van een kleine individuele klasse
+    """ Met deze view kan de BKO BK deelnemers van een kleine individuele klasse
         verplaatsen naar een andere klasse.
     """
 
@@ -162,9 +157,9 @@ class KleineKlassenIndivView(UserPassesTestMixin, TemplateView):
         return context
 
 
-class VerplaatsDeelnemerView(UserPassesTestMixin, View):
+class VerplaatsDeelnemerBkView(UserPassesTestMixin, View):
 
-    """ Met deze view kan de BKO deelnemers van een kleine individuele klasse
+    """ Met deze view kan de BKO een BK deelnemer van een kleine individuele klasse
         verplaatsen naar een andere klasse.
     """
 
@@ -226,17 +221,11 @@ class VerplaatsDeelnemerView(UserPassesTestMixin, View):
         door_str = "BKO %s" % account.volledige_naam()
         door_str = door_str[:149]
 
-        msg = "Kleine klasse %s: deelnemer %s verplaatsen van klasse %s naar klasse %s." % (
+        msg = "Kleine klasse %s: BK deelnemer %s verplaatsen van klasse %s naar klasse %s." % (
                     deelkamp, deelnemer, deelnemer.indiv_klasse.beschrijving, klasse.beschrijving)
         schrijf_in_logboek(account, "Competitie", msg)
 
-        CompetitieMutatie(
-                mutatie=MUTATIE_KAMP_VERPLAATS_KLASSE_INDIV,
-                door=door_str,
-                deelnemer_bk=deelnemer,
-                indiv_klasse=klasse).save()
-
-        mutatie_ping.ping()
+        maak_mutatie_verplaats_bk_deelnemer_kleine_klasse(deelnemer, klasse, door_str, snel=False)
 
         out = dict()
         return JsonResponse(out)

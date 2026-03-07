@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.conf import settings
 from django.http import HttpResponseRedirect, Http404, HttpResponse
 from django.urls import reverse
 from django.db.models import Count
@@ -13,31 +12,25 @@ from django.core.exceptions import PermissionDenied
 from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
-from Competitie.definities import (TEAM_PUNTEN_MODEL_FORMULE1, TEAM_PUNTEN_MODEL_TWEE, TEAM_PUNTEN_F1,
-                                   MUTATIE_REGIO_TEAM_RONDE)
-from Competitie.models import (Competitie, CompetitieTeamKlasse, CompetitieMutatie,
-                               Regiocompetitie, RegiocompetitieSporterBoog,
+from Competitie.definities import TEAM_PUNTEN_MODEL_FORMULE1, TEAM_PUNTEN_MODEL_TWEE, TEAM_PUNTEN_F1
+from Competitie.models import (Competitie, CompetitieTeamKlasse, Regiocompetitie, RegiocompetitieSporterBoog,
                                RegiocompetitieTeam, RegiocompetitieTeamPoule, RegiocompetitieRondeTeam)
 from Competitie.operations.poules import maak_poule_schema
-from CompLaagRegio.operations.maak_mutatie import maak_mutatie_regio_team_ronde
+from CompLaagRegio.operations.maak_mutatie_regio import maak_mutatie_regio_team_ronde
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
 from Geo.models import Rayon
 from Logboek.models import schrijf_in_logboek
-from Site.core.background_sync import BackgroundSync
 from Score.definities import AG_NUL
 from codecs import BOM_UTF8
 from types import SimpleNamespace
 import csv
-
 
 TEMPLATE_COMPREGIO_RCL_TEAMS = 'complaagregio/rcl-teams.dtl'
 TEMPLATE_COMPREGIO_RCL_AG_CONTROLE = 'complaagregio/rcl-ag-controle.dtl'
 TEMPLATE_COMPREGIO_RCL_TEAM_RONDE = 'complaagregio/rcl-team-ronde.dtl'
 
 CONTENT_TYPE_CSV = 'text/csv; charset=UTF-8'
-
-mutatie_ping = BackgroundSync(settings.BACKGROUND_SYNC__COMPETITIE_MUTATIES)
 
 
 class RegioTeamsTemplateView(TemplateView):

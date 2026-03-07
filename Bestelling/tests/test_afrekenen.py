@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2025 Ramon van der Winkel.
+#  Copyright (c) 2022-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -14,7 +14,7 @@ from Bestelling.definities import (BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS
 from Bestelling.models import BestellingMandje, Bestelling, BestellingRegel
 from Bestelling.operations import bestel_mutatieverzoek_inschrijven_wedstrijd
 from Betaal.models import BetaalInstellingenVereniging, BetaalActief, BetaalMutatie, BetaalTransactie
-from Betaal.mutaties import betaal_mutatieverzoek_start_ontvangst
+from Betaal.maak_mutaties_betaal import betaal_mutatieverzoek_start_ontvangst
 from Geo.models import Regio
 from Mailer.models import MailQueue
 from Locatie.models import WedstrijdLocatie
