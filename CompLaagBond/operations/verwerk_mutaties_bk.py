@@ -207,5 +207,9 @@ class VerwerkMutatiesBond:
         mutatie_code_verwerk_functie(self, mutatie)  # noqa
         return True
 
+    def verwerk_in_achtergrond(self):
+        # doe een klein beetje werk
+        pass
+
 
 # end of file
