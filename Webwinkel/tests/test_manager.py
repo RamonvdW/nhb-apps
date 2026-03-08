@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2024-2025 Ramon van der Winkel.
+#  Copyright (c) 2024-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -13,7 +13,7 @@ from Vereniging.models import Vereniging
 from Webwinkel.models import WebwinkelProduct, WebwinkelFoto
 
 
-class TestWebwinkelOverzicht(E2EHelpers, TestCase):
+class TestWebwinkelManager(E2EHelpers, TestCase):
 
     """ tests voor de Webwinkel applicatie, module: Overzicht """
 

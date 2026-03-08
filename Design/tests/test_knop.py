@@ -8,7 +8,7 @@ from django.test import TestCase
 from Design.templatetags.design_knop import sv_knop_nav, sv_knop_mailto, sv_knop_ext, sv_knop_modal
 
 
-class TestDesignTemplatetags(TestCase):
+class TestDesignTemplatetagsKnop(TestCase):
 
     """ tests voor de Design applicatie, module Template tags """
 

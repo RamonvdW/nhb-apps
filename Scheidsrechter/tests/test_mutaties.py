@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023-2025 Ramon van der Winkel.
+#  Copyright (c) 2023-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -23,7 +23,7 @@ import datetime
 import time
 
 
-class TestScheidsrechterBeschikbaarheid(E2EHelpers, TestCase):
+class TestScheidsrechterMutaties(E2EHelpers, TestCase):
 
     """ tests voor de Scheidsrechter applicatie; mutaties + achtergrondtaak """
 

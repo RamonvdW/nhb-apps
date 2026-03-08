@@ -18,7 +18,7 @@ class TestCompetitieCliCompetitieMutaties(E2EHelpers, TestCase):
 
     # Let op: veel test coverage komt vanuit CompLaagRegio en CompLaagRayon
 
-    def UITGEZET_test_basis(self):
+    def UITGEZET_test_basis(self):      # TODO: uitgezet om het niet meer werkt
 
         # maak een verzoek aan dat een crash veroorzaakt
         CompetitieMutatie(mutatie=MUTATIE_KAMP_RK_REINIT_TEST).save()

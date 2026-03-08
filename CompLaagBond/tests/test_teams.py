@@ -14,7 +14,7 @@ from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 
 
-class TestCompetitiePlanningBond(E2EHelpers, TestCase):
+class TestCompLaagBondTeams(E2EHelpers, TestCase):
 
     """ tests voor de CompLaagBond applicatie, beheer BK teams """
 

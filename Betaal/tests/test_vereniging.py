@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2025 Ramon van der Winkel.
+#  Copyright (c) 2022-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -12,9 +12,9 @@ from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
 
 
-class TestBetaalMutaties(E2EHelpers, TestCase):
+class TestBetaalVereniging(E2EHelpers, TestCase):
 
-    """ tests voor de Betaal-applicatie, interactie achtergrond taak met CPSP """
+    """ tests voor de Betaal-applicatie, instellingen voor de vereniging """
 
     url_login = '/account/login/'
     url_ver_instellingen = '/bestel/betaal/vereniging/instellingen/'

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -10,7 +10,7 @@ from Design.icon_svg.Material_Symbols.symbol_svg import MATERIAL_SYMBOL_SVG
 from Design.icon_svg.sv_symbols.symbol_svg import SV_SYMBOL_SVG
 
 
-class TestDesignTemplatetags(TestCase):
+class TestDesignTemplatetagIcons(TestCase):
 
     """ tests voor de Design applicatie, module Template tags """
 

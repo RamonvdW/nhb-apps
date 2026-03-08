@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023-2025 Ramon van der Winkel.
+#  Copyright (c) 2023-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -19,7 +19,7 @@ from Webwinkel.models import WebwinkelKeuze, WebwinkelProduct
 from decimal import Decimal
 
 
-class TestBestellingBestelling(E2EHelpers, TestCase):
+class TestBestellingKiesTransport(E2EHelpers, TestCase):
 
     """ tests voor de Bestelling applicatie, module Kies Transport """
 

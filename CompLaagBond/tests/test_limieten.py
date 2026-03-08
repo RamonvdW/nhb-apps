@@ -11,7 +11,7 @@ from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 
 
-class TestCompetitiePlanningBond(E2EHelpers, TestCase):
+class TestCompLaagBondLimieten(E2EHelpers, TestCase):
 
     """ tests voor de CompLaagBond applicatie, planning voor het BK """
 

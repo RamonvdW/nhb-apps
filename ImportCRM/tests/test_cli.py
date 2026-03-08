@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2025 Ramon van der Winkel.
+#  Copyright (c) 2025-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -43,7 +43,7 @@ TESTFILE_22_CRASH = TESTFILES_PATH + 'testfile_22.json'         # TODO: wordt ni
 TESTFILE_23_DIPLOMA = TESTFILES_PATH + 'testfile_23.json'
 
 
-class TestImportCRMImport(E2EHelpers, TestCase):
+class TestImportCRMCli(E2EHelpers, TestCase):
 
     """ tests voor de ImportCRM applicatie, management commando dump_educations """
 

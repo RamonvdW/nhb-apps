@@ -12,7 +12,7 @@ from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 
 
-class TestCompLaagRayonBko(E2EHelpers, TestCase):
+class TestCompLaagRayonSporter(E2EHelpers, TestCase):
 
     """ tests voor de CompLaagRayon applicatie, Sporter geeft status deelname RK door """
 

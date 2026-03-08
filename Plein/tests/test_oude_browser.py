@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2022 Ramon van der Winkel.
+#  Copyright (c) 2021-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -10,7 +10,7 @@ from Plein.views import is_browser_supported
 import types
 
 
-class TestPlein(E2EHelpers, TestCase):
+class TestPleinOudeBrowser(E2EHelpers, TestCase):
 
     """ tests voor de Plein applicatie """
 

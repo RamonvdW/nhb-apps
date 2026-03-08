@@ -19,7 +19,7 @@ from Vereniging.models import Vereniging
 import datetime
 
 
-class TestCompetitiePlanningBond(E2EHelpers, TestCase):
+class TestCompLaagBondPlanning(E2EHelpers, TestCase):
 
     """ tests voor de CompLaagBond applicatie, planning voor het BK """
 
