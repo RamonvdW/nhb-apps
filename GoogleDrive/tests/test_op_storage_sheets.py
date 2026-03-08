@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2025 Ramon van der Winkel.
+#  Copyright (c) 2025-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -65,7 +65,8 @@ class GoogleApiSpreadsheetsMock:
                     print('[DEBUG] {GoogleApiSheetsMock.execute} Generating GoogleApiError (reason=%s)' % repr(error_msg))
                 http_resp = Response(info={'status': 400})
                 http_resp.reason = error_msg
-                self.next_error = None
+                if match != 'retry':
+                    self.next_error = None
                 raise GoogleApiError(resp=http_resp, content=b'duh')
 
             else:       # pragma: no cover
@@ -132,6 +133,14 @@ class TestGoogleDriveStorageSheets(E2EHelpers, TestCase):
                     sheet.hide_sheet('fail')
 
                 sheet.stuur_wijzigingen()
+
+        # einde van "with" roept __exit__ aan
+        with StorageGoogleSheet(out, retry_delay=0.0001) as sheet:
+            my_service = GoogleApiMock(verbose=True)
+            with patch('GoogleDrive.operations.storage_sheets.build', return_value=my_service):
+                my_service.prime_error('reason', 'retry', 'GoogleApiError')
+                with self.assertRaises(StorageError) as exc:
+                    sheet.selecteer_file('x')
 
     def test_range(self):
         # range actions are executed without queuing

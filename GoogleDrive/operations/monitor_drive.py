@@ -40,17 +40,15 @@ class MonitorDriveFiles:
         self._close_services()
 
     def _setup_service(self):
-        if not self._service_files:
+        if not self._service_files:         # pragma: no branch
             creds = Credentials.from_service_account_file(self.SERVICE_ACCOUNT_FILE, scopes=self.SCOPES)
             service = build('drive', 'v3', credentials=creds)
             self._service_files = service.files()
 
     def _close_services(self):
-        for service in (self._service_files,):
-            if service:
-                service.close()
-        # for
-        self._service_files = None
+        if self._service_files:             # pragma: no branch
+            self._service_files.close()
+            self._service_files = None
 
     def _execute(self, request: HttpRequest) -> dict | None:
         retries = 7

@@ -19,7 +19,6 @@ import socket
 import json
 import time
 import sys
-import os
 
 
 class StorageGoogleDrive(StorageBase):

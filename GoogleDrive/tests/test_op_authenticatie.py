@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2025 Ramon van der Winkel.
+#  Copyright (c) 2025-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -8,10 +8,9 @@ from django.test import TestCase
 from GoogleDrive.models import Transactie, Token
 from GoogleDrive.operations import check_heeft_toestemming, get_authorization_url, handle_authentication_response
 from TestHelpers.e2ehelpers import E2EHelpers
-from unittest.mock import patch
 
 
-class TestGoogleDriveAuthenticatie(E2EHelpers, TestCase):
+class TestGoogleDriveOpAuthenticatie(E2EHelpers, TestCase):
 
     """ tests voor de GoogleDrive applicatie, module authenticatie """
 
