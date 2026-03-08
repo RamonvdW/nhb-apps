@@ -81,7 +81,8 @@ class TeamsBkView(UserPassesTestMixin, TemplateView):
                       .filter(kamp__competitie=deelkamp.competitie,
                               bij_vereniging=self.functie_nu.vereniging)
                       .select_related('sporterboog',
-                                      'sporterboog__sporter')
+                                      'sporterboog__sporter',
+                                      'sporterboog__boogtype')
                       .order_by('sporterboog__boogtype__volgorde',
                                 '-gemiddelde'))                     # sterkste bovenaan
 

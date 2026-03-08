@@ -20,7 +20,8 @@ class TestCompLaagBondTeams(E2EHelpers, TestCase):
 
     test_after = ('Competitie.tests.test_overzicht', 'Competitie.tests.test_tijdlijn')
 
-    url_lijst_bk_teams = '/bondscompetities/bk/teams/%s/'                            # deelkamp_pk
+    url_lijst_bk_teams = '/bondscompetities/bk/teams/%s/'                           # deelkamp_pk
+    url_bk_teams_ver = '/bondscompetities/bk/teams-vereniging/%s/'                  # deelkamp_pk
     url_wijzig_status_bk_team = '/bondscompetities/bk/teams/wijzig-status-bk-team/'
 
     testdata = None
@@ -163,5 +164,20 @@ class TestCompLaagBondTeams(E2EHelpers, TestCase):
         resp = self.client.post(self.url_wijzig_status_bk_team, data={'team_pk': team.pk})
         self.assert403(resp, 'Niet de beheerder')
 
+    def test_teams_ver(self):
+        bk_team = self.testdata.comp18_bk_teams[0]
+        ver_nr = bk_team.vereniging.ver_nr
+        functie_hwl = self.testdata.functie_hwl[ver_nr]
+
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
+        self.e2e_wissel_naar_functie(functie_hwl)
+
+        url = self.url_bk_teams_ver % self.testdata.deelkamp18_bk.pk
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('complaagbond/hwl-teams.dtl', 'design/site_layout.dtl'))
 
 # end of file
