@@ -25,8 +25,8 @@ class TestCompKampioenschapOpStorageWf(E2EHelpers, TestCase):
 
     def test_storage(self):
         # test de storage class
-        out = OutputWrapper(io.StringIO())
-        storage = StorageWedstrijdformulieren(out, 2025, [])
+        stdout = OutputWrapper(io.StringIO())
+        storage = StorageWedstrijdformulieren(stdout, 2025, [])
 
         res = storage._params_to_folder_name(18, True, True)
         self.assertEqual(res, 'Indoor Teams BK')

@@ -21,8 +21,8 @@ class LeesIndivWedstrijdFormulier:
             'voorronde_1': 'J11:J35',
             'voorronde_2': 'K11:K35',
             'voorronde_scores': 'J11:O34',          # 1e, 2e, totaal, 10-en, 9-en, 8-en
-            'voorronde_uitslag': 'S11:S34',
-            'voorronde_25m_tellingen': 'M11:O34',   # 10-en, 9-ens, 8-en
+            'voorronde_uitslag': 'S11:S34',         # uitslag, inclusief shoot-off resultaat als decimaal
+            # 'voorronde_25m_tellingen': 'M11:O34',   # 10-en, 9-ens, 8-en
             'finales16_8': 'C8:C53',                # 1/8 (laatste 16)
             'finales16_4': 'I11:I49',               # 1/4 (laatste 8)
             'finales16_2': 'O17:O43',               # 1/2 (laatste 4)
@@ -63,7 +63,7 @@ class LeesIndivWedstrijdFormulier:
         values = self.sheet.get_range(cells_range)
         self._data4range[range_name] = values
         if values:
-            for row in values:
+            for row in values:          # pragma: no branch
                 for cell in row:
                     if cell:
                         # cell is niet leeg
@@ -155,7 +155,7 @@ class LeesIndivWedstrijdFormulier:
             return
 
         # zoek naar de 1/8 finales
-        if self._check_input_on_sheet('Finales 16', 'finales16_8'):
+        if self._check_input_on_sheet('Finales 16', 'finales16_8'):     # pragma: no branch
             self._wedstrijd_voortgang = '1/8 finales'
             return
 
@@ -185,8 +185,10 @@ class LeesIndivWedstrijdFormulier:
                 self._data_voorronde_uitslag = self.sheet.get_range(self.ranges['voorronde_uitslag'])
 
                 if self.afstand == 25:
-                    self._data_heeft_uitslag = True
-                    self._wedstrijd_voortgang = 'Uitslag bekend'
+                    # data_voorronde_uitslag is een nested list
+                    if len(self._data_voorronde_uitslag) > 0 and len(self._data_voorronde_uitslag[0]) > 0:
+                        self._data_heeft_uitslag = True
+                        self._wedstrijd_voortgang = 'Uitslag bekend'
                 else:
                     # alleen voor de Indoor, lees ook de finales
                     self._laad_sheet_indoor_finales()
@@ -225,8 +227,9 @@ class LeesIndivWedstrijdFormulier:
         # collapsed the sub-lists for single-column data sets
         for i in range(len(data)):
             i_len = len(data[i])
-            if i_len == 1:
+            if i_len == 1:              # pragma: no branch
                 data[i] = data[i][0]
+            # TODO: else: lege sublist blijft staan
         # for
         return data
 
@@ -277,7 +280,7 @@ class LeesIndivWedstrijdFormulier:
                 if block_len == 0:
                     # no data, so remove
                     del block[i]
-                elif block_len == 1:
+                elif block_len == 1:        # pragma: no branch
                     # collapse the sub-list for single-column data sets
                     block[i] = block[i][0]
         # block

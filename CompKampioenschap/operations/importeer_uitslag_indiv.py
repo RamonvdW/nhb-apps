@@ -281,6 +281,14 @@ class ImporteerSheetUitslagIndiv:
     def _bepaal_uitslag_18(self):
         lid_nrs_done = list()
 
+        if len(self._data_finales) < 2:
+            regels = [
+                'Fout: data van de finales is niet compleet (verwacht: minstens 2 regels)',
+            ]
+            self.blokjes_info.append(regels)
+            self.bevat_fout = True
+            return
+
         # begin bij de medailles
         finale_uitslag = self._data_finales[0]
         finale_deelnemers = self._data_finales[1]
