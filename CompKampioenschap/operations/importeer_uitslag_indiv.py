@@ -220,12 +220,12 @@ class ImporteerSheetUitslagIndiv:
         sheets = StorageGoogleSheet(stdout)
         lezer = LeesIndivWedstrijdFormulier(stdout, bestand, sheets, lees_oppervlakkig=False)
 
-        foutmeldingen = stdout.getvalue().strip()
-        if len(foutmeldingen) > 0:
-            regels = foutmeldingen.split('\n')
+        meldingen = stdout.getvalue().strip()
+        if len(meldingen) > 0:
+            regels = meldingen.split('\n')
             while len(regels) >= 2 and regels[-1].startswith('[DEBUG] {execute} Retrying in'):
                 regels = regels[:-1]
-            if len(regels) > 0:
+            if len(regels) > 0:                 # pragma: no branch
                 regel = 'Fout: inlezen van Google Sheet is niet gelukt'
                 regels.insert(0, regel)
                 self.blokjes_info.append(regels)
@@ -274,7 +274,7 @@ class ImporteerSheetUitslagIndiv:
             return 1
 
         regels = [
-            'Kan rank niet bepalen uit uitslag beschrijving %s' % repr(uitslag)
+            'Fout: Kan rank niet bepalen uit uitslag beschrijving %s' % repr(uitslag)
         ]
         self.blokjes_info.append(regels)
         self.bevat_fout = True
@@ -319,7 +319,6 @@ class ImporteerSheetUitslagIndiv:
                 self._lid_nr2rank_volgorde[lid_nr] = (rank, rank)
 
                 scores = self._lid_nr2voorronde[lid_nr]     # totaal, counts_str, 1e, 2e
-                print(lid_nr, scores)
                 tup = (rank, -scores[0], scores, lid_nr)
                 uitslag.append(tup)
 
@@ -327,7 +326,7 @@ class ImporteerSheetUitslagIndiv:
                 regel = '%s: %s' % (rank, lid_nr)
                 regels.append(regel)
             else:
-                regel = 'Finalist %s wordt overgeslagen' % repr(finale_deelnemers[i])
+                regel = 'Let op: Finalist %s wordt overgeslagen' % repr(finale_deelnemers[i])
                 regels.append(regel)
         # for
         self.blokjes_info.append(regels)
@@ -355,7 +354,7 @@ class ImporteerSheetUitslagIndiv:
                     regels.append(regel)
             # for
 
-            if (rank == 5 and aantal > 4) or (rank == 9 and aantal > 8):
+            if (rank == 5 and aantal > 4) or (rank == 9 and aantal > 8):            # pragma: no cover
                 regels.append('Fout: te veel sporters met rank %s' % rank)
                 self.bevat_fout = True
 
@@ -379,7 +378,8 @@ class ImporteerSheetUitslagIndiv:
         # TODO: sorteer op rank
         for lid_nr, deelnemer in self._lid_nr2deelnemer.items():
             if lid_nr not in lid_nrs_done:
-                if lid_nr not in self._lid_nr2rank_volgorde:
+                if lid_nr not in self._lid_nr2rank_volgorde:                # pragma: no cover
+                    # not sure how to get here
                     self._lid_nr2rank_volgorde[lid_nr] = (99, 99)           # triggert result_rank = NO_SHOW
                     self._lid_nr2voorronde[lid_nr] = (0, '', 0, 0)
 

@@ -111,7 +111,7 @@ class TestCompKampioenschapOpImportUitslagIndiv(E2EHelpers, TestCase):
                                 boogtype=self.boog_r,
                                 voor_wedstrijd=True)
 
-        deelnemer_bk = DeelnemerBK.objects.create(
+        DeelnemerBK.objects.create(
                                 kamp=self.kamp_bk,
                                 sporterboog=sporterboog,
                                 indiv_klasse=self.indiv_klasse,
@@ -159,6 +159,7 @@ class TestCompKampioenschapOpImportUitslagIndiv(E2EHelpers, TestCase):
                                     beschrijving='test',
                                     min_ag=0)
 
+        self._maak_bk_deelnemer(100006, 'Zes', 'Scoorder', DEELNAME_JA)
         self._maak_bk_deelnemer(100007, 'Zeven', 'Scoorder')
         self._maak_bk_deelnemer(100008, 'Acht', 'Scoorder', DEELNAME_NEE)
         self._maak_bk_deelnemer(100009, 'Negen', 'Scoorder', DEELNAME_JA)
@@ -225,9 +226,9 @@ class TestCompKampioenschapOpImportUitslagIndiv(E2EHelpers, TestCase):
             self.sheet_status.bestand.params = params
             bevat_fout, blokjes_info = importeer_sheet_uitslag_indiv(self.kamp_bk, self.indiv_klasse, self.sheet_status)
 
+        # for regels in blokjes_info:
+        #     print(regels)
         self.assertTrue(bevat_fout)
-        for regels in blokjes_info:
-            print(regels)
 
     def test_rk_met_fouten(self):
         ver_str = self.ver.ver_nr_en_naam()
@@ -245,7 +246,12 @@ class TestCompKampioenschapOpImportUitslagIndiv(E2EHelpers, TestCase):
                         voorronde_uitslag=[],
                         voorronde_scores=[],
                         finales_blad=0,
-                        finales_uitslag=[],
+                        finales_uitslag=[
+                            ['Goud', 'Zilver', 'Brons', '4e'],
+                            ['[100010] x', '[100009] y', '[100008] z', '[100007] Zeven Scoorder'],
+                            [],  # 1/2 finale wordt niet gebruikt
+                            ['[100010] x', '[100009] y', '[100008] z', '[100007] Fout'],
+                        ],
                         foutmeldingen=[])
 
         with patch('CompKampioenschap.operations.importeer_uitslag_indiv.LeesIndivWedstrijdFormulier',
@@ -253,11 +259,11 @@ class TestCompKampioenschapOpImportUitslagIndiv(E2EHelpers, TestCase):
             self.sheet_status.bestand.params = params
             bevat_fout, blokjes_info = importeer_sheet_uitslag_indiv(self.kamp_rk, self.indiv_klasse, self.sheet_status)
 
-        self.assertTrue(bevat_fout)
         # for regels in blokjes_info:
         #     print(regels)
+        self.assertTrue(bevat_fout)
 
-    def test_met_uitslag_18(self):
+    def test_fout_in_finale_1(self):
         ver_str = self.ver.ver_nr_en_naam()
 
         params = SimpleNamespace(
@@ -271,14 +277,189 @@ class TestCompKampioenschapOpImportUitslagIndiv(E2EHelpers, TestCase):
                             ['100009', 'Negen Scoorder', ver_str, '106', '', 9.0],
                             ['100010', 'Tien Scoorder', ver_str, '106', '', 10.0],
                         ],
+                        voorronde_uitslag=[],
+                        voorronde_scores=[],
+                        finales_blad=0,
+                        finales_uitslag=[
+                            ['Goud', 'Zilver', 'Brons'],      # fout: lijstje te kort
+                            ['[100010] x', '[100009] y', '[100008] z', '[100007] Zeven Scoorder'],
+                        ],
+                        foutmeldingen=[])
+
+        with patch('CompKampioenschap.operations.importeer_uitslag_indiv.LeesIndivWedstrijdFormulier',
+                   new=MockLeesIndivWedstrijdFormulier):
+            self.sheet_status.bestand.params = params
+            bevat_fout, blokjes_info = importeer_sheet_uitslag_indiv(self.kamp_bk, self.indiv_klasse, self.sheet_status)
+
+        # for regels in blokjes_info:
+        #     print(regels)
+        self.assertTrue(bevat_fout)
+        self.assertTrue(['Fout: data van de medaille finales is niet compleet',
+                         "Uitslag: ['Goud', 'Zilver', 'Brons']",
+                         "Finalisten: ['[100010] x', '[100009] y', '[100008] z', '[100007] Zeven Scoorder']"] in blokjes_info)
+
+    def test_fout_in_finale_2(self):
+        ver_str = self.ver.ver_nr_en_naam()
+
+        params = SimpleNamespace(
+                        heeft_scores=False,
+                        heeft_uitslag=False,
+                        aantal_deelnemers=0,
+                        voortgang='Geen invoer',
+                        deelnemers=[
+                            ['100007', 'Zeven Scoorder', ver_str, '106', '', 7.0],
+                            ['100008', 'Acht Scoorder', ver_str, '106', '', 8.0],
+                            ['100009', 'Negen Scoorder', ver_str, '106', '', 9.0],
+                            ['100010', 'Tien Scoorder', ver_str, '106', '', 10.0],
+                        ],
+                        voorronde_uitslag=[],
+                        voorronde_scores=[],
+                        finales_blad=0,
+                        finales_uitslag=[
+                            ['Goud', 'Zilver', 'Brons', '4e'],
+                            ['[100010] x', '[100009] y', 'fout[100008] z', '[100007] Zeven Scoorder'],   # fout: lid_nr
+                        ],
+                        foutmeldingen=[])
+
+        with patch('CompKampioenschap.operations.importeer_uitslag_indiv.LeesIndivWedstrijdFormulier',
+                   new=MockLeesIndivWedstrijdFormulier):
+            self.sheet_status.bestand.params = params
+            bevat_fout, blokjes_info = importeer_sheet_uitslag_indiv(self.kamp_bk, self.indiv_klasse, self.sheet_status)
+
+        # for regels in blokjes_info:
+        #     print(regels)
+        self.assertFalse(bevat_fout)        # fout is niet fataal
+        self.assertTrue(['Ranking uit de medaille finales:',
+                         '1: 100010', '2: 100009',
+                         "Let op: Finalist 'fout[100008] z' wordt overgeslagen",
+                         '4: 100007'] in blokjes_info)
+
+    def test_fout_in_uitslag(self):
+        ver_str = self.ver.ver_nr_en_naam()
+
+        params = SimpleNamespace(
+                        heeft_scores=False,
+                        heeft_uitslag=False,
+                        aantal_deelnemers=0,
+                        voortgang='Geen invoer',
+                        deelnemers=[
+                            ['100007', 'Zeven Scoorder', ver_str, '106', '', 7.0],
+                            [],
+                            ['100008', 'Acht Scoorder', ver_str, '106', '', 8.0],
+                            ['100009', 'Negen Scoorder', ver_str, '106', '', 9.0],
+                            ['100010', 'Tien Scoorder', ver_str, '106', '', 10.0],
+                            ['100006', 'Zes Scoorder', ver_str, '106', '', 6.0],
+                        ],
                         voorronde_uitslag=[
                             14,
+                            '',
+                            17.002,
+                            17.001,
+                            20,
+                            # 12,
+                        ],
+                        voorronde_scores=[
+                            [7, ''],
+                            [],
+                            [8, 9, 17],
+                            [9, 8, 17],
+                            [10, 10, 20],
+                            # [6, 6, 12],
+                        ],
+                        finales_blad=4,
+                        finales_uitslag=[
+                            ['Goud', 'Zilver', 'Brons', '5e'],      # fout: 5e
+                            ['[100010] x', '[100009] y', '[100008] z', '[100007] Zeven Scoorder'],
+                            [],  # 1/2 finale wordt niet gebruikt
+                            ['[100010] x', '[100009] y', '[100008] z', '[100007] Fout'],
+                        ],
+                        foutmeldingen=[])
+
+        with patch('CompKampioenschap.operations.importeer_uitslag_indiv.LeesIndivWedstrijdFormulier',
+                   new=MockLeesIndivWedstrijdFormulier):
+            self.sheet_status.bestand.params = params
+            bevat_fout, blokjes_info = importeer_sheet_uitslag_indiv(self.kamp_bk, self.indiv_klasse, self.sheet_status)
+
+        # for regels in blokjes_info:
+        #     print(regels)
+        self.assertTrue(bevat_fout)
+        self.assertTrue(["Fout: Kan rank niet bepalen uit uitslag beschrijving '5e'"] in blokjes_info)
+
+    def test_fout_in_1_4_finale(self):
+        ver_str = self.ver.ver_nr_en_naam()
+
+        params = SimpleNamespace(
+                        heeft_scores=False,
+                        heeft_uitslag=False,
+                        aantal_deelnemers=0,
+                        voortgang='Geen invoer',
+                        deelnemers=[
+                            ['100006', 'Zes Scoorder', ver_str, '106', '', 6.0],
+                            ['100007', 'Zeven Scoorder', ver_str, '106', '', 7.0],
+                            ['100008', 'Acht Scoorder', ver_str, '106', '', 8.0],
+                            ['100009', 'Negen Scoorder', ver_str, '106', '', 9.0],
+                            ['100010', 'Tien Scoorder', ver_str, '106', '', 10.0],
+                        ],
+                        voorronde_uitslag=[
+                            12,
+                            14,
+                            17.002,
+                            17.001,
+                            20
+                        ],
+                        voorronde_scores=[
+                            [6, 6, 12],
+                            [7, ''],
+                            [8, 9, 17],
+                            [9, 8, 17],
+                            [10, 10, 20],
+                        ],
+                        finales_blad=4,
+                        finales_uitslag=[
+                            ['Goud', 'Zilver', 'Brons', '4e'],
+                            ['[100010] x', '[100009] y', '[100008] z', '[100007] Zeven Scoorder'],
+                            [],  # 1/2 finale wordt niet gebruikt
+                            ['[100010] x', '[100009] y', 'fout [100008] z', '[100007] a', '[100006] b'],
+                        ],
+                        foutmeldingen=[])
+
+        with patch('CompKampioenschap.operations.importeer_uitslag_indiv.LeesIndivWedstrijdFormulier',
+                   new=MockLeesIndivWedstrijdFormulier):
+            self.sheet_status.bestand.params = params
+            bevat_fout, blokjes_info = importeer_sheet_uitslag_indiv(self.kamp_bk, self.indiv_klasse, self.sheet_status)
+
+        # for regels in blokjes_info:
+        #     print(regels)
+        self.assertFalse(bevat_fout)        # waarschuwing is niet fataal
+        self.assertTrue(['Ranking uit de voorgaande finale ronde:',
+                         "Finalist 'fout [100008] z' wordt overgeslagen",
+                         '5: 100006'] in blokjes_info)
+
+    def test_met_uitslag_18(self):
+        ver_str = self.ver.ver_nr_en_naam()
+
+        params = SimpleNamespace(
+                        heeft_scores=False,
+                        heeft_uitslag=False,
+                        aantal_deelnemers=0,
+                        voortgang='Geen invoer',
+                        deelnemers=[
+                            ['100007', 'Zeven Scoorder', ver_str, '106', '', 7.0],
+                            [],
+                            ['100008', 'Acht Scoorder', ver_str, '106', '', 8.0],
+                            ['100009', 'Negen Scoorder', ver_str, '106', '', 9.0],
+                            ['100010', 'Tien Scoorder', ver_str, '106', '', 10.0],
+                        ],
+                        voorronde_uitslag=[
+                            14,
+                            '',
                             17.002,
                             17.001,
                             # 18
                         ],
                         voorronde_scores=[
                             [7, ''],
+                            [],
                             [8, 9, 17],
                             [9, 8, 17],
                             # [10, 8],
@@ -299,7 +480,96 @@ class TestCompKampioenschapOpImportUitslagIndiv(E2EHelpers, TestCase):
 
         # for regels in blokjes_info:
         #     print(regels)
-        #self.assertFalse(bevat_fout)
+        self.assertFalse(bevat_fout)
+
+        # flip 2 regels in de uitslag
+        params = SimpleNamespace(
+                        heeft_scores=False,
+                        heeft_uitslag=False,
+                        aantal_deelnemers=0,
+                        voortgang='Geen invoer',
+                        deelnemers=[
+                            ['100007', 'Zeven Scoorder', ver_str, '106', '', 7.0],
+                            [],
+                            ['100008', 'Acht Scoorder', ver_str, '106', '', 8.0],
+                            ['100009', 'Negen Scoorder', ver_str, '106', '', 9.0],
+                            ['100010', 'Tien Scoorder', ver_str, '106', '', 10.0],
+                        ],
+                        voorronde_uitslag=[
+                            14,
+                            '',
+                            17.002,
+                            17.001,
+                            # 18
+                        ],
+                        voorronde_scores=[
+                            [7, ''],
+                            [],
+                            [8, 9, 17],
+                            [9, 8, 17],
+                            # [10, 8],
+                        ],
+                        finales_blad=4,
+                        finales_uitslag=[
+                            ['Zilver', 'Goud', 'Brons', '4e'],      # goud en zilver omgedraaid
+                            ['[100010] x', '[100009] y', '[100008] z', '[100007] Zeven Scoorder'],
+                            [],  # 1/2 finale wordt niet gebruikt
+                            ['[100010] x', '[100009] y', '[100008] z', '[100007] Fout'],
+                        ],
+                        foutmeldingen=[])
+
+        with patch('CompKampioenschap.operations.importeer_uitslag_indiv.LeesIndivWedstrijdFormulier',
+                   new=MockLeesIndivWedstrijdFormulier):
+            self.sheet_status.bestand.params = params
+            bevat_fout, blokjes_info = importeer_sheet_uitslag_indiv(self.kamp_bk, self.indiv_klasse, self.sheet_status)
+
+        # for regels in blokjes_info:
+        #     print(regels)
+        self.assertFalse(bevat_fout)
+
+        # wijziging is te zien in het logboek van de deelnemer
+        deelnemer = DeelnemerBK.objects.get(sporterboog__sporter__lid_nr=100010)
+        # print(deelnemer.logboek)
+        self.assertTrue("Rank en volgorde bijgewerkt: 1, 1 --> 2, 2" in deelnemer.logboek)
+
+    def test_geen_bronzen_finale(self):
+        ver_str = self.ver.ver_nr_en_naam()
+
+        params = SimpleNamespace(
+                        heeft_scores=False,
+                        heeft_uitslag=False,
+                        aantal_deelnemers=0,
+                        voortgang='Geen invoer',
+                        deelnemers=[
+                            ['100007', 'Zeven Scoorder', ver_str, '106', '', 7.0],
+                            ['100008', 'Acht Scoorder', ver_str, '106', '', 8.0],
+                        ],
+                        voorronde_uitslag=[
+                            14,
+                            16,
+                            # 18
+                        ],
+                        voorronde_scores=[
+                            [7, 7, 14],
+                            [8, 8, 16],
+                        ],
+                        finales_blad=4,
+                        finales_uitslag=[
+                            ['Goud', 'Zilver'],
+                            ['[100007] x', '[100008] y', 'BYE', 'BYE'],
+                            [],  # 1/2 finale wordt niet gebruikt
+                            ['[100007] x', 'BYE', 'BYE', '[100008] y'],
+                        ],
+                        foutmeldingen=[])
+
+        with patch('CompKampioenschap.operations.importeer_uitslag_indiv.LeesIndivWedstrijdFormulier',
+                   new=MockLeesIndivWedstrijdFormulier):
+            self.sheet_status.bestand.params = params
+            bevat_fout, blokjes_info = importeer_sheet_uitslag_indiv(self.kamp_bk, self.indiv_klasse, self.sheet_status)
+
+        # for regels in blokjes_info:
+        #     print(regels)
+        self.assertFalse(bevat_fout)
 
     def test_met_uitslag_25(self):
         ver_str = self.ver.ver_nr_en_naam()
@@ -337,9 +607,10 @@ class TestCompKampioenschapOpImportUitslagIndiv(E2EHelpers, TestCase):
             self.sheet_status.bestand.params = params
             bevat_fout, blokjes_info = importeer_sheet_uitslag_indiv(self.kamp_bk, self.indiv_klasse, self.sheet_status)
 
-        # if bevat_fout:  # pragma: no cover
-        #     for regels in blokjes_info:
-        #         print(regels)
-        # self.assertFalse(bevat_fout)
+        # for regels in blokjes_info:
+        #     print(regels)
+        self.assertTrue(bevat_fout)
+        self.assertTrue(["Fout: Probleem met 10/9/8 tellingen voor [100007]: [7, 7, 14, '5', '4', 'error', '', '', '', '', '', '']"] in blokjes_info)
+        self.assertTrue(["Fout: Te veel 10/9/8-en voor [100008]: [7, 7, 14, '25', '25', '3', '', '', '', '', '', '']"] in blokjes_info)
 
 # end of file
