@@ -87,7 +87,7 @@ class ImporteerSheetUitslagIndiv:
                 return
 
             lid_nr, naam, ver, _regio_nr, _label, ag_str = row
-            deelnemer = deelnemers.get(lid_nr, None)
+            deelnemer = deelnemers.get(str(lid_nr), None)
             if not deelnemer:
                 regels = [
                     'Fout: Deelnemer in de uitslag niet gevonden op de deelnemerslijst!',
@@ -134,8 +134,9 @@ class ImporteerSheetUitslagIndiv:
         """
         uitslagen = list()
         for row, uitslag, scores in zip(self._data_deelnemers, self._data_voorronde_uitslag, self._data_voorronde_scores):
+            # print('row:', repr(row), 'uitslag:', repr(uitslag), 'scores:', repr(scores))
             if len(row) > 0:
-                lid_nr = row[0]
+                lid_nr = str(row[0])
                 tup = (uitslag, lid_nr)
                 uitslagen.append(tup)
 
@@ -143,8 +144,9 @@ class ImporteerSheetUitslagIndiv:
                 score1, score2, score_totaal, c10, c9, c8 = scores[:6]
 
                 # soms stoppen mensen en is er geen score ingevuld
-                if score2 == '' and score1 != '':
-                    score2 = '0'
+                if score2 == '' and str(score1) != '':
+                    score2 = 0
+                    score_totaal = score1
 
                 # converteer de telling van 10-en, 9-ens en 8-en voor de 25m1pijl
                 counts = list()
@@ -221,8 +223,8 @@ class ImporteerSheetUitslagIndiv:
         foutmeldingen = stdout.getvalue().strip()
         if len(foutmeldingen) > 0:
             regels = foutmeldingen.split('\n')
-            while len(regels) > 2 and regels[-1].startswith('[DEBUG] {execute} Retrying in'):
-                regels = regels[:-2]
+            while len(regels) >= 2 and regels[-1].startswith('[DEBUG] {execute} Retrying in'):
+                regels = regels[:-1]
             if len(regels) > 0:
                 regel = 'Fout: inlezen van Google Sheet is niet gelukt'
                 regels.insert(0, regel)
@@ -316,7 +318,8 @@ class ImporteerSheetUitslagIndiv:
                 rank = self._uitslag2rank(finale_uitslag[i])       # vertaalt "Zilver", "Brons", etc. naar 1/2/3/4
                 self._lid_nr2rank_volgorde[lid_nr] = (rank, rank)
 
-                scores = self._lid_nr2voorronde[lid_nr]
+                scores = self._lid_nr2voorronde[lid_nr]     # totaal, counts_str, 1e, 2e
+                print(lid_nr, scores)
                 tup = (rank, -scores[0], scores, lid_nr)
                 uitslag.append(tup)
 

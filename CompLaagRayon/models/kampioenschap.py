@@ -35,7 +35,7 @@ class KampRK(models.Model):
 
     def __str__(self):
         """ geef een tekstuele afkorting van dit object, voor in de admin interface """
-        msg = str(self.competitie) + ' Rayon %s' % self.rayon.rayon_nr
+        msg = str(self.competitie) + ' RK rayon %s' % self.rayon.rayon_nr
         return msg
 
     class Meta:

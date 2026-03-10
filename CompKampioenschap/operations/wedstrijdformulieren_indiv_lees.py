@@ -214,6 +214,9 @@ class LeesIndivWedstrijdFormulier:
     def get_indiv_deelnemers(self):
         """ geeft een lijst terug met op elke regel een mogelijk deelnemer
             volgorde is zoals weergegeven in het google sheet
+
+            elke regel van de lijst bevat 6 elementen (of is leeg)
+            [lid_nr, 'naam', '[ver_nr] naam', 'regio', 'label', gemiddelde]
         """
         return self._data_deelnemers
 

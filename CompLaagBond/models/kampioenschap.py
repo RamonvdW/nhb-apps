@@ -30,7 +30,7 @@ class KampBK(models.Model):
 
     def __str__(self):
         """ geef een tekstuele afkorting van dit object, voor in de admin interface """
-        msg = str(self.competitie)
+        msg = str(self.competitie) + ' BK'
         return msg
 
     class Meta:

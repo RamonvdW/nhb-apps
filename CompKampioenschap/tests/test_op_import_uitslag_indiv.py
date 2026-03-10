@@ -6,323 +6,89 @@
 
 from django.test import TestCase
 from BasisTypen.models import BoogType
+from Competitie.definities import DEELNAME_ONBEKEND, DEELNAME_JA, DEELNAME_NEE
 from Competitie.models import Competitie, CompetitieIndivKlasse
 from CompKampioenschap.models import SheetStatus
 from CompKampioenschap.operations import importeer_sheet_uitslag_indiv
 from CompLaagBond.models import KampBK, DeelnemerBK
+from CompLaagRayon.models import KampRK
 from Functie.tests.helpers import maak_functie
-from Geo.models import Regio
+from Geo.models import Regio, Rayon
 from GoogleDrive.models import Bestand
 from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
 from unittest.mock import patch
+from types import SimpleNamespace
 
 
-class SheetMock:
+class MockLeesIndivWedstrijdFormulier:
 
-    def __init__(self, _stdout, verbose=True, sheet_ranges=None):
-        self.file_id = ''
-        self.selected_sheet = ''
-        self.verbose = verbose
-        self.sheet_ranges = sheet_ranges
+    def __init__(self, stdout, bestand, _sheets, lees_oppervlakkig: bool):
+        self.stdout = stdout
+        self.afstand = bestand.afstand
+        self.lees_oppervlakkig = lees_oppervlakkig
+        self._params = bestand.params
+        self.finales_blad = self._params.finales_blad
 
-    def selecteer_file(self, file_id: str):
-        self.file_id = file_id
+        for regel in self._params.foutmeldingen:
+            self.stdout.write(regel)
+        # for
 
-    def selecteer_sheet(self, sheet_name: str):
-        if self.verbose:
-            print('[DEBUG] {SheetMock} selecteer_sheet: %s' % repr(sheet_name))
-        self.selected_sheet = sheet_name
+    def heeft_scores(self):
+        return self._params.heeft_scores
 
-    def get_range(self, range_a1: str):
-        if self.verbose:
-            print('[DEBUG] {SheetMock} get_range: %s from sheet %s' % (repr(range_a1), repr(self.selected_sheet)))
+    def heeft_uitslag(self):
+        return self._params.heeft_uitslag
 
-        try:
-            ranges = self.sheet_ranges[self.selected_sheet]
-        except KeyError:
-            print('[ERROR] {SheetMock} No sheet_ranges for sheet %s' % repr(self.selected_sheet))
-            values = [[]]
-        else:
-            try:
-                values = ranges[range_a1]
-            except KeyError:
-                print('[ERROR] {SheetMock} Range %s not found on sheet %s' % (repr(range_a1), repr(self.selected_sheet)))
-                values = [[]]
+    def tel_deelnemers(self):
+        return self._params.aantal_deelnemers
 
-        return values
+    def bepaal_wedstrijd_fase(self):
+        return self._params.voortgang
 
-    @staticmethod
-    def clear_range(range_a1: str):
-        pass
+    def get_indiv_deelnemers(self):
+        """ geeft een lijst terug met op elke regel een mogelijk deelnemer
+            volgorde is zoals weergegeven in het google sheet
+        """
+        return self._params.deelnemers
 
-    @staticmethod
-    def wijzig_cellen(range_a1: str, values: list):
-        pass
+    def get_indiv_voorronde_uitslag(self):
+        """ geeft een lijst terug met op elke regel een mogelijke voorronde uitslag:
+            dit is de som van de twee voorronde scores plus de eventuele shootoff als decimaal
 
-    @staticmethod
-    def stuur_wijzigingen():
-        pass
+            de volgorde komt overeen met get_deelnemers()
+        """
+        data = self._params.voorronde_uitslag
+        return data
 
-    @staticmethod
-    def toon_sheet(sheet_name: str):
-        pass
+    def get_indiv_voorronde_scores(self):
+        """ geeft een lijst terug met op elke regel de mogelijke score van een deelnemer:
+            [
+                score ronde 1
+                score ronde 2
+                totaal score
+                aantal 10-en        # leeg voor de Indoor
+                aantal 9-ens        # leeg voor de Indoor
+                aantal 8-en         # leeg voor de Indoor
+            ]
+        """
+        return self._params.voorronde_scores
 
-    @staticmethod
-    def hide_sheet(sheet_name: str):
-        pass
+    def get_indiv_finales_uitslag(self):
+        """ geeft de data van de finales terug, voor individuele Indoor wedstrijden
+            data  = list[uitslag, ronde, ronde, ..] met
+            uitslag = list['Goud', 'Zilver', 'Brons', '4e'] in verschillende volgordes
+            ronde = ['[123456] Naam', '[234567] Naam', ..]
+        """
+        return self._params.finales_uitslag
 
 
 class TestCompKampioenschapOpImportUitslagIndiv(E2EHelpers, TestCase):
 
-    """ tests voor de CompKampioenschap module, operations Importeer Uitslag Individueel """
+    """ tests voor de CompKampioenschap module, operations Maak Teams Excel (operations) """
 
-    voorronde = {
-        'D11:I34': [  # deelnemers
-            ['100010', 'Tien Scoorder', '[1001] Grote club', 'G', 'H', 'I'],
-            ['100009', 'Negen Scoorder', '[1001] Grote club', 'G', 'H', 'I'],
-            ['100008', 'Acht Scoorder', '[1001] Grote club', 'G', 'H', 'I'],
-            ['100007', 'Zeven Scoorder', '[1001] Grote club', 'G', 'H', 'I'],
-        ],
-        'J11:J35': [  # voorronde 1 scores
-            [10],
-            [9],
-            [8],
-            [7],
-        ],
-        'K11:K35': [  # voorronde 2 scores
-            [10],
-            [9],
-            [8],
-            [7],
-        ],
-        'J11:O34': [  # 1e, 2e, totaal, 10-en, 9-en, 8-en
-            [10, 10, 20],
-            [9, 9, 18],
-            [8, 10, 18],
-            [7, 7, 14],
-        ],
-        'S11:S34': [  # uitslag, inclusief shoot-off resultaat als decimaal
-            [20],
-            [18.001],
-            [18],
-            [14],
-        ],
-    }
-
-    sheet_ranges_bezig4 = {
-        'Voorronde': voorronde,
-        'Finales 16': {
-            'X25:X35': None,    # uitslag finales: "Zilver", etc.
-        },
-        'Finales 8': {
-            'R25:R35': None,    # uitslag finales: "Zilver", etc.
-        },
-        'Finales 4': {
-            'L25:L35': None,    # uitslag finales: "Zilver", etc.
-            'H25:H35': [        # deelnemers finales
-                ['[100010] Tien Scoorder'],  # 25
-                [],
-                ['[100007] Zeven Scoorder'],  # 27
-                *5*[[]],
-                ['[100008] Acht Scoorder'],  # 33
-                [],
-                ['[100009] Negen Scoorder'],  # 35
-            ],
-            'I25:I35': [        # setpunten finales
-                [6],  # 25: gouden finale
-                [''],
-                [0],  # 27: gouden finale
-                *5*[[]],
-                [4],  # 33: bronzen finale
-                [],
-                [6],  # 35: brozen finale
-            ],
-            'C17:C43': [  # setpunten 1/2 finale
-                [6],  # 17
-                [],
-                [4],  # 19
-                *21*[[]],
-                [5],  # 41
-                [],
-                [5],  # 43
-            ],
-            'B17:B43': [  # deelnemers 1/2 finale
-                ['[100010] Tien Scoorder'],  # 17
-                [],
-                ['[100009] Negen Scoorder'],  # 19
-                *21 * [[]],
-                ['[100008] Acht Scoorder'],  # 41
-                [],
-                ['[100007] Zeven Scoorder'],  # 43
-            ],
-        },
-    }
-
-    sheet_ranges_finales4 = {
-        'Voorronde': voorronde,
-        'Finales 16': {
-            'X25:X35': None,    # uitslag finales: "Zilver", etc.
-        },
-        'Finales 8': {
-            'R25:R35': None,    # uitslag finales: "Zilver", etc.
-        },
-        'Finales 4': {
-            'L25:L35': [        # uitslag finales: "Zilver", etc.
-                ['Goud'],  # 25: gouden finale
-                [],
-                ['Zilver'],  # 27: gouden finale
-                *5*[[]],
-                ['4e'],  # 33: bronzen finale
-                [],
-                ['Brons'],  # 35: brozen finale
-            ],
-            'H25:H35': [        # deelnemers finales
-                ['[100010] Tien Scoorder'],  # 25
-                [],
-                ['[100007] Zeven Scoorder'],  # 27
-                *5*[[]],
-                ['[100008] Acht Scoorder'],  # 33
-                [],
-                ['[100009] Negen Scoorder'],  # 35
-            ],
-            'I25:I35': [        # setpunten finales
-                [6],  # 25: gouden finale
-                [''],
-                [0],  # 27: gouden finale
-                *5*[[]],
-                [4],  # 33: bronzen finale
-                [],
-                [6],  # 35: brozen finale
-            ],
-            'C17:C43': [  # setpunten 1/2 finale
-                [6],  # 17
-                [],
-                [4],  # 19
-                *21*[[]],
-                [5],  # 41
-                [],
-                [5],  # 43
-            ],
-            'B17:B43': [  # deelnemers 1/2 finale
-                ['[100010] Tien Scoorder'],  # 17
-                [],
-                ['[100009] Negen Scoorder'],  # 19
-                *21 * [[]],
-                ['[100008] Acht Scoorder'],  # 41
-                [],
-                ['[100007] Zeven Scoorder'],  # 43
-            ],
-        },
-    }
-
-    sheet_ranges_finales8 = {
-        # Wedstrijd is voor 25m1pijl
-        'Wedstrijd': {
-        },
-
-        # Voorronde is voor Indoor
-        'Voorronde': {
-            'D11:I34': [        # deelnemers
-                ['100010', 'Tien Scoorder', '[1001] Grote club', 'G', 'H', 'I'],
-                ['100009', 'Negen Scoorder', '[1001] Grote club', 'G', 'H', 'I'],
-                ['100008', 'Acht Scoorder', '[1001] Grote club', 'G', 'H', 'I'],
-                ['100007', 'Zeven Scoorder', '[1001] Grote club', 'G', 'H', 'I'],
-            ],
-            'J11:J35': [        # voorronde 1 scores
-                [10],
-                [9],
-                [8],
-                [7],
-            ],
-            'K11:K35': [        # voorronde 2 scores
-                [10],
-                [9],
-                [8],
-                [7],
-            ],
-            'J11:O34': [        # 1e, 2e, totaal, 10-en, 9-en, 8-en
-                [10, 10, 20],
-                [9, 9, 18],
-                [8, 10, 18],
-                [7, 7, 14],
-            ],
-            'S11:S34': [        # uitslag, inclusief shoot-off resultaat als decimaal
-                [20],
-                [18.001],
-                [18],
-                [14],
-            ],
-        },
-
-        # Finales zijn alleen voor de Indoor
-        'Finales 16': {
-            'X25:X35': None,    # uitslag finales: "Zilver", etc.
-        },
-
-        'Finales 8': {
-            'R25:R35': [            # uitslag finales: "Zilver", etc.
-                ['Goud'],    # 25: gouden finale
-                [],
-                ['Zilver'],  # 27: gouden finale
-                *5*[[]],
-                ['4e'],      # 33: bronzen finale
-                [],
-                ['Brons'],   # 35: brozen finale
-            ],
-            'N25:N35': [            # deelnemers finales
-                ['[100010] Tien Scoorder'],  # 25
-                [],
-                ['[100007] Zeven Scoorder'],  # 27
-                *5 * [[]],
-                ['[100008] Acht Scoorder'],  # 33
-                [],
-                ['[100009] Negen Scoorder'],  # 35
-            ],
-            'H17:H43': [            # deelnemers 1/2 finale
-                ['[100010] Tien Scoorder'],  # 17
-                [],
-                ['[100007] Zeven Scoorder'],  # 19
-                *21* [[]],
-                ['[100008] Acht Scoorder'],  # 41
-                [],
-                ['[100009] Negen Scoorder'],  # 43
-            ],
-            'B11:B49': [            # deelnemers 1/4 finale
-                ['[100010] Tien Scoorder'],  # 11
-                [],
-                ['BYE'],                     # 13
-                *9*[[]],
-                ['[100009] Negen Scoorder'], # 23
-                [],
-                ['BYE'],                     # 25
-                *9*[[]],
-                ['[100008] Acht Scoorder'],  # 35
-                [],
-                ['BYE'],                     # 37
-                *9*[[]],
-                ['[100007] Zeven Scoorder'], # 47
-                [],
-                ['BYE'],                     # 49
-            ],
-        },
-
-        'Finales 4': {
-            'L25:L35': None,    # uitslag finales: "Zilver", etc.
-            'I25:I35': [        # setpunten finales
-                [6],  # 25: gouden finale
-                [''],
-                [0],  # 27: gouden finale
-                *5*[[]],
-                [4],  # 33: bronzen finale
-                [],
-                [6],  # 35: brozen finale
-            ],
-        },
-    }
-
-    def _maak_bk_deelnemer(self, lid_nr, voornaam, achternaam):
+    def _maak_bk_deelnemer(self, lid_nr, voornaam, achternaam, deelname_status=DEELNAME_ONBEKEND):
         sporter = Sporter.objects.create(
                             lid_nr=lid_nr,
                             voornaam=voornaam,
@@ -352,7 +118,7 @@ class TestCompKampioenschapOpImportUitslagIndiv(E2EHelpers, TestCase):
                                 indiv_klasse_volgende_ronde=self.indiv_klasse,
                                 bij_vereniging=self.ver,
                                 bevestiging_gevraagd_op='2000-01-01T00:00:00Z',
-                                #deelname=DEELNAME_ONBEKEND,
+                                deelname=deelname_status,
                                 gemiddelde=10.0)
 
     def setUp(self):
@@ -370,6 +136,14 @@ class TestCompKampioenschapOpImportUitslagIndiv(E2EHelpers, TestCase):
                             afstand='18')
         self.comp.refresh_from_db()
 
+        self.rayon4 = Rayon.objects.get(rayon_nr=4)
+
+        self.kamp_rk = KampRK.objects.create(
+                            competitie=self.comp,
+                            functie=self.functie_bko,
+                            rayon=self.rayon4,
+                            heeft_deelnemerslijst=True)
+
         self.kamp_bk = KampBK.objects.create(
                             competitie=self.comp,
                             functie=self.functie_bko,
@@ -386,9 +160,9 @@ class TestCompKampioenschapOpImportUitslagIndiv(E2EHelpers, TestCase):
                                     min_ag=0)
 
         self._maak_bk_deelnemer(100007, 'Zeven', 'Scoorder')
-        self._maak_bk_deelnemer(100008, 'Acht', 'Scoorder')
-        self._maak_bk_deelnemer(100009, 'Negen', 'Scoorder')
-        self._maak_bk_deelnemer(100010, 'Tien', 'Scoorder')
+        self._maak_bk_deelnemer(100008, 'Acht', 'Scoorder', DEELNAME_NEE)
+        self._maak_bk_deelnemer(100009, 'Negen', 'Scoorder', DEELNAME_JA)
+        self._maak_bk_deelnemer(100010, 'Tien', 'Scoorder', DEELNAME_JA)
 
         self.bestand = Bestand.objects.create(
                                 begin_jaar=self.comp.begin_jaar,
@@ -406,33 +180,166 @@ class TestCompKampioenschapOpImportUitslagIndiv(E2EHelpers, TestCase):
                                 bevat_scores=False,
                                 uitslag_is_compleet=False)
 
-    def test_finals4(self):
-        my_sheet = SheetMock(None, verbose=False, sheet_ranges=self.sheet_ranges_finales4)
-        with patch('CompKampioenschap.operations.importeer_uitslag_indiv.StorageGoogleSheet', return_value=my_sheet):
-            bevat_fout, blokjes_info = importeer_sheet_uitslag_indiv(self.kamp_bk, self.indiv_klasse, self.sheet_status)
-        if bevat_fout:      # pragma: no cover
-            for regels in blokjes_info:
-                print(regels)
-        self.assertFalse(bevat_fout)
+    def test_fout(self):
+        params = SimpleNamespace(
+                        heeft_scores=False,
+                        heeft_uitslag=False,
+                        aantal_deelnemers=0,
+                        voortgang='Geen invoer',
+                        deelnemers=[],
+                        voorronde_uitslag=[],
+                        voorronde_scores=[],
+                        finales_blad=0,
+                        finales_uitslag=[],
+                        foutmeldingen=['[INFO] Dit is een test',
+                                       '[DEBUG] {execute} Retrying in',])
 
-    def test_bezig4(self):
-        my_sheet = SheetMock(None, verbose=False, sheet_ranges=self.sheet_ranges_bezig4)
-        with patch('CompKampioenschap.operations.importeer_uitslag_indiv.StorageGoogleSheet', return_value=my_sheet):
+        with patch('CompKampioenschap.operations.importeer_uitslag_indiv.LeesIndivWedstrijdFormulier', new=MockLeesIndivWedstrijdFormulier):
+            self.sheet_status.bestand.params = params
             bevat_fout, blokjes_info = importeer_sheet_uitslag_indiv(self.kamp_bk, self.indiv_klasse, self.sheet_status)
-        if bevat_fout:      # pragma: no cover
-            for regels in blokjes_info:
-                print(regels)
-        self.assertFalse(bevat_fout)
+        self.assertTrue(bevat_fout)
+        self.assertEqual(blokjes_info[0][0], 'Fout: inlezen van Google Sheet is niet gelukt')
 
-    def test_finals8(self):
-        my_sheet = SheetMock(None, verbose=False, sheet_ranges=self.sheet_ranges_finales8)
-        with patch('CompKampioenschap.operations.importeer_uitslag_indiv.StorageGoogleSheet', return_value=my_sheet):
+    def test_bk_geen_uitslag(self):
+        ver_str = self.ver.ver_nr_en_naam()
+
+        params = SimpleNamespace(
+                        heeft_scores=False,
+                        heeft_uitslag=False,
+                        aantal_deelnemers=0,
+                        voortgang='Geen invoer',
+                        deelnemers=[
+                            [100007, 'Zeven Scoorder', ver_str, '106', '', 7.0],
+                            ['100008', 'Acht Scoorder', ver_str, '106', '', 8.0],
+                            ['100009', 'Negen Scoorder', ver_str, '106', '', 9.0],
+                            ['100010', 'Tien Scoorder', ver_str, '106', '', 10.0],
+                        ],
+                        voorronde_uitslag=[],
+                        voorronde_scores=[],
+                        finales_blad=0,
+                        finales_uitslag=[],
+                        foutmeldingen=[])
+
+        with patch('CompKampioenschap.operations.importeer_uitslag_indiv.LeesIndivWedstrijdFormulier',
+                   new=MockLeesIndivWedstrijdFormulier):
+            self.sheet_status.bestand.params = params
             bevat_fout, blokjes_info = importeer_sheet_uitslag_indiv(self.kamp_bk, self.indiv_klasse, self.sheet_status)
-        self.assertFalse(bevat_fout)
-        if bevat_fout:      # pragma: no cover
-            for regels in blokjes_info:
-                print(regels)
-        self.assertFalse(bevat_fout)
 
+        self.assertTrue(bevat_fout)
+        for regels in blokjes_info:
+            print(regels)
+
+    def test_rk_met_fouten(self):
+        ver_str = self.ver.ver_nr_en_naam()
+
+        params = SimpleNamespace(
+                        heeft_scores=False,
+                        heeft_uitslag=False,
+                        aantal_deelnemers=0,
+                        voortgang='Geen invoer',
+                        deelnemers=[
+                            [100007, 'Zeven Scoorder', ver_str, '106', '', 7.0],
+                            [],
+                            [100011, 'Niet compleet'],
+                        ],
+                        voorronde_uitslag=[],
+                        voorronde_scores=[],
+                        finales_blad=0,
+                        finales_uitslag=[],
+                        foutmeldingen=[])
+
+        with patch('CompKampioenschap.operations.importeer_uitslag_indiv.LeesIndivWedstrijdFormulier',
+                   new=MockLeesIndivWedstrijdFormulier):
+            self.sheet_status.bestand.params = params
+            bevat_fout, blokjes_info = importeer_sheet_uitslag_indiv(self.kamp_rk, self.indiv_klasse, self.sheet_status)
+
+        self.assertTrue(bevat_fout)
+        # for regels in blokjes_info:
+        #     print(regels)
+
+    def test_met_uitslag_18(self):
+        ver_str = self.ver.ver_nr_en_naam()
+
+        params = SimpleNamespace(
+                        heeft_scores=False,
+                        heeft_uitslag=False,
+                        aantal_deelnemers=0,
+                        voortgang='Geen invoer',
+                        deelnemers=[
+                            ['100007', 'Zeven Scoorder', ver_str, '106', '', 7.0],
+                            ['100008', 'Acht Scoorder', ver_str, '106', '', 8.0],
+                            ['100009', 'Negen Scoorder', ver_str, '106', '', 9.0],
+                            ['100010', 'Tien Scoorder', ver_str, '106', '', 10.0],
+                        ],
+                        voorronde_uitslag=[
+                            14,
+                            17.002,
+                            17.001,
+                            # 18
+                        ],
+                        voorronde_scores=[
+                            [7, ''],
+                            [8, 9, 17],
+                            [9, 8, 17],
+                            # [10, 8],
+                        ],
+                        finales_blad=4,
+                        finales_uitslag=[
+                            ['Goud', 'Zilver', 'Brons', '4e'],
+                            ['[100010] x', '[100009] y', '[100008] z', '[100007] Zeven Scoorder'],
+                            [],  # 1/2 finale wordt niet gebruikt
+                            ['[100010] x', '[100009] y', '[100008] z', '[100007] Fout'],
+                        ],
+                        foutmeldingen=[])
+
+        with patch('CompKampioenschap.operations.importeer_uitslag_indiv.LeesIndivWedstrijdFormulier',
+                   new=MockLeesIndivWedstrijdFormulier):
+            self.sheet_status.bestand.params = params
+            bevat_fout, blokjes_info = importeer_sheet_uitslag_indiv(self.kamp_bk, self.indiv_klasse, self.sheet_status)
+
+        # for regels in blokjes_info:
+        #     print(regels)
+        #self.assertFalse(bevat_fout)
+
+    def test_met_uitslag_25(self):
+        ver_str = self.ver.ver_nr_en_naam()
+
+        self.sheet_status.bestand.afstand = 25
+        self.sheet_status.bestand.save()
+
+        params = SimpleNamespace(
+            heeft_scores=False,
+            heeft_uitslag=False,
+            aantal_deelnemers=0,
+            voortgang='Geen invoer',
+            deelnemers=[
+                ['100007', 'Zeven Scoorder', ver_str, '106', '', 7.0],
+                ['100008', 'Acht Scoorder', ver_str, '106', '', 8.0],
+                ['100009', 'Negen Scoorder', ver_str, '106', '', 9.0],
+                ['100010', 'Tien Scoorder', ver_str, '106', '', 10.0],
+            ],
+            voorronde_uitslag=[
+                14,
+                16,
+                18.002,
+                18.001
+            ],
+            voorronde_scores=[
+                [7, 7, 14, '5', '4', 'error'],   # geen getal --> foutmelding
+                [7, 7, 14, '25', '25', '3'],     # meer dan 50 --> foutmelding
+            ],
+            finales_blad=0,
+            finales_uitslag=[],
+            foutmeldingen=[])
+
+        with patch('CompKampioenschap.operations.importeer_uitslag_indiv.LeesIndivWedstrijdFormulier',
+                   new=MockLeesIndivWedstrijdFormulier):
+            self.sheet_status.bestand.params = params
+            bevat_fout, blokjes_info = importeer_sheet_uitslag_indiv(self.kamp_bk, self.indiv_klasse, self.sheet_status)
+
+        # if bevat_fout:  # pragma: no cover
+        #     for regels in blokjes_info:
+        #         print(regels)
+        # self.assertFalse(bevat_fout)
 
 # end of file
