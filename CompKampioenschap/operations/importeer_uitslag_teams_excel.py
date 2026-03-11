@@ -8,10 +8,6 @@ from .lees_teams_excel import LeesTeamsExcel
 from Competitie.definities import KAMP_RANK_NO_SHOW
 from CompLaagBond.models import TeamBK
 from CompLaagRayon.models import DeelnemerRK, TeamRK
-from openpyxl.utils.exceptions import InvalidFileException
-from decimal import Decimal, InvalidOperation
-import openpyxl
-import zipfile
 
 
 class ImporteerUitslagTeamsExcel:
@@ -222,12 +218,6 @@ class ImporteerUitslagTeamsExcel:
             self.deelnemende_teams[lees_team.team_naam] = kamp_team
             self.stdout.write('[INFO] Gevonden team: %s van ver %s' % (repr(lees_team.team_naam), lees_team.ver_nr))
 
-            if self.team_klasse != kamp_team.team_klasse:
-                self.stderr.write('[ERROR] Inconsistente team klasse op regel %s: %s (eerdere teams: %s)' % (
-                                    lees_team.row_nr, kamp_team.team_klasse, self.team_klasse))
-                self.has_error = True
-                continue
-
             # lees de deelnemers van dit team
             ver_lid_nrs = self.ver_lid_nrs[lees_team.ver_nr]
             team_lid_nrs = self.team_lid_nrs[kamp_team.pk]
@@ -346,11 +336,11 @@ class ImporteerUitslagTeamsExcel:
             expected_teams.remove(kamp_team)
             alle_matchpunten.append(stand.matchpunten)
 
-            if not stand.shootoff is None:
+            if stand.shootoff is None:
+                shootoff_str = ''
+            else:
                 toon_shootoff[stand.matchpunten] = True
                 shootoff_str = str(stand.shootoff)
-            else:
-                shootoff_str = ''
 
             tup = (stand.matchpunten, shootoff_str, kamp_team.pk, kamp_team)
             eindstand.append(tup)
