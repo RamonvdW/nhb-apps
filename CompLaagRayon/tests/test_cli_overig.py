@@ -149,7 +149,7 @@ class TestCompLaagRayonCliOverig(E2EHelpers, TestCase):
                                              '18', '1')
         # print('f2:', f2.getvalue())
         self.assertTrue('[INFO] KampRK: Indoor competitie' in f2.getvalue())
-        self.assertTrue(' Rayon 1' in f2.getvalue())
+        self.assertTrue('RK rayon 1' in f2.getvalue())
         self.assertTrue('[INFO] 0 RK wedstrijden gevonden' in f2.getvalue())
 
         # 25m, zonder deelkamp

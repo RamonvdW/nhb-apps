@@ -153,8 +153,9 @@ class TestCompetitieCliCheckWedstrijdlocaties(E2EHelpers, TestCase):
         with self.assert_max_queries(24):
             management.call_command('check_wedstrijdlocaties', '--rk', stderr=f1, stdout=f2)
         # print("f2: %s" % f2.getvalue())
-        self.assertTrue("[WARNING] Geen matches voor comp1 Rayon 1" in f2.getvalue())
-        self.assertTrue("[WARNING] Geen matches voor comp1 Rayon 2" in f2.getvalue())
+        self.assertTrue("[WARNING] Geen matches voor comp1 RK rayon 1" in f2.getvalue())
+        self.assertTrue("[WARNING] Geen matches voor comp1 RK rayon 2" in f2.getvalue())
+        self.assertTrue("[WARNING] Geen matches voor comp1 RK rayon 4" in f2.getvalue())
         self.assertTrue("zonder banen 18m/25m opgaaf en zonder discipline_indoor en geen vereniging" in f2.getvalue())
 
         # bk (geen fouten)
