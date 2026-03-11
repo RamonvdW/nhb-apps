@@ -84,9 +84,9 @@ class MockLeesIndivWedstrijdFormulier:
         return self._params.finales_uitslag
 
 
-class TestCompKampioenschapOpImportUitslagIndiv(E2EHelpers, TestCase):
+class TestCompKampioenschapOpImporteerUitslagIndiv(E2EHelpers, TestCase):
 
-    """ tests voor de CompKampioenschap module, operations Maak Teams Excel (operations) """
+    """ tests voor de CompKampioenschap module, operations Importeer Uitslag Indiv (google sheets) """
 
     def _maak_bk_deelnemer(self, lid_nr, voornaam, achternaam, deelname_status=DEELNAME_ONBEKEND):
         sporter = Sporter.objects.create(

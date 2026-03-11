@@ -4,6 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
+from .lees_teams_excel import LeesTeamsExcel
 from Competitie.definities import KAMP_RANK_NO_SHOW
 from CompLaagBond.models import TeamBK
 from CompLaagRayon.models import DeelnemerRK, TeamRK
@@ -21,7 +22,7 @@ class ImporteerUitslagTeamsExcel:
         self.dryrun = dryrun
         self.verbose = verbose
         self.afstand = afstand
-        self.is_bk = True
+        self.is_bk = is_bk
 
         self.has_error = False
         self.team_klasse = None
@@ -127,9 +128,6 @@ class ImporteerUitslagTeamsExcel:
         return deelnemer
 
     def _get_team(self, team_naam: str, ver_nr: int, row_nr: int):
-        # if self.verbose:
-        #     self.stdout.write('[DEBUG] get_team: team_klasse=%s' % repr(self.team_klasse))
-
         up_naam = team_naam.upper()
         sel_teams = list()
         for team in self.teams_cache:
@@ -169,32 +167,13 @@ class ImporteerUitslagTeamsExcel:
 
         return kamp_team
 
-    @staticmethod
-    def _lees_team_naam(ws, cell):
-        team_naam = ws[cell].value
-        if team_naam is None:
-            team_naam = ''
-        else:
-            team_naam = str(team_naam)
-            if str(team_naam).upper() in ('N.V.T.', 'NVT', 'BYE', '#N/A', '0'):
-                team_naam = ''
-        return team_naam
-
-    def _bepaal_klasse_en_rayon(self, ws):
+    def _bepaal_klasse_en_rayon(self, lees: LeesTeamsExcel):
         mogelijke_klassen = list()
 
         # loop alle teams af
-        for row_nr in range(8, 43+1, 5):
-            # team naam
-            team_naam = self._lees_team_naam(ws, 'B' + str(row_nr))
-            if not team_naam:
-                continue
-
-            # ver_nr
-            try:
-                ver_nr = int(ws['C' + str(row_nr)].value)
-            except ValueError:
-                continue
+        for lees_team in lees.teams:
+            team_naam = lees_team.team_naam
+            ver_nr = lees_team.ver_nr
 
             # zoek de teams van de vereniging erbij
             up_naam = team_naam.upper()
@@ -232,78 +211,47 @@ class ImporteerUitslagTeamsExcel:
 
         self.stdout.write('[INFO] Klasse: %s' % self.team_klasse)
 
-    def _importeer_teams_en_sporters(self, ws):
-        for row_nr in range(8, 43+1, 5):
-
-            # team naam
-            team_naam = self._lees_team_naam(ws, 'B' + str(row_nr))
-            if not team_naam:
-                continue
-
-            # ver_nr
-            try:
-                ver_nr = int(ws['C' + str(row_nr)].value)
-            except ValueError:
-                continue
-
-            # zoek het team erbij
-            kamp_team = self._get_team(team_naam, ver_nr, row_nr)
+    def _bepaal_teams_en_sporters(self, lees: LeesTeamsExcel):
+        # loop alle teams af
+        for lees_team in lees.teams:
+            # vind het team
+            kamp_team = self._get_team(lees_team.team_naam, lees_team.ver_nr, lees_team.row_nr)
             if kamp_team is None:
                 continue
 
-            self.deelnemende_teams[team_naam] = kamp_team
-            self.stdout.write('[INFO] Gevonden team: %s van ver %s' % (repr(team_naam), ver_nr))
+            self.deelnemende_teams[lees_team.team_naam] = kamp_team
+            self.stdout.write('[INFO] Gevonden team: %s van ver %s' % (repr(lees_team.team_naam), lees_team.ver_nr))
 
             if self.team_klasse != kamp_team.team_klasse:
                 self.stderr.write('[ERROR] Inconsistente team klasse op regel %s: %s (eerdere teams: %s)' % (
-                                    row_nr, kamp_team.team_klasse, self.team_klasse))
+                                    lees_team.row_nr, kamp_team.team_klasse, self.team_klasse))
                 self.has_error = True
                 continue
 
             # lees de deelnemers van dit team
-            ver_lid_nrs = self.ver_lid_nrs[ver_nr]
+            ver_lid_nrs = self.ver_lid_nrs[lees_team.ver_nr]
             team_lid_nrs = self.team_lid_nrs[kamp_team.pk]
             aantal_gekoppeld = len(team_lid_nrs)
             gevonden_lid_nrs = list()
             feitelijke_deelnemers = list()
 
-            for sporter_row in range(row_nr+1, row_nr+4):
-                lid_nr_str = ws['C' + str(sporter_row)].value
-                if lid_nr_str is None:
-                    continue
+            for lees_lid in lees_team.leden:
 
-                lid_ag_str = ws['D' + str(sporter_row)].value
-                lid_ag_str = str(lid_ag_str).replace(',', '.')       # decimale komma naar punt
-
-                try:
-                    lid_nr = int(lid_nr_str)
-                except ValueError:
-                    self.stderr.write('[ERROR] Geen valide lid_nr %s op regel %s' % (repr(lid_nr_str), sporter_row))
+                if lees_lid.lid_nr not in self.kamp_lid_nrs:
+                    self.stderr.write('[ERROR] Lid %s is niet gekwalificeerd voor dit kampioenschap!' % lees_lid.lid_nr)
                     self.has_error = True
                     continue
-                else:
-                    if lid_nr not in self.kamp_lid_nrs:
-                        self.stderr.write('[ERROR] Lid %s is niet gekwalificeerd voor dit kampioenschap!' % lid_nr)
-                        self.has_error = True
-                        continue
 
-                    if lid_nr not in ver_lid_nrs:
-                        self.stderr.write('[ERROR] Lid %s is niet van vereniging %s!' % (lid_nr, ver_nr))
-                        self.has_error = True
-                        continue
+                if lees_lid.lid_nr not in ver_lid_nrs:
+                    self.stderr.write('[ERROR] Lid %s is niet van vereniging %s!' % (lees_lid.lid_nr, lees_team.ver_nr))
+                    self.has_error = True
+                    continue
 
-                    try:
-                        lid_ag = round(Decimal(lid_ag_str), 3)  # 3 cijfers achter de komma
-                    except (TypeError, InvalidOperation):
-                        self.stderr.write('[ERROR] Geen valide AG %s op regel %s' % (repr(lid_ag_str), sporter_row))
-                        self.has_error = True
-                        continue
+                deelnemer = self._get_deelnemer(lees_lid.lid_nr, lees_lid.lid_ag)
+                self.stdout.write('[INFO] team lid: %s' % deelnemer.sporterboog.sporter.lid_nr_en_volledige_naam())
 
-                    deelnemer = self._get_deelnemer(lid_nr, lid_ag)
-                    self.stdout.write('[INFO] team lid: %s' % deelnemer.sporterboog.sporter.lid_nr_en_volledige_naam())
-
-                    feitelijke_deelnemers.append(deelnemer)
-                    gevonden_lid_nrs.append(lid_nr)
+                feitelijke_deelnemers.append(deelnemer)
+                gevonden_lid_nrs.append(lees_lid.lid_nr)
             # for sporter
 
             # haal de verwachte lid_nrs eruit
@@ -312,7 +260,7 @@ class ImporteerUitslagTeamsExcel:
                                   if lid_nr in team_lid_nrs]
             if self.verbose:
                 self.stdout.write('[DEBUG] feitelijke_lid_nrs van team [%s] %s: %s' % (
-                                        ver_nr, team_naam, repr(feitelijke_lid_nrs)))
+                                        lees_team.ver_nr, lees_team.team_naam, repr(feitelijke_lid_nrs)))
 
             for lid_nr in feitelijke_lid_nrs:
                 gevonden_lid_nrs.remove(lid_nr)
@@ -326,7 +274,7 @@ class ImporteerUitslagTeamsExcel:
 
                 if len(invallers) > len(uitvallers):
                     self.stderr.write('[ERROR] Te veel invallers voor team %s met max %s sporters (ver: %s)' % (
-                                        repr(team_naam), aantal_gekoppeld, ver_nr))
+                                        repr(lees_team.team_naam), aantal_gekoppeld, lees_team.ver_nr))
                     feitelijke_deelnemers = list()
                 else:
                     while len(invallers) > 0:
@@ -337,7 +285,7 @@ class ImporteerUitslagTeamsExcel:
                             afgekeurd.append(lid_nr_in)
                             self.stderr.write(
                                 '[ERROR] Te hoog gemiddelde %s voor invaller %s voor team %s van vereniging %s' % (
-                                        gemiddelde_in, lid_nr_in, team_naam, ver_nr))
+                                        gemiddelde_in, lid_nr_in, lees_team.team_naam, lees_team.ver_nr))
                             for gemiddelde, lid_nr in uitvallers:
                                 self.stderr.write('        Uitvaller %s heeft gemiddelde %s' % (lid_nr, gemiddelde))
                             self.has_error = True
@@ -359,10 +307,9 @@ class ImporteerUitslagTeamsExcel:
             if not self.dryrun:
                 if len(feitelijke_deelnemers) > 0:
                     kamp_team.feitelijke_leden.set(feitelijke_deelnemers)
-
         # for team row
 
-    def _importeer_eindstand(self, ws):
+    def _bepaal_eindstand(self, lees: LeesTeamsExcel):
 
         if len(self.deelnemende_teams) == 0:
             self.stderr.write('[ERROR] Geen deelnemende teams gevonden!')
@@ -371,7 +318,7 @@ class ImporteerUitslagTeamsExcel:
 
         first_team = next(iter(self.deelnemende_teams.values()))
         deelkamp = first_team.kamp
-        self.stdout.write('[INFO] Rayon: %s' % deelkamp.rayon.rayon_nr)
+        self.stdout.write('[INFO] Deelkamp: %s' % deelkamp)
 
         # begin met alle teams in deze klasse op "no-show" te zetten
         # let op: dit kunnen ook reserve teams zijn (>8 deelnemers)
@@ -389,40 +336,23 @@ class ImporteerUitslagTeamsExcel:
         eindstand = list()
         alle_matchpunten = list()
         toon_shootoff = dict()  # [matchpunten] = True
-        for row_nr in range(8, 15+1):
-            # team naam
-            team_naam = self._lees_team_naam(ws, 'B' + str(row_nr))
-            if not team_naam:
-                continue
 
-            kamp_team = self.deelnemende_teams[team_naam]
-
-            matchpunten_str = ws['D' + str(row_nr)].value
-            try:
-                matchpunten = int(matchpunten_str)
-            except ValueError:
-                self.stderr.write('[ERROR] Geen valide matchpunten %s op regel %s' % (repr(matchpunten_str), row_nr))
-                self.has_error = True
-                continue
+        # loop alle regels af in de eindstand
+        for stand in lees.eindstand:
+            kamp_team = self.deelnemende_teams[stand.team_naam]
 
             # 100=blanco, 32000=no show, 32001=reserve
-            kamp_team.result_teamscore = matchpunten
+            kamp_team.result_teamscore = stand.matchpunten
             expected_teams.remove(kamp_team)
-            alle_matchpunten.append(matchpunten)
+            alle_matchpunten.append(stand.matchpunten)
 
-            shootoff_str = str(ws['F' + str(row_nr)].value)
-            if shootoff_str.upper() == 'NONE':
+            if not stand.shootoff is None:
+                toon_shootoff[stand.matchpunten] = True
+                shootoff_str = str(stand.shootoff)
+            else:
                 shootoff_str = ''
-            if shootoff_str != '':
-                toon_shootoff[matchpunten] = True
-                try:
-                    shootoff = int(shootoff_str)
-                except ValueError:
-                    self.stderr.write('[ERROR] Geen valide shootoff %s op regel %s' % (repr(shootoff_str), row_nr))
-                    self.has_error = True
-                    continue
 
-            tup = (matchpunten, shootoff_str, kamp_team.pk, kamp_team)
+            tup = (stand.matchpunten, shootoff_str, kamp_team.pk, kamp_team)
             eindstand.append(tup)
         # for
 
@@ -475,37 +405,24 @@ class ImporteerUitslagTeamsExcel:
     def importeer_bestand(self, fname: str):
 
         self.stdout.write('[INFO] Lees bestand %s' % repr(fname))
-        try:
-            prg = openpyxl.load_workbook(fname,
-                                         read_only=True,        # avoids warnings
-                                         data_only=True)        # do not evaluate formulas; use last calculated values
-        except (OSError, zipfile.BadZipFile, KeyError, InvalidFileException) as exc:
-            self.stderr.write('[ERROR] Kan het excel bestand niet openen (%s)' % str(exc))
-            return
 
-        blad = 'Deelnemers'
-        try:
-            ws_deelnemers = prg[blad]
-        except KeyError:        # pragma: no cover
-            self.stderr.write('[ERROR] Kan blad %s niet vinden' % repr(blad))
-            return
+        lees = LeesTeamsExcel()
+        lees.lees_bestand(fname)
 
-        blad = 'Stand'
-        try:
-            ws_stand = prg[blad]
-        except KeyError:        # pragma: no cover
-            self.stderr.write('[ERROR] Kan blad %s niet vinden' % repr(blad))
-            return
+        if lees.issues:
+            for regel in lees.issues:
+                self.stderr.write(regel)
+            # for
+        else:
+            self._deelnemers_ophalen()
+            self._teams_ophalen()
 
-        self._deelnemers_ophalen()
-        self._teams_ophalen()
+            self._bepaal_klasse_en_rayon(lees)
 
-        self._bepaal_klasse_en_rayon(ws_deelnemers)
+            if not self.has_error:
+                self._bepaal_teams_en_sporters(lees)
 
-        if not self.has_error:
-            self._importeer_teams_en_sporters(ws_deelnemers)
-
-        if not self.has_error:
-            self._importeer_eindstand(ws_stand)
+            if not self.has_error:
+                self._bepaal_eindstand(lees)
 
 # end of file
