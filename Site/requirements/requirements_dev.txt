@@ -19,7 +19,7 @@ certifi==2026.2.25
     #   -r requirements.txt
     #   requests
     #   selenium
-charset-normalizer==3.4.4
+charset-normalizer==3.4.5
     # via
     #   -r requirements.txt
     #   requests
@@ -51,7 +51,7 @@ google-api-core==2.30.0
     #   google-api-python-client
     #   google-geo-type
     #   google-maps-routing
-google-api-python-client==2.191.0
+google-api-python-client==2.192.0
     # via -r requirements.txt
 google-auth==2.47.0
     # via
@@ -74,7 +74,7 @@ google-geo-type==0.5.0
     #   google-maps-routing
 google-maps-routing==0.8.0
     # via -r requirements.txt
-googleapis-common-protos==1.72.0
+googleapis-common-protos==1.73.0
     # via
     #   -r requirements.txt
     #   google-api-core
@@ -158,7 +158,7 @@ pyparsing==3.2.5
     # via
     #   -r requirements.txt
     #   httplib2
-pypdf==6.7.5
+pypdf==6.8.0
     # via -r requirements.txt
 pysocks==1.7.1
     # via urllib3
