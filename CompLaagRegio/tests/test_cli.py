@@ -1,19 +1,19 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2024 Ramon van der Winkel.
+#  Copyright (c) 2021-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
 from BasisTypen.models import TemplateCompetitieIndivKlasse, BoogType, TeamType, Leeftijdsklasse
-from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
-                               Regiocompetitie, RegiocompetitieSporterBoog, RegiocompetitieTeam,
-                               RegiocompetitieRondeTeam)
+from Competitie.models import (Competitie, CompetitieMatch, CompetitieIndivKlasse, CompetitieTeamKlasse,
+                               Regiocompetitie, RegiocompetitieRonde,
+                               RegiocompetitieSporterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam)
 from Competitie.test_utils.tijdlijn import zet_competitie_fases, zet_competitie_fase_regio_inschrijven
 from Functie.models import Functie
 from Geo.models import Regio
 from Score.definities import AG_DOEL_INDIV, SCORE_TYPE_SCORE, SCORE_TYPE_GEEN
-from Score.models import Aanvangsgemiddelde, ScoreHist, Score
+from Score.models import Aanvangsgemiddelde, ScoreHist, Score, Uitslag
 from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
@@ -47,6 +47,7 @@ class TestCompLaagRegioCli(E2EHelpers, TestCase):
                             regio=regio_111,
                             functie=dummy_functie)
         deelcomp.save()
+        self.deelcomp = deelcomp
 
         indiv_r1 = TemplateCompetitieIndivKlasse.objects.filter(boogtype=boog_r)[1]
         indiv_r2 = TemplateCompetitieIndivKlasse.objects.filter(boogtype=boog_r)[2]
@@ -93,6 +94,7 @@ class TestCompLaagRegioCli(E2EHelpers, TestCase):
                     ver_nr=1000,
                     regio=regio_111)
         ver.save()
+        self.ver = ver
 
         # maak een test lid aan
         sporter = Sporter(
@@ -518,6 +520,27 @@ class TestCompLaagRegioCli(E2EHelpers, TestCase):
         hist.save()
 
         self.run_management_command('report_score_interval', '18', '111')
+
+    def test_score_counts(self):
+        uitslag = Uitslag.objects.create(
+                            max_score=1,
+                            afstand=18)
+
+        match = CompetitieMatch.objects.create(
+                        competitie=self.comp,
+                        beschrijving='Test match',
+                        vereniging=self.ver,
+                        datum_wanneer='2000-01-01',
+                        tijd_begin_wedstrijd='00:00',
+                        uitslag=uitslag)
+
+        ronde = RegiocompetitieRonde.objects.create(
+                                    regiocompetitie=self.deelcomp,
+                                    week_nr=50,
+                                    beschrijving='Ronde 6')
+        ronde.matches.add(match)
+
+        self.run_management_command('report_score_counts', '18', '111', 'fname')
 
 
 # end of file

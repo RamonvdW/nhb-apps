@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2025 Ramon van der Winkel.
+#  Copyright (c) 2025-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -44,6 +44,7 @@ class Command(BaseCommand):
             for match in (CompetitieMatch
                           .objects.filter(pk__in=pks)
                           .exclude(uitslag=None)
+                          .exclude(vereniging=None)
                           .order_by('datum_wanneer',
                                     'tijd_begin_wedstrijd',
                                     'vereniging')):
