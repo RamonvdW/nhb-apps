@@ -394,9 +394,26 @@ class ImporteerSheetUitslagIndiv:
         self.blokjes_info.append(regels)
 
     def _bepaal_uitslag_25(self):
-        regels = ['Fout: 25m1pijl is nog niet ondersteund']
+        regels = list()
+        """
+            self._lid_nr2deelnemer = dict()         # [str(lid_nr)] = DeelnemerRK of DeelnemerBK
+            self._lid_nr2voorronde = dict()         # [str(lid_nr)] = [totaal, aantallen_str, 1e, 2e]
+            self._lid_nr2rank_volgorde = dict()     # [str(lid_nr)] = (rank, volgorde)
+        """
+
+        for lid_nr, deelnemer in self._lid_nr2deelnemer.items():
+            if lid_nr not in self._lid_nr2rank_volgorde:                # pragma: no cover
+                self._lid_nr2rank_volgorde[lid_nr] = (99, 99)           # triggert result_rank = NO_SHOW
+                self._lid_nr2voorronde[lid_nr] = (0, '', 0, 0)
+
+            rank, volgorde = self._lid_nr2rank_volgorde[lid_nr]
+            scores = self._lid_nr2voorronde[lid_nr]
+
+            totaal, aantal_str, score1, score2 = scores
+            regel = '%s #%s [%s] %s (%s+%s) %s' % (rank, volgorde, lid_nr, totaal, score1, score2, aantal_str)
+            regels.append(regel)
+        # for
         self.blokjes_info.append(regels)
-        self.bevat_fout = True
 
     def bepaal_uitslag(self):
         self._bepaal_volgorde_voorronde()
