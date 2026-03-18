@@ -1,6 +1,6 @@
 {% extends 'design/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2019-2025 Ramon van der Winkel.
+                Copyright (c) 2019-2026 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -17,6 +17,8 @@
             <p>Voer de tweede factor code in om toegang te krijgen tot de beheerders rollen.</p>
         </div>
     </div>
+
+    {% include 'design/check_js_enabled.dtl' %}
 
     <!-- blauwe balk met kaartjes -->
     <div class="row-sv-blauw">

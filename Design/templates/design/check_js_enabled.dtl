@@ -1,0 +1,26 @@
+{% comment %}
+                Copyright (c) 2026 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+
+{% comment %}
+
+    Toon een melding als Javascript uitgezet is in de browser.
+    Door deze include kan de melding op een toepasselijke plaats op geselecteerde pagina's geplaatst worden.
+
+{% endcomment %}
+
+<noscript>
+    <!-- lichtblauw bordje -->
+    <div class="row">
+        <div style="padding:0px 0 30px 0">
+            <div class="col s12 m8 offset-m2 l6 offset-l3 sv-rood white-text z-depth-3 center" style="border-radius:5px;">
+                <p>Javascript is noodzakelijk voor de goede werking van deze site.<br>Graag aanzetten.</p>
+            </div>
+        </div>
+    </div>
+</noscript>
+
+
+<!-- end of file -->

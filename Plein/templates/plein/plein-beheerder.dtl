@@ -17,10 +17,12 @@
     <div class="row center">
         <div class="col s12">
             <h3 class="page-banner">Beheerders Plein</h3>
-            <p>Als beheerder vind je op dit plein extra kaartjes die bij jouw rechten passen</p>
+            <p>Als beheerder vind je op dit plein extra kaartjes die bij jouw rechten passen.</p>
             <p>Je huidige rol is: <b>{{ huidige_rol }}</b></p>
         </div>
     </div>
+
+    {% include 'design/check_js_enabled.dtl' %}
 
     {% if toon_bondscompetities or rol_is_bb or rol_is_mwz or rol_is_hwl or rol_is_wl or rol_is_mww or rol_is_mo or rol_is_cs %}
         <!-- blauwe balk met kaartjes -->

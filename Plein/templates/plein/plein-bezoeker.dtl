@@ -41,10 +41,12 @@
         </div>
 
         <div class="col s12">
-            <p>Op deze website kan je informatie vinden over de handboogsport<br>zoals records, wedstrijden en uitslagen</p>
+            <p>Op deze website kan je informatie vinden over de handboogsport<br>zoals records, wedstrijden en uitslagen.</p>
             <p>&nbsp;</p>
         </div>
     </div>
+
+    {% include 'design/check_js_enabled.dtl' %}
 
     <!-- blauwe balk met kaartjes bondscompetities en records -->
     <div class="row-sv-blauw">
