@@ -124,7 +124,7 @@ def get_kaartjes_rayon(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
                 kaartjes_indiv.append(kaartje)
 
             # RK limieten (indiv & teams)
-            if 'J' <= comp.fase_indiv <= 'L' or 'J' <= comp.fase_teams <= 'L':
+            if 'J' <= comp.fase_indiv <= 'L':
                 url = reverse('CompLaagRayon:limieten', kwargs={'deelkamp_pk': deelkamp_rk.pk})
                 kaartje = SimpleNamespace(
                             prio=5,
@@ -133,7 +133,6 @@ def get_kaartjes_rayon(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
                             tekst="Maximum aantal deelnemers in elke wedstrijdklasse van jouw RK instellen.",
                             url=url)
                 kaartjes_indiv.append(kaartje)
-                kaartjes_teams.append(kaartje)
 
             # Ingeschreven RK teams (inschrijving opent tijdens fase F)
             if 'F' <= comp.fase_teams <= 'L':
