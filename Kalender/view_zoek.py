@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2025 Ramon van der Winkel.
+#  Copyright (c) 2021-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -19,9 +19,9 @@ from Kalender.view_helpers import (maak_soort_filter, maak_bogen_filter, maak_di
 from Wedstrijden.definities import (WEDSTRIJD_STATUS_GEACCEPTEERD, WEDSTRIJD_STATUS_GEANNULEERD,
                                     ORGANISATIE_IFAA, ORGANISATIE_WA, ORGANISATIE_KHSN,
                                     WEDSTRIJD_WA_STATUS_A, WEDSTRIJD_WA_STATUS_B,
-                                    url2discipline)
+                                    WEDSTRIJD_DISCIPLINE_TO_STR_KHSN, url2discipline)
 from Wedstrijden.models import Wedstrijd
-from datetime import date, timedelta
+import datetime
 
 TEMPLATE_KALENDER_MAAND = 'kalender/overzicht-maand.dtl'
 TEMPLATE_KALENDER_JAAR = 'kalender/overzicht-jaar.dtl'
@@ -71,7 +71,7 @@ class KalenderView(TemplateView):
         self.jaar = jaar
         self.maand = maand
 
-        self.datum_vanaf = date(year=jaar, month=maand, day=1)
+        self.datum_vanaf = datetime.date(year=jaar, month=maand, day=1)
 
         if self.toon_maand:
             # bepaal de datum-range voor deze maand
@@ -84,7 +84,7 @@ class KalenderView(TemplateView):
             # bepaal de datum-range voor het jaar
             jaar += 1
 
-        self.datum_voor = date(year=jaar, month=maand, day=1)
+        self.datum_voor = datetime.date(year=jaar, month=maand, day=1)
 
     def _maak_prev_next(self, context):
         prev_jaar = self.jaar
@@ -135,38 +135,49 @@ class KalenderView(TemplateView):
                                status__in=(EVENEMENT_STATUS_GEACCEPTEERD,
                                            EVENEMENT_STATUS_GEANNULEERD)))
 
-        context['zoekterm'] = self.zoekterm
-        if self.zoekterm:
-            wedstrijden = wedstrijden.filter(Q(titel__icontains=self.zoekterm) |
-                                             Q(locatie__plaats__icontains=self.zoekterm))
-            evenementen = evenementen.filter(Q(titel__icontains=self.zoekterm) |
-                                             Q(locatie__plaats__icontains=self.zoekterm))
+        filtered = list()
 
         # filter wedstrijden op organisatie ("soort wedstrijd")
         if self.gekozen_soort == 'ifaa':
             wedstrijden = wedstrijden.filter(organisatie=ORGANISATIE_IFAA)
+            filtered.append('IFAA')
 
         elif self.gekozen_soort == 'wa-a':
             wedstrijden = wedstrijden.filter(organisatie=ORGANISATIE_WA,
                                              wa_status=WEDSTRIJD_WA_STATUS_A)
+            filtered.append('World Archery A-status')
 
         elif self.gekozen_soort == 'wa-b':
             wedstrijden = wedstrijden.filter(organisatie=ORGANISATIE_WA,
                                              wa_status=WEDSTRIJD_WA_STATUS_B)
+            filtered.append('World Archery B-status')
 
         elif self.gekozen_soort == 'khsn':
             wedstrijden = wedstrijden.filter(organisatie=ORGANISATIE_KHSN)
+            filtered.append('KHSN')
 
         # filter wedstrijden op bogen
         if self.gekozen_bogen != 'alle':
             boog_pks = context['boog_pks']      # ingevuld in maak_bogen_filter en gegarandeerd niet leeg
             # distinct is nodig om verdubbeling te voorkomen
             wedstrijden = wedstrijden.filter(boogtypen__pk__in=boog_pks).distinct('datum_begin', 'pk')
+            filtered.append('de door jouw ingestelde wedstrijdbogen')
+
+        context['zoekterm'] = self.zoekterm
+        if self.zoekterm:
+            wedstrijden = wedstrijden.filter(Q(titel__icontains=self.zoekterm) |
+                                             Q(locatie__plaats__icontains=self.zoekterm))
+            evenementen = evenementen.filter(Q(titel__icontains=self.zoekterm) |
+                                             Q(locatie__plaats__icontains=self.zoekterm))
+            filtered.append('"%s"' % self.zoekterm)
 
         if self.gekozen_discipline != 'alle':
             discipline = url2discipline[self.gekozen_discipline]
             wedstrijden = wedstrijden.filter(discipline=discipline)
             evenementen = list()
+            filtered.append(WEDSTRIJD_DISCIPLINE_TO_STR_KHSN[discipline])
+
+        context['filtered'] = " + ".join(filtered)
 
         now_date = timezone.now().date()
 
@@ -182,7 +193,8 @@ class KalenderView(TemplateView):
                                           kwargs={'wedstrijd_pk': wed.pk})
 
             wed.wanneer_str = maak_compacte_wanneer_str(wed.datum_begin, wed.datum_einde)
-            wed.inschrijven_voor = wed.datum_begin - timedelta(days=wed.inschrijven_tot)
+            wed.inschrijven_voor = wed.datum_begin
+            wed.inschrijven_voor -= datetime.timedelta(days=wed.inschrijven_tot)
             wed.inschrijven_dagen = (wed.inschrijven_voor - now_date).days
             wed.inschrijven_let_op = (wed.inschrijven_dagen <= 7)
             wed.is_voor_sluitingsdatum = (now_date < wed.inschrijven_voor)
@@ -203,7 +215,8 @@ class KalenderView(TemplateView):
                                                 kwargs={'evenement_pk': evenement.pk})
 
             evenement.wanneer_str = maak_compacte_wanneer_str(evenement.datum, evenement.datum)
-            evenement.inschrijven_voor = evenement.datum - timedelta(days=evenement.inschrijven_tot)
+            evenement.inschrijven_voor = evenement.datum
+            evenement.inschrijven_voor -= datetime.timedelta(days=evenement.inschrijven_tot)
             evenement.inschrijven_dagen = (evenement.inschrijven_voor - now_date).days
             evenement.inschrijven_let_op = (evenement.inschrijven_dagen <= 7)
             evenement.is_voor_sluitingsdatum = (now_date < evenement.inschrijven_voor)

@@ -29,6 +29,8 @@
         </div>
     </div>
 
+    {% include 'design/check_js_enabled.dtl' %}
+
     <!-- blauwe balk met dialoog venster -->
     <div class="row-sv-blauw">
 
@@ -144,7 +146,7 @@
         <!-- FUTURE: drop-down maken om direct naar een jaar/maand te springen -->
     </table>
 
-    <p class="center">{{ aantallen }}</p>
+    <p class="center">{{ aantallen }}{% if filtered %}<br><br>(we hebben gezocht op: {{ filtered }}{% endif %})</p>
 
     <!-- blauwe balk met informatie in een tabel -->
     <div class="row-sv-blauw">

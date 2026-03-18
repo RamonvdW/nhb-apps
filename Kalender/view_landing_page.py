@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2025 Ramon van der Winkel.
+#  Copyright (c) 2021-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -51,6 +51,33 @@ class KalenderLandingPageJaarView(View):
             # geef url met jaaroverzicht
             now = timezone.now()
             url = get_url_kalender_jaaroverzicht_vanaf_datum(now)
+
+        return HttpResponseRedirect(url)
+
+
+class KalenderLandingPageDisciplineView(View):
+    """ Deze pagina is voor het doorsturen naar het jaaroverzicht met een voorgeselecteerd discipline filter.
+    """
+    @staticmethod
+    def get(request, *args, **kwargs):
+
+        # geef basis url met jaaroverzicht
+        now = timezone.now()
+        url = get_url_kalender_jaaroverzicht_vanaf_datum(now)
+
+        url += 'alle/'      # soort (IFAA, WA A-status, etc.)
+
+        if request.user.is_authenticated:
+            # ingelogd, dus filter op gekozen bogen van de gebruiker
+            url += 'mijn/'
+        else:
+            url += 'alle/'
+
+        discipline = kwargs['discipline'].lower()
+        if discipline not in ('indoor', 'outdoor', '25m1pijl', 'clout', 'veld', 'run-archery', '3d'):
+            discipline = 'alle'
+
+        url += discipline + '/'
 
         return HttpResponseRedirect(url)
 
