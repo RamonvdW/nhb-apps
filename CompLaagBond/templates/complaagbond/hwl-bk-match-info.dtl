@@ -164,7 +164,7 @@
 
                     {% if geen_klassengrenzen %}
                         <tr class="white">
-                            <td colspan="5">
+                            <td class="center"{% if deelnemers_teams %} colspan="5"{% endif %}>
                                 <i class="sv-rood-text">De BKO heeft de teams klassengrenzen nog niet vastgesteld</i>
                             </td>
                         </tr>
