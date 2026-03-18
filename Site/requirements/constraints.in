@@ -9,4 +9,13 @@ mollie-api-python<3.0
 # [2025-12] stick to 3.2.x for now due to too many deprecation warnings
 pyparsing<3.3
 
+# 2.48 heeft een nieuwe dependency op "cryptography" en "cffi"
+# geeft deze fout:
+#   File "/var/www/nhb-apps-venv/lib/python3.13/site-packages/google/auth/crypt/es.py", line 21, in <module>
+#     import cryptography.exceptions
+#   File "/var/www/nhb-apps-venv/lib/python3.13/site-packages/cryptography/exceptions.py", line 9, in <module>
+#     from cryptography.hazmat.bindings._rust import exceptions as rust_exceptions
+# ImportError: PyO3 modules do not yet support subinterpreters, see https://github.com/PyO3/pyo3/issues/576
+google-auth<2.48
+
 # end of file
