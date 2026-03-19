@@ -11,6 +11,8 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError as GoogleApiError
 from googleapiclient.http import HttpRequest
 from google.oauth2.service_account import Credentials
+from google.auth.exceptions import TransportError
+from httplib2.error import ServerNotFoundError
 import datetime
 import socket
 import time
@@ -63,6 +65,10 @@ class MonitorDriveFiles:
                 self.stdout.write('[ERROR] {execute} Socket error: %s' % exc)
             except GoogleApiError as exc:           # aka HttpError
                 self.stdout.write('[ERROR] {execute} GoogleApiError: %s' % exc)
+            except TransportError as exc:
+                self.stdout.write('[ERROR] {execute} google.auth.TransportError: %s' % exc)
+            except ServerNotFoundError as exc:
+                self.stdout.write('[ERROR] {execute} httplib2.error.ServerNotFoundError: %s' % exc)
             else:
                 # self.stdout.write('[DEBUG] {execute} response=%s' % repr(response))
                 return response

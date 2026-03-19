@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2025 Ramon van der Winkel.
+#  Copyright (c) 2025-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -293,49 +293,13 @@ class WedstrijdBestelPlugin(BestelPluginBase):
                 if mailer_email_is_valide(sporter.email):
                     email = sporter.email
 
-            if email:
-                # maak de e-mail en stuur deze naar sporter.
+            if not inschrijving.sessie:
+                # rare situatie - sporter is waarschijnlijk al afgemeld
+                # maar we hebben toch een betaling ontvangen - registreer deze
+                self.stdout.write('[INFO] Sporter %s lijkt al afgemeld, dus stuur geen e-mail' % sporter.lid_nr)
+                return
 
-                aanwezig = datetime.datetime.combine(inschrijving.sessie.datum, inschrijving.sessie.tijd_begin)
-                aanwezig -= datetime.timedelta(minutes=inschrijving.wedstrijd.minuten_voor_begin_sessie_aanwezig_zijn)
-
-                if inschrijving.wedstrijd.contact_email == '':
-                    inschrijving.wedstrijd.contact_email = 'onbekend'
-                if inschrijving.wedstrijd.contact_telefoon == '':
-                    inschrijving.wedstrijd.contact_telefoon = 'onbekend'
-
-                context = {
-                    'voornaam': sporter.voornaam,
-                    'koper_volledige_naam': koper_account.volledige_naam(),
-                    'reserveringsnummer': settings.TICKET_NUMMER_START__WEDSTRIJD + inschrijving.pk,
-                    'wed_titel': inschrijving.wedstrijd.titel,
-                    'wed_adres': inschrijving.wedstrijd.locatie.adres_oneliner(),
-                    'wed_datum': inschrijving.sessie.datum,
-                    'wed_klasse': inschrijving.wedstrijdklasse.beschrijving,
-                    'wed_org_ver': inschrijving.wedstrijd.organiserende_vereniging,
-                    'aanwezig_tijd': aanwezig.strftime('%H:%M'),
-                    'contact_email': inschrijving.wedstrijd.contact_email,
-                    'contact_tel': inschrijving.wedstrijd.contact_telefoon,
-                    'geen_account': sporter.account is None,
-                    'naam_site': settings.NAAM_SITE,
-                }
-
-                if inschrijving.wedstrijd.organisatie == ORGANISATIE_IFAA:
-                    context['wed_klasse'] += ' [%s]' % inschrijving.wedstrijdklasse.afkorting
-
-                mail_body = render_email_template(context, EMAIL_TEMPLATE_INFO_INSCHRIJVING_WEDSTRIJD)
-
-                mailer_queue_email(email,
-                                   'Inschrijving op wedstrijd',
-                                   mail_body)
-
-                stamp_str = timezone.localtime(timezone.now()).strftime('%Y-%m-%d om %H:%M')
-                msg = "[%s] Informatieve e-mail is gestuurd naar sporter %s\n" % (stamp_str, sporter.lid_nr)
-                inschrijving.log += msg
-                inschrijving.save(update_fields=['log'])
-
-                self.stdout.write('[INFO] Informatieve e-mail is gestuurd naar sporter %s' % sporter.lid_nr)
-            else:
+            if not email:
                 msg = "[%s] Kan geen informatieve e-mail sturen naar sporter %s (geen e-mail beschikbaar)\n" % (
                     sporter.lid_nr, stamp_str)
                 inschrijving.log += msg
@@ -344,6 +308,49 @@ class WedstrijdBestelPlugin(BestelPluginBase):
                 self.stdout.write(
                     '[INFO] Kan geen informatieve e-mail sturen naar sporter %s (geen e-mail beschikbaar)' %
                     sporter.lid_nr)
+                return
+
+            # maak de e-mail en stuur deze naar sporter.
+
+            aanwezig = datetime.datetime.combine(inschrijving.sessie.datum, inschrijving.sessie.tijd_begin)
+            aanwezig -= datetime.timedelta(minutes=inschrijving.wedstrijd.minuten_voor_begin_sessie_aanwezig_zijn)
+
+            if inschrijving.wedstrijd.contact_email == '':
+                inschrijving.wedstrijd.contact_email = 'onbekend'
+            if inschrijving.wedstrijd.contact_telefoon == '':
+                inschrijving.wedstrijd.contact_telefoon = 'onbekend'
+
+            context = {
+                'voornaam': sporter.voornaam,
+                'koper_volledige_naam': koper_account.volledige_naam(),
+                'reserveringsnummer': settings.TICKET_NUMMER_START__WEDSTRIJD + inschrijving.pk,
+                'wed_titel': inschrijving.wedstrijd.titel,
+                'wed_adres': inschrijving.wedstrijd.locatie.adres_oneliner(),
+                'wed_datum': inschrijving.sessie.datum,
+                'wed_klasse': inschrijving.wedstrijdklasse.beschrijving,
+                'wed_org_ver': inschrijving.wedstrijd.organiserende_vereniging,
+                'aanwezig_tijd': aanwezig.strftime('%H:%M'),
+                'contact_email': inschrijving.wedstrijd.contact_email,
+                'contact_tel': inschrijving.wedstrijd.contact_telefoon,
+                'geen_account': sporter.account is None,
+                'naam_site': settings.NAAM_SITE,
+            }
+
+            if inschrijving.wedstrijd.organisatie == ORGANISATIE_IFAA:
+                context['wed_klasse'] += ' [%s]' % inschrijving.wedstrijdklasse.afkorting
+
+            mail_body = render_email_template(context, EMAIL_TEMPLATE_INFO_INSCHRIJVING_WEDSTRIJD)
+
+            mailer_queue_email(email,
+                               'Inschrijving op wedstrijd',
+                               mail_body)
+
+            stamp_str = timezone.localtime(timezone.now()).strftime('%Y-%m-%d om %H:%M')
+            msg = "[%s] Informatieve e-mail is gestuurd naar sporter %s\n" % (stamp_str, sporter.lid_nr)
+            inschrijving.log += msg
+            inschrijving.save(update_fields=['log'])
+
+            self.stdout.write('[INFO] Informatieve e-mail is gestuurd naar sporter %s' % sporter.lid_nr)
 
     def get_verkoper_ver_nr(self, regel: BestellingRegel) -> int:
         """

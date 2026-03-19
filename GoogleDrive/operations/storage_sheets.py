@@ -8,7 +8,7 @@
 
 from django.conf import settings
 from GoogleDrive.storage_base import StorageError
-from googleapiclient.errors import HttpError as GoogleApiError
+# from googleapiclient.errors import HttpError as GoogleApiError
 from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
 from googleapiclient.http import HttpRequest
