@@ -42,6 +42,14 @@ class TestDesignTemplatetagIcons(TestCase):
         with self.assertRaises(ValueError):
             sv_icon('email', kleur='not-a-color')
 
+        out = sv_icon('email', use='h5', icon_height=24, extra_style='', tooltip='hello')
+        self.assertTrue(out.startswith('<div class="tooltipped"'))
+        self.assertTrue('data-tooltip="hello"' in out)
+
+        out = sv_icon('email', use='h5', extra_style='stijl:2')
+        self.assertTrue(out.startswith('<svg '))
+        self.assertTrue('stijl:2;' in out)
+
         # toevoeging commentaar met icoon naam
         sv_icon.cache_clear()  # in verband met functools.cache gebruik
         with override_settings(DEBUG=True):
@@ -91,7 +99,7 @@ class TestDesignTemplatetagIcons(TestCase):
         out = sv_icon_op_button('email', tekst='Hello')
         self.assertTrue('Hello' in out)
 
-        out = sv_icon_op_button('email', extra_class='klasje')
+        out = sv_icon_op_button('email', extra_class='klasje', usability_label='hello')
         self.assertTrue('klasje' in out)
 
         out = sv_icon_op_button('email', extra_style='stijl')

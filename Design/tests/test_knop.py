@@ -27,8 +27,9 @@ class TestDesignTemplatetagsKnop(TestCase):
         self.assertTrue('klasje' in out)
         self.assertTrue('stijl:1' in out)
 
-        out = sv_knop_nav(icon='open url', smal=True)
-        out = sv_knop_nav(icon='open url', smal=True, extra_style='stijl:2', knop_id='my_id')
+        out = sv_knop_nav(icon='open url', smal=True, tekst='niet leeg')
+        out = sv_knop_nav(icon='open url', smal=True, tekst='')
+        out = sv_knop_nav(icon='open url', smal=True, tekst='', extra_style='stijl:2', knop_id='my_id')
         self.assertTrue('stijl:2' in out)
         self.assertTrue('id="my_id"' in out)
 
@@ -38,7 +39,7 @@ class TestDesignTemplatetagsKnop(TestCase):
         self.assertTrue('mailto:to@test.not' in out)
         self.assertTrue('btn-sv-rood' in out)
 
-        out = sv_knop_mailto(email='to@test.not', kleur='blauw', icon='')
+        out = sv_knop_mailto(email='to@test.not', kleur='blauw', icon='', usability_label='')
         self.assertTrue('mailto:to@test.not' in out)
         self.assertTrue('btn-sv-blauw' in out)
 
@@ -49,12 +50,19 @@ class TestDesignTemplatetagsKnop(TestCase):
         self.assertTrue('<svg ' in out)
         self.assertTrue('btn-sv-rood' in out)
 
-        out = sv_knop_ext(kleur='blauw', icon='email', tekst='hello', url='//test.not', extra_style='stijl')
+        out = sv_knop_ext(kleur='blauw', icon='email', smal=True, tekst='hello', url='//test.not', extra_style='stijl')
         self.assertTrue('stijl' in out)
         self.assertTrue('hello' in out)
         self.assertTrue('<svg ' in out)
         self.assertTrue('href="//test.not"' in out)
         self.assertTrue('btn-sv-blauw' in out)
+
+        out = sv_knop_ext(kleur='blauw', icon='email', smal=True, tekst='', url='//test.not', extra_style='stijl')
+        self.assertTrue(out.startswith('<a class="btn-sv-blauw"'))
+        self.assertTrue('stijl' in out)
+
+        out = sv_knop_ext(kleur='blauw', icon='email', smal=True, tekst='', url='//test.not', extra_style='')
+        self.assertTrue(out.startswith('<a class="btn-sv-blauw"'))
 
     def test_knop_modal(self):
         sv_knop_modal.cache_clear()
