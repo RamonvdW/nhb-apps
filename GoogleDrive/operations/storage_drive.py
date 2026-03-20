@@ -11,8 +11,9 @@ from GoogleDrive.models import Token, Bestand
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError as GoogleApiError
 from googleapiclient.http import HttpRequest
-from google.auth.exceptions import RefreshError
+from google.auth.exceptions import RefreshError, TransportError
 from google.oauth2.credentials import Credentials
+from httplib2.error import ServerNotFoundError
 from GoogleDrive.storage_base import StorageBase, StorageError
 import traceback
 import socket
@@ -102,6 +103,10 @@ class StorageGoogleDrive(StorageBase):
                 self.stdout.write('[ERROR] {execute} Socket error: %s' % exc)
             except GoogleApiError as exc:           # aka HttpError
                 self.stdout.write('[ERROR] {execute} GoogleApiError: %s' % exc)
+            except TransportError as exc:
+                self.stdout.write('[ERROR] {execute} google.auth.TransportError: %s' % exc)
+            except ServerNotFoundError as exc:
+                self.stdout.write('[ERROR] {execute} httplib2.error.ServerNotFoundError: %s' % exc)
             else:
                 # self.stdout.write('[DEBUG] {execute} response=%s' % repr(response))
                 return response

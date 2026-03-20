@@ -87,7 +87,9 @@ class ImporteerSheetUitslagIndiv:
                 return
 
             lid_nr, naam, ver, _regio_nr, _label, ag_str = row
-            deelnemer = deelnemers.get(str(lid_nr), None)
+            lid_nr = str(lid_nr)
+
+            deelnemer = deelnemers.get(lid_nr, None)
             if not deelnemer:
                 regels = [
                     'Fout: Deelnemer in de uitslag niet gevonden op de deelnemerslijst!',

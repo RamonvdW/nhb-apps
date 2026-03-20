@@ -70,9 +70,9 @@ class VerwerkCompKampMutaties:
         self.stdout.write('[INFO] Update dirty wedstrijdformulieren')
         sheet = None
 
-        # note: Indoor en 25m1pijl hebben aparte klassen, maar BK+elk RK hebben dezelfde klasse_pk, dus index nodig
-        indiv_klasse_pk_index2match = dict[tuple[int, int], CompetitieMatch]()
-        team_klasse_pk_index2match = dict[tuple[int, int], CompetitieMatch]()
+        # note: Indoor en 25m1pijl hebben aparte klassen, maar BK+elk RK hebben dezelfde klasse_pk, dus rayon_nr nodig
+        indiv_klasse_pk_rayon2match = dict[tuple[int, int], CompetitieMatch]()
+        team_klasse_pk_rayon2match = dict[tuple[int, int], CompetitieMatch]()
 
         # doorloop alle wedstrijden
         for deelkamp in (KampRK
@@ -81,7 +81,7 @@ class VerwerkCompKampMutaties:
                          .select_related('rayon')
                          .prefetch_related('matches')):
 
-            index = deelkamp.rayon.rayon_nr
+            rayon_nr = deelkamp.rayon.rayon_nr
 
             for match in (deelkamp.matches
                           .prefetch_related('indiv_klassen',
@@ -90,11 +90,11 @@ class VerwerkCompKampMutaties:
                                           'locatie')):
 
                 for klasse in match.indiv_klassen.all():
-                    indiv_klasse_pk_index2match[(klasse.pk, index)] = match
+                    indiv_klasse_pk_rayon2match[(klasse.pk, rayon_nr)] = match
                 # for
 
                 for klasse in match.team_klassen.all():
-                    team_klasse_pk_index2match[(klasse.pk, index)] = match
+                    team_klasse_pk_rayon2match[(klasse.pk, rayon_nr)] = match
                 # for
         # for
 
@@ -102,8 +102,8 @@ class VerwerkCompKampMutaties:
                          .objects
                          .filter(competitie__begin_jaar=begin_jaar)
                          .prefetch_related('matches')):
-            index = 0
 
+            rayon_nr = 0
             for match in (deelkamp.matches
                           .prefetch_related('indiv_klassen',
                                             'team_klassen')
@@ -111,11 +111,11 @@ class VerwerkCompKampMutaties:
                                           'locatie')):
 
                 for klasse in match.indiv_klassen.all():
-                    indiv_klasse_pk_index2match[(klasse.pk, index)] = match
+                    indiv_klasse_pk_rayon2match[(klasse.pk, rayon_nr)] = match
                 # for
 
                 for klasse in match.team_klassen.all():
-                    team_klasse_pk_index2match[(klasse.pk, index)] = match
+                    team_klasse_pk_rayon2match[(klasse.pk, rayon_nr)] = match
                 # for
         # for
 
@@ -131,19 +131,19 @@ class VerwerkCompKampMutaties:
             sheet.selecteer_file(bestand.file_id)
 
             if bestand.is_bk:
-                index = 0
+                rayon_nr = 0
             else:
-                index = bestand.rayon_nr
+                rayon_nr = bestand.rayon_nr
 
             res = ''
             if bestand.is_teams:
                 # teams
                 updater = UpdateTeamsWedstrijdFormulier(self.stdout, sheet)
-                match = team_klasse_pk_index2match.get((bestand.klasse_pk, index), None)
+                match = team_klasse_pk_rayon2match.get((bestand.klasse_pk, rayon_nr), None)
             else:
                 # individueel
                 updater = UpdateIndivWedstrijdFormulier(self.stdout, sheet)
-                match = indiv_klasse_pk_index2match.get((bestand.klasse_pk, index), None)
+                match = indiv_klasse_pk_rayon2match.get((bestand.klasse_pk, rayon_nr), None)
 
             now = timezone.now()
             stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')

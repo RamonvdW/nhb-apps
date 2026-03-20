@@ -18,6 +18,7 @@ from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
 import datetime
+import os
 
 
 class TestCompLaagRegioCli(E2EHelpers, TestCase):
@@ -540,7 +541,8 @@ class TestCompLaagRegioCli(E2EHelpers, TestCase):
                                     beschrijving='Ronde 6')
         ronde.matches.add(match)
 
-        self.run_management_command('report_score_counts', '18', '111', 'fname')
+        self.run_management_command('report_score_counts', '18', '111', '/tmp/fname')
+        os.remove('/tmp/fname')
 
 
 # end of file

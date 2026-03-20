@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2025 Ramon van der Winkel.
+#  Copyright (c) 2022-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -116,7 +116,7 @@ class OntvangerFilter(admin.SimpleListFilter):
 
 class BestellingAdmin(admin.ModelAdmin):
 
-    readonly_fields = ('account', 'bestel_nr', 'aangemaakt', 'regels_in_mandje',
+    readonly_fields = ('account', 'bestel_nr', 'aangemaakt', 'gekoppelde_regels',
                        'ontvanger', 'betaal_mutatie', 'betaal_actief')
 
     filter_vertical = ('transacties',)
@@ -132,7 +132,7 @@ class BestellingAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Inhoud',
             {'fields': ('aangemaakt',
-                        'regels_in_mandje')
+                        'gekoppelde_regels')
             }),
         ('Koper',
             {'fields': ('bestel_nr',
@@ -171,8 +171,9 @@ class BestellingAdmin(admin.ModelAdmin):
     )
 
     @staticmethod
-    def regels_in_mandje(obj):        # pragma: no cover
-        return "\n".join([str(regel) for regel in obj.regels.all()])
+    def gekoppelde_regels(obj):        # pragma: no cover
+        return "\n".join([str(regel)
+                          for regel in obj.regels.all()])
 
 
 class BestellingMutatieAdmin(admin.ModelAdmin):

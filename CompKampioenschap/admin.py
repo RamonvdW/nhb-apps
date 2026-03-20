@@ -14,6 +14,8 @@ class SheetStatusAdmin(admin.ModelAdmin):
                    'bestand__is_bk', 'bestand__is_teams', 'bestand__rayon_nr', 'bevat_scores', 'uitslag_is_compleet',
                    'aantal_deelnemers')
 
+    search_fields = ('bestand__fname', 'bestand__file_id')
+
 
 admin.site.register(SheetStatus, SheetStatusAdmin)
 

@@ -63,8 +63,11 @@ class SheetStatus(models.Model):
         return self.uitslag_ingelezen_op.year == 2000
 
     def __str__(self):
-        return "[%s] gewijzigd op %s" % (self.pk,
-                                         timezone.localtime(self.gewijzigd_op).strftime('%Y-%m-%d %H:%M:%S'))
+        msg = "[%s] gewijzigd op %s" % (self.pk,
+                                        timezone.localtime(self.gewijzigd_op).strftime('%Y-%m-%d %H:%M:%S'))
+        if self.bestand:
+            msg += ' ' + self.bestand.fname
+        return msg
 
     class Meta:
         verbose_name = verbose_name_plural = "Sheet status"
