@@ -197,20 +197,6 @@
                     <td class="center">
                         {% if team.klasse_heeft_uitslag %}
                             <b>{{ team.bk_score_str }}</b>
-                            {% for deelnemer in team.deelnemers %}
-                                {% if deelnemer.is_uitvaller %}
-                                    <br>
-                                    <span class="grey-text">-</span>
-                                {% else %}
-                                    <br>
-                                {% endif %}
-                            {% empty %}
-                                {% if team.toon_team_leden %}
-                                    {% for team_lid in team.team_leden %}
-                                        <br>
-                                    {% endfor %}
-                                {% endif %}
-                            {% endfor %}
                         {% else %}
                             {% if team.niet_deelgenomen %}
                                 <i class="grey-text">-</i>

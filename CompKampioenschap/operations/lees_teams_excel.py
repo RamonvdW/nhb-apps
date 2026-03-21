@@ -117,11 +117,11 @@ class LeesTeamsExcel:
 
         for row_nr in range(8, 15+1):
             # team naam
-            team_naam = self._lees_team_naam(ws, 'B' + str(row_nr))
+            team_naam = self._lees_team_naam(ws, 'C' + str(row_nr))
             if not team_naam:
                 continue
 
-            matchpunten_str = ws['D' + str(row_nr)].value
+            matchpunten_str = ws['E' + str(row_nr)].value
             try:
                 matchpunten = int(matchpunten_str)
             except ValueError:
