@@ -9,7 +9,7 @@ from django.http import Http404, HttpResponseRedirect
 from django.views.generic import TemplateView
 from django.utils.safestring import mark_safe
 from Account.models import get_account
-from Competitie.definities import DEELNAME_NEE, KAMP_RANK_BLANCO
+from Competitie.definities import DEELNAME_NEE, KAMP_RANK_BLANCO, KAMP_RANK_NO_SHOW, KAMP_RANK_RESERVE
 from Competitie.models import Competitie, CompetitieMatch
 from Competitie.seizoenen import get_comp_pk
 from CompLaagBond.models import KampBK, TeamBK
@@ -255,42 +255,47 @@ class UitslagenBKTeamsView(TemplateView):
                 team.rank = team.result_rank
                 if team.result_rank == KAMP_RANK_BLANCO:
                     team.bk_score_str = '(blanco)'
+
+                elif team.result_rank in (KAMP_RANK_NO_SHOW, KAMP_RANK_RESERVE):
+                    team.niet_deelgenomen = True
+                    team.geen_rank = True
+
                 else:
                     team.bk_score_str = str(team.result_teamscore)
+
+                    # de volgende statement worden aparte database queries
+                    originele_pks = list(team.gekoppelde_leden.values_list('pk', flat=True))
+                    feitelijke_pks = team.feitelijke_leden.values_list('pk', flat=True)
+
+                    unsorted = list()
+                    for pk in feitelijke_pks:
+                        deelnemer = bk_cache[pk]
+                        voor_uitslag = SimpleNamespace(
+                            naam_str=deelnemer.naam_str,
+                            is_uitvaller=False,
+                            is_invaller=deelnemer.pk not in originele_pks)
+                        tup = (deelnemer.gemiddelde, pk, voor_uitslag)
+                        unsorted.append(tup)
+                        if not voor_uitslag.is_invaller:
+                            originele_pks.remove(pk)
+                    # for
+
+                    # voeg de uitvallers toe
+                    for pk in originele_pks:
+                        deelnemer = bk_cache[pk]
+                        voor_uitslag = SimpleNamespace(
+                            naam_str=deelnemer.naam_str,
+                            is_uitvaller=True,
+                            is_invaller=False)
+                        # gebruik gemiddelde zodat de uitvallers aan het einde van de lijst staan na sorteren
+                        tup = (deelnemer.gemiddelde, pk, voor_uitslag)
+                        unsorted.append(tup)
+                    # for
+
+                    unsorted.sort(reverse=True)  # hoogste eerst
+                    team.deelnemers = [voor_uitslag for _, _, voor_uitslag in unsorted]
+
                 team.klasse_heeft_uitslag = True
-
-                # de volgende statement worden aparte database queries
-                originele_pks = list(team.gekoppelde_leden.values_list('pk', flat=True))
-                feitelijke_pks = team.feitelijke_leden.values_list('pk', flat=True)
-
-                unsorted = list()
-                for pk in feitelijke_pks:
-                    deelnemer = bk_cache[pk]
-                    voor_uitslag = SimpleNamespace(
-                                        naam_str=deelnemer.naam_str,
-                                        is_uitvaller=False,
-                                        is_invaller=deelnemer.pk not in originele_pks)
-                    tup = (deelnemer.gemiddelde, pk, voor_uitslag)
-                    unsorted.append(tup)
-                    if not voor_uitslag.is_invaller:
-                        originele_pks.remove(pk)
-                # for
-
-                # voeg de uitvallers toe
-                for pk in originele_pks:
-                    deelnemer = bk_cache[pk]
-                    voor_uitslag = SimpleNamespace(
-                                        naam_str=deelnemer.naam_str,
-                                        is_uitvaller=True,
-                                        is_invaller=False)
-                    # gebruik gemiddelde zodat de uitvallers aan het einde van de lijst staan na sorteren
-                    tup = (deelnemer.gemiddelde, pk, voor_uitslag)
-                    unsorted.append(tup)
-                # for
-
-                unsorted.sort(reverse=True)       # hoogste eerst
-                team.deelnemers = [voor_uitslag for _, _, voor_uitslag in unsorted]
-
                 klasse_teams_done.append(team)
             else:
                 # nog geen uitslag beschikbaar
