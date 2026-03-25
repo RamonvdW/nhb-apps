@@ -48,7 +48,7 @@ class PlanningView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            deelkamp_pk = int(kwargs['deelkamp_pk'][:6])  # afkappen voor de veiligheid
+            deelkamp_pk = int(kwargs['deelkamp_pk'][:7])  # afkappen voor de veiligheid
             deelkamp = (KampBK
                         .objects
                         .select_related('competitie')
@@ -187,7 +187,7 @@ class PlanningView(UserPassesTestMixin, TemplateView):
             in de BK planning, om een nieuwe wedstrijd toe te voegen.
         """
         try:
-            deelkamp_pk = int(kwargs['deelkamp_pk'][:6])  # afkappen voor de veiligheid
+            deelkamp_pk = int(kwargs['deelkamp_pk'][:7])  # afkappen voor de veiligheid
             deelkamp = (KampBK
                         .objects
                         .select_related('competitie')
@@ -377,7 +377,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            match_pk = int(kwargs['match_pk'][:6])     # afkappen voor de veiligheid
+            match_pk = int(kwargs['match_pk'][:7])     # afkappen voor de veiligheid
             match = (CompetitieMatch
                      .objects
                      .select_related('uitslag')
@@ -474,7 +474,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
         """
 
         try:
-            match_pk = int(kwargs['match_pk'][:6])     # afkappen voor de veiligheid
+            match_pk = int(kwargs['match_pk'][:7])     # afkappen voor de veiligheid
             match = (CompetitieMatch
                      .objects
                      .select_related('uitslag')
@@ -498,8 +498,8 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
         # aanvang bestaat uit vier cijfers, zoals 0830
         weekdag = request.POST.get('weekdag', '')[:2]           # afkappen voor de veiligheid
         aanvang = request.POST.get('aanvang', '')[:5]           # afkappen voor de veiligheid
-        ver_pk = request.POST.get('ver_pk', '')[:6]             # afkappen voor de veiligheid
-        loc_pk = request.POST.get('loc_pk', '')[:6]             # afkappen voor de veiligheid
+        ver_pk = request.POST.get('ver_pk', '')[:7]             # afkappen voor de veiligheid
+        loc_pk = request.POST.get('loc_pk', '')[:7]             # afkappen voor de veiligheid
 
         # let op: loc_pk='' is toegestaan
         if weekdag == "" or ver_pk == "" or len(aanvang) != 5 or aanvang[2] != ':':
@@ -673,7 +673,7 @@ class VerwijderWedstrijdView(UserPassesTestMixin, View):
         """ Deze functie wordt aangeroepen als de knop 'Verwijder' gebruikt wordt
         """
         try:
-            match_pk = int(kwargs['match_pk'][:6])  # afkappen voor de veiligheid
+            match_pk = int(kwargs['match_pk'][:7])  # afkappen voor de veiligheid
             match = (CompetitieMatch
                      .objects
                      .select_related('uitslag')

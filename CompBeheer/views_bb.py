@@ -256,7 +256,7 @@ class KlassengrenzenVaststellenView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            comp_pk = int(kwargs['comp_pk'][:6])      # afkappen voor de veiligheid
+            comp_pk = int(kwargs['comp_pk'][:7])      # afkappen voor de veiligheid
             comp = Competitie.objects.get(pk=comp_pk)
         except (ValueError, Competitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
@@ -292,7 +292,7 @@ class KlassengrenzenVaststellenView(UserPassesTestMixin, TemplateView):
         """
 
         try:
-            comp_pk = int(kwargs['comp_pk'][:6])      # afkappen voor de veiligheid
+            comp_pk = int(kwargs['comp_pk'][:7])      # afkappen voor de veiligheid
             comp = Competitie.objects.get(pk=comp_pk)
         except (ValueError, Competitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')

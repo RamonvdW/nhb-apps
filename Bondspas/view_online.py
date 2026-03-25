@@ -160,7 +160,7 @@ class ToonBondspasBeheerderView(UserPassesTestMixin, View):
         context = dict()
 
         try:
-            lid_nr = kwargs['lid_nr'][:6]       # afkappen voor de veiligheid
+            lid_nr = kwargs['lid_nr'][:7]       # afkappen voor de veiligheid
             lid_nr = int(lid_nr)
             sporter = Sporter.objects.get(lid_nr=lid_nr)
         except Sporter.DoesNotExist:
@@ -190,7 +190,7 @@ class ToonBondspasBeheerderView(UserPassesTestMixin, View):
             om een 'bondspas van ...' op te halen.
         """
         try:
-            lid_nr = kwargs['lid_nr'][:6]       # afkappen voor de veiligheid
+            lid_nr = kwargs['lid_nr'][:7]       # afkappen voor de veiligheid
             lid_nr = int(lid_nr)
             sporter = Sporter.objects.get(lid_nr=lid_nr)
         except Sporter.DoesNotExist:
@@ -231,7 +231,7 @@ class ToonBondspasVerenigingView(UserPassesTestMixin, View):
         context = dict()
 
         try:
-            lid_nr = kwargs['lid_nr'][:6]       # afkappen voor de veiligheid
+            lid_nr = kwargs['lid_nr'][:7]       # afkappen voor de veiligheid
             lid_nr = int(lid_nr)
             sporter = Sporter.objects.get(lid_nr=lid_nr)
         except Sporter.DoesNotExist:
@@ -264,7 +264,7 @@ class ToonBondspasVerenigingView(UserPassesTestMixin, View):
             om een 'bondspas van ...' op te halen.
         """
         try:
-            lid_nr = kwargs['lid_nr'][:6]       # afkappen voor de veiligheid
+            lid_nr = kwargs['lid_nr'][:7]       # afkappen voor de veiligheid
             lid_nr = int(lid_nr)
             sporter = Sporter.objects.get(lid_nr=lid_nr)
         except Sporter.DoesNotExist:

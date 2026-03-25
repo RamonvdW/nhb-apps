@@ -213,7 +213,7 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])  # afkappen voor de veiligheid
+            deelcomp_pk = int(kwargs['deelcomp_pk'][:7])  # afkappen voor de veiligheid
             deelcomp = (Regiocompetitie
                         .objects
                         .select_related('competitie',
@@ -270,7 +270,7 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
             raise PermissionDenied('Niet de beheerder')
 
         try:
-            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])  # afkappen voor de veiligheid
+            deelcomp_pk = int(kwargs['deelcomp_pk'][:7])  # afkappen voor de veiligheid
             deelcomp = (Regiocompetitie
                         .objects
                         .select_related('competitie',
@@ -322,7 +322,7 @@ class RegioClusterPlanningView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            cluster_pk = int(kwargs['cluster_pk'][:6])  # afkappen voor de veiligheid
+            cluster_pk = int(kwargs['cluster_pk'][:7])  # afkappen voor de veiligheid
             cluster = (Cluster
                        .objects
                        .select_related('regio', 'regio__rayon')
@@ -334,7 +334,7 @@ class RegioClusterPlanningView(UserPassesTestMixin, TemplateView):
         context['regio'] = cluster.regio
 
         try:
-            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])     # afkappen voor de veiligheid
+            deelcomp_pk = int(kwargs['deelcomp_pk'][:7])     # afkappen voor de veiligheid
             deelcomp = (Regiocompetitie
                         .objects
                         .select_related('competitie')
@@ -387,7 +387,7 @@ class RegioClusterPlanningView(UserPassesTestMixin, TemplateView):
             raise PermissionDenied('Niet de beheerder')
 
         try:
-            cluster_pk = int(kwargs['cluster_pk'][:6])  # afkappen voor de veiligheid
+            cluster_pk = int(kwargs['cluster_pk'][:7])  # afkappen voor de veiligheid
             cluster = (Cluster
                        .objects
                        .select_related('regio', 'regio__rayon')
@@ -396,7 +396,7 @@ class RegioClusterPlanningView(UserPassesTestMixin, TemplateView):
             raise Http404('Cluster niet gevonden')
 
         try:
-            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])     # afkappen voor de veiligheid
+            deelcomp_pk = int(kwargs['deelcomp_pk'][:7])     # afkappen voor de veiligheid
             deelcomp = (Regiocompetitie
                         .objects
                         .select_related('competitie')
@@ -440,7 +440,7 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            ronde_pk = int(kwargs['ronde_pk'][:6])  # afkappen voor de veiligheid
+            ronde_pk = int(kwargs['ronde_pk'][:7])  # afkappen voor de veiligheid
             ronde = (RegiocompetitieRonde
                      .objects
                      .select_related('regiocompetitie__competitie',
@@ -620,7 +620,7 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
         """
 
         try:
-            ronde_pk = int(kwargs['ronde_pk'][:6])  # afkappen voor de veiligheid
+            ronde_pk = int(kwargs['ronde_pk'][:7])  # afkappen voor de veiligheid
             ronde = (RegiocompetitieRonde
                      .objects
                      .select_related('regiocompetitie__competitie')
@@ -757,7 +757,7 @@ class RegioRondePlanningMethode1View(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            ronde_pk = int(kwargs['ronde_pk'][:6])  # afkappen voor de veiligheid
+            ronde_pk = int(kwargs['ronde_pk'][:7])  # afkappen voor de veiligheid
             ronde = (RegiocompetitieRonde
                      .objects
                      .select_related('regiocompetitie__competitie',
@@ -825,7 +825,7 @@ class RegioRondePlanningMethode1View(UserPassesTestMixin, TemplateView):
         """
 
         try:
-            ronde_pk = int(kwargs['ronde_pk'][:6])  # afkappen voor de veiligheid
+            ronde_pk = int(kwargs['ronde_pk'][:7])  # afkappen voor de veiligheid
             ronde = (RegiocompetitieRonde
                      .objects
                      .select_related('regiocompetitie__competitie')
@@ -954,7 +954,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            match_pk = int(kwargs['match_pk'][:6])  # afkappen voor de veiligheid
+            match_pk = int(kwargs['match_pk'][:7])  # afkappen voor de veiligheid
             match = (CompetitieMatch
                      .objects
                      .select_related('uitslag')
@@ -1124,7 +1124,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
         """
 
         try:
-            match_pk = int(kwargs['match_pk'][:6])  # afkappen voor de veiligheid
+            match_pk = int(kwargs['match_pk'][:7])  # afkappen voor de veiligheid
             match = CompetitieMatch.objects.get(pk=match_pk)
         except (ValueError, CompetitieMatch.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
@@ -1145,8 +1145,8 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
             # mag niet wijzigen
             raise PermissionDenied('Niet de beheerder')
 
-        ver_pk = request.POST.get('ver_pk', '')[:6]             # afkappen voor de veiligheid
-        loc_pk = request.POST.get('loc_pk', '')[:6]             # afkappen voor de veiligheid
+        ver_pk = request.POST.get('ver_pk', '')[:7]             # afkappen voor de veiligheid
+        loc_pk = request.POST.get('loc_pk', '')[:7]             # afkappen voor de veiligheid
         aanvang = request.POST.get('aanvang', '')[:5]           # afkappen voor de veiligheid
 
         if ver_pk == "" or len(aanvang) != 5 or aanvang[2] not in (':', '.'):    # allow numpad dot in time
@@ -1310,7 +1310,7 @@ class VerwijderWedstrijdView(UserPassesTestMixin, View):
         """ Deze functie wordt aangeroepen als de knop 'Verwijder' gebruikt wordt
         """
         try:
-            match_pk = int(kwargs['match_pk'][:6])  # afkappen voor de veiligheid
+            match_pk = int(kwargs['match_pk'][:7])  # afkappen voor de veiligheid
             match = (CompetitieMatch
                      .objects
                      .select_related('uitslag')
@@ -1371,7 +1371,7 @@ class AfsluitenRegiocompView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])  # afkappen voor de veiligheid
+            deelcomp_pk = int(kwargs['deelcomp_pk'][:7])  # afkappen voor de veiligheid
             deelcomp = (Regiocompetitie
                         .objects
                         .select_related('competitie')
@@ -1402,7 +1402,7 @@ class AfsluitenRegiocompView(UserPassesTestMixin, TemplateView):
         """ Deze functie wordt aangeroepen als de knop 'Afsluiten' gebruikt wordt door de RCL """
 
         try:
-            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])  # afkappen voor de veiligheid
+            deelcomp_pk = int(kwargs['deelcomp_pk'][:7])  # afkappen voor de veiligheid
             deelcomp = Regiocompetitie.objects.get(pk=deelcomp_pk)
         except (ValueError, Regiocompetitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -52,7 +52,7 @@ class VerenigingAccommodatieDetailsView(UserPassesTestMixin, TemplateView):
     @staticmethod
     def _get_vereniging_locaties_or_404(**kwargs):
         try:
-            ver_nr = int(kwargs['ver_nr'][:6])    # afkappen voor de veiligheid
+            ver_nr = int(kwargs['ver_nr'][:4])    # afkappen voor de veiligheid
             ver = Vereniging.objects.select_related('regio').get(ver_nr=ver_nr)
         except Vereniging.DoesNotExist:
             raise Http404('Geen valide vereniging')

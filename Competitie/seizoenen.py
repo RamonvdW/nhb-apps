@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023-2024 Ramon van der Winkel.
+#  Copyright (c) 2023-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -47,7 +47,7 @@ class SeizoenCache(object):
             is_ok = True
         else:
             try:
-                _ = int(comp_pk_of_seizoen[:6])       # afkappen voor de veiligheid
+                _ = int(comp_pk_of_seizoen[:7])       # afkappen voor de veiligheid
                 is_ok = True
             except ValueError:
                 pass

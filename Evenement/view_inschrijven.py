@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import django.http
-#  Copyright (c) 2024-2025 Ramon van der Winkel.
+#  Copyright (c) 2024-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -122,7 +122,7 @@ class InschrijvenSporterView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            evenement_pk = str(kwargs['evenement_pk'])[:6]     # afkappen voor de veiligheid
+            evenement_pk = str(kwargs['evenement_pk'])[:7]     # afkappen voor de veiligheid
             evenement = (Evenement
                          .objects
                          .select_related('organiserende_vereniging',
@@ -209,7 +209,7 @@ class InschrijvenGroepjeView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            evenement_pk = str(kwargs['evenement_pk'])[:6]     # afkappen voor de veiligheid
+            evenement_pk = str(kwargs['evenement_pk'])[:7]     # afkappen voor de veiligheid
             evenement = (Evenement
                          .objects
                          .select_related('organiserende_vereniging',
@@ -319,7 +319,7 @@ class InschrijvenFamilieView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            evenement_pk = str(kwargs['evenement_pk'])[:6]     # afkappen voor de veiligheid
+            evenement_pk = str(kwargs['evenement_pk'])[:7]     # afkappen voor de veiligheid
             evenement = (Evenement
                          .objects
                          .select_related('organiserende_vereniging',
@@ -427,9 +427,9 @@ class ToevoegenAanMandjeView(UserPassesTestMixin, View):
 
     def post(self, request, *args, **kwargs):
         """ de gebruiker heeft op de KIES knop gedrukt """
-        evenement_str = request.POST.get('evenement', '')[:6]       # afkappen voor de veiligheid
-        sporter_str = request.POST.get('sporter', '')[:6]           # afkappen voor de veiligheid
-        goto_str = request.POST.get('goto', '')[:6]                 # afkappen voor de veiligheid
+        evenement_str = request.POST.get('evenement', '')[:7]       # afkappen voor de veiligheid
+        sporter_str = request.POST.get('sporter', '')[:7]           # afkappen voor de veiligheid
+        goto_str = request.POST.get('goto', '')[:7]                 # afkappen voor de veiligheid
 
         try:
             evenement_pk = int(evenement_str)
@@ -567,7 +567,7 @@ class InschrijvenDoorHWL(UserPassesTestMixin, TemplateView):
         ver = self.functie_nu.vereniging
 
         try:
-            evenement_pk = str(kwargs['evenement_pk'])[:6]     # afkappen voor de veiligheid
+            evenement_pk = str(kwargs['evenement_pk'])[:7]     # afkappen voor de veiligheid
             evenement = (Evenement
                          .objects
                          .filter(organiserende_vereniging=ver)
@@ -666,8 +666,8 @@ class InschrijvenDoorHWL(UserPassesTestMixin, TemplateView):
 
     def post(self, request, *args, **kwargs):
         """ de gebruiker heeft op de KIES knop gedrukt """
-        evenement_str = request.POST.get('evenement', '')[:6]  # afkappen voor de veiligheid
-        sporter_str = request.POST.get('sporter', '')[:6]  # afkappen voor de veiligheid
+        evenement_str = request.POST.get('evenement', '')[:7]  # afkappen voor de veiligheid
+        sporter_str = request.POST.get('sporter', '')[:7]  # afkappen voor de veiligheid
 
         try:
             evenement_pk = int(evenement_str)

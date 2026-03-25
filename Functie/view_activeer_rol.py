@@ -61,7 +61,7 @@ class ActiveerRolView(UserPassesTestMixin, View):
 
         elif 'functie_pk' in kwargs:
             # activeer functie
-            functie_pk = kwargs['functie_pk'][:6]       # afkappen voor de veiligheid
+            functie_pk = kwargs['functie_pk'][:7]       # afkappen voor de veiligheid
             try:
                 functie_pk = int(functie_pk)
                 functie = Functie.objects.get(pk=functie_pk)

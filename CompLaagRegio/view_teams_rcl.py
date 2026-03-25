@@ -60,7 +60,7 @@ class RegioTeamsTemplateView(TemplateView):
             context['subset_filter'] = True
 
             try:
-                comp_pk = int(str(kwargs['comp_pk'][:6]))       # afkappen voor de veiligheid
+                comp_pk = int(str(kwargs['comp_pk'][:7]))       # afkappen voor de veiligheid
                 comp = Competitie.objects.get(pk=comp_pk)
             except (ValueError, Competitie.DoesNotExist):
                 raise Http404('Competitie niet gevonden')
@@ -118,7 +118,7 @@ class RegioTeamsTemplateView(TemplateView):
         else:
             # RCL mode
             try:
-                deelcomp_pk = int(kwargs['deelcomp_pk'][:6])    # afkappen voor de veiligheid
+                deelcomp_pk = int(kwargs['deelcomp_pk'][:7])    # afkappen voor de veiligheid
                 deelcomp = (Regiocompetitie
                             .objects
                             .select_related('competitie')
@@ -321,7 +321,7 @@ class RegioTeamsAlsBestand(UserPassesTestMixin, View):
     def get(self, request, *args, **kwargs):
 
         try:
-            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])    # afkappen voor de veiligheid
+            deelcomp_pk = int(kwargs['deelcomp_pk'][:7])    # afkappen voor de veiligheid
             deelcomp = (Regiocompetitie
                         .objects
                         .select_related('competitie')
@@ -441,8 +441,8 @@ class AGControleView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            regio_nr = int(kwargs['regio_nr'][:6])  # afkappen voor de veiligheid
-            comp_pk = int(kwargs['comp_pk'][:6])    # afkappen voor de veiligheid
+            regio_nr = int(kwargs['regio_nr'][:7])  # afkappen voor de veiligheid
+            comp_pk = int(kwargs['comp_pk'][:7])    # afkappen voor de veiligheid
             deelcomp = (Regiocompetitie
                         .objects
                         .select_related('competitie', 'regio')
@@ -685,7 +685,7 @@ class StartVolgendeTeamRondeView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])      # afkappen voor de veiligheid
+            deelcomp_pk = int(kwargs['deelcomp_pk'][:7])      # afkappen voor de veiligheid
             deelcomp = (Regiocompetitie
                         .objects
                         .select_related('competitie')
@@ -786,7 +786,7 @@ class StartVolgendeTeamRondeView(UserPassesTestMixin, TemplateView):
         """
 
         try:
-            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])      # afkappen voor de veiligheid
+            deelcomp_pk = int(kwargs['deelcomp_pk'][:7])      # afkappen voor de veiligheid
             deelcomp = (Regiocompetitie
                         .objects
                         .select_related('competitie')

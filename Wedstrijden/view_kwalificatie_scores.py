@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2025 Ramon van der Winkel.
+#  Copyright (c) 2021-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -49,7 +49,7 @@ class CheckKwalificatieScoresView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            wedstrijd_pk = int(str(kwargs['wedstrijd_pk'])[:6])      # afkappen voor de veiligheid
+            wedstrijd_pk = int(str(kwargs['wedstrijd_pk'])[:7])      # afkappen voor de veiligheid
             wedstrijd = Wedstrijd.objects.get(pk=wedstrijd_pk)
         except (ValueError, Wedstrijd.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
@@ -154,7 +154,7 @@ class CheckKwalificatieScoresWedstrijdView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            score_pk = int(str(kwargs['score_pk'])[:6])      # afkappen voor de veiligheid
+            score_pk = int(str(kwargs['score_pk'])[:7])      # afkappen voor de veiligheid
             ref_score = Kwalificatiescore.objects.select_related('inschrijving__wedstrijd').get(pk=score_pk)
         except (ValueError, Kwalificatiescore.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
@@ -224,7 +224,7 @@ class CheckKwalificatieScoresWedstrijdView(UserPassesTestMixin, TemplateView):
             raise Http404('Geen valide verzoek')
 
         try:
-            keuze = int(str(data['keuze'])[:6])
+            keuze = int(str(data['keuze'])[:3])
         except (KeyError, ValueError):
             # garbage in
             raise Http404('Geen valide verzoek')
@@ -239,7 +239,7 @@ class CheckKwalificatieScoresWedstrijdView(UserPassesTestMixin, TemplateView):
             raise Http404('Geen valide verzoek')
 
         try:
-            score_pk = int(str(kwargs['score_pk'])[:6])      # afkappen voor de veiligheid
+            score_pk = int(str(kwargs['score_pk'])[:7])      # afkappen voor de veiligheid
             score = (Kwalificatiescore
                      .objects
                      .select_related('inschrijving__sporterboog__sporter')

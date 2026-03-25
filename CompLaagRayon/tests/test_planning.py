@@ -996,7 +996,7 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagrayon/wijzig-limieten-rk.dtl', 'design/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagrayon/wijzig-limieten-indiv.dtl', 'design/site_layout.dtl'))
 
         isel = 'isel_%s' % self.klasse_r.pk
         tsel = 'tsel_%s' % self.klasse_r_ere.pk

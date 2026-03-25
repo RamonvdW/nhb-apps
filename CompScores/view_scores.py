@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -52,7 +52,7 @@ class ScoresRegioView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])            # afkappen voor de veiligheid
+            deelcomp_pk = int(kwargs['deelcomp_pk'][:7])            # afkappen voor de veiligheid
             deelcomp = (Regiocompetitie
                         .objects
                         .select_related('competitie')
@@ -150,7 +150,7 @@ def mag_deelcomp_wedstrijd_wijzigen(wedstrijd, functie_nu, deelcomp):
 
 def bepaal_match_en_deelcomp_of_404(match_pk, mag_database_wijzigen=False):
     try:
-        match_pk = int(match_pk[:6])        # afkappen voor de veiligheid
+        match_pk = int(match_pk[:7])        # afkappen voor de veiligheid
         match = (CompetitieMatch
                  .objects
                  .select_related('uitslag')
@@ -262,7 +262,7 @@ class WedstrijdUitslagInvoerenView(UserPassesTestMixin, TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        match_pk = kwargs['match_pk'][:6]     # afkappen voor de veiligheid
+        match_pk = kwargs['match_pk'][:7]     # afkappen voor de veiligheid
         match, deelcomp, ronde = bepaal_match_en_deelcomp_of_404(match_pk)
 
         context['wedstrijd'] = match
@@ -348,7 +348,7 @@ class WedstrijdUitslagControlerenView(WedstrijdUitslagInvoerenView):
 
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
 
-        match_pk = kwargs['match_pk'][:6]     # afkappen voor de veiligheid
+        match_pk = kwargs['match_pk'][:7]     # afkappen voor de veiligheid
         match, deelcomp, _ = bepaal_match_en_deelcomp_of_404(match_pk, mag_database_wijzigen=True)
 
         if not mag_deelcomp_wedstrijd_wijzigen(match, functie_nu, deelcomp):
@@ -389,7 +389,7 @@ class DynamicDeelnemersOphalenView(UserPassesTestMixin, View):
             raise Http404('Geen valide verzoek')
 
         try:
-            deelcomp_pk = int(str(data['deelcomp_pk'])[:6])   # afkappen voor extra veiligheid
+            deelcomp_pk = int(str(data['deelcomp_pk'])[:7])   # afkappen voor extra veiligheid
             deelcomp = (Regiocompetitie
                         .objects
                         .select_related('competitie')
@@ -398,7 +398,7 @@ class DynamicDeelnemersOphalenView(UserPassesTestMixin, View):
             raise Http404('Competitie niet gevonden')
 
         try:
-            match_pk = int(str(data['wedstrijd_pk'])[:6])   # afkappen voor extra veiligheid
+            match_pk = int(str(data['wedstrijd_pk'])[:7])   # afkappen voor extra veiligheid
             match = (CompetitieMatch
                      .objects
                      .get(pk=match_pk))
@@ -452,8 +452,8 @@ class DynamicZoekOpBondsnummerView(UserPassesTestMixin, View):
         out = dict()
 
         try:
-            lid_nr = int(str(data['lid_nr'])[:6])               # afkappen voor extra veiligheid
-            match_pk = int(str(data['wedstrijd_pk'])[:6])       # afkappen voor extra veiligheid
+            lid_nr = int(str(data['lid_nr'])[:7])               # afkappen voor extra veiligheid
+            match_pk = int(str(data['wedstrijd_pk'])[:7])       # afkappen voor extra veiligheid
             match = CompetitieMatch.objects.get(pk=match_pk)
         except (KeyError, ValueError, CompetitieMatch.DoesNotExist):
             # garbage in
@@ -607,7 +607,7 @@ class DynamicScoresOpslaanView(UserPassesTestMixin, View):
                 continue
 
             try:
-                pk = int(str(key)[:6])     # afkappen voor de veiligheid
+                pk = int(str(key)[:7])     # afkappen voor de veiligheid
             except ValueError:
                 # fout pk: ignore
                 continue        # met de for-loop
@@ -657,7 +657,7 @@ class DynamicScoresOpslaanView(UserPassesTestMixin, View):
 
         # print('data:', repr(data))
         try:
-            match_pk = str(data['wedstrijd_pk'])[:6]  # afkappen voor de veiligheid
+            match_pk = str(data['wedstrijd_pk'])[:7]  # afkappen voor de veiligheid
         except KeyError:
             raise Http404('Wedstrijd niet gevonden')
 
@@ -700,7 +700,7 @@ class WedstrijdUitslagBekijkenView(UserPassesTestMixin, TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        match_pk = kwargs['match_pk'][:6]     # afkappen voor de veiligheid
+        match_pk = kwargs['match_pk'][:7]     # afkappen voor de veiligheid
         match, deelcomp, ronde = bepaal_match_en_deelcomp_of_404(match_pk, mag_database_wijzigen=True)
 
         scores = (match
@@ -1055,7 +1055,7 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])  # afkappen voor de veiligheid
+            deelcomp_pk = int(kwargs['deelcomp_pk'][:7])  # afkappen voor de veiligheid
             deelcomp = (Regiocompetitie
                         .objects
                         .select_related('competitie')
@@ -1097,7 +1097,7 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
     def post(self, request, *args, **kwargs):
 
         try:
-            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])  # afkappen voor de veiligheid
+            deelcomp_pk = int(kwargs['deelcomp_pk'][:7])  # afkappen voor de veiligheid
             deelcomp = Regiocompetitie.objects.get(pk=deelcomp_pk)
         except (ValueError, Regiocompetitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')

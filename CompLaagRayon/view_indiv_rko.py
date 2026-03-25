@@ -80,7 +80,7 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
         # 2) deelnemers voor RK zijn vastgesteld --> toon lijst
 
         try:
-            deelkamp_pk = int(kwargs['deelkamp_pk'][:6])  # afkappen voor de veiligheid
+            deelkamp_pk = int(kwargs['deelkamp_pk'][:7])  # afkappen voor de veiligheid
             deelkamp = (KampRK
                         .objects
                         .select_related('competitie',
@@ -232,7 +232,7 @@ class LijstRkSelectieAlsBestandView(LijstRkSelectieView):
     def get(self, request, *args, **kwargs):
 
         try:
-            deelkamp_pk = int(kwargs['deelkamp_pk'][:6])  # afkappen voor de veiligheid
+            deelkamp_pk = int(kwargs['deelkamp_pk'][:7])  # afkappen voor de veiligheid
             deelkamp = (KampRK
                         .objects
                         .select_related('competitie',

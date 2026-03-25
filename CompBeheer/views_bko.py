@@ -83,7 +83,7 @@ class DoorzettenRegioNaarRKView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            comp_pk = int(kwargs['comp_pk'][:6])  # afkappen voor de veiligheid
+            comp_pk = int(kwargs['comp_pk'][:7])  # afkappen voor de veiligheid
             comp = (Competitie
                     .objects
                     .get(pk=comp_pk,
@@ -121,7 +121,7 @@ class DoorzettenRegioNaarRKView(UserPassesTestMixin, TemplateView):
             om de competitie door te zetten naar de RK fase
         """
         try:
-            comp_pk = int(kwargs['comp_pk'][:6])  # afkappen voor de veiligheid
+            comp_pk = int(kwargs['comp_pk'][:7])  # afkappen voor de veiligheid
             comp = (Competitie
                     .objects
                     .get(pk=comp_pk,
@@ -277,7 +277,7 @@ class KlassengrenzenVaststellenRkBkTeamsView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            comp_pk = int(kwargs['comp_pk'][:6])      # afkappen voor de veiligheid
+            comp_pk = int(kwargs['comp_pk'][:7])      # afkappen voor de veiligheid
             comp = (Competitie
                     .objects
                     .get(pk=comp_pk))
@@ -317,7 +317,7 @@ class KlassengrenzenVaststellenRkBkTeamsView(UserPassesTestMixin, TemplateView):
         """
 
         try:
-            comp_pk = int(kwargs['comp_pk'][:6])      # afkappen voor de veiligheid
+            comp_pk = int(kwargs['comp_pk'][:7])      # afkappen voor de veiligheid
             comp = (Competitie
                     .objects
                     .get(pk=comp_pk))
@@ -431,7 +431,7 @@ class DoorzettenBasisView(UserPassesTestMixin, TemplateView):
 
     def _get_competitie(self, comp_pk_str):
         try:
-            comp_pk = int(comp_pk_str[:6])  # afkappen voor de veiligheid
+            comp_pk = int(comp_pk_str[:7])  # afkappen voor de veiligheid
             comp = (Competitie
                     .objects
                     .get(pk=comp_pk,

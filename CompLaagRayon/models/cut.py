@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import models
-from Competitie.models import CompetitieIndivKlasse
+from Competitie.models import CompetitieIndivKlasse, CompetitieTeamKlasse
 from .kampioenschap import KampRK
 
 
@@ -28,8 +28,32 @@ class CutRK(models.Model):
         return "%s - %s: %s" % (self.kamp, self.indiv_klasse.beschrijving, self.limiet)
 
     class Meta:
-        verbose_name = "Cut RK"
-        verbose_name_plural = "Cuts RK"
+        verbose_name = "Cut RK indiv"
+        verbose_name_plural = "Cuts RK indiv"
+
+
+class CutTeamRK(models.Model):
+    """ Deze database tabel bevat de limieten voor het aantal teams in een wedstrijdklasse.
+        De RKO kan dit bijstellen specifiek voor zijn RK.
+    """
+
+    # voor welk kampioenschap
+    kamp = models.ForeignKey(KampRK, on_delete=models.CASCADE)
+
+    # voor welke klasse is deze limiet
+    team_klasse = models.ForeignKey(CompetitieTeamKlasse, on_delete=models.CASCADE)
+
+    # maximum aantal deelnemers in deze klasse
+    limiet = models.PositiveSmallIntegerField(default=8)
+
+    def __str__(self):
+        """ geef een tekstuele afkorting van dit object, voor in de admin interface """
+        return "%s - %s: %s" % (self.kamp, self.team_klasse.beschrijving, self.limiet)
+
+    class Meta:
+        verbose_name = "Cut RK teams"
+        verbose_name_plural = "Cuts RK teams"
+
 
 
 # end of file

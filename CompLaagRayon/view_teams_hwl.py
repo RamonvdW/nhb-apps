@@ -91,7 +91,7 @@ class TeamsRkView(UserPassesTestMixin, TemplateView):
     def _get_deelkamp_rk(self, deelkamp_pk) -> KampRK:
         # haal de gevraagde kampioenschap op
         try:
-            deelkamp_pk = int(deelkamp_pk[:6])  # afkappen voor de veiligheid
+            deelkamp_pk = int(deelkamp_pk[:7])  # afkappen voor de veiligheid
             deelkamp = (KampRK
                         .objects
                         .select_related('competitie',
@@ -232,7 +232,7 @@ class WijzigRKTeamsView(UserPassesTestMixin, TemplateView):
     def _get_deelkamp_rk(self, deelkamp_pk) -> KampRK:
         # haal de gevraagde kampioenschap op
         try:
-            deelkamp_pk = int(deelkamp_pk[:6])     # afkappen voor de veiligheid
+            deelkamp_pk = int(deelkamp_pk[:7])     # afkappen voor de veiligheid
             deelkamp = (KampRK
                         .objects
                         .select_related('competitie',
@@ -274,7 +274,7 @@ class WijzigRKTeamsView(UserPassesTestMixin, TemplateView):
         # for
 
         try:
-            rk_team_pk = int(kwargs['rk_team_pk'][:6])      # afkappen voor de veiligheid
+            rk_team_pk = int(kwargs['rk_team_pk'][:7])      # afkappen voor de veiligheid
             rk_team = (TeamRK
                        .objects
                        .get(pk=rk_team_pk,
@@ -320,7 +320,7 @@ class WijzigRKTeamsView(UserPassesTestMixin, TemplateView):
         ver = self.functie_nu.vereniging
 
         try:
-            rk_team_pk = int(kwargs['rk_team_pk'][:6])    # afkappen voor de veiligheid
+            rk_team_pk = int(kwargs['rk_team_pk'][:7])    # afkappen voor de veiligheid
         except (ValueError, KeyError):
             raise Http404('Slechte parameter')
 
@@ -435,7 +435,7 @@ class RKTeamsKoppelLedenView(UserPassesTestMixin, TemplateView):
 
         # zoek het rk_team erbij en controleer dat deze bij de vereniging van de beheerder hoort
         try:
-            rk_team_pk = int(kwargs['rk_team_pk'][:6])      # afkappen voor de veiligheid
+            rk_team_pk = int(kwargs['rk_team_pk'][:7])      # afkappen voor de veiligheid
             rk_team = (TeamRK
                        .objects
                        .select_related('kamp',
@@ -585,7 +585,7 @@ class RKTeamsKoppelLedenView(UserPassesTestMixin, TemplateView):
 
         # zoek het team erbij en controleer dat deze bij de vereniging van de beheerder hoort
         try:
-            rk_team_pk = int(kwargs['rk_team_pk'][:6])      # afkappen voor de veiligheid
+            rk_team_pk = int(kwargs['rk_team_pk'][:7])      # afkappen voor de veiligheid
             rk_team = (TeamRK
                        .objects
                        .select_related('kamp',

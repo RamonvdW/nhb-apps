@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -48,8 +48,8 @@ class RegioInstellingenView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            regio_nr = int(kwargs['regio_nr'][:6])  # afkappen voor de veiligheid
-            comp_pk = int(kwargs['comp_pk'][:6])    # afkappen voor de veiligheid
+            regio_nr = int(kwargs['regio_nr'][:7])  # afkappen voor de veiligheid
+            comp_pk = int(kwargs['comp_pk'][:7])    # afkappen voor de veiligheid
             deelcomp = (Regiocompetitie
                         .objects
                         .select_related('competitie',
@@ -129,8 +129,8 @@ class RegioInstellingenView(UserPassesTestMixin, TemplateView):
         """ Deze functie wordt aangeroepen als de knop 'Opslaan' gebruikt wordt door de RCL """
 
         try:
-            regio_nr = int(kwargs['regio_nr'][:6])  # afkappen voor de veiligheid
-            comp_pk = int(kwargs['comp_pk'][:6])    # afkappen voor de veiligheid
+            regio_nr = int(kwargs['regio_nr'][:7])  # afkappen voor de veiligheid
+            comp_pk = int(kwargs['comp_pk'][:7])    # afkappen voor de veiligheid
             deelcomp = (Regiocompetitie
                         .objects
                         .select_related('competitie', 'regio')
@@ -231,7 +231,7 @@ class RegioInstellingenGlobaalView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            comp_pk = int(kwargs['comp_pk'][:6])    # afkappen voor de veiligheid
+            comp_pk = int(kwargs['comp_pk'][:7])    # afkappen voor de veiligheid
             comp = Competitie.objects.get(pk=comp_pk)
         except (ValueError, Competitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')

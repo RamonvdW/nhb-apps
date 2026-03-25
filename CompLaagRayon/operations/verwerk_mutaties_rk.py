@@ -5,8 +5,8 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.utils import timezone
-from Competitie.definities import (DEELNAME_JA, DEELNAME_NEE,
-                                   MUTATIE_KAMP_RK_REINIT_TEST, MUTATIE_KAMP_RK_WIJZIG_CUT,
+from Competitie.definities import (DEELNAME_JA, DEELNAME_NEE, MUTATIE_KAMP_RK_REINIT_TEST,
+                                   MUTATIE_KAMP_RK_WIJZIG_INDIV_CUT, MUTATIE_KAMP_RK_WIJZIG_TEAMS_CUT,
                                    MUTATIE_KAMP_AANMELDEN_RK_INDIV, MUTATIE_KAMP_AFMELDEN_RK_INDIV,
                                    MUTATIE_EXTRA_RK_DEELNEMER, MUTATIE_KAMP_RK_TEAMS_NUMMEREN)
 from Competitie.models import CompetitieMutatie, RegiocompetitieSporterBoog
@@ -14,7 +14,7 @@ from CompKampioenschap.operations import (VerwerkCompKampMutaties, bepaal_kamp_i
                                           kamp_deelnemer_afmelden, kamp_deelnemer_opnieuw_aanmelden,
                                           _indiv_verlaag_cut, _indiv_verhoog_cut,
                                           maak_mutatie_update_dirty_wedstrijdformulieren, zet_dirty)
-from CompLaagRayon.models import KampRK, DeelnemerRK, TeamRK, CutRK
+from CompLaagRayon.models import KampRK, DeelnemerRK, TeamRK, CutRK, CutTeamRK
 
 
 class VerwerkMutatiesRayon:
@@ -209,8 +209,8 @@ class VerwerkMutatiesRayon:
             bepaal_kamp_indiv_deelnemerslijst(deelkamp, deelnemer.indiv_klasse, zet_boven_cut_op_ja=False)
         # for
 
-    def _verwerk_mutatie_kamp_rk_wijzig_cut(self, mutatie: CompetitieMutatie):
-        self.stdout.write('[INFO] Verwerk mutatie %s: aangepaste limiet (cut)' % mutatie.pk)
+    def _verwerk_mutatie_kamp_rk_wijzig_indiv_cut(self, mutatie: CompetitieMutatie):
+        self.stdout.write('[INFO] Verwerk mutatie %s: aangepaste indiv cut' % mutatie.pk)
 
         cut_oud = mutatie.cut_oud
         cut_nieuw = mutatie.cut_nieuw
@@ -255,8 +255,21 @@ class VerwerkMutatiesRayon:
         # else: cut_oud == cut_nieuw --> doe niets
         #   (dit kan voorkomen als 2 gebruikers tegelijkertijd de cut veranderen)
 
+    def _verwerk_mutatie_kamp_rk_wijzig_teams_cut(self, mutatie: CompetitieMutatie):
+        self.stdout.write('[INFO] Verwerk mutatie %s: RK teams cut aanpassen' % mutatie.pk)
+
+        limiet, _ = CutTeamRK.objects.get_or_create(kamp=mutatie.kamp_rk, team_klasse=mutatie.team_klasse)
+
+        if mutatie.cut_nieuw in (4, 8):
+            limiet.limiet = mutatie.cut_nieuw
+            limiet.save()
+
+        self.stdout.write('[INFO] RK teams limiet is nu %s voor klasse %s' % (limiet.limiet,
+                                                                              limiet.team_klasse.beschrijving))
+
     HANDLERS = {
-        MUTATIE_KAMP_RK_WIJZIG_CUT: _verwerk_mutatie_kamp_rk_wijzig_cut,
+        MUTATIE_KAMP_RK_WIJZIG_INDIV_CUT: _verwerk_mutatie_kamp_rk_wijzig_indiv_cut,
+        MUTATIE_KAMP_RK_WIJZIG_TEAMS_CUT: _verwerk_mutatie_kamp_rk_wijzig_teams_cut,
         MUTATIE_EXTRA_RK_DEELNEMER: _verwerk_mutatie_extra_rk_deelnemer,
         MUTATIE_KAMP_RK_TEAMS_NUMMEREN: _verwerk_mutatie_rk_teams_opnieuw_nummeren,
         MUTATIE_KAMP_AANMELDEN_RK_INDIV: _verwerk_mutatie_kamp_aanmelden_rk_indiv,

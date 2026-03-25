@@ -7,8 +7,8 @@
 """ helper functies die een CompetitieMutatie aanmaken en de achtergrondtaak vragen deze te verwerken """
 
 from Competitie.models import CompetitieMutatie, CompetitieIndivKlasse, CompetitieTeamKlasse
-from Competitie.definities import (MUTATIE_KAMP_RK_WIJZIG_CUT, MUTATIE_KAMP_RK_TEAMS_NUMMEREN,
-                                   MUTATIE_EXTRA_RK_DEELNEMER,
+from Competitie.definities import (MUTATIE_KAMP_RK_WIJZIG_INDIV_CUT, MUTATIE_KAMP_RK_WIJZIG_TEAMS_CUT,
+                                   MUTATIE_KAMP_RK_TEAMS_NUMMEREN, MUTATIE_EXTRA_RK_DEELNEMER,
                                    MUTATIE_KAMP_AANMELDEN_RK_INDIV, MUTATIE_KAMP_AFMELDEN_RK_INDIV)
 from Competitie.operations.ping_achtergrondtaak import ping_competitie_achtergrondtaak
 from CompLaagRayon.models import KampRK, DeelnemerRK
@@ -34,17 +34,37 @@ def maak_mutatie_kamp_afmelden_rk_indiv(deelnemer: DeelnemerRK, door_str: str, s
     ping_competitie_achtergrondtaak(mutatie, snel)
 
 
-def maak_mutatie_kamp_rk_wijzig_cut(deelkamp: KampRK,
-                                    wijzigingen: list[tuple[CompetitieIndivKlasse, int, int]],
-                                    door_str: str, snel: bool):
+def maak_mutatie_kamp_rk_wijzig_indiv_cut(deelkamp: KampRK,
+                                          wijzigingen: list[tuple[CompetitieIndivKlasse, int, int]],
+                                          door_str: str, snel: bool):
     # wijzigingen = list of tuples (indiv_klasse, oude_limiet, nieuwe_limiet)
     mutatie = None
     for indiv_klasse, oude_limiet, nieuwe_limiet in wijzigingen:
         mutatie = CompetitieMutatie.objects.create(
-                            mutatie=MUTATIE_KAMP_RK_WIJZIG_CUT,
+                            mutatie=MUTATIE_KAMP_RK_WIJZIG_INDIV_CUT,
                             door=door_str,
                             kamp_rk=deelkamp,
                             indiv_klasse=indiv_klasse,
+                            cut_oud=oude_limiet,
+                            cut_nieuw=nieuwe_limiet)
+    # for
+
+    # wacht tot de achtergrondtaak de laatste mutatie verwerkt heeft (maximaal 3 seconden)
+    if mutatie:
+        ping_competitie_achtergrondtaak(mutatie, snel)
+
+
+def maak_mutatie_kamp_rk_wijzig_teams_cut(deelkamp: KampRK,
+                                          wijzigingen: list[tuple[CompetitieTeamKlasse, int, int]],
+                                          door_str: str, snel: bool):
+    # wijzigingen = list of tuples (team_klasse, oude_limiet, nieuwe_limiet)
+    mutatie = None
+    for team_klasse, oude_limiet, nieuwe_limiet in wijzigingen:
+        mutatie = CompetitieMutatie.objects.create(
+                            mutatie=MUTATIE_KAMP_RK_WIJZIG_TEAMS_CUT,
+                            door=door_str,
+                            kamp_rk=deelkamp,
+                            team_klasse=team_klasse,
                             cut_oud=oude_limiet,
                             cut_nieuw=nieuwe_limiet)
     # for

@@ -47,7 +47,7 @@ class RkMatchInfoView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            match_pk = int(kwargs['match_pk'][:6])      # afkappen voor de veiligheid
+            match_pk = int(kwargs['match_pk'][:7])      # afkappen voor de veiligheid
             match = (CompetitieMatch
                      .objects
                      .select_related('vereniging',

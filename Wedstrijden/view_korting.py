@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2025 Ramon van der Winkel.
+#  Copyright (c) 2021-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -178,7 +178,7 @@ class WijzigKortingView(UserPassesTestMixin, View):
         context['ver'] = ver
 
         try:
-            korting_pk = kwargs['korting_pk'][:6]       # afkappen voor de veiligheid
+            korting_pk = kwargs['korting_pk'][:7]       # afkappen voor de veiligheid
             korting_pk = int(korting_pk)
             korting = (WedstrijdKorting
                        .objects
@@ -253,7 +253,7 @@ class WijzigKortingView(UserPassesTestMixin, View):
         onze_ver = self.functie_nu.vereniging
 
         try:
-            korting_pk = kwargs['korting_pk'][:6]       # afkappen voor de veiligheid
+            korting_pk = kwargs['korting_pk'][:7]       # afkappen voor de veiligheid
             korting_pk = int(korting_pk)
             korting = WedstrijdKorting.objects.get(pk=korting_pk,
                                                    uitgegeven_door=onze_ver)

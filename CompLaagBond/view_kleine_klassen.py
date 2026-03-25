@@ -47,7 +47,7 @@ class KleineKlassenBkIndivView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            deelkamp_pk = int(kwargs['deelkamp_pk'][:6])  # afkappen voor de veiligheid
+            deelkamp_pk = int(kwargs['deelkamp_pk'][:7])  # afkappen voor de veiligheid
             deelkamp = (KampBK
                         .objects
                         .select_related('competitie',
@@ -185,7 +185,7 @@ class VerplaatsDeelnemerBkView(UserPassesTestMixin, View):
             raise Http404('Geen valide verzoek')
 
         try:
-            deelnemer_pk = int(str(data['deelnemer'])[:6])       # afkappen voor de veiligheid
+            deelnemer_pk = int(str(data['deelnemer'])[:7])       # afkappen voor de veiligheid
             deelnemer = (DeelnemerBK
                          .objects
                          .select_related('kamp',
@@ -208,7 +208,7 @@ class VerplaatsDeelnemerBkView(UserPassesTestMixin, View):
             raise Http404('Verkeerde competitie fase')
 
         try:
-            klasse_pk = int(str(data['klasse'])[:6])        # afkappen voor de veiligheid
+            klasse_pk = int(str(data['klasse'])[:7])        # afkappen voor de veiligheid
             klasse = (CompetitieIndivKlasse
                       .objects
                       .get(pk=klasse_pk,

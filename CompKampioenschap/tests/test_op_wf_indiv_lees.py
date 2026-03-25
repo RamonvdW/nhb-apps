@@ -1298,7 +1298,7 @@ class TestCompKampioenschapOpWfIndivLees(E2EHelpers, TestCase):
 
         self.assertTrue(lees.heeft_uitslag())
         res = lees.get_indiv_finales_uitslag()
-        print(repr(res))
+        # print(repr(res))
 
         # extra coverage
         LeesIndivWedstrijdFormulier(stdout, self.bestand18, my_sheet, lees_oppervlakkig=True)
@@ -1428,7 +1428,7 @@ class TestCompKampioenschapOpWfIndivLees(E2EHelpers, TestCase):
 
         self.assertTrue(lees.heeft_uitslag())
         res = lees.get_indiv_finales_uitslag()
-        print(repr(res))
+        # print(repr(res))
 
         # extra coverage
         LeesIndivWedstrijdFormulier(stdout, self.bestand18, my_sheet, lees_oppervlakkig=True)

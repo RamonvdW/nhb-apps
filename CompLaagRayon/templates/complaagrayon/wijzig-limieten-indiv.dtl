@@ -7,7 +7,7 @@
 {% load static %}
 {% load design_icons %}
 
-{% block title %}RK limieten{% endblock %}
+{% block title %}RK individuele limieten{% endblock %}
 
 {% block pagina %}
 
@@ -25,22 +25,14 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">RK limieten</h3>
-            <p>De cut' instellen voor elke wedstrijdklasse van jouw RK.<br>Hiermee begrens je het aantal deelnemers dat uitgenodigd wordt.</p>
+            <h3 class="page-banner">RK individuele limieten</h3>
+            <p>De cut' instellen voor elke individuele wedstrijdklasse van jouw RK.<br>Hiermee begrens je het aantal deelnemers dat uitgenodigd wordt.</p>
         </div>
     </div>
 
 
     <form action="{{ url_opslaan }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
         {% csrf_token %}
-
-        <!-- witruimte -->
-        <div class="row center">
-            <div class="col s12">
-                <h4>Individueel</h4>
-            </div>
-        </div>
-
 
         <!-- blauwe balk met dialoog venster -->
         <div class="row-sv-blauw">
@@ -61,12 +53,12 @@
                                     <td>{{ wkl.beschrijving }}</td>
                                     <td>
                                         <select name="{{ wkl.sel }}" onchange="gewijzigd()">
-                                            <option value="24"{%if wkl.limiet == 24 %} selected{% endif %}>24 sporters (standaard)</option>
-                                            <option value="20"{%if wkl.limiet == 20 %} selected{% endif %}>20 sporters</option>
-                                            <option value="16"{%if wkl.limiet == 16 %} selected{% endif %}>16 sporters</option>
-                                            <option value="12"{%if wkl.limiet == 12 %} selected{% endif %}>12 sporters</option>
-                                            <option value="8"{%if wkl.limiet == 8 %} selected{% endif %}>8 sporters</option>
-                                            <option value="4"{%if wkl.limiet == 4 %} selected{% endif %}>4 sporters</option>
+                                            <option value="24"{% if wkl.limiet == 24 %} selected{% endif %}>24 sporters (standaard)</option>
+                                            <option value="20"{% if wkl.limiet == 20 %} selected{% endif %}>20 sporters</option>
+                                            <option value="16"{% if wkl.limiet == 16 %} selected{% endif %}>16 sporters</option>
+                                            <option value="12"{% if wkl.limiet == 12 %} selected{% endif %}>12 sporters</option>
+                                            <option value="8"{% if wkl.limiet == 8 %} selected{% endif %}>8 sporters</option>
+                                            <option value="4"{% if wkl.limiet == 4 %} selected{% endif %}>4 sporters</option>
                                         </select>
                                     </td>
                                 </tr>
@@ -85,6 +77,6 @@
         </div>
     </form>
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="complaagrayon-wijzig-limieten-rk" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="complaagrayon-wijzig-limieten-indiv" %}
 
 {% endblock %}

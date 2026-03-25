@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2025 Ramon van der Winkel.
+#  Copyright (c) 2020-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -46,7 +46,7 @@ class WaarschijnlijkeDeelnemersView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            match_pk = int(kwargs['match_pk'][:6])      # afkappen voor de veiligheid
+            match_pk = int(kwargs['match_pk'][:7])      # afkappen voor de veiligheid
             match = (CompetitieMatch
                      .objects
                      .select_related('vereniging')
@@ -140,7 +140,7 @@ class WaarschijnlijkeDeelnemersAlsBestandView(UserPassesTestMixin, TemplateView)
         """ Afhandelen van de GET request waarmee we een bestand terug geven. """
 
         try:
-            match_pk = int(kwargs['match_pk'][:6])      # afkappen voor de veiligheid
+            match_pk = int(kwargs['match_pk'][:7])      # afkappen voor de veiligheid
             match = (CompetitieMatch
                      .objects
                      .select_related('vereniging')

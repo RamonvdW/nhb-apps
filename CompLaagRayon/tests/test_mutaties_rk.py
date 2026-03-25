@@ -8,7 +8,7 @@ from django.test import TestCase
 from django.core import management
 from BasisTypen.models import BoogType
 from Competitie.definities import (MUTATIE_KAMP_RK_REINIT_TEST, MUTATIE_COMPETITIE_OPSTARTEN, MUTATIE_AG_VASTSTELLEN,
-                                   MUTATIE_KAMP_RK_WIJZIG_CUT, MUTATIE_KAMP_AFMELDEN_RK_INDIV,
+                                   MUTATIE_KAMP_RK_WIJZIG_CUT_INDIV, MUTATIE_KAMP_AFMELDEN_RK_INDIV,
                                    DEELNAME_ONBEKEND, DEELNAME_JA, DEELNAME_NEE)
 from Competitie.models import Competitie, CompetitieIndivKlasse, CompetitieMutatie
 from Competitie.test_utils.tijdlijn import (zet_competitie_fases, zet_competitie_fase_regio_wedstrijden,
@@ -102,9 +102,10 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
                     .filter(indiv_klasse=klasse)
                     .select_related('sporterboog__sporter')
                     .order_by('volgorde')):
-            print('  rank=%s, volgorde=%s, sporterboog_pk=%s, boog=%s, lid_nr=%s, gem=%s, deelname=%s, label=%s' % (
-                    obj.rank, obj.volgorde, obj.sporterboog.pk, obj.sporterboog.boogtype.afkorting,
-                    obj.sporterboog.sporter.lid_nr, obj.gemiddelde, obj.deelname, obj.kampioen_label))
+            print('  rank=%s, volgorde=%s, klasse=%s, sporterboog_pk=%s, boog=%s, lid_nr=%s, regio=%s, gem=%s, deelname=%s, label=%s' % (
+                    obj.rank, obj.volgorde, obj.indiv_klasse.pk, obj.sporterboog.pk, obj.sporterboog.boogtype.afkorting,
+                    obj.sporterboog.sporter.lid_nr, obj.bij_vereniging.regio.regio_nr,
+                    obj.gemiddelde, obj.deelname, obj.kampioen_label))
             if para_info:
                 v = SporterVoorkeuren.objects.get(sporter=obj.sporterboog.sporter)
                 print('  voorwerpen=%s, opmerking=%s' % (v.para_voorwerpen, v.opmerking_para_sporter))
@@ -112,8 +113,8 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
 
     def _dump_deelnemers(self, alle_klassen=False, para_info=False):                # pragma: no cover
         if alle_klassen:
-            for temp in DeelnemerRK.objects.distinct('klasse'):
-                self._dump_klasse_deelnemers(temp.klasse, para_info)
+            for temp in DeelnemerRK.objects.distinct('indiv_klasse'):
+                self._dump_klasse_deelnemers(temp.indiv_klasse, para_info)
             # for
         else:
             self._dump_klasse_deelnemers(self.klasse, para_info)
@@ -164,16 +165,15 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         self.assertEqual(rank, rank_ok)
 
     def test_begin_rk(self):
-        # competitie is doorgezet - controleer de lijst deelnemers
-
-        # 4 regio's met 6 sporters waarvan 1 met te weinig scores
         self.e2e_login_and_pass_otp(self.account_bko)
         self.e2e_wissel_naar_functie(self.functie_bko)
         self.e2e_wissel_naar_functie(self.functie_rko)
 
+        # competitie is doorgezet - controleer de lijst deelnemers
+        # 4 regio's met 6 sporters waarvan 1 met te weinig scores
         self.assertTrue(DeelnemerRK.objects.count() > 0)
-        # self._dump_deelnemers()
 
+        # self._dump_deelnemers(alle_klassen=True)
         self.assertEqual(60, DeelnemerRK.objects.filter(indiv_klasse=self.klasse).count())
 
         self._check_volgorde_en_rank()
@@ -197,6 +197,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_bko)
         self.e2e_wissel_naar_functie(self.functie_bko)
         self.e2e_wissel_naar_functie(self.functie_rko)
+
         self.assertTrue(DeelnemerRK.objects.count() > 0)
         # self._dump_deelnemers()
 
@@ -234,11 +235,24 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         # self._dump_deelnemers()
         self._check_volgorde_en_rank()
 
-        # nu zonder limiet
+        # nog een keer, nu zonder limiet
         CutRK.objects.all().delete()
+
+        # geef drie regio deelnemers het kampioen label
+        qset = DeelnemerRK.objects.filter(indiv_klasse=self.klasse)
+        self.assertEqual(qset.exclude(kampioen_label='').count(), 4)
+        for deelnemer in qset.order_by('-gemiddelde')[:3]:
+            deelnemer.kampioen_label = 'Kampioen regio XXX'
+            deelnemer.save(update_fields=['kampioen_label'])
+        # for
+
         CompetitieMutatie(mutatie=MUTATIE_KAMP_RK_REINIT_TEST,
                           kamp_rk=self.deelkamp_rk).save()
         self.verwerk_competitie_mutaties()
+        # self._dump_deelnemers()
+
+        qset = DeelnemerRK.objects.filter(indiv_klasse=self.klasse)
+        self.assertEqual(qset.exclude(kampioen_label='').count(), 6)
 
     def test_rko_bevestigen(self):
         # bevestig deelname door een sporter en een reserve
@@ -887,7 +901,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         mutatie.mutatie = MUTATIE_KAMP_RK_REINIT_TEST
         self.assertTrue(str(mutatie) != "")     # wel een beschrijving
 
-        mutatie.mutatie = MUTATIE_KAMP_RK_WIJZIG_CUT
+        mutatie.mutatie = MUTATIE_KAMP_RK_WIJZIG_CUT_INDIV
         self.assertTrue(str(mutatie) != "")     # wel een beschrijving
 
         mutatie.mutatie = MUTATIE_KAMP_AFMELDEN_RK_INDIV
@@ -903,14 +917,14 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
                           door='Tester').save()
 
         # mutatie nieuw record van 24 wordt niet opgeslagen
-        CompetitieMutatie(mutatie=MUTATIE_KAMP_RK_WIJZIG_CUT,
+        CompetitieMutatie(mutatie=MUTATIE_KAMP_RK_WIJZIG_CUT_INDIV,
                           kamp_rk=self.deelkamp_rk,
                           indiv_klasse=self.klasse,
                           cut_oud=23,
                           cut_nieuw=24,  # verwijder oude record
                           door='Tester').save()
 
-        CompetitieMutatie(mutatie=MUTATIE_KAMP_RK_WIJZIG_CUT,
+        CompetitieMutatie(mutatie=MUTATIE_KAMP_RK_WIJZIG_CUT_INDIV,
                           kamp_rk=self.deelkamp_rk,
                           indiv_klasse=self.klasse,
                           cut_oud=23,
@@ -918,7 +932,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
                           door='Tester').save()
 
         # mutatie die geen wijziging is
-        CompetitieMutatie(mutatie=MUTATIE_KAMP_RK_WIJZIG_CUT,
+        CompetitieMutatie(mutatie=MUTATIE_KAMP_RK_WIJZIG_CUT_INDIV,
                           kamp_rk=self.deelkamp_rk,
                           indiv_klasse=self.klasse,
                           cut_oud=24,

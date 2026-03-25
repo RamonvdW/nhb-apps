@@ -206,28 +206,28 @@ class TestCompKampioenschapOpLeesTeamsExcel(E2EHelpers, TestCase):
             'C46': None
         })
         sheet_stand = self._make_sheet({
-            'B8': 'Team 1',         # team naam
-            'D8': '20',             # matchpunten
+            'C8': 'Team 1',         # team naam
+            'E8': '20',             # matchpunten
             'F8': None,             # shootoff
 
-            'B9': 'Team 2',
-            'D9': '18',
+            'C9': 'Team 2',
+            'E9': '18',
             'F9': '27',
 
-            'B10': 'Team 3',
-            'D10': '18',
+            'C10': 'Team 3',
+            'E10': '18',
             'F10': '26',
 
-            'B11': 'Fout',
-            'D11': 'x10',
+            'C11': 'Fout',
+            'E11': 'x10',
 
-            'B12': 'Fout',
-            'D12': '10',
+            'C12': 'Fout',
+            'E12': '10',
             'F12': 'x10',
 
-            'B13': '',
-            'B14': '',
-            'B15': '',
+            'C13': '',
+            'C14': '',
+            'C15': '',
         })
         prg = {
             'Stand': sheet_stand,

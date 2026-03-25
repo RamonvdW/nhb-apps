@@ -43,7 +43,7 @@ class WijzigStatusBkDeelnemerView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            deelnemer_pk = int(kwargs['deelnemer_pk'][:6])  # afkappen voor de veiligheid
+            deelnemer_pk = int(kwargs['deelnemer_pk'][:7])  # afkappen voor de veiligheid
             deelnemer = (DeelnemerBK
                          .objects
                          .select_related('kamp',
@@ -90,7 +90,7 @@ class WijzigStatusBkDeelnemerView(UserPassesTestMixin, TemplateView):
     def post(self, request, *args, **kwargs):
         """ wordt aangeroepen als de beheerder op de knop OPSLAAN drukt """
         try:
-            deelnemer_pk = int(kwargs['deelnemer_pk'][:6])  # afkappen voor de veiligheid
+            deelnemer_pk = int(kwargs['deelnemer_pk'][:7])  # afkappen voor de veiligheid
             deelnemer = (DeelnemerBK
                          .objects
                          .select_related('kamp',

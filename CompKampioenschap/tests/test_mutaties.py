@@ -437,6 +437,6 @@ class TestCompKampioenschapMutaties(E2EHelpers, TestCase):
 
         for mutatie in CompetitieMutatie.objects.all():
             verwerk.verwerk(mutatie)
-        print(stdout.getvalue())
+        # print(stdout.getvalue())
 
         # end of file

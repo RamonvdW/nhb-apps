@@ -4,29 +4,29 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.conf import settings
 from django.urls import reverse
 from django.http import HttpResponseRedirect, Http404
-from django.views.generic import TemplateView, View
+from django.views.generic import TemplateView
+from django.core.exceptions import PermissionDenied
 from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
-from Competitie.models import CompetitieIndivKlasse, CompetitieTeamKlasse
-from CompLaagBond.models import KampBK, CutBK
-from CompLaagBond.operations import maak_mutatie_kamp_bk_wijzig_cut
+from Competitie.models import CompetitieIndivKlasse
+from CompLaagRayon.models import KampRK, CutRK
+from CompLaagRayon.operations import maak_mutatie_kamp_rk_wijzig_indiv_cut
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
 from Logboek.models import schrijf_in_logboek
 
-TEMPLATE_COMPLAAGBOND_WIJZIG_LIMIETEN = 'complaagbond/wijzig-limieten.dtl'
+TEMPLATE_COMPRAYON_WIJZIG_LIMIETEN_INDIV = 'complaagrayon/wijzig-limieten-indiv.dtl'
 
 
-class WijzigLimietenView(UserPassesTestMixin, TemplateView):
+class WijzigIndivLimietenView(UserPassesTestMixin, TemplateView):
 
-    """ Deze view laat de BKO de status van een BK selectie aanpassen """
+    """ Deze view laat de RKO de limiet van individuele wedstrijdklassen aanpassen """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_COMPLAAGBOND_WIJZIG_LIMIETEN
+    template_name = TEMPLATE_COMPRAYON_WIJZIG_LIMIETEN_INDIV
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
     permission_denied_message = 'Geen toegang'
 
@@ -37,7 +37,7 @@ class WijzigLimietenView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu == Rol.ROL_BKO
+        return self.rol_nu == Rol.ROL_RKO
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -45,36 +45,25 @@ class WijzigLimietenView(UserPassesTestMixin, TemplateView):
 
         try:
             deelkamp_pk = int(kwargs['deelkamp_pk'][:7])  # afkappen voor de veiligheid
-            deelkamp = (KampBK
+            deelkamp = (KampRK
                         .objects
                         .select_related('competitie')
                         .get(pk=deelkamp_pk))
-        except (ValueError, KampBK.DoesNotExist):
+        except (ValueError, KampRK.DoesNotExist):
             raise Http404('Kampioenschap niet gevonden')
 
-        # controleer dat de juiste BKO aan de knoppen zit
+        # controleer dat de juiste RKO aan de knoppen zit
         if self.functie_nu != deelkamp.functie:
-            raise Http404('Niet de beheerder')
+            raise PermissionDenied('Niet de beheerder')     # niet de juiste RKO
 
         comp = deelkamp.competitie
-        if comp.is_25m1pijl():
-            indiv_limieten = settings.COMPETITIE_25M_INDIV_LIMIETEN
-        else:
-            indiv_limieten = settings.COMPETITIE_18M_INDIV_LIMIETEN
-
-        context['indiv_limieten'] = indiv_limieten
+        comp.bepaal_fase()
 
         context['wkl_indiv'] = wkl_indiv = (CompetitieIndivKlasse
                                             .objects
-                                            .filter(competitie=deelkamp.competitie,
+                                            .filter(competitie=comp,
                                                     is_ook_voor_rk_bk=True)
                                             .select_related('boogtype')
-                                            .order_by('volgorde'))
-
-        context['wkl_teams'] = wkl_teams = (CompetitieTeamKlasse
-                                            .objects
-                                            .filter(competitie=deelkamp.competitie,
-                                                    is_voor_teams_rk_bk=True)
                                             .order_by('volgorde'))
 
         # zet de default limieten
@@ -85,17 +74,8 @@ class WijzigLimietenView(UserPassesTestMixin, TemplateView):
             pk2wkl_indiv[wkl.pk] = wkl
         # for
 
-        pk2wkl_team = dict()
-        for wkl in wkl_teams:
-            # ERE klasse: 12 teams
-            # overige: 8 teams
-            wkl.limiet = 12 if "ERE" in wkl.beschrijving else 8
-            wkl.sel = 'tsel_%s' % wkl.pk
-            pk2wkl_team[wkl.pk] = wkl
-        # for
-
         # aanvullen met de opgeslagen limieten
-        for limiet in (CutBK
+        for limiet in (CutRK
                        .objects
                        .select_related('indiv_klasse')
                        .filter(kamp=deelkamp,
@@ -104,15 +84,15 @@ class WijzigLimietenView(UserPassesTestMixin, TemplateView):
             wkl.limiet = limiet.limiet
         # for
 
-        context['url_opslaan'] = reverse('CompLaagBond:wijzig-limieten',
-                                         kwargs={'deelkamp_pk': deelkamp.pk})
+        if comp.fase_indiv < 'L':
+            context['url_opslaan'] = reverse('CompLaagRayon:indiv-limieten',
+                                             kwargs={'deelkamp_pk': deelkamp.pk})
 
-        comp = deelkamp.competitie
         context['kruimels'] = (
             (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
             (reverse('CompBeheer:overzicht',
                      kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
-            (None, 'BK limieten')
+            (None, 'RK individuele limieten')
         )
 
         return context
@@ -122,22 +102,21 @@ class WijzigLimietenView(UserPassesTestMixin, TemplateView):
 
         try:
             deelkamp_pk = int(kwargs['deelkamp_pk'][:7])  # afkappen voor de veiligheid
-            deelkamp = (KampBK
+            deelkamp = (KampRK
                         .objects
                         .select_related('competitie')
                         .get(pk=deelkamp_pk))
-        except (ValueError, KampBK.DoesNotExist):
+        except (ValueError, KampRK.DoesNotExist):
             raise Http404('Kampioenschap niet gevonden')
 
-        # controleer dat de BKO aan de knoppen zit
+        # controleer dat de juiste RKO aan de knoppen zit
         if self.functie_nu != deelkamp.functie:
-            raise Http404('Niet de beheerder')
+            raise PermissionDenied('Niet de beheerder')     # niet de juiste RKO
 
         comp = deelkamp.competitie
-        if comp.is_25m1pijl():
-            indiv_limieten = settings.COMPETITIE_25M_INDIV_LIMIETEN
-        else:
-            indiv_limieten = settings.COMPETITIE_18M_INDIV_LIMIETEN
+        comp.bepaal_fase()
+        if comp.fase_indiv >= 'L':
+            raise Http404('Wijzigingen kan niet meer')
 
         pk2ckl_indiv = dict()
         pk2keuze_indiv = dict()
@@ -156,13 +135,13 @@ class WijzigLimietenView(UserPassesTestMixin, TemplateView):
                 except ValueError:
                     pass
                 else:
-                    if pk2keuze_indiv[ckl.pk] not in indiv_limieten:
-                        raise Http404('Geen valide keuze voor indiv limiet')
+                    if pk2keuze_indiv[ckl.pk] not in (24, 20, 16, 12, 8, 4):
+                        raise Http404('Geen valide keuze voor indiv')
         # for
 
         wijzig_limiet_indiv = list()     # list of tup(indiv_klasse, nieuwe_limiet, oude_limiet)
 
-        for limiet in (CutBK
+        for limiet in (CutRK
                        .objects
                        .select_related('indiv_klasse')
                        .filter(kamp=deelkamp,
@@ -180,7 +159,7 @@ class WijzigLimietenView(UserPassesTestMixin, TemplateView):
         for pk, keuze in pk2keuze_indiv.items():
             try:
                 indiv_klasse = pk2ckl_indiv[pk]
-            except KeyError:        # pragma: no cover
+            except KeyError:
                 pass
             else:
                 # indiv klasse
@@ -191,10 +170,10 @@ class WijzigLimietenView(UserPassesTestMixin, TemplateView):
 
         # laat opnieuw de deelnemers boven de cut bepalen en sorteer op gemiddelde
         door_account = get_account(request)
-        door_str = "BKO %s" % door_account.volledige_naam()
+        door_str = "RKO %s" % door_account.volledige_naam()
         door_str = door_str[:149]
 
-        mutatie_lijst = list()
+        mutaties = list()
 
         for indiv_klasse, nieuwe_limiet, oude_limiet in wijzig_limiet_indiv:
             # schrijf in het logboek
@@ -204,15 +183,14 @@ class WijzigLimietenView(UserPassesTestMixin, TemplateView):
                 schrijf_in_logboek(door_account, "Competitie", msg)
 
                 tup = (indiv_klasse, oude_limiet, nieuwe_limiet)
-                mutatie_lijst.append(tup)
+                mutaties.append(tup)
         # for
 
-        snel = str(request.POST.get('snel', ''))[:1]  # voor autotest
+        snel = str(request.POST.get('snel', ''))[:1]        # voor autotest
 
-        maak_mutatie_kamp_bk_wijzig_cut(deelkamp, mutatie_lijst, door_str, snel == '1')
+        maak_mutatie_kamp_rk_wijzig_indiv_cut(deelkamp, mutaties, door_str, snel == '1')
 
         url = reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk})
-
         return HttpResponseRedirect(url)
 
 

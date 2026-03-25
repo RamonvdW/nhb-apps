@@ -9,7 +9,7 @@ from django.db.models import F
 from BasisTypen.models import TeamType
 from Competitie.models import (CompetitieIndivKlasse, CompetitieTeamKlasse,
                                RegiocompetitieSporterBoog)
-from CompLaagRayon.models import KampRK, DeelnemerRK, TeamRK, CutRK
+from CompLaagRayon.models import KampRK, DeelnemerRK, TeamRK, CutRK, CutTeamRK
 
 
 class CreateOnlyAdmin(admin.ModelAdmin):
@@ -427,10 +427,67 @@ class CutRKAdmin(CreateOnlyAdmin):
     list_select_related = ('kamp',
                            'indiv_klasse')
 
+    def __init__(self, model, admin_site):
+        super().__init__(model, admin_site)
+        self.obj = None
+
+    def get_form(self, request, obj=None, **kwargs):                    # pragma: no cover
+        """ initialisatie van het admin formulier
+            hier "vangen" we het database object waar we mee bezig gaan
+        """
+        if obj:
+            self.obj = obj
+        return super().get_form(request, obj, **kwargs)
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):    # pragma: no cover
+        """ bepaal de relevante keuzemogelijkheden voor specifieke velden
+        """
+        if db_field.name == 'indiv_klasse' and self.obj:
+            # alleen klassen laten kiezen van deze team competitie en rayon
+            kwargs['queryset'] = (CompetitieIndivKlasse
+                                  .objects
+                                  .filter(competitie=self.obj.kamp.competitie,
+                                          is_ook_voor_rk_bk=True)
+                                  .order_by('volgorde'))
+
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
+
+class CutTeamRKAdmin(CreateOnlyAdmin):
+
+    list_select_related = ('kamp',
+                           'team_klasse')
+
+    def __init__(self, model, admin_site):
+        super().__init__(model, admin_site)
+        self.obj = None
+
+    def get_form(self, request, obj=None, **kwargs):                    # pragma: no cover
+        """ initialisatie van het admin formulier
+            hier "vangen" we het database object waar we mee bezig gaan
+        """
+        if obj:
+            self.obj = obj
+        return super().get_form(request, obj, **kwargs)
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):    # pragma: no cover
+        """ bepaal de relevante keuzemogelijkheden voor specifieke velden
+        """
+        if db_field.name == 'team_klasse' and self.obj:
+            # alleen klassen laten kiezen van deze team competitie en rayon
+            kwargs['queryset'] = (CompetitieTeamKlasse
+                                  .objects
+                                  .filter(competitie=self.obj.kamp.competitie,
+                                          is_voor_teams_rk_bk=True)
+                                  .order_by('volgorde'))
+
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
 
 admin.site.register(KampRK, KampRKAdmin)
 admin.site.register(DeelnemerRK, DeelnemerRKAdmin)
 admin.site.register(TeamRK, TeamRKAdmin)
 admin.site.register(CutRK, CutRKAdmin)
+admin.site.register(CutTeamRK, CutTeamRKAdmin)
 
 # end of file

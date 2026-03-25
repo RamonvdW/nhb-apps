@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -624,7 +624,7 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
         """ called by the template system to get the queryset or list of objects for the template """
 
         try:
-            deelcomp_pk = int(self.kwargs['deelcomp_pk'][:6])       # afkappen voor de veiligheid
+            deelcomp_pk = int(self.kwargs['deelcomp_pk'][:7])       # afkappen voor de veiligheid
             deelcomp = (Regiocompetitie
                         .objects
                         .select_related('competitie')
@@ -739,7 +739,7 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
         deelnemer_pk = request.POST.get('toggle_deelnemer_pk', '')
         if deelnemer_pk:
             try:
-                deelnemer_pk = int(deelnemer_pk[:6])        # afkappen voor de veiligheid
+                deelnemer_pk = int(deelnemer_pk[:7])        # afkappen voor de veiligheid
                 deelnemer = (RegiocompetitieSporterBoog
                              .objects
                              .select_related('bij_vereniging',

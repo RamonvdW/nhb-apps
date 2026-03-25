@@ -47,7 +47,7 @@ class RayonTeamsTemplateView(TemplateView):
             context['subset_filter'] = True
 
             try:
-                comp_pk = int(str(kwargs['comp_pk'][:6]))       # afkappen voor de veiligheid
+                comp_pk = int(str(kwargs['comp_pk'][:7]))       # afkappen voor de veiligheid
                 comp = Competitie.objects.get(pk=comp_pk)
             except (ValueError, Competitie.DoesNotExist):
                 raise Http404('Competitie niet gevonden')
@@ -103,7 +103,7 @@ class RayonTeamsTemplateView(TemplateView):
         else:
             # RKO mode
             try:
-                deelkamp_pk = int(kwargs['deelkamp_pk'][:6])    # afkappen voor de veiligheid
+                deelkamp_pk = int(kwargs['deelkamp_pk'][:7])    # afkappen voor de veiligheid
                 deelkamp = (KampRK
                             .objects
                             .select_related('competitie')

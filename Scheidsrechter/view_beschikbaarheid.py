@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023-2025 Ramon van der Winkel.
+#  Copyright (c) 2023-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -53,7 +53,7 @@ class BeschikbaarheidOpvragenView(UserPassesTestMixin, View):
         """
 
         snel = str(request.POST.get('snel', ''))[:1]
-        wedstrijd_pk = request.POST.get('wedstrijd', '')[:6]    # afkappen voor de veiligheid
+        wedstrijd_pk = request.POST.get('wedstrijd', '')[:7]    # afkappen voor de veiligheid
 
         try:
             wedstrijd_pk = int(wedstrijd_pk)
@@ -276,7 +276,7 @@ class WijzigBeschikbaarheidView(UserPassesTestMixin, TemplateView):
 
         for dag in dagen:
             name = 'wedstrijd_%s_dag_%s' % (dag.wedstrijd.pk, dag.dag_offset)
-            keuze = request.POST.get(name, '')[:6]                       # afkappen voor de veiligheid
+            keuze = request.POST.get(name, '')[:3]                       # afkappen voor de veiligheid
             opmerking = request.POST.get(name + '-opmerking', '')[:100]  # afkappen voor de veiligheid
 
             if keuze in ('1', '2', '3'):

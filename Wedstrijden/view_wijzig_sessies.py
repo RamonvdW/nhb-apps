@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2025 Ramon van der Winkel.
+#  Copyright (c) 2021-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -46,7 +46,7 @@ class WedstrijdSessiesView(UserPassesTestMixin, View):
         context = dict()
 
         try:
-            wedstrijd_pk = int(str(kwargs['wedstrijd_pk'])[:6])     # afkappen voor de veiligheid
+            wedstrijd_pk = int(str(kwargs['wedstrijd_pk'])[:7])     # afkappen voor de veiligheid
             wedstrijd = (Wedstrijd
                          .objects
                          .get(pk=wedstrijd_pk))
@@ -224,7 +224,7 @@ class WijzigWedstrijdSessieView(UserPassesTestMixin, View):
         context = dict()
 
         try:
-            wedstrijd_pk = int(str(kwargs['wedstrijd_pk'])[:6])     # afkappen voor de veiligheid
+            wedstrijd_pk = int(str(kwargs['wedstrijd_pk'])[:7])     # afkappen voor de veiligheid
             wedstrijd = (Wedstrijd
                          .objects
                          .get(pk=wedstrijd_pk))
@@ -237,7 +237,7 @@ class WijzigWedstrijdSessieView(UserPassesTestMixin, View):
         context['wedstrijd'] = wedstrijd
 
         try:
-            sessie_pk = int(str(kwargs['sessie_pk'])[:6])     # afkappen voor de veiligheid
+            sessie_pk = int(str(kwargs['sessie_pk'])[:7])     # afkappen voor de veiligheid
             sessie = (WedstrijdSessie
                       .objects
                       .get(pk=sessie_pk))
@@ -287,7 +287,7 @@ class WijzigWedstrijdSessieView(UserPassesTestMixin, View):
         """ deze functie wordt aangeroepen om de POST request af te handelen """
 
         try:
-            wedstrijd_pk = int(str(kwargs['wedstrijd_pk'])[:6])     # afkappen voor de veiligheid
+            wedstrijd_pk = int(str(kwargs['wedstrijd_pk'])[:7])     # afkappen voor de veiligheid
             wedstrijd = (Wedstrijd
                          .objects
                          .get(pk=wedstrijd_pk))
@@ -298,7 +298,7 @@ class WijzigWedstrijdSessieView(UserPassesTestMixin, View):
             raise PermissionDenied('Wedstrijd niet van jouw vereniging')
 
         try:
-            sessie_pk = int(str(kwargs['sessie_pk'])[:6])     # afkappen voor de veiligheid
+            sessie_pk = int(str(kwargs['sessie_pk'])[:7])     # afkappen voor de veiligheid
             sessie = (WedstrijdSessie
                       .objects
                       .get(pk=sessie_pk))

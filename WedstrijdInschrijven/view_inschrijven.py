@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2025 Ramon van der Winkel.
+#  Copyright (c) 2021-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -74,7 +74,7 @@ class WedstrijdInschrijvenSporter(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            wedstrijd_pk = str(kwargs['wedstrijd_pk'])[:6]     # afkappen voor de veiligheid
+            wedstrijd_pk = str(kwargs['wedstrijd_pk'])[:7]     # afkappen voor de veiligheid
             wedstrijd = (Wedstrijd
                          .objects
                          .select_related('organiserende_vereniging',
@@ -216,7 +216,7 @@ class WedstrijdInschrijvenGroepje(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            wedstrijd_pk = str(kwargs['wedstrijd_pk'])[:6]     # afkappen voor de veiligheid
+            wedstrijd_pk = str(kwargs['wedstrijd_pk'])[:7]     # afkappen voor de veiligheid
             wedstrijd = (Wedstrijd
                          .objects
                          .select_related('organiserende_vereniging',
@@ -419,7 +419,7 @@ class WedstrijdInschrijvenFamilie(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            wedstrijd_pk = str(kwargs['wedstrijd_pk'])[:6]     # afkappen voor de veiligheid
+            wedstrijd_pk = str(kwargs['wedstrijd_pk'])[:7]     # afkappen voor de veiligheid
             wedstrijd = (Wedstrijd
                          .objects
                          .select_related('organiserende_vereniging',
@@ -617,11 +617,11 @@ class ToevoegenAanMandjeView(UserPassesTestMixin, View):
         return self.rol_nu != Rol.ROL_NONE
 
     def post(self, request, *args, **kwargs):
-        wedstrijd_str = request.POST.get('wedstrijd', '')[:6]       # afkappen voor de veiligheid
-        sporterboog_str = request.POST.get('sporterboog', '')[:6]   # afkappen voor de veiligheid
-        sessie_str = request.POST.get('sessie', '')[:6]             # afkappen voor de veiligheid
-        klasse_str = request.POST.get('klasse', '')[:6]             # afkappen voor de veiligheid
-        goto_str = request.POST.get('goto', '')[:6]                 # afkappen voor de veiligheid
+        wedstrijd_str = request.POST.get('wedstrijd', '')[:7]       # afkappen voor de veiligheid
+        sporterboog_str = request.POST.get('sporterboog', '')[:7]   # afkappen voor de veiligheid
+        sessie_str = request.POST.get('sessie', '')[:7]             # afkappen voor de veiligheid
+        klasse_str = request.POST.get('klasse', '')[:7]             # afkappen voor de veiligheid
+        goto_str = request.POST.get('goto', '')[:7]                 # afkappen voor de veiligheid
 
         try:
             wedstrijd_pk = int(wedstrijd_str)
@@ -763,7 +763,7 @@ class WedstrijdInschrijvenHandmatig(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            wedstrijd_pk = str(kwargs['wedstrijd_pk'])[:6]     # afkappen voor de veiligheid
+            wedstrijd_pk = str(kwargs['wedstrijd_pk'])[:7]     # afkappen voor de veiligheid
             wedstrijd = (Wedstrijd
                          .objects
                          .select_related('organiserende_vereniging',
@@ -928,7 +928,7 @@ class WedstrijdInschrijvenHandmatig(UserPassesTestMixin, TemplateView):
     def post(self, request, *args, **kwargs):
 
         try:
-            wedstrijd_pk = str(kwargs['wedstrijd_pk'])[:6]     # afkappen voor de veiligheid
+            wedstrijd_pk = str(kwargs['wedstrijd_pk'])[:7]     # afkappen voor de veiligheid
             wedstrijd = (Wedstrijd
                          .objects
                          .select_related('organiserende_vereniging',
@@ -943,9 +943,9 @@ class WedstrijdInschrijvenHandmatig(UserPassesTestMixin, TemplateView):
         if wedstrijd.organiserende_vereniging.ver_nr != self.functie_nu.vereniging.ver_nr:
             raise PermissionDenied('Wedstrijd van andere vereniging')
 
-        sporterboog_str = request.POST.get('sporterboog', '')[:6]   # afkappen voor de veiligheid
-        sessie_str = request.POST.get('sessie', '')[:6]             # afkappen voor de veiligheid
-        klasse_str = request.POST.get('klasse', '')[:6]             # afkappen voor de veiligheid
+        sporterboog_str = request.POST.get('sporterboog', '')[:7]   # afkappen voor de veiligheid
+        sessie_str = request.POST.get('sessie', '')[:7]             # afkappen voor de veiligheid
+        klasse_str = request.POST.get('klasse', '')[:7]             # afkappen voor de veiligheid
 
         try:
             sporterboog_pk = int(sporterboog_str)
