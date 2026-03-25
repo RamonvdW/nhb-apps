@@ -17,7 +17,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Wedstrijd details</h3>
+            <h1 class="sv-kopje-pagina">Wedstrijd details</h1>
 
             {% if toon_inschrijven_mh %}
                 <!-- knop om naar het onderste stuk van de pagina te springen -->
@@ -329,7 +329,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Informatie</h4>
+            <h2 class="sv-kopje-row">Informatie</h2>
         </div>
     </div>
 

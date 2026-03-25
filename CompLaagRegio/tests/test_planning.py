@@ -1450,7 +1450,7 @@ class TestCompLaagRegioPlanning(E2EHelpers, TestCase):
         # zoek alle weeknummers op
         parts = list()
         # zoek de tabel met de weeknummers
-        html = html[html.find('<h4>Wedstrijd blokken</h4>'):]
+        html = html[html.find('<h2 class="sv-kopje-row">Wedstrijd blokken</h2>'):]
         html = html[:html.find('<form>')]
         while len(html):
             pos = html.find('<tr><td class="center">')

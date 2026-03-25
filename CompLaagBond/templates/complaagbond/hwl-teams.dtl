@@ -14,7 +14,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Teams BK</h3>
+            <h1 class="sv-kopje-pagina">Teams BK</h1>
             <p>Dit zijn de teams die doorgestroomd zijn naar de <b>Bondskampioenschappen (BK)</b><br>van de <b>{{ deelkamp }}</b></p>
         </div>
     </div>
@@ -23,7 +23,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Teams</h4>
+            <h2 class="sv-kopje-row">Teams</h2>
         </div>
     </div>
 
@@ -74,7 +74,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Toegestane invallers</h4>
+            <h2 class="sv-kopje-row">Toegestane invallers</h2>
             <p>De volgende leden mogen invallen in een BK team<br>als ze een lager gemiddelde hebben dan de uitvaller.</p>
         </div>
     </div>

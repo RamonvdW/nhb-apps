@@ -1,6 +1,6 @@
 {% extends 'design/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2025 Ramon van der Winkel.
+                Copyright (c) 2020-2026 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -13,7 +13,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Klassengrenzen vaststellen</h3>
+            <h1 class="sv-kopje-pagina">Klassengrenzen vaststellen</h1>
             <p>Voor de individuele en teams wedstrijdklassen voor de <b>{{ comp.beschrijving }}</b>.</p>
         </div>
     </div>
@@ -50,7 +50,7 @@
             <div class="col s12">
                 <p>Hieronder volgen de berekende klassengrenzen voor de individuele en team klassen.</p>
                 <p>Onder aan deze pagina vindt je een knop om de klassengrenzen vast te leggen. Dit is een eenmalige actie voor elke competitie.</p>
-                <h4>Individuele wedstrijdklassen</h4>
+                <h2 class="sv-kopje-row">Individuele wedstrijdklassen</h2>
             </div>
         </div>
 
@@ -81,7 +81,7 @@
         <!-- witruimte -->
         <div class="row center">
             <div class="col s12">
-                <h4>Team wedstrijdklassen</h4>
+                <h2 class="sv-kopje-row">Team wedstrijdklassen</h2>
             </div>
         </div>
 

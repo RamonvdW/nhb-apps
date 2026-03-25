@@ -1,6 +1,6 @@
 {% extends 'design/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2025 Ramon van der Winkel.
+                Copyright (c) 2020-2026 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -15,7 +15,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Verenigingen</h3>
+            <h1 class="sv-kopje-pagina">Verenigingen</h1>
             <p>Je rol is <b>{{ huidige_rol }}</b>.</p>
             {% if landelijk %}
                 <p>Hieronder volgt de landelijke lijst van {{ verenigingen.count }} verenigingen.</p>

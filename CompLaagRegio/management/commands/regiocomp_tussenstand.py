@@ -512,7 +512,7 @@ class Command(BaseCommand):
             self.stop_at = (datetime.datetime.now()
                             + datetime.timedelta(seconds=duration))
 
-        self.stdout.write('[INFO] Taak loopt tot %s' % str(self.stop_at))
+        self.stdout.write('[INFO] {regiocomp_tussenstand} Taak loopt tot %s' % str(self.stop_at))
 
     def handle(self, *args, **options):
 

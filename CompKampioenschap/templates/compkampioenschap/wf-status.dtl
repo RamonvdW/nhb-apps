@@ -16,7 +16,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Status wedstrijdformulieren</h3>
+            <h1 class="sv-kopje-pagina">Status wedstrijdformulieren</h1>
             <p>Voor de RK's en BK's die nu actief zijn.</p>
             <p>De informatie wordt 1x per uur ververst.</p>
         </div>

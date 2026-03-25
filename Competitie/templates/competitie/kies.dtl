@@ -13,7 +13,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Bonds<wbr>competities</h3>
+            <h1 class="sv-kopje-pagina">Bonds<wbr>competities</h1>
         </div>
 
         <div class="col s12">
@@ -28,7 +28,7 @@
         <!-- witruimte -->
         <div class="row center">
             <div class="col s12">
-                <h4>De inschrijving is open!</h4>
+                <h2 class="sv-kopje-row">De inschrijving is open!</h2>
                 <p>Kies het kaartje <b>Mijn pagina</b> om je aan te melden.</p>
             </div>
         </div>
@@ -44,8 +44,7 @@
         <!-- witruimte -->
         <div class="row center">
             <div class="col s12">
-                <p>&nbsp;</p>
-                <h4>Bondscompetities</h4>
+                <h2 class="sv-kopje-row">Bondscompetities</h2>
             </div>
         </div>
 
@@ -79,7 +78,7 @@
         <!-- witruimte -->
         <div class="row center">
             <div class="col s12">
-                <h4>Google Drive</h4>
+                <h2 class="sv-kopje-row">Google Drive</h2>
             </div>
         </div>
 
@@ -105,7 +104,7 @@
         <!-- witruimte -->
         <div class="row center">
             <div class="col s12">
-                <h4>Management bondscompetities</h4>
+                <h2 class="sv-kopje-row">Voor beheerders</h2>
             </div>
         </div>
 
@@ -140,8 +139,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <p>&nbsp;</p>
-            <h4>Algemeen</h4>
+            <h2 class="sv-kopje-row">Algemeen</h2>
         </div>
     </div>
 

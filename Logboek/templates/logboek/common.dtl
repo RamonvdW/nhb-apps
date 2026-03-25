@@ -1,5 +1,5 @@
 {% comment %}
-                Copyright (c) 2020-2025 Ramon van der Winkel.
+                Copyright (c) 2020-2026 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -13,7 +13,7 @@
 <!-- banner -->
 <div class="row center">
     <div class="col s12">
-        <h3 class="page-banner">Logboek</h3>
+        <h1 class="sv-kopje-pagina">Logboek</h1>
     </div>
 </div>
 
@@ -68,7 +68,7 @@
 <!-- witruimte -->
 <div class="row center">
     <div class="col s12">
-        <h4>Resultaten</h4>
+        <h2 class="sv-kopje-row">Resultaten</h2>
         <h5>{{ actief_deel }}</h5>
         {% if is_paginated %}
             <ul class="pagination">

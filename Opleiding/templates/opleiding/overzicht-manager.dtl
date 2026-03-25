@@ -1,6 +1,6 @@
 {% extends 'design/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2022-2025 Ramon van der Winkel.
+                Copyright (c) 2022-2026 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -15,7 +15,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Opleidingen</h3>
+            <h1 class="sv-kopje-pagina">Opleidingen</h1>
             <p>Je huidige rol is: <b>{{ huidige_rol }}</b></p>
         </div>
     </div>
@@ -78,7 +78,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Voor de manager</h4>
+            <h2 class="sv-kopje-row">Voor de manager</h2>
         </div>
     </div>
 

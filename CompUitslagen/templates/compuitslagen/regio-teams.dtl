@@ -36,7 +36,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Regiocompetitie teams</h3>
+            <h1 class="sv-kopje-pagina">Regiocompetitie teams</h1>
             <p>{% if comp.regiocompetitie_is_afgesloten %}Eindstand{% else %}Tussenstand{% endif %} van de regiocompetities teams.</p>
         </div>
     </div>

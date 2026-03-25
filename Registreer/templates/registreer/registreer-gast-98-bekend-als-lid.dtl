@@ -1,6 +1,6 @@
 {% extends 'design/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2025 Ramon van der Winkel.
+                Copyright (c) 2025-2026 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -13,7 +13,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">E-mailadres al gebruikt</h3>
+            <h1 class="sv-kopje-pagina">E-mailadres al gebruikt</h1>
 
             {% if lid_nr_str %}
                 <p>Volgens onze administratie wordt dit e-mailadres gebruikt door het lid met bondsnummer <b>{{ lid_nr_str }}</b>.</p>
@@ -48,7 +48,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Verder</h4>
+            <h2 class="sv-kopje-row">Verder</h2>
         </div>
     </div>
 

@@ -14,7 +14,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Beheerders van de vereniging</h3>
+            <h1 class="sv-kopje-pagina">Beheerders van de vereniging</h1>
             <p>Hieronder staan functies en de gekoppelde beheerders. Afhankelijk van je rol mag je hier wijzigingen in aanbrengen.</p>
             <p>Jouw huidige rol is: <b>{{ huidige_rol }}</b></p>
         </div>

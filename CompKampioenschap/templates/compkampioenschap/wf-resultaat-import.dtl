@@ -14,7 +14,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Importeer rapportage</h3>
+            <h1 class="sv-kopje-pagina">Importeer rapportage</h1>
 
             {% if bevat_fout %}
                 <p>Er zijn <span class="sv-rood-text">fouten</span> gevonden tijdens het importeren van de uitslag uit het Google Sheet.</p>

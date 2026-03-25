@@ -25,7 +25,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Regio individueel</h3>
+            <h1 class="sv-kopje-pagina">Regio individueel</h1>
             <p>{% if comp.regiocompetitie_is_afgesloten %}Eindstand{% else %}Tussenstand{% endif %} van de regiocompetitie binnen een vereniging</p>
         </div>
     </div>
@@ -57,7 +57,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Filters</h4>
+            <h2 class="sv-kopje-row">Filters</h2>
         </div>
     </div>
 
@@ -86,7 +86,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Ranking</h4>
+            <h2 class="sv-kopje-row">Ranking</h2>
             <p>{{ aantal_deelnemers }} sporters van deze vereniging doen mee met dit type boog</p>
         </div>
     </div>

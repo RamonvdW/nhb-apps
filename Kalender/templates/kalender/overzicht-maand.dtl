@@ -22,7 +22,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Kalender</h3>
+            <h1 class="sv-kopje-pagina">Kalender</h1>
             {% if not kan_aanmelden %}
                 <p>Om in te schrijven moet je een account aanmaken en inloggen</p>
             {% endif %}

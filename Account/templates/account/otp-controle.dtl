@@ -13,7 +13,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Controle tweede factor</h3>
+            <h1 class="sv-kopje-pagina">Controle tweede factor</h1>
             <p>Voer de tweede factor code in om toegang te krijgen tot de beheerders rollen.</p>
         </div>
     </div>
@@ -74,7 +74,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Tips</h4>
+            <h2 class="sv-kopje-row">Tips</h2>
         </div>
     </div>
 

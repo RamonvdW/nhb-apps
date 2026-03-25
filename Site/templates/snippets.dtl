@@ -5,7 +5,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Page heading</h3>
+            <h1 class="sv-kopje-pagina">Page heading</h1>
             <p>Subtitle</p>
         </div>
     </div>
@@ -14,7 +14,7 @@
     <!-- tussenkopje -->
     <div class="row center">
         <div class="col s12">
-            <h4>Stap 3</h4>
+            <h2 class="sv-kopje-row">Stap 3</h2>
             <p>Ga naar je tweede-factor app en bekijk de cijfers voor "MijnHandboogsport".</p>
         </div>
     </div>

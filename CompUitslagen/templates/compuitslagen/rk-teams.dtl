@@ -13,7 +13,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">RK teams</h3>
+            <h1 class="sv-kopje-pagina">RK teams</h1>
             <p>{% if deelkamp.is_klaar_teams %}Eindstand van{% else %}Deelnemerslijst voor{% endif %} de rayon<wbr>kampioenschappen voor teams</p>
         </div>
     </div>
@@ -114,7 +114,7 @@
         <!-- witruimte -->
         <div class="row center" style="margin-bottom:0">
             <div class="col s12">
-                <h4>Ingeschreven teams</h4>
+                <h2 class="sv-kopje-row">Ingeschreven teams</h2>
                 <p>Aantal teams: {{ rk_teams|length }}</p>
             </div>
         </div>

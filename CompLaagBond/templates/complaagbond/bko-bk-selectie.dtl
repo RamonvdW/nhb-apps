@@ -15,7 +15,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">BK selectie</h3>
+            <h1 class="sv-kopje-pagina">BK selectie</h1>
         </div>
     </div>
 
@@ -73,7 +73,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Selectie per klasse</h4>
+            <h2 class="sv-kopje-row">Selectie per klasse</h2>
             <p>In elke klasse wordt met maximaal 48 sporters gewerkt</p>
             {% if url_download %}
                 <p>

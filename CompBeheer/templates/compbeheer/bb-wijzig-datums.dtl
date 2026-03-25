@@ -14,7 +14,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Wijzig datums</h3>
+            <h1 class="sv-kopje-pagina">Wijzig datums</h1>
             <p>voor de <b>{{ comp }}</b></p>
         </div>
     </div>

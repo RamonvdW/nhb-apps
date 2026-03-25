@@ -1,6 +1,6 @@
 {% extends 'design/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2024-2025 Ramon van der Winkel.
+                Copyright (c) 2024-2026 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -14,7 +14,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Evenementen</h3>
+            <h1 class="sv-kopje-pagina">Evenementen</h1>
             <p>Evenementen bij vereniging <b>{{ ver }}</b></p>
             <p>Je huidige rol is: <b>{{ huidige_rol }}</b></p>
         </div>
@@ -70,7 +70,7 @@
         <!-- witruimte -->
         <div class="row center">
             <div class="col s12">
-                <h4>Eerdere evenementen</h4>
+                <h2 class="sv-kopje-row">Eerdere evenementen</h2>
             </div>
         </div>
 
@@ -122,7 +122,7 @@
         <!-- witruimte -->
         <div class="row center">
             <div class="col s12">
-                <h4>Financieel</h4>
+                <h2 class="sv-kopje-row">Financieel</h2>
             </div>
         </div>
 
@@ -143,7 +143,7 @@
         <!-- witruimte -->
         <div class="row center">
             <div class="col s12">
-                <h4>Voorwaarden</h4>
+                <h2 class="sv-kopje-row">Voorwaarden</h2>
                 <p>Onderstaand document beschrijft de verkoopvoorwaarden voor bestelling via deze site.</p>
             </div>
         </div>

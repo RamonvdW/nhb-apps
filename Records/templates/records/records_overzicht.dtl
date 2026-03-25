@@ -1,6 +1,6 @@
 {% extends 'design/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2019-2025 Ramon van der Winkel.
+                Copyright (c) 2019-2026 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -19,7 +19,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Handboog<wbr>sport Records</h3>
+            <h1 class="sv-kopje-pagina">Handboog<wbr>sport Records</h1>
             <p>Toegekende Nederlandse records van de handboogsport.</p>
         </div>
     </div>
@@ -27,7 +27,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>10 nieuwste records</h4>
+            <h2 class="sv-kopje-row">10 nieuwste records</h2>
         </div>
     </div>
 
@@ -62,7 +62,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Snel vinden</h4>
+            <h2 class="sv-kopje-row">Snel vinden</h2>
         </div>
     </div>
 
@@ -88,7 +88,7 @@
             <!-- witruimte -->
             <div class="row center">
                 <div class="col s12">
-                    <h4>Eervolle vermeldingen</h4>
+                    <h2 class="sv-kopje-row">Eervolle vermeldingen</h2>
                 </div>
             </div>
 

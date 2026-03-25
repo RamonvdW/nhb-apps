@@ -13,7 +13,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Uitslag RK teams</h3>
+            <h1 class="sv-kopje-pagina">Uitslag RK teams</h1>
             <p>Eindstand van de rayon<wbr>kampioenschappen voor teams</p>
         </div>
     </div>

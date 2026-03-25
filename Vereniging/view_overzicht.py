@@ -266,7 +266,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
             if comp.fase_indiv >= 'C':
                 # 5 - uitslagen
                 kaartje = SimpleNamespace(
-                                titel="Uitslagenlijsten",
+                                titel="Deelnemers + Uitslagen",  # "Uitslagenlijsten",
                                 tekst="Toon de deelnemerslijsten en uitslagen van deze competitie.",
                                 url=reverse('Competitie:overzicht',
                                             kwargs={'comp_pk_of_seizoen': comp.maak_seizoen_url()}),

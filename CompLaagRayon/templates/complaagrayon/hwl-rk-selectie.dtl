@@ -15,7 +15,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Deelnemers RK</h3>
+            <h1 class="sv-kopje-pagina">Deelnemers RK</h1>
             <p>De lijst met kandidaat-deelnemers<br>voor de <b>Rayonkampioenschappen in {{ deelcomp_rk.rayon }}</b></p>
             <p>Individuele sporters stromen door uit de regiocompetitie. Deelname aan het RK moet bevestigd worden.<br>Afmelden wordt op prijs gesteld zodat reserves alvast opgeroepen kunnen worden.</p>
         </div>
@@ -60,7 +60,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Selectie per klasse</h4>
+            <h2 class="sv-kopje-row">Selectie per klasse</h2>
         </div>
     </div>
 

@@ -17,7 +17,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Mijn pagina</h3>
+            <h1 class="sv-kopje-pagina">Mijn pagina</h1>
             <p>Op deze pagina verzamelen we informatie die voor jou interessant is.</p>
             {% if case_nr is not None %}
                 <p style="color:red">Case nr: {{ case_nr }}<br>{{ case_tekst }}</p>
@@ -31,7 +31,7 @@
         <!-- witruimte -->
         <div class="row center">
             <div class="col s12">
-                <h4>Meteen even doen</h4>
+                <h2 class="sv-kopje-row">Meteen even doen</h2>
                 <p>We willen je vragen om persoonlijke keuzes door te geven.</p>
             </div>
         </div>
@@ -53,7 +53,7 @@
         <!-- witruimte -->
         <div class="row center">
             <div class="col s12">
-                <h4>Bondspas</h4>
+                <h2 class="sv-kopje-row">Bondspas</h2>
                 <p>De digitale bondspas is je bewijs van lidmaatschap. Op wedstrijden kan gevraagd worden om deze te tonen.</p>
             </div>
         </div>
@@ -74,7 +74,7 @@
         <!-- witruimte -->
         <div class="row center">
             <div class="col s12">
-                <h4>Bonds<wbr>competities</h4>
+                <h2 class="sv-kopje-row">Bonds<wbr>competities</h2>
             </div>
         </div>
 
@@ -643,7 +643,7 @@
         <!-- witruimte -->
         <div class="row center">
             <div class="col s12">
-                <h4>Bestellingen</h4>
+                <h2 class="sv-kopje-row">Bestellingen</h2>
                 <p>Bekijk alle details van eerder gemaakte bestellingen en regel betaling.</p>
             </div>
         </div>
@@ -676,7 +676,7 @@
         <!-- witruimte -->
         <div class="row center">
             <div class="col s12">
-                <h4>Jouw wedstrijden</h4>
+                <h2 class="sv-kopje-row">Jouw wedstrijden</h2>
                 <p>Wedstrijden waar je op ingeschreven bent.</p>
             </div>
         </div>
@@ -718,7 +718,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Je leeftijdsklasse</h4>
+            <h2 class="sv-kopje-row">Je leeftijdsklasse</h2>
             <p>Op wedstrijden {% if toon_bondscompetities %}en in de bondscompetities {% endif %}word je ingedeeld in een wedstrijdklasse aan de hand van je leeftijd.</p>
         </div>
     </div>
@@ -735,7 +735,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Voorkeuren</h4>
+            <h2 class="sv-kopje-row">Voorkeuren</h2>
         </div>
     </div>
 
@@ -758,7 +758,7 @@
         <!-- witruimte -->
         <div class="row center">
             <div class="col s12">
-                <h4>Records!</h4>
+                <h2 class="sv-kopje-row">Records!</h2>
                 <p>De volgende records staan geregistreerd op jouw naam.</p>
             </div>
         </div>
@@ -804,7 +804,7 @@
         <!-- witruimte -->
         <div class="row center">
             <div class="col s12">
-                <h4>Prestatiespelden</h4>
+                <h2 class="sv-kopje-row">Prestatiespelden</h2>
                 <p>De volgende spelden, veren of schilden zijn door jou behaald:</p>
             </div>
         </div>
@@ -853,7 +853,7 @@
         <!-- witruimte -->
         <div class="row center">
             <div class="col s12">
-                <h4>Jouw bondscompetitie scores</h4>
+                <h2 class="sv-kopje-row">Jouw bondscompetitie scores</h2>
             </div>
         </div>
 
@@ -935,7 +935,7 @@
         <!-- witruimte -->
         <div class="row center">
             <div class="col s12">
-                <h4>Jouw gemiddelden</h4>
+                <h2 class="sv-kopje-row">Jouw gemiddelden</h2>
                 <p>Deze bepalen in welke wedstrijdklasse je begint in de bondscompetities.</p>
             </div>
         </div>
@@ -978,7 +978,7 @@
         <!-- witruimte -->
         <div class="row center">
             <div class="col s12">
-                <h4>Opleidingen</h4>
+                <h2 class="sv-kopje-row">Opleidingen</h2>
                 <p>De volgende opleidingen zijn door jou gevolgd en zijn nog steeds geldig</p>
             </div>
         </div>
@@ -1011,7 +1011,7 @@
         <!-- witruimte -->
         <div class="row center">
             <div class="col s12">
-                <h4>Basics</h4>
+                <h2 class="sv-kopje-row">Basics</h2>
                 <p>Deze informatie is over jou bekend</p>
             </div>
         </div>
@@ -1105,7 +1105,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Hulp nodig?</h4>
+            <h2 class="sv-kopje-row">Hulp nodig?</h2>
             <p>Deze personen kunnen jou helpen</p>
         </div>
     </div>
@@ -1329,7 +1329,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Privacy</h4>
+            <h2 class="sv-kopje-row">Privacy</h2>
         </div>
     </div>
 

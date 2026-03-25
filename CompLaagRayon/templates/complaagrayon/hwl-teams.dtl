@@ -14,7 +14,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Teams RK</h3>
+            <h1 class="sv-kopje-pagina">Teams RK</h1>
             <p>De HWL kan de teams opgeven voor de <b>Rayonkampioenschappen (RK)</b><br>van de <b>{{ deelkamp }}</b></p>
         </div>
     </div>
@@ -38,7 +38,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Teams</h4>
+            <h2 class="sv-kopje-row">Teams</h2>
         </div>
     </div>
 
@@ -109,7 +109,7 @@
         <!-- witruimte -->
         <div class="row center">
             <div class="col s12">
-                <h4>Toegestane invallers</h4>
+                <h2 class="sv-kopje-row">Toegestane invallers</h2>
                 <p>De volgende leden mogen invallen in een RK team<br>als ze een lager gemiddelde hebben dan de uitvaller.</p>
             </div>
         </div>

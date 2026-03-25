@@ -25,7 +25,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Regio teams</h3>
+            <h1 class="sv-kopje-pagina">Regio teams</h1>
             <p>{% if comp.regiocompetitie_is_afgesloten %}Eindstand{% else %}Tussenstand{% endif %} van de regiocompetitie teams binnen een vereniging</p>
         </div>
     </div>
@@ -67,7 +67,7 @@
         <!-- witruimte -->
         <div class="row center">
             <div class="col s12">
-                <h4>Filters</h4>
+                <h2 class="sv-kopje-row">Filters</h2>
             </div>
         </div>
 
@@ -96,7 +96,7 @@
         <!-- witruimte -->
         <div class="row center">
             <div class="col s12">
-                <h4>Ranking</h4>
+                <h2 class="sv-kopje-row">Ranking</h2>
                 {% if geen_teams %}
                     <p>Deze vereniging heeft geen teams van dit type.</p>
                 {% else %}

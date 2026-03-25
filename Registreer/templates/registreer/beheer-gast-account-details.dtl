@@ -1,6 +1,6 @@
 {% extends 'design/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2023-2025 Ramon van der Winkel.
+                Copyright (c) 2023-2026 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -15,7 +15,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Details gast-account</h3>
+            <h1 class="sv-kopje-pagina">Details gast-account</h1>
             <p>Hieronder tonen we alle persoonsgegevens gerelateerd aan het gast-account met het tijdelijke bondsnummer {% if gast.lid_nr > 0 %}<b>{{ gast.lid_nr }}</b>{% else %}<i>Geen</i>{% endif %}.</p>
             {% if not gast.account %}
                 <p>Registratie is gestart op {{ gast.aangemaakt }} ({{ gast.dagen_geleden }} dag{% if gast.dagen_geleden != 1 %}en{% endif %} geleden)</p>
@@ -115,7 +115,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Bekend?</h4>
+            <h2 class="sv-kopje-row">Bekend?</h2>
             {% if gast.heeft_matches %}
                 <p>Hieronder volgen mogelijke overeenkomsten met bestaande leden</p>
                 {% if gast.url_ophef %}
@@ -214,7 +214,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Gebruik van dit gast-account</h4>
+            <h2 class="sv-kopje-row">Gebruik van dit gast-account</h2>
             {% if overzetten_url %}
                 <p>
                     {% sv-knop-modal 'bevestig_overzetten' '' icon='' tekst='Overzetten naar'|add:gast.overzetten_naar_lid_nr %}

@@ -19,7 +19,7 @@
         <!-- banner -->
         <div class="row center">
             <div class="col s12">
-                <h3 class="page-banner">RK selectie</h3>
+                <h1 class="sv-kopje-pagina">RK selectie</h1>
             </div>
         </div>
 
@@ -41,7 +41,7 @@
         <!-- witruimte -->
         <div class="row center">
             <div class="col s12">
-                <h4>Status regiocompetities</h4>
+                <h2 class="sv-kopje-row">Status regiocompetities</h2>
                 <p>Pas als alle regios afgesloten zijn, dan kunnen de kandidaat-deelnemers lijsten voor de RK's vastgesteld worden door de BKO.</p>
             </div>
         </div>
@@ -74,7 +74,7 @@
         <!-- banner -->
         <div class="row center">
             <div class="col s12">
-                <h3 class="page-banner">RK selectie</h3>
+                <h1 class="sv-kopje-pagina">RK selectie</h1>
                 <p>Hieronder tonen we de lijst van vastgestelde sporters voor elk van de {{ aantal_klassen }} wedstrijdklassen<br>van de Rayonkampioenschappen in <b>{{ deelkamp.rayon }}</b>.</p>
             </div>
         </div>
@@ -125,7 +125,7 @@
         <!-- witruimte -->
         <div class="row center">
             <div class="col s12">
-                <h4>Sporters</h4>
+                <h2 class="sv-kopje-row">Sporters</h2>
                 <p>Deelname-status voor de geselecteerde sporters + maximaal 8 reserves</p>
                 {% if url_download %}
                     <p>

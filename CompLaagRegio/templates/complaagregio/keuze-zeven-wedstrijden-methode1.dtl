@@ -1,6 +1,6 @@
 {% extends 'design/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2021-2025 Ramon van der Winkel.
+                Copyright (c) 2021-2026 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -13,7 +13,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Aanpassen</h3>
+            <h1 class="sv-kopje-pagina">Aanpassen</h1>
             {% if is_hwl %}
                 <p>Als HWL kan je via scherm de keuzes voor lid <b>{{ deelnemer.sporterboog.sporter.lid_nr_en_volledige_naam }}</b> van jouw vereniging aanpassen<br>voor de <b>{{ deelnemer.regiocompetitie.competitie.beschrijving }}</b></p>
             {% else %}
@@ -49,7 +49,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Wanneer wil je schieten?</h4>
+            <h2 class="sv-kopje-row">Wanneer wil je schieten?</h2>
             <p>Indien nodig, verander de vinkjes en druk op OPSLAAN</p>
         </div>
     </div>

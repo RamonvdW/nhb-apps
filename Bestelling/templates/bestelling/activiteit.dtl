@@ -1,6 +1,6 @@
 {% extends 'design/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2022-2025 Ramon van der Winkel.
+                Copyright (c) 2022-2026 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -15,7 +15,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Bestellingen en Betalingen</h3>
+            <h1 class="sv-kopje-pagina">Bestellingen en Betalingen</h1>
         </div>
     </div>
 
@@ -45,7 +45,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Details bestellingen</h4>
+            <h2 class="sv-kopje-row">Details bestellingen</h2>
             <p>Gebruik het formulier om details op te vragen over een specifieke bestelling, koper of verkoper</p>
             <p>Zoek op ** om nog te betalen / mislukte betalingen te zoeken</p>
         </div>
@@ -115,14 +115,14 @@
     <div class="row center">
         <div class="col s12">
             {% if zoekterm %}
-                <h4>Zoekresultaten</h4>
+                <h2 class="sv-kopje-row">Zoekresultaten</h2>
                 {% if bestellingen %}
                     <p>{{ bestellingen|length }} bestellingen gevonden</p>
                 {% else %}
                     <p class="sv-rood-text">Niets gevonden</p>
                 {% endif %}
             {% else %}
-                <h4>Recente bestellingen</h4>
+                <h2 class="sv-kopje-row">Recente bestellingen</h2>
                 <p>{{ bestellingen|length }} bestellingen gevonden</p>
             {% endif %}
         </div>

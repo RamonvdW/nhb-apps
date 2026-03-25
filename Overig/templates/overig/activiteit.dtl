@@ -16,7 +16,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Account activiteit</h3>
+            <h1 class="sv-kopje-pagina">Account activiteit</h1>
         </div>
     </div>
 
@@ -51,7 +51,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Details specifieke gebruiker</h4>
+            <h2 class="sv-kopje-row">Details specifieke gebruiker</h2>
             <p>Gebruik het formulier om details op te vragen over een specifieke gebruiker</p>
         </div>
     </div>
@@ -88,7 +88,7 @@
         <!-- witruimte -->
         <div class="row center">
             <div class="col s12">
-                <h4>Zoekresultaten</h4>
+                <h2 class="sv-kopje-row">Zoekresultaten</h2>
                 {% if zoek_leden %}
                     <p>{{ zoek_leden|length }} gebruikers gevonden</p>
                 {% else %}

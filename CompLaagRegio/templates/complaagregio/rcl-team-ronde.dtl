@@ -1,6 +1,6 @@
 {% extends 'design/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2021-2025 Ramon van der Winkel.
+                Copyright (c) 2021-2026 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -13,7 +13,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Team Ronde</h3>
+            <h1 class="sv-kopje-pagina">Team Ronde</h1>
             <p>De huidige ronde van de teamcompetitie inzien, team punten verdelen en afsluiten</p>
         </div>
     </div>
@@ -48,7 +48,7 @@
         <!-- witruimte -->
         <div class="row center">
             <div class="col s12">
-                <h4>Afgesloten</h4>
+                <h2 class="sv-kopje-row">Afgesloten</h2>
                 <p>Alle rondes van de teamcompetitie in deze regio zijn afgerond. Je hoeft niets meer te doen.</p>
             </div>
         </div>
@@ -60,7 +60,7 @@
             <!-- witruimte -->
             <div class="row center">
                 <div class="col s12">
-                    <h4>Nog niet geplaatste teams</h4>
+                    <h2 class="sv-kopje-row">Nog niet geplaatste teams</h2>
                     <p>De volgende teams zijn niet compleet en daarom niet geplaatst in een wedstrijdklasse.</p>
                     <p class="sv-rood-text">Dit moet eerst opgelost worden: sporters koppelen of het team verwijderen.</p>
                 </div>
@@ -100,7 +100,7 @@
             <!-- witruimte -->
             <div class="row center">
                 <div class="col s12">
-                    <h4>Teams nog niet in poule</h4>
+                    <h2 class="sv-kopje-row">Teams nog niet in poule</h2>
                     <p>De volgende teams zijn nog niet in een poule geplaatst.</p>
                     <p class="sv-rood-text">Dit moet eerst opgelost worden. Gebruik het kaartje Team Poules.</p>
                 </div>
@@ -156,7 +156,7 @@
         <!-- witruimte -->
         <div class="row center">
             <div class="col s12">
-                <h4>Wedstrijdpunten</h4>
+                <h2 class="sv-kopje-row">Wedstrijdpunten</h2>
 
                 {% if toon_som %}
                     <p>Het is niet nodig om wedstrijdpunten toe te kennen.</p>
@@ -234,7 +234,7 @@
             <!-- witruimte -->
             <div class="row center">
                 <div class="col s12">
-                    <h4>Scores selecteren</h4>
+                    <h2 class="sv-kopje-row">Scores selecteren</h2>
                 </div>
             </div>
 

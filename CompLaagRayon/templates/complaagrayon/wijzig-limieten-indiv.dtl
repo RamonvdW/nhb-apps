@@ -25,7 +25,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">RK individuele limieten</h3>
+            <h1 class="sv-kopje-pagina">RK individuele limieten</h1>
             <p>De cut' instellen voor elke individuele wedstrijdklasse van jouw RK.<br>Hiermee begrens je het aantal deelnemers dat uitgenodigd wordt.</p>
         </div>
     </div>

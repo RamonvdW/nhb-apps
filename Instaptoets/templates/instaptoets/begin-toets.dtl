@@ -1,6 +1,6 @@
 {% extends 'design/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2024-2025 Ramon van der Winkel.
+                Copyright (c) 2024-2026 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -13,7 +13,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Instaptoets</h3>
+            <h1 class="sv-kopje-pagina">Instaptoets</h1>
         </div>
     </div>
 
@@ -55,7 +55,7 @@
     <!-- tussenkopje -->
     <div class="row center">
         <div class="col s12">
-            <h4>Kennisbank</h4>
+            <h2 class="sv-kopje-row">Kennisbank</h2>
             <p>We verwachten niet van je dat je alle antwoorden op basis van parate kennis kunt geven. Daarom helpen we je graag.</p>
             <p>De antwoorden op de vragen zijn te vinden in diverse (schiettechnische) reglementen.<br>Onderstaand vind je een overzicht van de voor deze toets relevante reglementen.</p>
         </div>

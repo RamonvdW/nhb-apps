@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2025 Ramon van der Winkel.
+#  Copyright (c) 2025-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -480,8 +480,8 @@ class BrowserTestCase(TestCase):
 
         if self._driver.title == 'Uitloggen':
             # we zijn op de uitloggen pagina beland
-            h3 = self.find_element_type_with_text('h3', 'Uitloggen')
-            self.assertIsNotNone(h3)
+            h1 = self.find_element_type_with_text('h1', 'Uitloggen')
+            self.assertIsNotNone(h1)
 
             self.find_element_by_id('submit_knop').click()
             self.wait_until_url_not(self.url_logout)

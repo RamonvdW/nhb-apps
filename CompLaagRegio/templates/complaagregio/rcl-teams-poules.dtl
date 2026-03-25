@@ -1,6 +1,6 @@
 {% extends 'design/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2021-2025 Ramon van der Winkel.
+                Copyright (c) 2021-2026 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -15,7 +15,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Poules</h3>
+            <h1 class="sv-kopje-pagina">Poules</h1>
             <p>Poules {% if readonly %}bekijken{% else %}instellen{% endif %} voor de teamcompetitie</p>
             <p>Alle teams moeten in een poule geplaatst worden</p>
         </div>
@@ -44,7 +44,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Poules</h4>
+            <h2 class="sv-kopje-row">Poules</h2>
         </div>
     </div>
 
@@ -102,7 +102,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Teams</h4>
+            <h2 class="sv-kopje-row">Teams</h2>
             {% if readonly %}
                 <p>Alle teams en in welke poule ze geplaatst zijn</p>
             {% else %}

@@ -5,6 +5,67 @@
 
 // Specific classes for our website
 
+// banner is voor de titel van de site
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+}
+
+// grote banner op de landing page van de site
+.sv-site-banner-groot {
+  font-family: 'Fira Sans', sans-serif;
+  font-size: 4.2rem;
+  font-weight: bold;
+  line-height: 110%;
+  margin: 0;
+  color: $secondary-color;    // rood
+}
+.sv-site-banner-kleiner {
+  font-family: 'Fira Sans', sans-serif;
+  font-size: 4.2rem;
+  font-weight: bold;
+  line-height: 110%;
+  margin: 0;
+  color: $secondary-color;    // rood
+}
+
+// kopje bovenaan de pagina
+.sv-kopje-pagina {
+  font-family: 'Fira Sans', sans-serif;
+  font-size: 2.92rem;
+  font-weight: 400;
+  line-height: 110%;
+  margin: 2.0rem 0 1.2rem 0;
+  color: $secondary-color;    // rood
+}
+
+// groter tussenkopje
+.sv-kopje-sectie {
+  font-family: 'Fira Sans', sans-serif;
+  font-size: 2.92rem;
+  font-weight: 400;
+  line-height: 110%;
+  margin: 1.94rem 0 1.168rem 0;
+  color: $primary-color-dark;
+}
+
+// tussenkopje boven een blauw balk
+.sv-kopje-row {
+  font-family: 'Fira Sans', sans-serif;
+  font-size: 2.28rem;
+  font-weight: 400;
+  line-height: 110%;
+  margin: 1.5rem 0 0.9rem 0;
+  color: $off-black;
+}
+
+// margin: ($h1-fontsize / 1.5) 0 ($h1-fontsize / 2.5) 0;
+//$h1-fontsize: 4.2rem !default;
+//$h2-fontsize: 3.56rem !default;
+//$h3-fontsize: 2.92rem !default;
+//$h4-fontsize: 2.28rem !default;
+//$h5-fontsize: 1.64rem !default;
+//$h6-fontsize: 1.15rem !default;
 
 // als er geschakeld wordt naar een witte achtergrondkleur,
 // dan het hard zwart (ivm contrast grijze achtergrond)
@@ -463,14 +524,6 @@
 /* fonts */
 html, button, input, optgroup, select, textarea {
   font-family: 'Open Sans', sans-serif;
-}
-
-h1, h2, h3, h4, h5, h6 {
-  font-family: 'Fira Sans', sans-serif;
-}
-
-.page-banner {
-  color: $secondary-color;
 }
 
 a {

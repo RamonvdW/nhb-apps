@@ -1,6 +1,6 @@
 {% extends 'design/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2022-2025 Ramon van der Winkel.
+                Copyright (c) 2022-2026 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -15,7 +15,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Mandje</h3>
+            <h1 class="sv-kopje-pagina">Mandje</h1>
             {% if mandje_is_leeg %}
                 <p class="center">Je mandje is leeg</p>
             {% else %}
@@ -52,7 +52,7 @@
         <!-- witruimte -->
         <div class="row center">
             <div class="col s12">
-                <h4>Bestellingen</h4>
+                <h2 class="sv-kopje-row">Bestellingen</h2>
                 <p>Bekijk alle details van eerder gemaakte bestellingen en regel betaling.</p>
             </div>
         </div>
@@ -157,7 +157,7 @@
             <!-- witruimte -->
             <div class="row center">
                 <div class="col s12">
-                    <h4>Levering</h4>
+                    <h2 class="sv-kopje-row">Levering</h2>
                 </div>
             </div>
 
@@ -197,7 +197,7 @@
             <!-- witruimte -->
             <div class="row center">
                 <div class="col s12">
-                    <h4>Levering</h4>
+                    <h2 class="sv-kopje-row">Levering</h2>
                 </div>
             </div>
 
@@ -246,7 +246,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Voorwaarden</h4>
+            <h2 class="sv-kopje-row">Voorwaarden</h2>
             <p>Onderstaande documenten beschrijven de verkoopvoorwaarden voor bestellingen via deze site.</p>
         </div>
     </div>

@@ -7,7 +7,7 @@
 {% load static %}
 {% load design_icons %}
 
-{% block title %}RK teams limieten{% endblock %}
+{% block title %}RK team limieten{% endblock %}
 
 {% block pagina %}
 
@@ -25,8 +25,8 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">RK teams limieten</h3>
-            <p>De cut' instellen voor elke wedstrijdklasse van jouw RK.<br>Hiermee begrens je het aantal teams dat uitgenodigd wordt.</p>
+            <h1 class="sv-kopje-pagina">RK team limieten</h1>
+            <p>Hieronder kan je "de cut" instellen voor elke wedstrijdklasse van jouw RK.<br>Hiermee begrens je het aantal teams dat deel kan nemen. De rest is reserve.</p>
         </div>
     </div>
 

@@ -1,6 +1,6 @@
 {% extends 'design/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2025 Ramon van der Winkel.
+                Copyright (c) 2020-2026 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -14,7 +14,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Scores regio<wbr>competitie</h3>
+            <h1 class="sv-kopje-pagina">Scores regio<wbr>competitie</h1>
             <p>Regiocompetitie wedstrijden waarvan de scores ingevoerd, aanpast en gecontroleerd kunnen worden</p>
         </div>
     </div>
@@ -39,7 +39,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Wedstrijden</h4>
+            <h2 class="sv-kopje-row">Wedstrijden</h2>
         </div>
     </div>
 

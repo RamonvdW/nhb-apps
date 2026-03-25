@@ -1,6 +1,6 @@
 {% extends 'design/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2021-2025 Ramon van der Winkel.
+                Copyright (c) 2021-2026 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -14,7 +14,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Wijzig AG</h3>
+            <h1 class="sv-kopje-pagina">Wijzig AG</h1>
             <p>Wijzig sporter aanvangsgemiddelde dat gebruikt wordt voor het berekenen van de team sterkte en het toepassen van de regels voor invallers</p>
         </div>
     </div>
@@ -75,7 +75,7 @@
         <!-- witruimte -->
         <div class="row center">
             <div class="col s12">
-                <h4>Nieuw AG</h4>
+                <h2 class="sv-kopje-row">Nieuw AG</h2>
             </div>
         </div>
 
@@ -110,7 +110,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Eerdere wijzigingen</h4>
+            <h2 class="sv-kopje-row">Eerdere wijzigingen</h2>
             <p>Wijzigingen worden bijgehouden en kunnen hieronder ingezien worden</p>
         </div>
     </div>

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2025 Ramon van der Winkel.
+#  Copyright (c) 2025-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -19,8 +19,8 @@ class TestLogboekActiveerDeel(bh.BrowserTestCase):
 
         # ga naar het logboek (dit controleert ook dat we beheerder zijn)
         self.do_navigate_to(self.url_logboek)
-        h3 = self.find_element_type_with_text('h3', 'Logboek')
-        self.assertIsNotNone(h3)
+        h1 = self.find_element_type_with_text('h1', 'Logboek')
+        self.assertIsNotNone(h1)
 
         # kies een het deel Records en klik op de activeer knop
         radio = self.find_element_by_id('id_records')        # radio button voor deel 'Records'

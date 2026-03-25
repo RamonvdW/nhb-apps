@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 {% comment %}
-                Copyright (c) 2020-2025 Ramon van der Winkel.
+                Copyright (c) 2020-2026 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -30,7 +30,7 @@
 
         {% include 'design/site_layout_fonts.dtl' %}
 
-        <link rel="stylesheet" href="{% static 'css/materialize-new-326.css' %}">
+        <link rel="stylesheet" href="{% static 'css/materialize-new-333.css' %}">
 
         {% include 'design/site_layout_favicons.dtl' %}
 
@@ -47,7 +47,7 @@
         <!-- geen menu -->
         <div id="content">      <!-- geeft padding -->
 
-            <h3 class="page-banner">Oeps!</h3>
+            <h1 class="sv-kopje-pagina">Oeps!</h1>
 
             <!-- echt inhoud komt hier, vanuit de template -->
             {% block pagina_minimaal %}{% endblock %}

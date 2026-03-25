@@ -13,7 +13,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Privacy<wbr>verklaring</h3>
+            <h1 class="sv-kopje-pagina">Privacy<wbr>verklaring</h1>
             <p>Alle vragen en verzoeken over privacy kunnen gericht worden aan<br>de Koninklijke Handboogsport Nederland via e-mail: <code>{{ email_bb }}</code></p>
         </div>
     </div>

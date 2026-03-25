@@ -14,7 +14,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Para opmerkingen</h3>
+            <h1 class="sv-kopje-pagina">Para opmerkingen</h1>
             <p>Via deze pagina kan je alle para opmerkingen van sporters bekijken en aanpassen.</p>
         </div>
     </div>

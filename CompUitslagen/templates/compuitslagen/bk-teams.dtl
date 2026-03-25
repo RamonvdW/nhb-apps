@@ -25,7 +25,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">BK teams</h3>
+            <h1 class="sv-kopje-pagina">BK teams</h1>
             <p>{% if deelkamp_bk.is_klaar_teams %}Eindstand van{% else %}Deelnemerslijst voor{% endif %} de bonds<wbr>kampioenschappen teams</p>
         </div>
     </div>
@@ -60,7 +60,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Filters</h4>
+            <h2 class="sv-kopje-row">Filters</h2>
         </div>
     </div>
 

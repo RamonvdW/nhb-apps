@@ -1,6 +1,6 @@
 {% extends 'design/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2025 Ramon van der Winkel.
+                Copyright (c) 2020-2026 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -13,7 +13,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">{{ comp.beschrijving }}</h3>
+            <h1 class="sv-kopje-pagina">{{ comp.beschrijving }}</h1>
         </div>
     </div>
 
@@ -22,7 +22,7 @@
         <!-- witruimte -->
         <div class="row center">
             <div class="col s12">
-                <h4>Individuele competitie</h4>
+                <h2 class="sv-kopje-row">Individuele competitie</h2>
                 <p>Deelnemers<wbr>lijsten en uitslagen</p>
             </div>
         </div>
@@ -40,7 +40,7 @@
         <!-- witruimte -->
         <div class="row center">
             <div class="col s12">
-                <h4>Teamcompetitie</h4>
+                <h2 class="sv-kopje-row">Teamcompetitie</h2>
                 <p>Deelnemers<wbr>lijsten en uitslagen</p>
             </div>
         </div>
@@ -65,7 +65,7 @@
             {% if toon_uitslagen %}
                 <p>&nbsp;</p>
             {% endif %}
-            <h4>Informatie</h4>
+            <h2 class="sv-kopje-row">Informatie</h2>
         </div>
     </div>
 
@@ -98,7 +98,7 @@
         <!-- witruimte -->
         <div class="row center">
             <div class="col s12">
-                <h4>Beheer</h4>
+                <h2 class="sv-kopje-row">Beheer</h2>
             </div>
         </div>
 

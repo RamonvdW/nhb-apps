@@ -1,6 +1,6 @@
 {% extends 'design/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2025 Ramon van der Winkel.
+                Copyright (c) 2025-2026 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -13,7 +13,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Statistiek instaptoets</h3>
+            <h1 class="sv-kopje-pagina">Statistiek instaptoets</h1>
             <p>Je huidige rol is: <b>{{ huidige_rol }}</b></p>
         </div>
     </div>
@@ -49,7 +49,7 @@
     <!-- tussenkopje -->
     <div class="row center">
         <div class="col s12">
-            <h4>De lastige vragen</h4>
+            <h2 class="sv-kopje-row">De lastige vragen</h2>
             <p>Hieronder is te zien welke vragen slecht beantwoord worden - deze staan als eerste in de tabel.</p>
             <p>(gebaseerd op <b>{{ antwoord_count }} antwoorden</b>)</p>
         </div>

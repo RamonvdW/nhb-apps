@@ -1,6 +1,6 @@
 {% extends 'design/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2025 Ramon van der Winkel.
+                Copyright (c) 2020-2026 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -15,7 +15,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Benodigde dagdelen</h3>
+            <h1 class="sv-kopje-pagina">Benodigde dagdelen</h1>
             <p>Behoefte voor de regiocompetitie <b>{{ competitie.beschrijving }}</b> voor <b>{{ regio }}</b></p>
             <p>Je kan onderstaande lijst ook downloaden:</p>
             {% sv-knop-nav icon='download' url=url_download tekst='Download lijst' %}
@@ -25,7 +25,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Behoefte</h4>
+            <h2 class="sv-kopje-row">Behoefte</h2>
             <p>Aantal sporters per dagdeel en blazoen type</p>
         </div>
     </div>
@@ -81,7 +81,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Totalen</h4>
+            <h2 class="sv-kopje-row">Totalen</h2>
         </div>
     </div>
 
