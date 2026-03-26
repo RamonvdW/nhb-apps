@@ -42,7 +42,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4 id="filters" data-url="{{ url_filters }}">Filters</h4>
+            <h2 class="sv-kopje-row" id="filters" data-url="{{ url_filters }}">Filters</h2>
         </div>
     </div>
 

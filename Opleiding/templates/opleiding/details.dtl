@@ -106,7 +106,7 @@
         <!-- witruimte -->
         <div class="row center">
             <div class="col s12">
-                <h4 id="inschrijven">Inschrijven</h4>
+                <h2 class="sv-kopje-row" id="inschrijven">Inschrijven</h2>
 
                 {% if hint_inloggen %}
                     <!-- rood bordje -->

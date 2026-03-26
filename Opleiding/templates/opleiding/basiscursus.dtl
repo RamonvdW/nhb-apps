@@ -34,28 +34,28 @@
         <div class="col s12">
             <div class="sv-kader">
 
-                <h4 class="sv-middel-blauw-text">Waarom?</h4>
+                <h2 class="sv-kopje-sectie-text">Waarom?</h2>
                 <p>Goede wedstrijdleiders en scheidsrechters zijn onmisbaar in de handboogsport.<br>
                     <span>Ze zorgen ervoor dat wedstrijden georganiseerd worden en dat daarbij de juiste spelregels en procedures toegepast worden.</span><br>
                     <span>Mede dankzij hen kunnen sporters en publiek praktisch ieder weekend genieten van mooie wedstrijden en competities, in alle disciplines.</span>
                 </p>
 
-                <h4 class="sv-middel-blauw-text">Voor wie?</h4>
+                <h2 class="sv-kopje-sectie-text">Voor wie?</h2>
                 <p>Wil jij ons team van wedstrijdleiders en scheidsrechters komen versterken en daarmee een bijdrage leveren aan het succes van onze sport?<br>
                     <span>Dan ben je hier op de juiste plek! De basiscursus is namelijk stap 1 op weg naar een carrière als <b>wedstrijdleider</b> en/of <b>scheidsrechter</b>.</span>
                 </p>
 
-                <h4 class="sv-middel-blauw-text">Wat leer ik?</h4>
+                <h2 class="sv-kopje-sectie-text">Wat leer ik?</h2>
                 <p>De basiscursus is een <b>theoretische opleiding</b> waarin je veel leert over actuele <b>reglementen en procedures</b> onder begeleiding van een ervaren docent.<br>De cursus is verdeeld over twee dagen en wordt afgesloten met een toets.</p>
 
-                <h4 class="sv-middel-blauw-text">Ingangseisen</h4>
+                <h2 class="sv-kopje-sectie-text">Ingangseisen</h2>
                 <p>Om deel te kunnen nemen aan de basiscursus doe je eerst de online <b>instaptoets</b>.<br>
                     <span>Deze is er 1) omdat het leuk is om je reglementenkennis te testen en</span><br>
                     <span>2) omdat je daarmee aantoont dat je over enige basiskennis beschikt over de handboogsport.</span>
                 </p>
                 <p>Wanneer je deze toets met een minimaal {{ eis_percentage }}% goed-score doorlopen hebt, kan je je inschrijven voor één van de geplande basiscursussen.</p>
 
-                <h4 class="sv-middel-blauw-text">Waar en wanneer?</h4>
+                <h2 class="sv-kopje-sectie-text">Waar en wanneer?</h2>
                 {% if momenten %}
                     <p>De basiscursus wordt op de volgende locaties in het land gehouden:</p>
                     <p>
@@ -67,7 +67,7 @@
                     <p>De locaties en datums voor de volgende basiscursus zijn nog niet bekend.</p>
                 {% endif %}
 
-                <h4 class="sv-middel-blauw-text">Vervolg</h4>
+                <h2 class="sv-kopje-sectie-text">Vervolg</h2>
                 <p>Nadat je de basiscursus hebt afgerond kan je jezelf verder specialiseren als wedstrijdleider en/of scheidsrechter.<br>
                     <span>Op een niveau dat past bij je persoonlijke ambitie.</span>
                 </p>
@@ -81,7 +81,7 @@
         <!-- witruimte -->
         <div class="row center">
             <div class="col s12">
-                <h4 id="inschrijven">Inschrijven</h4>
+                <h2 class="sv-kopje-row" id="inschrijven">Inschrijven</h2>
                 <p>Om in te schrijven moet je KHSN lid zijn, een account aanmaken en inloggen.</p>
             </div>
         </div>
@@ -92,7 +92,7 @@
             <!-- witruimte -->
             <div class="row center">
                 <div class="col s12">
-                    <h4 id="inschrijven">Inschrijven</h4>
+                    <h2 class="sv-kopje-row" id="inschrijven">Inschrijven</h2>
                     <p>Volgens onze administratie heb je de instaptoets gehaald op {{ toets.afgerond|date:"j F Y" }}<br>Deze blijft nog {{ toets_geldig_dagen }} dagen geldig</p>
                 </div>
             </div>

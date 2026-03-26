@@ -26,7 +26,7 @@
 
                 {% if verkeerde_fase %}
 
-                    <h4 class="sv-rood-text">Wacht</h4>
+                    <p class="sv-kopje-row sv-rood-text">Wacht</p>
                     <p>De rayonkampioenschappen kunnen op dit moment nog niet doorgezet worden. Wacht tot de tijdlijn fase L bereikt heeft.</p>
 
                 {% elif url_doorzetten %}
@@ -40,7 +40,7 @@
 
                 {% elif problemen %}
 
-                    <h4 class="sv-rood-text">Wacht</h4>
+                    <p class="sv-kopje-row sv-rood-text">Wacht</p>
 
                     <p>Onderstaande problemen moeten eerst opgelost worden:</p>
 

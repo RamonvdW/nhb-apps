@@ -11,7 +11,7 @@ h1, h2, h3, h4, h5, h6 {
   margin: 0;
 }
 
-// grote banner op de landing page van de site
+// grote banner op de landing page van de site (h1)
 .sv-site-banner-groot {
   font-family: 'Fira Sans', sans-serif;
   font-size: 4.2rem;
@@ -29,7 +29,7 @@ h1, h2, h3, h4, h5, h6 {
   color: $secondary-color;    // rood
 }
 
-// kopje bovenaan de pagina
+// kopje bovenaan de pagina (h1)
 .sv-kopje-pagina {
   font-family: 'Fira Sans', sans-serif;
   font-size: 2.92rem;
@@ -39,7 +39,7 @@ h1, h2, h3, h4, h5, h6 {
   color: $secondary-color;    // rood
 }
 
-// groter tussenkopje
+// groter tussenkopje (h2)
 .sv-kopje-sectie {
   font-family: 'Fira Sans', sans-serif;
   font-size: 2.92rem;
@@ -49,7 +49,7 @@ h1, h2, h3, h4, h5, h6 {
   color: $primary-color-dark;
 }
 
-// tussenkopje boven een blauw balk
+// tussenkopje boven een blauw balk (h2 of h3)
 .sv-kopje-row {
   font-family: 'Fira Sans', sans-serif;
   font-size: 2.28rem;
@@ -57,6 +57,16 @@ h1, h2, h3, h4, h5, h6 {
   line-height: 110%;
   margin: 1.5rem 0 0.9rem 0;
   color: $off-black;
+}
+
+// tussenkopje in een blok text
+.sv-kopje-sectie-text {
+  font-family: 'Fira Sans', sans-serif;
+  font-size: 2.28rem;
+  font-weight: 400;
+  line-height: 100%;
+  margin: 1.5rem 0 0.9rem 0;
+  color: $primary-color;    // middle-blauw
 }
 
 // margin: ($h1-fontsize / 1.5) 0 ($h1-fontsize / 2.5) 0;

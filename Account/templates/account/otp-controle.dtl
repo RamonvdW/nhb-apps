@@ -102,7 +102,7 @@
         <!-- witruimte -->
         <div class="row center">
             <div class="col s12">
-                <h4 class="sv-rood-text">Tweede factor kwijt?</h4>
+                <h2 class="sv-kopje-row sv-rood-text">Tweede factor kwijt?</h2>
             </div>
         </div>
 

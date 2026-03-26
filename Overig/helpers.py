@@ -56,7 +56,7 @@ def make_valid_hashtag(text: str) -> str:
             Compound Klasse 1 --> compound-klasse-1
 
         URL: /some/url/#compound-klasse-1
-        id:  <h4 id="compound-klasse-1">Compound Klasse 1</h4>
+        id:  <h2 id="compound-klasse-1">Compound Klasse 1</h4>
     """
     hashtag = text.lower().replace(' ', '-')
     return hashtag

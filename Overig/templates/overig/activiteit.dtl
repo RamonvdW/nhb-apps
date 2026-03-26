@@ -159,7 +159,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4 id="hulp">Mogelijk hulp nodig</h4>
+            <h2 class="sv-kopje-row" id="hulp">Mogelijk hulp nodig</h2>
             <p>Onderstaande {{ hulp|length }} accounts zijn aangemaakt en gekoppeld aan een rol,<br>maar hebben nog geen 2FA gekoppeld.</p>
         </div>
     </div>
@@ -207,7 +207,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4 id="nieuwe">Nieuwe accounts</h4>
+            <h2 class="sv-kopje-row" id="nieuwe">Nieuwe accounts</h2>
             <p>(nieuwste 50)</p>
         </div>
     </div>
@@ -256,7 +256,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4 id="recent">Recente activiteit</h4>
+            <h2 class="sv-kopje-row" id="recent">Recente activiteit</h2>
             <p>Accounts waar recent op ingelogd is (maximaal 50)</p>
         </div>
     </div>
@@ -302,7 +302,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4 id="poging">Mislukte inlog pogingen</h4>
+            <h2 class="sv-kopje-row" id="poging">Mislukte inlog pogingen</h2>
             <p>Accounts waar recent geprobeerd is op in te loggen (maximaal 50)</p>
             <p>(dit zijn accounts waar de ooit op ingelogd is en daarna een mislukte inlogpoging)</p>
         </div>
@@ -352,7 +352,7 @@
     {% if age_groups %}
         <div class="row center">
             <div class="col s12">
-                <h4 id="leeftijdsgroepen">Leeftijd van de gebruikers</h4>
+                <h2 class="sv-kopje-row" id="leeftijdsgroepen">Leeftijd van de gebruikers</h2>
                 <p>Leeftijd van de {{ age_groups_total }} actieve gebruikers, gegroepeerd per 10 jaar.</p>
             </div>
         </div>

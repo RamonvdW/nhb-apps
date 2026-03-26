@@ -23,7 +23,7 @@
         <!-- witruimte -->
         <div class="row center">
             <div class="col s12">
-                <h4 class="sv-rood-text">Wat doe je hier?!</h4>
+                <p class="sv-kopje-row sv-rood-text">Wat doe je hier?!</p>
                 <p class="center">De klassengrenzen zijn al vastgesteld.</p>
             </div>
         </div>
