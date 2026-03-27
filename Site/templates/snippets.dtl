@@ -348,7 +348,8 @@
 
     <div class="modal" id="bevestig_verwijder_buitenbaan">
         <div class="modal-content center">
-            <h5>Verwijder buitenbaan?</h5>
+            <p class="sv-kopje-modal-dialog">Verwijder buitenbaan?</p>
+
             <p>Wil je de buitenbaan van vereniging<br><b>{{ ver }}</b><br>verwijderen uit het systeem?</p>
 
             <form action="{{ url_verwijder_buitenbaan }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">

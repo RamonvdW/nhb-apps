@@ -112,7 +112,8 @@
     {% if inschrijving.url_afmelden %}
         <div class="modal" id="bevestig_afmelden_{{ inschrijving.pk }}">
             <div class="modal-content center">
-                <h5>Verwijder aanmelding?</h5>
+                <p class="sv-kopje-modal-dialog">Verwijder aanmelding?</p>
+
                 <p>Wil je de aanmelding van <b>{{ sporter.volledige_naam }}</b><br>voor het evenement <b>{{ inschrijving.evenement.titel }}</b><br>verwijderen uit het systeem?</p>
 
                 <form action="{{ inschrijving.url_afmelden }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">

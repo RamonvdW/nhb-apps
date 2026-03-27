@@ -94,7 +94,7 @@
                             {% endif %}
                             <tr class="sv-table-sectie-header">
                                 <td colspan="7" class="center">
-                                    <h5>{{ deelnemer.indiv_klasse.beschrijving }}</h5>
+                                    <h2 class="sv-kopje-row">{{ deelnemer.indiv_klasse.beschrijving }}</h2>
                                     {% if deelnemer.url_open_indiv %}
                                         <br>
                                         {% sv-knop-ext url=deelnemer.url_open_indiv tekst='Wedstrijdformulier' %}
@@ -179,7 +179,7 @@
                             {% endif %}
                             <tr class="sv-table-sectie-header">
                                 <td colspan="5" class="center">
-                                    <h5>{{ team.team_klasse.beschrijving }}</h5>
+                                    <h2 class="sv-kopje-in-tabel">{{ team.team_klasse.beschrijving }}</h2>
                                     {% sv-knop-nav url=team.url_download_teams icon='download' tekst='Download excel' %}
                                 </td>
                             </tr>

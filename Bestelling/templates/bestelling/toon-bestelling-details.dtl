@@ -178,7 +178,8 @@
 
         <div class="modal" id="bevestig_annuleer">
             <div class="modal-content center black-text">
-                <h5>Bestelling annuleren?</h5>
+                <p class="sv-kopje-modal-dialog">Bestelling annuleren?</p>
+
                 <p>Weet je zeker dat je deze bestelling niet door wilt laten gaan?</p>
                 <p>Gemaakte reserveringen voor wedstrijden / evenementen / producten vervallen.</p>
                 <p>Doet dit alleen als je nog geen betaling gedaan hebt.</p>

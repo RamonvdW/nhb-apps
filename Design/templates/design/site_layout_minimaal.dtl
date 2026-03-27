@@ -30,7 +30,7 @@
 
         {% include 'design/site_layout_fonts.dtl' %}
 
-        <link rel="stylesheet" href="{% static 'css/materialize-new-335.css' %}">
+        <link rel="stylesheet" href="{% static 'css/materialize-new-345.css' %}">
 
         {% include 'design/site_layout_favicons.dtl' %}
 
@@ -56,18 +56,18 @@
                  kan weggehaald worden door dit block te vervangen in de template -->
             {% block terug_naar_af %}
                 <p>&nbsp;</p>
-                <h5>Wat kan je nog meer doen?</h5>
+                <h2 class="sv-kopje-klein">Wat kan je nog meer doen?</h2>
 
                 <p>Onderstaande knop brengt je naar de startpagina van MijnHandboogsport.</p>
                 {% sv-knop-nav url='/plein/' icon='het plein 2' tekst='Het plein' %}
             {% endblock %}
 
             <p>&nbsp;</p>
-            <h5>Hulp nodig?</h5>
+            <h2 class="sv-kopje-klein">Hulp nodig?</h2>
 
             <p>Lukt het niet om het probleem op te lossen? Stuur dan een e-mail naar het volgende adres (druk op de knop om je mailprogramma te starten):</p>
             {% sv-knop-mailto kleur='blauw' email=email_support tekst=email_support icon='' %}
-            <p>Schrijf de volgende informatie in de e-mail:<br>- Je bondsnummer<br>- Datum en tijdstip waarop het probleem ontstond<br>- Beschrijving van je probleem</p>
+            <p>Schrijf de volgende informatie in de e-mail:<br>&bull; Je bondsnummer<br>&bull; Datum en tijdstip waarop het probleem ontstond<br>&bull; Beschrijving van je probleem</p>
         </div>
     </body>
 </html>

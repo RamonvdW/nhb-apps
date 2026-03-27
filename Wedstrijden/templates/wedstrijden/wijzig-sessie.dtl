@@ -163,7 +163,8 @@
 
         <div class="modal" id="bevestig_verwijder_sessie">
             <div class="modal-content center">
-                <h5>Verwijder sessie?</h5>
+                <p class="sv-kopje-modal-dialog">Verwijder sessie?</p>
+
                 <p>Wil je deze sessie echt verwijderen?</p>
 
                 <form action="{{ url_verwijder }}" method="post" onsubmit="document.getElementById('submit_knop2').disabled=true; return true;">

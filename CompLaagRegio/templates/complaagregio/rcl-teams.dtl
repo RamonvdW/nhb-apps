@@ -150,7 +150,8 @@
 
                         <div class="modal" id="bevestig_verwijder_team_{{ team.pk }}">
                             <div class="modal-content center">
-                                <h5>Verwijder team?</h5>
+                                <p class="sv-kopje-modal-dialog">Verwijder team?</p>
+
                                 <p>Wil je team <b>{{ team.team_naam }}</b> van vereniging<br><b>{{ team.vereniging }}</b><br>verwijderen uit het systeem?</p>
 
                                 <form action="{{ team.url_verwijder }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">

@@ -148,7 +148,7 @@
 
                     <tr class="sv-table-sectie-header" id="{{ obj.klasse_hashtag }}">
                         <td colspan="8" class="center">
-                            <h5>{{ obj.klasse_str }}</h5>
+                            <h2 class="sv-kopje-row">{{ obj.klasse_str }}</h2>
                             {% if obj.match %}
                                 {% if comp.rk_is_afgelast %}<s>{% endif %}
                                 <span>{{ obj.match.datum_wanneer }} om {{ obj.match.tijd_begin_wedstrijd }} bij {{ obj.match.vereniging }}</span>

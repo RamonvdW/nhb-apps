@@ -31,14 +31,14 @@
                     {% if match.do_header %}
                         <tr>
                             <td colspan="6" class="center">
-                                <h5 class="sv-middel-blauw-text">{{ match.datum_wanneer }}</h5>
+                                <span class="sv-kopje-in-tabel">{{ match.datum_wanneer }}</span>
                             </td>
                         </tr>
                     {% endif %}
 
                     <tr>
                         <td colspan="6">
-                            <h6>{% if match.vereniging %}{{ match.vereniging.ver_nr_en_naam }}{% else %}???{% endif %}</h6>
+                            <span class="sv-kopje-klein">{% if match.vereniging %}{{ match.vereniging.ver_nr_en_naam }}{% else %}???{% endif %}</span>
                         </td>
                     </tr>
                     <tr>

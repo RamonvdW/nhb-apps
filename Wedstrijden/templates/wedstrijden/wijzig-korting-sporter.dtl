@@ -132,7 +132,8 @@
 
         <div class="modal" id="bevestig_annuleer">
             <div class="modal-content center">
-                <h5>Korting verwijderen?</h5>
+                <p class="sv-kopje-modal-dialog">Korting verwijderen?</p>
+
                 <p>Wil je deze korting echt verwijderen?</p>
 
                 <form action="{{ url_verwijder }}" method="post" onsubmit="document.getElementById('submit_knop2').disabled=true; return true;">

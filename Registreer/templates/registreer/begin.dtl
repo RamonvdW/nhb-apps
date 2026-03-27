@@ -66,7 +66,8 @@
         <!-- modal dialog -->
         <div class="modal" id="vang_khsn_lid">
             <div class="modal-content center">
-                <h5>Niet bedoeld voor leden van de KHSN</h5>
+                <p class="sv-kopje-modal-dialog">Niet bedoeld voor leden van de KHSN</p>
+
                 <p>Ben je lid bij een vereniging in Nederland die aangesloten is bij de KHSN?</p>
                 <p>Heb je al een 6-cijferig bondsnummer van de KHSN?</p>
 

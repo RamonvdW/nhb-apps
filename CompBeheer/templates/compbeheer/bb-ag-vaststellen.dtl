@@ -43,7 +43,7 @@
             <!-- wit informatie veld -->
             <div class="col s12 m10 offset-m1" style="margin-top:30px; margin-bottom:30px">
                 <div class="sv-kader">
-                    <h5 class="sv-rood-text">Controleer dat onderstaande gegevens juist zijn.</h5>
+                    <p class="sv-kopje-klein-text sv-rood-text">Controleer dat onderstaande gegevens juist zijn.</p>
                     <p>Gebruik uitslag <b>seizoen {{ seizoen }}</b>, afstand <b>{{ afstand }}m</b>.</p>
                     <p>Aantal scores: <b>minstens {{ aantal_scores }}</b>.</p>
                 </div>
@@ -52,14 +52,16 @@
             <!-- wit informatie veld -->
             <div class="col s12 m10 offset-m1">
                 <div class="sv-kader-form">
-                    <p>Als bovenstaande gegevens correct zijn, druk dan op de volgende knop:</p>
+                    <div class="center">
+                        <p>Als bovenstaande gegevens correct zijn, druk dan op de volgende knop:</p>
 
-                    <form action="{{ url_vaststellen }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
-                        {% csrf_token %}
-                        <input class="btn-sv-rood" id="submit_knop" name="button_vaststellen" type="submit" value="Ja, stel de aanvangsgemiddelden vast">
-                    </form>
+                        <form action="{{ url_vaststellen }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
+                            {% csrf_token %}
+                            <input class="btn-sv-rood" id="submit_knop" name="button_vaststellen" type="submit" value="Ja, stel de aanvangsgemiddelden vast">
+                        </form>
 
-                    <br>
+                        <br>
+                    </div>
                 </div>
             </div>
 

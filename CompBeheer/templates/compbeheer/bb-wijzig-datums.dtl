@@ -41,7 +41,9 @@
                     </tr>
 
                     <tr>
-                        <td colspan="3" class="center"><h5>Regiocompetitie</h5></td>
+                        <td colspan="3" class="center">
+                            <h2 class="sv-kopje-in-tabel">Regiocompetitie</h2>
+                        </td>
                     </tr>
 
                     <tr>
@@ -56,7 +58,9 @@
                     </tr>
 
                     <tr>
-                        <td colspan="3" class="center"><h5>Rayonkampioenschappen</h5></td>
+                        <td colspan="3" class="center">
+                            <h2 class="sv-kopje-in-tabel">Rayonkampioenschappen</h2>
+                        </td>
                     </tr>
 
                     <tr>
@@ -90,7 +94,9 @@
                     </tr>
 
                     <tr>
-                        <td colspan="3" class="center"><h5>Bondskampioenschappen</h5></td>
+                        <td colspan="3" class="center">
+                            <h2 class="sv-kopje-in-tabel">Bondskampioenschappen</h2>
+                        </td>
                     </tr>
 
                     <tr>

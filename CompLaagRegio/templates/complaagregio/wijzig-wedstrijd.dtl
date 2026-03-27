@@ -331,7 +331,8 @@
 
         <div class="modal" id="bevestig_verwijder_wedstrijd">
             <div class="modal-content center">
-                <h5>Verwijder wedstrijd?</h5>
+                <p class="sv-kopje-modal-dialog">Verwijder wedstrijd?</p>
+
                 <p>Wil je deze wedstrijd echt verwijderen uit de planning?</p>
 
                 <form action="{{ url_verwijderen }}" method="post" onsubmit="document.getElementById('submit_knop2').disabled=true; return true;">

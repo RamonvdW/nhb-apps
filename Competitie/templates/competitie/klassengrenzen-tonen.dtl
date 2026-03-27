@@ -30,7 +30,7 @@
         <!-- witruimte -->
         <div class="row center">
             <div class="col s12">
-                <h5>Wedstrijdklassen individuele competitie</h5>
+                <h2 class="sv-kopje-row">Individuele competitie</h2>
                 <p>(Regio + RK + BK)</p>
             </div>
         </div>
@@ -79,7 +79,7 @@
         <!-- witruimte -->
         <div class="row center" style="margin-top:50px">
             <div class="col s12">
-                <h5>Wedstrijdklassen regiocompetitie teams</h5>
+                <h2 class="sv-kopje-row">Regiocompetitie teams</h2>
             </div>
         </div>
 
@@ -132,7 +132,7 @@
         <!-- witruimte -->
         <div class="row center" style="margin-top:50px">
             <div class="col s12">
-                <h5>Wedstrijdklassen RK teams en BK teams</h5>
+                <h2 class="sv-kopje-row">RK teams en BK teams</h2>
             </div>
         </div>
 

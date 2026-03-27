@@ -24,7 +24,7 @@
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2 xl6 offset-xl3">
             <div class="sv-kader left-align">
-                <h5>Stappenplan</h5>
+                <p class="sv-kopje-klein-text">Stappenplan</p>
                 <p class="valign-wrapper sv-rood-text">
                     {% sv-icon 'otp stap 1' use='text' extra_style="margin-right:5px" kleur='rood' %}
                     <b>Installeer een applicatie op je mobiel of tablet.</b>
@@ -79,7 +79,7 @@
     <div class="row center">
         <div class="col s12">
 
-            <h5>Ik heb een andere app!</h5>
+            <p class="sv-kopje-klein-text">Ik heb een andere app!</p>
             <p>Andere apps worden ook ondersteund, zelfs een extensie / plug-in voor je browser.</p>
             <p>MijnHandboogsport vereist de TOPT standaard (TOTP = Time-based One Time Password).</p>
         </div>

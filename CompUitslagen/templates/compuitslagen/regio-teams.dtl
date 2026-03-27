@@ -229,7 +229,9 @@
 
                 {% if team.break_klasse %}
                     <tr class="sv-table-sectie-header" id="{{ team.klasse_hashtag }}">
-                        <td colspan="20" class="center"><h5>Klasse: {{ team.klasse_str }}</h5></td>
+                        <td colspan="20" class="center">
+                            <h2 class="sv-kopje-row">Klasse: {{ team.klasse_str }}</h2>
+                        </td>
                     </tr>
                     <tr class="sv-table-header">
                         <td class="sv-table-zijrand" rowspan="{{ team.aantal_in_groep }}"></td>

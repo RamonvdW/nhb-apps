@@ -113,7 +113,8 @@
         <!-- modal dialog -->
         <div class="modal" id="verwijder_poule">
             <div class="modal-content center">
-                <h5>Verwijderen poule?</h5>
+                <p class="sv-kopje-modal-dialog">Verwijderen poule?</p>
+
                 <p>Heb je deze poule niet meer nodig en wil je 'm verwijderen?</p>
 
                 <form action="{{ url_opslaan }}" method="post" onsubmit="document.getElementById('submit_knop2').disabled=true; return true;">

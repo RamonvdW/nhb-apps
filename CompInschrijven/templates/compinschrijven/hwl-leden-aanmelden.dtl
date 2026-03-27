@@ -127,7 +127,7 @@
                     {% if leden_jeugd %}
 
                         <br>
-                        <h5 class="center sv-blauw-text">Jeugd</h5>
+                        <p class="sv-kopje-in-tabel center sv-blauw-text">Jeugd</p>
 
                         <table class="sv-kader-tabel" id="table1">
                             <thead>
@@ -189,7 +189,7 @@
                     {% endif %}
 
                     <br>
-                    <h5 class="center sv-blauw-text">Senioren</h5>
+                    <p class="sv-kopje-in-tabel center sv-blauw-text">Senioren</p>
 
                     <table class="sv-kader-tabel" id="table2">
                         <thead>

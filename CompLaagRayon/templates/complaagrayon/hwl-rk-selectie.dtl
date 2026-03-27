@@ -80,7 +80,7 @@
 
                         <tr class="sv-table-sectie-header">
                             <td colspan="5" class="center">
-                                <h5>{{ obj.klasse_str }}</h5>
+                                <h2 class="sv-kopje-in-tabel">{{ obj.klasse_str }}</h2>
                             </td>
                         </tr>
 

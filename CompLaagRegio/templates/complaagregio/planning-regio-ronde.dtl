@@ -317,7 +317,8 @@
 
             <div class="modal" id="bevestig_verwijder_blok">
                 <div class="modal-content center">
-                    <h5>Verwijder blok?</h5>
+                    <p class="sv-kopje-modal-dialog">Verwijder blok?</p>
+
                     <p>Wil je dit blok echt verwijderen uit de planning?</p>
 
                     <form action="{{ url_verwijderen }}" method="post" onsubmit="document.getElementById('submit_knop4').disabled=true; return true;">

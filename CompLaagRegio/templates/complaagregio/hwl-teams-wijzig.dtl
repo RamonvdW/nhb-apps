@@ -103,7 +103,7 @@
         <!-- witruimte -->
         <div class="row center">
             <div class="col s12">
-                <h5>Niet meer nodig?</h5>
+                <h2 class="sv-kopje-row">Niet meer nodig?</h2>
                 {% sv-knop-modal 'bevestig_verwijder_team' '' kleur='blauw' icon='verwijder' tekst='Verwijder dit team' %}
             </div>
         </div>
@@ -111,7 +111,8 @@
         <!-- modal dialog -->
         <div class="modal" id="bevestig_verwijder_team">
             <div class="modal-content center">
-                <h5>Verwijder dit team?</h5>
+                <p class="sv-kopje-modal-dialog">Verwijder dit team?</p>
+
                 <p>Wil je dit team van vereniging<br><b>{{ team.vereniging }}</b><br>verwijderen?</p>
 
                 <form action="{{ url_verwijderen }}" method="post" onsubmit="document.getElementById('submit_knop2').disabled=true; return true;">

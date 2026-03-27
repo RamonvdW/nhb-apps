@@ -32,13 +32,14 @@
                 <p class="sv-rood-text">Na deze actie moeten de HWL's geïnformeerd worden dat ze de RK teams weer compleet moeten maken.</p>
 
                 {% if url_doorzetten %}
-
-                    <form action="{{ url_doorzetten }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
-                        {% csrf_token %}
-                        <input class="btn-sv-rood" id="submit_knop" name="button_afsluiten" type="submit" value="Doorzetten naar de volgende fase">
-                    </form>
-
-                    <br>
+                    <div class="center" style="margin:30px 0px 20px 0px">
+                        <form action="{{ url_doorzetten }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
+                            {% csrf_token %}
+                            <input class="btn-sv-rood" id="submit_knop" name="button_afsluiten" type="submit" value="Doorzetten naar de volgende fase">
+                        </form>
+                    </div>
+                {% else %}
+                    <p>Doorzetten is nog niet mogelijk. Wacht tot de tijdlijn fase G bereikt heeft.</p>
                 {% endif %}
 
             </div>
@@ -49,8 +50,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h2 class="sv-kopje-row">Wacht</h2>
-            <p>De regiocompetitie kan op dit moment nog niet doorgezet worden.<br><span class="sv-rood-text">Wacht tot de tijdlijn fase G bereikt heeft.</span><br>In de tabel hieronder kan je zien op welke regio's we moeten wachten.</p>
+            <h2 class="sv-kopje-row">Status van elke regio</h2>
         </div>
     </div>
 
@@ -58,8 +58,6 @@
     <div class="row-sv-blauw">
         <div class="col s12 m8 offset-m2 l6 offset-l3 xl4 offset-xl4">
             <div class="sv-kader">
-
-                <h5>Status regiocompetities</h5>
                 <table class="sv-kader-tabel">
                     <thead>
                         <tr>

@@ -110,7 +110,7 @@
 
                     <tr class="sv-table-sectie-header" id="{{ team.klasse_hashtag }}">
                         <td colspan="7" class="center">
-                            <h5>{{ team.klasse_str }}</h5>
+                            <h2 class="sv-kopje-row">{{ team.klasse_str }}</h2>
                             {% if team.match %}
                                 {% if comp.bk_is_afgelast %}<s>{% endif %}
                                 <span>{{ team.match.datum_wanneer }} om {{ team.match.tijd_begin_wedstrijd }} bij {{ team.match.vereniging }}</span>

@@ -675,7 +675,8 @@
 
         <div class="modal" id="bevestig_annuleer">
             <div class="modal-content center">
-                <h5>Annuleren?</h5>
+                <p class="sv-kopje-modal-dialog">Annuleren?</p>
+
                 <p>Wil je deze wedstrijd echt annuleren?</p>
 
                 <form action="{{ url_annuleer }}" method="post" onsubmit="document.getElementById('submit_knop4').disabled=true; return true;">
@@ -706,8 +707,8 @@
             <div class="modal" id="bevestig_verwijder">
                 <div class="modal-content center">
                     {% if url_verwijder %}
+                        <p class="sv-kopje-modal-dialog">Verwijderen?</p>
 
-                        <h5>Verwijderen?</h5>
                         <p>Wil je deze wedstrijd echt verwijderen?</p>
 
                         <form action="{{ url_verwijder }}" method="post" onsubmit="document.getElementById('submit_knop5').disabled=true; return true;">

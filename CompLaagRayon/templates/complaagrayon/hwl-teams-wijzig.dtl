@@ -93,7 +93,8 @@
         <!-- modal dialog -->
         <div class="modal" id="bevestig_verwijder_team">
             <div class="modal-content center">
-                <h5>Verwijder dit RK team?</h5>
+                <p class="sv-kopje-modal-dialog">Verwijder dit RK team?</p>
+
                 <p>Wil je dit RK team van vereniging<br><b>{{ rk_team.vereniging }}</b><br>verwijderen?</p>
 
                 <form action="{{ url_verwijderen }}" method="post" onsubmit="document.getElementById('submit_knop2').disabled=true; return true;">

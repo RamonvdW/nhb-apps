@@ -73,6 +73,12 @@ def maak_regiocomp_zoom_knoppen(context, comp_pk, rayon=None, regio=None):
                                             kwargs={'comp_pk': comp_pk, 'regio_pk': obj2.pk})
     # for
 
+def _punt_einde_zin(zin: str) -> str:
+    if len(zin) > 0:
+        last = zin[-1]
+        if last not in "!?.":
+            zin += '.'
+    return zin
 
 def formatteer_objs(objs):
 
@@ -94,7 +100,7 @@ def formatteer_objs(objs):
             obj_aantal = obj
             volgorde = obj.indiv_klasse.volgorde
 
-        obj.notities = obj.inschrijf_notitie
+        obj.notities = _punt_einde_zin(obj.inschrijf_notitie.strip())
 
         try:
             voorkeuren = lid2voorkeuren[obj.sporterboog.sporter.lid_nr]
@@ -104,10 +110,11 @@ def formatteer_objs(objs):
             obj.voorkeuren = voorkeuren
 
             if voorkeuren.para_voorwerpen:
-                obj.notities += '\nSporter laat voorwerpen op de schietlijn staan\n'
+                obj.notities += ' Sporter laat voorwerpen op de schietlijn staan.'
 
-            if voorkeuren.opmerking_para_sporter:
-                obj.notities = obj.notities + '\n' + voorkeuren.opmerking_para_sporter
+            para_notities = _punt_einde_zin(voorkeuren.opmerking_para_sporter.strip())
+            if para_notities:
+                obj.notities = obj.notities + ' ' + para_notities
 
         obj.notities = obj.notities.replace('\n\n', '\n')
         obj.notities = textwrap.fill(obj.notities, 30)

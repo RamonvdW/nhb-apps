@@ -133,7 +133,7 @@
             </td>
 
             <td class="center" style="width:60%">       <!-- 60% voorkomt springen van de knoppen -->
-                <h5>{{ datum_vanaf|date:'F Y' }}</h5>
+                <p class="sv-kopje-klein-text">{{ datum_vanaf|date:'F Y' }}</p>
             </td>
 
             <!-- knop -->
