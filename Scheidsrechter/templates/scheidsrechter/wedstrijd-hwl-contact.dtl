@@ -55,8 +55,8 @@
                 {% for dag in wed.dagen %}
 
                     <tr>
-                        <td colspan="2" class="center sv-blauw-text">
-                            <h6>{{ dag.datum }}</h6>
+                        <td colspan="2" class="center">
+                            <span class="sv-kopje-in-tabel">{{ dag.datum }}</span>
                         </td>
                     </tr>
 

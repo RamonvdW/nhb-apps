@@ -78,7 +78,9 @@
 
                             {% if opleiding.titel != '' %}
                                 <tr>
-                                    <td colspan="3" class="center"><h6 class="sv-blauw-text">Datums en locaties</h6></td>
+                                    <td colspan="3" class="center">
+                                        <span class="sv-kopje-in-tabel">Datums en locaties</span>
+                                    </td>
                                 </tr>
 
                                 {% for moment in momenten %}
@@ -113,7 +115,9 @@
                             {% endif %}
 
                             <tr>
-                                <td colspan="3" class="center"><h6 class="sv-blauw-text">Basisgegevens</h6></td>
+                                <td colspan="3" class="center">
+                                    <span class="sv-kopje-in-tabel">Basisgegevens</span>
+                                </td>
                             </tr>
 
                             <tr>
@@ -146,7 +150,9 @@
 
 
                             <tr>
-                                <td colspan="3" class="center sv-blauw-text"><h6>Periode en belasting</h6></td>
+                                <td colspan="3" class="center">
+                                    <span class="sv-kopje-in-tabel">Periode en belasting</span>
+                                </td>
                             </tr>
 
                             <tr>
@@ -189,7 +195,9 @@
 
 
                             <tr>
-                                <td colspan="3" class="center sv-blauw-text"><h6>Voorwaarden</h6></td>
+                                <td colspan="3" class="center">
+                                    <span class="sv-kopje-in-tabel">Voorwaarden</span>
+                                </td>
                             </tr>
 
                             <tr>

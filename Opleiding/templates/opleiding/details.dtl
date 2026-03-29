@@ -36,8 +36,8 @@
             <table class="sv-kader-tabel">
 
                 <tr>
-                    <td colspan="2" class="center sv-blauw-text">
-                        <h6>Informatie</h6>
+                    <td colspan="2" class="center">
+                        <span class="sv-kopje-in-tabel">Informatie</span>
                     </td>
                 </tr>
 

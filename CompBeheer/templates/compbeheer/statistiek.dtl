@@ -29,7 +29,7 @@
             <div class="col s12 m10 offset-m1 l8 offset-l2 xl6 offset-xl3">
                 <table class="sv-kader-tabel">
                     <tr>
-                        <td colspan="4" class="center sv-blauw-text">
+                        <td colspan="4" class="center">
                             <h2 class="sv-kopje-in-tabel">Deelnemers aantallen</h2>
                         </td>
                     </tr>
@@ -59,7 +59,7 @@
                     </tr>
 
                     <tr>
-                        <td colspan="4" class="center sv-blauw-text">
+                        <td colspan="4" class="center">
                             <h2 class="sv-kopje-in-tabel">Regiocompetitie individueel</h2>
                         </td>
                     </tr>
@@ -103,7 +103,7 @@
 
 
                     <tr>
-                        <td colspan="4" class="center sv-blauw-text">
+                        <td colspan="4" class="center">
                             <h2 class="sv-kopje-in-tabel">Regiocompetitie teams</h2>
                         </td>
                     </tr>
@@ -125,7 +125,7 @@
                     {% endif %}
 
                     <tr>
-                        <td colspan="4" class="center sv-blauw-text">
+                        <td colspan="4" class="center">
                             <h2 class="sv-kopje-in-tabel">Leeftijdsgroepen regiocompetitie</h2>
                         </td>
                     </tr>
@@ -169,7 +169,7 @@
 
 
                     <tr>
-                        <td colspan="4" class="center sv-blauw-text">
+                        <td colspan="4" class="center">
                             <h2 class="sv-kopje-in-tabel">Rayonkampioenschappen individueel</h2>
                         </td>
                     </tr>
@@ -205,7 +205,7 @@
 
 
                     <tr>
-                        <td colspan="4" class="center sv-blauw-text">
+                        <td colspan="4" class="center">
                             <h2 class="sv-kopje-in-tabel">Rayonkampioenschappen teams</h2>
                         </td>
                     </tr>
@@ -219,7 +219,7 @@
 
 
                     <tr>
-                        <td colspan="4" class="center sv-blauw-text">
+                        <td colspan="4" class="center">
                             <h2 class="sv-kopje-in-tabel">Leeftijdsgroepen rayonkampioenschappen</h2>
                         </td>
                     </tr>
@@ -263,7 +263,7 @@
 
 
                     <tr>
-                        <td colspan="4" class="center sv-blauw-text">
+                        <td colspan="4" class="center">
                             <h2 class="sv-kopje-in-tabel">Bondskampioenschappen individueel</h2>
                         </td>
                     </tr>
@@ -283,7 +283,7 @@
                     </tr>
 
                     <tr>
-                        <td colspan="4" class="center sv-blauw-text">
+                        <td colspan="4" class="center">
                             <h2 class="sv-kopje-in-tabel">Bondskampioenschappen teams</h2>
                         </td>
                     </tr>

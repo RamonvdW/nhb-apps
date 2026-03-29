@@ -95,7 +95,9 @@
                         <table class="sv-kader-tabel">
 
                             <tr>
-                                <td colspan="2" class="center sv-blauw-text"><h6>Instellingen</h6></td>
+                                <td colspan="2" class="center">
+                                    <span class="sv-kopje-in-tabel">Instellingen</span>
+                                </td>
                             </tr>
 
                             <tr>
@@ -421,7 +423,9 @@
 
 
                             <tr>
-                                <td colspan="2" class="center sv-blauw-text"><h6>Contactgegevens organisatie</h6></td>
+                                <td colspan="2" class="center">
+                                    <span class="sv-kopje-in-tabel">Contactgegevens organisatie</span>
+                                </td>
                             </tr>
 
                             <tr>
@@ -484,7 +488,9 @@
 
 
                             <tr>
-                                <td colspan="2" class="center sv-blauw-text"><h6>Inschrijfgeld</h6></td>
+                                <td colspan="2" class="center">
+                                    <span class="sv-kopje-in-tabel">Inschrijfgeld</span>
+                                </td>
                             </tr>
 
                             <tr>
@@ -504,7 +510,9 @@
                             </tr>
 
                             <tr>
-                                <td colspan="2" class="center sv-blauw-text"><h6>Scheidsrechter behoefte</h6></td>
+                                <td colspan="2" class="center">
+                                    <span class="sv-kopje-in-tabel">Scheidsrechter behoefte</span>
+                                </td>
                             </tr>
 
                             <tr>
@@ -559,7 +567,7 @@
 
                             <tr>
                                 <td colspan="2" class="center">
-                                    <h6 class="sv-blauw-text">Uitslag</h6>
+                                    <span class="sv-kopje-in-tabel">Uitslag</span>
                                     <p></p>
                                 </td>
                             </tr>
@@ -605,7 +613,7 @@
 
                             <tr>
                                 <td colspan="2" class="center">
-                                    <h6 class="sv-blauw-text">Wedstrijdklassen</h6>
+                                    <p class="sv-kopje-in-tabel">Wedstrijdklassen</p>
                                                          <!-- N = KHSN -->
                                     {% if wed.organisatie == 'N' %}
                                         <p>Klassen zonder man/vrouw benoeming zijn genderneutraal</p>

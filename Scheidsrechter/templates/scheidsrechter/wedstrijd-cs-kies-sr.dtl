@@ -64,7 +64,7 @@
                                 {% for dag in dagen %}
                                     <tr>
                                         <td colspan="2" class="center">
-                                            <h6 class="sv-blauw-text">{{ dag.datum }}</h6>
+                                            <span class="sv-kopje-in-tabel">{{ dag.datum }}</span>
                                         </td>
                                     </tr>
                                     <tr>
@@ -180,8 +180,8 @@
             <table class="sv-kader-tabel">
 
                 <tr>
-                    <td colspan="2" class="center sv-blauw-text">
-                        <h6>Informatie</h6>
+                    <td colspan="2" class="center">
+                        <span class="sv-kopje-in-tabel">Informatie</span>
                     </td>
                 </tr>
 
@@ -256,8 +256,8 @@
 
 
                 <tr>
-                    <td colspan="2" class="center sv-blauw-text">
-                        <h6>Contactgegevens organisatie</h6>
+                    <td colspan="2" class="center">
+                        <span class="sv-kopje-in-tabel">Contactgegevens organisatie</span>
                     </td>
                 </tr>
 
@@ -278,7 +278,9 @@
 
 
                 <tr>
-                    <td colspan="2" class="center sv-blauw-text"><h6>Scheidsrechter behoefte</h6></td>
+                    <td colspan="2" class="center">
+                        <span class="sv-kopje-in-tabel">Scheidsrechter behoefte</span>
+                    </td>
                 </tr>
 
                 <tr>

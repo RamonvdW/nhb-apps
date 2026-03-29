@@ -165,7 +165,9 @@
                             <table>
                                 {% for score in kwalificatie_scores %}
                                     <tr>
-                                        <td colspan="2"><h6 class="sv-blauw-text center">Jouw resultaat van een 60-pijlen Indoor A-status wedstrijd</h6></td>
+                                        <td colspan="2">
+                                            <h6 class="sv-blauw-text center">Jouw resultaat van een 60-pijlen Indoor A-status wedstrijd</h6>
+                                        </td>
                                     </tr>
 
                                     <tr>

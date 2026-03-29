@@ -105,7 +105,7 @@
 
                             <tr>
                                 <td colspan="2" class="center">
-                                    <h6 class="sv-blauw-text">Gebruik</h6>
+                                    <span class="sv-kopje-in-tabel">Gebruik</span>
                                 </td>
                             </tr>
 
