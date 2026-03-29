@@ -176,14 +176,16 @@
                 {% if obj.break_klasse %}
                     {% if obj.needs_closure %}
                         <tr class="sv-table-onderrand">
-                            <td class="sv-table-onderrand" colspan="15"></td>
+                            <td class="sv-table-onderrand" colspan="13"></td>
                         </tr>
                     {% endif %}
 
                     <tr class="sv-table-sectie-header" id="{{ obj.klasse_hashtag }}">
-                        <td class="center" colspan="15">
+                        <td style="max-width:5px"></td>
+                        <td class="center" colspan="13">        <!-- colspan=15 geeft html validatie fout -->
                             <h2 class="sv-kopje-row">{{ obj.klasse_str }}</h2>
                         </td>
+                        <td style="max-width:5px"></td>
                     </tr>
 
                     <tr class="sv-table-header">

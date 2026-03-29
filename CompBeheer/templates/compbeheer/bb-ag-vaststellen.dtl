@@ -43,7 +43,7 @@
             <!-- wit informatie veld -->
             <div class="col s12 m10 offset-m1" style="margin-top:30px; margin-bottom:30px">
                 <div class="sv-kader">
-                    <p class="sv-kopje-klein-text sv-rood-text">Controleer dat onderstaande gegevens juist zijn.</p>
+                    <p class="sv-kopje-dialoog sv-rood-text">Controleer dat onderstaande gegevens juist zijn.</p>
                     <p>Gebruik uitslag <b>seizoen {{ seizoen }}</b>, afstand <b>{{ afstand }}m</b>.</p>
                     <p>Aantal scores: <b>minstens {{ aantal_scores }}</b>.</p>
                 </div>

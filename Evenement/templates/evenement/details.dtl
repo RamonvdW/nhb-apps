@@ -35,7 +35,7 @@
 
                 <tr>
                     <td colspan="2" class="center sv-blauw-text">
-                        <h6>Informatie</h6>
+                        <h2 class="sv-kopje-in-tabel">Informatie</h2>
                     </td>
                 </tr>
 
@@ -95,7 +95,7 @@
 
                 <tr>
                     <td colspan="2" class="center sv-blauw-text">
-                        <h6>Contactgegevens organisatie</h6>
+                        <h2 class="sv-kopje-in-tabel">Contactgegevens organisatie</h2>
                     </td>
                 </tr>
 
@@ -125,7 +125,7 @@
             
                 <tr>
                     <td colspan="2" class="center sv-blauw-text">
-                        <h6>Inschrijfgeld</h6>
+                        <h2 class="sv-kopje-in-tabel">Inschrijfgeld</h2>
                     </td>
                 </tr>
 

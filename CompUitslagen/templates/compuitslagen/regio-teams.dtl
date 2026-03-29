@@ -180,7 +180,7 @@
                     {% if team.schema %}
                         <tr class="sv-table-sectie-header">
                             <td colspan="20" class="center">
-                                <h6>Wedstrijdschema</h6>
+                                <h3 class="sv-kopje-klein">Wedstrijdschema</h3>
                             </td>
                         </tr>
 
@@ -230,7 +230,7 @@
                 {% if team.break_klasse %}
                     <tr class="sv-table-sectie-header" id="{{ team.klasse_hashtag }}">
                         <td colspan="20" class="center">
-                            <h2 class="sv-kopje-row">Klasse: {{ team.klasse_str }}</h2>
+                            <h2 class="sv-kopje-klein">Klasse: {{ team.klasse_str }}</h2>
                         </td>
                     </tr>
                     <tr class="sv-table-header">

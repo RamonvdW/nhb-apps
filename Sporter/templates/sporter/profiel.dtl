@@ -176,7 +176,7 @@
                                         <!-- modal dialog voor deze specifieke competitie -->
                                         <div class="modal" id="{{ deelnemer.id_afmelden }}">
                                             <div class="modal-content center">
-                                                <p class="sv-kopje-modal-dialog">Zeker weten?</p>
+                                                <p class="sv-kopje-dialoog">Zeker weten?</p>
 
                                                 <p>Je wilt jezelf (met {{ deelnemer.boog_beschrijving }} boog) uitschrijven voor de<br>
                                                     <b>{{ deelnemer.competitie.beschrijving }}</b>?</p>
@@ -277,7 +277,7 @@
                                                 <!-- modal dialog voor deze specifieke competitie -->
                                                 <div class="modal" id="{{ deelnemer.id_deelname_rk }}">
                                                     <div class="modal-content center">
-                                                        <p class="sv-kopje-modal-dialog">Meedoen met het RK?</p>
+                                                        <p class="sv-kopje-dialoog">Meedoen met het RK?</p>
 
                                                         <p>We willen graag weten of je mee kan doen met de Rayonkampioenschappen van de <b>{{ deelnemer.regiocompetitie.competitie.beschrijving }}</b>.</p>
                                                         <p>Kan je meedoen?</p>
@@ -302,7 +302,7 @@
                                                 <!-- modal dialog voor deze specifieke competitie -->
                                                 <div class="modal" id="{{ deelnemer.id_deelname_rk }}">
                                                     <div class="modal-content center">
-                                                        <p class="sv-kopje-modal-dialog">Toch meedoen met het RK?</p>
+                                                        <p class="sv-kopje-dialoog">Toch meedoen met het RK?</p>
 
                                                         <p>Je hebt je gekwalificeerd voor de Rayonkampioenschappen van de <b>{{ deelnemer.rk_inschrijving.kamp.competitie.beschrijving }}</b>, maar je bent afgemeld.</p>
                                                         <p>Wil je toch meedoen?</p>
@@ -329,7 +329,7 @@
                                                 <!-- modal dialog voor deze specifieke competitie -->
                                                 <div class="modal" id="{{ deelnemer.id_deelname_rk }}">
                                                     <div class="modal-content center">
-                                                        <p class="sv-kopje-modal-dialog">Afmelden voor het RK?</p>
+                                                        <p class="sv-kopje-dialoog">Afmelden voor het RK?</p>
 
                                                         <p>Je hebt je gekwalificeerd voor de Rayonkampioenschappen van de <b>{{ deelnemer.regiocompetitie.competitie.beschrijving }}</b> en staat op de deelnemerslijst.</p>
                                                         <p>Als je niet deel kan nemen, meld je dan af. Daarmee geef je ruimte aan een andere sporters om deel te nemen.</p>
@@ -363,7 +363,7 @@
                                             <!-- modal dialog voor deze specifieke competitie -->
                                             <div class="modal" id="id_voorkeur_rk_{{ deelnemer.pk }}">
                                                 <div class="modal-content center">
-                                                    <p class="sv-kopje-modal-dialog">Toch meedoen met het RK?</p>
+                                                    <p class="sv-kopje-dialoog">Toch meedoen met het RK?</p>
 
                                                     <p>Je bent alvast afgemeld voor het RK. Aan het einde van de regiocompetitie fase van de <b>{{ deelnemer.regiocompetitie.competitie.beschrijving }}</b> stroom je daarom <span class="sv-rood-text">niet</span> door naar de deelnemerslijst van het RK.</p>
                                                     <p>Wil je toch meedoen?</p>
@@ -388,7 +388,7 @@
                                             <!-- modal dialog voor deze specifieke competitie -->
                                             <div class="modal" id="id_voorkeur_rk_{{ deelnemer.pk }}">
                                                 <div class="modal-content center">
-                                                    <p class="sv-kopje-modal-dialog">Afmelden voor het RK?</p>
+                                                    <p class="sv-kopje-dialoog">Afmelden voor het RK?</p>
 
                                                     <p>Als je geen mogelijkheid (of zin) hebt om mee te doen aan de rayonkampioenschappen van de <b>{{ deelnemer.competitie.beschrijving }}</b>, dan kan je je nu alvast afmelden. Aan het einde van de regiocompetitie stroom je dan <span class="sv-rood-text">niet</span> door naar de deelnemerslijst van het RK.</p>
                                                     <p>Wil je je afmelden voor het RK?</p>
@@ -491,7 +491,7 @@
                                                 <!-- modal dialog voor deze specifieke competitie -->
                                                 <div class="modal" id="{{ deelnemer.id_deelname_bk }}">
                                                     <div class="modal-content center">
-                                                        <p class="sv-kopje-modal-dialog">Meedoen met het BK?</p>
+                                                        <p class="sv-kopje-dialoog">Meedoen met het BK?</p>
 
                                                         <p>We willen graag weten of je mee kan doen met de Bondskampioenschappen van de <b>{{ deelnemer.bk_inschrijving.kamp.competitie.beschrijving }}</b>.</p>
                                                         <p>Kan je meedoen?</p>
@@ -516,7 +516,7 @@
                                                 <!-- modal dialog voor deze specifieke competitie -->
                                                 <div class="modal" id="{{ deelnemer.id_deelname_bk }}">
                                                     <div class="modal-content center">
-                                                        <p class="sv-kopje-modal-dialog">Toch meedoen met het BK?</p>
+                                                        <p class="sv-kopje-dialoog">Toch meedoen met het BK?</p>
 
                                                         <p>Je hebt je gekwalificeerd voor de Bondskampioenschappen van de <b>{{ deelnemer.bk_inschrijving.kamp.competitie.beschrijving }}</b>, maar je bent afgemeld.</p>
                                                         <p>Wil je toch meedoen?</p>
@@ -543,7 +543,7 @@
                                                 <!-- modal dialog voor deze specifieke competitie -->
                                                 <div class="modal" id="{{ deelnemer.id_deelname_bk }}">
                                                     <div class="modal-content center">
-                                                        <p class="sv-kopje-modal-dialog">Afmelden voor het BK?</p>
+                                                        <p class="sv-kopje-dialoog">Afmelden voor het BK?</p>
 
                                                         <p>Je hebt je gekwalificeerd voor de Bondskampioenschappen van de <b>{{ deelnemer.bk_inschrijving.kamp.competitie.beschrijving }}</b> en staat op de deelnemerslijst.</p>
                                                         <p>Als je niet deel kan nemen, meld je dan af. Daarmee geef je ruimte aan een andere sporters om deel te nemen.</p>

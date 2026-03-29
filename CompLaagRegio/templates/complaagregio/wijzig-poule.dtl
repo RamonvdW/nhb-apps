@@ -113,7 +113,7 @@
         <!-- modal dialog -->
         <div class="modal" id="verwijder_poule">
             <div class="modal-content center">
-                <p class="sv-kopje-modal-dialog">Verwijderen poule?</p>
+                <p class="sv-kopje-dialoog">Verwijderen poule?</p>
 
                 <p>Heb je deze poule niet meer nodig en wil je 'm verwijderen?</p>
 

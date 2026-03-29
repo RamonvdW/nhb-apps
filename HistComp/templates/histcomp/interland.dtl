@@ -56,7 +56,7 @@
                     {% endif %}
                     <tr>
                         <td colspan="6" class="center">
-                            <h5 id="{{ klasse.beschrijving }}">Klasse: {{ klasse.beschrijving }}</h5>
+                            <h3 class="sv-kopje-row" id="{{ klasse.beschrijving }}">Klasse: {{ klasse.beschrijving }}</h3>
                             {% sv-knop-nav url=klasse.url_download icon='download' tekst='Download' %}
                         </td>
                     </tr>

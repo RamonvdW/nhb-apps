@@ -111,7 +111,7 @@
         <!-- modal dialog -->
         <div class="modal" id="bevestig_verwijder_team">
             <div class="modal-content center">
-                <p class="sv-kopje-modal-dialog">Verwijder dit team?</p>
+                <p class="sv-kopje-dialoog">Verwijder dit team?</p>
 
                 <p>Wil je dit team van vereniging<br><b>{{ team.vereniging }}</b><br>verwijderen?</p>
 

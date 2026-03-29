@@ -34,7 +34,7 @@
         <div class="row-sv-blauw">
             <div class="col s12">
                 <div class="sv-kader">
-                    <p class="sv-kopje-klein-text sv-rood-text">Controleer dat onderstaande gegevens juist zijn.</p>
+                    <p class="sv-kopje-dialoog sv-rood-text">Controleer dat onderstaande gegevens juist zijn.</p>
                     <p>Weet je zeker dat de <b>aanvangsgemiddelden</b> recentelijk vastgesteld zijn aan de hand van de uitslagen van vorig seizoen?</p>
                     <p>Op <b>{{ bb_ag_nieuwste_datum }}</b> zijn de aanvangsgemiddelden voor het laatste vastgesteld.</p>
                     <p>

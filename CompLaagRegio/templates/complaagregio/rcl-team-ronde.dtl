@@ -177,7 +177,9 @@
                         {% for regel in alle_regels %}
                             {% if regel.break_poule %}
                                 <tr class="sv-table-sectie-header">
-                                    <td colspan="4" class="center"><h6>{{ regel.poule_str }}</h6></td>
+                                    <td colspan="4" class="center">
+                                        <h3 class="sv-kopje-in-tabel">Poule: {{ regel.poule_str }}</h3>
+                                    </td>
                                 </tr>
                                 <tr>
                                     <th>Team</th>
@@ -205,7 +207,9 @@
                         {% for regel in alle_regels %}
                             {% if regel.break_poule %}
                                 <tr class="sv-table-sectie-header">
-                                    <td colspan="4" class="center"><h6>{{ regel.poule_str }}</h6></td>
+                                    <td colspan="4" class="center">
+                                        <h3 class="sv-kopje-in-tabel">Poule: {{ regel.poule_str }}</h3>
+                                    </td>
                                 </tr>
                                 <tr>
                                     <th><!-- rank --></th>

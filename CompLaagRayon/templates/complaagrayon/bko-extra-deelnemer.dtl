@@ -70,7 +70,7 @@
         {% if obj.url %}
             <div class="modal" id="bevestig_{{ obj.pk }}">
                 <div class="modal-content center">
-                    <p class="sv-kopje-modal-dialog">Sporter toevoegen aan RK?</p>
+                    <p class="sv-kopje-dialoog">Sporter toevoegen aan RK?</p>
 
                     <p>Wil je <b>{{ obj.lid_nr_naam }}</b> toevoegen aan het RK van Rayon {{ obj.rayon_nr }}?</p>
                     <p>Sporter zal worden opgenomen in klasse <b>{{ obj.nieuwe_klasse.beschrijving }}</b> ({{ obj.nieuwe_klasse.min_ag }})</p>

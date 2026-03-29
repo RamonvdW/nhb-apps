@@ -84,7 +84,7 @@
 
                     <tr class="sv-table-sectie-header">
                         <td colspan="8" class="center">
-                            <h5>{{ indiv.bk_indiv_klasse }}</h5>
+                            <h2 class="sv-kopje-row">{{ indiv.bk_indiv_klasse }}</h2>
                         </td>
                     </tr>
 

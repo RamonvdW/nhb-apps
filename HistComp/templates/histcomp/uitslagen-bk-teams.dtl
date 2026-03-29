@@ -94,7 +94,7 @@
 
                     <tr class="sv-table-sectie-header">
                         <td colspan="7" class="center">
-                            <h5>{{ team.teams_klasse }}</h5>
+                            <h2 class="sv-kopje-row">{{ team.teams_klasse }}</h2>
                         </td>
                     </tr>
 

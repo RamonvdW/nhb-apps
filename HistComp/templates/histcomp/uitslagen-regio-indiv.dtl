@@ -129,7 +129,9 @@
                     {% endif %}
 
                     <tr class="sv-table-sectie-header">
-                        <td class="center" colspan="13"><h5>{{ indiv.indiv_klasse }}</h5></td>
+                        <td class="center" colspan="13">
+                            <h2 class="sv-kopje-row">{{ indiv.indiv_klasse }}</h2>
+                        </td>
                     </tr>
 
                     <tr class="sv-table-header">

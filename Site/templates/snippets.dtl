@@ -348,7 +348,7 @@
 
     <div class="modal" id="bevestig_verwijder_buitenbaan">
         <div class="modal-content center">
-            <p class="sv-kopje-modal-dialog">Verwijder buitenbaan?</p>
+            <p class="sv-kopje-dialoog">Verwijder buitenbaan?</p>
 
             <p>Wil je de buitenbaan van vereniging<br><b>{{ ver }}</b><br>verwijderen uit het systeem?</p>
 

@@ -161,7 +161,7 @@
     {% if url_verwijder %}
         <div class="modal" id="bevestig_verwijder_locatie">
             <div class="modal-content center">
-                <p class="sv-kopje-modal-dialog">Verwijder locatie?</p>
+                <p class="sv-kopje-dialoog">Verwijder locatie?</p>
 
                 <p>Wil je deze locatie van vereniging<br><b>{{ ver }}</b><br>verwijderen uit het systeem?</p>
 

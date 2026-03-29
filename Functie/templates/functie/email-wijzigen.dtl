@@ -28,7 +28,7 @@
         {% if functie.nieuwe_email %}
             <!-- blauw balk met wit informatie veld -->
             <div class="col s1s m10 offset-m1 white" style="margin-bottom:50px">
-                <h5>Let op!</h5>
+                <p class="sv-rood-text"><b>Let op!</b></p>
                 <p>Het eerder ingevoerde e-mailadres (<code>{{ functie.nieuwe_email }}</code>) is nog niet bevestigd.</p>
                 <p>Volg de instructies in de e-mail om de bevestiging af te ronden.</p>
                 <p>Het is mogelijk een nieuw e-mailadres op te geven.</p>

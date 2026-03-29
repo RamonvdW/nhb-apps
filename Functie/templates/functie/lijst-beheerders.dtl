@@ -64,7 +64,7 @@
                                 {% if not forloop.first %}
                                     <br>
                                 {% endif %}
-                                <span>{{ obj.volledige_naam }}</span>
+                                <span>[{{ obj.username }}] {{ obj.volledige_naam }}</span>
                             {% endfor %}
                         </td>
                         <td>
@@ -84,7 +84,7 @@
                                 {% if not forloop.first %}
                                     <br>
                                 {% endif %}
-                                <span>{{ obj.volledige_naam }}</span>
+                                <span>[{{ obj.username }}] {{ obj.volledige_naam }}</span>
                             {% endfor %}
                         </td>
                         <td>

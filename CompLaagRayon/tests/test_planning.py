@@ -40,7 +40,7 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
     url_lijst_rk = '/bondscompetities/rk/lijst/%s/'                                             # deelcomp_pk
     url_lijst_bestand = '/bondscompetities/rk/lijst/%s/bestand/'                                # deelcomp_pk
     url_wijzig_status = '/bondscompetities/rk/lijst/wijzig-status-rk-deelnemer/%s/'             # deelnemer_pk
-    url_wijzig_limiet = '/bondscompetities/rk/planning/%s/limieten/'                            # deelcomp_pk
+    url_wijzig_limiet = '/bondscompetities/rk/planning/%s/individuele-limieten/'                # deelcomp_pk
     url_doorzetten_regio_naar_rk = '/bondscompetities/beheer/%s/doorzetten/regio-naar-rk/'      # comp_pk
     url_doorzetten_rk_indiv = '/bondscompetities/beheer/%s/doorzetten/rk-indiv-naar-bk/'        # comp_pk
     url_doorzetten_rk_teams = '/bondscompetities/beheer/%s/doorzetten/rk-teams-naar-bk/'        # comp_pk
@@ -953,23 +953,14 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
 
         url = self.url_wijzig_limiet % self.deelkamp_rayon1_18.pk
         isel = 'isel_%s' % self.klasse_c.pk
-        tsel = 'tsel_%s' % self.klasse_r_ere.pk
 
         with self.assert_max_queries(20):
             resp = self.client.post(url, {isel: 'xx'})
         self.assertEqual(resp.status_code, 302)     # doorloopt alles
 
         with self.assert_max_queries(20):
-            resp = self.client.post(url, {tsel: 'xx'})
-        self.assertEqual(resp.status_code, 302)     # doorloopt alles
-
-        with self.assert_max_queries(20):
             resp = self.client.post(url, {isel: '19'})
         self.assert404(resp, 'Geen valide keuze voor indiv')
-
-        with self.assert_max_queries(20):
-            resp = self.client.post(url, {tsel: '19'})
-        self.assert404(resp, 'Geen valide keuze voor team')
 
         # verkeerde RKO
         self.e2e_login_and_pass_otp(self.account_rko2_18)

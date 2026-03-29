@@ -195,7 +195,7 @@
     {% if gast.url_ophef %}
         <div class="modal" id="bevestig_opheffen">
             <div class="modal-content center">
-                <p class="sv-kopje-modal-dialog">Gast-account opheffen?</p>
+                <p class="sv-kopje-dialoog">Gast-account opheffen?</p>
 
                 <p>Je hebt gecontroleerd dat het gast-account overeenkomt met een bekend lid.</p>
                 <p>We blokkeren het gast-account en sturen een automatische e-mail waarin we kort uitleggen dat een normaal account gemaakt moet worden.</p>
@@ -289,7 +289,7 @@
     {% if overzetten_url %}
         <div class="modal" id="bevestig_overzetten">
             <div class="modal-content center">
-                <p class="sv-kopje-modal-dialog">Bestellingen overzetten</p>
+                <p class="sv-kopje-dialoog">Bestellingen overzetten</p>
 
                 <p>Je hebt gecontroleerd dat het gast-account overeenkomt een bekend lid.</p>
                 <p>Wil je alle bestellingen van {{ gast.sporter.lid_nr }} overzetten naar {{ gast.overzetten_naar_lid_nr }}?</p>

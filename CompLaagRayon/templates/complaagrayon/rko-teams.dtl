@@ -105,7 +105,7 @@
                         <tr class="sv-table-sectie-header">
                             <td colspan="7" class="center">
                                 {% if toon_klassen %}
-                                    <h5 class="sv-rood-text">Nog niet geplaatste teams</h5>
+                                    <h2 class="sv-kopje-in-tabel sv-rood-text">Nog niet geplaatste teams</h2>
                                 {% endif %}
                                 <span>Vraag de HWL's om <span class="sv-rood-text">rood gemarkeerde teams</span> compleet te maken met sporters die mee mogen doen met het RK, of te verwijderen.</span>
                             </td>
@@ -149,7 +149,9 @@
                         {% endif %}
                         <tr>
                             <td colspan="7" class="center">
-                                <h5>{{ klasse.beschrijving }}</h5>{{ klasse.sterkte_str }}</td>
+                                <h3 class="sv-kopje-in-tabel">{{ klasse.beschrijving }}</h3>
+                                <span>{{ klasse.sterkte_str }}</span>
+                            </td>
                         </tr>
                         <tr>
                             <th class="center">Regio</th>

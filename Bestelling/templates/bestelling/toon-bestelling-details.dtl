@@ -26,7 +26,7 @@
             <table class="sv-kader-tabel">
                 <tr>
                     <td colspan="3" class="center">
-                        <h6>Bestelde producten</h6>
+                        <span class="sv-kopje-klein">Bestelde producten</span>
                     </td>
                 </tr>
 
@@ -158,7 +158,7 @@
             <table class="sv-kader-tabel">
                 <tr>
                     <td colspan="4" class="center">
-                        <h6>Verkoper</h6>
+                        <span class="sv-kopje-klein">Verkoper</span>
                     </td>
                 </tr>
 
@@ -178,7 +178,7 @@
 
         <div class="modal" id="bevestig_annuleer">
             <div class="modal-content center black-text">
-                <p class="sv-kopje-modal-dialog">Bestelling annuleren?</p>
+                <p class="sv-kopje-dialoog">Bestelling annuleren?</p>
 
                 <p>Weet je zeker dat je deze bestelling niet door wilt laten gaan?</p>
                 <p>Gemaakte reserveringen voor wedstrijden / evenementen / producten vervallen.</p>

@@ -238,7 +238,7 @@
 
         <div class="modal" id="bevestig_verwijder_wedstrijd">
             <div class="modal-content center">
-                <p class="sv-kopje-modal-dialog">Verwijder RK wedstrijd?</p>
+                <p class="sv-kopje-dialoog">Verwijder RK wedstrijd?</p>
 
                 <p>Heb je deze RK wedstrijd echt niet meer nodig?</p>
 

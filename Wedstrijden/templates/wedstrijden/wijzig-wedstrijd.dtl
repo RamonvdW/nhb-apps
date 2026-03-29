@@ -675,7 +675,7 @@
 
         <div class="modal" id="bevestig_annuleer">
             <div class="modal-content center">
-                <p class="sv-kopje-modal-dialog">Annuleren?</p>
+                <p class="sv-kopje-dialoog">Annuleren?</p>
 
                 <p>Wil je deze wedstrijd echt annuleren?</p>
 
@@ -707,7 +707,7 @@
             <div class="modal" id="bevestig_verwijder">
                 <div class="modal-content center">
                     {% if url_verwijder %}
-                        <p class="sv-kopje-modal-dialog">Verwijderen?</p>
+                        <p class="sv-kopje-dialoog">Verwijderen?</p>
 
                         <p>Wil je deze wedstrijd echt verwijderen?</p>
 

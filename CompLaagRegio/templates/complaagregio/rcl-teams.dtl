@@ -114,7 +114,7 @@
             {% if team.break_before %}
                 <tr class="sv-table-sectie-header">
                     <td colspan="{{ hdr_cols }}">
-                        <h5 class="sv-rood-text center">Nog niet geplaatste teams</h5>
+                        <h3 class="sv-kopje-in-tabel center">Nog niet geplaatste teams</h3>
                     </td>
                 </tr>
                 <tr class="sv-table-header">
@@ -150,7 +150,7 @@
 
                         <div class="modal" id="bevestig_verwijder_team_{{ team.pk }}">
                             <div class="modal-content center">
-                                <p class="sv-kopje-modal-dialog">Verwijder team?</p>
+                                <p class="sv-kopje-dialoog">Verwijder team?</p>
 
                                 <p>Wil je team <b>{{ team.team_naam }}</b> van vereniging<br><b>{{ team.vereniging }}</b><br>verwijderen uit het systeem?</p>
 
@@ -182,7 +182,9 @@
         {% for klasse, teams in regioteams.items %}
             <tr>
                 <td colspan="{{ hdr_cols }}" class="center">
-                    <h5>{{ klasse.beschrijving }}</h5>{{ klasse.sterkte_str }}</td>
+                    <h2 class="sv-kopje-in-tabel">{{ klasse.beschrijving }}</h2>
+                    <span>{{ klasse.sterkte_str }}</span>
+                </td>
             </tr>
             <tr class="sv-table-header">
                 <td rowspan="{{ klasse.aantal_regels }}" class="sv-table-zijrand"></td>

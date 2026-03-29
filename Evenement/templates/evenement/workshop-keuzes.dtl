@@ -27,7 +27,7 @@
                     <tr>
                         <td></td>
                         <td>
-                            <h5 class="sv-middel-blauw-text">Workshop ronde {{ ronde_nr }}</h5>
+                            <h2 class="sv-kopje-in-tabel">Workshop ronde {{ ronde_nr }}</h2>
                         </td>
                     <td>
                     {% for code, count, titel in ronde_ws %}

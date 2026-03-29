@@ -76,7 +76,7 @@
         {% if obj.url %}
             <div class="modal" id="bevestig_{{ obj.pk }}">
                 <div class="modal-content center">
-                    <p class="sv-kopje-modal-dialog">Sporter blanco resultaat geven?</p>
+                    <p class="sv-kopje-dialoog">Sporter blanco resultaat geven?</p>
 
                     <p>Wil je <b>{{ obj.lid_nr_naam }}</b> een blanco RK resultaat geven?</p>
                     <p>Sporter kan daarmee doorstromen naar de Bondskampioenschappen</p>

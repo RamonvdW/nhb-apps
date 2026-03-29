@@ -159,7 +159,7 @@
 
             <div class="modal" id="wijzig_{{ team.pk }}">
                 <div class="modal-content center">
-                    <p class="sv-kopje-modal-dialog">Team status aanpassen?</p>
+                    <p class="sv-kopje-dialoog">Team status aanpassen?</p>
 
                     <p>Kies welke wijziging je wilt maken voor team <b>{{ team.team_naam }}</b> van <b>{{ team.ver_str }}</b>.</p>
 

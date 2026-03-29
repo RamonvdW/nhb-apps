@@ -48,7 +48,7 @@
                         {% csrf_token %}
 
                         <div class="center" style="margin-bottom:30px">
-                            <h6 class="sv-blauw-text">Koppeling met Mollie</h6>
+                            <h2 class="sv-kopje-dialoog">Koppeling met Mollie</h2>
                             <p>Alleen invullen als jullie vereniging een account bij Mollie heeft</p>
                         </div>
 

@@ -132,7 +132,7 @@
 
         <div class="modal" id="bevestig_annuleer">
             <div class="modal-content center">
-                <p class="sv-kopje-modal-dialog">Korting verwijderen?</p>
+                <p class="sv-kopje-dialoog">Korting verwijderen?</p>
 
                 <p>Wil je deze korting echt verwijderen?</p>
 

@@ -27,7 +27,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
     url_lijst_rk_rko = '/bondscompetities/rk/lijst/%s/'                            # deelcomp_rk.pk
     url_lijst_rk_hwl = '/bondscompetities/rk/lijst/%s/vereniging/'                 # deelcomp_rk.pk
     url_wijzig_stat = '/bondscompetities/rk/lijst/wijzig-status-rk-deelnemer/%s/'  # deelnemer_pk
-    url_wijzig_cut_rk = '/bondscompetities/rk/planning/%s/limieten/'               # deelcomp_rk.pk
+    url_wijzig_cut_rk = '/bondscompetities/rk/planning/%s/individuele-limieten/'   # deelcomp_rk.pk
 
     testdata = None
     rayon_nr = 1
@@ -323,7 +323,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
             resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
         self.assert_is_redirect(resp, self.url_lijst_rko)        # 302 = redirect = success
 
-        self.verwerk_competitie_mutaties(show_all=True)
+        self.verwerk_competitie_mutaties()
 
         # self._dump_deelnemers()
         deelnemer.refresh_from_db()

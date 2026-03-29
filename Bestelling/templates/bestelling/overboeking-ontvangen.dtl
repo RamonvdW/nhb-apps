@@ -31,7 +31,7 @@
                         <input id="id_actie" type="hidden" name="actie" value="{% if was_foutvrij %}registreer{% else %}check{% endif %}">
 
                         <div class="center">
-                            <h6 class="sv-blauw-text">Registreer overboeking</h6>
+                            <p class="sv-kopje-dialoog">Registreer overboeking</p>
                             <p>Bevestig een ontvangen betalingen voor een bestelling</p>
                         </div>
 
@@ -79,7 +79,7 @@
 
                             <div class="modal" id="bevestig_registreer">
                                 <div class="modal-content center">
-                                    <p class="sv-kopje-modal-dialog">Registreren?</p>
+                                    <p class="sv-kopje-dialoog">Registreren?</p>
 
                                     <p>Bestelnummer: MH-{{ kenmerk }}<br>Bedrag: &euro;&nbsp;{{ bedrag }}</p>
                                     <p>Invoer is geaccepteerd. Wil je deze ontvangen overboeking registreren?</p>

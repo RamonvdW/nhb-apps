@@ -85,7 +85,7 @@
         <!-- witruimte -->
         <div class="row center">
             <div class="col s12">
-                <h5>Niet meer nodig?</h5>
+                <h2 class="sv-kopje-row">Niet meer nodig?</h2>
                 {% sv-knop-modal 'bevestig_verwijder_team' '' kleur='blauw' icon='verwijder' tekst='Verwijder dit team' %}
             </div>
         </div>
@@ -93,7 +93,7 @@
         <!-- modal dialog -->
         <div class="modal" id="bevestig_verwijder_team">
             <div class="modal-content center">
-                <p class="sv-kopje-modal-dialog">Verwijder dit RK team?</p>
+                <p class="sv-kopje-dialoog">Verwijder dit RK team?</p>
 
                 <p>Wil je dit RK team van vereniging<br><b>{{ rk_team.vereniging }}</b><br>verwijderen?</p>
 

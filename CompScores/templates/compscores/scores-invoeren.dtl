@@ -157,7 +157,7 @@
             <div class="sv-kader-form center">
 
                 <!-- dialoog venster -->
-                <h5 style="padding:30px">Zoeken en toevoegen</h5>
+                <p class="sv-kopje-dialoog" style="padding:30px">Zoeken en toevoegen</p>
 
                 <!-- bondsnummer invoer veld + zoekknop -->
                 <div class="center">

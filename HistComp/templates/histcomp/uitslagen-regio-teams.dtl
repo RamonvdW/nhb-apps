@@ -135,7 +135,9 @@
                     {% endif %}
 
                     <tr class="sv-table-sectie-header">
-                        <td colspan="21" class="center"><h5>Klasse: {{ team.team_klasse }}</h5></td>
+                        <td colspan="21" class="center">
+                            <h2 class="sv-kopje-row">Klasse: {{ team.team_klasse }}</h2>
+                        </td>
                     </tr>
                     <tr class="sv-table-header">
                         <td class="sv-table-zijrand" rowspan="{{ team.aantal_in_groep }}"></td>

@@ -124,7 +124,7 @@
     <!-- modal dialog -->
     <div class="modal" id="bevestig">
         <div class="modal-content center">
-            <p class="sv-kopje-modal-dialog">Toestemming</p>
+            <p class="sv-kopje-dialoog">Toestemming</p>
 
             <p>Door op 'Ja' te drukken geef je toestemming om de door jou ingevoerde gegevens op te slaan in ons systeem en te gebruiken voor de dienstverlening.<br>Details staan beschreven in het document Privacyverklaring.</p>
             <p>Wijzigen van de gegevens kan alleen door contact op te nemen met het Bondsbureau.<br>Contactgegevens kan je vinden op 'Mijn Pagina'.</p>

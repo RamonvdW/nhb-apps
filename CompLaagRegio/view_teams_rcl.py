@@ -199,7 +199,7 @@ class RegioTeamsTemplateView(TemplateView):
                 prev_klasse = team.team_klasse
 
             # team AG is 0.0 - 30.0 --> toon als score: 000.0 .. 900.0
-            ag_str = "%05.1f" % (team.aanvangsgemiddelde * aantal_pijlen)
+            ag_str = "%05.1f" % (float(team.aanvangsgemiddelde) * aantal_pijlen)
             team.ag_str = ag_str.replace('.', ',')
 
             poule = team.regiocompetitieteampoule_set.first()
@@ -235,7 +235,7 @@ class RegioTeamsTemplateView(TemplateView):
         is_eerste = True
         for team in regioteams:
             # team AG is 0.0 - 30.0 --> toon als score: 000.0 .. 900.0
-            ag_str = "%05.1f" % (team.aanvangsgemiddelde * aantal_pijlen)
+            ag_str = "%05.1f" % (float(team.aanvangsgemiddelde) * aantal_pijlen)
             team.ag_str = ag_str.replace('.', ',')
 
             if self.rol_nu == Rol.ROL_RCL:
@@ -372,7 +372,7 @@ class RegioTeamsAlsBestand(UserPassesTestMixin, View):
 
         for team in regioteams_niet_af:
             # team AG is 0.0 - 30.0 --> toon als score: 000.0 .. 900.0
-            ag_str = "%05.1f" % (team.aanvangsgemiddelde * aantal_pijlen)
+            ag_str = "%05.1f" % (float(team.aanvangsgemiddelde) * aantal_pijlen)
             ag_str = ag_str.replace('.', ',')
 
             ver = team.vereniging
@@ -400,7 +400,7 @@ class RegioTeamsAlsBestand(UserPassesTestMixin, View):
 
         for team in regioteams:
             # team AG is 0.0 - 30.0 --> toon als score: 000.0 .. 900.0
-            ag_str = "%05.1f" % (team.aanvangsgemiddelde * aantal_pijlen)
+            ag_str = "%05.1f" % (float(team.aanvangsgemiddelde) * aantal_pijlen)
             ag_str = ag_str.replace('.', ',')
 
             ver = team.vereniging

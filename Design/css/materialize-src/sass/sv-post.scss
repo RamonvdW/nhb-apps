@@ -70,7 +70,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 // tussenkopje in een blok text
-.sv-kopje-klein-text {
+.sv-kopje-dialoog {
   font-family: 'Fira Sans', sans-serif;
   font-size: 1.64rem;
   font-weight: 400;
@@ -81,20 +81,11 @@ h1, h2, h3, h4, h5, h6 {
 
 .sv-kopje-in-tabel {
   font-family: 'Fira Sans', sans-serif;
-  font-size: 1.64rem;
+  font-size: 1.5rem;
   font-weight: 400;
   line-height: 110%;
-  margin: 1.1rem 0 0.65rem 0;
+  margin: 1.0rem 0 0.6rem 0;
   color: $primary-color-dark;    // donker-blauw
-}
-
-.sv-kopje-modal-dialog {
-  font-family: 'Fira Sans', sans-serif;
-  font-size: 1.64rem;
-  font-weight: 400;
-  line-height: 110%;
-  margin: 1.1rem 0 0.65rem 0;
-  color: $off-black;
 }
 
 .sv-kopje-klein {

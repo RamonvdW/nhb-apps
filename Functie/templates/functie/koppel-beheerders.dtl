@@ -79,7 +79,7 @@
                                 <!-- modal dialog voor deze specifieke beheerder -->
                                 <div class="modal" id="bevestig_ontkoppel_{{ account.pk }}">
                                     <div class="modal-content center">
-                                        <p class="sv-kopje-modal-dialog">Ontkoppel beheerder?</p>
+                                        <p class="sv-kopje-dialoog">Ontkoppel beheerder?</p>
 
                                         <p>Wil je <b>{{ account.volledige_naam }}</b> loskoppelen<br>van de functie <b>{{ functie.beschrijving }}</b>?</p>
 

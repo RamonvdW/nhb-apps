@@ -64,13 +64,17 @@
                                 {% for regel in alle_regels %}
                                     {% if regel.poule_str %}
                                         <tr>
-                                            <td colspan="3" class="center sv-rood-text"><h5>Poule: {{ regel.poule_str }}</h5></td>
+                                            <td colspan="3" class="center sv-rood-text">
+                                                <h3 class="sv-kopje-in-tabel">Poule: {{ regel.poule_str }}</h3>
+                                            </td>
                                         </tr>
                                     {% endif %}
 
                                     {% if regel.klasse_str %}
                                         <tr>
-                                            <td colspan="3" class="center"><h6>Klasse: {{ regel.klasse_str }}</h6></td>
+                                            <td colspan="3" class="center">
+                                                <h4 class="sv-kopje-klein">Klasse: {{ regel.klasse_str }}</h4>
+                                            </td>
                                         </tr>
 
                                         <tr>

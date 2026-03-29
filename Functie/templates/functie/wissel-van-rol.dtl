@@ -74,7 +74,10 @@
 
             <!-- witte rechthoek voor radiobuttons -->
             <div class="col s12 m8 offset-m2{% if heeft_alle_rollen %} l6{% endif %}">
-                <div class="sv-kader left-align" style="margin-bottom:20px">  <!-- margin-bottom voor als kaart onder filter komt -->
+                <div class="sv-kader-filter left-align" style="margin-bottom:20px">  <!-- margin-bottom voor als kaart onder filter komt -->
+                    {% if heeft_alle_rollen %}
+                        <h3 class="sv-kopje-klein center" style="margin-bottom:20px">Jouw rollen</h3>
+                    {% endif %}
                     <ul>
                     {% for obj in eigen_rollen %}
                         <li>
@@ -96,8 +99,8 @@
                 <div class="col s12 m8 offset-m2 l6">
 
                     <!-- verenigingen -->
-                    <div class="sv-kader left-align" style="margin-bottom:15px">
-                        <h6 class="center" style="margin-bottom:10px">Verenigingen</h6>
+                    <div class="sv-kader-filter left-align" style="margin-bottom:15px">
+                        <h3 class="sv-kopje-klein center" style="margin-bottom:20px">Verenigingen</h3>
 
                         <!-- vereniging naar keuze -->
                         <form class="center" action="{{ url_hwl_naar_keuze }}" method="post" onsubmit="document.getElementById('submit_knop00').disabled=true; return true;">
@@ -144,10 +147,8 @@
 
                 <!-- indoor -->
                 <div class="col s12 m6">
-                    <div class="sv-kader left-align" style="margin-bottom:15px">
-                        <div class="center" style="margin-bottom:10px">
-                            <b>Indoor</b>
-                        </div>
+                    <div class="sv-kader-filter left-align" style="margin-bottom:15px">
+                        <h3 class="sv-kopje-klein center" style="margin-bottom:20px">Indoor</h3>
                         {% for obj in alle_18 %}
                             <form style="display:inline" action="{{ obj.url }}" method="post" onsubmit="document.getElementById('submit_knop{{ obj.pk }}').disabled=true; return true;">
                                 {% csrf_token %}
@@ -161,10 +162,8 @@
 
                 <!-- 25m1pijl -->
                 <div class="col s12 m6">
-                    <div class="sv-kader left-align" style="margin-bottom:15px">
-                        <div class="center" style="margin-bottom:10px">
-                            <b>25m1pijl</b>
-                        </div>
+                    <div class="sv-kader-filter left-align" style="margin-bottom:15px">
+                        <h3 class="sv-kopje-klein center" style="margin-bottom:20px">25m1pijl</h3>
                         {% for obj in alle_25 %}
                             <form style="display:inline" action="{{ obj.url }}" method="post" onsubmit="document.getElementById('submit_knop{{ obj.pk }}').disabled=true; return true;">
                                 {% csrf_token %}

@@ -183,7 +183,7 @@ ICON_NAME2MATERIAL_SYMBOL_NAME = {
     'opleiding instaptoets niet gehaald': 'thumb_down',
     'opleiding instaptoets niet ingeschreven': 'radar',
     'opleiding instaptoets': 'login',
-    'opleiding lesmateriaal': 'book_2',
+    'opleiding lesmateriaal': 'menu_book',
     'opleiding locaties': 'school',
     'opleiding verkoopvoorwaarden': 'article',
     'opleiding details': 'schedule',
