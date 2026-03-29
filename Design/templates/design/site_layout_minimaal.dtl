@@ -30,7 +30,7 @@
 
         {% include 'design/site_layout_fonts.dtl' %}
 
-        <link rel="stylesheet" href="{% static 'css/materialize-new-345.css' %}">
+        <link rel="stylesheet" href="{% static 'css/materialize-new-348.css' %}">
 
         {% include 'design/site_layout_favicons.dtl' %}
 
@@ -55,19 +55,24 @@
             <!-- default knop om terug te gaan naar het plein
                  kan weggehaald worden door dit block te vervangen in de template -->
             {% block terug_naar_af %}
-                <p>&nbsp;</p>
-                <h2 class="sv-kopje-klein">Wat kan je nog meer doen?</h2>
+                <h2 class="sv-kopje-row" style="margin-top:30px">Wat kan je nog meer doen?</h2>
 
                 <p>Onderstaande knop brengt je naar de startpagina van MijnHandboogsport.</p>
                 {% sv-knop-nav url='/plein/' icon='het plein 2' tekst='Het plein' %}
             {% endblock %}
 
-            <p>&nbsp;</p>
-            <h2 class="sv-kopje-klein">Hulp nodig?</h2>
+            <h2 class="sv-kopje-row" style="margin-top:30px">Hulp nodig?</h2>
 
             <p>Lukt het niet om het probleem op te lossen? Stuur dan een e-mail naar het volgende adres (druk op de knop om je mailprogramma te starten):</p>
             {% sv-knop-mailto kleur='blauw' email=email_support tekst=email_support icon='' %}
-            <p>Schrijf de volgende informatie in de e-mail:<br>&bull; Je bondsnummer<br>&bull; Datum en tijdstip waarop het probleem ontstond<br>&bull; Beschrijving van je probleem</p>
+
+            <p>Schrijf de volgende informatie in de e-mail:</p>
+            <ul class="browser-default">
+                <li>Je bondsnummer</li>
+                <li>Datum en tijdstip waarop het probleem ontstond</li>
+                <li>Beschrijving van je probleem</li>
+            </ul>
+
         </div>
     </body>
 </html>

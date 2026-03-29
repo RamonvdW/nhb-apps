@@ -87,11 +87,13 @@
                                 <td colspan="4" class="sv-table-onderrand" style="height:50px"></td>
                             </tr>
                         {% endif %}
+
                         <tr class="sv-table-sectie-header">
                             <td colspan="4" class="center">
                                 <h2 class="sv-kopje-in-tabel">{{ obj.klasse_str }}</h2>
                             </td>
                         </tr>
+
                         <tr>
                             <td colspan="3"></td>
                             <td>

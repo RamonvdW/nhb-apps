@@ -29,7 +29,9 @@
 
             <table class="sv-kader-tabel">
                 <tr>
-                    <td colspan="2"><h5 class="sv-blauw-text center">Status</h5></td>
+                    <td colspan="2">
+                        <h2 class="sv-kopje-in-tabel center">Status</h2>
+                    </td>
                 </tr>
                 <tr>
                     <th>Registratie fase</th>
@@ -52,7 +54,9 @@
                 </tr>
 
                 <tr>
-                    <td colspan="2"><h5 class="sv-blauw-text center">Persoonsgegevens</h5></td>
+                    <td colspan="2">
+                        <h2 class="sv-kopje-in-tabel center">Persoonsgegevens</h2>
+                    </td>
                 </tr>
                 <tr>
                     <th>Voornaam</th>
@@ -80,7 +84,9 @@
                 </tr>
 
                 <tr>
-                    <td colspan="2"><h5 class="sv-blauw-text center">Lidmaatschap</h5></td>
+                    <td colspan="2">
+                        <h2 class="sv-kopje-in-tabel center">Lidmaatschap</h2>
+                    </td>
                 </tr>
                 <tr>
                     <th>Club</th>

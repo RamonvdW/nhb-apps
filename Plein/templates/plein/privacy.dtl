@@ -28,7 +28,7 @@
     </div>
 
     {% comment %}
-    <h5>Cookies</h5>
+    <p>Cookies</p>
 
     <p>Tijdens een bezoek aan deze website kunnen wij 'cookies' naar jouw browser sturen.
     Dit zijn kleine bestanden die op jouw apparaat kunnen worden opgeslagen en op een

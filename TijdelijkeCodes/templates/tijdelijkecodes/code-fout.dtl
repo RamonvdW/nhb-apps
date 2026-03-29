@@ -17,7 +17,7 @@
         <div class="col s12">
             <h1 class="sv-kopje-pagina">Eenmalig verzoek</h1>
             <p>De link die je hebt gevolgd is onjuist of verlopen.</p>
-            <h5>Je kan dit venster sluiten.</h5>
+            <p class="sv-kopje-klein">Je kan dit venster sluiten.</p>
         </div>
     </div>
 

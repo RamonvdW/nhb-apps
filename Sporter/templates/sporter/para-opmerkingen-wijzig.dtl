@@ -32,7 +32,7 @@
 
                         <tr>
                             <td>
-                                <h5>Voorkeuren voor para-sporters</h5>
+                                <p class="sv-kopje-in-tabel">Voorkeuren voor para-sporters</p>
                                 <br>
                                 <span>De ingevoerde informatie wordt gedeeld met de wedstrijdleiding zodat ze, indien mogelijk, hier rekening mee houden.</span>
                             </td>

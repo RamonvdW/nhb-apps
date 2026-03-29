@@ -70,7 +70,7 @@
             <!-- witruimte -->
             <div class="row center">
                 <div class="col s12">
-                    <h5 class="sv-rood-text">Aanvangsgemiddelden voor afstand: {{ afstand }}m</h5>
+                    <h3 class="sv-kopje-row">Aanvangsgemiddelden {{ afstand }}m</h3>
                 </div>
             </div>
 
@@ -126,7 +126,7 @@
             <!-- witruimte -->
             <div class="row center">
                 <div class="col s12">
-                    <h5 class="sv-rood-text">Scores voor afstand: {{ afstand }}m</h5>
+                    <h3 class="sv-kopje-row">Scores {{ afstand }}m</h3>
                 </div>
             </div>
 

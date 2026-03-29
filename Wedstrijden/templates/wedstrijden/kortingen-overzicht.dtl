@@ -95,7 +95,7 @@
     <div class="row-sv-blauw">
         <div class="col s12">
             <div class="sv-kader">
-                <h5>Algemeen</h5>
+                <h3 class="sv-kopje-in-tabel">Algemeen</h3>
                 <p>Kortingen uitgegeven door jouw vereniging zijn alleen bruikbaar op <b>wedstrijden van jouw vereniging</b>.</p>
                 <p>De korting is een <b>percentage</b> dat afgetrokken wordt van de inschrijfprijs van een wedstrijd.</p>
                 <p>Alle kortingen hebben een <b>uiterste datum</b> waarop ze gebruikt kunnen worden.</p>
@@ -106,27 +106,27 @@
                 <p>Er zijn drie soorten kortingen: persoonlijk, vereniging en combinatie-korting.</p>
 
                 <br>
-                <h5>
-                    {% sv-icon 'korting persoonlijk' use='h5' kleur='blauw' icon_height=40  %}
+                <p class="sv-kopje-in-tabel">
+                    {% sv-icon 'korting persoonlijk' use='kopje' kleur='blauw' %}
                     <span>Persoonlijk</span>
-                </h5>
+                </p>
                 <p>Voor een specifieke sporter (bondsnummer).</p>
                 <p>Kan geldig zijn voor meerdere wedstrijden.</p>
                 <p>Voorbeelden: winnaar van vorig jaar, eventueel voor hele serie wedstrijden.</p>
 
                 <br>
-                <h5>
-                    {% sv-icon 'korting vereniging' use='h5' kleur='blauw' %}
+                <p class="sv-kopje-in-tabel">
+                    {% sv-icon 'korting vereniging' use='kopje' kleur='blauw' %}
                     <span>Vereniging</span>
-                </h5>
+                </p>
                 <p>Voor alle leden van jullie vereniging.</p>
                 <p>Voorbeelden: eigen leden motiveren om aan een wedstrijd mee te doen.</p>
 
                 <br>
-                <h5>
-                    {% sv-icon 'korting combi' use='h5' kleur='blauw' %}
+                <p class="sv-kopje-in-tabel">
+                    {% sv-icon 'korting combi' use='kopje' kleur='blauw' %}
                     <span>Combinatie-korting</span>
-                </h5>
+                </p>
                 <p>Korting bij inschrijving op meerdere wedstrijden.</p>
                 <p>Voorbeeld: wedstrijd zaterdag + zondag; korting als je beide dagen mee doet.</p>
             </div>

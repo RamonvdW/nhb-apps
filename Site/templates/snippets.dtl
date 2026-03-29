@@ -289,7 +289,7 @@
                 {% if obj.show_header %}
                     <tr class="sv-table-sectie-header">     <!-- voorkomt grijze lijn -->
                         <td colspan="6" class="center">
-                            <h5>{{ obj.header }}</h5>
+                            <h2>{{ obj.header }}</h2>
                         </td>
                     </tr>
                 {% endif %}

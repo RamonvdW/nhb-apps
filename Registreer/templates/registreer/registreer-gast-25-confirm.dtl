@@ -32,7 +32,9 @@
 
                     <table>
                         <tr>
-                            <td colspan="2"><h5 class="sv-blauw-text center">Persoonsgegevens</h5></td>
+                            <td colspan="2">
+                                <h2 class="sv-kopje-in-tabel center">Persoonsgegevens</h2>
+                            </td>
                         </tr>
                         <tr>
                             <td>Voornaam</td>
@@ -60,7 +62,9 @@
                         </tr>
 
                         <tr>
-                            <td colspan="2"><h5 class="sv-blauw-text center">Lidmaatschap</h5></td>
+                            <td colspan="2">
+                                <h2 class="sv-kopje-in-tabel center">Lidmaatschap</h2>
+                            </td>
                         </tr>
                         <tr>
                             <td>Club</td>
