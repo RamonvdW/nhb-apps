@@ -8,12 +8,12 @@ from django.http import Http404
 from django.shortcuts import redirect, reverse
 from django.views.generic import View
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Account.models import get_account
+from Account.models import get_account, Account
 from Competitie.menu import get_url_voor_competitie
 from Functie.definities import Rol, url2rol
 from Functie.models import Functie
 from Functie.rol import (rol_mag_wisselen, rol_get_huidige_functie, rol_get_beschrijving,
-                         rol_activeer_rol, rol_activeer_functie)
+                         rol_activeer_rol, rol_activeer_functie, RolBepaler)
 from Overig.helpers import get_safe_from_ip
 from Taken.operations import eval_open_taken
 from Wedstrijden.definities import WEDSTRIJD_STATUS_URL_WACHT_OP_GOEDKEURING
@@ -30,8 +30,13 @@ class ActiveerRolView(UserPassesTestMixin, View):
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
     permission_denied_message = 'Geen toegang'
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.rol_nu, self.functie_nu = None, None
+
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
         return self.request.user.is_authenticated and rol_mag_wisselen(self.request)
 
     def post(self, request, *args, **kwargs):
@@ -46,11 +51,16 @@ class ActiveerRolView(UserPassesTestMixin, View):
                 nwe_rol = url2rol[rol_str]
             except KeyError:
                 # onbekende rol
-                raise Http404('Slechte parameter')
+                raise Http404('Slechte parameter (rol)')
 
-            # alleen rollen toestaan die geen functie zijn
-            if nwe_rol not in (Rol.ROL_BB, Rol.ROL_SPORTER, Rol.ROL_NONE):
-                raise Http404('Slechte parameter (2)')
+            if nwe_rol == Rol.ROL_BB:
+                # controleer dat de beheerder deze functie mag gebruiken
+                rol_bepaler = RolBepaler(account)
+                if not rol_bepaler.mag_rol(nwe_rol):
+                    raise Http404('Geen toegang (rol)')
+
+            elif nwe_rol != Rol.ROL_SPORTER:
+                raise Http404('Slechte parameter')
 
             my_logger.info('%s ROL account %s wissel naar rol %s' % (
                                 from_ip,
@@ -61,12 +71,17 @@ class ActiveerRolView(UserPassesTestMixin, View):
 
         elif 'functie_pk' in kwargs:
             # activeer functie
-            functie_pk = kwargs['functie_pk'][:6]       # afkappen voor de veiligheid
+            functie_pk = kwargs['functie_pk'][:7]       # afkappen voor de veiligheid
             try:
                 functie_pk = int(functie_pk)
                 functie = Functie.objects.get(pk=functie_pk)
             except (ValueError, TypeError, Functie.DoesNotExist):
                 raise Http404('Slechte parameter (functie)')
+
+            # controleer dat de beheerder deze functie mag gebruiken
+            rol_bepaler = RolBepaler(account)
+            if not rol_bepaler.mag_functie(request, functie.pk):
+                raise Http404('Geen toegang (functie)')
 
             my_logger.info('%s ROL account %s wissel naar functie %s (%s)' % (
                             from_ip,
