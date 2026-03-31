@@ -50,7 +50,7 @@ url2rol = {
     'CS': Rol.ROL_CS,
     'support': Rol.ROL_SUP,
     'sporter': Rol.ROL_SPORTER,
-    # 'geen': Rol.ROL_NONE
+    'geen': Rol.ROL_NONE
 }
 
 # wordt beperkt gebruikt:
