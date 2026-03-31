@@ -292,6 +292,7 @@ class UitslagenRayonTeamsView(TemplateView):
                 klasse_teams_afgemeld = list()
                 alle_matchscores = list()
                 alle_ranks = list()
+                eerste_reserve = True
 
                 limiet = klasse_pk2limiet.get(team.team_klasse.pk, 8)
                 prev_klasse = team.team_klasse
@@ -373,6 +374,7 @@ class UitslagenRayonTeamsView(TemplateView):
                     if eerste_reserve:
                         team.break_reserve = True
                         aantal_regels += 1
+                        eerste_reserve = False
 
                 # toon teamleden waar ze heen moeten
                 if team.ver_nr == toon_team_leden_van_ver_nr:

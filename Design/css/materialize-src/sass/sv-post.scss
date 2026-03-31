@@ -460,8 +460,9 @@ h1, h2, h3, h4, h5, h6 {
 .sv-table-onderrand {
   @extend .sv-blauw-hoofd;
   padding: 0;
-  height: 3px;            // (werkt op td)
-  border-bottom: none;    // (werkt op tr) geen separator line
+  height: 3px;                  // (werkt op td)
+  border-bottom: none;          // (werkt op tr) geen separator line
+  border-top: 1px solid white;  // overschrijft grijze lijn (none werkt niet)
 }
 
 // zo smal mogelijke tabel kolom, zonder wrapping
