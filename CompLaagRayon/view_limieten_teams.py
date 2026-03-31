@@ -115,7 +115,7 @@ class WijzigTeamsLimietenView(UserPassesTestMixin, TemplateView):
 
         comp = deelkamp.competitie
         comp.bepaal_fase()
-        if comp.fase_indiv >= 'L':
+        if comp.fase_teams >= 'L':
             raise Http404('Wijzigen kan niet meer')
 
         pk2klasse = dict()

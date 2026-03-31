@@ -139,7 +139,7 @@
                 {% endif %}
 
                 {% if team.break_reserve %}
-                    <tr>
+                    <tr class="sv-table-onderrand">
                         <td colspan="7" class="sv-table-onderrand"></td>
                     </tr>
                 {% endif %}

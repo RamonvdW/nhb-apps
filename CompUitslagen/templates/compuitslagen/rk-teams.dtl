@@ -131,7 +131,7 @@
                     {% endif %}
 
                     <tr class="sv-table-sectie-header" id="{{ team.klasse_hashtag }}">
-                        <td colspan="7" class="center">
+                        <td colspan="8" class="center">
                             <h2 class="sv-kopje-row">{{ team.klasse_str }}</h2>
                             {% if team.match %}
                                 {% if comp.rk_is_afgelast %}<s>{% endif %}
@@ -152,10 +152,16 @@
                             <span class="hide-on-small-only">Vereniging</span>
                         </th>
                         <th>Team</th>
-                        <th class="center hide-on-small-only">Team sterkte</th>
+                        <th class="center"><span class="hide-on-small-only">Team sterkte</span></th>
                         <th class="center">RK score</th>
                         <th><!-- toekomstig label / reserve --></th>
                         <td rowspan="{{ team.aantal_regels }}" class="sv-table-zijrand"></td>
+                    </tr>
+                {% endif %}
+
+                {% if team.break_reserve %}
+                    <tr class="sv-table-onderrand">
+                        <td colspan="6" class="sv-table-onderrand"></td>
                     </tr>
                 {% endif %}
 
@@ -196,28 +202,30 @@
                     </td>
 
                     <!-- team sterkte + deelnemer gemiddelden -->
-                    <td class="center hide-on-small-only">
-                        {% if team.klasse_heeft_uitslag %}
-                            {% for deelnemer in team.deelnemers %}
-                                {% if forloop.first %}
-                                    <span><b>{{ team.ag_str }}</b></span>
-                                {% endif %}
-                                <br>
-                                <span{% if deelnemer.is_uitvaller %} class="grey-text"{% endif %}>{{ deelnemer.gemiddelde }}</span>
-                            {% empty %}
-                                <span>{{ team.ag_str }}</span>
-                            {% endfor %}
-                        {% else %}
-                            {% if team.toon_team_leden %}
-                                <b>{{ team.ag_str }}</b>
-                                {% for team_lid in team.team_leden %}
+                    <td class="center">
+                        <div class="hide-on-small-only">
+                            {% if team.klasse_heeft_uitslag %}
+                                {% for deelnemer in team.deelnemers %}
+                                    {% if forloop.first %}
+                                        <span><b>{{ team.ag_str }}</b></span>
+                                    {% endif %}
                                     <br>
-                                    <span>{{ team_lid.gemiddelde }}</span>
+                                    <span{% if deelnemer.is_uitvaller %} class="grey-text"{% endif %}>{{ deelnemer.gemiddelde }}</span>
+                                {% empty %}
+                                    <span>{{ team.ag_str }}</span>
                                 {% endfor %}
                             {% else %}
-                                <span>{{ team.ag_str }}</span>
+                                {% if team.toon_team_leden %}
+                                    <b>{{ team.ag_str }}</b>
+                                    {% for team_lid in team.team_leden %}
+                                        <br>
+                                        <span>{{ team_lid.gemiddelde }}</span>
+                                    {% endfor %}
+                                {% else %}
+                                    <span>{{ team.ag_str }}</span>
+                                {% endif %}
                             {% endif %}
-                        {% endif %}
+                        </div>
                     </td>
 
                     <!-- RK score -->
