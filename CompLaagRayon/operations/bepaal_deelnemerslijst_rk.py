@@ -160,7 +160,7 @@ def bepaal_deelnemers_rk_indiv(stdout, comp: Competitie):
                 if not deelnemer.inschrijf_voorkeur_rk_bk:
                     # bij inschrijven al afgemeld voor RK/BK
                     kampioen.deelname = DEELNAME_NEE
-                    kampioen.logboek += '[%s] Deelname op Nee gezet want geen voorkeur RK/BK' % stamp_str
+                    kampioen.logboek += '[%s] Deelname op Nee gezet want geen voorkeur RK/BK\n' % stamp_str
 
                 bulk_lijst.append(kampioen)
                 if len(bulk_lijst) > 150:  # pragma: no cover

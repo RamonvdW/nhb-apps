@@ -115,7 +115,7 @@ class TestFunctieRol(E2EHelpers, TestCase):
 
         resp = self.client.get('/plein/')
         request = resp.wsgi_request
-        account = request.user
+        account = get_account(request)
 
         self.assertTrue(SESSIONVAR_ROL_BESCHRIJVING not in request.session.keys())
         self.assertEqual(rol_get_beschrijving(request), "?")
@@ -194,8 +194,9 @@ class TestFunctieRol(E2EHelpers, TestCase):
         rol = rol_get_huidige(request)
         self.assertEqual(rol, Rol.ROL_SPORTER)
 
+        # probeer te wisselen naar BB --> dit wordt stilletjes ignored
         resp = self.client.post(self.url_activeer_rol % 'BB')
-        self.assert404(resp, 'Geen toegang (rol)')
+        self.assert_is_redirect(resp, self.url_plein)
 
         rol = rol_get_huidige(request)
         self.assertEqual(rol, Rol.ROL_SPORTER)

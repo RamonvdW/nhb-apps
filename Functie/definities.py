@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2025 Ramon van der Winkel.
+#  Copyright (c) 2020-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -50,7 +50,7 @@ url2rol = {
     'CS': Rol.ROL_CS,
     'support': Rol.ROL_SUP,
     'sporter': Rol.ROL_SPORTER,
-    'geen': Rol.ROL_NONE
+    # 'geen': Rol.ROL_NONE
 }
 
 # wordt beperkt gebruikt:

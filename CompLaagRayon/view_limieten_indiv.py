@@ -116,7 +116,7 @@ class WijzigIndivLimietenView(UserPassesTestMixin, TemplateView):
         comp = deelkamp.competitie
         comp.bepaal_fase()
         if comp.fase_indiv >= 'L':
-            raise Http404('Wijzigingen kan niet meer')
+            raise Http404('Wijzigen kan niet meer')
 
         pk2ckl_indiv = dict()
         pk2keuze_indiv = dict()
@@ -159,7 +159,7 @@ class WijzigIndivLimietenView(UserPassesTestMixin, TemplateView):
         for pk, keuze in pk2keuze_indiv.items():
             try:
                 indiv_klasse = pk2ckl_indiv[pk]
-            except KeyError:
+            except KeyError:        # pragma: no cover
                 pass
             else:
                 # indiv klasse

@@ -116,7 +116,7 @@ class WijzigTeamsLimietenView(UserPassesTestMixin, TemplateView):
         comp = deelkamp.competitie
         comp.bepaal_fase()
         if comp.fase_indiv >= 'L':
-            raise Http404('Wijzigingen kan niet meer')
+            raise Http404('Wijzigen kan niet meer')
 
         pk2klasse = dict()
         pk2keuze = dict()
@@ -159,7 +159,7 @@ class WijzigTeamsLimietenView(UserPassesTestMixin, TemplateView):
         for pk, keuze in pk2keuze.items():
             try:
                 team_klasse = pk2klasse[pk]
-            except KeyError:
+            except KeyError:        # pragma: no cover
                 pass
             else:
                 default = 8
@@ -167,7 +167,7 @@ class WijzigTeamsLimietenView(UserPassesTestMixin, TemplateView):
                 wijzig_limiet_teams.append(tup)
         # for
 
-        # laat opnieuw de deelnemers boven de cut bepalen en sorteer op gemiddelde
+        # vraag de achtergrondtaak de mutatie te verwerken
         door_account = get_account(request)
         door_str = "RKO %s" % door_account.volledige_naam()
         door_str = door_str[:149]

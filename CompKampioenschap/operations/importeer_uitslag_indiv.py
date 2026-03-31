@@ -45,7 +45,7 @@ class ImporteerSheetUitslagIndiv:
 
             vult in: self._lid_nr2deelnemer
         """
-        stamp = timezone.localtime(timezone.now()).strftime('%Y-%m-%d om %H:%M:%S')
+        stamp = timezone.localtime(timezone.now()).strftime('%Y-%m-%d om %H:%M')
 
         deelnemers = dict()     # [lid_nr] = [DeelnemerRK of DeelnemerBK, ...]
         if self.is_rk:
@@ -108,13 +108,13 @@ class ImporteerSheetUitslagIndiv:
                 regels_deelnemers.append(regel)
 
                 if deelnemer.deelname != DEELNAME_JA:
-                    regel = 'Deelname van %s aangepast van %s naar naar %s' % (
+                    regel = 'Deelname van %s aangepast van %s naar %s' % (
                                     deelnemer.sporterboog.sporter.lid_nr_en_volledige_naam(),
                                     DEELNAME2STR[deelnemer.deelname],
                                     DEELNAME2STR[DEELNAME_JA])
                     regels_deelname.append(regel)
 
-                    deelnemer.logboek += '[%s] Deelname aangepast van %s naar naar %s' % (
+                    deelnemer.logboek += '[%s] Deelname aangepast van %s naar %s\n' % (
                                                 stamp,
                                                 DEELNAME2STR[deelnemer.deelname],
                                                 DEELNAME2STR[DEELNAME_JA])

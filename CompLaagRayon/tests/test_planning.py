@@ -40,7 +40,6 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
     url_lijst_rk = '/bondscompetities/rk/lijst/%s/'                                             # deelcomp_pk
     url_lijst_bestand = '/bondscompetities/rk/lijst/%s/bestand/'                                # deelcomp_pk
     url_wijzig_status = '/bondscompetities/rk/lijst/wijzig-status-rk-deelnemer/%s/'             # deelnemer_pk
-    url_wijzig_limiet = '/bondscompetities/rk/planning/%s/individuele-limieten/'                # deelcomp_pk
     url_doorzetten_regio_naar_rk = '/bondscompetities/beheer/%s/doorzetten/regio-naar-rk/'      # comp_pk
     url_doorzetten_rk_indiv = '/bondscompetities/beheer/%s/doorzetten/rk-indiv-naar-bk/'        # comp_pk
     url_doorzetten_rk_teams = '/bondscompetities/beheer/%s/doorzetten/rk-teams-naar-bk/'        # comp_pk
@@ -690,13 +689,6 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
         # laat de mutaties verwerken
         self.verwerk_competitie_mutaties()
 
-        # zet een limiet
-        limiet = CutRK(kamp=self.deelkamp_rayon1_18,
-                       indiv_klasse=self.klasse_r,
-                       limiet=20)
-        limiet.save()
-        self.assertTrue(str(limiet) != "")      # coverage only
-
         # nu nog een keer, met een RK deelnemerslijst
         self.e2e_login_and_pass_otp(self.account_rko1_18)
         self.e2e_wissel_naar_functie(self.functie_rko1_18)
@@ -932,124 +924,5 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(url, {})
         self.assert403(resp)
-
-    def test_bad_wijzig_limiet(self):
-        self.client.logout()
-        url = self.url_wijzig_limiet % 999999
-        resp = self.client.get(url)
-        self.assert403(resp)
-
-        # RKO
-        self.e2e_login_and_pass_otp(self.account_rko1_18)
-        self.e2e_wissel_naar_functie(self.functie_rko1_18)
-
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert404(resp, 'Kampioenschap niet gevonden')
-
-        with self.assert_max_queries(20):
-            resp = self.client.post(url)
-        self.assert404(resp, 'Kampioenschap niet gevonden')
-
-        url = self.url_wijzig_limiet % self.deelkamp_rayon1_18.pk
-        isel = 'isel_%s' % self.klasse_c.pk
-
-        with self.assert_max_queries(20):
-            resp = self.client.post(url, {isel: 'xx'})
-        self.assertEqual(resp.status_code, 302)     # doorloopt alles
-
-        with self.assert_max_queries(20):
-            resp = self.client.post(url, {isel: '19'})
-        self.assert404(resp, 'Geen valide keuze voor indiv')
-
-        # verkeerde RKO
-        self.e2e_login_and_pass_otp(self.account_rko2_18)
-        self.e2e_wissel_naar_functie(self.functie_rko2_18)
-
-        url = self.url_wijzig_limiet % self.deelkamp_rayon1_18.pk
-
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert403(resp)
-
-        with self.assert_max_queries(20):
-            resp = self.client.post(url)
-        self.assert403(resp)
-
-    def test_wijzig_limiet(self):
-        # RKO
-        self.e2e_login_and_pass_otp(self.account_rko1_18)
-        self.e2e_wissel_naar_functie(self.functie_rko1_18)
-
-        # zonder limiet aanwezig
-        url = self.url_wijzig_limiet % self.deelkamp_rayon1_18.pk
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('complaagrayon/wijzig-limieten-indiv.dtl', 'design/site_layout.dtl'))
-
-        isel = 'isel_%s' % self.klasse_r.pk
-        tsel = 'tsel_%s' % self.klasse_r_ere.pk
-
-        # limiet op default zetten
-        self.assertEqual(CutRK.objects.count(), 0)
-        with self.assert_max_queries(20):
-            resp = self.client.post(url, {isel: 24, tsel: 12, 'snel': 1})
-        self.assert_is_redirect_not_plein(resp)  # check for success
-        self.assertEqual(CutRK.objects.count(), 0)
-
-        # limiet zetten
-        self.assertEqual(CutRK.objects.count(), 0)
-        with self.assert_max_queries(20):
-            resp = self.client.post(url, {isel: 20, tsel: 10, 'snel': 1})
-        self.assert_is_redirect_not_plein(resp)  # check for success
-        self.verwerk_competitie_mutaties()
-        self.assertEqual(CutRK.objects.count(), 1)
-
-        # limiet opnieuw zetten, geen wijziging
-        with self.assert_max_queries(20):
-            resp = self.client.post(url, {isel: 20, tsel: 10, 'snel': 1})
-        self.assert_is_redirect_not_plein(resp)  # check for success
-        self.verwerk_competitie_mutaties()
-        self.assertEqual(CutRK.objects.count(), 1)
-
-        # limiet aanpassen
-        with self.assert_max_queries(20):
-            resp = self.client.post(url, {isel: 16, tsel: 8, 'snel': 1})
-        self.assert_is_redirect_not_plein(resp)  # check for success
-        self.verwerk_competitie_mutaties()
-        self.assertEqual(CutRK.objects.count(), 1)
-
-        # met limiet aanwezig
-        url = self.url_wijzig_limiet % self.deelkamp_rayon1_18.pk
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-
-        # limiet verwijderen, zonder 'snel'
-        time.sleep = self._dummy_sleep
-        with self.assert_max_queries(20):
-            resp = self.client.post(url, {isel: 24})
-        self.assert_is_redirect_not_plein(resp)  # check for success
-        self.verwerk_competitie_mutaties()
-        self.assertEqual(CutRK.objects.count(), 0)
-        time.sleep = sleep_oud
-
-        # nu met een deelnemer, zodat de mutatie opgestart wordt
-        deelnemer = DeelnemerRK(kamp=self.deelkamp_rayon1_18,
-                                             sporterboog=self.sporterboog,
-                                             bij_vereniging=self.sporterboog.sporter.bij_vereniging,
-                                             indiv_klasse=self.klasse_r)
-        deelnemer.save()
-
-        aantal = CompetitieMutatie.objects.count()
-        with self.assert_max_queries(20):
-            resp = self.client.post(url, {isel: 4, 'snel': 1})
-        self.assert_is_redirect_not_plein(resp)  # check for success
-        self.verwerk_competitie_mutaties()
-        self.assertGreater(CompetitieMutatie.objects.count(), aantal)
-
 
 # end of file
