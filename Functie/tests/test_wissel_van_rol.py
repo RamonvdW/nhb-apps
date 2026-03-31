@@ -262,13 +262,10 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
 
         # controleer dat een rol wissel die met een functie moet geen effect heeft
         resp = self.client.post(self.url_activeer_rol % 'BKO', follow=True)
-        self.assert404(resp, 'Slechte parameter (2)')
+        self.assert404(resp, 'Slechte parameter')
 
         resp = self.client.post(self.url_activeer_rol % 'geen', follow=True)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertContains(resp, "Sporter")        # ondanks geen koppeling met Sporter
-        urls = self._get_wissel_urls(resp)
-        self.assertIn(self.url_accountwissel, urls)
+        self.assert404(resp, 'Slechte parameter')
 
     def test_bb(self):
         # maak een BB die geen lid is

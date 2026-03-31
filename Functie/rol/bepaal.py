@@ -286,14 +286,14 @@ class RolBepaler:
             # for
             return
 
-    # def mag_rol(self, rol: Rol) -> bool:
-    #     """ Controleer of de gebruiker de gevraagde rol aan mag nemen
-    #     """
-    #     for mag_rol, _ in self.iter_directe_rollen():
-    #         if mag_rol == rol:
-    #             return True
-    #     # for
-    #     return False
+    def mag_rol(self, rol: Rol) -> bool:
+        """ Controleer of de gebruiker de gevraagde rol aan mag nemen
+        """
+        for mag_rol, _ in self.iter_directe_rollen():
+            if mag_rol == rol:
+                return True
+        # for
+        return False
 
     def mag_functie(self, request, functie_pk: int) -> tuple[bool, Rol]:
         """ Controleer of de gebruiker de gevraagde functie aan mag nemen

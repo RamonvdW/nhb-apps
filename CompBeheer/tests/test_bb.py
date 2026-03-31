@@ -511,7 +511,7 @@ class TestCompBeheerBB(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
 
         # trigger de permissie check (want: verkeerde rol)
-        self.e2e_wisselnaarrol_gebruiker()
+        self.e2e_wisselnaarrol_sporter()
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_ag_vaststellen_afstand % '18')
         self.assert403(resp)

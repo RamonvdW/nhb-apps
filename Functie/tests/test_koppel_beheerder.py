@@ -213,7 +213,7 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_hwl)
         self.e2e_check_rol('HWL')
 
-        with self.assert_max_queries(23):
+        with self.assert_max_queries(25):
             resp = self.client.post(self.url_activeer_functie % self.functie_hwl.pk, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('vereniging/overzicht.dtl', 'design/site_layout.dtl'))
@@ -340,14 +340,9 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
         self.assert403(resp)
         self.assertEqual(self.functie_rcl111.accounts.count(), 0)
 
-        # probeer als bezoeker (corner case coverage)
-        # (admin kan geen schutter worden)
-        url = self.url_wijzig_ontvang % self.functie_rko3.pk
-        resp = self.client.post(self.url_activeer_rol % 'geen', follow=True)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        with self.assert_max_queries(20):
-            resp = self.client.post(url, {'add': self.account_beh2.pk}, follow=False)
-        self.assert403(resp)
+        # probeer bezoeker te worden (corner case coverage)
+        resp = self.client.post(self.url_activeer_rol % 'geen')
+        self.assert404(resp, 'Slechte parameter')
 
     def test_koppel_rko(self):
         # log in als beh1 zodat er sessie gemaakt wordt
