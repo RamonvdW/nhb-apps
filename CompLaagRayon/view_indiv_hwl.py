@@ -45,7 +45,7 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
         rayon = ver.regio.rayon
 
         try:
-            deelkamp_pk = int(kwargs['deelkamp_pk'][:6])  # afkappen voor de veiligheid
+            deelkamp_pk = int(kwargs['deelkamp_pk'][:7])  # afkappen voor de veiligheid
             deelkamp = (KampRK
                         .objects
                         .select_related('competitie',

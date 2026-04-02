@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -79,7 +79,7 @@ def get_kaartjes_beheer(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_in
         url = reverse('Competitie:overzicht', kwargs={'comp_pk_of_seizoen': comp.maak_seizoen_url()})
         kaartje = SimpleNamespace(
                     prio=4,
-                    titel="Uitslagenlijsten",
+                    titel="Deelnemers + Uitslagen", #"Uitslagenlijsten",
                     sv_icon="comp uitslagen",
                     tekst="Toon de deelnemerslijsten en uitslagen van deze competitie.",
                     url=url)

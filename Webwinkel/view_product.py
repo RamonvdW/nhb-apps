@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2025 Ramon van der Winkel.
+#  Copyright (c) 2022-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -32,7 +32,7 @@ class ProductView(TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            product_pk = kwargs['product_pk'][:6]             # afkappen voor de veiligheid
+            product_pk = kwargs['product_pk'][:7]             # afkappen voor de veiligheid
             product_pk = int(product_pk)
             product = (WebwinkelProduct
                        .objects
@@ -145,7 +145,7 @@ class ProductView(TemplateView):
             raise Http404('Geen toegang')
 
         try:
-            product_pk = kwargs['product_pk'][:6]           # afkappen voor de veiligheid
+            product_pk = kwargs['product_pk'][:7]           # afkappen voor de veiligheid
             product_pk = int(product_pk)
             product = (WebwinkelProduct
                        .objects

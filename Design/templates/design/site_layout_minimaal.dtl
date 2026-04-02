@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 {% comment %}
-                Copyright (c) 2020-2025 Ramon van der Winkel.
+                Copyright (c) 2020-2026 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -30,7 +30,7 @@
 
         {% include 'design/site_layout_fonts.dtl' %}
 
-        <link rel="stylesheet" href="{% static 'css/materialize-new-326.css' %}">
+        <link rel="stylesheet" href="{% static 'css/materialize-new-352.css' %}">
 
         {% include 'design/site_layout_favicons.dtl' %}
 
@@ -47,7 +47,7 @@
         <!-- geen menu -->
         <div id="content">      <!-- geeft padding -->
 
-            <h3 class="page-banner">Oeps!</h3>
+            <h1 class="sv-kopje-pagina">Oeps!</h1>
 
             <!-- echt inhoud komt hier, vanuit de template -->
             {% block pagina_minimaal %}{% endblock %}
@@ -55,19 +55,24 @@
             <!-- default knop om terug te gaan naar het plein
                  kan weggehaald worden door dit block te vervangen in de template -->
             {% block terug_naar_af %}
-                <p>&nbsp;</p>
-                <h5>Wat kan je nog meer doen?</h5>
+                <h2 class="sv-kopje-row" style="margin-top:30px">Wat kan je nog meer doen?</h2>
 
                 <p>Onderstaande knop brengt je naar de startpagina van MijnHandboogsport.</p>
                 {% sv-knop-nav url='/plein/' icon='het plein 2' tekst='Het plein' %}
             {% endblock %}
 
-            <p>&nbsp;</p>
-            <h5>Hulp nodig?</h5>
+            <h2 class="sv-kopje-row" style="margin-top:30px">Hulp nodig?</h2>
 
             <p>Lukt het niet om het probleem op te lossen? Stuur dan een e-mail naar het volgende adres (druk op de knop om je mailprogramma te starten):</p>
             {% sv-knop-mailto kleur='blauw' email=email_support tekst=email_support icon='' %}
-            <p>Schrijf de volgende informatie in de e-mail:<br>- Je bondsnummer<br>- Datum en tijdstip waarop het probleem ontstond<br>- Beschrijving van je probleem</p>
+
+            <p>Schrijf de volgende informatie in de e-mail:</p>
+            <ul class="browser-default">
+                <li>Je bondsnummer</li>
+                <li>Datum en tijdstip waarop het probleem ontstond</li>
+                <li>Beschrijving van je probleem</li>
+            </ul>
+
         </div>
     </body>
 </html>

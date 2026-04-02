@@ -13,7 +13,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">{{ product.omslag_titel }}</h3>
+            <h1 class="sv-kopje-pagina">{{ product.omslag_titel }}</h1>
         </div>
     </div>
 
@@ -46,7 +46,7 @@
         <!-- witruimte -->
         <div class="row center">
             <div class="col s12">
-                <h4>Bestellen</h4>
+                <h2 class="sv-kopje-row">Bestellen</h2>
             </div>
         </div>
 
@@ -105,7 +105,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Product<wbr>informatie</h4>
+            <h2 class="sv-kopje-row">Product<wbr>informatie</h2>
         </div>
     </div>
 
@@ -145,7 +145,7 @@
         <!-- witruimte -->
         <div class="row center">
             <div class="col s12">
-                <h4>Bestellen</h4>
+                <h2 class="sv-kopje-row">Bestellen</h2>
             </div>
         </div>
 

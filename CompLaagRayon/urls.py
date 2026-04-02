@@ -7,7 +7,7 @@
 from django.urls import path
 from CompLaagRayon import (view_planning, view_formulieren, view_match_info_hwl,
                            view_indiv_rko, view_indiv_hwl, view_indiv_wijzig_status,
-                           view_teams_rko, view_teams_hwl, view_bko)
+                           view_teams_rko, view_teams_hwl, view_bko, view_limieten_indiv, view_limieten_teams)
 
 app_name = 'CompLaagRayon'
 
@@ -16,9 +16,13 @@ app_name = 'CompLaagRayon'
 urlpatterns = [
 
     # RKO: planning RK
-    path('planning/<deelkamp_pk>/limieten/',
-         view_planning.RayonLimietenView.as_view(),
-         name='limieten'),
+    path('planning/<deelkamp_pk>/individuele-limieten/',
+         view_limieten_indiv.WijzigIndivLimietenView.as_view(),
+         name='indiv-limieten'),
+
+    path('planning/<deelkamp_pk>/teams-limieten/',
+         view_limieten_teams.WijzigTeamsLimietenView.as_view(),
+         name='team-limieten'),
 
     path('planning/<deelkamp_pk>/',
          view_planning.RayonPlanningView.as_view(),

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#  Copyright (c) 2021-2025 Ramon van der Winkel.
+#  Copyright (c) 2021-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -17,6 +17,7 @@ EXCLUDE+="|site_layout_minimaal.dtl"
 EXCLUDE+="|webwinkel/card_product.dtl"
 EXCLUDE+="|vhpg-tekst.dtl"
 EXCLUDE+="|snippets.dtl"
+EXCLUDE+="|check_js_enabled.dtl"
 
 INCLUDES=$(grep -- '{% include' */templates/*/*dtl | grep -vE "$EXCLUDE")
 RES=$?

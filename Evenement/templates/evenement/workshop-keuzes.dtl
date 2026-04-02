@@ -1,6 +1,6 @@
 {% extends 'design/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2025 Ramon van der Winkel.
+                Copyright (c) 2025-2026 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -13,7 +13,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Voorkeur workshops</h3>
+            <h1 class="sv-kopje-pagina">Voorkeur workshops</h1>
             <p>Evenement: {{ evenement.titel }}</p>
             <p>Aantal inschrijvingen met workshop keuzes: {{ aantal_opgaven }}</p>
         </div>
@@ -27,7 +27,7 @@
                     <tr>
                         <td></td>
                         <td>
-                            <h5 class="sv-middel-blauw-text">Workshop ronde {{ ronde_nr }}</h5>
+                            <h2 class="sv-kopje-in-tabel">Workshop ronde {{ ronde_nr }}</h2>
                         </td>
                     <td>
                     {% for code, count, titel in ronde_ws %}

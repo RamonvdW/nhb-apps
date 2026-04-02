@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -98,7 +98,7 @@ class DetailsView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            taak_pk = int(kwargs['taak_pk'][:6])        # afkappen voor de veiligheid
+            taak_pk = int(kwargs['taak_pk'][:7])        # afkappen voor de veiligheid
             taak = (Taak
                     .objects
                     .select_related('toegekend_aan_functie',
@@ -127,7 +127,7 @@ class DetailsView(UserPassesTestMixin, TemplateView):
     def post(self, request, *args, **kwargs):
 
         try:
-            taak_pk = int(kwargs['taak_pk'][:6])    # afkappen voor de veiligheid
+            taak_pk = int(kwargs['taak_pk'][:7])    # afkappen voor de veiligheid
             taak = Taak.objects.get(pk=taak_pk)
         except (ValueError, Taak.DoesNotExist):
             raise Http404('Geen valide taak')

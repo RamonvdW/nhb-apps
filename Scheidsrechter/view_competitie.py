@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023-2025 Ramon van der Winkel.
+#  Copyright (c) 2023-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -210,7 +210,7 @@ class MatchDetailsView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            match_pk = str(kwargs['match_pk'])[:6]     # afkappen voor de veiligheid
+            match_pk = str(kwargs['match_pk'])[:7]     # afkappen voor de veiligheid
             match = (CompetitieMatch
                      .objects
                      .filter(competitie__afstand=18)
@@ -289,7 +289,7 @@ class MatchDetailsView(UserPassesTestMixin, TemplateView):
 
 class MatchDetailsCSView(UserPassesTestMixin, TemplateView):
 
-    """ Django class-based view voor de scheidsrechters """
+    """ Django class-based view voor de commissie scheidsrechters """
 
     # class variables shared by all instances
     template_name = TEMPLATE_MATCH_CS_KIES_SR
@@ -342,7 +342,7 @@ class MatchDetailsCSView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            match_pk = str(kwargs['match_pk'])[:6]     # afkappen voor de veiligheid
+            match_pk = str(kwargs['match_pk'])[:7]     # afkappen voor de veiligheid
             match = (CompetitieMatch
                      .objects
                      .filter(competitie__afstand=18)
@@ -589,7 +589,7 @@ class MatchDetailsCSView(UserPassesTestMixin, TemplateView):
         # print('POST: %s' % repr(list(request.POST.items())))
 
         try:
-            match_pk = str(kwargs['match_pk'])[:6]     # afkappen voor de veiligheid
+            match_pk = str(kwargs['match_pk'])[:7]     # afkappen voor de veiligheid
             match = (CompetitieMatch
                      .objects
                      .filter(competitie__afstand=18)
@@ -632,7 +632,7 @@ class MatchDetailsCSView(UserPassesTestMixin, TemplateView):
                 # SR koppelen
                 nr_hsr = "hsr"
                 gekozen = request.POST.get(nr_hsr, '')
-                gekozen = str(gekozen)[:6]      # afkappen voor de veiligheid
+                gekozen = str(gekozen)[:7]      # afkappen voor de veiligheid
                 if gekozen:
                     if gekozen == 'geen':
                         match_sr.gekozen_hoofd_sr = None
@@ -713,7 +713,7 @@ class MatchHWLContactView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            match_pk = str(kwargs['match_pk'])[:6]     # afkappen voor de veiligheid
+            match_pk = str(kwargs['match_pk'])[:7]     # afkappen voor de veiligheid
             match = (CompetitieMatch
                      .objects
                      .filter(competitie__afstand=18)

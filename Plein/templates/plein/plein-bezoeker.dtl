@@ -30,23 +30,30 @@
 
     <!-- MijnHandboogsport banner -->
     <div class="row center">
-        <div class="col s12">
-            <p>&nbsp;</p>
-            <h4>Welkom op</h4>
+        <div class="col s12" style="margin-top:38px">
+            <p class="sv-kopje-row">Welkom op</p>
         </div>
 
         <div class="col s12 sv-rood-text">
-            <h1 class="hide-on-small-only" style="margin:0; font-weight:bold">MijnHandboogsport</h1>
-            <h3 class="hide-on-med-and-up" style="margin:0; font-weight:bold">Mijn<wbr>Handboog<wbr>sport</h3>
+            <h1>
+                <span class="hide-on-small-only sv-site-banner-groot">MijnHandboogsport</span>
+                <span class="hide-on-med-and-up sv-site-banner-kleiner">Mijn<wbr>Handboog<wbr>sport</span>
+            </h1>
         </div>
 
         <div class="col s12">
             <p>Op deze website kan je informatie vinden over de handboogsport<br>zoals records, wedstrijden en uitslagen.</p>
-            <p>&nbsp;</p>
         </div>
     </div>
 
     {% include 'design/check_js_enabled.dtl' %}
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h2 class="sv-kopje-row">Ontdekken</h2>
+        </div>
+    </div>
 
     <!-- blauwe balk met kaartjes bondscompetities en records -->
     <div class="row-sv-blauw">
@@ -79,7 +86,7 @@
     <div class="row center">
         <div class="col s12">
             <p>&nbsp;</p>
-            <h4>Maak het persoonlijk</h4>
+            <h2 class="sv-kopje-row">Maak het persoonlijk</h2>
             <p>Door een account aan te maken kunnen we informatie tonen die voor jou relevant is<br>en kan je je aanmelden voor wedstrijden.</p>
         </div>
     </div>
@@ -102,7 +109,7 @@
     <div class="row center">
         <div class="col s12">
             <p>&nbsp;</p>
-            <h4>Andere sites van de KHSN</h4>
+            <h2 class="sv-kopje-row">Andere sites van de KHSN</h2>
             <p>De volgende websites zijn misschien ook interessant voor je</p>
         </div>
     </div>

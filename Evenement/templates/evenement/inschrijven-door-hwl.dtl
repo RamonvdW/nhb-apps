@@ -1,6 +1,6 @@
 {% extends 'design/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2025 Ramon van der Winkel.
+                Copyright (c) 2025-2026 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -14,7 +14,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Toevoegen</h3>
+            <h1 class="sv-kopje-pagina">Toevoegen</h1>
         </div>
     </div>
 
@@ -54,7 +54,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Zoeken</h4>
+            <h2 class="sv-kopje-row">Zoeken</h2>
 
             <p>Hieronder kan je een lid zoeken op bondsnummer of (deel van de) naam.</p>
             {% if not sporter %}
@@ -97,7 +97,7 @@
         <!-- witruimte -->
         <div class="row center">
             <div class="col s12">
-                <h4>Gevonden sporters</h4>
+                <h2 class="sv-kopje-row">Gevonden sporters</h2>
                 <p>Er zijn meerdere hits. Graag de zoektekst preciezer maken.</p>
             </div>
         </div>
@@ -130,7 +130,7 @@
         <!-- witruimte -->
         <div class="row center">
             <div class="col s12">
-                <h4>Gevonden sporter</h4>
+                <h2 class="sv-kopje-row">Gevonden sporter</h2>
             </div>
         </div>
 

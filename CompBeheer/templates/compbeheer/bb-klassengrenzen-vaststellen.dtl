@@ -1,6 +1,6 @@
 {% extends 'design/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2025 Ramon van der Winkel.
+                Copyright (c) 2020-2026 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -13,7 +13,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Klassengrenzen vaststellen</h3>
+            <h1 class="sv-kopje-pagina">Klassengrenzen vaststellen</h1>
             <p>Voor de individuele en teams wedstrijdklassen voor de <b>{{ comp.beschrijving }}</b>.</p>
         </div>
     </div>
@@ -23,7 +23,7 @@
         <!-- witruimte -->
         <div class="row center">
             <div class="col s12">
-                <h4 class="sv-rood-text">Wat doe je hier?!</h4>
+                <p class="sv-kopje-row sv-rood-text">Wat doe je hier?!</p>
                 <p class="center">De klassengrenzen zijn al vastgesteld.</p>
             </div>
         </div>
@@ -34,7 +34,7 @@
         <div class="row-sv-blauw">
             <div class="col s12">
                 <div class="sv-kader">
-                    <h5 class="sv-rood-text">Controleer dat onderstaande gegevens juist zijn.</h5>
+                    <p class="sv-kopje-dialoog sv-rood-text">Controleer dat onderstaande gegevens juist zijn.</p>
                     <p>Weet je zeker dat de <b>aanvangsgemiddelden</b> recentelijk vastgesteld zijn aan de hand van de uitslagen van vorig seizoen?</p>
                     <p>Op <b>{{ bb_ag_nieuwste_datum }}</b> zijn de aanvangsgemiddelden voor het laatste vastgesteld.</p>
                     <p>
@@ -49,8 +49,10 @@
         <div class="row center">
             <div class="col s12">
                 <p>Hieronder volgen de berekende klassengrenzen voor de individuele en team klassen.</p>
-                <p>Onder aan deze pagina vindt je een knop om de klassengrenzen vast te leggen. Dit is een eenmalige actie voor elke competitie.</p>
-                <h4>Individuele wedstrijdklassen</h4>
+                <p>Onder aan deze pagina vindt je een knop om de klassengrenzen vast te leggen.<br>Dit is een eenmalige actie voor elke competitie.</p>
+                <br>
+                <h2 class="sv-kopje-row">Individuele wedstrijdklassen</h2>
+                <p>Aantal sporters is van de voorgaande competitie</p>
             </div>
         </div>
 
@@ -61,7 +63,7 @@
                     <thead>
                         <tr>
                             <th>Materiaalklasse</th>
-                            <th>Aantal sporters</th>
+                            <th class="center">Aantal sporters</th>
                             <th>Minimaal AG</th>
                         </tr>
                     </thead>
@@ -69,7 +71,7 @@
                     {% for obj in klassengrenzen_indiv %}
                         <tr>
                             <td>{{ obj.beschrijving }}</td>
-                            <td>{{ obj.count }}</td>
+                            <td class="center">{{ obj.count }}</td>
                             <td>{{ obj.ag|floatformat:3 }}{% if obj.ag < 0.0005 %} (onbekend){% endif %}</td>
                         </tr>
                     {% endfor %}
@@ -81,7 +83,8 @@
         <!-- witruimte -->
         <div class="row center">
             <div class="col s12">
-                <h4>Team wedstrijdklassen</h4>
+                <h2 class="sv-kopje-row">Team wedstrijdklassen</h2>
+                <p>Aantal teams is van de voorgaande competitie</p>
             </div>
         </div>
 
@@ -92,16 +95,16 @@
                     <thead>
                         <tr>
                             <th>Materiaalklasse</th>
-                            <th>Aantal teams</th>
-                            <th>Minimaal Team-AG</th>
+                            <th class="center">Aantal teams</th>
+                            <th class="center">Minimaal Team-AG</th>
                         </tr>
                     </thead>
 
                     {% for obj in klassengrenzen_teams %}
                         <tr>
                             <td>{{ obj.beschrijving }}</td>
-                            <td>{{ obj.count }}</td>
-                            <td>{{ obj.ag_str }}</td>
+                            <td class="center">{{ obj.count }}</td>
+                            <td class="center">{{ obj.ag_str }}</td>
                         </tr>
                     {% endfor %}
 

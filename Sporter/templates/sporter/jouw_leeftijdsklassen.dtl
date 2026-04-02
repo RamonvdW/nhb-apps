@@ -1,6 +1,6 @@
 {% extends 'design/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2019-2025 Ramon van der Winkel.
+                Copyright (c) 2019-2026 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -13,7 +13,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Jouw leeftijdsklassen</h3>
+            <h1 class="sv-kopje-pagina">Jouw leeftijdsklassen</h1>
             <p>Vooral voor jonge sporters verandert de klasse waarin je uit mag komen regelmatig, daarom hebben we hieronder een overzicht gemaakt.</p>
         </div>
     </div>
@@ -21,7 +21,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Wedstrijden World Archery</h4>
+            <h2 class="sv-kopje-row">Wedstrijden World Archery</h2>
             <p>Dit jaar bereik je de leeftijd <b class="sv-rood-text">{{ leeftijd }} jaar</b>, daarom kom je het hele jaar uit in de klasse <b class="sv-rood-text">{{ lkl_wa_dit_jaar }}</b></p>
         </div>
     </div>
@@ -88,7 +88,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Wedstrijden IFAA</h4>
+            <h2 class="sv-kopje-row">Wedstrijden IFAA</h2>
             <p>Dit jaar bereik je de leeftijd <b class="sv-rood-text">{{ leeftijd }} jaar</b></p>
         </div>
     </div>
@@ -136,7 +136,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Wedstrijden KHSN</h4>
+            <h2 class="sv-kopje-row">Wedstrijden KHSN</h2>
             <p>De KHSN wedstrijdklassen zijn gebaseerd op World Archery, uitgebreid met extra klassen voor de jongsten en oudsten.</p>
             <p>Verder hebben KHSN wedstrijden de optie tot gender-neutrale wedstrijdklassen.</p>
             <p>Dit jaar bereik je de leeftijd <b class="sv-rood-text">{{ leeftijd }} jaar</b>, daarom kom je het hele jaar uit in de klasse <b class="sv-rood-text">{{ lkl_khsn_dit_jaar_1 }}</b>
@@ -206,7 +206,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Bondscompetitie</h4>
+            <h2 class="sv-kopje-row">Bondscompetitie</h2>
             {% if is_gast %}
                 <p>Je moet lid zijn bij de KHSN om deel te nemen aan de bondscompetities.</p>
                 <p>Tijdens seizoen {{ lkl_comp.1.seizoen }} zou je de bondscompetitie schieten als <b class="sv-rood-text">{{ lkl_comp.1.tekst }}</b></p>

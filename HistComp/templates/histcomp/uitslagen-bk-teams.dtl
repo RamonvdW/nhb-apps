@@ -1,6 +1,6 @@
 {% extends 'design/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2025 Ramon van der Winkel.
+                Copyright (c) 2020-2026 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -13,7 +13,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Uitslagen BK teams</h3>
+            <h1 class="sv-kopje-pagina">Uitslagen BK teams</h1>
             <p>Eindstand van de bonds<wbr>kampioenschappen teams</p>
         </div>
     </div>
@@ -38,7 +38,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4 id="filters" data-url="{{ url_filters }}">Filters</h4>
+            <h2 class="sv-kopje-row" id="filters" data-url="{{ url_filters }}">Filters</h2>
         </div>
     </div>
 
@@ -94,7 +94,7 @@
 
                     <tr class="sv-table-sectie-header">
                         <td colspan="7" class="center">
-                            <h5>{{ team.teams_klasse }}</h5>
+                            <h2 class="sv-kopje-row">{{ team.teams_klasse }}</h2>
                         </td>
                     </tr>
 

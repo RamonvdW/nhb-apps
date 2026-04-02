@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023-2025 Ramon van der Winkel.
+#  Copyright (c) 2023-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -142,7 +142,7 @@ class WedstrijdDetailsView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            wedstrijd_pk = str(kwargs['wedstrijd_pk'])[:6]     # afkappen voor de veiligheid
+            wedstrijd_pk = str(kwargs['wedstrijd_pk'])[:7]     # afkappen voor de veiligheid
             wedstrijd = (Wedstrijd
                          .objects
                          .filter(status=WEDSTRIJD_STATUS_GEACCEPTEERD)
@@ -269,7 +269,7 @@ class WedstrijdDetailsCSView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            wedstrijd_pk = str(kwargs['wedstrijd_pk'])[:6]     # afkappen voor de veiligheid
+            wedstrijd_pk = str(kwargs['wedstrijd_pk'])[:7]     # afkappen voor de veiligheid
             wedstrijd = (Wedstrijd
                          .objects
                          .filter(status=WEDSTRIJD_STATUS_GEACCEPTEERD)
@@ -512,7 +512,7 @@ class WedstrijdDetailsCSView(UserPassesTestMixin, TemplateView):
         # print('POST: %s' % repr(list(request.POST.items())))
 
         try:
-            wedstrijd_pk = int(str(kwargs['wedstrijd_pk'])[:6])     # afkappen voor de veiligheid
+            wedstrijd_pk = int(str(kwargs['wedstrijd_pk'])[:7])     # afkappen voor de veiligheid
             wedstrijd = (Wedstrijd
                          .objects
                          .get(pk=wedstrijd_pk))
@@ -549,7 +549,7 @@ class WedstrijdDetailsCSView(UserPassesTestMixin, TemplateView):
                 # haal de radiobutton keuze op
                 nr_hsr = "hsr_%s" % dag.dag_offset
                 gekozen = request.POST.get(nr_hsr, '')
-                gekozen = str(gekozen)[:6]      # afkappen voor de veiligheid
+                gekozen = str(gekozen)[:7]      # afkappen voor de veiligheid
                 if gekozen:
                     if gekozen == 'geen':
                         dag.gekozen_hoofd_sr = None
@@ -629,7 +629,7 @@ class WedstrijdHWLContactView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            wedstrijd_pk = str(kwargs['wedstrijd_pk'])[:6]     # afkappen voor de veiligheid
+            wedstrijd_pk = str(kwargs['wedstrijd_pk'])[:7]     # afkappen voor de veiligheid
             wedstrijd = (Wedstrijd
                          .objects
                          #.exclude(is_ter_info=True)

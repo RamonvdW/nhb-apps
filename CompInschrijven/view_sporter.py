@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2025 Ramon van der Winkel.
+#  Copyright (c) 2020-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -425,7 +425,7 @@ class RegiocompetitieAfmeldenView(View):
 
         # converteer en doe eerste controle op de parameters
         try:
-            deelnemer_pk = int(kwargs['deelnemer_pk'][:6])     # afkappen voor de veiligheid
+            deelnemer_pk = int(kwargs['deelnemer_pk'][:7])     # afkappen voor de veiligheid
             deelnemer = (RegiocompetitieSporterBoog
                          .objects
                          .select_related('regiocompetitie__competitie',

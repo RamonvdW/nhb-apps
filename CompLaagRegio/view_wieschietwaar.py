@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2025 Ramon van der Winkel.
+#  Copyright (c) 2021-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -43,7 +43,7 @@ class WieSchietWaarView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            deelcomp_pk = int(self.kwargs['deelcomp_pk'][:6])       # afkappen voor de veiligheid
+            deelcomp_pk = int(self.kwargs['deelcomp_pk'][:7])       # afkappen voor de veiligheid
             deelcomp = (Regiocompetitie
                         .objects
                         .select_related('competitie')

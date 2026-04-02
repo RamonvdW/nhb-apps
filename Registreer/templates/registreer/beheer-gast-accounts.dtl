@@ -13,7 +13,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Gast-accounts</h3>
+            <h1 class="sv-kopje-pagina">Gast-accounts</h1>
         </div>
     </div>
 
@@ -21,7 +21,7 @@
     <div class="row-sv-blauw">
         <div class="col s12">
             <div class="sv-kader">
-                <h6>Afspraken</h6>
+                <p class="sv-kopje-klein">Afspraken</p>
                 <p>Sporters die lid zijn bij World Archery of de IFAA kunnen met een gast-account inschrijven op wedstrijden.</p>
                 <p>Personen die niet lid zijn bij de KHSN kunnen een gast-account aanmaken om de site te ontdekken en in te schrijven op wedstrijden.</p>
                 <p>KHSN-leden moeten een normaal account aanmaken, geen gast-account.</p>
@@ -32,7 +32,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Actieve gast-accounts</h4>
+            <h2 class="sv-kopje-row">Actieve gast-accounts</h2>
             <p>Aantal gast-accounts: {{ count_gasten }}</p>
             <p>Tip: rode knop vraagt om aandacht</p>
         </div>
@@ -95,7 +95,7 @@
         <!-- witruimte -->
         <div class="row center">
             <div class="col s12">
-                <h4>Afgewezen gast-accounts</h4>
+                <h2 class="sv-kopje-row">Afgewezen gast-accounts</h2>
                 <p>Aantal afgewezen gast-accounts: {{ count_afgewezen }}</p>
             </div>
         </div>

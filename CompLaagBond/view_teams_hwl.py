@@ -40,7 +40,7 @@ class TeamsBkView(UserPassesTestMixin, TemplateView):
     def _get_deelkamp_bk(deelkamp_pk) -> KampBK:
         # haal de gevraagde kampioenschap op
         try:
-            deelkamp_pk = int(deelkamp_pk[:6])  # afkappen voor de veiligheid
+            deelkamp_pk = int(deelkamp_pk[:7])  # afkappen voor de veiligheid
             deelkamp = (KampBK
                         .objects
                         .select_related('competitie')

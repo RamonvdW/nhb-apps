@@ -7,9 +7,9 @@
 from .kampioenschap import KampRK
 from .deelnemer import DeelnemerRK
 from .team import TeamRK
-from .cut import CutRK
+from .cut import CutRK, CutTeamRK
 
-__all__ = ['KampRK', 'DeelnemerRK', 'TeamRK', 'CutRK']
+__all__ = ['KampRK', 'DeelnemerRK', 'TeamRK', 'CutRK', 'CutTeamRK']
 
 
 # end of file

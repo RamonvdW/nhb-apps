@@ -44,7 +44,7 @@ class WijzigLimietenView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            deelkamp_pk = int(kwargs['deelkamp_pk'][:6])  # afkappen voor de veiligheid
+            deelkamp_pk = int(kwargs['deelkamp_pk'][:7])  # afkappen voor de veiligheid
             deelkamp = (KampBK
                         .objects
                         .select_related('competitie')
@@ -121,7 +121,7 @@ class WijzigLimietenView(UserPassesTestMixin, TemplateView):
         """ wordt aangeroepen als de gebruik op de knop OPSLAAN druk """
 
         try:
-            deelkamp_pk = int(kwargs['deelkamp_pk'][:6])  # afkappen voor de veiligheid
+            deelkamp_pk = int(kwargs['deelkamp_pk'][:7])  # afkappen voor de veiligheid
             deelkamp = (KampBK
                         .objects
                         .select_related('competitie')

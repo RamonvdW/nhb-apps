@@ -16,7 +16,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Account activiteit</h3>
+            <h1 class="sv-kopje-pagina">Account activiteit</h1>
         </div>
     </div>
 
@@ -51,7 +51,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Details specifieke gebruiker</h4>
+            <h2 class="sv-kopje-row">Details specifieke gebruiker</h2>
             <p>Gebruik het formulier om details op te vragen over een specifieke gebruiker</p>
         </div>
     </div>
@@ -88,7 +88,7 @@
         <!-- witruimte -->
         <div class="row center">
             <div class="col s12">
-                <h4>Zoekresultaten</h4>
+                <h2 class="sv-kopje-row">Zoekresultaten</h2>
                 {% if zoek_leden %}
                     <p>{{ zoek_leden|length }} gebruikers gevonden</p>
                 {% else %}
@@ -159,7 +159,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4 id="hulp">Mogelijk hulp nodig</h4>
+            <h2 class="sv-kopje-row" id="hulp">Mogelijk hulp nodig</h2>
             <p>Onderstaande {{ hulp|length }} accounts zijn aangemaakt en gekoppeld aan een rol,<br>maar hebben nog geen 2FA gekoppeld.</p>
         </div>
     </div>
@@ -207,7 +207,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4 id="nieuwe">Nieuwe accounts</h4>
+            <h2 class="sv-kopje-row" id="nieuwe">Nieuwe accounts</h2>
             <p>(nieuwste 50)</p>
         </div>
     </div>
@@ -256,7 +256,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4 id="recent">Recente activiteit</h4>
+            <h2 class="sv-kopje-row" id="recent">Recente activiteit</h2>
             <p>Accounts waar recent op ingelogd is (maximaal 50)</p>
         </div>
     </div>
@@ -302,7 +302,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4 id="poging">Mislukte inlog pogingen</h4>
+            <h2 class="sv-kopje-row" id="poging">Mislukte inlog pogingen</h2>
             <p>Accounts waar recent geprobeerd is op in te loggen (maximaal 50)</p>
             <p>(dit zijn accounts waar de ooit op ingelogd is en daarna een mislukte inlogpoging)</p>
         </div>
@@ -352,7 +352,7 @@
     {% if age_groups %}
         <div class="row center">
             <div class="col s12">
-                <h4 id="leeftijdsgroepen">Leeftijd van de gebruikers</h4>
+                <h2 class="sv-kopje-row" id="leeftijdsgroepen">Leeftijd van de gebruikers</h2>
                 <p>Leeftijd van de {{ age_groups_total }} actieve gebruikers, gegroepeerd per 10 jaar.</p>
             </div>
         </div>
@@ -402,7 +402,8 @@
                 {% if obj.kan_loskoppelen %}
                     <div class="modal" id="bevestig_reset_tweede_factor_{{ obj.inlog_naam_str }}">
                         <div class="modal-content center">
-                            <h5>Tweede factor loskoppelen?</h5>
+                            <p class="sv-kopje-dialoog">Tweede factor loskoppelen?</p>
+
                             <p>Gebruik dit alleen als de gebruiker aangegeven heeft de controle niet meer uit te kunnen voeren, bijvoorbeeld na overstappen op een andere mobiele telefoon.</p>
                             <p>Wil je de tweede factor voor <b>[{{ obj.inlog_naam_str }}] {{ obj.volledige_naam }}</b> resetten?</p>
                             <p>We sturen de gebruiker een e-mail met instructies hoe de tweede factor weer gekoppeld kan worden.</p>

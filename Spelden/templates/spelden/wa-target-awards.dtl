@@ -1,6 +1,6 @@
 {% extends 'design/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2024-2025 Ramon van der Winkel.
+                Copyright (c) 2024-2026 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -13,7 +13,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Target awards</h3>
+            <h1 class="sv-kopje-pagina">Target awards</h1>
             <p>Deze World Archery spelden zijn te behalen op specifieke wedstrijden als er geschoten is met recurve, compound of barebow.</p>
         </div>
     </div>
@@ -90,7 +90,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>De spelden</h4>
+            <h2 class="sv-kopje-row">De spelden</h2>
         </div>
     </div>
 
@@ -150,7 +150,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Benodigde scores</h4>
+            <h2 class="sv-kopje-row">Benodigde scores</h2>
             <p>De Target awards en Zilveren target awards zijn beschikbaar als je de benodigde score behaald hebt</p>
         </div>
     </div>

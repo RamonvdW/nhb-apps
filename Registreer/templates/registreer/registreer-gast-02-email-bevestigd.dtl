@@ -1,6 +1,6 @@
 {% extends 'design/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2023-2025 Ramon van der Winkel.
+                Copyright (c) 2023-2026 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -15,7 +15,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">E-mail is bevestigd</h3>
+            <h1 class="sv-kopje-pagina">E-mail is bevestigd</h1>
         </div>
     </div>
 
@@ -26,7 +26,7 @@
                 <p>Je hebt laten zien dat je toegang hebt de opgegeven e-mail.</p>
                 <br>
                 <p>We hebben het volgende tijdelijke bondsnummer toegekend aan jouw gast-account:</p>
-                <h4><b>{{ lid_nr }}</b></h4>
+                <h2 class="sv-kopje-row"><b>{{ lid_nr }}</b></h2>
                 <br>
                 <p>Je kan nu een wachtwoord instellen.</p>
                 <p><a class="btn-sv-rood" href="{{ url_volgende_vraag }}">Ga door</a></p>

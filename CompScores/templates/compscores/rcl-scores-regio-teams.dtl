@@ -1,6 +1,6 @@
 {% extends 'design/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2025 Ramon van der Winkel.
+                Copyright (c) 2020-2026 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -14,7 +14,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Scores koppelen aan team</h3>
+            <h1 class="sv-kopje-pagina">Scores koppelen aan team</h1>
             <p>Individuele scores koppelen aan een team, voor de huidige ronde</p>
         </div>
     </div>
@@ -64,13 +64,17 @@
                                 {% for regel in alle_regels %}
                                     {% if regel.poule_str %}
                                         <tr>
-                                            <td colspan="3" class="center sv-rood-text"><h5>Poule: {{ regel.poule_str }}</h5></td>
+                                            <td colspan="3" class="center sv-rood-text">
+                                                <h3 class="sv-kopje-in-tabel">Poule: {{ regel.poule_str }}</h3>
+                                            </td>
                                         </tr>
                                     {% endif %}
 
                                     {% if regel.klasse_str %}
                                         <tr>
-                                            <td colspan="3" class="center"><h6>Klasse: {{ regel.klasse_str }}</h6></td>
+                                            <td colspan="3" class="center">
+                                                <h4 class="sv-kopje-klein">Klasse: {{ regel.klasse_str }}</h4>
+                                            </td>
                                         </tr>
 
                                         <tr>

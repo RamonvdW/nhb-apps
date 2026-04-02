@@ -1,6 +1,6 @@
 {% extends 'design/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2023-2025 Ramon van der Winkel.
+                Copyright (c) 2023-2026 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -15,7 +15,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Kies scheidsrechters</h3>
+            <h1 class="sv-kopje-pagina">Kies scheidsrechters</h1>
             <p>voor de Commissie Scheidsrechters</p>
         </div>
     </div>
@@ -64,7 +64,7 @@
                                 {% for dag in dagen %}
                                     <tr>
                                         <td colspan="2" class="center">
-                                            <h6 class="sv-blauw-text">{{ dag.datum }}</h6>
+                                            <span class="sv-kopje-in-tabel">{{ dag.datum }}</span>
                                         </td>
                                     </tr>
                                     <tr>
@@ -170,7 +170,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Wedstrijd details</h4>
+            <h2 class="sv-kopje-row">Wedstrijd details</h2>
         </div>
     </div>
 
@@ -180,8 +180,8 @@
             <table class="sv-kader-tabel">
 
                 <tr>
-                    <td colspan="2" class="center sv-blauw-text">
-                        <h6>Informatie</h6>
+                    <td colspan="2" class="center">
+                        <span class="sv-kopje-in-tabel">Informatie</span>
                     </td>
                 </tr>
 
@@ -256,8 +256,8 @@
 
 
                 <tr>
-                    <td colspan="2" class="center sv-blauw-text">
-                        <h6>Contactgegevens organisatie</h6>
+                    <td colspan="2" class="center">
+                        <span class="sv-kopje-in-tabel">Contactgegevens organisatie</span>
                     </td>
                 </tr>
 
@@ -278,7 +278,9 @@
 
 
                 <tr>
-                    <td colspan="2" class="center sv-blauw-text"><h6>Scheidsrechter behoefte</h6></td>
+                    <td colspan="2" class="center">
+                        <span class="sv-kopje-in-tabel">Scheidsrechter behoefte</span>
+                    </td>
                 </tr>
 
                 <tr>
@@ -299,7 +301,7 @@
                 <ul id="sessies" class="collapsible z-depth-0 white" style="margin-top:30px; margin-bottom:0">
                     <li>
                         <div class="collapsible-header white center" style="display:block; cursor:inherit">
-                            <h6 class="sv-blauw-text">Sessies</h6>
+                            <p class="sv-kopje-in-tabel">Sessies</p>
                             {% if wed.organisatie == 'N' %}
                                 <p>Klassen zonder man/vrouw benoeming zijn genderneutraal</p>
                             {% endif %}

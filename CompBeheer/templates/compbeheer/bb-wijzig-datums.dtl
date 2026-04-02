@@ -14,7 +14,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Wijzig datums</h3>
+            <h1 class="sv-kopje-pagina">Wijzig datums</h1>
             <p>voor de <b>{{ comp }}</b></p>
         </div>
     </div>
@@ -41,7 +41,9 @@
                     </tr>
 
                     <tr>
-                        <td colspan="3" class="center"><h5>Regiocompetitie</h5></td>
+                        <td colspan="3" class="center">
+                            <h2 class="sv-kopje-in-tabel">Regiocompetitie</h2>
+                        </td>
                     </tr>
 
                     <tr>
@@ -56,7 +58,9 @@
                     </tr>
 
                     <tr>
-                        <td colspan="3" class="center"><h5>Rayonkampioenschappen</h5></td>
+                        <td colspan="3" class="center">
+                            <h2 class="sv-kopje-in-tabel">Rayonkampioenschappen</h2>
+                        </td>
                     </tr>
 
                     <tr>
@@ -90,7 +94,9 @@
                     </tr>
 
                     <tr>
-                        <td colspan="3" class="center"><h5>Bondskampioenschappen</h5></td>
+                        <td colspan="3" class="center">
+                            <h2 class="sv-kopje-in-tabel">Bondskampioenschappen</h2>
+                        </td>
                     </tr>
 
                     <tr>

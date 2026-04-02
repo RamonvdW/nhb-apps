@@ -62,6 +62,7 @@ KEEP_DB=1
 TEST_ALL=0
 
 FOCUS_ARGS=()
+FOCUS_COUNT=0
 for arg in "${ARGS[@]}"
 do
     # echo "[DEBUG] arg=$arg"
@@ -106,6 +107,7 @@ do
         arg=${arg/.py/}                               # strip .py at the end
 
         FOCUS_ARGS+=("$arg")
+        FOCUS_COUNT=$((FOCUS_COUNT + 1))
     fi
 done
 

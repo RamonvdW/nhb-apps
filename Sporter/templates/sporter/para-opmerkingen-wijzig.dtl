@@ -14,7 +14,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Wijzig para notitie</h3>
+            <h1 class="sv-kopje-pagina">Wijzig para notitie</h1>
             <p>Voor sporter <b>{{ voorkeuren.sporter.lid_nr_en_volledige_naam }}</b></p>
         </div>
     </div>
@@ -32,7 +32,7 @@
 
                         <tr>
                             <td>
-                                <h5>Voorkeuren voor para-sporters</h5>
+                                <p class="sv-kopje-in-tabel">Voorkeuren voor para-sporters</p>
                                 <br>
                                 <span>De ingevoerde informatie wordt gedeeld met de wedstrijdleiding zodat ze, indien mogelijk, hier rekening mee houden.</span>
                             </td>

@@ -1,6 +1,6 @@
 {% extends 'design/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2025 Ramon van der Winkel.
+                Copyright (c) 2020-2026 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -15,7 +15,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Account wissel</h3>
+            <h1 class="sv-kopje-pagina">Account wissel</h1>
         </div>
     </div>
 
@@ -45,7 +45,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Gevonden gebruikers ({{ aantal_gevonden }})</h4>
+            <h2 class="sv-kopje-row">Gevonden gebruikers ({{ aantal_gevonden }})</h2>
         </div>
     </div>
 

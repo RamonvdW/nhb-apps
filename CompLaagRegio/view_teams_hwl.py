@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2025 Ramon van der Winkel.
+#  Copyright (c) 2021-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -93,7 +93,7 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
 
         # haal de gevraagde regiocompetitie op
         try:
-            deelcomp_pk = int(deelcomp_pk[:6])     # afkappen voor de veiligheid
+            deelcomp_pk = int(deelcomp_pk[:7])     # afkappen voor de veiligheid
             deelcomp = (Regiocompetitie
                         .objects
                         .select_related('competitie', 'regio')
@@ -308,7 +308,7 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
             regio = self.functie_nu.regio
 
         try:
-            deelcomp_pk = int(deelcomp_pk[:6])     # afkappen voor de veiligheid
+            deelcomp_pk = int(deelcomp_pk[:7])     # afkappen voor de veiligheid
             deelcomp = (Regiocompetitie
                         .objects
                         .select_related('competitie', 'regio')
@@ -354,7 +354,7 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
         mag_wijzigen = (now <= einde)
 
         try:
-            team_pk = int(kwargs['team_pk'][:6])        # afkappen voor de veiligheid
+            team_pk = int(kwargs['team_pk'][:7])        # afkappen voor de veiligheid
             team = (RegiocompetitieTeam
                     .objects
                     .get(pk=team_pk,
@@ -403,7 +403,7 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
         deelcomp = self._get_deelcomp(kwargs['deelcomp_pk'])        # kan Http404 genereren
 
         try:
-            team_pk = int(kwargs['team_pk'][:6])    # afkappen voor de veiligheid
+            team_pk = int(kwargs['team_pk'][:7])    # afkappen voor de veiligheid
         except (ValueError, KeyError):
             raise Http404('Geen valide parameter')
 
@@ -512,7 +512,7 @@ class WijzigTeamAGView(UserPassesTestMixin, TemplateView):
 
         # haal de deelnemer op
         try:
-            deelnemer_pk = int(kwargs['deelnemer_pk'][:6])  # afkappen voor de veiligheid
+            deelnemer_pk = int(kwargs['deelnemer_pk'][:7])  # afkappen voor de veiligheid
             deelnemer = (RegiocompetitieSporterBoog
                          .objects
                          .select_related('sporterboog',
@@ -587,7 +587,7 @@ class WijzigTeamAGView(UserPassesTestMixin, TemplateView):
 
         # haal de deelnemer op
         try:
-            deelnemer_pk = int(kwargs['deelnemer_pk'][:6])  # afkappen voor de veiligheid
+            deelnemer_pk = int(kwargs['deelnemer_pk'][:7])  # afkappen voor de veiligheid
             deelnemer = (RegiocompetitieSporterBoog
                          .objects
                          .select_related('regiocompetitie',
@@ -674,7 +674,7 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
 
         # zoek het team erbij en controleer dat deze bij de vereniging van de beheerder hoort
         try:
-            team_pk = int(kwargs['team_pk'][:6])        # afkappen voor de veiligheid
+            team_pk = int(kwargs['team_pk'][:7])        # afkappen voor de veiligheid
             team = (RegiocompetitieTeam
                     .objects
                     .select_related('regiocompetitie',
@@ -786,7 +786,7 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
 
         # zoek het team erbij en controleer dat deze bij de vereniging van de beheerder hoort
         try:
-            team_pk = int(kwargs['team_pk'][:6])        # afkappen voor de veiligheid
+            team_pk = int(kwargs['team_pk'][:7])        # afkappen voor de veiligheid
             team = (RegiocompetitieTeam
                     .objects
                     .select_related('regiocompetitie',
@@ -898,7 +898,7 @@ class TeamsRegioInvallersView(UserPassesTestMixin, TemplateView):
 
         # haal de gevraagde regiocompetitie op
         try:
-            deelcomp_pk = int(deelcomp_pk[:6])     # afkappen voor de veiligheid
+            deelcomp_pk = int(deelcomp_pk[:7])     # afkappen voor de veiligheid
             deelcomp = (Regiocompetitie
                         .objects
                         .select_related('competitie', 'regio')
@@ -1043,7 +1043,7 @@ class TeamsRegioInvallersKoppelLedenView(UserPassesTestMixin, TemplateView):
 
         # zoek het team erbij en controleer dat deze bij de vereniging van de beheerder hoort
         try:
-            ronde_team_pk = int(kwargs['ronde_team_pk'][:6])        # afkappen voor de veiligheid
+            ronde_team_pk = int(kwargs['ronde_team_pk'][:7])        # afkappen voor de veiligheid
             ronde_team = (RegiocompetitieRondeTeam
                           .objects
                           .select_related('team',
@@ -1225,7 +1225,7 @@ class TeamsRegioInvallersKoppelLedenView(UserPassesTestMixin, TemplateView):
 
         # zoek het team erbij en controleer dat deze bij de vereniging van de beheerder hoort
         try:
-            ronde_team_pk = int(kwargs['ronde_team_pk'][:6])        # afkappen voor de veiligheid
+            ronde_team_pk = int(kwargs['ronde_team_pk'][:7])        # afkappen voor de veiligheid
             ronde_team = (RegiocompetitieRondeTeam
                           .objects
                           .select_related('team')
@@ -1295,7 +1295,7 @@ class TeamsRegioInvallersKoppelLedenView(UserPassesTestMixin, TemplateView):
 
             sel_pk = request.POST.get('invaller_%s' % nr, '')
             try:
-                sel_pk = int(str(sel_pk)[:6])       # afkappen voor de veiligheid
+                sel_pk = int(str(sel_pk)[:7])       # afkappen voor de veiligheid
             except ValueError:
                 raise Http404('Verkeerde parameters')
 

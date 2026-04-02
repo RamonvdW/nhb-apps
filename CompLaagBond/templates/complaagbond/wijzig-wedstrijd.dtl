@@ -76,7 +76,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Wijzig BK wedstrijd</h3>
+            <h1 class="sv-kopje-pagina">Wijzig BK wedstrijd</h1>
         </div>
     </div>
 
@@ -234,7 +234,8 @@
 
         <div class="modal" id="bevestig_verwijder_wedstrijd">
             <div class="modal-content center">
-                <h5>Verwijder BK wedstrijd?</h5>
+                <p class="sv-kopje-dialoog">Verwijder BK wedstrijd?</p>
+
                 <p>Heb je deze BK wedstrijd echt niet meer nodig?</p>
 
                 <form action="{{ url_verwijderen }}" method="post" onsubmit="document.getElementById('submit_knop2').disabled=true; return true;">

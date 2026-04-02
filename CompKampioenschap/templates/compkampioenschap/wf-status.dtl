@@ -16,7 +16,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Status wedstrijdformulieren</h3>
+            <h1 class="sv-kopje-pagina">Status wedstrijdformulieren</h1>
             <p>Voor de RK's en BK's die nu actief zijn.</p>
             <p>De informatie wordt 1x per uur ververst.</p>
         </div>
@@ -31,14 +31,14 @@
                     {% if match.do_header %}
                         <tr>
                             <td colspan="6" class="center">
-                                <h5 class="sv-middel-blauw-text">{{ match.datum_wanneer }}</h5>
+                                <span class="sv-kopje-in-tabel">{{ match.datum_wanneer }}</span>
                             </td>
                         </tr>
                     {% endif %}
 
                     <tr>
                         <td colspan="6">
-                            <h6>{% if match.vereniging %}{{ match.vereniging.ver_nr_en_naam }}{% else %}???{% endif %}</h6>
+                            <span class="sv-kopje-klein">{% if match.vereniging %}{{ match.vereniging.ver_nr_en_naam }}{% else %}???{% endif %}</span>
                         </td>
                     </tr>
                     <tr>

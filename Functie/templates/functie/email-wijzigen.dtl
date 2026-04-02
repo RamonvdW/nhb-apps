@@ -1,6 +1,6 @@
 {% extends 'design/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2025 Ramon van der Winkel.
+                Copyright (c) 2020-2026 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -15,7 +15,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Wijzig e-mailadres</h3>
+            <h1 class="sv-kopje-pagina">Wijzig e-mailadres</h1>
             <p>Voor beheerders gekoppeld aan de functie <b>{{ functie.beschrijving }}</b>.</p>
             <p>Huidige (bevestigde) e-mailadres: {% if functie.bevestigde_email %}<code>{{ functie.bevestigde_email }}</code>{% else %}<i class="sv-rood-text">Geen</i>{% endif %}</p>
         </div>
@@ -28,7 +28,7 @@
         {% if functie.nieuwe_email %}
             <!-- blauw balk met wit informatie veld -->
             <div class="col s1s m10 offset-m1 white" style="margin-bottom:50px">
-                <h5>Let op!</h5>
+                <p class="sv-rood-text"><b>Let op!</b></p>
                 <p>Het eerder ingevoerde e-mailadres (<code>{{ functie.nieuwe_email }}</code>) is nog niet bevestigd.</p>
                 <p>Volg de instructies in de e-mail om de bevestiging af te ronden.</p>
                 <p>Het is mogelijk een nieuw e-mailadres op te geven.</p>

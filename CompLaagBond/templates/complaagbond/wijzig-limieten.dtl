@@ -25,7 +25,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">BK limieten</h3>
+            <h1 class="sv-kopje-pagina">BK limieten</h1>
             <p>De "cut" instellen voor elke individuele wedstrijdklasse van jouw BK.<br>Hiermee begrens je het aantal deelnemers dat uitgenodigd wordt.</p>
         </div>
     </div>

@@ -1,6 +1,6 @@
 {% extends 'design/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2024-2025 Ramon van der Winkel.
+                Copyright (c) 2024-2026 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -13,7 +13,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Uitslag instaptoets</h3>
+            <h1 class="sv-kopje-pagina">Uitslag instaptoets</h1>
             <p>Je hebt de toets afgerond op {{ toets.afgerond|date:"j F Y" }} om {{ toets.afgerond|date:"H:i" }}.</p>
         </div>
     </div>
@@ -24,7 +24,7 @@
         <div class="col s12 m8 offset-m2 l6 offset-l3">
             <div class="sv-kader">
                 {% if toets.geslaagd %}
-                    <h5 class="sv-rood-text">Gefeliciteerd!</h5>
+                    <p class="sv-kopje-sectie-text sv-rood-text">Gefeliciteerd!</p>
                     <p>Je bent geslaagd voor de instaptoets.<br>Je had {{ toets.aantal_goed }} van de {{ toets.aantal_vragen }} vragen goed.</p>
                     <p>Met dit mooie resultaat kan je je inschrijven voor de basiscursus.</p>
                     <p>

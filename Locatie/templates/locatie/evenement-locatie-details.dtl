@@ -1,6 +1,6 @@
 {% extends 'design/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2025 Ramon van der Winkel.
+                Copyright (c) 2025-2026 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -15,7 +15,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Evenement locatie details</h3>
+            <h1 class="sv-kopje-pagina">Evenement locatie details</h1>
             <p>Je huidige rol is <b>{{ rol }}</b></p>
             {% if readonly %}
                 <p>Deze gegevens kunnen worden aangepast door de HWL van de vereniging en de Manager Opleidingen.</p>
@@ -105,7 +105,7 @@
 
                             <tr>
                                 <td colspan="2" class="center">
-                                    <h6 class="sv-blauw-text">Gebruik</h6>
+                                    <span class="sv-kopje-in-tabel">Gebruik</span>
                                 </td>
                             </tr>
 
@@ -161,7 +161,8 @@
     {% if url_verwijder %}
         <div class="modal" id="bevestig_verwijder_locatie">
             <div class="modal-content center">
-                <h5>Verwijder locatie?</h5>
+                <p class="sv-kopje-dialoog">Verwijder locatie?</p>
+
                 <p>Wil je deze locatie van vereniging<br><b>{{ ver }}</b><br>verwijderen uit het systeem?</p>
 
                 <form action="{{ url_verwijder }}" method="post" onsubmit="document.getElementById('submit_knop2').disabled=true; return true;">

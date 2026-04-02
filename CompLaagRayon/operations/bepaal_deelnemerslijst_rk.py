@@ -43,7 +43,7 @@ def _get_regio_sporters_rayon(comp: Competitie, rayon_nr: int):
 
     # markeer de regiokampioenen
     klasse = -1
-    regios = list()  # bijhouden welke kampioenen we al gemarkeerd hebben
+    regio_score = dict()   # [regio] = score  --> bijhouden welke kampioenen we al gemarkeerd hebben, meerdere #1 mogelijk
     kampioenen = list()
     deelnemers = list(deelnemers)
     nr = 0
@@ -55,14 +55,15 @@ def _get_regio_sporters_rayon(comp: Competitie, rayon_nr: int):
         if klasse != deelnemer.indiv_klasse.volgorde:
             klasse = deelnemer.indiv_klasse.volgorde
             if len(kampioenen):
-                kampioenen.sort()
-                for _, kampioen in kampioenen:
+                kampioenen.sort()       # TODO: sortering niet gelijk aan sortering net buiten while lus
+                for tup in kampioenen:
+                    kampioen = tup[-1]
                     deelnemers.insert(insert_at, kampioen)
                     insert_at += 1
                     nr += 1
                 # for
             kampioenen = list()
-            regios = list()
+            regio_score = dict()
             insert_at = nr
             rank = 0
 
@@ -77,10 +78,11 @@ def _get_regio_sporters_rayon(comp: Competitie, rayon_nr: int):
         deelnemer.regio_scores = "%03d%03d%03d%03d%03d%03d%03d" % tuple(scores)
 
         regio_nr = deelnemer.bij_vereniging.regio.regio_nr
-        if regio_nr not in regios:
-            regios.append(regio_nr)
+        prev_score = regio_score.get(regio_nr, None)
+        if not prev_score or deelnemer.totaal == prev_score:
+            regio_score[regio_nr] = deelnemer.totaal
             deelnemer.kampioen_label = "Kampioen regio %s" % regio_nr
-            tup = (regio_nr, deelnemer)
+            tup = (regio_nr, deelnemer.pk, deelnemer)
             kampioenen.append(tup)
             deelnemers.pop(nr)
         else:
@@ -91,7 +93,8 @@ def _get_regio_sporters_rayon(comp: Competitie, rayon_nr: int):
 
     if len(kampioenen):
         kampioenen.sort(reverse=True)  # hoogste regionummer bovenaan
-        for _, kampioen in kampioenen:
+        for tup in kampioenen:
+            kampioen = tup[-1]
             deelnemers.insert(insert_at, kampioen)
             insert_at += 1
         # for
@@ -157,7 +160,7 @@ def bepaal_deelnemers_rk_indiv(stdout, comp: Competitie):
                 if not deelnemer.inschrijf_voorkeur_rk_bk:
                     # bij inschrijven al afgemeld voor RK/BK
                     kampioen.deelname = DEELNAME_NEE
-                    kampioen.logboek += '[%s] Deelname op Nee gezet want geen voorkeur RK/BK' % stamp_str
+                    kampioen.logboek += '[%s] Deelname op Nee gezet want geen voorkeur RK/BK\n' % stamp_str
 
                 bulk_lijst.append(kampioen)
                 if len(bulk_lijst) > 150:  # pragma: no cover

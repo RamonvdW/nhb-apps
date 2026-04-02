@@ -21,7 +21,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Team<wbr>competities</h3>
+            <h1 class="sv-kopje-pagina">Team<wbr>competities</h1>
             <p>Informatie over het deelname met een team in de bondscompetities.</p>
         </div>
     </div>
@@ -40,7 +40,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Vanuit de vereniging</h4>
+            <h2 class="sv-kopje-row">Vanuit de vereniging</h2>
         </div>
     </div>
 
@@ -60,7 +60,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>5 soorten teams</h4>
+            <h2 class="sv-kopje-row">5 soorten teams</h2>
             <p>Teams van hetzelfde soort komen tegen elkaar uit in 5 aparte teamcompetities</p>
         </div>
     </div>
@@ -116,7 +116,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Team sterkte</h4>
+            <h2 class="sv-kopje-row">Team sterkte</h2>
         </div>
     </div>
 
@@ -136,7 +136,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Wedstrijdklassen</h4>
+            <h2 class="sv-kopje-row">Wedstrijdklassen</h2>
         </div>
     </div>
 
@@ -164,7 +164,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="sv-blauw-text">Regiocompetitie</h3>
+            <h2 class="sv-kopje-sectie">Regiocompetitie</h2>
             <p>Niet alle 16 regio's organiseren een teamcompetitie.</p>
             {% if toon_teams_persoonlijk %}
                 <p>{{ jouw_regio_team_comp }}</p>
@@ -176,7 +176,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>7 rondes</h4>
+            <h3 class="sv-kopje-row">7 rondes</h3>
         </div>
     </div>
 
@@ -195,7 +195,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Vast of voortschrijdend</h4>
+            <h3 class="sv-kopje-row">Vast of voortschrijdend</h3>
         </div>
     </div>
 
@@ -216,7 +216,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Uitvallen en invallen</h4>
+            <h3 class="sv-kopje-row">Uitvallen en invallen</h3>
         </div>
     </div>
 
@@ -245,7 +245,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="sv-blauw-text">Rayonkampioenschappen</h3>
+            <h2 class="sv-kopje-sectie">Rayonkampioenschappen</h2>
         </div>
     </div>
 
@@ -263,7 +263,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Verdeling teams</h4>
+            <h3 class="sv-kopje-row">Verdeling teams</h3>
         </div>
     </div>
 
@@ -282,7 +282,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Wedstrijdverloop</h4>
+            <h3 class="sv-kopje-row">Wedstrijdverloop</h3>
         </div>
     </div>
 
@@ -304,7 +304,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="sv-blauw-text">Bondskampioenschappen</h3>
+            <h2 class="sv-kopje-sectie">Bondskampioenschappen</h2>
         </div>
     </div>
 
@@ -335,7 +335,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
-            <h4>Individueel</h4>
+            <h3 class="sv-kopje-row">Individueel</h3>
             <p>Naast de teamcompetitie wordt er ook een individuele competitie georganiseerd.</p>
         </div>
     </div>

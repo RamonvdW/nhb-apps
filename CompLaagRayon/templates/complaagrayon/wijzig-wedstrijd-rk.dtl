@@ -1,6 +1,6 @@
 {% extends 'design/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2025 Ramon van der Winkel.
+                Copyright (c) 2020-2026 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -76,7 +76,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Wijzig RK wedstrijd</h3>
+            <h1 class="sv-kopje-pagina">Wijzig RK wedstrijd</h1>
         </div>
     </div>
 
@@ -238,7 +238,8 @@
 
         <div class="modal" id="bevestig_verwijder_wedstrijd">
             <div class="modal-content center">
-                <h5>Verwijder RK wedstrijd?</h5>
+                <p class="sv-kopje-dialoog">Verwijder RK wedstrijd?</p>
+
                 <p>Heb je deze RK wedstrijd echt niet meer nodig?</p>
 
                 <form action="{{ url_verwijderen }}" method="post" onsubmit="document.getElementById('submit_knop2').disabled=true; return true;">

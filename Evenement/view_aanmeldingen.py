@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2024-2025 Ramon van der Winkel.
+#  Copyright (c) 2024-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -68,7 +68,7 @@ class EvenementAanmeldingenView(UserPassesTestMixin, TemplateView):
         ver = self.functie_nu.vereniging
 
         try:
-            evenement_pk = str(kwargs['evenement_pk'])[:6]     # afkappen voor de veiligheid
+            evenement_pk = str(kwargs['evenement_pk'])[:7]     # afkappen voor de veiligheid
             evenement = (Evenement
                          .objects
                          .filter(organiserende_vereniging=ver)
@@ -297,7 +297,7 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
         ver = self.functie_nu.vereniging
 
         try:
-            evenement_pk = str(kwargs['evenement_pk'])[:6]     # afkappen voor de veiligheid
+            evenement_pk = str(kwargs['evenement_pk'])[:7]     # afkappen voor de veiligheid
             evenement = (Evenement
                          .objects
                          .filter(organiserende_vereniging=ver)
@@ -498,7 +498,7 @@ class EvenementWorkshopKeuzesView(TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            evenement_pk = str(kwargs['evenement_pk'])[:6]     # afkappen voor de veiligheid
+            evenement_pk = str(kwargs['evenement_pk'])[:7]     # afkappen voor de veiligheid
             evenement = (Evenement
                          .objects
                          .exclude(workshop_opties='')

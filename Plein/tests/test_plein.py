@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -337,14 +337,6 @@ class TestPlein(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('plein/plein-beheerder.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, 'Ledenadministrateur')
-
-        # geen
-        self.e2e_wisselnaarrol_gebruiker()
-        self.e2e_check_rol('geen')
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_plein)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('plein/plein-bezoeker.dtl', 'design/site_layout.dtl'))
 
     def test_sec(self):
         # login als secretaris

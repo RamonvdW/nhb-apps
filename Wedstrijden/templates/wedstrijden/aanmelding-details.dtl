@@ -1,6 +1,6 @@
 {% extends 'design/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2022-2025 Ramon van der Winkel.
+                Copyright (c) 2022-2026 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -14,7 +14,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Details aanmelding</h3>
+            <h1 class="sv-kopje-pagina">Details aanmelding</h1>
         </div>
     </div>
 
@@ -191,7 +191,8 @@
     {% if inschrijving.url_afmelden %}
         <div class="modal" id="bevestig_afmelden_{{ inschrijving.pk }}">
             <div class="modal-content center">
-                <h5>Verwijder aanmelding?</h5>
+                <p class="sv-kopje-dialoog">Verwijder aanmelding?</p>
+
                 <p>Wil je de aanmelding van <b>{{ sporter.volledige_naam }}</b><br>voor de wedstrijd <b>{{ inschrijving.wedstrijd.titel }}</b><br>verwijderen uit het systeem?</p>
 
                 <form action="{{ inschrijving.url_afmelden }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">

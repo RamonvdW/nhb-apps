@@ -1,6 +1,6 @@
 {% extends 'design/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2022-2025 Ramon van der Winkel.
+                Copyright (c) 2022-2026 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -14,7 +14,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Instellingen</h3>
+            <h1 class="sv-kopje-pagina">Instellingen</h1>
             <p>Voor vereniging <b>{{ ver.ver_nr_en_naam }}</b></p>
         </div>
     </div>
@@ -48,7 +48,7 @@
                         {% csrf_token %}
 
                         <div class="center" style="margin-bottom:30px">
-                            <h6 class="sv-blauw-text">Koppeling met Mollie</h6>
+                            <h2 class="sv-kopje-dialoog">Koppeling met Mollie</h2>
                             <p>Alleen invullen als jullie vereniging een account bij Mollie heeft</p>
                         </div>
 
@@ -95,7 +95,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Verkopende partij</h4>
+            <h2 class="sv-kopje-row">Verkopende partij</h2>
             <p>Op de bestelling wordt onderstaande verplichte informatie opgenomen</p>
         </div>
     </div>

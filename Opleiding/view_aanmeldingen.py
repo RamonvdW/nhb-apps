@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2025 Ramon van der Winkel.
+#  Copyright (c) 2025-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -84,7 +84,7 @@ class OpleidingAanmeldingenView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            opleiding_pk = str(kwargs['opleiding_pk'])[:6]     # afkappen voor de veiligheid
+            opleiding_pk = str(kwargs['opleiding_pk'])[:7]     # afkappen voor de veiligheid
             opleiding = (Opleiding
                          .objects
                          .get(pk=opleiding_pk))
@@ -305,7 +305,7 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
     def get(self, request, *args, **kwargs):
 
         try:
-            opleiding_pk = str(kwargs['opleiding_pk'])[:6]     # afkappen voor de veiligheid
+            opleiding_pk = str(kwargs['opleiding_pk'])[:7]     # afkappen voor de veiligheid
             opleiding = (Opleiding
                          .objects
                          .get(pk=opleiding_pk))

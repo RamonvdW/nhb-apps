@@ -1,6 +1,6 @@
 {% extends 'design/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2024-2025 Ramon van der Winkel.
+                Copyright (c) 2024-2026 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -13,8 +13,8 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Instaptoets</h3>
-            <h6>Vraag {{ toets.vraag_nr }} van de {{ toets.aantal_vragen }}</h6>
+            <h1 class="sv-kopje-pagina">Instaptoets</h1>
+            <p class="sv-kopje-klein">Vraag {{ toets.vraag_nr }} van de {{ toets.aantal_vragen }}</p>
             {% if vraag.categorie %}
                 <p>Categorie: {{ vraag.categorie.beschrijving }}</p>
             {% endif %}
@@ -90,7 +90,7 @@
     <!-- tussenkopje -->
     <div class="row center">
         <div class="col s12">
-            <h4>Hulp nodig?</h4>
+            <h2 class="sv-kopje-row">Hulp nodig?</h2>
         </div>
     </div>
 

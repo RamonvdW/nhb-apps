@@ -50,7 +50,7 @@ class CompetitieBeheerView(UserPassesTestMixin, TemplateView):
         context['huidige_rol'] = rol_get_beschrijving(self.request)
 
         try:
-            comp_pk = int(kwargs['comp_pk'][:6])      # afkappen voor de veiligheid
+            comp_pk = int(kwargs['comp_pk'][:7])      # afkappen voor de veiligheid
             comp = (Competitie
                     .objects
                     .get(pk=comp_pk))

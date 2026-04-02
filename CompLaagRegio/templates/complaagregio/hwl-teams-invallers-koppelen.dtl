@@ -1,6 +1,6 @@
 {% extends 'design/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2021-2025 Ramon van der Winkel.
+                Copyright (c) 2021-2026 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -14,7 +14,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Invallers Koppelen</h3>
+            <h1 class="sv-kopje-pagina">Invallers Koppelen</h1>
             <p>Leden van de vereniging koppelen als invaller voor een team</p>
         </div>
     </div>
@@ -98,7 +98,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Invallers</h4>
+            <h2 class="sv-kopje-row">Invallers</h2>
             <p>Een invaller mag nu niet sterker zijn dan de uitvaller,<br>zoals voor beide sporters vastgelegd aan het begin van de ronde</p>
         </div>
     </div>
@@ -182,7 +182,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Eerdere wijzigingen</h4>
+            <h2 class="sv-kopje-row">Eerdere wijzigingen</h2>
         </div>
     </div>
 

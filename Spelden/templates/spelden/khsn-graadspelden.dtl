@@ -1,6 +1,6 @@
 {% extends 'design/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2024-2025 Ramon van der Winkel.
+                Copyright (c) 2024-2026 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -13,7 +13,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">KHSN graadspelden</h3>
+            <h1 class="sv-kopje-pagina">KHSN graadspelden</h1>
             <p>Er zijn drie niveaus: 1e, 2e en 3e graad.</p>
             <p>In vier discipline kunnen deze graadspelden afzonderlijk behaald worden.</p>
         </div>
@@ -23,7 +23,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Disciplines</h4>
+            <h2 class="sv-kopje-row">Disciplines</h2>
             <p>Korte beschrijving van het wedstrijd format.</p>
         </div>
     </div>
@@ -77,7 +77,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Scores</h4>
+            <h2 class="sv-kopje-row">Scores</h2>
             <p>Hieronder staan de te behalen scores.</p>
             <p>Het maakt niet uit welke boog je gebruikt.</p>
         </div>
@@ -115,7 +115,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Spelden</h4>
+            <h2 class="sv-kopje-row">Spelden</h2>
             <p>Voorbeelden van een aantal van de spelden</p>
         </div>
     </div>

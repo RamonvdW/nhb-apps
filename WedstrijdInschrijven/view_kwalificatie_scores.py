@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2025 Ramon van der Winkel.
+#  Copyright (c) 2021-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -49,7 +49,7 @@ class KwalificatieScoresOpgevenView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            inschrijving_pk = str(kwargs['inschrijving_pk'])[:6]     # afkappen voor de veiligheid
+            inschrijving_pk = str(kwargs['inschrijving_pk'])[:7]     # afkappen voor de veiligheid
             inschrijving = (WedstrijdInschrijving
                             .objects
                             .select_related('sporterboog__sporter',
@@ -173,7 +173,7 @@ class KwalificatieScoresOpgevenView(UserPassesTestMixin, TemplateView):
         # print(list(request.POST.items()))
 
         try:
-            inschrijving_pk = str(kwargs['inschrijving_pk'])[:6]     # afkappen voor de veiligheid
+            inschrijving_pk = str(kwargs['inschrijving_pk'])[:7]     # afkappen voor de veiligheid
             inschrijving = (WedstrijdInschrijving
                             .objects
                             .select_related('sporterboog__sporter',

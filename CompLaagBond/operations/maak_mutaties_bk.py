@@ -7,7 +7,7 @@
 """ helper functies die een CompetitieMutatie aanmaken en de achtergrondtaak vragen deze te verwerken """
 
 from Competitie.models import CompetitieMutatie, CompetitieIndivKlasse, CompetitieTeamKlasse
-from Competitie.definities import (MUTATIE_KAMP_BK_WIJZIG_CUT, MUTATIE_KAMP_BK_TEAMS_NUMMEREN,
+from Competitie.definities import (MUTATIE_KAMP_BK_WIJZIG_INDIV_CUT, MUTATIE_KAMP_BK_TEAMS_NUMMEREN,
                                    MUTATIE_KAMP_AANMELDEN_BK_INDIV, MUTATIE_KAMP_AFMELDEN_BK_INDIV,
                                    MUTATIE_KAMP_BK_VERPLAATS_KLASSE_INDIV)
 from Competitie.operations.ping_achtergrondtaak import ping_competitie_achtergrondtaak
@@ -41,7 +41,7 @@ def maak_mutatie_kamp_bk_wijzig_cut(deelkamp: KampBK,
     mutatie = None
     for indiv_klasse, oude_limiet, nieuwe_limiet in wijzigingen:
         mutatie = CompetitieMutatie.objects.create(
-                            mutatie=MUTATIE_KAMP_BK_WIJZIG_CUT,
+                            mutatie=MUTATIE_KAMP_BK_WIJZIG_INDIV_CUT,
                             door=door_str,
                             kamp_bk=deelkamp,
                             indiv_klasse=indiv_klasse,

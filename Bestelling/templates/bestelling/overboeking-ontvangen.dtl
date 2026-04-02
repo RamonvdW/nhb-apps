@@ -1,6 +1,6 @@
 {% extends 'design/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2022-2025 Ramon van der Winkel.
+                Copyright (c) 2022-2026 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -14,7 +14,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Overboekingen</h3>
+            <h1 class="sv-kopje-pagina">Overboekingen</h1>
             <p>Voor vereniging <b>{{ ver.ver_nr_en_naam }}</b></p>
         </div>
     </div>
@@ -31,7 +31,7 @@
                         <input id="id_actie" type="hidden" name="actie" value="{% if was_foutvrij %}registreer{% else %}check{% endif %}">
 
                         <div class="center">
-                            <h6 class="sv-blauw-text">Registreer overboeking</h6>
+                            <p class="sv-kopje-dialoog">Registreer overboeking</p>
                             <p>Bevestig een ontvangen betalingen voor een bestelling</p>
                         </div>
 
@@ -79,8 +79,8 @@
 
                             <div class="modal" id="bevestig_registreer">
                                 <div class="modal-content center">
+                                    <p class="sv-kopje-dialoog">Registreren?</p>
 
-                                    <h5>Registreren?</h5>
                                     <p>Bestelnummer: MH-{{ kenmerk }}<br>Bedrag: &euro;&nbsp;{{ bedrag }}</p>
                                     <p>Invoer is geaccepteerd. Wil je deze ontvangen overboeking registreren?</p>
 
@@ -109,7 +109,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Nog niet betaalde bestellingen</h4>
+            <h2 class="sv-kopje-row">Nog niet betaalde bestellingen</h2>
             <p>(afgelopen 3 tot 90 dagen)</p>
             <p>Controleer jullie bankrekening voor handmatige overschrijvingen</p>
         </div>
@@ -147,7 +147,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Geregistreerde overboekingen</h4>
+            <h2 class="sv-kopje-row">Geregistreerde overboekingen</h2>
         </div>
     </div>
 

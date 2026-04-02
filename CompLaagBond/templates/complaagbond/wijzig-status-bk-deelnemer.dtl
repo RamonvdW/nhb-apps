@@ -14,7 +14,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Wijzig sporter status</h3>
+            <h1 class="sv-kopje-pagina">Wijzig sporter status</h1>
             <p>De status van een sporter voor deelname aan het BK aanpassen.</p>
         </div>
     </div>

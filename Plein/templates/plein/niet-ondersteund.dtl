@@ -1,6 +1,6 @@
 {% extends 'design/site_layout_minimaal.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2025 Ramon van der Winkel.
+                Copyright (c) 2020-2026 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -17,8 +17,7 @@
     <p>Op deze pagina beschrijven we de minimale eisen om deze website te kunnen gebruiken.</p>
 
 
-    <p>&nbsp;</p>
-    <h5>Ondersteunde browsers</h5>
+    <h2 class="sv-kopje-row" style="margin-top:30px">Ondersteunde browsers</h2>
 
     <p>We hebben redelijke moderne tools gekozen voor deze website. Dit vereist een redelijk moderne browser.</p>
     <p>Hieronder kan je zien welke populaire browsers we ondersteunen en vanaf welke versie:</p>
@@ -47,8 +46,7 @@
     <p>Technisch detail: De ondergrens wordt gezet door Javascript gebaseerd op de ECMAScript 2015 standaard (ES6).</p>
 
 
-    <p>&nbsp;</p>
-    <h5>Maar...</h5>
+    <h2 class="sv-kopje-row" style="margin-top:30px">Maar...</h2>
 
     <p>Browsers die we niet ondersteunen zijn waarschijnlijk zo oud dat we je afraden deze te gebruiken om redenen van persoonlijke digitale veiligheid op het Internet.</p>
 

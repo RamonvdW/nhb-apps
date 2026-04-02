@@ -1,6 +1,6 @@
 {% extends 'design/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2025 Ramon van der Winkel.
+                Copyright (c) 2025-2026 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -13,7 +13,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Inschrijven basiscursus</h3>
+            <h1 class="sv-kopje-pagina">Inschrijven basiscursus</h1>
         </div>
     </div>
 
@@ -107,7 +107,7 @@
         <!-- witruimte -->
         <div class="row center">
             <div class="col s12">
-                <h4>Aanmelden</h4>
+                <h2 class="sv-kopje-row">Aanmelden</h2>
                 <p class="sv-rood-text">Je bent al ingeschreven voor deze cursus!</p>
             </div>
         </div>
@@ -119,7 +119,7 @@
             <!-- witruimte -->
             <div class="row center">
                 <div class="col s12">
-                    <h4>Correctie persoonsgegevens</h4>
+                    <h2 class="sv-kopje-row">Correctie persoonsgegevens</h2>
                     <p>Controleer jouw gegevens hieronder en geef eventuele correcties door.</p>
                     <p>Naam, telefoonnummer en e-mailadres worden gedeeld met de docent.<br>Geboorteplaats komt op je diploma.</p>
                 </div>
@@ -175,7 +175,7 @@
             <!-- witruimte -->
             <div class="row center">
                 <div class="col s12">
-                    <h4>Aanmelden</h4>
+                    <h2 class="sv-kopje-row">Aanmelden</h2>
                 </div>
             </div>
 
@@ -203,7 +203,7 @@
             <!-- witruimte -->
             <div class="row center">
                 <div class="col s12">
-                    <h4>Verkoopvoorwaarden</h4>
+                    <h2 class="sv-kopje-row">Verkoopvoorwaarden</h2>
                 </div>
             </div>
 

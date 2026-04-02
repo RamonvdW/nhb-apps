@@ -68,7 +68,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Inschrijven</h3>
+            <h1 class="sv-kopje-pagina">Inschrijven</h1>
         </div>
     </div>
 
@@ -110,7 +110,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Zoeken</h4>
+            <h2 class="sv-kopje-row">Zoeken</h2>
 
             <p>Hieronder kan je een sporter zoeken op bondsnummer.</p>
             <p>Deze sporter kan je inschrijven door een wedstrijd sessie toe te voegen aan jouw winkelmandje en daarna de bestelling te voltooien.</p>
@@ -150,7 +150,7 @@
         <!-- witruimte -->
         <div class="row center">
             <div class="col s12">
-                <h4>Gevonden sporter</h4>
+                <h2 class="sv-kopje-row">Gevonden sporter</h2>
             </div>
         </div>
 
@@ -196,7 +196,7 @@
         <!-- witruimte -->
         <div class="row center">
             <div class="col s12">
-                <h4>{% if toon_sportersboog %}Geselecteerde sporter{% else %}Gevonden sporter{% endif %}</h4>
+                <h2 class="sv-kopje-row">{% if toon_sportersboog %}Geselecteerde sporter{% else %}Gevonden sporter{% endif %}</h2>
             </div>
         </div>
 
@@ -251,7 +251,7 @@
             <!-- witruimte -->
             <div class="row center">
                 <div class="col s12">
-                    <h4>Kies een sessie</h4>
+                    <h2 class="sv-kopje-row">Kies een sessie</h2>
                     {% if not kan_aanmelden %}
                         <p><span  class="sv-rood-text">Sporter kan niet ingeschreven worden op deze wedstrijd:</span> geen beschikbare sessie gevonden.</p>
                         {% if wed.begrenzing_str %}

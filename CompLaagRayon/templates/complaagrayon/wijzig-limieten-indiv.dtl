@@ -1,0 +1,82 @@
+{% extends 'design/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2020-2026 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+{% load design_icons %}
+
+{% block title %}RK individuele limieten{% endblock %}
+
+{% block pagina %}
+
+    <script>
+        function gewijzigd() {
+            // het formulier is aangepast en moet opgeslagen worden
+
+            // enable de 'opslaan' knop
+            const el = document.getElementById("submit_knop")
+            el.disabled = false
+            el.parentElement.style.display = "block"
+        }
+    </script>
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h1 class="sv-kopje-pagina">RK individuele limieten</h1>
+            <p>De cut' instellen voor elke individuele wedstrijdklasse van jouw RK.<br>Hiermee begrens je het aantal deelnemers dat uitgenodigd wordt.</p>
+        </div>
+    </div>
+
+
+    <form action="{{ url_opslaan }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
+        {% csrf_token %}
+
+        <!-- blauwe balk met dialoog venster -->
+        <div class="row-sv-blauw">
+            <div class="col s12">
+
+                <!-- dialoog venster -->
+                <div class="sv-kader-form">
+                    <div class="form-padding">
+
+                        <table class="sv-kader-tabel">
+                            <tr>
+                                <th>Klasse</th>
+                                <th>Limiet</th>
+                            </tr>
+
+                            {% for wkl in wkl_indiv %}
+                                <tr>
+                                    <td>{{ wkl.beschrijving }}</td>
+                                    <td>
+                                        <select name="{{ wkl.sel }}" onchange="gewijzigd()">
+                                            <option value="24"{% if wkl.limiet == 24 %} selected{% endif %}>24 sporters (standaard)</option>
+                                            <option value="20"{% if wkl.limiet == 20 %} selected{% endif %}>20 sporters</option>
+                                            <option value="16"{% if wkl.limiet == 16 %} selected{% endif %}>16 sporters</option>
+                                            <option value="12"{% if wkl.limiet == 12 %} selected{% endif %}>12 sporters</option>
+                                            <option value="8"{% if wkl.limiet == 8 %} selected{% endif %}>8 sporters</option>
+                                            <option value="4"{% if wkl.limiet == 4 %} selected{% endif %}>4 sporters</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div style="display: none">
+            <button class="btn-sv-float" id="submit_knop" type="submit" disabled>
+                {% sv-icon-op-button 'opslaan' tekst='Wijzigingen opslaan' %}
+            </button>
+        </div>
+    </form>
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="complaagrayon-wijzig-limieten-indiv" %}
+
+{% endblock %}

@@ -1,6 +1,6 @@
 {% extends 'design/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2025 Ramon van der Winkel.
+                Copyright (c) 2020-2026 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -13,7 +13,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Ledenlijst</h3>
+            <h1 class="sv-kopje-pagina">Ledenlijst</h1>
             <p>van vereniging [{{ ver.ver_nr }}] {{ ver.naam }}{% if ver.plaats %} te {{ ver.plaats }}{% endif %}</p>
         </div>
     </div>
@@ -23,7 +23,7 @@
         <!-- witruimte -->
         <div class="row center">
             <div class="col s12">
-                <h4>Jeugdleden</h4>
+                <h2 class="sv-kopje-row">Jeugdleden</h2>
             </div>
         </div>
 
@@ -92,7 +92,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Volwassenen</h4>
+            <h2 class="sv-kopje-row">Volwassenen</h2>
         </div>
     </div>
 
@@ -160,7 +160,7 @@
         <!-- witruimte -->
         <div class="row center">
             <div class="col s12">
-                <h4>Inactieve leden</h4>
+                <h2 class="sv-kopje-row">Inactieve leden</h2>
             </div>
         </div>
 

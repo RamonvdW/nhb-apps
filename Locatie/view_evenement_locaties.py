@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -43,7 +43,7 @@ class EvenementLocatiesView(UserPassesTestMixin, TemplateView):
 
     def get_vereniging_or_404(self):
         try:
-            ver_nr = int(self.kwargs['ver_nr'][:6])        # afkappen voor de veiligheid
+            ver_nr = int(self.kwargs['ver_nr'][:4])        # afkappen voor de veiligheid
             ver = Vereniging.objects.get(ver_nr=ver_nr)
         except (ValueError, Vereniging.DoesNotExist):
             raise Http404('Vereniging niet gevonden')
@@ -150,7 +150,7 @@ class EvenementLocatieDetailsView(UserPassesTestMixin, TemplateView):
             doe een access-check en
         """
         try:
-            location_pk = int(self.kwargs['locatie_pk'][:6])        # afkappen voor de veiligheid
+            location_pk = int(self.kwargs['locatie_pk'][:7])        # afkappen voor de veiligheid
             locatie = EvenementLocatie.objects.get(pk=location_pk,
                                                    vereniging=ver,
                                                    zichtbaar=True)
@@ -161,7 +161,7 @@ class EvenementLocatieDetailsView(UserPassesTestMixin, TemplateView):
 
     def get_vereniging_or_404(self):
         try:
-            ver_nr = int(self.kwargs['ver_nr'][:6])          # afkappen voor de veiligheid
+            ver_nr = int(self.kwargs['ver_nr'][:4])          # afkappen voor de veiligheid
             ver = Vereniging.objects.get(ver_nr=ver_nr)
         except (ValueError, Vereniging.DoesNotExist):
             raise Http404('Vereniging niet gevonden')

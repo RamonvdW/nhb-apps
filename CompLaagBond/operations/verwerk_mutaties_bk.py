@@ -8,7 +8,7 @@ from django.utils import timezone
 from Competitie.definities import (DEELNAME_JA, DEELNAME_NEE,
                                    MUTATIE_KAMP_AANMELDEN_BK_INDIV, MUTATIE_KAMP_AFMELDEN_BK_INDIV,
                                    MUTATIE_KAMP_BK_VERPLAATS_KLASSE_INDIV, MUTATIE_KAMP_BK_TEAMS_NUMMEREN,
-                                   MUTATIE_KAMP_BK_WIJZIG_CUT)
+                                   MUTATIE_KAMP_BK_WIJZIG_INDIV_CUT)
 from Competitie.models import CompetitieMutatie
 from CompKampioenschap.operations import (maak_mutatie_update_dirty_wedstrijdformulieren, zet_dirty,
                                           bepaal_kamp_indiv_deelnemerslijst,
@@ -187,7 +187,7 @@ class VerwerkMutatiesBond:
         #   (dit kan voorkomen als 2 gebruikers tegelijkertijd de cut veranderen)
 
     HANDLERS = {
-        MUTATIE_KAMP_BK_WIJZIG_CUT: _verwerk_mutatie_kamp_bk_wijzig_cut,
+        MUTATIE_KAMP_BK_WIJZIG_INDIV_CUT: _verwerk_mutatie_kamp_bk_wijzig_cut,
         MUTATIE_KAMP_AANMELDEN_BK_INDIV: _verwerk_mutatie_kamp_aanmelden_bk_indiv,
         MUTATIE_KAMP_AFMELDEN_BK_INDIV: _verwerk_mutatie_kamp_afmelden_bk_indiv,
         MUTATIE_KAMP_BK_VERPLAATS_KLASSE_INDIV: _verwerk_mutatie_kamp_bk_verplaats_deelnemer_naar_andere_klasse,

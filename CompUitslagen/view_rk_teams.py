@@ -12,7 +12,7 @@ from Account.models import get_account
 from Competitie.definities import DEELNAME_NEE, KAMP_RANK_RESERVE, KAMP_RANK_NO_SHOW, KAMP_RANK_BLANCO
 from Competitie.models import Competitie, CompetitieMatch
 from Competitie.seizoenen import get_comp_pk
-from CompLaagRayon.models import KampRK, TeamRK
+from CompLaagRayon.models import KampRK, TeamRK, CutTeamRK
 from Functie.rol import rol_get_huidige_functie
 from Geo.models import Rayon
 from HistComp.operations import get_hist_url
@@ -235,6 +235,11 @@ class UitslagenRayonTeamsView(TemplateView):
 
         context['rk_teams'] = totaal_lijst = list()
 
+        klasse_pk2limiet = dict()
+        for cut in CutTeamRK.objects.all():
+            klasse_pk2limiet[cut.team_klasse.pk] = cut.limiet
+        # for
+
         prev_klasse = ""
         limiet = 8
         klasse_teams_done = list()
@@ -243,6 +248,7 @@ class UitslagenRayonTeamsView(TemplateView):
         aantal_regels = 0
         alle_matchscores = list()        # voor bepalen "toon shootoff"
         alle_ranks = list()
+        eerste_reserve = True
 
         for team in (TeamRK
                      .objects
@@ -286,7 +292,9 @@ class UitslagenRayonTeamsView(TemplateView):
                 klasse_teams_afgemeld = list()
                 alle_matchscores = list()
                 alle_ranks = list()
+                eerste_reserve = True
 
+                limiet = klasse_pk2limiet.get(team.team_klasse.pk, 8)
                 prev_klasse = team.team_klasse
                 aantal_regels = 2
 
@@ -363,6 +371,10 @@ class UitslagenRayonTeamsView(TemplateView):
 
                 if team.rank > limiet:
                     team.is_reserve = True
+                    if eerste_reserve:
+                        team.break_reserve = True
+                        aantal_regels += 1
+                        eerste_reserve = False
 
                 # toon teamleden waar ze heen moeten
                 if team.ver_nr == toon_team_leden_van_ver_nr:

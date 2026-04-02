@@ -1,6 +1,6 @@
 {% extends 'design/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2021-2025 Ramon van der Winkel.
+                Copyright (c) 2021-2026 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -13,7 +13,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Uitslagen regiocompetitie teams</h3>
+            <h1 class="sv-kopje-pagina">Uitslagen regiocompetitie teams</h1>
             <p>Eindstand van de regiocompetities teams {{ seizoen }}.</p>
         </div>
     </div>
@@ -41,7 +41,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4 id="filters" data-url="{{ url_filters }}">Filters</h4>
+            <h2 class="sv-kopje-row" id="filters" data-url="{{ url_filters }}">Filters</h2>
         </div>
     </div>
 
@@ -135,7 +135,9 @@
                     {% endif %}
 
                     <tr class="sv-table-sectie-header">
-                        <td colspan="21" class="center"><h5>Klasse: {{ team.team_klasse }}</h5></td>
+                        <td colspan="21" class="center">
+                            <h2 class="sv-kopje-row">Klasse: {{ team.team_klasse }}</h2>
+                        </td>
                     </tr>
                     <tr class="sv-table-header">
                         <td class="sv-table-zijrand" rowspan="{{ team.aantal_in_groep }}"></td>

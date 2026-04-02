@@ -36,7 +36,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Regiocompetitie teams</h3>
+            <h1 class="sv-kopje-pagina">Regiocompetitie teams</h1>
             <p>{% if comp.regiocompetitie_is_afgesloten %}Eindstand{% else %}Tussenstand{% endif %} van de regiocompetities teams.</p>
         </div>
     </div>
@@ -72,7 +72,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4 id="filters" data-url="{{ url_filters }}">Filters</h4>
+            <h2 class="sv-kopje-row" id="filters" data-url="{{ url_filters }}">Filters</h2>
         </div>
     </div>
 
@@ -180,7 +180,7 @@
                     {% if team.schema %}
                         <tr class="sv-table-sectie-header">
                             <td colspan="20" class="center">
-                                <h6>Wedstrijdschema</h6>
+                                <h3 class="sv-kopje-klein">Wedstrijdschema</h3>
                             </td>
                         </tr>
 
@@ -218,9 +218,9 @@
                             <td colspan="20" class="center">
                                 <br>
                                 {% if team.poule_str == '??' %}
-                                    <h5 class="sv-rood-text">Nog niet in een poule geplaatst</h5>
+                                    <h2 class="sv-kopje-row sv-rood-text">Nog niet in een poule geplaatst</h2>
                                 {% else %}
-                                    <h4 class="sv-rood-text">Poule: {{ team.poule_str }}</h4>
+                                    <h2 class="sv-kopje-row sv-rood-text">Poule: {{ team.poule_str }}</h2>
                                 {% endif %}
                             </td>
                         </tr>
@@ -229,7 +229,9 @@
 
                 {% if team.break_klasse %}
                     <tr class="sv-table-sectie-header" id="{{ team.klasse_hashtag }}">
-                        <td colspan="20" class="center"><h5>Klasse: {{ team.klasse_str }}</h5></td>
+                        <td colspan="20" class="center">
+                            <h2 class="sv-kopje-klein">Klasse: {{ team.klasse_str }}</h2>
+                        </td>
                     </tr>
                     <tr class="sv-table-header">
                         <td class="sv-table-zijrand" rowspan="{{ team.aantal_in_groep }}"></td>

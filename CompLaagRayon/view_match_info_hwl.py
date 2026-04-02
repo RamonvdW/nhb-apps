@@ -47,7 +47,7 @@ class RkMatchInfoView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            match_pk = int(kwargs['match_pk'][:6])      # afkappen voor de veiligheid
+            match_pk = int(kwargs['match_pk'][:7])      # afkappen voor de veiligheid
             match = (CompetitieMatch
                      .objects
                      .select_related('vereniging',
@@ -168,7 +168,7 @@ class RkMatchInfoView(UserPassesTestMixin, TemplateView):
                             deelnemer.kampioen_label += ';\n'
                         deelnemer.kampioen_label += textwrap.fill(voorkeuren_opmerking_para_sporter, 30)
 
-                if 'J' <= comp.fase_indiv <= 'K':
+                if 'J' <= comp.fase_indiv <= 'L':
                     deelnemer.url_wijzig = reverse('CompLaagRayon:wijzig-status-rk-deelnemer',
                                                    kwargs={'deelnemer_pk': deelnemer.pk})
             # for

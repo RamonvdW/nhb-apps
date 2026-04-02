@@ -5,7 +5,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Page heading</h3>
+            <h1 class="sv-kopje-pagina">Page heading</h1>
             <p>Subtitle</p>
         </div>
     </div>
@@ -14,7 +14,7 @@
     <!-- tussenkopje -->
     <div class="row center">
         <div class="col s12">
-            <h4>Stap 3</h4>
+            <h2 class="sv-kopje-row">Stap 3</h2>
             <p>Ga naar je tweede-factor app en bekijk de cijfers voor "MijnHandboogsport".</p>
         </div>
     </div>
@@ -289,7 +289,7 @@
                 {% if obj.show_header %}
                     <tr class="sv-table-sectie-header">     <!-- voorkomt grijze lijn -->
                         <td colspan="6" class="center">
-                            <h5>{{ obj.header }}</h5>
+                            <h2>{{ obj.header }}</h2>
                         </td>
                     </tr>
                 {% endif %}
@@ -348,7 +348,8 @@
 
     <div class="modal" id="bevestig_verwijder_buitenbaan">
         <div class="modal-content center">
-            <h5>Verwijder buitenbaan?</h5>
+            <p class="sv-kopje-dialoog">Verwijder buitenbaan?</p>
+
             <p>Wil je de buitenbaan van vereniging<br><b>{{ ver }}</b><br>verwijderen uit het systeem?</p>
 
             <form action="{{ url_verwijder_buitenbaan }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">

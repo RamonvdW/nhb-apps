@@ -50,7 +50,7 @@ class ExtraDeelnemerView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            comp_pk = int(kwargs['comp_pk'][:6])  # afkappen voor de veiligheid
+            comp_pk = int(kwargs['comp_pk'][:7])  # afkappen voor de veiligheid
             comp = (Competitie
                     .objects
                     .exclude(is_afgesloten=True)
@@ -141,7 +141,7 @@ class ExtraDeelnemerView(UserPassesTestMixin, TemplateView):
     def post(self, request, *args, **kwargs):
 
         try:
-            comp_pk = int(kwargs['comp_pk'][:6])  # afkappen voor de veiligheid
+            comp_pk = int(kwargs['comp_pk'][:7])  # afkappen voor de veiligheid
             comp = (Competitie
                     .objects
                     .exclude(is_afgesloten=True)
@@ -159,7 +159,7 @@ class ExtraDeelnemerView(UserPassesTestMixin, TemplateView):
             raise Http404('Verkeerde fase')
 
         try:
-            deelnemer_pk = int(kwargs['deelnemer_pk'][:6])  # afkappen voor de veiligheid
+            deelnemer_pk = int(kwargs['deelnemer_pk'][:7])  # afkappen voor de veiligheid
             deelnemer = (RegiocompetitieSporterBoog
                          .objects
                          .select_related('sporterboog',
@@ -246,7 +246,7 @@ class GeefBlancoResultaatView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            comp_pk = int(kwargs['comp_pk'][:6])  # afkappen voor de veiligheid
+            comp_pk = int(kwargs['comp_pk'][:7])  # afkappen voor de veiligheid
             comp = (Competitie
                     .objects
                     .exclude(is_afgesloten=True)
@@ -316,7 +316,7 @@ class GeefBlancoResultaatView(UserPassesTestMixin, TemplateView):
     def post(self, request, *args, **kwargs):
 
         try:
-            comp_pk = int(kwargs['comp_pk'][:6])  # afkappen voor de veiligheid
+            comp_pk = int(kwargs['comp_pk'][:7])  # afkappen voor de veiligheid
             comp = (Competitie
                     .objects
                     .exclude(is_afgesloten=True)
@@ -334,7 +334,7 @@ class GeefBlancoResultaatView(UserPassesTestMixin, TemplateView):
             raise Http404('Verkeerde fase')
 
         try:
-            deelnemer_pk = int(kwargs['deelnemer_pk'][:6])  # afkappen voor de veiligheid
+            deelnemer_pk = int(kwargs['deelnemer_pk'][:7])  # afkappen voor de veiligheid
             deelnemer = (DeelnemerRK
                          .objects
                          .exclude(deelname=DEELNAME_NEE)

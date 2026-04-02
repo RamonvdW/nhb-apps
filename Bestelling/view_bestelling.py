@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2025 Ramon van der Winkel.
+#  Copyright (c) 2022-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -27,6 +27,7 @@ from Functie.definities import Rol
 from Functie.models import Functie
 from Functie.rol import rol_get_huidige
 from decimal import Decimal
+from typing import Tuple
 
 TEMPLATE_TOON_BESTELLINGEN = 'bestelling/toon-bestellingen.dtl'
 TEMPLATE_BESTELLING_DETAILS = 'bestelling/toon-bestelling-details.dtl'
@@ -159,7 +160,7 @@ class ToonBestellingDetailsView(UserPassesTestMixin, TemplateView):
         return regels, bevat_fout
 
     @staticmethod
-    def _beschrijf_transacties(bestelling) -> (list, Decimal):
+    def _beschrijf_transacties(bestelling) -> Tuple[list, Decimal]:
         transacties = list()
         totaal_euro = Decimal(0)
 
@@ -170,7 +171,7 @@ class ToonBestellingDetailsView(UserPassesTestMixin, TemplateView):
             if transactie.transactie_type == TRANSACTIE_TYPE_HANDMATIG:
                 transactie.type_str = 'Overboeking'
                 transacties.append(transactie)
-                transactie.regels = regels = list()
+                transactie.regels = list()
                 tup = ('Ontvangen', format_bedrag_euro(transactie.bedrag_handmatig))
                 transactie.regels.append(tup)
                 totaal_euro += transactie.bedrag_handmatig

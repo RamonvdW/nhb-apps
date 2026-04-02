@@ -36,7 +36,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Regiocompetitie individueel</h3>
+            <h1 class="sv-kopje-pagina">Regiocompetitie individueel</h1>
             <p>{% if comp.regiocompetitie_is_afgesloten %}Eindstand{% else %}Tussenstand{% endif %} van de individuele regiocompetities.</p>
         </div>
     </div>
@@ -64,7 +64,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4 id="filters" data-url="{{ url_filters }}">Filters</h4>
+            <h2 class="sv-kopje-row" id="filters" data-url="{{ url_filters }}">Filters</h2>
         </div>
     </div>
 
@@ -181,11 +181,11 @@
                     {% endif %}
 
                     <tr class="sv-table-sectie-header" id="{{ obj.klasse_hashtag }}">
-                        <td></td>
-                        <td class="center" colspan="13">
-                            <h5>{{ obj.klasse_str }}</h5>
+                        <td style="max-width:5px"></td>
+                        <td class="center" colspan="13">        <!-- colspan=15 geeft html validatie fout -->
+                            <h2 class="sv-kopje-row">{{ obj.klasse_str }}</h2>
                         </td>
-                        <td></td>
+                        <td style="max-width:5px"></td>
                     </tr>
 
                     <tr class="sv-table-header">

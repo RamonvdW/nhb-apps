@@ -183,7 +183,7 @@ ICON_NAME2MATERIAL_SYMBOL_NAME = {
     'opleiding instaptoets niet gehaald': 'thumb_down',
     'opleiding instaptoets niet ingeschreven': 'radar',
     'opleiding instaptoets': 'login',
-    'opleiding lesmateriaal': 'book_2',
+    'opleiding lesmateriaal': 'menu_book',
     'opleiding locaties': 'school',
     'opleiding verkoopvoorwaarden': 'article',
     'opleiding details': 'schedule',
@@ -370,7 +370,7 @@ def sv_icon(icon_name, use='button', kleur='rood', icon_height=0, extra_style=''
     if not icon_height:
         icon_height = icon_use_to_icon_height.get(use, 24)
 
-    if use in ('h5',):
+    if use in ('kopje',):
         if extra_style:
             extra_style += '; '
 
@@ -379,6 +379,8 @@ def sv_icon(icon_name, use='button', kleur='rood', icon_height=0, extra_style=''
 
         # verticale plaatsing t.o.v. tekst
         extra_style += 'vertical-align:bottom'
+
+        icon_height = 36
 
     kleur_class = ''
     if kleur:

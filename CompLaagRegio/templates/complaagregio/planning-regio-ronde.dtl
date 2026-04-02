@@ -1,6 +1,6 @@
 {% extends 'design/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2025 Ramon van der Winkel.
+                Copyright (c) 2020-2026 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -15,7 +15,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Wedstrijden blok</h3>
+            <h1 class="sv-kopje-pagina">Wedstrijden blok</h1>
         </div>
     </div>
 
@@ -83,7 +83,7 @@
             <!-- witruimte -->
             <div class="row center">
                 <div class="col s12">
-                    <h4>Wijzig</h4>
+                    <h2 class="sv-kopje-row">Wijzig</h2>
                     <p>Week nummer en beschrijving aanpassen</p>
                 </div>
             </div>
@@ -145,7 +145,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Wedstrijden</h4>
+            <h2 class="sv-kopje-row">Wedstrijden</h2>
         </div>
     </div>
 
@@ -249,7 +249,7 @@
             <!-- witruimte -->
             <div class="row center">
                 <div class="col s12">
-                    <h4>Wijzig</h4>
+                    <h2 class="sv-kopje-row">Wijzig</h2>
                     <p>Week nummer en beschrijving aanpassen</p>
                 </div>
             </div>
@@ -305,7 +305,7 @@
             <!-- witruimte -->
             <div class="row center">
                 <div class="col s12">
-                    <h4>Verwijder</h4>
+                    <h2 class="sv-kopje-row">Verwijder</h2>
 
                     {% if heeft_wedstrijden %}
                         <p>Blok kan nu niet verwijderd worden<br>Verwijder eerst de wedstrijden</p>
@@ -317,7 +317,8 @@
 
             <div class="modal" id="bevestig_verwijder_blok">
                 <div class="modal-content center">
-                    <h5>Verwijder blok?</h5>
+                    <p class="sv-kopje-dialoog">Verwijder blok?</p>
+
                     <p>Wil je dit blok echt verwijderen uit de planning?</p>
 
                     <form action="{{ url_verwijderen }}" method="post" onsubmit="document.getElementById('submit_knop4').disabled=true; return true;">

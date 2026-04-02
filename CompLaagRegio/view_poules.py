@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -50,7 +50,7 @@ class RegioPoulesView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])    # afkappen voor de veiligheid
+            deelcomp_pk = int(kwargs['deelcomp_pk'][:7])    # afkappen voor de veiligheid
             deelcomp = (Regiocompetitie
                         .objects
                         .select_related('competitie',
@@ -126,7 +126,7 @@ class RegioPoulesView(UserPassesTestMixin, TemplateView):
     def post(self, request, *args, **kwargs):
         """ maak een nieuwe poule aan """
         try:
-            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])    # afkappen voor de veiligheid
+            deelcomp_pk = int(kwargs['deelcomp_pk'][:7])    # afkappen voor de veiligheid
             deelcomp = (Regiocompetitie
                         .objects
                         .select_related('competitie',
@@ -188,7 +188,7 @@ class WijzigPouleView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            poule_pk = int(kwargs['poule_pk'][:6])      # afkappen voor de veiligheid
+            poule_pk = int(kwargs['poule_pk'][:7])      # afkappen voor de veiligheid
             poule = (RegiocompetitieTeamPoule
                      .objects
                      .select_related('regiocompetitie',
@@ -259,7 +259,7 @@ class WijzigPouleView(UserPassesTestMixin, TemplateView):
         """ deze functie wordt aangeroepen als ... knop ... """
 
         try:
-            poule_pk = int(kwargs['poule_pk'][:6])      # afkappen voor de veiligheid
+            poule_pk = int(kwargs['poule_pk'][:7])      # afkappen voor de veiligheid
             poule = (RegiocompetitieTeamPoule
                      .objects
                      .select_related('regiocompetitie')

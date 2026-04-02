@@ -120,7 +120,7 @@ class VerwerkCompKampMutaties:
         # for
 
         for bestand in iter_dirty_wedstrijdformulieren(begin_jaar):
-            self.stdout.write('[INFO] Update bestand pk=%s' % bestand.pk)
+            self.stdout.write('[INFO] Update dirty bestand [pk=%s] %s' % (bestand.pk, bestand.fname))
 
             # om te voorkomen dat we over de quota van 60 per minuut heen gaan
             # altijd 1 seconden vertragen

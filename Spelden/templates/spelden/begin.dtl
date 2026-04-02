@@ -1,6 +1,6 @@
 {% extends 'design/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2024-2025 Ramon van der Winkel.
+                Copyright (c) 2024-2026 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -13,7 +13,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Prestatiespelden</h3>
+            <h1 class="sv-kopje-pagina">Prestatiespelden</h1>
             <p>Bij KHSN kan je een prestatiespeld bestellen als je een score behaald hebt die daar recht op geeft.</p>
             <p>Je moet de scorebriefjes met handtekening van de hoofdscheidsrechter toevoegen aan je aanvraag.</p>
         </div>
@@ -22,7 +22,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>World Archery</h4>
+            <h2 class="sv-kopje-row">World Archery</h2>
             <p>De spelden van World Archery zijn opgedeeld in de volgende groepen. Maak een keuze voor meer details en het bestelformulier.</p>
         </div>
     </div>
@@ -54,7 +54,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>KHSN</h4>
+            <h2 class="sv-kopje-row">KHSN</h2>
             <p>De spelden van KHSN zijn opgedeeld in de volgende groepen. Maak een keuze voor meer details en het bestelformulier.</p>
         </div>
     </div>

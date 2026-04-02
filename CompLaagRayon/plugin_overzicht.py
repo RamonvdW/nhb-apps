@@ -123,14 +123,14 @@ def get_kaartjes_rayon(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
                             url=url)
                 kaartjes_indiv.append(kaartje)
 
-            # RK limieten (indiv & teams)
+            # RK limieten (indiv)
             if 'J' <= comp.fase_indiv <= 'L':
-                url = reverse('CompLaagRayon:limieten', kwargs={'deelkamp_pk': deelkamp_rk.pk})
+                url = reverse('CompLaagRayon:indiv-limieten', kwargs={'deelkamp_pk': deelkamp_rk.pk})
                 kaartje = SimpleNamespace(
                             prio=5,
-                            titel="RK limieten",
+                            titel="Limieten",
                             sv_icon="comp limieten",
-                            tekst="Maximum aantal deelnemers in elke wedstrijdklasse van jouw RK instellen.",
+                            tekst="Maximum aantal deelnemers instellen voor de wedstrijdklassen van jouw RK.",
                             url=url)
                 kaartjes_indiv.append(kaartje)
 
@@ -142,6 +142,17 @@ def get_kaartjes_rayon(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
                             titel="RK teams",
                             sv_icon="comp rk teams",
                             tekst="Aangemelde teams voor de Rayonkampioenschappen in %s." % deelkamp_rk.rayon.naam,
+                            url=url)
+                kaartjes_teams.append(kaartje)
+
+            # RK limieten (teams)
+            if 'J' <= comp.fase_teams <= 'K':
+                url = reverse('CompLaagRayon:team-limieten', kwargs={'deelkamp_pk': deelkamp_rk.pk})
+                kaartje = SimpleNamespace(
+                            prio=5,
+                            titel="Team limieten",
+                            sv_icon="comp limieten",
+                            tekst="Maximum aantal teams instellen voor de wedstrijdklassen van jouw RK.",
                             url=url)
                 kaartjes_teams.append(kaartje)
 

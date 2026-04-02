@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2025 Ramon van der Winkel.
+#  Copyright (c) 2021-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -246,7 +246,7 @@ class VerwijderProductUitMandje(UserPassesTestMixin, View):
         snel = str(request.POST.get('snel', ''))[:1]
 
         try:
-            regel_pk = str(kwargs['product_pk'])[:6]        # afkappen voor de veiligheid
+            regel_pk = str(kwargs['product_pk'])[:7]        # afkappen voor de veiligheid
             regel_pk = int(regel_pk)
         except (KeyError, ValueError, TypeError):
             raise Http404('Verkeerde parameter')

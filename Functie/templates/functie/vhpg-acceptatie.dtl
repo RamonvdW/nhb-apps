@@ -1,6 +1,6 @@
 {% extends 'design/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2019-2025 Ramon van der Winkel.
+                Copyright (c) 2019-2026 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -13,7 +13,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Omgaan met persoons<wbr>gegevens</h3>
+            <h1 class="sv-kopje-pagina">Omgaan met persoons<wbr>gegevens</h1>
             <p>De KHSN heeft jou een rol toegekend op deze website.<br>Voordat je aan de slag kan vragen we je onderstaande tekst goed door te lezen en akkoord te geven.</p>
         </div>
     </div>
@@ -26,7 +26,7 @@
             <div class="sv-kader-form">
                 <div class="row">
                     <div class="col s12">
-                        <h5 class="center sv-rood white-text" style="padding:10px 0 10px 0">Voorwaarden voor het hanteren van persoonsgegevens</h5>
+                        <p class="sv-kopje-klein center sv-rood white-text" style="padding:10px 0 10px 0">Voorwaarden voor het hanteren van persoonsgegevens</p>
                         <form action="{% url 'Functie:vhpg-acceptatie' %}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
                             {% csrf_token %}
 

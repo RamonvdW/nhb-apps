@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2025 Ramon van der Winkel.
+#  Copyright (c) 2025-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -64,8 +64,8 @@ class TestBrowserPleinStuurPing(bh.BrowserTestCase):
         self.assert_no_console_log()
 
         # controleer dat we beheerder zijn
-        h3 = self.find_element_type_with_text('h3', 'Beheerders Plein')
-        self.assertIsNotNone(h3)
+        h1 = self.find_element_type_with_text('h1', 'Beheerders Plein')
+        self.assertIsNotNone(h1)
 
         # check dat de ping gedaan is
         self._check_ping()

@@ -1,6 +1,6 @@
 {% extends 'design/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2021-2025 Ramon van der Winkel.
+                Copyright (c) 2021-2026 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -77,7 +77,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Wijzig wedstrijd</h3>
+            <h1 class="sv-kopje-pagina">Wijzig wedstrijd</h1>
         </div>
     </div>
 
@@ -95,7 +95,9 @@
                         <table class="sv-kader-tabel">
 
                             <tr>
-                                <td colspan="2" class="center sv-blauw-text"><h6>Instellingen</h6></td>
+                                <td colspan="2" class="center">
+                                    <span class="sv-kopje-in-tabel">Instellingen</span>
+                                </td>
                             </tr>
 
                             <tr>
@@ -421,7 +423,9 @@
 
 
                             <tr>
-                                <td colspan="2" class="center sv-blauw-text"><h6>Contactgegevens organisatie</h6></td>
+                                <td colspan="2" class="center">
+                                    <span class="sv-kopje-in-tabel">Contactgegevens organisatie</span>
+                                </td>
                             </tr>
 
                             <tr>
@@ -484,7 +488,9 @@
 
 
                             <tr>
-                                <td colspan="2" class="center sv-blauw-text"><h6>Inschrijfgeld</h6></td>
+                                <td colspan="2" class="center">
+                                    <span class="sv-kopje-in-tabel">Inschrijfgeld</span>
+                                </td>
                             </tr>
 
                             <tr>
@@ -504,7 +510,9 @@
                             </tr>
 
                             <tr>
-                                <td colspan="2" class="center sv-blauw-text"><h6>Scheidsrechter behoefte</h6></td>
+                                <td colspan="2" class="center">
+                                    <span class="sv-kopje-in-tabel">Scheidsrechter behoefte</span>
+                                </td>
                             </tr>
 
                             <tr>
@@ -559,7 +567,7 @@
 
                             <tr>
                                 <td colspan="2" class="center">
-                                    <h6 class="sv-blauw-text">Uitslag</h6>
+                                    <span class="sv-kopje-in-tabel">Uitslag</span>
                                     <p></p>
                                 </td>
                             </tr>
@@ -605,7 +613,7 @@
 
                             <tr>
                                 <td colspan="2" class="center">
-                                    <h6 class="sv-blauw-text">Wedstrijdklassen</h6>
+                                    <p class="sv-kopje-in-tabel">Wedstrijdklassen</p>
                                                          <!-- N = KHSN -->
                                     {% if wed.organisatie == 'N' %}
                                         <p>Klassen zonder man/vrouw benoeming zijn genderneutraal</p>
@@ -675,7 +683,8 @@
 
         <div class="modal" id="bevestig_annuleer">
             <div class="modal-content center">
-                <h5>Annuleren?</h5>
+                <p class="sv-kopje-dialoog">Annuleren?</p>
+
                 <p>Wil je deze wedstrijd echt annuleren?</p>
 
                 <form action="{{ url_annuleer }}" method="post" onsubmit="document.getElementById('submit_knop4').disabled=true; return true;">
@@ -706,8 +715,8 @@
             <div class="modal" id="bevestig_verwijder">
                 <div class="modal-content center">
                     {% if url_verwijder %}
+                        <p class="sv-kopje-dialoog">Verwijderen?</p>
 
-                        <h5>Verwijderen?</h5>
                         <p>Wil je deze wedstrijd echt verwijderen?</p>
 
                         <form action="{{ url_verwijder }}" method="post" onsubmit="document.getElementById('submit_knop5').disabled=true; return true;">

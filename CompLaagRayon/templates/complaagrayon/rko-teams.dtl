@@ -1,6 +1,6 @@
 {% extends 'design/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2021-2025 Ramon van der Winkel.
+                Copyright (c) 2021-2026 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -14,7 +14,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">RK Teams</h3>
+            <h1 class="sv-kopje-pagina">RK Teams</h1>
             {% if not subset_filter  %}
                 <p>Verenigingsteams aangemeld voor de rayonkampioenschappen</p>
             {% endif %}
@@ -77,7 +77,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Teams</h4>
+            <h2 class="sv-kopje-row">Teams</h2>
             <p>Aantal: {{ totaal_teams }}</p>
 
             {% if not toon_klassen %}
@@ -105,7 +105,7 @@
                         <tr class="sv-table-sectie-header">
                             <td colspan="7" class="center">
                                 {% if toon_klassen %}
-                                    <h5 class="sv-rood-text">Nog niet geplaatste teams</h5>
+                                    <h2 class="sv-kopje-in-tabel sv-rood-text">Nog niet geplaatste teams</h2>
                                 {% endif %}
                                 <span>Vraag de HWL's om <span class="sv-rood-text">rood gemarkeerde teams</span> compleet te maken met sporters die mee mogen doen met het RK, of te verwijderen.</span>
                             </td>
@@ -149,7 +149,9 @@
                         {% endif %}
                         <tr>
                             <td colspan="7" class="center">
-                                <h5>{{ klasse.beschrijving }}</h5>{{ klasse.sterkte_str }}</td>
+                                <h3 class="sv-kopje-in-tabel">{{ klasse.beschrijving }}</h3>
+                                <span>{{ klasse.sterkte_str }}</span>
+                            </td>
                         </tr>
                         <tr>
                             <th class="center">Regio</th>

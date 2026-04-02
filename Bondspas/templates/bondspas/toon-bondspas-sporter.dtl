@@ -13,7 +13,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Jouw digitale bondspas</h3>
+            <h1 class="sv-kopje-pagina">Jouw digitale bondspas</h1>
 
             {% if is_oude_pas %}
                 <!-- blauw bordje -->

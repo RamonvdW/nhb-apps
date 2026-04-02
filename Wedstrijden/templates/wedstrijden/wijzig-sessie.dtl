@@ -1,6 +1,6 @@
 {% extends 'design/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2021-2025 Ramon van der Winkel.
+                Copyright (c) 2021-2026 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -28,7 +28,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Wijzig sessie</h3>
+            <h1 class="sv-kopje-pagina">Wijzig sessie</h1>
         </div>
     </div>
 
@@ -163,7 +163,8 @@
 
         <div class="modal" id="bevestig_verwijder_sessie">
             <div class="modal-content center">
-                <h5>Verwijder sessie?</h5>
+                <p class="sv-kopje-dialoog">Verwijder sessie?</p>
+
                 <p>Wil je deze sessie echt verwijderen?</p>
 
                 <form action="{{ url_verwijder }}" method="post" onsubmit="document.getElementById('submit_knop2').disabled=true; return true;">

@@ -136,7 +136,7 @@ class TestGoogleDriveStorageSheets(E2EHelpers, TestCase):
 
         # einde van "with" roept __exit__ aan
         with StorageGoogleSheet(out, retry_delay=0.0001) as sheet:
-            my_service = GoogleApiMock(verbose=True)
+            my_service = GoogleApiMock(verbose=False)
             with patch('GoogleDrive.operations.storage_sheets.build', return_value=my_service):
                 my_service.prime_error('reason', 'retry', 'GoogleApiError')
                 with self.assertRaises(StorageError) as exc:

@@ -1,6 +1,6 @@
 {% extends 'design/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2021-2025 Ramon van der Winkel.
+                Copyright (c) 2021-2026 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -14,7 +14,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Verenigingen zonder beheerders</h3>
+            <h1 class="sv-kopje-pagina">Verenigingen zonder beheerders</h1>
             <p>Contactgegevens van de secretarissen van verenigingen die nog niet actief genoeg zijn in MijnHandboogsport.</p>
         </div>
     </div>
@@ -23,7 +23,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Geen HWL</h4>
+            <h2 class="sv-kopje-row">Geen HWL</h2>
             <p>Geen beheerder gekoppeld aan de rol HWL</p>
         </div>
     </div>
@@ -45,7 +45,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Geen SEC account</h4>
+            <h2 class="sv-kopje-row">Geen SEC account</h2>
             <p>Secretaris heeft nog geen account aangemaakt</p>
         </div>
     </div>

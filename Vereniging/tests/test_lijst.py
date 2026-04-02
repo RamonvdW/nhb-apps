@@ -391,7 +391,7 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('vereniging/contact-geen-beheerders.dtl', 'design/site_layout.dtl'))
 
         # probeer het met een andere rol
-        self.e2e_wisselnaarrol_gebruiker()
+        self.e2e_wisselnaarrol_sporter()
         resp = self.client.get(self.url_geen_beheerders)
         self.assert403(resp)
 

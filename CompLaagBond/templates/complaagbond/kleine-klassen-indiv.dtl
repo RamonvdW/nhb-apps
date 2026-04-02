@@ -1,6 +1,6 @@
 {% extends 'design/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2023-2025 Ramon van der Winkel.
+                Copyright (c) 2023-2026 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -33,7 +33,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Kleine klassen</h3>
+            <h1 class="sv-kopje-pagina">Kleine klassen</h1>
             <p>Wedstrijdklassen voor de Bondskampioenschappen van de <b>{{ deelkamp.competitie }}</b>.</p>
         </div>
     </div>
@@ -63,7 +63,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>De kleine klassen</h4>
+            <h2 class="sv-kopje-row">De kleine klassen</h2>
             {% if aantal_kleine_klassen == 0 %}
                 <p>Er zijn geen kleine klassen (meer)</p>
             {% else %}
@@ -87,11 +87,13 @@
                                 <td colspan="4" class="sv-table-onderrand" style="height:50px"></td>
                             </tr>
                         {% endif %}
+
                         <tr class="sv-table-sectie-header">
                             <td colspan="4" class="center">
-                                <h5>{{ obj.klasse_str }}</h5>
+                                <h2 class="sv-kopje-in-tabel">{{ obj.klasse_str }}</h2>
                             </td>
                         </tr>
+
                         <tr>
                             <td colspan="3"></td>
                             <td>

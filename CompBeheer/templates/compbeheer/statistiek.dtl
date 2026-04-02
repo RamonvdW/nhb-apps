@@ -13,7 +13,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Statistiek</h3>
+            <h1 class="sv-kopje-pagina">Statistiek</h1>
             {% if heeft_data %}
                 <p>Rapportage voor seizoen <b>{{ seizoen }}</b></p>
             {% else %}
@@ -29,7 +29,9 @@
             <div class="col s12 m10 offset-m1 l8 offset-l2 xl6 offset-xl3">
                 <table class="sv-kader-tabel">
                     <tr>
-                        <td colspan="4" class="center sv-blauw-text"><h5>Deelnemers aantallen</h5></td>
+                        <td colspan="4" class="center">
+                            <h2 class="sv-kopje-in-tabel">Deelnemers aantallen</h2>
+                        </td>
                     </tr>
                     <tr>
                         <th>Aanmeldingen</th>
@@ -57,7 +59,9 @@
                     </tr>
 
                     <tr>
-                        <td colspan="4" class="center sv-blauw-text"><h5>Regiocompetitie individueel</h5></td>
+                        <td colspan="4" class="center">
+                            <h2 class="sv-kopje-in-tabel">Regiocompetitie individueel</h2>
+                        </td>
                     </tr>
 
                     <tr>
@@ -99,7 +103,9 @@
 
 
                     <tr>
-                        <td colspan="4" class="center sv-blauw-text"><h5>Regiocompetitie teams</h5></td>
+                        <td colspan="4" class="center">
+                            <h2 class="sv-kopje-in-tabel">Regiocompetitie teams</h2>
+                        </td>
                     </tr>
 
                     <tr>
@@ -119,14 +125,16 @@
                     {% endif %}
 
                     <tr>
-                        <td colspan="4" class="center sv-blauw-text"><h5>Leeftijdsgroepen regiocompetitie</h5></td>
+                        <td colspan="4" class="center">
+                            <h2 class="sv-kopje-in-tabel">Leeftijdsgroepen regiocompetitie</h2>
+                        </td>
                     </tr>
 
                     {% for titel, total, age_groups in age_groups_regio %}
                         {% if total > 0 %}
                             <tr>
                                 <td colspan="4" class="center">
-                                    <h5>{{ titel }}</h5>
+                                    <h3 class="sv-kopje-klein">{{ titel }}</h3>
                                     <p>Leeftijd van de {{ total }} sporters, gegroepeerd per 10 jaar.</p>
                                 </td>
                             </tr>
@@ -161,7 +169,9 @@
 
 
                     <tr>
-                        <td colspan="4" class="center sv-blauw-text"><h5>Rayonkampioenschappen individueel</h5></td>
+                        <td colspan="4" class="center">
+                            <h2 class="sv-kopje-in-tabel">Rayonkampioenschappen individueel</h2>
+                        </td>
                     </tr>
 
                     <tr>
@@ -195,7 +205,9 @@
 
 
                     <tr>
-                        <td colspan="4" class="center sv-blauw-text"><h5>Rayonkampioenschappen teams</h5></td>
+                        <td colspan="4" class="center">
+                            <h2 class="sv-kopje-in-tabel">Rayonkampioenschappen teams</h2>
+                        </td>
                     </tr>
 
                     <tr>
@@ -207,14 +219,16 @@
 
 
                     <tr>
-                        <td colspan="4" class="center sv-blauw-text"><h5>Leeftijdsgroepen rayonkampioenschappen</h5></td>
+                        <td colspan="4" class="center">
+                            <h2 class="sv-kopje-in-tabel">Leeftijdsgroepen rayonkampioenschappen</h2>
+                        </td>
                     </tr>
 
                     {% for titel, total, age_groups in age_groups_rk %}
                         {% if total > 0 %}
                             <tr>
                                 <td colspan="4" class="center">
-                                    <h5>{{ titel }}</h5>
+                                    <h3 class="sv-kopje-klein">{{ titel }}</h3>
                                     <p>Leeftijd van de {{ total }} sporters, gegroepeerd per 10 jaar.</p>
                                 </td>
                             </tr>
@@ -249,7 +263,9 @@
 
 
                     <tr>
-                        <td colspan="4" class="center sv-blauw-text"><h5>Bondskampioenschappen individueel</h5></td>
+                        <td colspan="4" class="center">
+                            <h2 class="sv-kopje-in-tabel">Bondskampioenschappen individueel</h2>
+                        </td>
                     </tr>
 
                     <tr>
@@ -267,7 +283,9 @@
                     </tr>
 
                     <tr>
-                        <td colspan="4" class="center sv-blauw-text"><h5>Bondskampioenschappen teams</h5></td>
+                        <td colspan="4" class="center">
+                            <h2 class="sv-kopje-in-tabel">Bondskampioenschappen teams</h2>
+                        </td>
                     </tr>
 
                     <tr>

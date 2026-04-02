@@ -86,7 +86,7 @@ class WijzigParaOpmerkingView(UserPassesTestMixin, TemplateView):
 
     def _get_voorkeuren_or_404(self, sporter_pk: str):
         try:
-            sporter_pk = int(sporter_pk[:6])    # afkappen voor de veiligheid
+            sporter_pk = int(sporter_pk[:7])    # afkappen voor de veiligheid
             self.voorkeuren = (SporterVoorkeuren
                                .objects
                                .select_related('sporter')

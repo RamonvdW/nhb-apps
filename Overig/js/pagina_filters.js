@@ -1,5 +1,5 @@
 /*!
- * Copyright (c) 2020-2025 Ramon van der Winkel.
+ * Copyright (c) 2020-2026 Ramon van der Winkel.
  * All rights reserved.
  * Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
  */
@@ -23,7 +23,8 @@
     De click handler navigeert naar een andere pagina aan de hand van de url die geconstrueerd is.
 
     voorbeeld:
-        <h4
+        <h2
+           class="sv-kopje-row"
            id="filters"                        <--
            data-url="{{ url_filter }}">        <-- "/app/func/~1/regio-~2/"
            Filters

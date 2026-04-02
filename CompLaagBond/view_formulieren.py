@@ -34,7 +34,7 @@ class FormulierBkTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
         """ Afhandelen van de GET request waarmee we een bestand terug geven. """
 
         try:
-            match_pk = int(kwargs['match_pk'][:6])      # afkappen voor de veiligheid
+            match_pk = int(kwargs['match_pk'][:7])      # afkappen voor de veiligheid
             match = (CompetitieMatch
                      .objects
                      .select_related('vereniging',
@@ -44,7 +44,7 @@ class FormulierBkTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
             raise Http404('Wedstrijd niet gevonden')
 
         try:
-            klasse_pk = int(kwargs['klasse_pk'][:6])            # afkappen voor de veiligheid
+            klasse_pk = int(kwargs['klasse_pk'][:7])            # afkappen voor de veiligheid
             team_klasse = (CompetitieTeamKlasse
                            .objects
                            .get(pk=klasse_pk))

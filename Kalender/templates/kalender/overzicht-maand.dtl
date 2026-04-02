@@ -22,7 +22,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Kalender</h3>
+            <h1 class="sv-kopje-pagina">Kalender</h1>
             {% if not kan_aanmelden %}
                 <p>Om in te schrijven moet je een account aanmaken en inloggen</p>
             {% endif %}
@@ -133,7 +133,7 @@
             </td>
 
             <td class="center" style="width:60%">       <!-- 60% voorkomt springen van de knoppen -->
-                <h5>{{ datum_vanaf|date:'F Y' }}</h5>
+                <p class="sv-kopje-dialoog">{{ datum_vanaf|date:'F Y' }}</p>
             </td>
 
             <!-- knop -->

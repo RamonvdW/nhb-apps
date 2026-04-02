@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -74,6 +74,14 @@ def maak_regiocomp_zoom_knoppen(context, comp_pk, rayon=None, regio=None):
     # for
 
 
+def _punt_einde_zin(zin: str) -> str:
+    if len(zin) > 0:
+        last = zin[-1]
+        if last not in "!?.":
+            zin += '.'
+    return zin
+
+
 def formatteer_objs(objs):
 
     lid2voorkeuren = dict()  # [lid_nr] = SporterVoorkeuren
@@ -94,7 +102,7 @@ def formatteer_objs(objs):
             obj_aantal = obj
             volgorde = obj.indiv_klasse.volgorde
 
-        obj.notities = obj.inschrijf_notitie
+        obj.notities = _punt_einde_zin(obj.inschrijf_notitie.strip())
 
         try:
             voorkeuren = lid2voorkeuren[obj.sporterboog.sporter.lid_nr]
@@ -104,10 +112,11 @@ def formatteer_objs(objs):
             obj.voorkeuren = voorkeuren
 
             if voorkeuren.para_voorwerpen:
-                obj.notities += '\nSporter laat voorwerpen op de schietlijn staan\n'
+                obj.notities += ' Sporter laat voorwerpen op de schietlijn staan.'
 
-            if voorkeuren.opmerking_para_sporter:
-                obj.notities = obj.notities + '\n' + voorkeuren.opmerking_para_sporter
+            para_notities = _punt_einde_zin(voorkeuren.opmerking_para_sporter.strip())
+            if para_notities:
+                obj.notities = obj.notities + ' ' + para_notities
 
         obj.notities = obj.notities.replace('\n\n', '\n')
         obj.notities = textwrap.fill(obj.notities, 30)
@@ -138,7 +147,7 @@ class LijstAangemeldRegiocompAllesView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            comp_pk = int(kwargs['comp_pk'][:6])        # afkappen voor de veiligheid
+            comp_pk = int(kwargs['comp_pk'][:7])        # afkappen voor de veiligheid
             comp = Competitie.objects.get(pk=comp_pk)
         except (ValueError, Competitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
@@ -196,7 +205,7 @@ class LijstAangemeldRegiocompRayonView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            comp_pk = int(kwargs['comp_pk'][:6])    # afkappen voor de veiligheid
+            comp_pk = int(kwargs['comp_pk'][:7])    # afkappen voor de veiligheid
             comp = Competitie.objects.get(pk=comp_pk)
         except (ValueError, Competitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
@@ -208,7 +217,7 @@ class LijstAangemeldRegiocompRayonView(UserPassesTestMixin, TemplateView):
         context['competitie'] = comp
 
         try:
-            rayon_pk = int(kwargs['rayon_pk'][:6])  # afkappen voor de veiligheid
+            rayon_pk = int(kwargs['rayon_pk'][:7])  # afkappen voor de veiligheid
             rayon = Rayon.objects.get(pk=rayon_pk)
         except (ValueError, Rayon.DoesNotExist):
             raise Http404('Rayon niet gevonden')
@@ -262,7 +271,7 @@ class LijstAangemeldRegiocompRegioView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            comp_pk = int(kwargs['comp_pk'][:6])        # afkappen voor de veiligheid
+            comp_pk = int(kwargs['comp_pk'][:7])        # afkappen voor de veiligheid
             comp = Competitie.objects.get(pk=comp_pk)
         except (ValueError, Competitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
@@ -274,7 +283,7 @@ class LijstAangemeldRegiocompRegioView(UserPassesTestMixin, TemplateView):
         context['competitie'] = comp
 
         try:
-            regio_pk = int(kwargs['regio_pk'][:6])      # afkappen voor de veiligheid
+            regio_pk = int(kwargs['regio_pk'][:7])      # afkappen voor de veiligheid
             regio = (Regio
                      .objects
                      .select_related('rayon')
@@ -576,7 +585,7 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            comp_pk = int(kwargs['comp_pk'][:6])        # afkappen voor de veiligheid
+            comp_pk = int(kwargs['comp_pk'][:7])        # afkappen voor de veiligheid
             comp = Competitie.objects.get(pk=comp_pk)
         except (ValueError, Competitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
@@ -588,7 +597,7 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
         context['competitie'] = comp
 
         try:
-            regio_pk = int(kwargs['regio_pk'][:6])      # afkappen voor de veiligheid
+            regio_pk = int(kwargs['regio_pk'][:7])      # afkappen voor de veiligheid
             regio = (Regio
                      .objects
                      .select_related('rayon')
@@ -656,7 +665,7 @@ class Inschrijfmethode3BehoefteAlsBestandView(Inschrijfmethode3BehoefteView):
         context = dict()
 
         try:
-            comp_pk = int(kwargs['comp_pk'][:6])        # afkappen voor de veiligheid
+            comp_pk = int(kwargs['comp_pk'][:7])        # afkappen voor de veiligheid
             comp = Competitie.objects.get(pk=comp_pk)
         except (ValueError, Competitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
@@ -668,7 +677,7 @@ class Inschrijfmethode3BehoefteAlsBestandView(Inschrijfmethode3BehoefteView):
         context['competitie'] = comp
 
         try:
-            regio_pk = int(kwargs['regio_pk'][:6])      # afkappen voor de veiligheid
+            regio_pk = int(kwargs['regio_pk'][:7])      # afkappen voor de veiligheid
             regio = (Regio
                      .objects
                      .select_related('rayon')
@@ -756,7 +765,7 @@ class Inschrijfmethode1BehoefteView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            comp_pk = int(kwargs['comp_pk'][:6])        # afkappen voor de veiligheid
+            comp_pk = int(kwargs['comp_pk'][:7])        # afkappen voor de veiligheid
             comp = Competitie.objects.get(pk=comp_pk)
         except (ValueError, Competitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
@@ -768,7 +777,7 @@ class Inschrijfmethode1BehoefteView(UserPassesTestMixin, TemplateView):
         context['competitie'] = comp
 
         try:
-            regio_pk = int(kwargs['regio_pk'][:6])      # afkappen voor de veiligheid
+            regio_pk = int(kwargs['regio_pk'][:7])      # afkappen voor de veiligheid
             regio = (Regio
                      .objects
                      .select_related('rayon')
@@ -889,7 +898,7 @@ class Inschrijfmethode1BehoefteAlsBestandView(Inschrijfmethode1BehoefteView):
         context = dict()
 
         try:
-            comp_pk = int(kwargs['comp_pk'][:6])        # afkappen voor de veiligheid
+            comp_pk = int(kwargs['comp_pk'][:7])        # afkappen voor de veiligheid
             comp = Competitie.objects.get(pk=comp_pk)
         except (ValueError, Competitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
@@ -901,7 +910,7 @@ class Inschrijfmethode1BehoefteAlsBestandView(Inschrijfmethode1BehoefteView):
         context['competitie'] = comp
 
         try:
-            regio_pk = int(kwargs['regio_pk'][:6])      # afkappen voor de veiligheid
+            regio_pk = int(kwargs['regio_pk'][:7])      # afkappen voor de veiligheid
             regio = (Regio
                      .objects
                      .select_related('rayon')

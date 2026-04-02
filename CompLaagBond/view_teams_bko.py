@@ -46,7 +46,7 @@ class LijstBkTeamsView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            deelkamp_pk = int(kwargs['deelkamp_pk'][:6])  # afkappen voor de veiligheid
+            deelkamp_pk = int(kwargs['deelkamp_pk'][:7])  # afkappen voor de veiligheid
             deelkamp = (KampBK
                         .objects
                         .select_related('competitie')
@@ -168,7 +168,7 @@ class WijzigStatusBkTeamView(UserPassesTestMixin, View):
     def post(self, request, *args, **kwargs):
         """ wordt aangeroepen als de gebruiker op de knop OPSLAAN druk """
 
-        team_pk = str(request.POST.get('team_pk'))[:6]      # afkappen voor de veiligheid
+        team_pk = str(request.POST.get('team_pk'))[:7]      # afkappen voor de veiligheid
         status = str(request.POST.get('status'))[:15]       # afkappen voor de veiligheid
 
         try:

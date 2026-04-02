@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2024-2025 Ramon van der Winkel.
+#  Copyright (c) 2024-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -215,7 +215,7 @@ class ToevoegenAanMandjeView(UserPassesTestMixin, View):
         return False
 
     def post(self, request, *args, **kwargs):
-        opleiding_str = request.POST.get('opleiding', '')[:6]       # afkappen voor de veiligheid
+        opleiding_str = request.POST.get('opleiding', '')[:7]       # afkappen voor de veiligheid
 
         try:
             opleiding_pk = int(opleiding_str)

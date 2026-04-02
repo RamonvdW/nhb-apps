@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2025 Ramon van der Winkel.
+#  Copyright (c) 2022-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -98,7 +98,7 @@ class OpleidingDetailsView(TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            opleiding_pk = kwargs['opleiding_pk'][:6]     # afkappen voor de veiligheid
+            opleiding_pk = kwargs['opleiding_pk'][:7]     # afkappen voor de veiligheid
             opleiding_pk = int(opleiding_pk)
             opleiding = Opleiding.objects.exclude(status=OPLEIDING_STATUS_VOORBEREIDEN).get(pk=opleiding_pk)
         except (IndexError, ValueError, TypeError, Opleiding.DoesNotExist):

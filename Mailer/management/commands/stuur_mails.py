@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2024 Ramon van der Winkel.
+#  Copyright (c) 2020-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -118,7 +118,7 @@ class Command(BaseCommand):
             self.stop_at = (datetime.datetime.now()
                             + datetime.timedelta(seconds=duration))
 
-        self.stdout.write('[INFO] Taak loopt tot %s' % str(self.stop_at))
+        self.stdout.write('[INFO] {stuur_mails} Taak loopt tot %s' % str(self.stop_at))
 
     def handle(self, *args, **options):
         self._set_stop_time(**options)

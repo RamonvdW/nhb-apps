@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2025 Ramon van der Winkel.
+#  Copyright (c) 2022-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -274,7 +274,7 @@ class AanpassenView(UserPassesTestMixin, TemplateView):
         """ wordt aangeroepen om de POST af te handelen"""
 
         try:
-            inschrijving_pk = str(kwargs['inschrijving_pk'])[:6]     # afkappen voor de veiligheid
+            inschrijving_pk = str(kwargs['inschrijving_pk'])[:7]     # afkappen voor de veiligheid
             inschrijving_pk = int(inschrijving_pk)
             inschrijving = (WedstrijdInschrijving
                             .objects
@@ -297,9 +297,9 @@ class AanpassenView(UserPassesTestMixin, TemplateView):
                 raise Http404('Verkeerde vereniging')
 
         # oude inschrijving omzetten in een nieuwe inschrijving
-        sporterboog_str = request.POST.get('sporterboog', '')[:6]   # afkappen voor de veiligheid
-        sessie_str = request.POST.get('sessie', '')[:6]             # afkappen voor de veiligheid
-        klasse_str = request.POST.get('klasse', '')[:6]             # afkappen voor de veiligheid
+        sporterboog_str = request.POST.get('sporterboog', '')[:7]   # afkappen voor de veiligheid
+        sessie_str = request.POST.get('sessie', '')[:7]             # afkappen voor de veiligheid
+        klasse_str = request.POST.get('klasse', '')[:7]             # afkappen voor de veiligheid
 
         try:
             sporterboog_pk = int(sporterboog_str)
@@ -355,7 +355,7 @@ class AfmeldenView(UserPassesTestMixin, View):
         """ wordt aangeroepen om de POST af te handelen"""
 
         try:
-            inschrijving_pk = str(kwargs['inschrijving_pk'])[:6]     # afkappen voor de veiligheid
+            inschrijving_pk = str(kwargs['inschrijving_pk'])[:7]     # afkappen voor de veiligheid
             inschrijving_pk = int(inschrijving_pk)
             inschrijving = WedstrijdInschrijving.objects.get(pk=inschrijving_pk)
         except (TypeError, ValueError, WedstrijdInschrijving.DoesNotExist):

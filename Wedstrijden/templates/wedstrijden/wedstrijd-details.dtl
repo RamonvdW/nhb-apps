@@ -17,7 +17,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Wedstrijd details</h3>
+            <h1 class="sv-kopje-pagina">Wedstrijd details</h1>
 
             {% if toon_inschrijven_mh %}
                 <!-- knop om naar het onderste stuk van de pagina te springen -->
@@ -38,8 +38,8 @@
             <table class="sv-kader-tabel">
 
                 <tr>
-                    <td colspan="2" class="center sv-blauw-text">
-                        <h6>Informatie</h6>
+                    <td colspan="2" class="center">
+                        <h2 class="sv-kopje-in-tabel">Informatie</h2>
                     </td>
                 </tr>
 
@@ -148,8 +148,8 @@
 
 
                 <tr>
-                    <td colspan="2" class="center sv-blauw-text">
-                        <h6>Contactgegevens organisatie</h6>
+                    <td colspan="2" class="center">
+                        <h2 class="sv-kopje-in-tabel">Contactgegevens organisatie</h2>
                     </td>
                 </tr>
 
@@ -183,8 +183,8 @@
 
 
                 <tr>
-                    <td colspan="2" class="center sv-blauw-text">
-                        <h6>Inschrijfgeld</h6>
+                    <td colspan="2" class="center">
+                        <h2 class="sv-kopje-in-tabel">Inschrijfgeld</h2>
                     </td>
                 </tr>
                 <tr>
@@ -199,8 +199,8 @@
 
                 {% if wed.url_uitslag_1 %}
                     <tr>
-                        <td colspan="2" class="center sv-blauw-text">
-                            <h6>Gepubliceerde uitslag</h6>
+                        <td colspan="2" class="center">
+                            <span class="sv-kopje-in-tabel">Gepubliceerde uitslag</span>
                         </td>
                     </tr>
                     {% for url in wed.uitslag_urls %}
@@ -217,8 +217,8 @@
 
                 {% if wed.url_deelnemerslijst %}
                     <tr>
-                        <td colspan="2" class="center sv-blauw-text">
-                            <h6>Deelnemers</h6>
+                        <td colspan="2" class="center">
+                            <h2 class="sv-kopje-in-tabel">Deelnemers</h2>
                         </td>
                     </tr>
                     <tr>
@@ -237,7 +237,7 @@
                 <ul id="sessies" class="collapsible z-depth-0 white" style="margin-top:50px; margin-bottom:0">
                     <li>
                         <div class="collapsible-header white center" style="display:block; cursor:inherit">
-                            <h6 class="sv-blauw-text">Sessies</h6>
+                            <h2 class="sv-kopje-in-tabel">Sessies</h2>
                             {% if wed.organisatie == 'N' %}
                                 <p>Eventuele klassen zonder man/vrouw benoeming zijn genderneutraal</p>
                             {% endif %}
@@ -280,7 +280,7 @@
         <!-- witruimte -->
         <div class="row center">
             <div class="col s12">
-                <h4 id="inschrijven">Inschrijven</h4>
+                <h2 class="sv-kopje-row" id="inschrijven">Inschrijven</h2>
 
                 {% if hint_inloggen %}
                     <!-- rood bordje -->
@@ -329,7 +329,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Informatie</h4>
+            <h2 class="sv-kopje-row">Informatie</h2>
         </div>
     </div>
 

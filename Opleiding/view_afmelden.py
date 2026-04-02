@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2025 Ramon van der Winkel.
+#  Copyright (c) 2025-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -37,7 +37,7 @@ class AfmeldenView(UserPassesTestMixin, View):
         """ wordt aangeroepen om de POST af te handelen"""
 
         try:
-            inschrijving_pk = str(kwargs['inschrijving_pk'])[:6]     # afkappen voor de veiligheid
+            inschrijving_pk = str(kwargs['inschrijving_pk'])[:7]     # afkappen voor de veiligheid
             inschrijving_pk = int(inschrijving_pk)
             inschrijving = OpleidingInschrijving.objects.get(pk=inschrijving_pk)
         except (TypeError, ValueError, OpleidingInschrijving.DoesNotExist):
