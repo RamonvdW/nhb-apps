@@ -43,7 +43,7 @@ class Command(BaseCommand):
         try:
             for bestand in Bestand.objects.all():
                 self._check_wf(bestand)
-                time.sleep(1)       # prevent quota overrun
+                time.sleep(5)       # prevent quota overrun
             # for
 
         except KeyboardInterrupt:
