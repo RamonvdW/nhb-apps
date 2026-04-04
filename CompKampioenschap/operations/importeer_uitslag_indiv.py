@@ -24,7 +24,7 @@ class ImporteerSheetUitslagIndiv:
 
     def __init__(self, deelkamp: KampRK | KampBK, indiv_klasse: CompetitieIndivKlasse):
         self.bevat_fout = False
-        self.blokjes_info = list()
+        self.blokjes_info = list()              # [regels, ...] with regels=[str, str, ...]
         self.deelkamp = deelkamp
         self.is_rk = isinstance(self.deelkamp, KampRK)
         self.indiv_klasse = indiv_klasse
@@ -72,14 +72,17 @@ class ImporteerSheetUitslagIndiv:
             'Aanpassing status deelnemers:'
         ]
 
+        regel_nr = 0
         for row in self._data_deelnemers:
+            regel_nr += 1
+
             if len(row) == 0:
                 # skip empty row
                 continue
 
             if len(row) != 6:
                 regels = [
-                    'Fout: Kreeg %s kolommen in plaats van 6' % len(row),
+                    'Fout: Kreeg %s kolommen in plaats van 6 op regel %s' % (len(row), regel_nr),
                     'row = %s' % repr(row)
                 ]
                 self.blokjes_info.append(regels)
@@ -98,28 +101,42 @@ class ImporteerSheetUitslagIndiv:
                 ]
                 self.blokjes_info.append(regels)
                 self.bevat_fout = True
-            else:
-                # geen gemiddelde check
-                self._lid_nr2deelnemer[lid_nr] = deelnemer
-                regel = "[%s] %s met %s en gemiddelde %s van vereniging %s" % (
-                                lid_nr, naam,
-                                deelnemer.sporterboog.boogtype.beschrijving,
-                                deelnemer.gemiddelde, ver)
-                regels_deelnemers.append(regel)
+                continue        # met de for
 
-                if deelnemer.deelname != DEELNAME_JA:
-                    regel = 'Deelname van %s aangepast van %s naar %s' % (
-                                    deelnemer.sporterboog.sporter.lid_nr_en_volledige_naam(),
-                                    DEELNAME2STR[deelnemer.deelname],
-                                    DEELNAME2STR[DEELNAME_JA])
-                    regels_deelname.append(regel)
+            exp_naam = deelnemer.sporterboog.sporter.volledige_naam()
+            if exp_naam != naam:
+                regels = [
+                    'Fout: Deelnemer naam in de wedstrijdformulier klopt niet!',
+                    '[%s] heet %s' % (lid_nr, repr(exp_naam)),
+                    'Maar in sheet staat %s' % repr(naam)
+                ]
+                self.blokjes_info.append(regels)
+                self.bevat_fout = True
+                continue
 
-                    deelnemer.logboek += '[%s] Deelname aangepast van %s naar %s\n' % (
-                                                stamp,
-                                                DEELNAME2STR[deelnemer.deelname],
-                                                DEELNAME2STR[DEELNAME_JA])
-                    deelnemer.deelname = DEELNAME_JA
-                    deelnemer.save(update_fields=['deelname', 'logboek'])
+            # geen gemiddelde check
+
+            # deelnemer opslaan
+            self._lid_nr2deelnemer[lid_nr] = deelnemer
+            regel = "[%s] %s met %s en gemiddelde %s van vereniging %s" % (
+                            lid_nr, naam,
+                            deelnemer.sporterboog.boogtype.beschrijving,
+                            deelnemer.gemiddelde, ver)
+            regels_deelnemers.append(regel)
+
+            if deelnemer.deelname != DEELNAME_JA:
+                regel = 'Deelname van %s aangepast van %s naar %s' % (
+                                deelnemer.sporterboog.sporter.lid_nr_en_volledige_naam(),
+                                DEELNAME2STR[deelnemer.deelname],
+                                DEELNAME2STR[DEELNAME_JA])
+                regels_deelname.append(regel)
+
+                deelnemer.logboek += '[%s] Deelname aangepast van %s naar %s\n' % (
+                                            stamp,
+                                            DEELNAME2STR[deelnemer.deelname],
+                                            DEELNAME2STR[DEELNAME_JA])
+                deelnemer.deelname = DEELNAME_JA
+                deelnemer.save(update_fields=['deelname', 'logboek'])
         # for
 
         self.blokjes_info.append(regels_deelnemers)
@@ -168,9 +185,10 @@ class ImporteerSheetUitslagIndiv:
                         counts.append('%sx8' % c8)
                     else:
                         c8 = 0
-                except (TypeError, ValueError) as err:
+                except (TypeError, ValueError) as exc:
                     regels = [
-                        'Fout: Probleem met 10/9/8 tellingen voor [%s]: %s' % (lid_nr, repr(scores))
+                        'Fout: Probleem met 10/9/8 tellingen voor [%s]: %s' % (lid_nr, repr(scores)),
+                        '(%s)' % str(exc)
                     ]
                     self.blokjes_info.append(regels)
                     self.bevat_fout = True
