@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2026 Ramon van der Winkel.
+#  Copyright (c) 2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -17,7 +17,9 @@ class Command(BaseCommand):
     help = "Check wedstrijdformulieren (google sheet)"
 
     def _check_wf(self, bestand: Bestand):
-        print('{check_wf} %s' % bestand.fname)
+        self.stdout.write('{check_wf} [%sm %s/%s] %s' % (bestand.afstand,
+                                                         bestand.begin_jaar, bestand.begin_jaar + 1,
+                                                         bestand.fname))
 
         if bestand.is_bk:
             qset = KampBK.objects.all()
@@ -38,10 +40,13 @@ class Command(BaseCommand):
             # for
 
     def handle(self, *args, **options):
-        for bestand in Bestand.objects.all():
-            self._check_wf(bestand)
-            time.sleep(1)       # prevent quota overrun
-        # for
+        try:
+            for bestand in Bestand.objects.all():
+                self._check_wf(bestand)
+                time.sleep(1)       # prevent quota overrun
+            # for
 
+        except KeyboardInterrupt:
+            pass
 
 # end of file
