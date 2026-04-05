@@ -70,7 +70,7 @@ class TestCompKampioenschapOpWfIndivLees(E2EHelpers, TestCase):
     """ tests voor de CompKampioenschap module, operations Wedstrijdformulier Individueel Lees """
 
     voorronde = {
-        'D11:I34': [  # deelnemers
+        'D11:I35': [  # deelnemers
             ['100010', 'Tien Scoorder', '[1001] Grote club', 'G', 'H', 'I'],
             ['100009', 'Negen Scoorder', '[1001] Grote club', 'G', 'H', 'I'],
             ['100008', 'Acht Scoorder', '[1001] Grote club', 'G', 'H', 'I'],
@@ -88,13 +88,13 @@ class TestCompKampioenschapOpWfIndivLees(E2EHelpers, TestCase):
             [8],
             [7],
         ],
-        'J11:O34': [  # 1e, 2e, totaal, 10-en, 9-en, 8-en
+        'J11:O35': [  # 1e, 2e, totaal, 10-en, 9-en, 8-en
             [10, 10, 20],
             [9, 9, 18],
             [8, 10, 18],
             [7, 7, 14],
         ],
-        'S11:S34': [  # uitslag, inclusief shoot-off resultaat als decimaal
+        'S11:S35': [  # uitslag, inclusief shoot-off resultaat als decimaal
             [20],
             [18.001],
             [18],
@@ -1026,7 +1026,7 @@ class TestCompKampioenschapOpWfIndivLees(E2EHelpers, TestCase):
 
     sheet_ranges_25_geen_deelnemers = {
         'Wedstrijd': {
-            'D11:I34': [  # deelnemers
+            'D11:I35': [  # deelnemers
             ],
             'J11:J35': [  # scores 1e voorronde
             ],
@@ -1037,7 +1037,7 @@ class TestCompKampioenschapOpWfIndivLees(E2EHelpers, TestCase):
 
     sheet_ranges_25_geen_invoer = {
         'Wedstrijd': {
-            'D11:I34': [        # deelnemers
+            'D11:I35': [        # deelnemers
                 # D = bondsnummer; E = naam; F = vereniging; G = regio; H = label; I = gemiddelde
                 ['100010', 'Tien Scoorder',  '[1001] Grote club', '101', 'Kampioen regio 101', '10,0'],
                 ['100009', 'Negen Scoorder', '[1001] Grote club', '101', 'H', '9,0'],
@@ -1053,7 +1053,7 @@ class TestCompKampioenschapOpWfIndivLees(E2EHelpers, TestCase):
 
     sheet_ranges_25_voorronde1 = {
         'Wedstrijd': {
-            'D11:I34': [        # deelnemers
+            'D11:I35': [        # deelnemers
                 # D = bondsnummer; E = naam; F = vereniging; G = regio; H = label; I = gemiddelde
                 ['100010', 'Tien Scoorder',  '[1001] Grote club', '101', 'Kampioen regio 101', '10,0'],
                 ['100009', 'Negen Scoorder', '[1001] Grote club', '101', 'H', '9,0'],
@@ -1073,7 +1073,7 @@ class TestCompKampioenschapOpWfIndivLees(E2EHelpers, TestCase):
 
     sheet_ranges_25_voorronde2 = {
         'Wedstrijd': {
-            'D11:I34': [        # deelnemers
+            'D11:I35': [        # deelnemers
                 # D = bondsnummer; E = naam; F = vereniging; G = regio; H = label; I = gemiddelde
                 ['100010', 'Tien Scoorder',  '[1001] Grote club', '101', 'Kampioen regio 101', '10,0'],
                 ['100009', 'Negen Scoorder', '[1001] Grote club', '101', 'H', '9,0'],
@@ -1089,21 +1089,21 @@ class TestCompKampioenschapOpWfIndivLees(E2EHelpers, TestCase):
             'K11:K35': [        # scores 2e voorronde
                 [100],
             ],
-            'J11:O34': [        # volledige uitslag
+            'J11:O35': [        # volledige uitslag
                 # 1e, 2e, totaal, 10-en, 9-en, 8-en
                 [90, 90, 180, 40, 10, ''],
                 [90, 90, 180, 39, 11, ''],
                 [''],  # no show
                 [70, 70, 140, 20, 25, 4],
             ],
-            'S11:S34': [         # resultaat (kolom "sorteer mij")
+            'S11:S35': [         # resultaat (kolom "sorteer mij")
             ],
         }
     }
 
     sheet_ranges_25_uitslag = {
         'Wedstrijd': {
-            'D11:I34': [        # deelnemers
+            'D11:I35': [        # deelnemers
                 # D = bondsnummer; E = naam; F = vereniging; G = regio; H = label; I = gemiddelde
                 ['100010', 'Tien Scoorder',  '[1001] Grote club', '101', 'Kampioen regio 101', '10,0'],
                 ['100009', 'Negen Scoorder', '[1001] Grote club', '101', 'H', '9,0'],
@@ -1120,14 +1120,14 @@ class TestCompKampioenschapOpWfIndivLees(E2EHelpers, TestCase):
             'K11:K35': [        # scores 2e voorronde
                 [100],
             ],
-            'J11:O34': [        # volledige uitslag
+            'J11:O35': [        # volledige uitslag
                 # 1e, 2e, totaal, 10-en, 9-en, 8-en
                 [90, 90, 180, 40, 10, ''],
                 [90, 90, 180, 39, 11, ''],
                 ['', '', '', '', '', ''],   # no show
                 [70, 70, 140, 20, 25, 4],
             ],
-            'S11:S34': [         # resultaat (kolom "sorteer mij")
+            'S11:S35': [         # resultaat (kolom "sorteer mij")
                 [180.4010],
                 [180.3911],
                 [''],

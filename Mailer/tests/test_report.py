@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2024 Ramon van der Winkel.
+#  Copyright (c) 2024-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -8,8 +8,7 @@ from django.test import TestCase, override_settings
 from Account.models import Account
 from Functie.models import Functie
 from Mailer.models import MailQueue
-from Mailer.operations import mailer_queue_email
-from Mailer.mailer import send_mail
+from Mailer.operations import mailer_queue_email, send_mail
 from Registreer.models import GastRegistratie
 from Sporter.models import Sporter
 from Taken.models import Taak

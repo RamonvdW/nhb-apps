@@ -31,8 +31,8 @@
                 {% for dag in dagen %}
                     <li>
                         <div class="collapsible-header white">
-                            <h6 class="sv-blauw-text">{{ dag.wedstrijd.titel }}</h6>
-                            <h6>{{ dag.datum }}</h6>
+                            <p class="sv-kopje-in-tabel">{{ dag.wedstrijd.titel }}</p>
+                            <p class="sv-kopje-klein">{{ dag.datum }}</p>
                             <span>Aantal scheidsrechters nodig: {{ dag.wedstrijd.aantal_scheids }}</span>
 
                             <!-- icoon svg wordt gezet in Overige/js/collapsible_icons.js -->

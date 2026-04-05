@@ -181,11 +181,11 @@
                     {% endif %}
 
                     <tr class="sv-table-sectie-header" id="{{ obj.klasse_hashtag }}">
-                        <td style="max-width:5px"></td>
+                        <td style="max-width:5px; padding:0"></td>
                         <td class="center" colspan="13">        <!-- colspan=15 geeft html validatie fout -->
                             <h2 class="sv-kopje-row">{{ obj.klasse_str }}</h2>
                         </td>
-                        <td style="max-width:5px"></td>
+                        <td style="max-width:5px; padding:0"></td>
                     </tr>
 
                     <tr class="sv-table-header">

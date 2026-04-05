@@ -289,7 +289,7 @@ class MatchDetailsView(UserPassesTestMixin, TemplateView):
 
 class MatchDetailsCSView(UserPassesTestMixin, TemplateView):
 
-    """ Django class-based view voor de scheidsrechters """
+    """ Django class-based view voor de commissie scheidsrechters """
 
     # class variables shared by all instances
     template_name = TEMPLATE_MATCH_CS_KIES_SR

@@ -87,11 +87,11 @@
                             <table>
                                 {% for score in kwalificatie_scores %}
                                     <tr>
-                                        <td colspan="2">
+                                        <td colspan="2" class="center">
                                             {% if not score.is_eerste %}
                                                 <br>        <!-- iets meer ruimte tussen de verschillende scores -->
                                             {% endif %}
-                                            <h6 class="sv-blauw-text center">Jouw resultaat van een 60-pijlen Indoor A-status wedstrijd</h6>
+                                            <span class="sv-kopje-in-tabel">Jouw resultaat van een 60-pijlen Indoor A-status wedstrijd</span>
                                         </td>
                                     </tr>
 
@@ -165,8 +165,8 @@
                             <table>
                                 {% for score in kwalificatie_scores %}
                                     <tr>
-                                        <td colspan="2">
-                                            <h6 class="sv-blauw-text center">Jouw resultaat van een 60-pijlen Indoor A-status wedstrijd</h6>
+                                        <td colspan="2" class="center">
+                                            <span class="sv-kopje-in-tabel">Jouw resultaat van een 60-pijlen Indoor A-status wedstrijd</span>
                                         </td>
                                     </tr>
 

@@ -170,7 +170,7 @@
                 <ul id="sessies" class="collapsible z-depth-0 white" style="margin-top:30px; margin-bottom:0">
                     <li>
                         <div class="collapsible-header white center" style="display:block; cursor:inherit">
-                            <h6 class="sv-blauw-text">Sessies</h6>
+                            <div class="sv-kopje-in-tabel">Sessies</div>
                             {% if wed.organisatie == 'N' %}
                                 <p>Klassen zonder man/vrouw benoeming zijn genderneutraal</p>
                             {% endif %}

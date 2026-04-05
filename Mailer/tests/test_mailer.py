@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase, override_settings
 from Mailer.models import MailQueue
-from Mailer.operations import mailer_queue_email
-from Mailer.mailer import send_mail
+from Mailer.operations import mailer_queue_email, send_mail
 
 
 class TestMailerGoodBase(TestCase):

@@ -162,7 +162,7 @@
 
                 <tr>
                     <td colspan="2" class="center sv-blauw-text">
-                        <h6>Informatie</h6>
+                        <span class="sv-kopje-in-tabel">Informatie</span>
                     </td>
                 </tr>
 
@@ -208,7 +208,7 @@
 
                 <tr>
                     <td colspan="2" class="center sv-blauw-text">
-                        <h6>Contactgegevens organisatie</h6>
+                        <span class="sv-kopje-in-tabel">Contactgegevens organisatie</span>
                     </td>
                 </tr>
 
@@ -228,7 +228,9 @@
                 </tr>
 
                 <tr>
-                    <td colspan="2" class="center sv-blauw-text"><h6>Wedstrijdklassen</h6></td>
+                    <td colspan="2" class="center sv-blauw-text">
+                        <span class="sv-kopje-in-tabel">Wedstrijdklassen</span>
+                    </td>
                 </tr>
 
                 <tr>

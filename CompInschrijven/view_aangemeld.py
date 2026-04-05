@@ -73,12 +73,14 @@ def maak_regiocomp_zoom_knoppen(context, comp_pk, rayon=None, regio=None):
                                             kwargs={'comp_pk': comp_pk, 'regio_pk': obj2.pk})
     # for
 
+
 def _punt_einde_zin(zin: str) -> str:
     if len(zin) > 0:
         last = zin[-1]
         if last not in "!?.":
             zin += '.'
     return zin
+
 
 def formatteer_objs(objs):
 

@@ -17,11 +17,11 @@ class LeesIndivWedstrijdFormulier:
         self.lees_oppervlakkig = lees_oppervlakkig
 
         self.ranges = {
-            'deelnemers': 'D11:I34',
+            'deelnemers': 'D11:I35',                # lid nr, naam, vereniging, regio, label, gemiddelde
             'voorronde_1': 'J11:J35',
             'voorronde_2': 'K11:K35',
-            'voorronde_scores': 'J11:O34',          # 1e, 2e, totaal, 10-en, 9-en, 8-en
-            'voorronde_uitslag': 'S11:S34',         # uitslag, inclusief shoot-off resultaat als decimaal
+            'voorronde_scores': 'J11:O35',          # 1e, 2e, totaal, 10-en, 9-en, 8-en
+            'voorronde_uitslag': 'S11:S35',         # uitslag, inclusief shoot-off resultaat als decimaal
             # 'voorronde_25m_tellingen': 'M11:O34',   # 10-en, 9-ens, 8-en
             'finales16_8': 'C8:C53',                # 1/8 (laatste 16)
             'finales16_4': 'I11:I49',               # 1/4 (laatste 8)

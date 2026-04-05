@@ -610,7 +610,8 @@ class TestCompKampioenschapOpImporteerUitslagIndiv(E2EHelpers, TestCase):
         # for regels in blokjes_info:
         #     print(regels)
         self.assertTrue(bevat_fout)
-        self.assertTrue(["Fout: Probleem met 10/9/8 tellingen voor [100007]: [7, 7, 14, '5', '4', 'error', '', '', '', '', '', '']"] in blokjes_info)
+        self.assertTrue(["Fout: Probleem met 10/9/8 tellingen voor [100007]: [7, 7, 14, '5', '4', 'error', '', '', '', '', '', '']",
+                         "(invalid literal for int() with base 10: 'error')"] in blokjes_info)
         self.assertTrue(["Fout: Te veel 10/9/8-en voor [100008]: [7, 7, 14, '25', '25', '3', '', '', '', '', '', '']"] in blokjes_info)
 
 # end of file

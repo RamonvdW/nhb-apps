@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2024 Ramon van der Winkel.
+#  Copyright (c) 2020-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -13,11 +13,18 @@
 
 from django.conf import settings
 from django.utils import timezone
-from Mailer.report import emailadres_is_geblokkeerd
 import requests
 
+_bad_email_handler = None
 
-def send_mail_postmark(obj, stdout=None, stderr=None):
+
+# wordt aangeroepen vanuit ready() in Mailer.apps
+def set_bad_email_handler(f):
+    global _bad_email_handler
+    _bad_email_handler = f
+
+
+def _send_mail_postmark(obj, stdout=None, stderr=None):
 
     """ Deze functie probeert een mail te versturen via PostMark.
 
@@ -63,11 +70,11 @@ def send_mail_postmark(obj, stdout=None, stderr=None):
             if stdout:
                 stdout.write("[INFO] Een mail verstuurd")
         else:
-            obj.log += "[WARNING] Mail niet kunnen versturen\n"
+            obj.log += "[WARNING] Send mail request gaf onverwacht antwoord\n"
             obj.log += "  response encoding:%s, status_code:%s\n" % (repr(resp.encoding), repr(resp.status_code))
             obj.log += "  full response: %s\n" % repr(resp.text)
             if stdout:
-                stdout.write("[WARNING] Mail niet kunnen versturen! response encoding:%s, status_code:%s" % (
+                stdout.write("[WARNING] Send mail request gaf onverwacht antwoord! response encoding:%s, status_code:%s" % (
                                 repr(resp.encoding), repr(resp.status_code)))
                 stdout.write("  full response: %s" % repr(resp.text))
 
@@ -84,7 +91,9 @@ def send_mail_postmark(obj, stdout=None, stderr=None):
     obj.save()
 
     if flag_bad:
-        emailadres_is_geblokkeerd(obj.mail_to)
+        global _bad_email_handler
+        if _bad_email_handler:
+            _bad_email_handler(obj.mail_to)     # noqa
 
 
 def send_mail(obj, stdout=None, stderr=None):
@@ -110,7 +119,7 @@ def send_mail(obj, stdout=None, stderr=None):
         obj.log += "[INFO] Nieuwe poging om %s\n" % now.strftime('%Y-%m-%d %H:%M:%S')
         obj.save()
 
-        send_mail_postmark(obj, stdout, stderr)
+        _send_mail_postmark(obj, stdout, stderr)
 
 
 # end of file
