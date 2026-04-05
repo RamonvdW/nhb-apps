@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2024-2025 Ramon van der Winkel.
+#  Copyright (c) 2024-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -15,8 +15,9 @@ import datetime
 
 def emailadres_is_geblokkeerd(email: str):
     """
-        Deze functie wordt aangeroepen als een mail niet af te leveren is en resulteert in een foutcode
+        Deze functie wordt aangeroepen als een mail niet af te leveren is en resulteerde in een foutcode
         die aangeeft dat het e-mailadres het probleem is.
+        We maken een Taak aan voor de functie Support om hier naar te kijken.
     """
 
     now = timezone.now()

@@ -21,8 +21,8 @@ pillow
 # QR code generation for 2FA
 qrcode
 
-# Download records gsheet
-# Wedstrijdformulieren in google drive
+# Download records gsheet       # TODO: kan weg na overstap sharepoint
+# r/w wedstrijdformulieren in google drive
 google-auth
 google-auth-oauthlib
 google-api-python-client
@@ -31,7 +31,7 @@ google-api-python-client
 googlemaps
 google-maps-routing
 
-# collecting payment service provide
+# collecting payment service provider
 mollie-api-python
 
 # voor inlezen uitslag uit pdf

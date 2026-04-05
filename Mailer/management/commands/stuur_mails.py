@@ -8,7 +8,7 @@
     normaal gebruik is aanroep vanuit een cron-job, typisch elke 5 minuten
 """
 
-from Mailer import mailer
+from Mailer.operations import send_mail
 from Mailer.models import MailQueue
 from Taken.operations import herinner_aan_taken
 from django.core.management.base import BaseCommand
@@ -56,7 +56,7 @@ class Command(BaseCommand):
                     .filter(is_verstuurd=False,
                             is_blocked=False,
                             aantal_pogingen__lt=25)):
-            mailer.send_mail(obj, self.stdout, self.stderr)
+            send_mail(obj, self.stdout, self.stderr)
             send_count += 1
 
             # bail out when time's up
@@ -79,7 +79,7 @@ class Command(BaseCommand):
                             aantal_pogingen=0))
             if len(objs):
                 obj = objs[0]
-                mailer.send_mail(obj, self.stdout, self.stderr)
+                send_mail(obj, self.stdout, self.stderr)
                 send_count += 1
             else:
                 # sleep a bit, then check again
