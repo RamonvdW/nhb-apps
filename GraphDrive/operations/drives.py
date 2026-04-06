@@ -14,46 +14,54 @@ _graph_drive_id = ''
 _graph_drive_web_url = ''
 
 
-def _request_drives(out, bearer_token, ) -> dict | None:
+def clear_drives_cache():
+    global _graph_drive_id, _graph_drive_web_url
+    _graph_drive_id = _graph_drive_web_url = ''
 
-    if bearer_token:
-        out.write("[INFO] Requesting site drives")
 
-        headers = {
-            'Authorization': 'Bearer %s' % bearer_token,
-            'Accept': 'application/json',
-        }
+def _request_drives(out, bearer_token, ) -> list | None:
 
-        url = "https://graph.microsoft.com/v1.0/sites/%s/drives" % settings.GRAPH_SITE_ID
+    if not bearer_token:
+        out.write('[ERROR] {drives} No access token')
+        return None
 
-        try:
-            resp = requests.get(url,
-                                headers=headers)
+    out.write("[INFO] {drives} Requesting site drives")
 
-        except (requests.exceptions.SSLError, requests.exceptions.ConnectionError) as exc:
-            out.write("[ERROR] Exceptie bij versturen get_drive_id request: %s" % str(exc))
+    headers = {
+        'Authorization': 'Bearer %s' % bearer_token,
+        'Accept': 'application/json',
+    }
+
+    url = "https://graph.microsoft.com/v1.0/sites/%s/drives" % settings.GRAPH_SITE_ID
+
+    try:
+        resp = requests.get(url,
+                            headers=headers)
+
+    except (requests.exceptions.SSLError, requests.exceptions.ConnectionError) as exc:
+        out.write("[ERROR] Exceptie bij versturen get_drive_id request: %s" % str(exc))
+    else:
+        # out.write("[INFO] Full response: %s" % repr(resp.text))
+        if resp.status_code != 200:
+            out.write(
+                "[ERROR] Get drive id request gaf onverwacht antwoord! response encoding:%s, status_code:%s" % (
+                    repr(resp.encoding), repr(resp.status_code)))
+            out.write("[ERROR] {drives} Full response: %s" % repr(resp.text))
+
         else:
-            # out.write("[INFO] Full response: %s" % repr(resp.text))
-            if resp.status_code != 200:
-                out.write(
-                    "[ERROR] Get drive id request gaf onverwacht antwoord! response encoding:%s, status_code:%s" % (
-                        repr(resp.encoding), repr(resp.status_code)))
-                out.write("[ERROR] Full response: %s" % repr(resp.text))
+            data = resp.json()
+            # out.write("[INFO] Full json: %s" % repr(data))
 
+            # {
+            #     '@odata.context': 'https://graph.microsoft.com/v1.0/$metadata#drives',
+            #     'value': [drive, ...]
+            # }
+            try:
+                drives = data["value"]
+            except KeyError:
+                out.write("[ERROR] Missing value in response: %s" % repr(data))
             else:
-                data = resp.json()
-                # out.write("[INFO] Full json: %s" % repr(data))
-
-                # {
-                #     '@odata.context': 'https://graph.microsoft.com/v1.0/$metadata#drives',
-                #     'value': [drive, ...]
-                # }
-                try:
-                    drives = data["value"]
-                except KeyError:
-                    out.write("[ERROR] Missing value in response: %s" % repr(data))
-                else:
-                    return drives
+                return drives
 
     return None
 
@@ -67,7 +75,10 @@ def get_drive_id(out) -> Tuple[str, str]:
         token = get_bearer_token(out)
         drives = _request_drives(out, token)
 
-        if len(drives) != 1:
+        if drives is None:
+            out.write('[ERROR] No drives')
+
+        elif len(drives) != 1:
             out.write('[ERROR] Expected 1 drive but got %s' % len(drives))
             for drive in drives:
                 out.write('[DEBUG] Drive: %s' % repr(drive))
@@ -102,8 +113,12 @@ def get_drive_id(out) -> Tuple[str, str]:
                 }
             """
 
-            _graph_drive_id = drive['id']
-            _graph_drive_web_url = drive['webUrl']
+            try:
+                _graph_drive_id = drive['id']
+                _graph_drive_web_url = drive['webUrl']
+            except KeyError:
+                out.write("[ERROR] Not a complete drive response: %s" % repr(drive))
+                _graph_drive_id = _graph_drive_web_url = ''
 
     return _graph_drive_id, _graph_drive_web_url
 
