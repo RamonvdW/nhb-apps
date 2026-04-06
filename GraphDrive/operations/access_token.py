@@ -14,6 +14,19 @@ _bearer_token = ''
 _bearer_valid_until = timezone.now()
 
 
+def clear_bearer_token():
+    global _bearer_token, _bearer_valid_until
+    _bearer_token = ''
+    _bearer_valid_until = timezone.now()
+
+
+def force_bearer_token(token, valid_until):
+    global _bearer_token, _bearer_valid_until
+    _bearer_token = token
+    _bearer_valid_until = valid_until
+
+
+
 def get_bearer_token(out) -> str | None:
 
     """ Deze functie probeert een bearer token te krijgen aan de hand van een setje credentials
@@ -23,8 +36,8 @@ def get_bearer_token(out) -> str | None:
 
     global _bearer_token, _bearer_valid_until
 
-    now = timezone.now()
-    if now >= _bearer_valid_until:
+    now = timezone.now() + timedelta(seconds=30)
+    if _bearer_valid_until < now:
         _bearer_token = ''
 
     if _bearer_token:
@@ -78,15 +91,18 @@ def get_bearer_token(out) -> str | None:
 
     token = None
     try:
-        if data["token_type"] == "Bearer":
-            token = data["access_token"]
-            seconds = data["expires_in"]
+        if data["token_type"] != "Bearer":
+            out.write("[ERROR] Not a bearer access token in %s" % repr(resp.text))
+            return None
 
-            _bearer_token = token
-            _bearer_valid_until = timezone.now() + timedelta(seconds=seconds)
+        token = data["access_token"]
+        seconds = data["expires_in"]
+
+        _bearer_token = token
+        _bearer_valid_until = timezone.now() + timedelta(seconds=seconds)
 
     except KeyError:
-        out.write("[ERROR] Not a bearer access token in %s" % repr(resp.text))
+        out.write("[ERROR] Not a complete bearer access token in %s" % repr(resp.text))
         return None
 
     return token

@@ -20,6 +20,7 @@ class Command(BaseCommand):
 
         data = get_file_metadata(self.stdout, fpath)
 
-        pprint.pp(data, indent=4)
+        out = pprint.pformat(data, indent=4)
+        self.stdout.write(out)
 
 # end of file
