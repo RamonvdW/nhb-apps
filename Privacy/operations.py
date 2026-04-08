@@ -105,7 +105,8 @@ def get_verklaring_doc():
 
     # eerste keer automatisch inladen
     if len(verklaring) == 0:
-        laad_privacyverklaring(settings.PRIVACYVERKLARING_FILE)
+        fpath = os.path.join(settings.INSTALL_PATH, settings.PRIVACYVERKLARING_FILE)
+        laad_privacyverklaring(fpath)
 
     # for tup in verklaring:
     #     print(repr(tup[0]), repr(tup[1][:20]))
