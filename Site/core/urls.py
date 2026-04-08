@@ -48,6 +48,7 @@ urlpatterns = [
     path('opleiding/instaptoets/',              include('Instaptoets.urls')),
     path('overig/',                             include('Overig.urls')),
     path('plein/',                              include('Plein.urls')),
+    path('privacy/',                            include('Privacy.urls')),
     path('records/',                            include('Records.urls')),
     path('scheidsrechter/',                     include('Scheidsrechter.urls')),
     path('sporter/',                            include('Sporter.urls')),

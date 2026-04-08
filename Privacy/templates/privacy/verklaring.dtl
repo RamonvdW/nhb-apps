@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+{% comment %}
+                Copyright (c) 2026 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+
+<!-- losstaande stijl om de inhoud van "een document" aan te bieden -->
+
+<html lang="nl">
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <title>Privacyverklaring</title>
+
+        <style>
+            html {
+                 line-height: 1.15;
+                 -ms-text-size-adjust: 100%;
+                 -webkit-text-size-adjust: 100%;
+                text-decoration: none;
+            }
+
+            body {
+                background-color: white;
+                color:black;
+
+                /* lange woorden mogen afgebroken worden (voorkomt horizontaal scrollen) */
+                overflow-wrap: break-word;
+
+                font-family: Arial, Helvetica, sans-serif;
+                font-style: normal;
+                font-weight: 400;
+                font-size: 13pt;
+
+                display: block;
+
+                margin: 30px;
+                overflow: auto;             /* controls scrollbars */
+            }
+
+            h1 {
+                font-size: 26pt;
+                margin: 0 0 5px 0;
+            }
+
+            h2 {
+                font-size: 16pt;
+                font-weight: bold;
+                margin: 15px 0 5px 0;
+            }
+
+            p {
+                margin: 0;
+            }
+
+            ul {
+                margin: 5px 0 5px 0;
+            }
+        </style>
+    </head>
+
+    <body>
+        {% for layout, inhoud in document %}
+            {% if layout == 'p' %}
+                <p>{{ inhoud }}</p>
+            {% elif layout == 'br' %}
+                <br>
+            {% elif layout == 'h1' %}
+                <h1>{{ inhoud }}</h1>
+            {% elif layout == 'h2' %}
+                <h2>{{ inhoud }}</h2>
+            {% elif layout == 'li' %}
+                <li>{{ inhoud }}</li>
+            {% elif layout == 'ul+' %}
+                <ul>
+            {% elif layout == 'ul-' %}
+                </ul>
+            {% endif %}
+        {% endfor %}
+    </body>
+</html>
+
