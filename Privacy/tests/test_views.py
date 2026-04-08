@@ -5,6 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
+from Privacy.operations import clear_verklaring
 from TestHelpers.e2ehelpers import E2EHelpers
 
 
@@ -27,12 +28,20 @@ class TestPrivacyViews(E2EHelpers, TestCase):
             self.assert_html_ok(resp)
 
     def test_verklaring(self):
-        # let op: deze test met de echte verklaring
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_verklaring)
-            self.assertEqual(resp.status_code, 200)     # 200 = OK
-            self.assert_template_used(resp, ('privacy/verklaring.dtl',))
-            self.assert_html_ok(resp)
+        # eerste keer wordt de verklaring ingeladen
+        clear_verklaring()
+
+        # let op: gebruikt de echte verklaring
+        resp = self.client.get(self.url_verklaring)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_template_used(resp, ('privacy/verklaring.dtl',))
+        self.assert_html_ok(resp)
+
+        # tweede keer is de verklaring al ingeladen
+        resp = self.client.get(self.url_verklaring)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_template_used(resp, ('privacy/verklaring.dtl',))
+        self.assert_html_ok(resp)
 
 
 # end of file

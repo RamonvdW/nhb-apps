@@ -62,7 +62,6 @@ expected_doc = [
     ('a1', 'www.test.not'),
     ('a2', 'linkje'),
     ('p2', ' nog meer tekst'),
-    ('p', 'paragraaf met %link%linkje%www.test.not nog meer tekst'),
     ('p', 'lege regels aan het einde')
 ]
 

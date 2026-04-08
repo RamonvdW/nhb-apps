@@ -91,8 +91,8 @@ def laad_privacyverklaring(fpath: str):
                 verklaring.append(('a2', spl[0]))
 
                 verklaring.append(('p2', regel[pos_end:]))
-
-            verklaring.append(('p', regel))
+            else:
+                verklaring.append(('p', regel))
     # for
 
     while verklaring[-1] == ('br', ''):
@@ -112,6 +112,12 @@ def get_verklaring_doc():
     # # for
 
     return verklaring
+
+
+def clear_verklaring():
+    # wordt gebruikt door de test suite
+    global verklaring
+    verklaring = []
 
 
 # end of file
