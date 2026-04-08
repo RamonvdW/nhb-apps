@@ -117,7 +117,7 @@
     <!-- blauwe balk met informatie -->
     <div class="row-sv-blauw">
         <div class="col s12">
-            {% url 'Plein:privacy' as card_url %}
+            {% url 'Privacy:overzicht' as card_url %}
             {% include 'design/card_icon.dtl' with title="Privacyverklaring" text="Lees hier hoe we omgaan met jouw privacy." sv_icon="privacyverklaring" url=card_url %}
         </div>
     </div>

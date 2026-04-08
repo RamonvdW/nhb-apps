@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -15,7 +15,6 @@ class TestPleinBasics(E2EHelpers, TestCase):
 
     url_root = '/'
     url_plein = '/plein/'
-    url_privacy = '/plein/privacy/'
 
     @classmethod
     def setUpTestData(cls):
@@ -26,14 +25,6 @@ class TestPleinBasics(E2EHelpers, TestCase):
             resp = self.client.get(self.url_root)
         self.assertEqual(resp.status_code, 302)     # 302 = redirect
         self.assertEqual(resp.url, '/plein/')
-
-    def test_privacy(self):
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_privacy)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('plein/privacy.dtl', 'design/site_layout.dtl'))
-        self.assert_html_ok(resp)
-        self.e2e_assert_other_http_commands_not_supported(self.url_privacy)
 
     def test_quick(self):
         # voor test.sh om met een snelle run in debug mode

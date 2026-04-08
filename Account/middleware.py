@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2024-2025 Ramon van der Winkel.
+#  Copyright (c) 2024-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.conf import settings
-from django.utils import timezone
+from django.urls import reverse
 from django.http import HttpResponseRedirect
+from django.utils import timezone
 from django.contrib.auth import logout
-from django.shortcuts import reverse
 from Account.models import get_account
 from Account.operations import otp_zet_controle_niet_gelukt
 import datetime

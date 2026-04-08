@@ -25,7 +25,6 @@ TEMPLATE_PLEIN_BEZOEKER = 'plein/plein-bezoeker.dtl'     # niet ingelogd
 TEMPLATE_PLEIN_BEHEERDER = 'plein/plein-beheerder.dtl'   # beheerder (ROL_BB/BKO/RKO/RCL/SEC/HWL/WL)
 TEMPLATE_PLEIN_HANDLEIDINGEN = 'plein/handleidingen.dtl'
 TEMPLATE_NIET_ONDERSTEUND = 'plein/niet-ondersteund.dtl'
-TEMPLATE_PRIVACY = 'plein/privacy.dtl'
 TEMPLATE_TEST_UI = 'plein/test-ui.dtl'
 
 SESSIONVAR_VORIGE_POST = 'plein_vorige_post'
@@ -194,7 +193,7 @@ class PleinView(View):
 
         context['email_support'] = settings.EMAIL_SUPPORT
         context['url_email_support'] = 'mailto:' + settings.EMAIL_SUPPORT
-        context['url_privacy'] = reverse('Plein:privacy')
+        context['url_privacy'] = reverse('Privacy:overzicht')
 
         context['canonical'] = reverse('Plein:plein')
 
@@ -242,27 +241,6 @@ class PleinView(View):
             out = {'ok': 'n'}
 
         return JsonResponse(out)
-
-
-class PrivacyView(TemplateView):
-
-    """ Django class-based view voor het Privacy bericht """
-
-    # class variables shared by all instances
-    template_name = TEMPLATE_PRIVACY
-
-    def get_context_data(self, **kwargs):
-        """ called by the template system to get the context data for the template """
-        context = super().get_context_data(**kwargs)
-        context['url_privacyverklaring'] = settings.PRIVACYVERKLARING_URL
-        context['email_bb'] = settings.EMAIL_BONDSBUREAU
-        context['url_email_bb'] = 'mailto:' + settings.EMAIL_BONDSBUREAU
-
-        context['kruimels'] = (
-            (None, 'Privacy'),
-        )
-
-        return context
 
 
 class HandleidingenView(UserPassesTestMixin, TemplateView):

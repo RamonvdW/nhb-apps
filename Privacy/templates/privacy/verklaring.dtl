@@ -70,12 +70,24 @@
                 <h1>{{ inhoud }}</h1>
             {% elif layout == 'h2' %}
                 <h2>{{ inhoud }}</h2>
-            {% elif layout == 'li' %}
+            {% elif layout == '*' %}
                 <li>{{ inhoud }}</li>
-            {% elif layout == 'ul+' %}
+            {% elif layout == '*+' %}
                 <ul>
-            {% elif layout == 'ul-' %}
+            {% elif layout == '*-' %}
                 </ul>
+            {% elif layout == '**+' %}
+                <li>{{ inhoud }}<ul>
+            {% elif layout == '**-' %}
+                </ul></li>
+            {% elif layout == 'p1' %}
+                <p><span>{{ inhoud }}</span>
+            {% elif layout == 'p2' %}
+                <span>{{ inhoud }}</span></p>
+            {% elif layout == 'a1' %}
+                <a href="{{ inhoud }}" target="_blank" rel="noopener noreferrer">
+            {% elif layout == 'a2' %}
+                <span>{{ inhoud }}</span></a>
             {% endif %}
         {% endfor %}
     </body>

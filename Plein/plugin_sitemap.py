@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2024-2025 Ramon van der Winkel.
+#  Copyright (c) 2024-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -13,7 +13,8 @@ def generate_urls():
     """ deze generator geeft URLs terug voor de sitemap """
 
     yield CHECK_LOW, reverse('Plein:plein')
-    yield CHECK_LOW, reverse('Plein:privacy')
+    yield CHECK_LOW, reverse('Privacy:overzicht')
+    yield CHECK_LOW, reverse('Privacy:verklaring')
 
     yield CHECK_LOW, reverse('Account:login')
     yield CHECK_LOW, reverse('Account:wachtwoord-vergeten')

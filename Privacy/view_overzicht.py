@@ -5,6 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.conf import settings
+from django.urls import reverse
 from django.views.generic import TemplateView
 
 TEMPLATE_PRIVACY_OVERZICHT = 'privacy/overzicht.dtl'
@@ -21,7 +22,7 @@ class OverzichtView(TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        context['url_privacyverklaring'] = settings.PRIVACYVERKLARING_URL
+        context['url_privacyverklaring'] = reverse('Privacy:verklaring')
 
         context['email_bb'] = settings.EMAIL_BONDSBUREAU
         context['url_email_bb'] = 'mailto:' + settings.EMAIL_BONDSBUREAU

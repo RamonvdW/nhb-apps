@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -19,10 +19,6 @@ urlpatterns = [
     path('handleidingen/',
          views.HandleidingenView.as_view(),
          name='handleidingen'),
-
-    path('privacy/',
-         views.PrivacyView.as_view(),
-         name='privacy'),
 
     path('niet-ondersteund/',
          views.NietOndersteundView.as_view(),
