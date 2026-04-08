@@ -6,6 +6,7 @@
 
 from django.conf import settings
 from django.utils.safestring import mark_safe
+import os
 
 # verklaring is een lijst van tuples: (layout_code, inhoud)
 # waarbij layout_code kan zijn:
