@@ -94,7 +94,7 @@ class MaakTeamsExcel:
                  .select_related('vereniging',
                                  'vereniging__regio')
                  .prefetch_related('gekoppelde_leden')
-                 .order_by('rank'))
+                 .order_by('-aanvangsgemiddelde'))      # hoogste eerst
 
         self.deelnemers_ver_nrs = list()
 
@@ -104,6 +104,8 @@ class MaakTeamsExcel:
             row = str(row_nr)
 
             ver = team.vereniging
+
+            # onthoud van welke verenigingen we de "toegestane deelnemers" op moeten nemen
             if ver.ver_nr not in self.deelnemers_ver_nrs:
                 self.deelnemers_ver_nrs.append(ver.ver_nr)
 

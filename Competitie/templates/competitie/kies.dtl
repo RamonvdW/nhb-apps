@@ -8,6 +8,12 @@
 
 {% block title %}Bondscompetities{% endblock %}
 
+{% block extraheader %}
+    <!-- extra headers voor SEO -->
+    <meta name="keywords" content="MijnHandboogsport bondscompetities indoor 25m1pijl uitslagen deelnemerslijst informatie">
+    <meta name="description" content="Informatie, deelnemerslijsten en uitslagen van de bondscompetities">
+{% endblock %}
+
 {% block pagina %}
 
     <!-- banner -->

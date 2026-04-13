@@ -169,12 +169,12 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
                 if match.is_rk:
                     match.url_lijst = reverse('CompLaagRayon:download-formulier',
                                               kwargs={'match_pk': match.pk})
-                    match.titel_lijst = "RK programma's"
+                    match.titel_lijst = "RK programma"
 
                 elif match.is_bk:
                     match.url_lijst = reverse('CompLaagBond:bk-match-informatie',
                                               kwargs={'match_pk': match.pk})
-                    match.titel_lijst = "BK programma's"
+                    match.titel_lijst = "BK programma"
 
                 else:
                     # link naar de waarschijnlijke deelnemerslijst

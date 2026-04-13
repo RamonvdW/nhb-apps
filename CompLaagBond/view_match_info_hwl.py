@@ -240,7 +240,7 @@ class BkMatchInfoView(UserPassesTestMixin, TemplateView):
         context['kruimels'] = (
             (reverse('Vereniging:overzicht'), 'Beheer vereniging'),
             (reverse('CompScores:wedstrijden'), 'Competitiewedstrijden'),
-            (None, "BK programma's")
+            (None, "BK programma")
         )
 
         return context

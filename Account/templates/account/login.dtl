@@ -6,14 +6,20 @@
 {% endcomment %}
 {% load static %}
 
-{% block title %}Inloggen{% endblock %}
+{% block title %}Inloggen op MijnHandboogsport{% endblock %}
+
+{% block extraheader %}
+    <!-- extra headers voor SEO -->
+    <meta name="keywords" content="MijnHandboogsport account inloggen login">
+    <meta name="description" content="Heb je al een account, log dan in op MijnHandboogsport.">
+{% endblock %}
 
 {% block pagina %}
 
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h1 class="sv-kopje-pagina">Inloggen</h1>
+            <h1 class="sv-kopje-pagina">Inloggen op MijnHandboogsport</h1>
             <p>Heb je al een account, log dan in:</p>
         </div>
     </div>

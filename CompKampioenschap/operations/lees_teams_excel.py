@@ -125,7 +125,8 @@ class LeesTeamsExcel:
             try:
                 matchpunten = int(matchpunten_str)
             except ValueError:
-                self.issues.append('[ERROR] Geen valide matchpunten %s op regel %s' % (repr(matchpunten_str), row_nr))
+                self.issues.append('[ERROR] Geen valide matchpunten %s in cell E%s op blad %s' % (
+                                        repr(matchpunten_str), row_nr, repr(blad)))
                 continue
 
             shootoff_str = str(ws['F' + str(row_nr)].value)

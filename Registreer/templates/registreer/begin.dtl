@@ -6,14 +6,20 @@
 {% endcomment %}
 {% load static %}
 
-{% block title %}Registreren{% endblock %}
+{% block title %}Account aanmaken op MijnHandboogsport{% endblock %}
+
+{% block extraheader %}
+    <!-- extra headers voor SEO -->
+    <meta name="keywords" content="MijnHandboogsport account aanmaken registreer leden gasten gast-account">
+    <meta name="description" content="Account aanmaken op MijnHandboogsport, voor leden van de KHSN en gasten.">
+{% endblock %}
 
 {% block pagina %}
 
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h1 class="sv-kopje-pagina">Account aanmaken</h1>
+            <h1 class="sv-kopje-pagina">Account aanmaken op MijnHandboogsport</h1>
             <p>KHSN-leden kunnen een account aanmaken met hun bondsnummer en het e-mailadres dat bekend is bij de bond.</p>
         </div>
     </div>

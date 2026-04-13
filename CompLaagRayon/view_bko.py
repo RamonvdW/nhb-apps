@@ -223,8 +223,8 @@ class ExtraDeelnemerView(UserPassesTestMixin, TemplateView):
 
 class GeefBlancoResultaatView(UserPassesTestMixin, TemplateView):
 
-    """ Deze view laat de BKO een extra deelnemer toevoegen vanuit de regiocompetitie,
-        bijvoorbeeld een aspirant of na correctie score van een sporter (toch nog gekwalificeerd).
+    """ Deze view laat de BKO een blanco resultaat toekennen aan een RK deelnemer,
+        waardoor deze door mag stromen naar het BK.
     """
 
     # class variables shared by all instances
