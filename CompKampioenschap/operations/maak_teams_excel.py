@@ -93,8 +93,12 @@ class MaakTeamsExcel:
                  .filter(team_klasse=self.team_klasse.pk)
                  .select_related('vereniging',
                                  'vereniging__regio')
-                 .prefetch_related('gekoppelde_leden')
-                 .order_by('-aanvangsgemiddelde'))      # hoogste eerst
+                 .prefetch_related('gekoppelde_leden'))
+
+        if self.is_rk:
+            teams = teams.order_by('-aanvangsgemiddelde')   # hoogste eerst (reserve-teams laatst)
+        else:
+            teams = teams.order_by('rank')      # TODO: werkt nog niet, want rank is altijd 0
 
         self.deelnemers_ver_nrs = list()
 

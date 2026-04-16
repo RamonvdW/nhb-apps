@@ -240,10 +240,10 @@ class TestCompKampioenschapOpLeesTeamsExcel(E2EHelpers, TestCase):
             # for regel in lees.issues:
             #     print(regel)
             self.assertEqual(len(lees.issues), 4)
-            self.assertTrue("[ERROR] Geen valide lid_nr 'bad' op regel 44" in lees.issues)
-            self.assertTrue("[ERROR] Geen valide AG '10...0' op regel 45" in lees.issues)
-            self.assertTrue("[ERROR] Geen valide matchpunten 'x10' op regel 11" in lees.issues)
-            self.assertTrue("[ERROR] Geen valide shootoff 'x10' op regel 12" in lees.issues)
+            self.assertTrue("[ERROR] Geen valide lid_nr 'bad' in cell C44 op blad 'Deelnemers'" in lees.issues)
+            self.assertTrue("[ERROR] Geen valide AG '10...0' in cell D45 op blad 'Deelnemers'" in lees.issues)
+            self.assertTrue("[ERROR] Geen valide matchpunten 'x10' in cell E11 op blad 'Stand'" in lees.issues)
+            self.assertTrue("[ERROR] Geen valide shootoff 'x10' in cell F12 op blad 'Stand'" in lees.issues)
 
             # print(lees.teams)
             self.assertEqual(len(lees.teams), 4)

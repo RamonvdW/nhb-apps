@@ -35,16 +35,16 @@ class MockLeesIndivWedstrijdFormulier:
             self.stdout.write(regel)
         # for
 
-    def heeft_scores(self):
+    def heeft_scores(self):                     # pragma: no cover
         return self._params.heeft_scores
 
-    def heeft_uitslag(self):
+    def heeft_uitslag(self):                    # pragma: no cover
         return self._params.heeft_uitslag
 
-    def tel_deelnemers(self):
+    def tel_deelnemers(self):                   # pragma: no cover
         return self._params.aantal_deelnemers
 
-    def bepaal_wedstrijd_fase(self):
+    def bepaal_wedstrijd_fase(self):            # pragma: no cover
         return self._params.voortgang
 
     def get_indiv_deelnemers(self):

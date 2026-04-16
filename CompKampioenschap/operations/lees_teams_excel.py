@@ -81,7 +81,8 @@ class LeesTeamsExcel:
                 try:
                     lid_nr = int(lid_nr_str)
                 except ValueError:
-                    self.issues.append('[ERROR] Geen valide lid_nr %s op regel %s' % (repr(lid_nr_str), sporter_row))
+                    self.issues.append('[ERROR] Geen valide lid_nr %s in cell C%s op blad %s' % (
+                                            repr(lid_nr_str), sporter_row, repr(blad)))
                     continue
 
                 lid_ag_str = ws['D' + str(sporter_row)].value
@@ -89,7 +90,8 @@ class LeesTeamsExcel:
                 try:
                     lid_ag = round(Decimal(lid_ag_str), 3)          # 3 cijfers achter de komma
                 except (TypeError, InvalidOperation):
-                    self.issues.append('[ERROR] Geen valide AG %s op regel %s' % (repr(lid_ag_str), sporter_row))
+                    self.issues.append('[ERROR] Geen valide AG %s in cell D%s op blad %s' % (
+                                            repr(lid_ag_str), sporter_row, repr(blad)))
                     continue
 
                 lid = SimpleNamespace(
@@ -136,7 +138,8 @@ class LeesTeamsExcel:
                 try:
                     shootoff = int(shootoff_str)
                 except ValueError:
-                    self.issues.append('[ERROR] Geen valide shootoff %s op regel %s' % (repr(shootoff_str), row_nr))
+                    self.issues.append('[ERROR] Geen valide shootoff %s in cell F%s op blad %s' % (
+                                            repr(shootoff_str), row_nr, repr(blad)))
                     continue
             else:
                 shootoff = None
