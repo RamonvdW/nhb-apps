@@ -4,22 +4,25 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.http import Http404
+from django.http import Http404, HttpResponseRedirect
 from django.urls import reverse
 from django.db.models import Count
 from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.definities import DEELNAME_JA, DEELNAME_NEE
+from Account.models import get_account
+from Competitie.definities import DEELNAME_JA, DEELNAME_NEE, KAMP_RANK_BLANCO
 from Competitie.models import Competitie, CompetitieTeamKlasse
 from CompLaagRayon.models import KampRK, TeamRK
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
 from Geo.models import Rayon
+from Logboek.models import schrijf_in_logboek
 from Score.definities import AG_NUL
 
 TEMPLATE_COMPRAYON_RKO_TEAMS = 'complaagrayon/rko-teams.dtl'
+TEMPLATE_COMPRAYON_RKO_TEAM_BLANCO_SCORE = 'complaagrayon/rko-teams-blanco-resultaat.dtl'
 
 
 class RayonTeamsTemplateView(TemplateView):
@@ -233,7 +236,7 @@ class RayonTeamsTemplateView(TemplateView):
         is_eerste = True
         for team in rk_teams:
             # team AG is 0.0 - 30.0 --> toon als score: 000,0 .. 900,0
-            ag_str = "%05.1f" % (team.aanvangsgemiddelde * aantal_pijlen)
+            ag_str = "%05.1f" % (float(team.aanvangsgemiddelde) * aantal_pijlen)
             team.ag_str = ag_str.replace('.', ',')
 
             if comp.fase_teams <= 'K' and self.rol_nu == Rol.ROL_RKO:
@@ -289,6 +292,126 @@ class RayonTeamsAlleView(UserPassesTestMixin, RayonTeamsTemplateView):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
         return self.rol_nu in (Rol.ROL_BB, Rol.ROL_BKO)
+
+
+class RayonTeamsBlancoResultaatView(UserPassesTestMixin, TemplateView):
+
+    """ Deze view laat de RKO een blanco resultaat toekennen aan een RK team,
+        waardoor deze door mag stromen naar het BK.
+    """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_COMPRAYON_RKO_TEAM_BLANCO_SCORE
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.rol_nu, self.functie_nu = None, None
+        self.kamp_rk = None
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
+        return self.rol_nu == Rol.ROL_RKO
+
+    def _get_kamp_rk_or_40x(self, kwargs):
+        try:
+            kamp_pk = int(kwargs['kamp_pk'][:7])  # afkappen voor de veiligheid
+            self.kamp_rk = (KampRK
+                            .objects
+                            .select_related('competitie')
+                            .get(pk=kamp_pk))
+        except (ValueError, KampRK.DoesNotExist):
+            raise Http404('RK niet gevonden')
+
+        # controleer dat de juiste RKO aan de knoppen zit
+        comp = self.kamp_rk.competitie
+        if self.functie_nu.comp_type != comp.afstand or self.functie_nu.rayon != self.kamp_rk.rayon:
+            raise PermissionDenied('Niet de beheerder')     # niet de juiste RKO
+
+        # check competitie fase
+        comp.bepaal_fase()
+        if comp.fase_teams != 'L':
+            raise Http404('Verkeerde fase')
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        self._get_kamp_rk_or_40x(kwargs)
+        context['kamp_rk'] = self.kamp_rk
+
+        klasse_met_uitslag = list()
+
+        for team in (TeamRK
+                     .objects
+                     .filter(kamp=self.kamp_rk)
+                     .prefetch_related('team_klasse')):
+
+            if 0 < team.result_rank < KAMP_RANK_BLANCO:
+                if team.team_klasse.pk not in klasse_met_uitslag:
+                    klasse_met_uitslag.append(team.team_klasse.pk)
+        # for
+
+        # zoek teams zonder resultaat
+        context['teams'] = teams = list()
+        prev_klasse = None
+        for team in (TeamRK
+                     .objects
+                     .filter(kamp=self.kamp_rk)
+                     .exclude(team_klasse__in=klasse_met_uitslag)
+                     .exclude(result_rank=KAMP_RANK_BLANCO)
+                     .select_related('team_klasse',
+                                     'vereniging')
+                     .order_by('team_klasse__volgorde')):
+
+            if prev_klasse != team.team_klasse:
+                prev_klasse = team.team_klasse
+                team.break_klasse = True
+
+            ver = team.vereniging
+            if ver:
+                team.url = reverse('CompLaagRayon:rayon-teams-blanco-score-toekennen',
+                                   kwargs={'kamp_pk': self.kamp_rk.pk,
+                                           'team_pk': team.pk})
+
+            teams.append(team)
+        # for
+
+        comp = self.kamp_rk.competitie
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
+            (reverse('CompBeheer:overzicht',
+                     kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (None, 'Blanco scores teams')
+        )
+
+        return context
+
+    def post(self, request, *args, **kwargs):
+        self._get_kamp_rk_or_40x(kwargs)
+
+        try:
+            team_pk = int(kwargs['team_pk'][:7])  # afkappen voor de veiligheid
+            team = (TeamRK
+                    .objects
+                    .filter(kamp=self.kamp_rk)
+                    .get(pk=team_pk))
+        except (KeyError, ValueError, TeamRK.DoesNotExist):
+            raise Http404('Team niet gevonden')
+
+        team.result_rank = KAMP_RANK_BLANCO
+        team.save(update_fields=['result_rank'])
+
+        account = get_account(request)
+        schrijf_in_logboek(account, 'Competitie', 'Blanco score voor RK team %s van %s in %s' % (repr(team.team_naam),
+                                                                                                 team.vereniging,
+                                                                                                 self.kamp_rk))
+
+        url = reverse('CompLaagRayon:rayon-teams-blanco-score', kwargs={'kamp_pk': self.kamp_rk.pk})
+        return HttpResponseRedirect(url)
+
 
 
 # end of file

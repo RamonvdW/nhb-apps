@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2025 Ramon van der Winkel.
+#  Copyright (c) 2025-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -20,7 +20,7 @@ class TestBrowserAccountLogin(bh.BrowserTestCase):
 
         # inloggen dialoog oproepen
         self.do_navigate_to(self.url_login)
-        self.assertEqual(self._driver.title, 'Inloggen')
+        self.assertEqual(self._driver.title, 'Inloggen op MijnHandboogsport')
 
         # move_label_after_autofill draaien op timers
         # totale tijd: 1000+500+200+100+50 = 1750ms

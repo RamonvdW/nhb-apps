@@ -429,7 +429,7 @@ class BrowserTestCase(TestCase):
         # haal de inlog pagina op
         self.do_navigate_to(self.url_login, check_console_log=False)
 
-        if self._driver.title == 'Inloggen':
+        if self._driver.title == 'Inloggen op MijnHandboogsport':
             # gelukt
             self.assert_no_console_log()
 

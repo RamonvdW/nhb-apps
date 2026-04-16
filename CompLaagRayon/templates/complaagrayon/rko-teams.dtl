@@ -179,7 +179,7 @@
                             </tr>
                         {% empty %}
                             <tr>
-                                <td colspan="7">
+                                <td class="center" colspan="7">
                                     <i>Nog geen teams</i>
                                 </td>
                             </tr>

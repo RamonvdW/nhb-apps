@@ -73,6 +73,13 @@ urlpatterns = [
          view_teams_rko.RayonTeamsRKOView.as_view(),
          name='rayon-teams'),
 
+    path('teams-blanco-resultaat/<kamp_pk>/',
+         view_teams_rko.RayonTeamsBlancoResultaatView.as_view(),
+         name='rayon-teams-blanco-score'),
+
+    path('teams-blanco-resultaat/<kamp_pk>/toekennen/<team_pk>/',  # POST
+         view_teams_rko.RayonTeamsBlancoResultaatView.as_view(),
+         name='rayon-teams-blanco-score-toekennen'),
 
     # HWL: RK teams
     path('teams-vereniging/<deelkamp_pk>/nieuw/',
@@ -111,12 +118,12 @@ urlpatterns = [
          view_bko.ExtraDeelnemerView.as_view(),
          name='rayon-extra-deelnemer-toevoegen'),
 
-    # BKO
+    # BKO, individueel blanco resultaat
     path('<comp_pk>/blanco-resultaat/',
          view_bko.GeefBlancoResultaatView.as_view(),
          name='geef-blanco-resultaat'),
 
-    path('<comp_pk>/blanco-resultaat/<deelnemer_pk>/toevoegen/',
+    path('<comp_pk>/blanco-resultaat/<deelnemer_pk>/toevoegen/',        # POST
          view_bko.GeefBlancoResultaatView.as_view(),
          name='geef-deelnemer-blanco-resultaat'),
 
