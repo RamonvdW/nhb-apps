@@ -17,7 +17,7 @@
   //overflow-y: auto;
   overflow-y:hidden;    // geen scrollbar bij heel klein browser window
 
-  border-radius: 2px;
+  border-radius: 7px;
   will-change: top, opacity;
 
   @media #{$medium-and-down} {
