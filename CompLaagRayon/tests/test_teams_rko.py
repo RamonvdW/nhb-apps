@@ -6,7 +6,7 @@
 
 from django.test import TestCase
 from django.utils import timezone
-from Competitie.test_utils.tijdlijn import zet_competitie_fase_rk_prep
+from Competitie.test_utils.tijdlijn import zet_competitie_fase_rk_prep, zet_competitie_fase_rk_wedstrijden
 from CompLaagRayon.models import KampRK, TeamRK
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers.testdata import TestData
@@ -18,9 +18,11 @@ class TestCompLaagRayonTeams(E2EHelpers, TestCase):
 
     test_after = ('Competitie.tests.test_overzicht', 'Competitie.tests.test_tijdlijn')
 
-    url_rko_teams = '/bondscompetities/rk/ingeschreven-teams/%s/'                           # deelkamp_pk
-    url_rk_teams_alle = '/bondscompetities/rk/ingeschreven-teams/%s/%s/'                    # comp_pk, subset
-    url_teams_klassengrenzen_vaststellen = '/bondscompetities/beheer/%s/doorzetten/rk-bk-teams-klassengrenzen-vaststellen/'  # comp_pk
+    url_rko_teams = '/bondscompetities/rk/ingeschreven-teams/%s/'                               # deelkamp_pk
+    url_rk_teams_alle = '/bondscompetities/rk/ingeschreven-teams/%s/%s/'                        # comp_pk, subset
+    url_team_kl_gr_vastst = '/bondscompetities/beheer/%s/doorzetten/rk-bk-teams-klassengrenzen-vaststellen/'  # comp_pk
+    url_team_blanco_resultaat = '/bondscompetities/rk/teams-blanco-resultaat/%s/'               # kamp_pk
+    url_team_blanco_toekennen = '/bondscompetities/rk/teams-blanco-resultaat/%s/toekennen/%s/'  # kamp_pk, team_pk
 
     regio_nr = 101
     ver_nr = 0      # wordt in setUpTestData ingevuld
@@ -136,7 +138,7 @@ class TestCompLaagRayonTeams(E2EHelpers, TestCase):
 
         # stel de RK/BK klassengrenzen vast
         zet_competitie_fase_rk_prep(self.testdata.comp25)
-        resp = self.client.post(self.url_teams_klassengrenzen_vaststellen % self.testdata.comp25.pk)
+        resp = self.client.post(self.url_team_kl_gr_vastst % self.testdata.comp25.pk)
         self.assert_is_redirect_not_plein(resp)
 
         # verpruts de klasse van 1 team
@@ -171,6 +173,46 @@ class TestCompLaagRayonTeams(E2EHelpers, TestCase):
         url = self.url_rko_teams % self.testdata.deelkamp25_rk[2].pk
         resp = self.client.get(url)
         self.assert403(resp)
+
+    def test_team_blanco_resultaat(self):
+        self.testdata.maak_rk_deelnemers(25, self.ver_nr, self.regio_nr)
+        self.testdata.maak_rk_teams(25, self.ver_nr)
+
+        kamp_rk = self.testdata.deelkamp25_rk[1]    # rayon 1
+        team = self.testdata.comp25_rk_teams[0]
+
+        # anon (alleen de RKO heeft toegang)
+        url1 = self.url_team_blanco_resultaat % kamp_rk.pk
+        resp = self.client.get(url1)
+        self.assert403(resp)
+
+        url2 = self.url_team_blanco_toekennen % (kamp_rk.pk, team.pk)
+        resp = self.client.post(url2)
+        self.assert_is_redirect_login(resp)
+
+        # wordt RKO van rayon 1
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
+        self.e2e_wissel_naar_functie(self.testdata.comp25_functie_rko[1])
+
+        resp = self.client.get(self.url_team_blanco_resultaat % 999999)
+        self.assert404(resp, 'RK niet gevonden')
+
+        resp = self.client.get(self.url_team_blanco_resultaat % self.testdata.deelkamp18_rk[1].pk)
+        self.assert403(resp, 'Niet de beheerder')
+
+        resp = self.client.get(self.url_team_blanco_resultaat % self.testdata.deelkamp25_rk[2].pk)
+        self.assert403(resp, 'Niet de beheerder')
+
+        resp = self.client.get(url1)
+        self.assert404(resp, 'Verkeerde fase')
+
+        zet_competitie_fase_rk_wedstrijden(kamp_rk.competitie)
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(url1)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_template_used(resp, ('complaagrayon/rko-teams-blanco-resultaat.dtl', 'design/site_layout.dtl'))
+        self.assert_html_ok(resp)
 
 
 # end of file
