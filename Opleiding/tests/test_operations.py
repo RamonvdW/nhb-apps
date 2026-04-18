@@ -87,7 +87,7 @@ class TestOpleidingOperations(E2EHelpers, TestCase):
         self.inschrijving.delete()
         stdout = OutputWrapper(io.StringIO())
         opleiding_post_import_crm(stdout)
-        print(stdout.getvalue())
+        # print(stdout.getvalue())
         self.assertFalse('[INFO] Inschrijving voor opleiding met geboorteplaats die afwijkt van CRM:' in stdout.getvalue())
 
 
