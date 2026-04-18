@@ -178,8 +178,28 @@ class TestCompLaagRayonTeams(E2EHelpers, TestCase):
         self.testdata.maak_rk_deelnemers(25, self.ver_nr, self.regio_nr)
         self.testdata.maak_rk_teams(25, self.ver_nr)
 
+        # wordt BKO
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
+        self.e2e_wissel_naar_functie(self.testdata.comp25_functie_bko)
+
+        # stel de RK/BK klassengrenzen vast
+        zet_competitie_fase_rk_prep(self.testdata.comp25)
+        resp = self.client.post(self.url_team_kl_gr_vastst % self.testdata.comp25.pk)
+        self.assert_is_redirect_not_plein(resp)
+
+        # zet de uitslag in een klasse
+        team = self.testdata.comp25_rk_teams[-1]
+        team.result_rank = 1
+        team.save(update_fields=['result_rank'])
+
+        team = self.testdata.comp25_rk_teams[-2]
+        team.result_rank = 2
+        team.save(update_fields=['result_rank'])
+
         kamp_rk = self.testdata.deelkamp25_rk[1]    # rayon 1
         team = self.testdata.comp25_rk_teams[0]
+
+        self.e2e_wisselnaarrol_sporter()
 
         # anon (alleen de RKO heeft toegang)
         url1 = self.url_team_blanco_resultaat % kamp_rk.pk
@@ -188,10 +208,9 @@ class TestCompLaagRayonTeams(E2EHelpers, TestCase):
 
         url2 = self.url_team_blanco_toekennen % (kamp_rk.pk, team.pk)
         resp = self.client.post(url2)
-        self.assert_is_redirect_login(resp)
+        self.assert403(resp)
 
         # wordt RKO van rayon 1
-        self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wissel_naar_functie(self.testdata.comp25_functie_rko[1])
 
         resp = self.client.get(self.url_team_blanco_resultaat % 999999)
@@ -213,6 +232,14 @@ class TestCompLaagRayonTeams(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('complaagrayon/rko-teams-blanco-resultaat.dtl', 'design/site_layout.dtl'))
         self.assert_html_ok(resp)
+
+        # blanco score toekennen
+        resp = self.client.post(self.url_team_blanco_toekennen % (kamp_rk.pk, 999999))
+        self.assert404(resp, 'Team niet gevonden')
+
+        with self.assert_max_queries(20):
+            resp = self.client.post(url2)
+            self.assert_is_redirect(resp, url1)
 
 
 # end of file

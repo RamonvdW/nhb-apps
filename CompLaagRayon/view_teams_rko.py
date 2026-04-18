@@ -347,6 +347,7 @@ class RayonTeamsBlancoResultaatView(UserPassesTestMixin, TemplateView):
         for team in (TeamRK
                      .objects
                      .filter(kamp=self.kamp_rk)
+                     .exclude(team_klasse=None)
                      .prefetch_related('team_klasse')):
 
             if 0 < team.result_rank < KAMP_RANK_BLANCO:
@@ -371,7 +372,7 @@ class RayonTeamsBlancoResultaatView(UserPassesTestMixin, TemplateView):
                 team.break_klasse = True
 
             ver = team.vereniging
-            if ver:
+            if ver:     # pragma: no branch
                 team.url = reverse('CompLaagRayon:rayon-teams-blanco-score-toekennen',
                                    kwargs={'kamp_pk': self.kamp_rk.pk,
                                            'team_pk': team.pk})
