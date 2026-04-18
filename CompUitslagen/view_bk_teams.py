@@ -245,7 +245,11 @@ class UitslagenBKTeamsView(TemplateView):
 
             team.rayon_nr = team.vereniging.regio.rayon_nr
 
-            team.rk_score_str = str(team.rk_score)
+            if team.rk_rank == KAMP_RANK_BLANCO:
+                team.rk_score_str = '(blanco)'
+            else:
+                team.rk_score_str = '%s (%s)' % (team.rk_rank, team.rk_score)
+
             team.bk_score_str = '-'
 
             aantal_regels += 1

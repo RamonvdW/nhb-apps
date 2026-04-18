@@ -39,8 +39,9 @@ class TeamBK(models.Model):
     # expliciete controle of dit team een reserve is of deelnemer mag worden
     is_reserve = models.BooleanField(default=False)
 
-    # resultaat van de RK
+    # resultaat van het RK
     rk_score = models.PositiveSmallIntegerField(default=0)
+    rk_rank = models.PositiveSmallIntegerField(default=0)           # 1..4 of KAMP_RANK_BLANCO
 
     # Positie van dit team in de lijst zoals vastgesteld aan het begin van het BK
     # dit is de originele volgorde, welke nooit meer wijzigt ook al meldt het team zich af.

@@ -57,6 +57,7 @@ def maak_deelnemerslijst_bk_teams(stdout, comp: Competitie):
                             team_naam=rk_team.team_naam,
                             team_klasse=klasse,
                             rk_score=rk_team.result_teamscore,
+                            rk_rank=rk_team.result_rank,
                             deelname=DEELNAME_JA)
 
             stdout.write('[INFO] Maak BK team %s.%s (%s)' % (
@@ -66,7 +67,10 @@ def maak_deelnemerslijst_bk_teams(stdout, comp: Competitie):
             pks = rk_team.gekoppelde_leden.values_list('pk', flat=True)
             bk_team.gekoppelde_leden.set(pks)
 
-            tup = (rk_team.result_teamscore, len(sterkte), bk_team)
+            tup = (rk_team.result_teamscore,        # hoogste score eerst
+                   100 - rk_team.result_rank,       # laagste rank eerst
+                   len(sterkte),                    # altijd een verschil
+                   bk_team)
             sterkte.append(tup)
         # for
 
@@ -101,6 +105,7 @@ def maak_deelnemerslijst_bk_teams(stdout, comp: Competitie):
                             team_naam=rk_team.team_naam,
                             team_klasse=klasse,
                             rk_score=rk_team.result_teamscore,
+                            rk_rank=rk_team.result_rank,
                             is_reserve=True,
                             deelname=DEELNAME_ONBEKEND)
 
@@ -113,7 +118,11 @@ def maak_deelnemerslijst_bk_teams(stdout, comp: Competitie):
 
             rayon_nr = rk_team.kamp.rayon.rayon_nr
 
-            tup = (0-rayon_nr, rk_team.result_teamscore, len(sterkte), bk_team)
+            tup = (0-rayon_nr,                          # laagste rayon nummer eerst
+                   rk_team.result_teamscore,            # hoogste score eerst
+                   100 - rk_team.result_rank,           # laagste rank eerst
+                   len(sterkte),                        # altijd een verschil
+                   bk_team)
             sterkte.append(tup)
         # for
 

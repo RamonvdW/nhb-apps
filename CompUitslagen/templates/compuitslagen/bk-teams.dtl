@@ -131,7 +131,7 @@
                         </th>
                         <th>Team</th>
                         <th class="center hide-on-small-only">Rayon</th>
-                        <th class="center hide-on-small-only">{% if not team.klasse_heeft_uitslag %}RK score{% endif %}</th>
+                        <th class="center hide-on-small-only">{% if not team.klasse_heeft_uitslag %}RK resultaat{% endif %}</th>
                         <th class="center">BK score</th>
                         <th class="hide-on-small-only"></th>       <!-- label -->
                         <td rowspan="{{ team.aantal_regels }}" class="sv-table-zijrand"></td>
@@ -186,7 +186,7 @@
 
                     <td class="center hide-on-small-only">Rayon {{ team.rayon_nr }}</td>
 
-                    <!-- RK score (alleen op deelnemerslijst) -->
+                    <!-- RK resultaat (alleen op deelnemerslijst) -->
                     <td class="center hide-on-small-only">
                         {% if not team.klasse_heeft_uitslag %}
                             <span>{{ team.rk_score_str }}</span>
