@@ -19,7 +19,7 @@ from Wedstrijden.definities import (WEDSTRIJD_INSCHRIJVING_STATUS_TO_SHORT_STR,
                                     WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD,
                                     WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF,
                                     WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD)
-from Wedstrijden.models import Wedstrijd, WedstrijdInschrijving
+from Wedstrijden.models import Wedstrijd, WedstrijdInschrijving, WedstrijdSessie
 from Wedstrijden.operations.kwalificatie_scores import get_kwalificatie_scores
 from decimal import Decimal
 from codecs import BOM_UTF8
@@ -381,6 +381,14 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
                 korting_str = '%s%%' % aanmelding.korting.percentage
             else:
                 korting_str = 'Geen'
+
+            if not aanmelding.sessie:
+                # voorkom een crash
+                aanmelding.sessie = WedstrijdSessie(
+                                        datum='2001-01-01',
+                                        tijd_begin='01:01',
+                                        tijd_einde='01:02',
+                                        beschrijving='Fout: geen sessie!')
 
             if wedstrijd.eis_kwalificatie_scores:
                 # FUTURE: deze individuele queries maken het erg duur (wordt bijna nooit gebruikt)
