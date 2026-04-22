@@ -18,9 +18,8 @@ class TestAccountOpAanmaken(TestCase):
 
     def test_create(self):
         with self.assertRaises(AccountCreateError) as exc:
-            account_create('123456', 'Test', 'de Tester', 'wachtwoord',
-                           'bad email', False)
-            self.assertTrue('Dit is geen valide e-mail' in str(exc))
+            account_create('123456', 'Test', 'de Tester', 'wachtwoord', 'bad email', False)
+        self.assertTrue('Dat is geen valide e-mail' in str(exc.exception))
 
         email = 'test@khsn.not'
 
@@ -37,6 +36,6 @@ class TestAccountOpAanmaken(TestCase):
         # double create
         with self.assertRaises(AccountCreateError) as exc:
             account_create('123457', 'Test', 'de Tester', 'wachtwoord', email, True)
-            self.assertTrue('Account bestaat al' in str(exc))
+        self.assertTrue('Account bestaat al' in str(exc.exception))
 
 # end of file

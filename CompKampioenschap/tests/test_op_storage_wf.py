@@ -38,7 +38,7 @@ class TestCompKampioenschapOpStorageWf(E2EHelpers, TestCase):
         self.assertEqual(res, '25m1pijl Individueel BK')
 
         with self.assertRaises(StorageError) as exc:
-            res = storage._params_to_folder_name(42, False, False)
+            storage._params_to_folder_name(42, False, False)
         self.assertEqual(str(exc.exception), 'Geen valide afstand: 42')
 
     def test_zet_dirty(self):
