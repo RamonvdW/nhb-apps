@@ -78,7 +78,7 @@ def do_migrate(apps, _):
 
         # haal alle DeelnemerRK records op (om te koppelen aan de teams)
         deelnemer2new = dict()  # [(RK) KampioenschapSporterBoog.pk] --> DeelnemerRK
-        for deelnemer_rk in deelnemer_rk_klas.objects.all():
+        for deelnemer_rk in deelnemer_rk_klas.objects.all():                # pragma: no cover
             deelnemer2new[deelnemer_rk.oude_pk] = deelnemer_rk
         # for
 

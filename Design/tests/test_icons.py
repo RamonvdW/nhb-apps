@@ -32,10 +32,10 @@ class TestDesignTemplatetagIcons(TestCase):
         self.assertTrue(out.startswith('<svg '))
         self.assertTrue('green-text' in out)
 
-        out = sv_icon('email', kleur='')
+        out = sv_icon('email', kleur='', use='kopje')
         self.assertTrue(out.startswith('<svg '))
 
-        out = sv_icon('email', kleur='', extra_style='stijl:1')
+        out = sv_icon('email', kleur='', extra_style='stijl:1', use='kopje')
         self.assertTrue(out.startswith('<svg '))
         self.assertTrue('stijl:1' in out)
 
