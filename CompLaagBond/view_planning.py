@@ -128,13 +128,13 @@ class PlanningView(UserPassesTestMixin, TemplateView):
             obj.sporters_count = 0
 
             obj.wkl_namen = list()
-            for wkl in obj.indiv_klassen.order_by('volgorde'):    # FUTURE: order_by zorgt voor extra database accesses
+            for wkl in obj.indiv_klassen.order_by('volgorde'):    # order_by zorgt voor extra database accesses
                 obj.wkl_namen.append(wkl.beschrijving)
                 niet_gebruikt[100000 + wkl.pk] = None
                 obj.sporters_count += indiv_klasse2count.get(wkl.pk, 0)
             # for
 
-            for wkl in obj.team_klassen.order_by('volgorde'):     # FUTURE: order_by zorgt voor extra database accesses
+            for wkl in obj.team_klassen.order_by('volgorde'):     # order_by zorgt voor extra database accesses
                 obj.wkl_namen.append(wkl.beschrijving)
                 niet_gebruikt[200000 + wkl.pk] = None
                 obj.sporters_count += team_klasse2count.get(wkl.pk, 0)
