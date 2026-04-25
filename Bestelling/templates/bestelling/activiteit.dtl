@@ -143,7 +143,7 @@
                                         <!-- icoontje voor de status -->
                                         <td style="width:35px; padding-left:0; padding-right:0">
                                             {% if bestelling.status == 'A' %}
-                                                <!-- betaald: groene checkmark -->
+                                                <!-- afgerond: groene checkmark -->
                                                 {% sv-icon 'bestelling status betaald' kleur='groen' use='text' %}
                                             {% elif bestelling.status in 'NBF' %}
                                                 <!-- nieuw, betaling actief, betaling mislukt  -->
@@ -207,15 +207,14 @@
                                         </td>
                                     </tr>
 
-                                    {% for product in bestelling.prods_list %}
+                                    {% for regel in bestelling.regels_list %}
                                         <tr>
                                             <th>Product:</th>
                                             <td>
-                                                {% if product.geen_beschrijving %}
-                                                    <i>Onbekend</i>
-                                                {% else %}
-                                                    <span>{% if product.beschrijving_str1 %}{{ product.beschrijving_str1 }}<br>{% endif %}{{ product.beschrijving_str2|highlight:zoekterm }}<br>{% if product.beschrijving_str3 %}{{ product.beschrijving_str3 }}{% endif %}</span>
-                                                {% endif %}
+                                                {% for line in regel.korte_beschrijving_lst %}
+                                                    <span>{{ line }}</span><br>
+                                                {% endfor %}
+                                                <span>{{ regel.bedrag_euro_str }}</span>
                                             </td>
                                         </tr>
                                     {% endfor %}
