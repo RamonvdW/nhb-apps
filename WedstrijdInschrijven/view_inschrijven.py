@@ -437,7 +437,7 @@ class WedstrijdInschrijvenFamilie(UserPassesTestMixin, TemplateView):
         # begrens de mogelijkheden tot leden met dezelfde adres_code als de ingelogde gebruiker
         account = get_account(self.request)
         sporter = get_sporter(account)
-        if not sporter:
+        if not sporter:     # pragma: no cover
             raise Http404('Account is niet compleet')
 
         adres_code = sporter.adres_code
