@@ -310,14 +310,17 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                           .filter(sporterboog__sporter=self.sporter,
                                   wedstrijd__datum_begin__gte=vandaag)
                           .select_related('wedstrijd',
-                                          'wedstrijd__locatie'))
+                                          'wedstrijd__locatie',
+                                          'sessie',
+                                          'sporterboog'))
 
         afmeldingen = (WedstrijdAfgemeld
                        .objects
                        .filter(sporterboog__sporter=self.sporter,
                                wedstrijd__datum_begin__gte=vandaag)
                        .select_related('wedstrijd',
-                                       'wedstrijd__locatie'))
+                                       'wedstrijd__locatie',
+                                       'sporterboog'))
 
         lijst = list()
 

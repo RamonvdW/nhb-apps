@@ -432,6 +432,8 @@ class VerwerkBestelMutaties:
 
             # verwijder uit het mandje
             mandje.regels.remove(regel)
+
+            mutatie.regel = None        # remove reference to to-be-deleted object
             regel.delete()
 
             # kijk of er automatische kortingen zijn die niet meer toegepast mogen worden

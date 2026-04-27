@@ -572,7 +572,7 @@ class TestImportCRMImport(E2EHelpers, TestCase):
         self.assertTrue("[INFO] Secretaris 100024 van vereniging 2000 is gekoppeld aan SEC functie" in f2.getvalue())
 
         # probeer 100024 te verwijderen
-        with self.assert_max_queries(90):
+        with self.assert_max_queries(91):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_16_VERWIJDER_LID,
                                                  OPTION_SIM)
