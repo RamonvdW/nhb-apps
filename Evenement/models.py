@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2024-2025 Ramon van der Winkel.
+#  Copyright (c) 2024-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -178,7 +178,7 @@ class EvenementAfgemeld(models.Model):
     bestelling = models.ForeignKey(BestellingRegel, on_delete=models.PROTECT, null=True)
 
     # wie was de koper?
-    koper = models.ForeignKey(Account, on_delete=models.PROTECT)
+    koper = models.ForeignKey(Account, on_delete=models.PROTECT)        # TODO: waarom dit veld? Bestelling heeft toch ook een koper?
 
     # bedragen ontvangen en terugbetaald
     bedrag_ontvangen = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal(0))
