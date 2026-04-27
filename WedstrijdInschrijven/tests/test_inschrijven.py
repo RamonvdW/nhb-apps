@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2025 Ramon van der Winkel.
+#  Copyright (c) 2022-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -14,7 +14,7 @@ from Locatie.models import WedstrijdLocatie
 from Sporter.models import Sporter, SporterBoog
 from Sporter.operations import get_sporter_voorkeuren
 from Vereniging.models import Vereniging
-from Wedstrijden.definities import (WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD, WEDSTRIJD_BEGRENZING_VERENIGING,
+from Wedstrijden.definities import (WEDSTRIJD_BEGRENZING_VERENIGING,
                                     WEDSTRIJD_BEGRENZING_REGIO, WEDSTRIJD_BEGRENZING_RAYON)
 from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdInschrijving
 from TestHelpers.e2ehelpers import E2EHelpers

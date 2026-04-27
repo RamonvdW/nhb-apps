@@ -109,17 +109,22 @@
 
                             {% if toon_ter_info %}
                                 <tr>
-                                    <th>Ter info op de kalender zetten?</th>
-                                    <td>
-                                        <ul id="id_ter_info">
-                                            <li>
-                                                <label>
-                                                    <input type="checkbox" class="filled-in" name="ter_info" onchange="gewijzigd()"{% if wed.is_ter_info %} checked{% endif %}>
-                                                    <span class="black-text">&nbsp;Ja (geen inschrijvingen toestaan)</span>
-                                                </label>
-                                            </li>
-                                        </ul>
-                                    </td>
+                                    {% if wijzig_ter_info %}
+                                        <th>Ter info op de kalender zetten?</th>
+                                        <td>
+                                            <ul id="id_ter_info">
+                                                <li>
+                                                    <label>
+                                                        <input type="checkbox" class="filled-in" name="ter_info" onchange="gewijzigd()"{% if wed.is_ter_info %} checked{% endif %}>
+                                                        <span class="black-text">&nbsp;Ja (geen inschrijvingen toestaan)</span>
+                                                    </label>
+                                                </li>
+                                            </ul>
+                                        </td>
+                                    {% else %}
+                                        <th>Ter info op de kalender?</th>
+                                        <td>Ja; geen inschrijvingen toegestaan</td>
+                                    {% endif %}
                                 </tr>
                             {% endif %}
 
@@ -250,16 +255,18 @@
                                 </td>
                             </tr>
 
-                            <tr>
-                                <th>Wanneer moet de inschrijving sluiten?</th>
-                                <td>
-                                    <select name="sluit" onchange="gewijzigd()">
-                                        {% for opt in opt_sluit %}
-                                            <option value="{{ opt.sel }}"{% if opt.selected %} selected{% endif %}>{{ opt.keuze_str }} (op {{ opt.datum }} om 00:00)</option>
-                                        {% endfor %}
-                                    </select>
-                                </td>
-                            </tr>
+                            {% if not wed.is_ter_info %}
+                                <tr>
+                                    <th>Wanneer moet de inschrijving sluiten?</th>
+                                    <td>
+                                        <select name="sluit" onchange="gewijzigd()">
+                                            {% for opt in opt_sluit %}
+                                                <option value="{{ opt.sel }}"{% if opt.selected %} selected{% endif %}>{{ opt.keuze_str }} (op {{ opt.datum }} om 00:00)</option>
+                                            {% endfor %}
+                                        </select>
+                                    </td>
+                                </tr>
+                            {% endif %}
 
                             <tr>
                                 <th>Aanwezig melden</th>
@@ -486,28 +493,29 @@
                                 </td>
                             </tr>
 
+                            {% if not wed.is_ter_info %}
+                                <tr>
+                                    <td colspan="2" class="center">
+                                        <span class="sv-kopje-in-tabel">Inschrijfgeld</span>
+                                    </td>
+                                </tr>
 
-                            <tr>
-                                <td colspan="2" class="center">
-                                    <span class="sv-kopje-in-tabel">Inschrijfgeld</span>
-                                </td>
-                            </tr>
+                                <tr>
+                                    <th>Standaard</th>
+                                    <td>
+                                        <span style="font-size:16px">&euro;&nbsp;</span>
+                                        <input style="width:90%" type="text" name="prijs_normaal" value="{{ prijs_euro_normaal_str }}" pattern="^\d+(,\d{2})?$" placeholder="123,45" oninput="gewijzigd()">
+                                    </td>
+                                </tr>
 
-                            <tr>
-                                <th>Standaard</th>
-                                <td>
-                                    <span style="font-size:16px">&euro;&nbsp;</span>
-                                    <input style="width:90%" type="text" name="prijs_normaal" value="{{ prijs_euro_normaal_str }}" pattern="^\d+(,\d{2})?$" placeholder="123,45" oninput="gewijzigd()">
-                                </td>
-                            </tr>
-
-                            <tr>
-                                <th>Tot 18 jaar</th>
-                                <td>
-                                    <span style="font-size:16px">&euro;&nbsp;</span>
-                                    <input style="width:90%" type="text" name="prijs_onder18" value="{{ prijs_euro_onder18_str }}" pattern="^\d+(,\d{2})?$" placeholder="123,45" oninput="gewijzigd()">
-                                </td>
-                            </tr>
+                                <tr>
+                                    <th>Tot 18 jaar</th>
+                                    <td>
+                                        <span style="font-size:16px">&euro;&nbsp;</span>
+                                        <input style="width:90%" type="text" name="prijs_onder18" value="{{ prijs_euro_onder18_str }}" pattern="^\d+(,\d{2})?$" placeholder="123,45" oninput="gewijzigd()">
+                                    </td>
+                                </tr>
+                            {% endif %}
 
                             <tr>
                                 <td colspan="2" class="center">

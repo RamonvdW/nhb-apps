@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2025 Ramon van der Winkel.
+#  Copyright (c) 2021-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -76,7 +76,7 @@ urlpatterns = [
          name='check-kwalificatie-scores-wedstrijd'),
 
 
-    # gedeeld (TODO: met wie?)
+    # gedeeld (HWL en MWZ)
     path('<wedstrijd_pk>/wijzig/',
          view_wijzig_wedstrijd.WijzigWedstrijdView.as_view(),
          name='wijzig-wedstrijd'),
@@ -120,6 +120,11 @@ urlpatterns = [
     path('afmelden/<inschrijving_pk>/',
          view_aanmelding_details.AfmeldenView.as_view(),
          name='afmelden'),
+
+    # afmelding details
+    path('details-afmelding/<afgemeld_pk>/',
+         view_aanmelding_details.WedstrijdAfgemeldDetailsView.as_view(),
+         name='details-afmelding'),
 ]
 
 # end of file

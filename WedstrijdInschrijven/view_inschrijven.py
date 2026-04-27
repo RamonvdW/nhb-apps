@@ -20,8 +20,7 @@ from Functie.rol import rol_get_huidige, rol_get_huidige_functie
 from Kalender.definities import MAAND2URL
 from Sporter.models import Sporter, SporterBoog, get_sporter
 from Sporter.operations import get_sporter_voorkeuren
-from Wedstrijden.definities import (WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD, WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF,
-                                    WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD, WEDSTRIJD_INSCHRIJVING_STATUS_TO_STR)
+from Wedstrijden.definities import WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF, WEDSTRIJD_INSCHRIJVING_STATUS_TO_STR
 from Wedstrijden.models import Wedstrijd, WedstrijdInschrijving
 from WedstrijdInschrijven.operations import get_sessies
 from datetime import timedelta
@@ -341,7 +340,6 @@ class WedstrijdInschrijvenGroepje(UserPassesTestMixin, TemplateView):
                                      .objects
                                      .filter(wedstrijd=wedstrijd,
                                              sporterboog__sporter=geselecteerd.sporter)
-                                     .exclude(status=WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD)
                                      .select_related('sessie',
                                                      'sporterboog',
                                                      'sporterboog__sporter')):
@@ -525,7 +523,6 @@ class WedstrijdInschrijvenFamilie(UserPassesTestMixin, TemplateView):
                                      .objects
                                      .filter(wedstrijd=wedstrijd,
                                              sporterboog__sporter=geselecteerd.sporter)
-                                     .exclude(status=WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD)
                                      .select_related('sessie',
                                                      'sporterboog',
                                                      'sporterboog__sporter')):
@@ -652,18 +649,6 @@ class ToevoegenAanMandjeView(UserPassesTestMixin, View):
         account_koper = get_account(request)
 
         now = timezone.now()
-
-        # misschien dat de sporter al ingeschreven staat, maar afgemeld is
-        # verwijder deze inschrijving omdat het nu een andere koper kan zijn
-        # TODO: afmeldingen verplaatsen naar een andere tabel
-        qset = (WedstrijdInschrijving
-                .objects
-                .filter(wedstrijd=wedstrijd,
-                        sporterboog=sporterboog,
-                        status__in=(WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD, WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD)))
-        if qset.count() > 0:
-            qset.delete()
-
         stamp_str = timezone.localtime(timezone.now()).strftime('%Y-%m-%d om %H:%M')
         msg = "[%s] Toegevoegd aan het mandje van %s\n" % (stamp_str, account_koper.get_account_full_name())
 
@@ -877,7 +862,6 @@ class WedstrijdInschrijvenHandmatig(UserPassesTestMixin, TemplateView):
                                  .objects
                                  .filter(wedstrijd=wedstrijd,
                                          sporterboog__sporter=geselecteerd.sporter)
-                                 .exclude(status=WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD)
                                  .select_related('sessie',
                                                  'sporterboog',
                                                  'sporterboog__sporter')):
@@ -973,18 +957,6 @@ class WedstrijdInschrijvenHandmatig(UserPassesTestMixin, TemplateView):
         account_koper = get_account(request)
 
         now = timezone.now()
-
-        # misschien dat de sporter al ingeschreven staat, maar afgemeld is
-        # verwijder deze inschrijving omdat het nu een andere koper kan zijn
-        # TODO: afmeldingen verplaatsen naar een andere tabel
-        qset = (WedstrijdInschrijving
-                .objects
-                .filter(wedstrijd=wedstrijd,
-                        sporterboog=sporterboog,
-                        status=WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD))
-        if qset.count() > 0:
-            qset.delete()
-
         stamp_str = timezone.localtime(timezone.now()).strftime('%Y-%m-%d om %H:%M')
         msg = "[%s] Handmatig toegevoegd door de HWL: %s\n" % (stamp_str, account_koper.get_account_full_name())
 

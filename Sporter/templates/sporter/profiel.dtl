@@ -707,7 +707,17 @@
                     {% for obj in wedstrijden %}
                         <tr>
                             <td class="center">{{ obj.datum_str }}</td>
-                            <td class="center">{{ obj.wedstrijd.titel }}{% if obj.status_str %}<br><span class="sv-rood-text">Let op: {{ obj.status_str }}</span>{% endif %}</td>
+                            <td class="center">
+                                <span>{{ obj.wedstrijd.titel }}</span>
+                                {% if obj.sessie_str %}
+                                    <br>
+                                    <span>{{ obj.sessie_str }}</span>
+                                {% endif %}
+                                {% if obj.status_str %}
+                                    <br>
+                                    <span class="sv-rood-text">Let op: {{ obj.status_str }}</span>
+                                {% endif %}
+                            </td>
                             <td class="center">{{ obj.plaats_str }}</td>
                             <td class="center">
                                 <a class="btn-sv-blauw" href="{{ obj.url_details }}">Details</a>

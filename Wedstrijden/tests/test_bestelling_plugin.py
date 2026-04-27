@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2025 Ramon van der Winkel.
+#  Copyright (c) 2025-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -20,9 +20,8 @@ from Vereniging.models import Vereniging
 from Wedstrijden.definities import (WEDSTRIJD_STATUS_GEACCEPTEERD,
                                     WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_MANDJE,
                                     WEDSTRIJD_INSCHRIJVING_STATUS_BESTELD,
-                                    WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD,
                                     WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF)
-from Wedstrijden.models import Wedstrijd, WedstrijdInschrijving, WedstrijdSessie
+from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdInschrijving, WedstrijdAfgemeld
 from Wedstrijden.plugin_bestelling import WedstrijdBestelPlugin, WedstrijdKortingBestelPlugin
 from decimal import Decimal
 import datetime
@@ -194,6 +193,7 @@ class TestWedstrijdenBestellingPlugin(E2EHelpers, TestCase):
         self.assertEqual(len(mandje_pks), 1)
         self.assertEqual(mandje_pks, [self.mandje.pk])
 
+        # print('{stdout} %s' % stdout.getvalue())
         self.assertTrue('[INFO] Vervallen: BestellingRegel pk=' in stdout.getvalue())
         self.assertTrue('[INFO] BestellingRegel met pk=' in stdout.getvalue())
         self.assertTrue('wordt verwijderd' in stdout.getvalue())
@@ -257,11 +257,14 @@ class TestWedstrijdenBestellingPlugin(E2EHelpers, TestCase):
         self.sessie.aantal_inschrijvingen = 1
         self.sessie.save(update_fields=['aantal_inschrijvingen'])
 
+        self.assertEqual(WedstrijdAfgemeld.objects.count(), 0)
         plugin.afmelden(inschrijving.pk)
+        self.assertEqual(WedstrijdAfgemeld.objects.count(), 1)
+        self.assertEqual(WedstrijdInschrijving.objects.filter(pk=inschrijving.pk).count(), 0)
 
-        inschrijving.refresh_from_db()
-        self.assertEqual(inschrijving.status, WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD)
-        self.assertTrue('] Afgemeld voor de wedstrijd; plekje weer vrijgegeven' in inschrijving.log)
+        afgemeld = WedstrijdAfgemeld.objects.first()
+
+        self.assertTrue('] Afgemeld voor de wedstrijd; plekje weer vrijgegeven' in afgemeld.log)
 
         self.sessie.refresh_from_db()
         self.assertEqual(self.sessie.aantal_inschrijvingen, 0)
@@ -285,7 +288,9 @@ class TestWedstrijdenBestellingPlugin(E2EHelpers, TestCase):
 
         # inschrijving bestaat niet
         plugin.annuleer(regel)
-        self.assertTrue("[ERROR] Kan WedstrijdInschrijving voor regel met pk=" in stdout.getvalue())
+
+        # print('f1: %s' % stdout.getvalue())
+        self.assertTrue("[ERROR] {wedstrijden bestel plugin}.annuleer: kan WedstrijdInschrijving met bestelling regel met pk=" in stdout.getvalue())
 
         stdout = OutputWrapper(io.StringIO())       # weer leeg
         plugin.zet_stdout(stdout)
@@ -330,7 +335,9 @@ class TestWedstrijdenBestellingPlugin(E2EHelpers, TestCase):
 
         # niet te vinden
         plugin.is_besteld(regel)
-        self.assertTrue("[ERROR] Kan WedstrijdInschrijving voor regel met pk=" in stdout.getvalue())
+
+        # print('{stdout} %s' % stdout.getvalue())
+        self.assertTrue("[ERROR] {wedstrijden bestel plugin}.is_besteld: kan WedstrijdInschrijving met bestelling regel met pk=" in stdout.getvalue())
 
         inschrijving = WedstrijdInschrijving(
                                 wanneer=timezone.now(),
@@ -368,7 +375,9 @@ class TestWedstrijdenBestellingPlugin(E2EHelpers, TestCase):
         bedrag_ontvangen = Decimal(10.22)
 
         plugin.is_betaald(regel, bedrag_ontvangen)
-        self.assertTrue("[ERROR] Kan WedstrijdInschrijving voor regel met pk=" in stdout.getvalue())
+
+        # print('{stdout} %s' % stdout.getvalue())
+        self.assertTrue("[ERROR] {wedstrijden bestel plugin}.is_betaald: kan WedstrijdInschrijving met bestelling regel met pk=" in stdout.getvalue())
 
         inschrijving = WedstrijdInschrijving(
                                 wanneer=timezone.now(),
@@ -410,7 +419,9 @@ class TestWedstrijdenBestellingPlugin(E2EHelpers, TestCase):
         bedrag_ontvangen = Decimal(10.22)
 
         plugin.is_betaald(regel, bedrag_ontvangen)
-        self.assertTrue("[ERROR] Kan WedstrijdInschrijving voor regel met pk=" in stdout.getvalue())
+
+        # print('{stdout} %s' % stdout.getvalue())
+        self.assertTrue("[ERROR] {wedstrijden bestel plugin}.is_betaald: kan WedstrijdInschrijving met bestelling regel met pk=" in stdout.getvalue())
 
         inschrijving = WedstrijdInschrijving(
                                 wanneer=timezone.now(),
@@ -470,7 +481,8 @@ class TestWedstrijdenBestellingPlugin(E2EHelpers, TestCase):
 
         ver_nr = plugin.get_verkoper_ver_nr(regel)
         self.assertEqual(ver_nr, -1)
-        self.assertTrue('] Kan WedstrijdInschrijving voor regel met pk=' in stdout.getvalue())
+        # print('{stdout} %s' % stdout.getvalue())
+        self.assertTrue('[ERROR] {wedstrijd bestel plugin}.get_verkoper_ver_nr: kan WedstrijdInschrijving voor bestelling regel met pk=' in stdout.getvalue())
 
         inschrijving = WedstrijdInschrijving(
                                 wanneer=timezone.now(),

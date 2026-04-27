@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2025 Ramon van der Winkel.
+#  Copyright (c) 2022-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -432,6 +432,7 @@ class VerwerkBestelMutaties:
 
             # verwijder uit het mandje
             mandje.regels.remove(regel)
+            regel.delete()
 
             # kijk of er automatische kortingen zijn die niet meer toegepast mogen worden
             self._automatische_kortingen_toepassen(mandje)
@@ -794,6 +795,7 @@ class VerwerkBestelMutaties:
             plugin = bestel_plugins[regel.code]
             plugin.annuleer(regel)
         # for
+        bestelling.regels.all().delete()
 
     def _verwerk_mutatie_transport(self, mutatie: BestellingMutatie):
         """ Wijzig keuze voor transport tussen ophalen en verzender; alleen voor webwinkel aankopen """

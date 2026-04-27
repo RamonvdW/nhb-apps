@@ -16,10 +16,8 @@ from Kalender.view_helpers import maak_compacte_wanneer_str
 from Mailer.operations import mailer_email_is_valide, mailer_queue_email, render_email_template
 from Wedstrijden.definities import (WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_MANDJE,
                                     WEDSTRIJD_INSCHRIJVING_STATUS_BESTELD,
-                                    WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF,
-                                    WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD,
-                                    WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD)
-from Wedstrijden.models import WedstrijdInschrijving, Wedstrijd, WedstrijdSessie
+                                    WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF)
+from Wedstrijden.models import WedstrijdInschrijving, WedstrijdAfgemeld, Wedstrijd, WedstrijdSessie
 from decimal import Decimal
 import datetime
 
@@ -74,7 +72,7 @@ class WedstrijdBestelPlugin(BestelPluginBase):
                         .first())
 
         if not inschrijving:
-            self.stdout.write('[WARNING] {wedstrijden bestel plugin}.reserveer: ' +
+            self.stdout.write('[ERROR] {wedstrijden bestel plugin}.reserveer: ' +
                               'kan WedstrijdInschrijving met pk=%s niet vinden' % product_pk)
             return None
 
@@ -108,6 +106,9 @@ class WedstrijdBestelPlugin(BestelPluginBase):
 
         inschrijving.bestelling = regel
 
+        #inschrijving.status = WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_MANDJE
+        #inschrijving.nummer = inschrijving.pk
+
         stamp_str = timezone.localtime(timezone.now()).strftime('%Y-%m-%d om %H:%M')
         msg = "[%s] Plekje gereserveerd voor de wedstrijd sessie\n" % stamp_str
         inschrijving.log += msg
@@ -120,30 +121,55 @@ class WedstrijdBestelPlugin(BestelPluginBase):
         """
             Verwerk het verzoek tot afmelden voor een wedstrijd.
         """
-        inschrijving = WedstrijdInschrijving.objects.select_related('sessie').get(pk=inschrijving_pk)
+        inschrijving = (WedstrijdInschrijving
+                        .objects
+                        .select_related('sessie',
+                                        'wedstrijd',
+                                        'sporterboog')
+                        .filter(pk=inschrijving_pk)
+                        .first())
 
-        if inschrijving.status not in (WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD,
-                                       WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD):
-            self.stdout.write('[INFO] WedstrijdInschrijving met pk=%s afmelden' % inschrijving.pk)
+        if not inschrijving:
+            self.stdout.write('[ERROR] {wedstrijden bestel plugin}.afmelden: ' +
+                              'kan WedstrijdInschrijving met pk=%s niet vinden' % inschrijving_pk)
+            return
 
-            # verlaag het aantal inschrijvingen op deze sessie
-            sessie = inschrijving.sessie
-            sessie.aantal_inschrijvingen -= 1
-            sessie.save(update_fields=['aantal_inschrijvingen'])
+        self.stdout.write('[INFO] WedstrijdInschrijving met pk=%s afmelden' % inschrijving.pk)
 
-            now = timezone.now()
-            stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
-            msg = "[%s] Afgemeld voor de wedstrijd; plekje weer vrijgegeven\n" % stamp_str
-            inschrijving.log += msg
+        # verlaag het aantal inschrijvingen op deze sessie
+        sessie = inschrijving.sessie
+        sessie.aantal_inschrijvingen -= 1
+        sessie.save(update_fields=['aantal_inschrijvingen'])
 
-            inschrijving.status = WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD
-            inschrijving.sessie = None
-            # inschrijving.klasse kan niet op None gezet worden
+        now = timezone.now()
+        stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
+        msg = "[%s] Afgemeld voor de wedstrijd; plekje weer vrijgegeven\n" % stamp_str
+        inschrijving.log += msg
 
-            # inschrijving mag niet verwijderd worden, in verband met mogelijk verwijzing vanuit bestelling
-            # TODO: maak WedstrijdAfgemeld (ref: EvenementAfgemeld)
+        sessie_str = "%s %s" % (sessie.datum, sessie.tijd_begin)
+        if sessie.beschrijving:
+            sessie_str += ' (%s)' % sessie.beschrijving
 
-            inschrijving.save(update_fields=['status', 'log', 'sessie'])
+        # zet de inschrijving om in een afmelding
+        afmelding = WedstrijdAfgemeld(
+                            wanneer_inschrijving=inschrijving.wanneer,
+                            wanneer_afgemeld=now,
+                            reserveringsnummer=inschrijving.pk,
+                            wedstrijd=inschrijving.wedstrijd,
+                            sporterboog=inschrijving.sporterboog,
+                            wedstrijdklasse=inschrijving.wedstrijdklasse,
+                            sessie=sessie_str,
+                            koper=inschrijving.koper,
+                            korting=inschrijving.korting,
+                            bedrag_ontvangen=inschrijving.ontvangen_euro,
+                            bedrag_retour=inschrijving.retour_euro,
+                            bestelling=inschrijving.bestelling,
+                            log=inschrijving.log + msg)
+        afmelding.save()
+
+        # verwijder de inschrijving
+        self.stdout.write('[INFO] WedstrijdInschrijving pk=%s wordt verwijderd' % inschrijving.pk)
+        inschrijving.delete()
 
     def aanpassen(self, product_pk: int, door_account_str: str, **kwargs):
         """
@@ -164,6 +190,11 @@ class WedstrijdBestelPlugin(BestelPluginBase):
                                         'sporterboog',
                                         'wedstrijdklasse')
                         .get(pk=product_pk))
+
+        if not inschrijving:
+            self.stdout.write('[ERROR] {wedstrijden bestel plugin}.aanpassen: ' +
+                              'kan WedstrijdInschrijving met pk=%s niet vinden' % product_pk)
+            return
 
         aanpassingen = list()
         if sessie != inschrijving.sessie:
@@ -199,45 +230,26 @@ class WedstrijdBestelPlugin(BestelPluginBase):
             Het product wordt uit het mandje gehaald of de bestelling wordt geannuleerd (voordat deze betaald is)
             Geef een eerder gemaakte reservering voor een wedstrijd weer vrij.
         """
-        inschrijving = WedstrijdInschrijving.objects.filter(bestelling=regel).first()
+        inschrijving = (WedstrijdInschrijving
+                        .objects
+                        .select_related('sessie',
+                                        'wedstrijd',
+                                        'sporterboog')
+                        .filter(bestelling=regel)
+                        .first())
+
         if not inschrijving:
-            self.stdout.write(
-                '[ERROR] Kan WedstrijdInschrijving voor regel met pk=%s niet vinden {annuleer}' % regel.pk)
+            self.stdout.write('[ERROR] {wedstrijden bestel plugin}.annuleer: ' +
+                              'kan WedstrijdInschrijving met bestelling regel met pk=%s niet vinden' % regel.pk)
             return
 
-        self.afmelden(inschrijving.pk)
-
-        # # zet de inschrijving om in een afmelding
-        # now = timezone.now()
-        # stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
-        # msg = "[%s] Annuleer inschrijving voor deze opleiding\n" % stamp_str
-        #
-        # afmelding = WedstrijdAfgemeld(
-        #                 wanneer_aangemeld=inschrijving.wanneer_aangemeld,
-        #                 nummer=inschrijving.nummer,
-        #                 wanneer_afgemeld=now,
-        #                 status=OPLEIDING_AFMELDING_STATUS_AFGEMELD,
-        #                 opleiding=inschrijving.opleiding,
-        #                 bestelling=None,
-        #                 sporter=inschrijving.sporter,
-        #                 koper=inschrijving.koper,
-        #                 bedrag_ontvangen=inschrijving.bedrag_ontvangen,
-        #                 log=inschrijving.log + msg)
-        #
-        # if inschrijving.status != WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF:
-        #     # nog niet betaald
-        #     afmelding.status = WEDSTRIJD_AFMELDING_STATUS_GEANNULEERD
-        #
-        # afmelding.save()
-        #
-        # self.stdout.write('[INFO] Wedstrijd inschrijving pk=%s status %s --> afgemeld pk=%s status %s' % (
-        #                     inschrijving.pk,
-        #                     WEDSTRIJD_INSCHRIJVING_STATUS_TO_STR[inschrijving.status],
-        #                     afmelding.pk,
-        #                     WEDSTRIJD_AFMELDING_STATUS_TO_STR[afmelding.status]))
+        # verlaag het aantal inschrijvingen op deze sessie
+        sessie = inschrijving.sessie
+        sessie.aantal_inschrijvingen -= 1
+        sessie.save(update_fields=['aantal_inschrijvingen'])
 
         # verwijder de inschrijving
-        self.stdout.write('[INFO] WedstrijdInschrijving pk=%s wordt verwijderd' % inschrijving.pk)
+        self.stdout.write('[INFO] WedstrijdInschrijving pk=%s is geannuleerd en wordt verwijderd' % inschrijving.pk)
         inschrijving.delete()
 
     def is_besteld(self, regel: BestellingRegel):
@@ -246,9 +258,10 @@ class WedstrijdBestelPlugin(BestelPluginBase):
             Verander de status van het gevraagde product naar 'besteld maar nog niet betaald'
         """
         inschrijving = WedstrijdInschrijving.objects.filter(bestelling=regel).first()
+
         if not inschrijving:
-            self.stdout.write(
-                '[ERROR] Kan WedstrijdInschrijving voor regel met pk=%s niet vinden {is_besteld}' % regel.pk)
+            self.stdout.write('[ERROR] {wedstrijden bestel plugin}.is_besteld: ' +
+                              'kan WedstrijdInschrijving met bestelling regel met pk=%s niet vinden' % regel.pk)
             return
 
         now = timezone.now()
@@ -265,9 +278,10 @@ class WedstrijdBestelPlugin(BestelPluginBase):
             Wordt ook aangeroepen als een bestelling niet betaald hoeft te worden (totaal bedrag nul).
         """
         inschrijving = WedstrijdInschrijving.objects.filter(bestelling=regel).first()
+
         if not inschrijving:
-            self.stdout.write(
-                '[ERROR] Kan WedstrijdInschrijving voor regel met pk=%s niet vinden {is_betaald}' % regel.pk)
+            self.stdout.write('[ERROR] {wedstrijden bestel plugin}.is_betaald: ' +
+                              'kan WedstrijdInschrijving met bestelling regel met pk=%s niet vinden' % regel.pk)
             return
 
         inschrijving.ontvangen_euro = bedrag_ontvangen
@@ -368,7 +382,7 @@ class WedstrijdBestelPlugin(BestelPluginBase):
             ver_nr = inschrijving.wedstrijd.organiserende_vereniging.ver_nr
         else:
             self.stdout.write(
-                '[ERROR] Kan WedstrijdInschrijving voor regel met pk=%s niet vinden {get_verkoper_ver_nr}' % regel.pk)
+                '[ERROR] {wedstrijd bestel plugin}.get_verkoper_ver_nr: kan WedstrijdInschrijving voor bestelling regel met pk=%s niet vinden' % regel.pk)
         return ver_nr
 
     def wil_kwalificatiescores(self, regel: BestellingRegel) -> Wedstrijd | None:

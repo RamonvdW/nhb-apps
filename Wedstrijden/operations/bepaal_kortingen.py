@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2025 Ramon van der Winkel.
+#  Copyright (c) 2022-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -8,8 +8,7 @@ from django.db.utils import DatabaseError
 from Bestelling.definities import BESTELLING_REGEL_CODE_WEDSTRIJD_KORTING, BESTELLING_KORT_BREAK
 from Bestelling.models import BestellingRegel
 from Betaal.format import format_bedrag_euro
-from Wedstrijden.definities import (WEDSTRIJD_KORTING_COMBI, WEDSTRIJD_KORTING_SPORTER, WEDSTRIJD_KORTING_VERENIGING,
-                                    WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD, WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD)
+from Wedstrijden.definities import WEDSTRIJD_KORTING_COMBI, WEDSTRIJD_KORTING_SPORTER, WEDSTRIJD_KORTING_VERENIGING
 from Wedstrijden.models import WedstrijdKorting, WedstrijdInschrijving, beschrijf_korting
 from decimal import Decimal
 
@@ -85,8 +84,6 @@ class BepaalAutomatischeKorting(object):
                        .objects
                        .filter(sporterboog__sporter__lid_nr=lid_nr)
                        .filter(korting=None)                            # voorkom stapelen van kortingen
-                       .exclude(status__in=(WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD,
-                                            WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD))
                        .exclude(wedstrijd__pk__in=nieuwe_pks)
                        .values_list('wedstrijd__pk', flat=True))
             self._lid_nr2wedstrijd_pks_eerder[lid_nr] = pks

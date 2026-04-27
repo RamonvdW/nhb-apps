@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2025 Ramon van der Winkel.
+#  Copyright (c) 2020-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -35,10 +35,8 @@ from Sporter.models import SporterBoog, Speelsterkte
 from Sporter.operations import get_sporter_gekozen_bogen, get_sporter_voorkeuren
 from Wedstrijden.definities import (WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_MANDJE,
                                     WEDSTRIJD_INSCHRIJVING_STATUS_BESTELD,
-                                    WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF,
-                                    WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD,
-                                    WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD)
-from Wedstrijden.models import WedstrijdInschrijving
+                                    WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF)
+from Wedstrijden.models import WedstrijdInschrijving, WedstrijdAfgemeld
 import datetime
 import logging
 
@@ -305,18 +303,25 @@ class ProfielView(UserPassesTestMixin, TemplateView):
         return scores
 
     def _find_wedstrijden(self):
-        heeft_wedstrijden = False
-
         vandaag = timezone.now().date()
-        wedstrijden = (WedstrijdInschrijving
+
+        inschrijvingen = (WedstrijdInschrijving
+                          .objects
+                          .filter(sporterboog__sporter=self.sporter,
+                                  wedstrijd__datum_begin__gte=vandaag)
+                          .select_related('wedstrijd',
+                                          'wedstrijd__locatie'))
+
+        afmeldingen = (WedstrijdAfgemeld
                        .objects
                        .filter(sporterboog__sporter=self.sporter,
                                wedstrijd__datum_begin__gte=vandaag)
                        .select_related('wedstrijd',
-                                       'wedstrijd__locatie')
-                       .order_by('wedstrijd__datum_begin'))
+                                       'wedstrijd__locatie'))
 
-        for inschrijving in wedstrijden:
+        lijst = list()
+
+        for inschrijving in inschrijvingen:
             wedstrijd = inschrijving.wedstrijd
 
             inschrijving.datum_str = maak_compacte_wanneer_str(wedstrijd.datum_begin, wedstrijd.datum_einde)
@@ -326,12 +331,6 @@ class ProfielView(UserPassesTestMixin, TemplateView):
             if inschrijving.status in (WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_MANDJE, WEDSTRIJD_INSCHRIJVING_STATUS_BESTELD):
                 inschrijving.status_str = "Reservering; bestelling is nog niet voltooid"
 
-            elif inschrijving.status == WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD:
-                inschrijving.status_str = "Deze reservering is verwijderd"
-
-            elif inschrijving.status == WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD:
-                inschrijving.status_str = "Je bent afgemeld"
-
             if inschrijving.status == WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF and wedstrijd.eis_kwalificatie_scores:
                 inschrijven_voor = wedstrijd.datum_begin - datetime.timedelta(days=wedstrijd.inschrijven_tot + 1)
                 inschrijving.mag_kwalificatiescores_aanpassen = timezone.now().date() < inschrijven_voor
@@ -339,13 +338,44 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                 inschrijving.url_kwalificatie_scores = reverse('WedstrijdInschrijven:inschrijven-kwalificatie-scores',
                                                                kwargs={'inschrijving_pk': inschrijving.pk})
 
+            sessie = inschrijving.sessie
+            if sessie:
+                inschrijving.sessie_str = 'Aanvang sessie: '
+
+                if sessie.datum != inschrijving.wedstrijd.datum_begin:
+                    inschrijving.sessie_str += sessie.datum.strftime('%Y-%m-%d')
+                    inschrijving.sessie_str += ' om '
+
+                inschrijving.sessie_str += sessie.tijd_begin.strftime('%H:%M')
+
+                inschrijving.sessie_str += ' met de %s boog' % inschrijving.sporterboog.boogtype.beschrijving
+
             inschrijving.url_details = reverse('Wedstrijden:wedstrijd-details',
                                                kwargs={'wedstrijd_pk': wedstrijd.pk})
 
-            heeft_wedstrijden = True
+            tup = (wedstrijd.datum_begin, len(lijst), inschrijving)
+            lijst.append(tup)
         # for
 
-        return heeft_wedstrijden, wedstrijden
+        for afmelding in afmeldingen:
+            wedstrijd = afmelding.wedstrijd
+
+            afmelding.datum_str = maak_compacte_wanneer_str(wedstrijd.datum_begin, wedstrijd.datum_einde)
+            afmelding.plaats_str = wedstrijd.locatie.plaats
+            afmelding.status_str = "Je bent afgemeld"
+
+            afmelding.url_details = reverse('Wedstrijden:wedstrijd-details',
+                                            kwargs={'wedstrijd_pk': wedstrijd.pk})
+
+            tup = (wedstrijd.datum_begin, len(lijst), afmelding)
+            lijst.append(tup)
+        # for
+
+        lijst.sort()        # op datum, eerst aankomende datum bovenaan
+        lijst = [tup[-1]
+                 for tup in lijst]
+
+        return len(lijst) > 0, lijst
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """

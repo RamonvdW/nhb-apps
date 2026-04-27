@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2025 Ramon van der Winkel.
+#  Copyright (c) 2021-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -73,8 +73,9 @@ class VerenigingWedstrijdenView(UserPassesTestMixin, View):
             wed.disc_str += disc2str[wed.discipline]
             wed.status_str = WEDSTRIJD_STATUS_TO_STR[wed.status]
             wed.url_wijzig = reverse('Wedstrijden:wijzig-wedstrijd', kwargs={'wedstrijd_pk': wed.pk})
-            wed.url_sessies = reverse('Wedstrijden:wijzig-sessies', kwargs={'wedstrijd_pk': wed.pk})
-            wed.url_aanmeldingen = reverse('Wedstrijden:aanmeldingen', kwargs={'wedstrijd_pk': wed.pk})
+            if not wed.is_ter_info:
+                wed.url_sessies = reverse('Wedstrijden:wijzig-sessies', kwargs={'wedstrijd_pk': wed.pk})
+                wed.url_aanmeldingen = reverse('Wedstrijden:aanmeldingen', kwargs={'wedstrijd_pk': wed.pk})
             if wed.eis_kwalificatie_scores:
                 wed.url_check_kwalificatie_scores = reverse('Wedstrijden:check-kwalificatie-scores',
                                                             kwargs={'wedstrijd_pk': wed.pk})

@@ -16,10 +16,8 @@ from Functie.definities import Rol
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie
 from Sporter.models import SporterVoorkeuren
 from Wedstrijden.definities import (WEDSTRIJD_INSCHRIJVING_STATUS_TO_SHORT_STR,
-                                    WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD,
-                                    WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF,
-                                    WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD)
-from Wedstrijden.models import Wedstrijd, WedstrijdInschrijving, WedstrijdSessie
+                                    WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF)
+from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdInschrijving, WedstrijdAfgemeld
 from Wedstrijden.operations.kwalificatie_scores import get_kwalificatie_scores
 from decimal import Decimal
 from codecs import BOM_UTF8
@@ -32,9 +30,9 @@ CONTENT_TYPE_TSV = 'text/tab-separated-values; charset=UTF-8'
 CONTENT_TYPE_CSV = 'text/csv; charset=UTF-8'
 
 
-def get_inschrijving_mh_bestel_nr(inschrijving: WedstrijdInschrijving):
-    if inschrijving.bestelling:
-        regel = inschrijving.bestelling
+def get_inschrijving_mh_bestel_nr(obj: WedstrijdInschrijving | WedstrijdAfgemeld):
+    if obj.bestelling:
+        regel = obj.bestelling
         bestelling = regel.bestelling_set.first()
         if bestelling:      # pragma: no branch
             return bestelling.mh_bestel_nr()
@@ -75,59 +73,88 @@ class WedstrijdAanmeldingenView(UserPassesTestMixin, TemplateView):
 
         context['wed'] = wedstrijd
 
-        aanmeldingen = (WedstrijdInschrijving
-                        .objects
-                        .filter(wedstrijd=wedstrijd)
-                        .select_related('sessie',
-                                        'sporterboog',
-                                        'sporterboog__sporter',
-                                        'sporterboog__boogtype',
-                                        'korting')
-                        .order_by('sessie',
-                                  'pk'))        # = reserveringsnummer
-        context['aanmeldingen'] = aanmeldingen
-
         totaal_ontvangen_euro = Decimal('000.00')
         totaal_retour_euro = Decimal('000.00')
 
-        aantal_aanmeldingen = 0
-        aantal_afmeldingen = 0
-        for aanmelding in aanmeldingen:
+        if True:
+            inschrijvingen = (WedstrijdInschrijving
+                              .objects
+                              .filter(wedstrijd=wedstrijd)
+                              .select_related('sessie',
+                                              'sporterboog',
+                                              'sporterboog__sporter',
+                                              'sporterboog__boogtype',
+                                              'korting')
+                              .order_by('sessie',
+                                        'pk'))        # = reserveringsnummer
 
-            sporterboog = aanmelding.sporterboog
-            sporter = sporterboog.sporter
+            context['aanmeldingen'] = inschrijvingen
 
-            if aanmelding.status not in (WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD,
-                                         WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD):
+            aantal_aanmeldingen = 0
+            for inschrijving in inschrijvingen:
                 aantal_aanmeldingen += 1
-                aanmelding.volg_nr = aantal_aanmeldingen
-                aanmelding.reserveringsnummer = aanmelding.pk + settings.TICKET_NUMMER_START__WEDSTRIJD
-                aanmelding.is_definitief = (aanmelding.status == WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF)
-            else:
+                inschrijving.volg_nr = aantal_aanmeldingen
+                inschrijving.reserveringsnummer = inschrijving.pk + settings.TICKET_NUMMER_START__WEDSTRIJD
+                inschrijving.is_definitief = (inschrijving.status == WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF)
+
+                inschrijving.status_str = WEDSTRIJD_INSCHRIJVING_STATUS_TO_SHORT_STR[inschrijving.status]
+
+                sporterboog = inschrijving.sporterboog
+                sporter = sporterboog.sporter
+
+                inschrijving.sporter_str = sporter.lid_nr_en_volledige_naam()
+                inschrijving.boog_str = sporterboog.boogtype.beschrijving
+
+                inschrijving.korting_str = 'geen'
+                if inschrijving.korting:
+                    inschrijving.korting_str = '%s%%' % inschrijving.korting.percentage
+
+                inschrijving.url_details = reverse('Wedstrijden:details-aanmelding',
+                                                 kwargs={'inschrijving_pk': inschrijving.pk})
+
+                totaal_ontvangen_euro += inschrijving.ontvangen_euro
+                totaal_retour_euro += inschrijving.retour_euro
+            # for
+            context['aantal_aanmeldingen'] = aantal_aanmeldingen
+
+        if True:
+            afmeldingen = (WedstrijdAfgemeld
+                           .objects
+                           .filter(wedstrijd=wedstrijd)
+                           .select_related('sporterboog',
+                                           'sporterboog__sporter',
+                                           'sporterboog__boogtype',
+                                           'korting')
+                              .order_by('-wanneer_afgemeld'))       # nieuwste afmelding bovenaan
+
+            context['afmeldingen'] = afmeldingen
+
+            aantal_afmeldingen = 0
+            for afmelding in afmeldingen:
                 aantal_afmeldingen += 1
-                aanmelding.is_afgemeld = True
 
-            aanmelding.status_str = WEDSTRIJD_INSCHRIJVING_STATUS_TO_SHORT_STR[aanmelding.status]
+                afmelding.reserveringsnummer = afmelding.reserveringsnummer + settings.TICKET_NUMMER_START__WEDSTRIJD
 
-            aanmelding.sporter_str = sporter.lid_nr_en_volledige_naam()
-            aanmelding.boog_str = sporterboog.boogtype.beschrijving
+                sporterboog = afmelding.sporterboog
+                sporter = sporterboog.sporter
 
-            aanmelding.korting_str = 'geen'
-            if aanmelding.korting:
-                aanmelding.korting_str = '%s%%' % aanmelding.korting.percentage
+                afmelding.sporter_str = sporter.lid_nr_en_volledige_naam()
+                afmelding.boog_str = sporterboog.boogtype.beschrijving
 
-            aanmelding.url_details = reverse('Wedstrijden:details-aanmelding',
-                                             kwargs={'inschrijving_pk': aanmelding.pk})
+                afmelding.korting_str = 'geen'
+                if afmelding.korting:
+                    afmelding.korting_str = '%s%%' % afmelding.korting.percentage
 
-            totaal_ontvangen_euro += aanmelding.ontvangen_euro
-            totaal_retour_euro += aanmelding.retour_euro
-        # for
+                afmelding.url_details = reverse('Wedstrijden:details-afmelding',
+                                                kwargs={'afgemeld_pk': afmelding.pk})
 
-        # context['totaal_euro'] = totaal_ontvangen_euro - totaal_retour_euro
+                totaal_ontvangen_euro += afmelding.bedrag_ontvangen
+                totaal_retour_euro += afmelding.bedrag_retour
+            # for
+            context['aantal_afmeldingen'] = aantal_afmeldingen
+
         context['totaal_ontvangen_euro'] = totaal_ontvangen_euro
         context['totaal_retour_euro'] = totaal_retour_euro
-        context['aantal_aanmeldingen'] = aantal_aanmeldingen
-        context['aantal_afmeldingen'] = aantal_afmeldingen
 
         context['url_download_tsv'] = reverse('Wedstrijden:download-aanmeldingen-tsv',
                                               kwargs={'wedstrijd_pk': wedstrijd.pk})
@@ -199,8 +226,7 @@ class DownloadAanmeldingenBestandTSV(UserPassesTestMixin, View):
         aanmeldingen = (WedstrijdInschrijving
                         .objects
                         .filter(wedstrijd=wedstrijd)
-                        .exclude(status__in=(WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD,
-                                             WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD))
+                        .exclude(sessie=None)           # just in case
                         .select_related('sessie',
                                         'wedstrijdklasse',
                                         'sporterboog',
@@ -308,8 +334,7 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
         aanmeldingen = (WedstrijdInschrijving
                         .objects
                         .filter(wedstrijd=wedstrijd)
-                        .exclude(status__in=(WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD,
-                                             WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD))
+                        .exclude(sessie=None)           # just in case
                         .select_related('sessie',
                                         'wedstrijdklasse',
                                         'sporterboog',
@@ -381,14 +406,6 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
                 korting_str = '%s%%' % aanmelding.korting.percentage
             else:
                 korting_str = 'Geen'
-
-            if not aanmelding.sessie:
-                # voorkom een crash
-                aanmelding.sessie = WedstrijdSessie(
-                                        datum='2001-01-01',
-                                        tijd_begin='01:01',
-                                        tijd_einde='01:02',
-                                        beschrijving='Fout: geen sessie!')
 
             if wedstrijd.eis_kwalificatie_scores:
                 # FUTURE: deze individuele queries maken het erg duur (wordt bijna nooit gebruikt)

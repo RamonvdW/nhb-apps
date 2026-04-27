@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2025 Ramon van der Winkel.
+#  Copyright (c) 2025-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -170,7 +170,7 @@ class EvenementBestelPlugin(BestelPluginBase):
                                 nummer=inschrijving.nummer,
                                 wanneer_afgemeld=now,
                                 status=EVENEMENT_AFMELDING_STATUS_AFGEMELD,
-                                bestelling=None,
+                                bestelling=None,            
                                 evenement=inschrijving.evenement,
                                 sporter=inschrijving.sporter,
                                 koper=inschrijving.koper,

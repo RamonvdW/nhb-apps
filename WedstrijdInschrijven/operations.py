@@ -5,8 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from Sporter.models import Sporter, SporterVoorkeuren
-from Wedstrijden.definities import (WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD, WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD,
-                                    WEDSTRIJD_BEGRENZING_TO_STR,
+from Wedstrijden.definities import (WEDSTRIJD_BEGRENZING_TO_STR,
                                     WEDSTRIJD_BEGRENZING_VERENIGING, WEDSTRIJD_BEGRENZING_REGIO,
                                     WEDSTRIJD_BEGRENZING_RAYON, WEDSTRIJD_BEGRENZING_WERELD)
 from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdInschrijving
@@ -53,9 +52,7 @@ def get_sessies(wedstrijd: Wedstrijd, sporter: Sporter,
                                          'sporterboog__sporter',
                                          'sporterboog__boogtype')
                          .filter(sessie__pk__in=sessie_pks,
-                                 sporterboog__sporter=sporter)
-                         .exclude(status__in=(WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD,
-                                              WEDSTRIJD_INSCHRIJVING_STATUS_VERWIJDERD))):
+                                 sporterboog__sporter=sporter)):
 
         sessie_pk = inschrijving.sessie.pk
         try:

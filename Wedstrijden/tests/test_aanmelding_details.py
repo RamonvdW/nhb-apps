@@ -7,7 +7,7 @@
 from django.test import TestCase
 from django.utils import timezone
 from BasisTypen.models import BoogType
-from Bestelling.models import Bestelling
+from Bestelling.models import Bestelling, BestellingMutatie
 from Bestelling.operations import bestel_mutatieverzoek_maak_bestellingen
 from Functie.models import Functie
 from Functie.tests.helpers import maak_functie
@@ -17,8 +17,8 @@ from Sporter.models import Sporter, SporterBoog
 from Sporter.operations import get_sporter_voorkeuren
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
-from Wedstrijden.definities import WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD, WEDSTRIJD_KORTING_VERENIGING
-from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdInschrijving, WedstrijdKorting
+from Wedstrijden.definities import WEDSTRIJD_KORTING_VERENIGING
+from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdInschrijving, WedstrijdAfgemeld, WedstrijdKorting
 from datetime import timedelta
 
 
@@ -28,9 +28,10 @@ class TestWedstrijdenAanmeldingDetails(E2EHelpers, TestCase):
 
     test_after = ('Wedstrijden.tests.test_aanmeldingen',)
 
-    url_details = '/wedstrijden/details-aanmelding/%s/'     # inschrijving_pk
-    url_aanpassen = '/wedstrijden/aanpassen/%s/'            # inschrijving_pk
-    url_afmelden = '/wedstrijden/afmelden/%s/'              # inschrijving_pk
+    url_aanmelding_details = '/wedstrijden/details-aanmelding/%s/'  # inschrijving_pk
+    url_afgemeld_details = '/wedstrijden/details-afmelding/%s/'     # afgemeld_pk
+    url_aanpassen = '/wedstrijden/aanpassen/%s/'                    # inschrijving_pk
+    url_afmelden = '/wedstrijden/afmelden/%s/'                      # inschrijving_pk
 
     url_wedstrijden_wijzig_wedstrijd = '/wedstrijden/%s/wijzig/'        # wedstrijd_pk
     url_wedstrijden_maak_nieuw = '/wedstrijden/vereniging/kies-type/'
@@ -200,7 +201,6 @@ class TestWedstrijdenAanmeldingDetails(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('wedstrijdinschrijven/inschrijven-toegevoegd-aan-mandje.dtl',
                                          'design/site_layout.dtl'))
-
         self.assertEqual(1, WedstrijdInschrijving.objects.count())
         self.inschrijving1r = WedstrijdInschrijving.objects.select_related('wedstrijd').first()
 
@@ -231,27 +231,51 @@ class TestWedstrijdenAanmeldingDetails(E2EHelpers, TestCase):
         self.inschrijving2 = WedstrijdInschrijving.objects.exclude(pk__in=(self.inschrijving1r.pk,
                                                                            self.inschrijving1c.pk))[0]
 
-        korting = WedstrijdKorting(
+        self.korting = WedstrijdKorting(
                         geldig_tot_en_met='2099-12-31',
                         soort=WEDSTRIJD_KORTING_VERENIGING,
                         uitgegeven_door=self.ver1,
                         percentage=42)
-        korting.save()
+        self.korting.save()
 
-        self.inschrijving1r.korting = korting
+        self.inschrijving1r.korting = self.korting
         self.inschrijving1r.save(update_fields=['korting'])
 
-        self.inschrijving2.status = WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD
-        self.inschrijving2.korting = korting
-        self.inschrijving2.save(update_fields=['status', 'korting'])
+    @staticmethod
+    def _maak_afmelding(inschrijving: WedstrijdInschrijving):
+        # zet een inschrijving om in een afmelding
+        afgemeld = WedstrijdAfgemeld.objects.create(
+                            wanneer_afgemeld=timezone.now(),
+                            wanneer_inschrijving=inschrijving.wanneer,
+                            reserveringsnummer=inschrijving.pk,
+                            wedstrijd=inschrijving.wedstrijd,
+                            sporterboog=inschrijving.sporterboog,
+                            sessie='oude sessie',
+                            wedstrijdklasse=inschrijving.wedstrijdklasse,
+                            bestelling=inschrijving.bestelling,
+                            koper=inschrijving.koper,
+                            korting=inschrijving.korting,
+                            bedrag_ontvangen=inschrijving.ontvangen_euro,
+                            bedrag_retour=inschrijving.retour_euro,
+                            log=inschrijving.log)
+
+        inschrijving.bestelling = None
+        inschrijving.save(update_fields=['bestelling'])
+        inschrijving.delete()
+
+        return afgemeld
 
     def test_anon(self):
         self.client.logout()
 
-        resp = self.client.get(self.url_details % self.inschrijving1r.pk)
+        resp = self.client.get(self.url_aanmelding_details % self.inschrijving1r.pk)
         self.assert403(resp)
 
         resp = self.client.get(self.url_afmelden % self.inschrijving1r.pk)
+        self.assert403(resp)
+
+        afgemeld = self._maak_afmelding(self.inschrijving1r)
+        resp = self.client.get(self.url_afgemeld_details % afgemeld.pk)
         self.assert403(resp)
 
     def test_details_sporter(self):
@@ -259,7 +283,7 @@ class TestWedstrijdenAanmeldingDetails(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_admin)
         self.e2e_wissel_naar_functie(self.functie_hwl)
 
-        url = self.url_details % self.inschrijving1r.pk
+        url = self.url_aanmelding_details % self.inschrijving1r.pk
 
         with self.assert_max_queries(20):
             resp = self.client.get(url)
@@ -281,27 +305,12 @@ class TestWedstrijdenAanmeldingDetails(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('wedstrijden/aanmelding-details.dtl', 'design/site_layout.dtl'))
 
-        # # maak de sporter niet ingeschreven
-        # self.inschrijving2.delete()
-        #
-        # url = self.url_details_aanmelding % self.inschrijving2.pk      # is afgemeld
-        # print('url=%s' % repr(url))
-        # with self.assert_max_queries(20):
-        #     resp = self.client.get(url)
-        # self.assertEqual(resp.status_code, 200)     # 200 = OK
-        # self.assert_html_ok(resp)
-        # self.assert_template_used(resp, ('wedstrijden/aanmelding-details.dtl', 'design/site_layout.dtl'))
-
         # bad
-        resp = self.client.get(self.url_details % 'Y<42')
+        resp = self.client.get(self.url_aanmelding_details % 'Y<42')
         self.assert404(resp, 'Geen valide parameter')
 
-        resp = self.client.get(self.url_details % 999999)
+        resp = self.client.get(self.url_aanmelding_details % 999999)
         self.assert404(resp, 'Inschrijving niet gevonden')
-
-        # maak 1 inschrijving afgemeld
-        self.inschrijving1c.status = WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD
-        self.inschrijving1c.save(update_fields=['status'])
 
         # verkeerde vereniging
         ver2 = Vereniging(
@@ -314,20 +323,61 @@ class TestWedstrijdenAanmeldingDetails(E2EHelpers, TestCase):
 
         self.e2e_wissel_naar_functie(self.functie_hwl)
 
-        url = self.url_details % self.inschrijving1c.pk
+        url = self.url_aanmelding_details % self.inschrijving1c.pk
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assert404(resp, 'Verkeerde vereniging')
+
+    def test_afmelden_exception(self):
+        # wordt HWL
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_wissel_naar_functie(self.functie_hwl)
+
+        self.assertEqual(BestellingMutatie.objects.count(), 3)
+
+        # verwijder 1 regel uit het mandje
+        # terwijl de toevoegen-aan-mandje mutatie nog niet verwerkt is
+        # en er dus geen bestelling regel aan gekoppeld is
+        url = self.url_afmelden % self.inschrijving1r.pk
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'snel': 1})
+        self.assert_is_redirect(resp, self.url_aanmelding_details % self.inschrijving1r.pk)
+
+        # verwerk de mutaties
+        # geeft fout bij "verwijder uit mandje" zonder bestelling regel
+        f1, f2, = self.verwerk_bestel_mutaties(fail_on_error=False)
+        # print('\nf1: %s\nf2: %s\n' % (f1.getvalue(), f2.getvalue()))
+        self.assertTrue('Onverwachte fout' in f2.getvalue())
 
     def test_afmelden(self):
         # wordt HWL
         self.e2e_login_and_pass_otp(self.account_admin)
         self.e2e_wissel_naar_functie(self.functie_hwl)
 
+        # zet het mandje om in een bestelling zodat er een bestelnummer aan komt te hangen
+        self.assertEqual(Bestelling.objects.count(), 0)
+        bestel_mutatieverzoek_maak_bestellingen(self.account, snel=True)
+        f1, f2, = self.verwerk_bestel_mutaties()
+        # print('\nf1: %s\nf2: %s\n' % (f1.getvalue(), f2.getvalue()))
+        self.assertEqual(Bestelling.objects.count(), 1)
+
+        # verwijder 1 regel uit het mandje
         url = self.url_afmelden % self.inschrijving1r.pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'snel': 1})
-        self.assert_is_redirect(resp, self.url_details % self.inschrijving1r.pk)
+        self.assert_is_redirect(resp, self.url_aanmelding_details % self.inschrijving1r.pk)
+
+        # zet het mandje om in een bestelling zodat er een bestelnummer aan komt te hangen
+        #self.assertEqual(Bestelling.objects.count(), 0)
+        bestel_mutatieverzoek_maak_bestellingen(self.account, snel=True)
+        f1, f2, = self.verwerk_bestel_mutaties()
+        # print('\nf1: %s\nf2: %s\n' % (f1.getvalue(), f2.getvalue()))
+        self.assertEqual(Bestelling.objects.count(), 1)
+
+        url = self.url_afmelden % self.inschrijving1c.pk
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'snel': 1})
+        self.assert_is_redirect(resp, self.url_aanmelding_details % self.inschrijving1c.pk)
 
         # maak een tweede vereniging
         ver2 = Vereniging(
@@ -338,7 +388,7 @@ class TestWedstrijdenAanmeldingDetails(E2EHelpers, TestCase):
         self.wedstrijd.organiserende_vereniging = ver2
         self.wedstrijd.save()
 
-        url = self.url_afmelden % self.inschrijving1r.pk
+        url = self.url_afmelden % self.inschrijving2.pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'snel': 1})
         self.assert404(resp, 'Verkeerde vereniging')
@@ -349,7 +399,7 @@ class TestWedstrijdenAanmeldingDetails(E2EHelpers, TestCase):
         url = self.url_afmelden % self.inschrijving2.pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'snel': 1})
-        self.assert_is_redirect(resp, self.url_details % self.inschrijving2.pk)  # is afgemeld
+        self.assert_is_redirect(resp, self.url_aanmelding_details % self.inschrijving2.pk)  # is afgemeld
 
         self.e2e_assert_other_http_commands_not_supported(url, post=False)
 
@@ -385,7 +435,7 @@ class TestWedstrijdenAanmeldingDetails(E2EHelpers, TestCase):
                                           'sessie': self.sessie_c.pk,
                                           'klasse': self.klasse_c.pk,
                                           'snel': 1})
-        self.assert_is_redirect(resp, self.url_details % self.inschrijving1r.pk)
+        self.assert_is_redirect(resp, self.url_aanmelding_details % self.inschrijving1r.pk)
         #self.assert404(resp, 'Slecht verzoek (3)')
 
         # maak een tweede vereniging
@@ -440,5 +490,64 @@ class TestWedstrijdenAanmeldingDetails(E2EHelpers, TestCase):
                                           'klasse': self.klasse_c_fout.pk,
                                           'snel': 1})
         self.assert404(resp, 'Slecht verzoek (3)')
+
+    def test_afgemeld_details(self):
+        # wordt HWL
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_wissel_naar_functie(self.functie_hwl)
+
+        resp = self.client.get(self.url_afgemeld_details % 99999)
+        self.assert404(resp, 'Afmelding niet gevonden')
+
+        resp = self.client.get(self.url_afgemeld_details % 'xyz')
+        self.assert404(resp, 'Geen valide parameter')
+
+        # zet het mandje om in een bestelling zodat er een bestelnummer aan komt te hangen
+        self.assertEqual(Bestelling.objects.count(), 0)
+        bestel_mutatieverzoek_maak_bestellingen(self.account, snel=True)
+        f1, f2, = self.verwerk_bestel_mutaties()
+        # print('\nf1: %s\nf2: %s\n' % (f1.getvalue(), f2.getvalue()))
+        self.assertEqual(Bestelling.objects.count(), 1)
+
+        # TODO: korting verdwijnt na omzetten - waarom?
+        self.inschrijving1r.korting = self.korting
+        self.inschrijving1r.save(update_fields=['korting'])
+
+        self.inschrijving1c.refresh_from_db()
+        afgemeld = self._maak_afmelding(self.inschrijving1c)        # geen korting
+        url = self.url_afgemeld_details % afgemeld.pk
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('wedstrijden/afgemeld-details.dtl', 'design/site_layout.dtl'))
+
+        # verkeerde vereniging
+        ver2 = Vereniging(
+                        ver_nr=2000,
+                        naam="Andere Club",
+                        regio=Regio.objects.get(regio_nr=116))
+        ver2.save()
+        self.wedstrijd.organiserende_vereniging = ver2
+        self.wedstrijd.save(update_fields=['organiserende_vereniging'])
+
+        resp = self.client.get(url)
+        self.assert404(resp, 'Verkeerde vereniging')
+
+        self.inschrijving1r.refresh_from_db()
+        self.inschrijving1r.bestelling = None                   # corner case: handmatig toegevoegd
+        afgemeld = self._maak_afmelding(self.inschrijving1r)    # met korting
+        url = self.url_afgemeld_details % afgemeld.pk
+
+        # als MWZ
+        self.e2e_wissel_naar_functie(self.functie_mwz)
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('wedstrijden/afgemeld-details.dtl', 'design/site_layout.dtl'))
+
 
 # end of file

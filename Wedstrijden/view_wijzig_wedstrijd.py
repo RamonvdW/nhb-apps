@@ -354,6 +354,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
 
         if self.rol_nu == Rol.ROL_MWZ:
             context['toon_ter_info'] = True
+            context['wijzig_ter_info'] = True
 
             context['keuze_aantal_scheids'] = [
                 (AANTAL_SCHEIDS_GEEN_KEUZE, 'Nog geen keuze gemaakt'),
@@ -371,6 +372,9 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
                 context['keuze_aantal_scheids'].pop(0)
 
         else:
+            if wedstrijd.is_ter_info:
+                context['toon_ter_info'] = True
+
             if wedstrijd.aantal_scheids == AANTAL_SCHEIDS_GEEN_KEUZE:
                 wedstrijd.aantal_scheids_str = ''
             elif wedstrijd.aantal_scheids == 0:

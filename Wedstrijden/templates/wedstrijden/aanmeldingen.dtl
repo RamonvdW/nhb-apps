@@ -90,22 +90,20 @@
                 </thead>
 
                 {% for aanmelding in aanmeldingen %}
-                    {% if not aanmelding.is_afgemeld  %}
-                        <tr{% if not aanmelding.is_definitief %} class="sv-blauw-text"{% endif %}>
-                            <td>{{ aanmelding.volg_nr }}</td>
-                            <td class="hide-on-small-only">{{ aanmelding.reserveringsnummer }}</td>
-                            <td class="hide-on-small-only">{{ aanmelding.wanneer }}</td>
-                            <td>{{ aanmelding.sporter_str }}</td>
-                            <td>{{ aanmelding.boog_str }}</td>
-                            <td>{{ aanmelding.status_str }}</td>
-                            <td class="hide-on-med-and-down">{{ aanmelding.korting_str }}</td>
-                            <td>
-                                {% if aanmelding.url_details %}
-                                    {% sv-knop-nav url=aanmelding.url_details icon='toon details' tekst='' %}
-                                {% endif %}
-                            </td>
-                        </tr>
-                    {% endif %}
+                    <tr{% if not aanmelding.is_definitief %} class="sv-blauw-text"{% endif %}>
+                        <td>{{ aanmelding.volg_nr }}</td>
+                        <td class="hide-on-small-only">{{ aanmelding.reserveringsnummer }}</td>
+                        <td class="hide-on-small-only">{{ aanmelding.wanneer }}</td>
+                        <td>{{ aanmelding.sporter_str }}</td>
+                        <td>{{ aanmelding.boog_str }}</td>
+                        <td>{{ aanmelding.status_str }}</td>
+                        <td class="hide-on-med-and-down">{{ aanmelding.korting_str }}</td>
+                        <td>
+                            {% if aanmelding.url_details %}
+                                {% sv-knop-nav url=aanmelding.url_details icon='toon details' tekst='' %}
+                            {% endif %}
+                        </td>
+                    </tr>
                 {% endfor %}
 
                 {% if aantal_aanmeldingen == 0 %}
@@ -141,7 +139,8 @@
             <table class="sv-kader-tabel">
                 <thead>
                     <tr>
-                        <th class="hide-on-small-only">Aangemeld op</th>
+                        <th class="hide-on-small-only">Reserverings<wbr>nummer</th>
+                        <th class="hide-on-small-only">Afgemeld op</th>
                         <th>Sporter</th>
                         <th>Boog</th>
                         <th>Status</th>
@@ -149,20 +148,19 @@
                     </tr>
                 </thead>
 
-                {% for aanmelding in aanmeldingen %}
-                    {% if aanmelding.is_afgemeld  %}
-                        <tr>
-                            <td class="hide-on-small-only">{{ aanmelding.wanneer }}</td>
-                            <td>{{ aanmelding.sporter_str }}</td>
-                            <td>{{ aanmelding.boog_str }}</td>
-                            <td>{{ aanmelding.status_str }}</td>
-                            <td>
-                                {% if aanmelding.url_details %}
-                                    {% sv-knop-nav url=aanmelding.url_details icon='toon details' tekst='' %}
-                                {% endif %}
-                            </td>
-                        </tr>
-                    {% endif %}
+                {% for afgemeld in afmeldingen %}
+                    <tr>
+                        <td class="hide-on-small-only">{{ afgemeld.reserveringsnummer }}</td>
+                        <td class="hide-on-small-only">{{ afgemeld.wanneer_afgemeld }}</td>
+                        <td>{{ afgemeld.sporter_str }}</td>
+                        <td>{{ afgemeld.boog_str }}</td>
+                        <td>Afgemeld</td>
+                        <td>
+                            {% if afgemeld.url_details %}
+                                {% sv-knop-nav url=afgemeld.url_details icon='toon details' tekst='' %}
+                            {% endif %}
+                        </td>
+                    </tr>
                 {% endfor %}
 
                 {% if aantal_afmeldingen == 0 %}

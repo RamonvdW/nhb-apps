@@ -88,7 +88,9 @@
                         <td>
                             <div style="white-space:nowrap">     <!-- keeps buttons side by side -->
                                 {% sv-knop-nav url=wed.url_wijzig icon='aanpassen' tekst='' smal=True %}
-                                {% sv-knop-nav url=wed.url_sessies icon='wedstrijd sessies' tekst='' smal=True %}
+                                {% if wed.url_sessies %}
+                                    {% sv-knop-nav url=wed.url_sessies icon='wedstrijd sessies' tekst='' smal=True %}
+                                {% endif %}
 
                                 {% if wed.url_check_kwalificatie_scores %}
                                     {% sv-knop-nav url=wed.url_check_kwalificatie_scores kleur='blauw' icon='wedstrijd kwalificatiescores' tekst='' smal=True %}

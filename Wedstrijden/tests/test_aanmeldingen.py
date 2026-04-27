@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2025 Ramon van der Winkel.
+#  Copyright (c) 2022-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -18,8 +18,9 @@ from Sporter.models import Sporter, SporterBoog
 from Sporter.operations import get_sporter_voorkeuren
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
-from Wedstrijden.definities import WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD, WEDSTRIJD_KORTING_VERENIGING
-from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdInschrijving, WedstrijdKorting, Kwalificatiescore
+from Wedstrijden.definities import WEDSTRIJD_KORTING_VERENIGING
+from Wedstrijden.models import (Wedstrijd, WedstrijdSessie, WedstrijdInschrijving, WedstrijdAfgemeld, WedstrijdKorting,
+                                Kwalificatiescore)
 from datetime import timedelta
 
 
@@ -204,6 +205,7 @@ class TestWedstrijdenAanmeldingen(E2EHelpers, TestCase):
 
         self.assertEqual(1, WedstrijdInschrijving.objects.count())
         self.inschrijving1r = WedstrijdInschrijving.objects.first()
+        self.assertIsNotNone(self.inschrijving1r.sessie)
 
         resp = self.client.post(self.url_inschrijven_toevoegen_mandje, {'snel': 1,
                                                                         'wedstrijd': self.wedstrijd.pk,
@@ -217,6 +219,25 @@ class TestWedstrijdenAanmeldingen(E2EHelpers, TestCase):
                                          'design/site_layout.dtl'))
         self.assertEqual(2, WedstrijdInschrijving.objects.count())
         self.inschrijving1c = WedstrijdInschrijving.objects.exclude(pk=self.inschrijving1r.pk)[0]
+        self.assertIsNotNone(self.inschrijving1c.sessie)
+
+        self.korting = WedstrijdKorting(
+                            geldig_tot_en_met='2099-12-31',
+                            soort=WEDSTRIJD_KORTING_VERENIGING,
+                            uitgegeven_door=self.ver1,
+                            percentage=42)
+        self.korting.save()
+
+        # zet het mandje om in een bestelling zodat er een bestelnummer aan komt te hangen
+        self.assertEqual(Bestelling.objects.count(), 0)
+        bestel_mutatieverzoek_maak_bestellingen(self.account, snel=True)
+        f1, f2, = self.verwerk_bestel_mutaties()
+        # print('\nf1: %s\nf2: %s\n' % (f1.getvalue(), f2.getvalue()))
+        self.assertEqual(Bestelling.objects.count(), 1)
+
+        # forceer de korting, ook al is deze niet toegevoegd door de bestelling
+        self.inschrijving1r.korting = self.korting
+        self.inschrijving1r.save(update_fields=['korting'])
 
         resp = self.client.post(self.url_inschrijven_toevoegen_mandje, {'snel': 1,
                                                                         'wedstrijd': self.wedstrijd.pk,
@@ -229,22 +250,30 @@ class TestWedstrijdenAanmeldingen(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('wedstrijdinschrijven/inschrijven-toegevoegd-aan-mandje.dtl',
                                          'design/site_layout.dtl'))
         self.assertEqual(3, WedstrijdInschrijving.objects.count())
-        self.inschrijving2 = WedstrijdInschrijving.objects.exclude(pk__in=(self.inschrijving1r.pk,
-                                                                           self.inschrijving1c.pk))[0]
 
-        korting = WedstrijdKorting(
-                        geldig_tot_en_met='2099-12-31',
-                        soort=WEDSTRIJD_KORTING_VERENIGING,
-                        uitgegeven_door=self.ver1,
-                        percentage=42)
-        korting.save()
+    @staticmethod
+    def _maak_afmelding(inschrijving: WedstrijdInschrijving):
+        # zet een inschrijving om in een afmelding
+        afgemeld = WedstrijdAfgemeld.objects.create(
+                            wanneer_afgemeld=timezone.now(),
+                            wanneer_inschrijving=inschrijving.wanneer,
+                            reserveringsnummer=inschrijving.pk,
+                            wedstrijd=inschrijving.wedstrijd,
+                            sporterboog=inschrijving.sporterboog,
+                            sessie='oude sessie',
+                            wedstrijdklasse=inschrijving.wedstrijdklasse,
+                            bestelling=inschrijving.bestelling,
+                            koper=inschrijving.koper,
+                            korting=inschrijving.korting,
+                            bedrag_ontvangen=inschrijving.ontvangen_euro,
+                            bedrag_retour=inschrijving.retour_euro,
+                            log=inschrijving.log)
 
-        self.inschrijving1r.korting = korting
-        self.inschrijving1r.save(update_fields=['korting'])
+        inschrijving.bestelling = None
+        inschrijving.save(update_fields=['bestelling'])
+        inschrijving.delete()
 
-        self.inschrijving2.status = WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD
-        self.inschrijving2.korting = korting
-        self.inschrijving2.save(update_fields=['status', 'korting'])
+        return afgemeld
 
     def test_anon(self):
         self.client.logout()
@@ -271,9 +300,26 @@ class TestWedstrijdenAanmeldingen(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('wedstrijden/aanmeldingen.dtl', 'design/site_layout.dtl'))
 
+        afgemeld = self._maak_afmelding(self.inschrijving1r)
+
+        url = self.url_aanmeldingen_wedstrijd % self.wedstrijd.pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('wedstrijden/aanmeldingen.dtl', 'design/site_layout.dtl'))
+
+        # zet een korting op de afmelding
+        afgemeld.korting = None
+        afgemeld.save(update_fields=['korting'])
+
         # als MWZ (andere kruimels, verder niets)
         self.e2e_wissel_naar_functie(self.functie_mwz)
-        self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('wedstrijden/aanmeldingen.dtl', 'design/site_layout.dtl'))
 
         self.e2e_assert_other_http_commands_not_supported(url)
 
@@ -299,13 +345,6 @@ class TestWedstrijdenAanmeldingen(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assert200_is_bestand_csv(resp)
-
-        # zet het mandje om in een bestelling zodat er een bestelnummer aan komt te hangen
-        self.assertEqual(Bestelling.objects.count(), 0)
-        bestel_mutatieverzoek_maak_bestellingen(self.account, snel=True)
-        f1, f2, = self.verwerk_bestel_mutaties()
-        # print('\nf1: %s\nf2: %s\n' % (f1.getvalue(), f2.getvalue()))
-        self.assertEqual(Bestelling.objects.count(), 1)
 
         # zet para voorwerpen
         self.sporter1_voorkeuren.para_voorwerpen = True
