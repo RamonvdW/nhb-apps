@@ -127,9 +127,9 @@ class TestGoogleDriveStorageSheets(E2EHelpers, TestCase):
                 sheet.selecteer_file('x')
                 sheet.toon_sheet('test')
                 sheet.hide_sheet('test')
-                with self.assertRaises(StorageError) as exc:
+                with self.assertRaises(StorageError):
                     sheet.toon_sheet('fail')
-                with self.assertRaises(StorageError) as exc:
+                with self.assertRaises(StorageError):
                     sheet.hide_sheet('fail')
 
                 sheet.stuur_wijzigingen()
@@ -139,7 +139,7 @@ class TestGoogleDriveStorageSheets(E2EHelpers, TestCase):
             my_service = GoogleApiMock(verbose=False)
             with patch('GoogleDrive.operations.storage_sheets.build', return_value=my_service):
                 my_service.prime_error('reason', 'retry', 'GoogleApiError')
-                with self.assertRaises(StorageError) as exc:
+                with self.assertRaises(StorageError):
                     sheet.selecteer_file('x')
 
     def test_range(self):

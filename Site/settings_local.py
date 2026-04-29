@@ -123,7 +123,7 @@ BONDSPAS_FONT = '/usr/share/fonts/truetype/liberation2/LiberationSans-Regular.tt
 BONDSPAS_FONT_BOLD = '/usr/share/fonts/truetype/liberation2/LiberationSans-Bold.ttf'
 
 # the full path to the installation directory where each app subdirectory is located
-# this is used to access resources like CompLaagRayon/files/template-excel-rk-teams.xls
+# this is used to access resources like CompKampioenschap/files/template-excel-teams.xlsx
 INSTALL_PATH = '/directory/on/server/nhbapps-venv/project/'
 
 # toon het kaartje Opleidingen?
@@ -194,7 +194,7 @@ GOOGLEMAPS_API_URL = None
 GOOGLEMAPS_API_KEY = 'AIzaDummy'
 
 # hoe vaak de reistijd verversen?
-# 183 = 6 maanden
+# 183 dagen = 6 maanden
 REISTIJD_VERVERSEN_NA_DAGEN = 183
 
 # voor sommige adressen werkt de geocode API niet...
@@ -246,5 +246,18 @@ CREDENTIALS_SERVICE_ACCOUNT_DOWNLOADER = 'file2_with_credentials_service-account
 CRM_URL = 'url'
 CRM_TITEL = 'title'
 CRM_BESCHRIJVING = 'Persoonsgegevens van leden worden geadministreerd in een apart systeem.'
+
+
+# voeg /_api/site/id/ toe om aan de site url (vereist dat je ingelogd bent en toegang hebt)
+# https://yoursite.sharepoint.com/sites/Folder-Name/_api/site/id/
+# retourneert een kort xml doc met het site id:
+# <d:Id m:type="Edm.Guid">12345678-1234-1234-1234-123456789abc</d:Id>
+
+GRAPH_SITE_ID = "12345678-1234-1234-1234-123456789abc"
+
+# credentials voor toegang to shared document op Sharepoint/Teams site van de bond
+GRAPH_TENANT_ID = "b9999999-8888-7777-6666-543210123456"
+GRAPH_CLIENT_ID = "b8888888-9999-4444-6666-543210123456"
+GRAPH_CLIENT_SECRET = "sssst"
 
 # end of file

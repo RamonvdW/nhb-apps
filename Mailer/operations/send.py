@@ -92,7 +92,7 @@ def _send_mail_postmark(obj, stdout=None, stderr=None):
 
     if flag_bad:
         global _bad_email_handler
-        if _bad_email_handler:
+        if _bad_email_handler:                  # pragma: no branch
             _bad_email_handler(obj.mail_to)     # noqa
 
 

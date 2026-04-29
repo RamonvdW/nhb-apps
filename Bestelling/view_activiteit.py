@@ -12,13 +12,15 @@ from django.views.generic import TemplateView
 from django.urls import reverse
 from Account.models import get_account
 from Bestelling.definities import (BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_BETALING_ACTIEF,
-                                   BESTELLING_STATUS_MISLUKT, BESTELLING_STATUS2STR, BESTELLING_REGEL_CODE2STR,
+                                   BESTELLING_STATUS_GEANNULEERD, BESTELLING_STATUS_MISLUKT, BESTELLING_STATUS2STR,
                                    BESTELLING_KORT_BREAK,
+                                   BESTELLING_REGEL_CODE2STR,
                                    BESTELLING_REGEL_CODE_WEBWINKEL, BESTELLING_REGEL_CODE_WEDSTRIJD,
                                    BESTELLING_REGEL_CODE_OPLEIDING, BESTELLING_REGEL_CODE_EVENEMENT)
 from Bestelling.forms import ZoekBestellingForm
 from Bestelling.models import Bestelling
 from Betaal.definities import TRANSACTIE_TYPE_MOLLIE_PAYMENT
+from Betaal.format import format_bedrag_euro
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
 import datetime
@@ -153,6 +155,7 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
             laatste_opleiding_beschrijving = ''
 
             for regel in bestelling.regels_list:
+                regel.bedrag_euro_str = format_bedrag_euro(regel.bedrag_euro)
 
                 regel.korte_beschrijving_lst = regel.korte_beschrijving.split(BESTELLING_KORT_BREAK)
 
@@ -185,7 +188,13 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
             if aantal_opleiding:
                 beschrijvingen.append('%sx %s' % (aantal_opleiding, laatste_opleiding_beschrijving))
 
-            bestelling.beschrijving_kort = " + ".join(beschrijvingen) if len(beschrijvingen) else "?"
+            if len(beschrijvingen):
+                bestelling.beschrijving_kort = " + ".join(beschrijvingen)
+            else:
+                if bestelling.status == BESTELLING_STATUS_GEANNULEERD:
+                    bestelling.beschrijving_kort = "Geannuleerd"
+                else:
+                    bestelling.beschrijving_kort = "?"
 
             bestelling.trans_list = list()
             transactie_mollie = None

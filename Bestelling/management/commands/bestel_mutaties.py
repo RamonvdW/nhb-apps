@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2025 Ramon van der Winkel.
+#  Copyright (c) 2022-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -95,6 +95,7 @@ class Command(BaseCommand):
                        .get(pk=pk))
 
             self.verwerk_mutaties.verwerk(mutatie)
+
             mutatie.is_verwerkt = True
             mutatie.save(update_fields=['is_verwerkt'])
             did_useful_work = True

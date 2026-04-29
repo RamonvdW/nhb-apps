@@ -306,8 +306,7 @@ class TestGoogleDriveOpStorageDrive(E2EHelpers, TestCase):
             my_service.prime_error('test C', 'top', 'no files')
             with self.assertRaises(StorageError) as exc:
                 drive.maak_sheet_van_template(18, False, False, 1, 3, 'fname')
-            self.assertEqual("{vind_globale_folder} Missing 'files' in response",
-                             str(exc.exception))
+            self.assertEqual("{vind_globale_folder} Missing 'files' in response", str(exc.exception))
         del drive
 
         # kan globale 'templates' folder niet vinden
@@ -317,8 +316,7 @@ class TestGoogleDriveOpStorageDrive(E2EHelpers, TestCase):
             my_service.prime_error('test D', 'templates', 'empty folder')
             with self.assertRaises(StorageError) as exc:
                 drive.maak_sheet_van_template(18, False, False, 1, 3, 'fname')
-            self.assertEqual("{vind_templates_folder} Templates folder 'templates' not found",
-                             str(exc.exception))
+            self.assertEqual("{vind_templates_folder} Templates folder 'templates' not found", str(exc.exception))
         del drive
 
     def test_maak_folder(self):
@@ -361,8 +359,7 @@ class TestGoogleDriveOpStorageDrive(E2EHelpers, TestCase):
             my_service.prime_error('test L2', 'site1234', 'no files')
             with self.assertRaises(StorageError) as exc:
                 drive.maak_sheet_van_template(18, False, False, 1, 3, 'fname3')
-            self.assertEqual("{list_folder} No 'files' in response",
-                             str(exc.exception))
+            self.assertEqual("{list_folder} No 'files' in response", str(exc.exception))
         del drive
 
         # trigger de KeyError fout tijdens list_folder
@@ -387,8 +384,7 @@ class TestGoogleDriveOpStorageDrive(E2EHelpers, TestCase):
                 # omdat de seizoen folder er niet is, zijn de deel-folders er ook niet
                 with self.assertRaises(StorageError) as exc:
                     drive.maak_sheet_van_template(18, False, False, 1, 2, 'fname3')
-                self.assertEqual("Folder '18 Indiv RK' niet gevonden",
-                                 str(exc.exception))
+                self.assertEqual("Folder '18 Indiv RK' niet gevonden", str(exc.exception))
         del drive
 
         # seizoen folder is al gedeeld

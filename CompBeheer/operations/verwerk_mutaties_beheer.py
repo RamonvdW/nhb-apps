@@ -24,6 +24,8 @@ from CompLaagBond.operations import maak_deelnemerslijst_bk_indiv, maak_deelneme
 from CompLaagRayon.operations import bepaal_deelnemers_rk_indiv, converteer_rk_teams_tijdelijke_leden
 
 
+# TODO: meer zaken in het logboek schrijven
+
 class VerwerkCompBeheerMutaties:
 
     """

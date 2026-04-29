@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2025 Ramon van der Winkel.
+#  Copyright (c) 2021-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.conf import settings
 from django.utils import timezone
 from Account.models import Account
+from BasisTypen.models import KalenderWedstrijdklasse
 from Bestelling.definities import (BESTELLING_MUTATIE_WEDSTRIJD_INSCHRIJVEN, BESTELLING_MUTATIE_WEBWINKEL_KEUZE,
                                    BESTELLING_MUTATIE_MAAK_BESTELLINGEN, BESTELLING_MUTATIE_VERWIJDER,
                                    BESTELLING_MUTATIE_WEDSTRIJD_AFMELDEN, BESTELLING_MUTATIE_BETALING_AFGEROND,
@@ -22,7 +23,7 @@ from Opleiding.models import OpleidingInschrijving
 from Site.core.background_sync import BackgroundSync
 from Sporter.models import SporterBoog
 from Webwinkel.models import WebwinkelKeuze
-from Wedstrijden.models import WedstrijdInschrijving, WedstrijdSessie, KalenderWedstrijdklasse
+from Wedstrijden.models import WedstrijdInschrijving, WedstrijdSessie
 import time
 
 

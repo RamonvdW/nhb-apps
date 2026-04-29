@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -244,6 +244,10 @@ class NieuwWachtwoordView(UserPassesTestMixin, TemplateView):
             del request.session['moet_oude_ww_weten']
         except KeyError:
             pass
+
+        # track het session_id in de log zodat we deze kunnen koppelen aan de webserver logs
+        session_id = request.session.session_key
+        my_logger.info('Account %s has SESSION %s' % (repr(self.account.username), repr(session_id)))
 
         # schrijf in het logboek
         schrijf_in_logboek(account=self.account,
