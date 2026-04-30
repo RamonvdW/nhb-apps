@@ -17,7 +17,8 @@ from CompBeheer.operations.maak_mutaties_beheer import (maak_mutatie_doorzetten_
                                                         maak_mutatie_kamp_indiv_doorzetten_naar_bk,
                                                         maak_mutatie_kamp_teams_doorzetten_naar_bk,
                                                         maak_mutatie_kamp_indiv_afsluiten, maak_mutatie_kamp_teams_afsluiten)
-from CompLaagRayon.models import TeamRK
+from CompLaagBond.models import DeelnemerBK, TeamBK
+from CompLaagRayon.models import DeelnemerRK, TeamRK
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
 
@@ -605,6 +606,51 @@ class BevestigEindstandBKIndivView(DoorzettenBasisView):
     url_name = 'bko-bevestig-eindstand-bk-indiv'
     is_afsluiten = True
 
+    def _check_uitslag_compleet(self) -> list[str]:
+        problemen = list()
+
+        # kijk of er klassen zijn zonder uitslag
+        klasse_heeft_uitslag = dict()   # [klasse.pk] = bool
+
+        # zoek alle klassen
+        for deelnemer in (DeelnemerBK
+                          .objects
+                          .filter(kamp__competitie=self.comp)
+                          .order_by('indiv_klasse')
+                          .distinct('indiv_klasse')):
+            klasse_pk = deelnemer.indiv_klasse.pk
+            klasse_heeft_uitslag[klasse_pk] = False
+        # for
+
+        # zoek klassen met gepubliceerde uitslag
+        for deelnemer in (DeelnemerBK
+                          .objects
+                          .filter(kamp__competitie=self.comp)
+                          .exclude(result_rank=0)
+                          .order_by('indiv_klasse')
+                          .distinct('indiv_klasse')):
+            klasse_pk = deelnemer.indiv_klasse.pk
+            klasse_heeft_uitslag[klasse_pk] = True
+        # for
+
+        klasse_pks = [klasse_pk
+                      for klasse_pk, heeft_uitslag in klasse_heeft_uitslag.items()
+                      if not heeft_uitslag]
+
+        if len(klasse_pks) > 0:
+            for deelnemer in (DeelnemerBK
+                              .objects
+                              .filter(kamp__competitie=self.comp,
+                                      indiv_klasse__pk__in=klasse_pks)
+                              .order_by('indiv_klasse__volgorde')
+                              .distinct('indiv_klasse__volgorde')):
+
+                probleem = 'Klasse zonder uitslag: %s' % deelnemer.indiv_klasse.beschrijving
+                problemen.append(probleem)
+            # for
+
+        return problemen
+
 
 class BevestigEindstandBKTeamsView(DoorzettenBasisView):
 
@@ -616,6 +662,23 @@ class BevestigEindstandBKTeamsView(DoorzettenBasisView):
     url_name = 'bko-bevestig-eindstand-bk-teams'
     is_teams = True
     is_afsluiten = True
+
+    def _check_uitslag_compleet(self) -> list[str]:
+        problemen = list()
+
+        # kijk of er klassen zijn zonder uitslag
+        for team in (TeamBK
+                     .objects
+                     .filter(kamp__competitie=self.comp,
+                             result_rank=0)
+                     .order_by('team_klasse__volgorde')
+                     .distinct('team_klasse__volgorde')):
+
+            probleem = 'Klasse zonder uitslag: %s' % team.team_klasse.beschrijving
+            problemen.append(probleem)
+        # for
+
+        return problemen
 
 
 # end of file
