@@ -34,6 +34,17 @@
 
     {% include 'design/check_js_enabled.dtl' %}
 
+    {% if menu_toon_mandje %}
+        <!-- blauwe balk met kaartjes -->
+        <div class="row-sv-blauw">
+            <div class="col s12">
+                <!-- mandje -->
+                {% url 'Bestelling:toon-inhoud-mandje' as card_url %}
+                {% include 'design/card_icon.dtl' with title="Naar je mandje" text="Mandje bekijken, bestelling afronden en betalen." sv_icon="mandje" url=card_url %}
+            </div>
+        </div>
+    {% endif %}
+
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">

@@ -135,6 +135,20 @@
                         </li>
                     {% endif %}
 
+                    {% if menu_toon_mandje %}
+                        <li class="divider"></li>
+                        <li>
+                            <a href="{{ url_toon_mandje }}">
+                                <i>{% sv-icon 'mandje' %}</i>Mandje&nbsp;
+                                {% if menu_mandje_aantal > 1 %}
+                                    <span class="new badge" data-badge-caption="producten">{{ menu_mandje_aantal }}</span>
+                                {% else %}
+                                    <span class="new badge" data-badge-caption="product">{{ menu_mandje_aantal }}</span>
+                                {% endif %}
+                            </a>
+                        </li>
+                    {% endif %}
+
                     {% if menu_url_uitloggen %}
                         <li class="divider"></li>
                         <li>

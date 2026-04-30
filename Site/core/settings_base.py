@@ -62,7 +62,7 @@ APPS_DIR = os.path.dirname(BASE_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2026-04-27'
+SITE_VERSIE = '2026-04-30'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -133,6 +133,7 @@ INSTALLED_APPS = [
 #
 # TODO: ContentSecurityPolicyMiddleware provides: (see https://docs.djangoproject.com/en/6.0/ref/csp/)
 # - Content-Security-Policy header ('default-src=self')
+# voorlopig geregeld via webserver header
 #
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',                # security (https improvements)
