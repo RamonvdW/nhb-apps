@@ -535,6 +535,8 @@ class DoorzettenIndivRKNaarBKView(DoorzettenBasisView):
     fase_verkeerd_404 = True
     url_name = 'bko-rk-indiv-doorzetten-naar-bk'
 
+    # TODO: check uitslag compleet
+
 
 class DoorzettenTeamsRKNaarBKView(DoorzettenBasisView):
 

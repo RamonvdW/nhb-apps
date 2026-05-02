@@ -49,6 +49,8 @@ class VerwerkMutatiesRayon:
             het vaststellen van de wedstrijdklasse voor de RK teams volgt later
         """
 
+        stamp = timezone.localtime(timezone.now()).strftime('%Y-%m-%d om %H:%M')
+
         # maak een look-up tabel van RegioCompetitieSporterBoog naar KampioenschapSporterBoog
         sporterboog_pk2regiocompetitiesporterboog = dict()
         for deelnemer in (RegiocompetitieSporterBoog
@@ -116,7 +118,9 @@ class VerwerkMutatiesRayon:
             # de klasse wordt later bepaald als de klassengrenzen vastgesteld zijn
             team.team_klasse = None
 
-            team.save(update_fields=['aanvangsgemiddelde', 'team_klasse'])
+            team.logboek += '[%s] Team leden overgezet van tijdelijke inschrijving regio naar RK deelnemers\n' % stamp
+
+            team.save(update_fields=['aanvangsgemiddelde', 'team_klasse', 'logboek'])
         # for
 
         # FUTURE: maak een taak aan voor de HWL's om de RK teams te herzien (eerst functionaliteit voor HWL maken)
@@ -125,6 +129,8 @@ class VerwerkMutatiesRayon:
         self.stdout.write('[INFO] Verwerk mutatie %s: RK teams opnieuw nummeren' % mutatie.pk)
         deelkamp = mutatie.kamp_rk
         team_klasse = mutatie.team_klasse
+
+        stamp = timezone.localtime(timezone.now()).strftime('%Y-%m-%d om %H:%M')
 
         self.stdout.write('[INFO] RK teams opnieuw nummeren voor kampioenschap %s team klasse %s' % (deelkamp,
                                                                                                      team_klasse))
@@ -141,8 +147,10 @@ class VerwerkMutatiesRayon:
 
             rank += 1
             if rank != team.rank:
+                msg = '[%s] Rank %s -> %s tijdens opnieuw nummeren\n' % (stamp, team.rank, rank)
+                team.logboek += msg
                 team.rank = rank
-                team.save(update_fields=['rank'])
+                team.save(update_fields=['rank', 'logboek'])
         # for
 
         # zorg dat het google sheet bijgewerkt worden
