@@ -9,6 +9,7 @@ from django.http import HttpResponse, Http404
 from django.urls import reverse
 from django.utils import timezone
 from django.views.generic import TemplateView, View
+from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.definities import GESLACHT2STR
 from Betaal.format import format_bedrag_euro
@@ -51,11 +52,11 @@ class WedstrijdAanmeldingenView(UserPassesTestMixin, TemplateView):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.rol_nu = None
+        self.rol_nu, self.functie_nu = None, None
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        self.rol_nu = rol_get_huidige(self.request)
+        self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
         return self.rol_nu in (Rol.ROL_HWL, Rol.ROL_MWZ)
 
     def get_context_data(self, **kwargs):
@@ -72,6 +73,17 @@ class WedstrijdAanmeldingenView(UserPassesTestMixin, TemplateView):
             raise Http404('Wedstrijd niet gevonden')
 
         context['wed'] = wedstrijd
+
+        uitvoerend = False
+        if self.rol_nu == Rol.ROL_HWL:
+            ver = self.functie_nu.vereniging
+            if wedstrijd.uitvoerende_vereniging == ver:
+                uitvoerend = True
+            else:
+                if wedstrijd.organiserende_vereniging != ver:
+                    raise PermissionDenied('Wedstrijd niet van jouw vereniging')
+
+        context['uitvoerend'] = uitvoerend
 
         totaal_ontvangen_euro = Decimal('000.00')
         totaal_retour_euro = Decimal('000.00')
@@ -212,7 +224,8 @@ class DownloadAanmeldingenBestandTSV(UserPassesTestMixin, View):
             raise Http404('Wedstrijd niet gevonden')
 
         if self.rol_nu == Rol.ROL_HWL:
-            if wedstrijd.organiserende_vereniging.ver_nr != self.functie_nu.vereniging.ver_nr:
+            ver = self.functie_nu.vereniging
+            if wedstrijd.uitvoerende_vereniging != ver and wedstrijd.organiserende_vereniging != ver:
                 raise Http404('Wedstrijd is niet bij jullie vereniging')
 
         lid_nr2geslacht = dict()     # [lid_nr] = wedstrijd geslacht (M/V/X)
@@ -321,7 +334,8 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
             raise Http404('Wedstrijd niet gevonden')
 
         if self.rol_nu == Rol.ROL_HWL:
-            if wedstrijd.organiserende_vereniging.ver_nr != self.functie_nu.vereniging.ver_nr:
+            ver = self.functie_nu.vereniging
+            if wedstrijd.uitvoerende_vereniging != ver and wedstrijd.organiserende_vereniging != ver:
                 raise Http404('Wedstrijd is niet bij jullie vereniging')
 
         lid_nr2voorkeuren = dict()   # [lid_nr] = SporterVoorkeuren

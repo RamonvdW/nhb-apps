@@ -16,7 +16,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
 from BasisTypen.definities import (GESLACHT_ALLE,
                                    ORGANISATIES2LONG_STR, ORGANISATIES2SHORT_STR,
-                                   ORGANISATIE_WA, ORGANISATIE_WA_STRIKT, ORGANISATIE_IFAA)
+                                   ORGANISATIE_WA, ORGANISATIE_IFAA)
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
 from BasisTypen.operations import get_organisatie_boogtypen, get_organisatie_klassen
 from Functie.definities import Rol
@@ -74,10 +74,18 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
         except Wedstrijd.DoesNotExist:
             raise Http404('Wedstrijd niet gevonden')
 
-        if self.rol_nu == Rol.ROL_HWL and wedstrijd.organiserende_vereniging != self.functie_nu.vereniging:
-            raise PermissionDenied('Wedstrijd niet van jouw vereniging')
-
         context['wed'] = wedstrijd
+
+        uitvoerend = False
+        if self.rol_nu == Rol.ROL_HWL:
+            ver = self.functie_nu.vereniging
+            if wedstrijd.uitvoerende_vereniging == ver:
+                uitvoerend = True
+            else:
+                if wedstrijd.organiserende_vereniging != ver:
+                    raise PermissionDenied('Wedstrijd niet van jouw vereniging')
+
+        context['mag_wijzigen'] = not uitvoerend
 
         # zorg dat de huidige datum weer gekozen kan worden
         context['now'] = now = timezone.now()
@@ -125,6 +133,9 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
         if wedstrijd.status == WEDSTRIJD_STATUS_GEANNULEERD:
             context['limit_edits'] = True
             context['block_edits'] = True
+            context['niet_verwijderbaar'] = True
+
+        if uitvoerend:
             context['niet_verwijderbaar'] = True
 
         # bereken hoeveel dagen de wedstrijd duurt

@@ -639,7 +639,8 @@ class WedstrijdHWLContactView(UserPassesTestMixin, TemplateView):
         except Wedstrijd.DoesNotExist:
             raise Http404('Wedstrijd niet gevonden')
 
-        if wedstrijd.organiserende_vereniging != self.functie_nu.vereniging:
+        ver = self.functie_nu.vereniging
+        if not (wedstrijd.organiserende_vereniging == ver or wedstrijd.uitvoerende_vereniging == ver):
             raise Http404('Verkeerde beheerders')
 
         context['wed'] = wedstrijd

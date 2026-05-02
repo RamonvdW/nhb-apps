@@ -8,6 +8,7 @@ from django.conf import settings
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.utils import timezone
+from django.db.models import Q
 from django.shortcuts import render
 from django.views.generic import View
 from django.contrib.auth.mixins import UserPassesTestMixin
@@ -62,7 +63,7 @@ class VerenigingWedstrijdenView(UserPassesTestMixin, View):
 
         wedstrijden = (Wedstrijd
                        .objects
-                       .filter(organiserende_vereniging=ver,
+                       .filter(Q(organiserende_vereniging=ver) | Q(uitvoerende_vereniging=ver),
                                datum_begin__gt=datum)
                        .order_by('datum_begin',
                                  'pk'))

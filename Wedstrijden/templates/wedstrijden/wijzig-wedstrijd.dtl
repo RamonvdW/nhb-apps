@@ -103,7 +103,11 @@
                             <tr>
                                 <th>Titel</th>
                                 <td>
-                                    <input type="text" name="titel" value="{{ wed.titel }}" oninput="gewijzigd()">
+                                    {% if mag_wijzigen %}
+                                        <input type="text" name="titel" value="{{ wed.titel }}" oninput="gewijzigd()">
+                                    {% else %}
+                                        <span>{{ wed.titel }}</span>
+                                    {% endif %}
                                 </td>
                             </tr>
 
@@ -201,8 +205,8 @@
                                     {% for opt in opt_status %}
                                         <span class="{% if opt.selected %}sv-blauw-text{% else %}grey-text{% endif %}" style="white-space: nowrap">{{ opt.status_str }}</span><br>
                                     {% endfor %}
-                                    <br>
                                     {% if url_prev_tekst %}
+                                        <br>
                                         <button form="form_prev" class="btn-sv-blauw vertrek_knop" id="submit_knop2" type="submit">{{ url_prev_tekst }}</button>
                                         <span>&nbsp;&nbsp;</span>
                                     {% endif %}
@@ -227,6 +231,13 @@
                                 <th>Organiserende vereniging</th>
                                 <td>{{ wed.organiserende_vereniging }}</td>
                             </tr>
+
+                            {% if not mag_wijzigen %}
+                                <tr>
+                                    <th>Uitvoerende vereniging</th>
+                                    <td>{{ wed.uitvoerende_vereniging }}</td>
+                                </tr>
+                            {% endif %}
 
                             <tr>
                                 <th>Datum begin wedstrijd</th>
@@ -259,11 +270,19 @@
                                 <tr>
                                     <th>Wanneer moet de inschrijving sluiten?</th>
                                     <td>
-                                        <select name="sluit" onchange="gewijzigd()">
+                                        {% if mag_wijzigen %}
+                                            <select name="sluit" onchange="gewijzigd()">
+                                                {% for opt in opt_sluit %}
+                                                    <option value="{{ opt.sel }}"{% if opt.selected %} selected{% endif %}>{{ opt.keuze_str }} (op {{ opt.datum }} om 00:00)</option>
+                                                {% endfor %}
+                                            </select>
+                                        {% else %}
                                             {% for opt in opt_sluit %}
-                                                <option value="{{ opt.sel }}"{% if opt.selected %} selected{% endif %}>{{ opt.keuze_str }} (op {{ opt.datum }} om 00:00)</option>
+                                                {% if opt.selected %}
+                                                    <span>{{ opt.keuze_str }} (op {{ opt.datum }} om 00:00)</span>
+                                                {% endif %}
                                             {% endfor %}
-                                        </select>
+                                        {% endif %}
                                     </td>
                                 </tr>
                             {% endif %}
@@ -308,8 +327,12 @@
                            <tr>
                                 <th>Nieuwsbericht of brochure</th>
                                 <td>
-                                    {% if block_edits %}
-                                        <span>{{ wed.url_flyer }}</span>
+                                    {% if block_edits or not mag_wijzigen %}
+                                        {% if wed.url_flyer %}
+                                            <span>{{ wed.url_flyer }}</span>
+                                        {% else %}
+                                            <i>Geen</i>
+                                        {% endif %}
                                     {% else %}
                                         <input type="url" name="url_flyer" value="{{ wed.url_flyer }}" inputmode="url" placeholder="https://een-site.nl/flyer.pdf" oninput="gewijzigd()">
                                     {% endif %}
@@ -319,8 +342,12 @@
                            <tr>
                                 <th>Gepubliceerde deelnemerslijst</th>
                                 <td>
-                                    {% if block_edits %}
-                                        <span>{{ wed.url_deelnemerslijst }}</span>
+                                    {% if block_edits or not mag_wijzigen %}
+                                        {% if wed.url_deelnemerslijst %}
+                                            <code>{{ wed.url_deelnemerslijst }}</code>
+                                        {% else %}
+                                            <i>Geen</i>
+                                        {% endif %}
                                     {% else %}
                                         <input type="url" name="url_deelnemers" value="{{ wed.url_deelnemerslijst }}" inputmode="url" placeholder="https://een-site.nl/deelnemers.pdf" oninput="gewijzigd()">
                                     {% endif %}
@@ -362,7 +389,7 @@
                             <tr>
                                 <th>Doelgroep</th>
                                 <td>
-                                    {% if block_edits %}
+                                    {% if block_edits or not mag_wijzigen %}
                                         <span>{{ wed.begrenzing_str }}</span>
                                     {% else %}
                                         <ul id="id_doelgroep">
@@ -382,8 +409,8 @@
                             <tr>
                                 <th>Wedstrijd locatie</th>
                                 <td>
-                                    {% if block_edits %}
-                                        <span>{{ wed.locatie }}</span>
+                                    {% if block_edits or not mag_wijzigen %}
+                                        <span>{{ wed.locatie.adres|linebreaksbr }}</span>
                                     {% else %}
                                         {% if toon_uitvoerende %}
                                             <select name="uitvoerend" onchange="gewijzigd()">
@@ -461,7 +488,7 @@
                                 <th>E-mail<wbr>adres</th>
                                 <td>
                                     {% if block_edits %}
-                                        <span>{{ wed.contact_email }}</span>
+                                        <code>{{ wed.contact_email }}</code>
                                     {% else %}
                                         <input type="email" name="contact_email" value="{{ wed.contact_email }}" inputmode="email" oninput="gewijzigd()">
                                     {% endif %}
@@ -471,8 +498,12 @@
                             <tr>
                                 <th>Website</th>
                                 <td>
-                                    {% if block_edits %}
-                                        <span>{{ wed.contact_website }}</span>
+                                    {% if block_edits or not mag_wijzigen %}
+                                        {% if wed.contact_website %}
+                                            <code>{{ wed.contact_website }}</code>
+                                        {% else %}
+                                            <i>Geen</i>
+                                        {% endif %}
                                     {% else %}
                                         <input type="url" name="contact_website" value="{{ wed.contact_website }}" inputmode="url" oninput="gewijzigd()">
                                     {% endif %}
@@ -482,7 +513,7 @@
                             <tr>
                                 <th>Extern beheer</th>
                                 <td>
-                                    {% if block_edits %}
+                                    {% if block_edits or not mag_wijzigen %}
                                         <span>{% if wed.extern_beheerd %}Ja{% else %}Nee{% endif %}</span>
                                     {% else %}
                                         <label class="black-text">
@@ -503,16 +534,24 @@
                                 <tr>
                                     <th>Standaard</th>
                                     <td>
-                                        <span style="font-size:16px">&euro;&nbsp;</span>
-                                        <input style="width:90%" type="text" name="prijs_normaal" value="{{ prijs_euro_normaal_str }}" pattern="^\d+(,\d{2})?$" placeholder="123,45" oninput="gewijzigd()">
+                                        {% if mag_wijzigen %}
+                                            <span style="font-size:16px">&euro;&nbsp;</span>
+                                            <input style="width:90%" type="text" name="prijs_normaal" value="{{ prijs_euro_normaal_str }}" pattern="^\d+(,\d{2})?$" placeholder="123,45" oninput="gewijzigd()">
+                                        {% else %}
+                                            <span>&euro;&nbsp;{{ prijs_euro_normaal_str }}</span>
+                                        {% endif %}
                                     </td>
                                 </tr>
 
                                 <tr>
                                     <th>Tot 18 jaar</th>
                                     <td>
-                                        <span style="font-size:16px">&euro;&nbsp;</span>
-                                        <input style="width:90%" type="text" name="prijs_onder18" value="{{ prijs_euro_onder18_str }}" pattern="^\d+(,\d{2})?$" placeholder="123,45" oninput="gewijzigd()">
+                                        {% if mag_wijzigen %}
+                                            <span style="font-size:16px">&euro;&nbsp;</span>
+                                            <input style="width:90%" type="text" name="prijs_onder18" value="{{ prijs_euro_onder18_str }}" pattern="^\d+(,\d{2})?$" placeholder="123,45" oninput="gewijzigd()">
+                                        {% else %}
+                                            <span>&euro;&nbsp;{{ prijs_euro_onder18_str }}</span>
+                                        {% endif %}
                                     </td>
                                 </tr>
                             {% endif %}
@@ -543,7 +582,11 @@
                                 <th>Eigen scheids<wbr>rechters (namen)</th>
                                 <td>
                                     {% if limit_edits %}
-                                        <span>{{ wed.scheidsrechters|linebreaksbr }}</span>
+                                        {% if wed.scheidsrechters %}
+                                            <span>{{ wed.scheidsrechters|linebreaksbr }}</span>
+                                        {% else %}
+                                            <i>Geen</i>
+                                        {% endif %}
                                     {% else %}
                                         <textarea name="scheidsrechters" class="materialize-textarea" oninput="gewijzigd()">{{ wed.scheidsrechters }}</textarea>
                                     {% endif %}
@@ -632,25 +675,33 @@
                             <tr>
                                 <th></th>
                                 <td>
-                                    {% for klasse in opt_klasse %}
-                                        <label class="black-text">
-                                            <input type="checkbox" name="{{ klasse.sel }}"
-                                                    {% if klasse.gebruikt %}
-                                                        disabled checked
-                                                    {% else %}
-                                                        class="filled-in"
-                                                        {% if klasse.selected %}
-                                                            checked
+                                    {% if mag_wijzigen %}
+                                        {% for klasse in opt_klasse %}
+                                            <label class="black-text">
+                                                <input type="checkbox" name="{{ klasse.sel }}"
+                                                        {% if klasse.gebruikt %}
+                                                            disabled checked
+                                                        {% else %}
+                                                            class="filled-in"
+                                                            {% if klasse.selected %}
+                                                                checked
+                                                            {% endif %}
+                                                            {% if klasse.disabled %}
+                                                                disabled
+                                                            {% endif %}
                                                         {% endif %}
-                                                        {% if klasse.disabled %}
-                                                            disabled
-                                                        {% endif %}
-                                                    {% endif %}
-                                                   onchange="gewijzigd('{{ klasse.code_blokkeer }}')"
-                                                   data-code="{{ klasse.code }}">
-                                            <span>{{ klasse.volg_nr }}: {{ klasse.beschrijving }}</span>
-                                        </label><br>
-                                    {% endfor %}
+                                                       onchange="gewijzigd('{{ klasse.code_blokkeer }}')"
+                                                       data-code="{{ klasse.code }}">
+                                                <span>{{ klasse.volg_nr }}: {{ klasse.beschrijving }}</span>
+                                            </label><br>
+                                        {% endfor %}
+                                    {% else %}
+                                        {% for klasse in opt_klasse %}
+                                            {% if klasse.gebruikt %}
+                                                <span>{{ klasse.beschrijving }}</span><br>
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% endif %}
                                 </td>
                             </tr>
                         </table>
@@ -663,7 +714,9 @@
                             {% endif %}
 
                             <p>De wedstrijdklasse van de volwassenen is altijd de 'open' klasse waarin alle andere leeftijdsklassen mee mogen doen.</p>
-                            <p>Wedstrijdklassen en bogen die niet aangepast kunnen worden, zijn in gebruik in een sessie.</p>
+                            {% if mag_wijzigen %}
+                                <p>Wedstrijdklassen en bogen die niet aangepast kunnen worden, zijn in gebruik in een sessie.</p>
+                            {% endif %}
                         </div>
 
                         <div style="display: none">
@@ -683,7 +736,7 @@
 
     <!-- annuleren van de wedstrijd -->
 
-    {% if url_annuleer %}
+    {% if url_annuleer and mag_wijzigen %}
 
         <p style="margin-left:10px">
             <a class="btn-sv-rood modal-trigger" href="#bevestig_annuleer">Annuleer deze wedstrijd</a>

@@ -53,10 +53,19 @@ class WedstrijdSessiesView(UserPassesTestMixin, View):
         except Wedstrijd.DoesNotExist:
             raise Http404('Wedstrijd niet gevonden')
 
-        if self.rol_nu == Rol.ROL_HWL and wedstrijd.organiserende_vereniging != self.functie_nu.vereniging:
-            raise PermissionDenied('Wedstrijd niet van jouw vereniging')
-
         context['wed'] = wedstrijd
+
+        uitvoerend = False
+        if self.rol_nu == Rol.ROL_HWL:
+            ver = self.functie_nu.vereniging
+            if wedstrijd.uitvoerende_vereniging == ver:
+                uitvoerend = True
+            else:
+                if wedstrijd.organiserende_vereniging != ver:
+                    raise PermissionDenied('Wedstrijd niet van jouw vereniging')
+
+        context['uitvoerend'] = uitvoerend
+
         sessies = (wedstrijd
                    .sessies
                    .prefetch_related('wedstrijdklassen')

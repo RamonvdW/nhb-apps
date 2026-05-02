@@ -39,7 +39,7 @@
                                 <td colspan="3"></td>
                             {% endif %}
                             <td class="table-filter">
-                                <input class="table-filter" oninput="tabel_filter(this, 'tabel1')" placeholder="Zoeken"/>
+                                <input class="table-filter" oninput="tabel_filter(this, 'tabel1')" placeholder="Zoeken" autofocus/>
                             </td>
                             <td><!-- kolom voor knoppen --></td>
                         </tr>
