@@ -49,7 +49,7 @@ def maak_afgemeld(apps, _):
                         sessie=sessie_str,
                         sporterboog=inschrijving.sporterboog,
                         wedstrijdklasse=inschrijving.wedstrijdklasse,
-                        bestelling=inschrijving.bestelling,
+                        bestelling_regel=inschrijving.bestelling_regel,
                         koper=inschrijving.koper,
                         bedrag_ontvangen=inschrijving.ontvangen_euro,
                         bedrag_retour=inschrijving.retour_euro,

@@ -30,7 +30,7 @@ CONTENT_TYPE_CSV = 'text/csv; charset=UTF-8'
 
 
 def get_inschrijving_mh_bestel_nr(inschrijving):
-    regel = inschrijving.bestelling
+    regel = inschrijving.bestelling_regel
     if regel:
         bestelling = regel.bestelling_set.first()
         if bestelling:
@@ -222,7 +222,7 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
                 ver_nr = 0
                 ver_str = 'geen'
 
-            regel = aanmelding.bestelling
+            regel = aanmelding.bestelling_regel
             if regel:
                 prijs_str = format_bedrag_euro(regel.bedrag_euro)
             else:
@@ -275,7 +275,7 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
                 ver_nr = 0
                 ver_str = 'geen'
 
-            regel = afmelding.bestelling
+            regel = afmelding.bestelling_regel
             if regel:
                 prijs_str = format_bedrag_euro(regel.bedrag_euro)
             else:
@@ -386,7 +386,7 @@ class OpleidingDetailsAanmeldingView(UserPassesTestMixin, TemplateView):
             inschrijving.url_afmelden = reverse('Opleiding:afmelden',
                                                 kwargs={'inschrijving_pk': inschrijving.pk})
 
-        regel = inschrijving.bestelling
+        regel = inschrijving.bestelling_regel
         if regel:
             inschrijving.bedrag_euro_str = format_bedrag_euro(regel.bedrag_euro)
         else:
@@ -469,7 +469,7 @@ class OpleidingDetailsAfmeldingView(UserPassesTestMixin, TemplateView):
 
         afmelding.bestelnummer_str = get_inschrijving_mh_bestel_nr(afmelding)
 
-        regel = afmelding.bestelling
+        regel = afmelding.bestelling_regel
         if regel:
             afmelding.bedrag_euro_str = format_bedrag_euro(regel.bedrag_euro)
         else:

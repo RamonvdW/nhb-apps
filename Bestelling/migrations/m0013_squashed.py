@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2025 Ramon van der Winkel.
+#  Copyright (c) 2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -22,6 +22,8 @@ def init_hoogste_bestel_nr(apps, _):
 
 
 class Migration(migrations.Migration):
+
+    """ Migratie class voor dit deel van de applicatie """
 
     replaces = [('Bestelling', 'm0003_squashed'),
                 ('Bestelling', 'm0004_opleiding_2'),

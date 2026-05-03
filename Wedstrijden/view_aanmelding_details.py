@@ -109,7 +109,7 @@ class WedstrijdAanmeldingDetailsView(UserPassesTestMixin, TemplateView):
             inschrijving.korting_str = None
 
         # prijs
-        regel = inschrijving.bestelling
+        regel = inschrijving.bestelling_regel
         if regel:
             inschrijving.prijs_str = format_bedrag_euro(regel.bedrag_euro)
         else:
@@ -180,7 +180,7 @@ class AanpassenView(UserPassesTestMixin, TemplateView):
                                             'sporterboog__sporter__bij_vereniging__regio',
                                             'sporterboog__sporter__bij_vereniging__regio__rayon',
                                             'korting',
-                                            'bestelling')
+                                            'bestelling_regel')
                             .filter(status__in=(WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF,
                                                 WEDSTRIJD_INSCHRIJVING_STATUS_BESTELD))
                             .get(pk=inschrijving_pk))
@@ -369,7 +369,7 @@ class AfmeldenView(UserPassesTestMixin, View):
         snel = str(request.POST.get('snel', ''))[:1]
 
         if inschrijving.status == WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_MANDJE:
-            regel = inschrijving.bestelling
+            regel = inschrijving.bestelling_regel
             bestel_mutatieverzoek_verwijder_regel_uit_mandje(inschrijving.koper, regel, snel == '1')
         else:
             bestel_mutatieverzoek_afmelden_wedstrijd(inschrijving, snel == '1')
@@ -448,7 +448,7 @@ class WedstrijdAfgemeldDetailsView(UserPassesTestMixin, TemplateView):
         afgemeld.bedrag_retour_str = format_bedrag_euro(afgemeld.bedrag_retour)
 
         # prijs
-        regel = afgemeld.bestelling
+        regel = afgemeld.bestelling_regel
         if regel:
             afgemeld.prijs_str = format_bedrag_euro(regel.bedrag_euro)
         else:

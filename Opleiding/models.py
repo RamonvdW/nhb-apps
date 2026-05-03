@@ -214,7 +214,7 @@ class OpleidingInschrijving(models.Model):
                               default=OPLEIDING_INSCHRIJVING_STATUS_INSCHRIJVEN)
 
     # koppeling aan de bestelling
-    bestelling = models.ForeignKey(BestellingRegel, on_delete=models.PROTECT, null=True)
+    bestelling_regel = models.ForeignKey(BestellingRegel, on_delete=models.PROTECT, null=True)
 
     # wie was de koper?
     koper = models.ForeignKey(Account, on_delete=models.PROTECT, null=True, blank=True)
@@ -269,7 +269,7 @@ class OpleidingAfgemeld(models.Model):
     nummer = models.BigIntegerField(default=0)
 
     # koppeling aan de bestelling
-    bestelling = models.ForeignKey(BestellingRegel, on_delete=models.PROTECT, null=True)
+    bestelling_regel = models.ForeignKey(BestellingRegel, on_delete=models.PROTECT, null=True)
 
     # wie was de koper?
     koper = models.ForeignKey(Account, on_delete=models.PROTECT, null=True, blank=True)

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2025 Ramon van der Winkel.
+#  Copyright (c) 2025-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -207,7 +207,7 @@ class TestWedstrijdenBepaalKortingen(E2EHelpers, TestCase):
                             sessie=self.sessie1,
                             sporterboog=self.sporterboog1_r,
                             wedstrijdklasse=self.klasse_r,
-                            bestelling=regel,
+                            bestelling_regel=regel,
                             koper=self.account_102030,
                             korting=None)
         inschrijving.save()
@@ -227,7 +227,7 @@ class TestWedstrijdenBepaalKortingen(E2EHelpers, TestCase):
                             sessie=self.sessie2,
                             sporterboog=self.sporterboog1_r,
                             wedstrijdklasse=self.klasse_r,
-                            bestelling=regel,
+                            bestelling_regel=regel,
                             koper=self.account_102030,
                             korting=None)
         inschrijving.save()
@@ -247,7 +247,7 @@ class TestWedstrijdenBepaalKortingen(E2EHelpers, TestCase):
                             sessie=self.sessie1,
                             sporterboog=self.sporterboog2_r,
                             wedstrijdklasse=self.klasse_r,
-                            bestelling=regel,
+                            bestelling_regel=regel,
                             koper=self.account_102030,
                             korting=None)
         inschrijving.save()

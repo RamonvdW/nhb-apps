@@ -84,7 +84,9 @@
                         </td>
                         -->
                         <td class="center">
-                            {% sv-knop-nav url=sessie.url_wijzig icon='aanpassen' tekst='' %}
+                            {% if sessie.url_wijzig %}
+                                {% sv-knop-nav url=sessie.url_wijzig icon='aanpassen' tekst='' %}
+                            {% endif %}
                         </td>
                     </tr>
                 {% empty %}

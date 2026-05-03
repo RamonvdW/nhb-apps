@@ -27,9 +27,9 @@ class WebwinkelBestelPlugin(BestelPluginBase):
                       .objects
                       .filter(status=KEUZE_STATUS_RESERVERING_MANDJE,
                               wanneer__lt=verval_datum)
-                      .select_related('bestelling')):
+                      .select_related('bestelling_regel')):
 
-            regel = keuze.bestelling
+            regel = keuze.bestelling_regel
 
             # onthoud in welk mandje deze lag
             mandje = regel.bestellingmandje_set.first()
@@ -100,13 +100,13 @@ class WebwinkelBestelPlugin(BestelPluginBase):
                         code=BESTELLING_REGEL_CODE_WEBWINKEL)
         regel.save()
 
-        webwinkel_keuze.bestelling = regel
+        webwinkel_keuze.bestelling_regel = regel
 
         stamp_str = timezone.localtime(timezone.now()).strftime('%Y-%m-%d om %H:%M')
         msg = "[%s] Toegevoegd aan het mandje van %s\n" % (stamp_str, mandje_van_str)
         webwinkel_keuze.log += msg
 
-        webwinkel_keuze.save(update_fields=['bestelling', 'log'])
+        webwinkel_keuze.save(update_fields=['bestelling_regel', 'log'])
 
         return regel
 
@@ -115,7 +115,7 @@ class WebwinkelBestelPlugin(BestelPluginBase):
             Het product wordt uit het mandje gehaald of de bestelling wordt geannuleerd (voordat deze betaald is)
             Geef een eerder gemaakte reservering voor het webwinkel product weer vrij.
         """
-        keuze = WebwinkelKeuze.objects.filter(bestelling=regel).select_related('product').first()
+        keuze = WebwinkelKeuze.objects.filter(bestelling_regel=regel).select_related('product').first()
         if not keuze:
             self.stdout.write('[ERROR] Kan WebwinkelKeuze voor regel met pk=%s niet vinden' % regel.pk)
             return
@@ -138,7 +138,7 @@ class WebwinkelBestelPlugin(BestelPluginBase):
             Het gereserveerde product in het mandje is nu omgezet in een bestelling.
             Verander de status van het gevraagde product naar 'besteld maar nog niet betaald'
         """
-        keuze = WebwinkelKeuze.objects.filter(bestelling=regel.pk).first()
+        keuze = WebwinkelKeuze.objects.filter(bestelling_regel=regel.pk).first()
         if keuze:
             stamp_str = timezone.localtime(timezone.now()).strftime('%Y-%m-%d om %H:%M')
             msg = "[%s] Reservering is omgezet in een bestelling\n" % stamp_str
@@ -151,7 +151,7 @@ class WebwinkelBestelPlugin(BestelPluginBase):
             Het product is betaald, dus de reservering moet definitief gemaakt worden.
             Wordt ook aangeroepen als een bestelling niet betaald hoeft te worden (totaal bedrag nul).
         """
-        keuze = WebwinkelKeuze.objects.filter(bestelling=regel.pk).first()
+        keuze = WebwinkelKeuze.objects.filter(bestelling_regel=regel.pk).first()
         if not keuze:
             self.stdout.write('[ERROR] Kan WebwinkelKeuze voor regel met pk=%s niet vinden' % regel.pk)
             return
@@ -195,7 +195,7 @@ class VerzendkostenBestelPlugin(BestelPluginBase):
         btw_euro = Decimal(0)
 
         if webwinkel_count > 0:
-            qset = WebwinkelKeuze.objects.filter(bestelling__pk__in=regel_pks)
+            qset = WebwinkelKeuze.objects.filter(bestelling_regel__pk__in=regel_pks)
             webwinkel_briefpost = qset.filter(product__type_verzendkosten=VERZENDKOSTEN_BRIEFPOST).count()
             webwinkel_pakketpost = qset.filter(product__type_verzendkosten=VERZENDKOSTEN_PAKKETPOST).count()
 

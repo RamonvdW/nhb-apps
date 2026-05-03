@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2025 Ramon van der Winkel.
+#  Copyright (c) 2025-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -103,7 +103,7 @@ class TestWebwinkelBestellingPlugin(E2EHelpers, TestCase):
         keuze1 = WebwinkelKeuze(
                     wanneer=vervallen,
                     status=KEUZE_STATUS_RESERVERING_MANDJE,
-                    bestelling=regel1,
+                    bestelling_regel=regel1,
                     product=self.product,
                     aantal=1)
         keuze1.save()
@@ -117,7 +117,7 @@ class TestWebwinkelBestellingPlugin(E2EHelpers, TestCase):
         keuze2 = WebwinkelKeuze(
                     wanneer=vervallen,
                     status=KEUZE_STATUS_RESERVERING_MANDJE,
-                    bestelling=regel2,
+                    bestelling_regel=regel2,
                     product=self.product,
                     aantal=1)
         keuze2.save()
@@ -150,7 +150,7 @@ class TestWebwinkelBestellingPlugin(E2EHelpers, TestCase):
         keuze = WebwinkelKeuze(
                     wanneer=timezone.now(),
                     status=KEUZE_STATUS_RESERVERING_MANDJE,
-                    bestelling=None,
+                    bestelling_regel=None,
                     product=self.product,
                     aantal=1)
         keuze.save()
@@ -162,7 +162,7 @@ class TestWebwinkelBestellingPlugin(E2EHelpers, TestCase):
         self.assertEqual(round(regel.bedrag_euro, 2), round(Decimal(10.00), 2))
 
         keuze.refresh_from_db()
-        self.assertEqual(keuze.bestelling, regel)
+        self.assertEqual(keuze.bestelling_regel, regel)
         # self.assertEqual(keuze.status, KEUZE_STATUS_RESERVERING_MANDJE)       # wordt niet aangepast
 
         # extra coverage
@@ -192,7 +192,7 @@ class TestWebwinkelBestellingPlugin(E2EHelpers, TestCase):
         keuze = WebwinkelKeuze(
                     wanneer=timezone.now(),
                     status=KEUZE_STATUS_RESERVERING_MANDJE,
-                    bestelling=regel,
+                    bestelling_regel=regel,
                     product=self.product,
                     aantal=1)
         keuze.save()
@@ -211,7 +211,7 @@ class TestWebwinkelBestellingPlugin(E2EHelpers, TestCase):
         keuze = WebwinkelKeuze(
                     wanneer=timezone.now(),
                     status=KEUZE_STATUS_RESERVERING_MANDJE,
-                    bestelling=regel,
+                    bestelling_regel=regel,
                     product=self.product,
                     aantal=1)
         keuze.save()
@@ -235,7 +235,7 @@ class TestWebwinkelBestellingPlugin(E2EHelpers, TestCase):
         keuze = WebwinkelKeuze(
                     wanneer=timezone.now(),
                     status=KEUZE_STATUS_RESERVERING_MANDJE,
-                    bestelling=regel,
+                    bestelling_regel=regel,
                     product=self.product,
                     aantal=1)
         keuze.save()
@@ -271,7 +271,7 @@ class TestWebwinkelBestellingPlugin(E2EHelpers, TestCase):
         keuze = WebwinkelKeuze(
                     wanneer=timezone.now(),
                     status=KEUZE_STATUS_RESERVERING_MANDJE,
-                    bestelling=regel,
+                    bestelling_regel=regel,
                     product=self.product,
                     aantal=1)
         keuze.save()
@@ -327,7 +327,7 @@ class TestWebwinkelBestellingPlugin(E2EHelpers, TestCase):
         keuze2 = WebwinkelKeuze(
                     wanneer=timezone.now(),
                     status=KEUZE_STATUS_RESERVERING_MANDJE,
-                    bestelling=regel,
+                    bestelling_regel=regel,
                     product=self.product,
                     aantal=1)
         keuze2.save()

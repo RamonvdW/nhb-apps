@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2025 Ramon van der Winkel.
+#  Copyright (c) 2025-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -105,7 +105,7 @@ class TestOpleidingBestellingPlugin(E2EHelpers, TestCase):
                             sporter=self.sporter_100001,
                             nummer=1,
                             koper=self.account_100000,
-                            bestelling=regel1)
+                            bestelling_regel=regel1)
         inschrijving1.save()
 
         regel2 = BestellingRegel(
@@ -120,7 +120,7 @@ class TestOpleidingBestellingPlugin(E2EHelpers, TestCase):
                             sporter=self.sporter_100001,
                             nummer=2,
                             koper=self.account_100000,
-                            bestelling=regel2)
+                            bestelling_regel=regel2)
         inschrijving2.save()
 
         self.mandje.regels.add(regel1)
@@ -150,7 +150,7 @@ class TestOpleidingBestellingPlugin(E2EHelpers, TestCase):
                             status='??',
                             opleiding=self.opleiding,
                             sporter=self.sporter_100000,
-                            bestelling=None,
+                            bestelling_regel=None,
                             koper=self.account_100000)
         inschrijving.save()
 
@@ -158,7 +158,7 @@ class TestOpleidingBestellingPlugin(E2EHelpers, TestCase):
         self.assertEqual(regel.korte_beschrijving, 'Opleiding "Test opleiding"||voor [100000] Nor Maal')
 
         inschrijving.refresh_from_db()
-        self.assertEqual(inschrijving.bestelling, regel)
+        self.assertEqual(inschrijving.bestelling_regel, regel)
         self.assertEqual(inschrijving.status, OPLEIDING_INSCHRIJVING_STATUS_RESERVERING_MANDJE)
 
     def test_afmelden(self):
@@ -177,7 +177,7 @@ class TestOpleidingBestellingPlugin(E2EHelpers, TestCase):
                             status='??',
                             opleiding=self.opleiding,
                             sporter=self.sporter_100000,
-                            bestelling=regel,
+                            bestelling_regel=regel,
                             koper=self.account_100000,
                             bedrag_ontvangen=Decimal(42.0))
         inschrijving.save()
@@ -225,7 +225,7 @@ class TestOpleidingBestellingPlugin(E2EHelpers, TestCase):
                             status=OPLEIDING_INSCHRIJVING_STATUS_RESERVERING_MANDJE,
                             opleiding=self.opleiding,
                             sporter=self.sporter_100000,
-                            bestelling=regel,
+                            bestelling_regel=regel,
                             koper=self.account_100000)
         inschrijving.save()
 
@@ -253,7 +253,7 @@ class TestOpleidingBestellingPlugin(E2EHelpers, TestCase):
                             status=OPLEIDING_INSCHRIJVING_STATUS_BESTELD,
                             opleiding=self.opleiding,
                             sporter=self.sporter_100000,
-                            bestelling=regel,
+                            bestelling_regel=regel,
                             koper=self.account_100000)
         inschrijving.save()
 
@@ -291,7 +291,7 @@ class TestOpleidingBestellingPlugin(E2EHelpers, TestCase):
                             status=OPLEIDING_INSCHRIJVING_STATUS_DEFINITIEF,
                             opleiding=self.opleiding,
                             sporter=self.sporter_100000,
-                            bestelling=regel,
+                            bestelling_regel=regel,
                             koper=self.account_100000)
         inschrijving.save()
 
@@ -332,7 +332,7 @@ class TestOpleidingBestellingPlugin(E2EHelpers, TestCase):
                             status=OPLEIDING_INSCHRIJVING_STATUS_RESERVERING_MANDJE,
                             opleiding=self.opleiding,
                             sporter=self.sporter_100000,
-                            bestelling=regel,
+                            bestelling_regel=regel,
                             koper=self.account_100000)
         inschrijving.save()
 
@@ -363,7 +363,7 @@ class TestOpleidingBestellingPlugin(E2EHelpers, TestCase):
                             status=OPLEIDING_INSCHRIJVING_STATUS_BESTELD,
                             opleiding=self.opleiding,
                             sporter=self.sporter_100000,
-                            bestelling=regel,
+                            bestelling_regel=regel,
                             koper=self.account_100000)
         inschrijving.save()
 

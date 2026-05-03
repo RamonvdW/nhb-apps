@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2025 Ramon van der Winkel.
+#  Copyright (c) 2025-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -148,7 +148,7 @@ class TestEvenementBestellingPlugin(E2EHelpers, TestCase):
                             status=EVENEMENT_INSCHRIJVING_STATUS_RESERVERING_MANDJE,
                             evenement=self.evenement1,
                             sporter=self.sporter_100000,
-                            bestelling=regel1,
+                            bestelling_regel=regel1,
                             koper=self.account_100000)
         inschrijving1.save()
 
@@ -164,7 +164,7 @@ class TestEvenementBestellingPlugin(E2EHelpers, TestCase):
                             status=EVENEMENT_INSCHRIJVING_STATUS_RESERVERING_MANDJE,
                             evenement=self.evenement2,
                             sporter=self.sporter_100000,
-                            bestelling=regel2,
+                            bestelling_regel=regel2,
                             koper=self.account_100000)
         inschrijving2.save()
 
@@ -190,7 +190,7 @@ class TestEvenementBestellingPlugin(E2EHelpers, TestCase):
                             status='??',
                             evenement=self.evenement1,
                             sporter=self.sporter_100000,
-                            bestelling=None,
+                            bestelling_regel=None,
                             koper=self.account_100000)
         inschrijving.save()
 
@@ -198,7 +198,7 @@ class TestEvenementBestellingPlugin(E2EHelpers, TestCase):
         self.assertEqual(regel.korte_beschrijving, 'Evenement "Test evenement 1"||voor [100000] Nor Maal')
 
         inschrijving.refresh_from_db()
-        self.assertEqual(inschrijving.bestelling, regel)
+        self.assertEqual(inschrijving.bestelling_regel, regel)
         self.assertEqual(inschrijving.status, EVENEMENT_INSCHRIJVING_STATUS_RESERVERING_MANDJE)
 
     def test_afmelden(self):
@@ -218,7 +218,7 @@ class TestEvenementBestellingPlugin(E2EHelpers, TestCase):
                             status=EVENEMENT_INSCHRIJVING_STATUS_RESERVERING_MANDJE,
                             evenement=self.evenement1,
                             sporter=self.sporter_100000,
-                            bestelling=regel,
+                            bestelling_regel=regel,
                             koper=self.account_100000)
         inschrijving.save()
         inschrijving.refresh_from_db()
@@ -258,7 +258,7 @@ class TestEvenementBestellingPlugin(E2EHelpers, TestCase):
                             status=EVENEMENT_INSCHRIJVING_STATUS_RESERVERING_MANDJE,
                             evenement=self.evenement1,
                             sporter=self.sporter_100000,
-                            bestelling=regel,
+                            bestelling_regel=regel,
                             koper=self.account_100000)
         inschrijving.save()
         inschrijving.refresh_from_db()
@@ -288,7 +288,7 @@ class TestEvenementBestellingPlugin(E2EHelpers, TestCase):
                             status=EVENEMENT_INSCHRIJVING_STATUS_BESTELD,
                             evenement=self.evenement1,
                             sporter=self.sporter_100000,
-                            bestelling=regel,
+                            bestelling_regel=regel,
                             koper=self.account_100000)
         inschrijving.save()
         inschrijving.refresh_from_db()
@@ -328,7 +328,7 @@ class TestEvenementBestellingPlugin(E2EHelpers, TestCase):
                             status=EVENEMENT_INSCHRIJVING_STATUS_DEFINITIEF,
                             evenement=self.evenement1,
                             sporter=self.sporter_100000,
-                            bestelling=regel,
+                            bestelling_regel=regel,
                             koper=self.account_100000)
         inschrijving.save()
         inschrijving.refresh_from_db()
@@ -371,7 +371,7 @@ class TestEvenementBestellingPlugin(E2EHelpers, TestCase):
                             status=EVENEMENT_INSCHRIJVING_STATUS_RESERVERING_MANDJE,
                             evenement=self.evenement1,
                             sporter=self.sporter_100000,
-                            bestelling=regel,
+                            bestelling_regel=regel,
                             koper=self.account_100000)
         inschrijving.save()
 
@@ -403,7 +403,7 @@ class TestEvenementBestellingPlugin(E2EHelpers, TestCase):
                             status=EVENEMENT_INSCHRIJVING_STATUS_BESTELD,
                             evenement=self.evenement1,
                             sporter=self.sporter_100000,
-                            bestelling=regel,
+                            bestelling_regel=regel,
                             koper=self.account_100000)
         inschrijving.save()
 
@@ -439,7 +439,7 @@ class TestEvenementBestellingPlugin(E2EHelpers, TestCase):
                             status=EVENEMENT_INSCHRIJVING_STATUS_BESTELD,
                             evenement=self.evenement1,
                             sporter=self.sporter_100001,        # niet gelijk aan koper
-                            bestelling=regel,
+                            bestelling_regel=regel,
                             koper=self.account_100000)
         inschrijving.save()
 
@@ -503,7 +503,7 @@ class TestEvenementBestellingPlugin(E2EHelpers, TestCase):
                             status=EVENEMENT_INSCHRIJVING_STATUS_DEFINITIEF,
                             evenement=self.evenement1,
                             sporter=self.sporter_100000,
-                            bestelling=regel,
+                            bestelling_regel=regel,
                             koper=self.account_100000)
         inschrijving.save()
 

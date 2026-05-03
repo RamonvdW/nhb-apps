@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2025 Ramon van der Winkel.
+#  Copyright (c) 2022-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -395,7 +395,7 @@ class TestBestellingMandje(E2EHelpers, TestCase):
 
         WebwinkelKeuze(
                 wanneer=timezone.now() - datetime.timedelta(days=4),      # meteen al "te lang in mandje"
-                bestelling=regel2,
+                bestelling_regel=regel2,
                 product=product).save()
 
         verwerk.mandjes_opschonen()

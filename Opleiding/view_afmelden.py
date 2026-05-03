@@ -46,7 +46,7 @@ class AfmeldenView(UserPassesTestMixin, View):
         snel = str(request.POST.get('snel', ''))[:1]
 
         if inschrijving.status == OPLEIDING_INSCHRIJVING_STATUS_RESERVERING_MANDJE:
-            regel = inschrijving.bestelling
+            regel = inschrijving.bestelling_regel
             bestel_mutatieverzoek_verwijder_regel_uit_mandje(inschrijving.koper, regel, snel == '1')
         else:
             bestel_mutatieverzoek_afmelden_opleiding(inschrijving, snel == '1')

@@ -414,7 +414,7 @@ class VerwerkBestelMutaties:
         if not mandje:
             raise ValueError('Geen mandje')
 
-        regel = mutatie.regel
+        regel = mutatie.bestelling_regel
         if not regel:
             raise ValueError('Geen regel')
 
@@ -433,7 +433,7 @@ class VerwerkBestelMutaties:
             # verwijder uit het mandje
             mandje.regels.remove(regel)
 
-            mutatie.regel = None        # remove reference to to-be-deleted object
+            mutatie.bestelling_regel = None        # remove reference to to-be-deleted object
             regel.delete()
 
             # kijk of er automatische kortingen zijn die niet meer toegepast mogen worden

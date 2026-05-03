@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2025 Ramon van der Winkel.
+#  Copyright (c) 2022-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -58,7 +58,7 @@ class BestellingMutatie(models.Model):
     product_pk = models.PositiveBigIntegerField(default=0)
 
     # het product waar deze mutatie betrekking op heeft
-    regel = models.ForeignKey(BestellingRegel, on_delete=models.SET_NULL, null=True, blank=True)
+    bestelling_regel = models.ForeignKey(BestellingRegel, on_delete=models.SET_NULL, null=True, blank=True)
 
     # gevraagde korting om toe te passen
     korting = models.CharField(max_length=20, default='', blank=True)

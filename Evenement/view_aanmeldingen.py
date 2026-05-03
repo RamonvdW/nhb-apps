@@ -33,7 +33,7 @@ CONTENT_TYPE_CSV = 'text/csv; charset=UTF-8'
 
 
 def get_inschrijving_mh_bestel_nr(inschrijving):
-    regel = inschrijving.bestelling
+    regel = inschrijving.bestelling_regel
     if regel:
         bestelling = regel.bestelling_set.first()
         if bestelling:
@@ -211,7 +211,7 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
                 ver_nr = 0
                 ver_str = 'geen'
 
-            regel = aanmelding.bestelling
+            regel = aanmelding.bestelling_regel
             if regel:
                 prijs_str = format_bedrag_euro(regel.bedrag_euro)
             else:
@@ -268,7 +268,7 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
                 ver_nr = 0
                 ver_str = 'geen'
 
-            regel = afgemeld.bestelling
+            regel = afgemeld.bestelling_regel
             if regel:
                 prijs_str = format_bedrag_euro(regel.bedrag_euro)
             else:
@@ -391,7 +391,7 @@ class EvenementDetailsAanmeldingView(UserPassesTestMixin, TemplateView):
                                             kwargs={'inschrijving_pk': inschrijving.pk})
 
         # toon de prijs die geselecteerd was voor dit lid (jeugd/volwassenen)
-        regel = inschrijving.bestelling
+        regel = inschrijving.bestelling_regel
         if regel:
             inschrijving.kosten_euro = format_bedrag_euro(regel.bedrag_euro)
         else:
@@ -465,7 +465,7 @@ class EvenementDetailsAfmeldingView(UserPassesTestMixin, TemplateView):
         afmelding.bestelnummer_str = get_inschrijving_mh_bestel_nr(afmelding)
 
         # toon de prijs die geselecteerd was voor dit lid (jeugd/volwassenen)
-        regel = afmelding.bestelling
+        regel = afmelding.bestelling_regel
         if regel:
             afmelding.kosten_euro = format_bedrag_euro(regel.bedrag_euro)
         else:

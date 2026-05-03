@@ -38,10 +38,10 @@ class WedstrijdBestelPlugin(BestelPluginBase):
                              .objects
                              .filter(wanneer__lt=verval_datum,
                                      status=WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_MANDJE)
-                             .select_related('bestelling',
+                             .select_related('bestelling_regel',
                                              'koper')):
 
-            regel = inschrijving.bestelling
+            regel = inschrijving.bestelling_regel
 
             self.stdout.write('[INFO] Vervallen: BestellingRegel pk=%s inschrijving (%s) in mandje van %s' % (
                               regel.pk, inschrijving, inschrijving.koper))
@@ -104,7 +104,7 @@ class WedstrijdBestelPlugin(BestelPluginBase):
                     code=BESTELLING_REGEL_CODE_WEDSTRIJD)
         regel.save()
 
-        inschrijving.bestelling = regel
+        inschrijving.bestelling_regel = regel
 
         #inschrijving.status = WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_MANDJE
         #inschrijving.nummer = inschrijving.pk
@@ -113,7 +113,7 @@ class WedstrijdBestelPlugin(BestelPluginBase):
         msg = "[%s] Plekje gereserveerd voor de wedstrijd sessie\n" % stamp_str
         inschrijving.log += msg
 
-        inschrijving.save(update_fields=['bestelling', 'log'])
+        inschrijving.save(update_fields=['bestelling_regel', 'log'])
 
         return regel
 
@@ -163,7 +163,7 @@ class WedstrijdBestelPlugin(BestelPluginBase):
                             korting=inschrijving.korting,
                             bedrag_ontvangen=inschrijving.ontvangen_euro,
                             bedrag_retour=inschrijving.retour_euro,
-                            bestelling=inschrijving.bestelling,
+                            bestelling_regel=inschrijving.bestelling_regel,
                             log=inschrijving.log + msg)
         afmelding.save()
 
@@ -235,7 +235,7 @@ class WedstrijdBestelPlugin(BestelPluginBase):
                         .select_related('sessie',
                                         'wedstrijd',
                                         'sporterboog')
-                        .filter(bestelling=regel)
+                        .filter(bestelling_regel=regel)
                         .first())
 
         if not inschrijving:
@@ -257,7 +257,7 @@ class WedstrijdBestelPlugin(BestelPluginBase):
             Het gereserveerde product in het mandje is nu omgezet in een bestelling.
             Verander de status van het gevraagde product naar 'besteld maar nog niet betaald'
         """
-        inschrijving = WedstrijdInschrijving.objects.filter(bestelling=regel).first()
+        inschrijving = WedstrijdInschrijving.objects.filter(bestelling_regel=regel).first()
 
         if not inschrijving:
             self.stdout.write('[ERROR] {wedstrijden bestel plugin}.is_besteld: ' +
@@ -277,7 +277,7 @@ class WedstrijdBestelPlugin(BestelPluginBase):
             Het product is betaald, dus de reservering moet definitief gemaakt worden.
             Wordt ook aangeroepen als een bestelling niet betaald hoeft te worden (totaal bedrag nul).
         """
-        inschrijving = WedstrijdInschrijving.objects.filter(bestelling=regel).first()
+        inschrijving = WedstrijdInschrijving.objects.filter(bestelling_regel=regel).first()
 
         if not inschrijving:
             self.stdout.write('[ERROR] {wedstrijden bestel plugin}.is_betaald: ' +
@@ -374,7 +374,7 @@ class WedstrijdBestelPlugin(BestelPluginBase):
         ver_nr = -1
         inschrijving = (WedstrijdInschrijving
                         .objects
-                        .filter(bestelling=regel)
+                        .filter(bestelling_regel=regel)
                         .select_related('wedstrijd',
                                         'wedstrijd__organiserende_vereniging')
                         .first())
@@ -397,7 +397,7 @@ class WedstrijdBestelPlugin(BestelPluginBase):
         """
         inschrijving = (WedstrijdInschrijving
                         .objects
-                        .filter(bestelling=regel)
+                        .filter(bestelling_regel=regel)
                         .select_related('wedstrijd',
                                         'wedstrijd__locatie',
                                         'sporterboog__sporter')

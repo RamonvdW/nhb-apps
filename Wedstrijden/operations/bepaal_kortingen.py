@@ -42,7 +42,7 @@ class BepaalAutomatischeKorting(object):
         # laad de inhoud van het mandje en reset all kortingen
         for inschrijving in (WedstrijdInschrijving
                              .objects
-                             .filter(bestelling__pk__in=regel_pks)
+                             .filter(bestelling_regel__pk__in=regel_pks)
                              .exclude(sporterboog__sporter__bij_vereniging=None)
                              .select_related('korting',
                                              'sporterboog',
@@ -201,7 +201,7 @@ class BepaalAutomatischeKorting(object):
             if inschrijving.korting:
                 toegepaste_korting_pks.append(inschrijving.korting.pk)
                 procent = inschrijving.korting.percentage / Decimal('100')
-                regel = inschrijving.bestelling
+                regel = inschrijving.bestelling_regel
                 self._stdout.write(' procent=%s, bedrag=%s' % (procent, regel.bedrag_euro))
                 totaal_korting_euro += (regel.bedrag_euro * procent)
         # for
@@ -287,7 +287,7 @@ class BepaalAutomatischeKorting(object):
                     inschrijving.save(update_fields=['korting'])
 
                     procent = korting.percentage / Decimal(100)
-                    korting_euro = inschrijving.bestelling.bedrag_euro * procent
+                    korting_euro = inschrijving.bestelling_regel.bedrag_euro * procent
                     korting_euro = 0 - korting_euro     # korting is een negatief bedrag
                     # self._stdout.write('   korting_euro: %s' % korting_euro)
 
@@ -330,7 +330,7 @@ class BepaalAutomatischeKorting(object):
             # for
 
         for inschrijving in alle_inschrijvingen:
-            regel = inschrijving.bestelling
+            regel = inschrijving.bestelling_regel
             if inschrijving.korting:
                 self._stdout.write('[DEBUG] bestelling regel %s --> korting pk=%s: %s' % (regel,
                                                                                           inschrijving.korting.pk,
@@ -359,8 +359,8 @@ class BepaalAutomatischeKorting(object):
             for inschrijving in self._lid_nr_wedstrijd_pk2inschrijving.values():
                 self._stdout.write('    %s' % inschrijving)
                 self._stdout.write('       bestelling regel %s voor %s' % (
-                                                format_bedrag_euro(inschrijving.bestelling.bedrag_euro),
-                                                inschrijving.bestelling))
+                                                format_bedrag_euro(inschrijving.bestelling_regel.bedrag_euro),
+                                                inschrijving.bestelling_regel))
                 self._stdout.write('       mogelijke kortingen: %s' % inschrijving.mogelijke_kortingen)
             # for
 

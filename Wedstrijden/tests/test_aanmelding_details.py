@@ -252,15 +252,15 @@ class TestWedstrijdenAanmeldingDetails(E2EHelpers, TestCase):
                             sporterboog=inschrijving.sporterboog,
                             sessie='oude sessie',
                             wedstrijdklasse=inschrijving.wedstrijdklasse,
-                            bestelling=inschrijving.bestelling,
+                            bestelling_regel=inschrijving.bestelling_regel,
                             koper=inschrijving.koper,
                             korting=inschrijving.korting,
                             bedrag_ontvangen=inschrijving.ontvangen_euro,
                             bedrag_retour=inschrijving.retour_euro,
                             log=inschrijving.log)
 
-        inschrijving.bestelling = None
-        inschrijving.save(update_fields=['bestelling'])
+        inschrijving.bestelling_regel = None
+        inschrijving.save(update_fields=['bestelling_regel'])
         inschrijving.delete()
 
         return afgemeld
@@ -536,7 +536,7 @@ class TestWedstrijdenAanmeldingDetails(E2EHelpers, TestCase):
         self.assert404(resp, 'Verkeerde vereniging')
 
         self.inschrijving1r.refresh_from_db()
-        self.inschrijving1r.bestelling = None                   # corner case: handmatig toegevoegd
+        self.inschrijving1r.bestelling_regel = None                   # corner case: handmatig toegevoegd
         afgemeld = self._maak_afmelding(self.inschrijving1r)    # met korting
         url = self.url_afgemeld_details % afgemeld.pk
 

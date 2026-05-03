@@ -46,7 +46,7 @@ class WedstrijdInschrijving(models.Model):
     wedstrijdklasse = models.ForeignKey(KalenderWedstrijdklasse, on_delete=models.PROTECT)
 
     # koppeling aan het mandje / een bestelling
-    bestelling = models.ForeignKey(BestellingRegel, on_delete=models.PROTECT, null=True)
+    bestelling_regel = models.ForeignKey(BestellingRegel, on_delete=models.PROTECT, null=True)
 
     # wie is de koper?
 

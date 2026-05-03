@@ -113,7 +113,7 @@ class EvenementInschrijving(models.Model):
     sporter = models.ForeignKey(Sporter, on_delete=models.PROTECT)
 
     # koppeling aan de bestelling
-    bestelling = models.ForeignKey(BestellingRegel, on_delete=models.PROTECT, null=True, blank=True)
+    bestelling_regel = models.ForeignKey(BestellingRegel, on_delete=models.PROTECT, null=True, blank=True)
 
     # wie is de koper?
     # (BestellingProduct verwijst naar deze inschrijving)
@@ -175,7 +175,7 @@ class EvenementAfgemeld(models.Model):
     sporter = models.ForeignKey(Sporter, on_delete=models.PROTECT)
 
     # koppeling aan de bestelling
-    bestelling = models.ForeignKey(BestellingRegel, on_delete=models.PROTECT, null=True)
+    bestelling_regel = models.ForeignKey(BestellingRegel, on_delete=models.PROTECT, null=True)
 
     # wie was de koper?
     koper = models.ForeignKey(Account, on_delete=models.PROTECT)        # TODO: waarom dit veld? Bestelling heeft toch ook een koper?

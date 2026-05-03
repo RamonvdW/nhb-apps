@@ -445,7 +445,7 @@ class BestellingOverzettenView(UserPassesTestMixin, View):
             bestelling.account = self.account_new
             regel_pks = list(bestelling.regels.values_list('pk', flat=True))
 
-            for inschrijving in WedstrijdInschrijving.objects.filter(bestelling__pk__in=regel_pks):
+            for inschrijving in WedstrijdInschrijving.objects.filter(bestelling_regel__pk__in=regel_pks):
 
                 if self.sporter_old == inschrijving.sporterboog.sporter:
                     afk = inschrijving.sporterboog.boogtype.afkorting
@@ -462,7 +462,7 @@ class BestellingOverzettenView(UserPassesTestMixin, View):
                 inschrijving.save(update_fields=['koper', 'sporterboog'])
             # for
 
-            for keuze in WebwinkelKeuze.objects.filter(bestelling__pk__in=regel_pks):
+            for keuze in WebwinkelKeuze.objects.filter(bestelling_regel__pk__in=regel_pks):
                 if keuze.koper == self.account_old:
                     keuze.koper = self.account_new
                     keuze.save(update_fields=['koper'])

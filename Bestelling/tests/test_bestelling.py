@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2025 Ramon van der Winkel.
+#  Copyright (c) 2022-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -366,8 +366,8 @@ class TestBestellingBestelling(E2EHelpers, TestCase):
         regel.save()
         bestelling.regels.add(regel)
 
-        self.wedstrijd_inschrijving.bestelling = regel
-        self.wedstrijd_inschrijving.save(update_fields=['bestelling'])
+        self.wedstrijd_inschrijving.bestelling_regel = regel
+        self.wedstrijd_inschrijving.save(update_fields=['bestelling_regel'])
 
         # wedstrijd eis kwalificatie scores
         self.wedstrijd.eis_kwalificatie_scores = True

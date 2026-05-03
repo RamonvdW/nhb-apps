@@ -156,7 +156,7 @@ class TestBestellingKiesTransport(E2EHelpers, TestCase):
 
             keuze = WebwinkelKeuze(
                             wanneer=timezone.now(),
-                            bestelling=regel,
+                            bestelling_regel=regel,
                             product=self.webwinkel_product,
                             aantal=1)
             keuze.save()
@@ -211,7 +211,7 @@ class TestBestellingKiesTransport(E2EHelpers, TestCase):
 
             keuze = WebwinkelKeuze(
                             wanneer=timezone.now(),
-                            bestelling=regel,
+                            bestelling_regel=regel,
                             product=self.webwinkel_product,
                             aantal=1)
             keuze.save()

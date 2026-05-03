@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -167,6 +167,7 @@ class InzichtView(UserPassesTestMixin, ListView):
         count_niet_afgehandeld = Feedback.objects.filter(is_afgehandeld=False).count()
         context['count_aanwezig'] = count_aanwezig = Feedback.objects.count()
         context['count_afgehandeld'] = count_aanwezig - count_niet_afgehandeld
+        context['count_open'] = count_niet_afgehandeld
 
         account = get_account(self.request)
         if account.is_staff:

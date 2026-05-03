@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2025 Ramon van der Winkel.
+#  Copyright (c) 2025-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -35,10 +35,10 @@ class OpleidingBestelPlugin(BestelPluginBase):
                              .objects
                              .filter(status=OPLEIDING_INSCHRIJVING_STATUS_RESERVERING_MANDJE,
                                      wanneer_aangemeld__lt=verval_datum)
-                             .select_related('bestelling',
+                             .select_related('bestelling_regel',
                                              'koper')):
 
-            regel = inschrijving.bestelling
+            regel = inschrijving.bestelling_regel
 
             self.stdout.write('[INFO] Vervallen: BestellingRegel pk=%s inschrijving (%s) in mandje van %s' % (
                               regel.pk, inschrijving, inschrijving.koper))
@@ -92,7 +92,7 @@ class OpleidingBestelPlugin(BestelPluginBase):
                         code=BESTELLING_REGEL_CODE_OPLEIDING)
         regel.save()
 
-        inschrijving.bestelling = regel
+        inschrijving.bestelling_regel = regel
         inschrijving.status = OPLEIDING_INSCHRIJVING_STATUS_RESERVERING_MANDJE
         inschrijving.nummer = inschrijving.pk
 
@@ -100,7 +100,7 @@ class OpleidingBestelPlugin(BestelPluginBase):
         msg = "[%s] Toegevoegd aan het mandje van %s\n" % (stamp_str, mandje_van_str)
         inschrijving.log += msg
 
-        inschrijving.save(update_fields=['bestelling', 'log', 'status', 'nummer'])
+        inschrijving.save(update_fields=['bestelling_regel', 'log', 'status', 'nummer'])
 
         self.stdout.write('[DEBUG] Opleiding inschrijving pk=%s heeft status %s (%s)' % (
                           inschrijving.pk, inschrijving.status,
@@ -137,7 +137,7 @@ class OpleidingBestelPlugin(BestelPluginBase):
                             sporter=inschrijving.sporter,
                             koper=inschrijving.koper,
                             bedrag_ontvangen=inschrijving.bedrag_ontvangen,
-                            bestelling=inschrijving.bestelling,
+                            bestelling_regel=inschrijving.bestelling_regel,
                             log=inschrijving.log + msg)
             afmelding.save()
 
@@ -151,7 +151,7 @@ class OpleidingBestelPlugin(BestelPluginBase):
             Geef een eerder gemaakte reservering voor een opleiding weer vrij
             zodat deze door iemand anders te kiezen zijn.
         """
-        inschrijving = OpleidingInschrijving.objects.filter(bestelling=regel).first()
+        inschrijving = OpleidingInschrijving.objects.filter(bestelling_regel=regel).first()
         if not inschrijving:
             self.stdout.write('[ERROR] Kan OpleidingInschrijving voor regel met pk=%s niet vinden' % regel.pk)
             return
@@ -173,7 +173,7 @@ class OpleidingBestelPlugin(BestelPluginBase):
                             wanneer_afgemeld=now,
                             status=OPLEIDING_AFMELDING_STATUS_AFGEMELD,
                             opleiding=inschrijving.opleiding,
-                            bestelling=None,
+                            bestelling_regel=None,
                             sporter=inschrijving.sporter,
                             koper=inschrijving.koper,
                             bedrag_ontvangen=inschrijving.bedrag_ontvangen,
@@ -200,7 +200,7 @@ class OpleidingBestelPlugin(BestelPluginBase):
             Het gereserveerde product in het mandje is nu omgezet in een bestelling.
             Verander de status van het gevraagde product naar 'besteld maar nog niet betaald'
         """
-        inschrijving = OpleidingInschrijving.objects.filter(bestelling=regel).first()
+        inschrijving = OpleidingInschrijving.objects.filter(bestelling_regel=regel).first()
         if not inschrijving:
             self.stdout.write('[ERROR] Kan OpleidingInschrijving voor regel met pk=%s niet vinden' % regel.pk)
             return
@@ -218,7 +218,7 @@ class OpleidingBestelPlugin(BestelPluginBase):
             Het product is betaald, dus de reservering moet definitief gemaakt worden.
             Wordt ook aangeroepen als een bestelling niet betaald hoeft te worden (totaal bedrag nul).
         """
-        inschrijving = OpleidingInschrijving.objects.filter(bestelling=regel).first()
+        inschrijving = OpleidingInschrijving.objects.filter(bestelling_regel=regel).first()
         if not inschrijving:
             self.stdout.write('[ERROR] Kan OpleidingInschrijving voor regel met pk=%s niet vinden' % regel.pk)
             return

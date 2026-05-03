@@ -40,7 +40,7 @@ class WedstrijdAfgemeld(models.Model):
     wedstrijdklasse = models.ForeignKey(KalenderWedstrijdklasse, on_delete=models.PROTECT)
 
     # koppeling aan de bestelling
-    bestelling = models.ForeignKey(BestellingRegel, on_delete=models.PROTECT, null=True)
+    bestelling_regel = models.ForeignKey(BestellingRegel, on_delete=models.PROTECT, null=True)
 
     # wie is de koper?
     # (BestellingProduct verwijst naar deze inschrijving)           # TODO: klopt dit nog?

@@ -91,7 +91,7 @@ class Command(BaseCommand):
                        .objects
                        .select_related('account',
                                        'bestelling',
-                                       'regel')
+                                       'bestelling_regel')
                        .get(pk=pk))
 
             self.verwerk_mutaties.verwerk(mutatie)

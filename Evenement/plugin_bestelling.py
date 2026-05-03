@@ -37,10 +37,10 @@ class EvenementBestelPlugin(BestelPluginBase):
                              .objects
                              .filter(status=EVENEMENT_INSCHRIJVING_STATUS_RESERVERING_MANDJE,
                                      wanneer__lt=verval_datum)
-                             .select_related('bestelling',
+                             .select_related('bestelling_regel',
                                              'koper')):
 
-            regel = inschrijving.bestelling
+            regel = inschrijving.bestelling_regel
 
             self.stdout.write('[INFO] Vervallen: BestellingRegel pk=%s EvenementInschrijving (%s) in mandje van %s' % (
                               regel.pk, inschrijving, inschrijving.koper))
@@ -95,7 +95,7 @@ class EvenementBestelPlugin(BestelPluginBase):
                         code=BESTELLING_REGEL_CODE_EVENEMENT)
         regel.save()
 
-        inschrijving.bestelling = regel
+        inschrijving.bestelling_regel = regel
 
         inschrijving.status = EVENEMENT_INSCHRIJVING_STATUS_RESERVERING_MANDJE
         inschrijving.nummer = inschrijving.pk
@@ -104,7 +104,7 @@ class EvenementBestelPlugin(BestelPluginBase):
         msg = "[%s] Toegevoegd aan het mandje van %s\n" % (stamp_str, mandje_van_str)
         inschrijving.log += msg
 
-        inschrijving.save(update_fields=['bestelling', 'status', 'log', 'nummer'])
+        inschrijving.save(update_fields=['bestelling_regel', 'status', 'log', 'nummer'])
 
         return regel
 
@@ -137,7 +137,7 @@ class EvenementBestelPlugin(BestelPluginBase):
                                 sporter=inschrijving.sporter,
                                 koper=inschrijving.koper,
                                 bedrag_ontvangen=inschrijving.bedrag_ontvangen,
-                                bestelling=inschrijving.bestelling,
+                                bestelling_regel=inschrijving.bestelling_regel,
                                 log=inschrijving.log + msg)
             afmelding.save()
 
@@ -170,7 +170,7 @@ class EvenementBestelPlugin(BestelPluginBase):
                                 nummer=inschrijving.nummer,
                                 wanneer_afgemeld=now,
                                 status=EVENEMENT_AFMELDING_STATUS_AFGEMELD,
-                                bestelling=None,            
+                                bestelling_regel=None,            # TODO: koppeling met bestelling behouden
                                 evenement=inschrijving.evenement,
                                 sporter=inschrijving.sporter,
                                 koper=inschrijving.koper,
@@ -198,7 +198,7 @@ class EvenementBestelPlugin(BestelPluginBase):
             Het gereserveerde product in het mandje is nu omgezet in een bestelling.
             Verander de status van het gevraagde product naar 'besteld maar nog niet betaald'
         """
-        inschrijving = EvenementInschrijving.objects.filter(bestelling=regel).first()
+        inschrijving = EvenementInschrijving.objects.filter(bestelling_regel=regel).first()
         if not inschrijving:
             self.stdout.write('[ERROR] Kan EvenementInschrijving voor regel met pk=%s niet vinden' % regel.pk)
             return
@@ -217,7 +217,7 @@ class EvenementBestelPlugin(BestelPluginBase):
             Wordt ook aangeroepen als een bestelling niet betaald hoeft te worden (totaal bedrag nul).
         """
 
-        inschrijving = EvenementInschrijving.objects.filter(bestelling=regel).first()
+        inschrijving = EvenementInschrijving.objects.filter(bestelling_regel=regel).first()
         if not inschrijving:
             self.stdout.write('[ERROR] Kan EvenementInschrijving voor regel met pk=%s niet vinden' % regel.pk)
             return
@@ -294,7 +294,7 @@ class EvenementBestelPlugin(BestelPluginBase):
         ver_nr = -1
         inschrijving = (EvenementInschrijving
                         .objects
-                        .filter(bestelling=regel)
+                        .filter(bestelling_regel=regel)
                         .select_related('evenement',
                                         'evenement__organiserende_vereniging')
                         .first())

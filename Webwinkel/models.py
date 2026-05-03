@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2025 Ramon van der Winkel.
+#  Copyright (c) 2022-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -165,7 +165,7 @@ class WebwinkelKeuze(models.Model):
                               default=KEUZE_STATUS_RESERVERING_MANDJE)
 
     # koppeling aan de bestelling
-    bestelling = models.ForeignKey(BestellingRegel, on_delete=models.PROTECT, null=True)
+    bestelling_regel = models.ForeignKey(BestellingRegel, on_delete=models.PROTECT, null=True)
 
     # om welk product gaat het
     product = models.ForeignKey(WebwinkelProduct, on_delete=models.PROTECT)

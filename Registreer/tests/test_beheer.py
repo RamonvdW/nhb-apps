@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2025 Ramon van der Winkel.
+#  Copyright (c) 2020-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -540,7 +540,7 @@ class TestRegistreerBeheer(E2EHelpers, TestCase):
                             sporterboog=self.sporterboog_800001,
                             wedstrijdklasse=klasse,
                             koper=self.account_800001,
-                            bestelling=regel)
+                            bestelling_regel=regel)
         inschrijving.save()
 
         webwinkel_product = WebwinkelProduct()

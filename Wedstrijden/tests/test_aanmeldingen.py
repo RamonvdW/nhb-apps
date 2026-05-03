@@ -262,15 +262,15 @@ class TestWedstrijdenAanmeldingen(E2EHelpers, TestCase):
                             sporterboog=inschrijving.sporterboog,
                             sessie='oude sessie',
                             wedstrijdklasse=inschrijving.wedstrijdklasse,
-                            bestelling=inschrijving.bestelling,
+                            bestelling_regel=inschrijving.bestelling_regel,
                             koper=inschrijving.koper,
                             korting=inschrijving.korting,
                             bedrag_ontvangen=inschrijving.ontvangen_euro,
                             bedrag_retour=inschrijving.retour_euro,
                             log=inschrijving.log)
 
-        inschrijving.bestelling = None
-        inschrijving.save(update_fields=['bestelling'])
+        inschrijving.bestelling_regel = None
+        inschrijving.save(update_fields=['bestelling_regel'])
         inschrijving.delete()
 
         return afgemeld

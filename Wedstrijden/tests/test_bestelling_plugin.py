@@ -156,7 +156,7 @@ class TestWedstrijdenBestellingPlugin(E2EHelpers, TestCase):
                                 sessie=self.sessie,
                                 sporterboog=self.sporterboog_r,
                                 wedstrijdklasse=self.wedstrijdklasse_r,
-                                bestelling=regel1,
+                                bestelling_regel=regel1,
                                 koper=self.account_100000)
         inschrijving1.save()
 
@@ -173,7 +173,7 @@ class TestWedstrijdenBestellingPlugin(E2EHelpers, TestCase):
                                 sessie=self.sessie,
                                 sporterboog=self.sporterboog_c,
                                 wedstrijdklasse=self.wedstrijdklasse_c,
-                                bestelling=regel2,
+                                bestelling_regel=regel2,
                                 koper=self.account_100000)
         inschrijving2.save()
 
@@ -218,7 +218,7 @@ class TestWedstrijdenBestellingPlugin(E2EHelpers, TestCase):
                                 sessie=self.sessie,
                                 sporterboog=self.sporterboog_r,
                                 wedstrijdklasse=self.wedstrijdklasse_r,
-                                bestelling=None,
+                                bestelling_regel=None,
                                 koper=self.account_100000)
         inschrijving.save()
 
@@ -227,7 +227,7 @@ class TestWedstrijdenBestellingPlugin(E2EHelpers, TestCase):
                          'Wedstrijd "Test wedstrijd"||deelname door [100000] Nor Maal||met boog Recurve')
 
         inschrijving.refresh_from_db()
-        self.assertEqual(inschrijving.bestelling, regel)
+        self.assertEqual(inschrijving.bestelling_regel, regel)
         self.assertEqual(inschrijving.status, WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_MANDJE)
         self.assertTrue("] Plekje gereserveerd voor de wedstrijd sessie" in inschrijving.log)
 
@@ -249,7 +249,7 @@ class TestWedstrijdenBestellingPlugin(E2EHelpers, TestCase):
                                 sessie=self.sessie,
                                 sporterboog=self.sporterboog_r,
                                 wedstrijdklasse=self.wedstrijdklasse_r,
-                                bestelling=regel,
+                                bestelling_regel=regel,
                                 koper=self.account_100000,
                                 ontvangen_euro=Decimal(12.34))
         inschrijving.save()
@@ -302,7 +302,7 @@ class TestWedstrijdenBestellingPlugin(E2EHelpers, TestCase):
                                 sessie=self.sessie,
                                 sporterboog=self.sporterboog_r,
                                 wedstrijdklasse=self.wedstrijdklasse_r,
-                                bestelling=regel,
+                                bestelling_regel=regel,
                                 koper=self.account_100000,
                                 ontvangen_euro=Decimal(12.34))
         inschrijving.save()
@@ -346,7 +346,7 @@ class TestWedstrijdenBestellingPlugin(E2EHelpers, TestCase):
                                 sessie=self.sessie,
                                 sporterboog=self.sporterboog_r,
                                 wedstrijdklasse=self.wedstrijdklasse_r,
-                                bestelling=regel,
+                                bestelling_regel=regel,
                                 koper=self.account_100000,
                                 ontvangen_euro=Decimal(12.34))
         inschrijving.save()
@@ -386,7 +386,7 @@ class TestWedstrijdenBestellingPlugin(E2EHelpers, TestCase):
                                 sessie=self.sessie,
                                 sporterboog=self.sporterboog_r,
                                 wedstrijdklasse=self.wedstrijdklasse_r,
-                                bestelling=regel,
+                                bestelling_regel=regel,
                                 koper=self.account_100000)      # zelf
         inschrijving.save()
 
@@ -430,7 +430,7 @@ class TestWedstrijdenBestellingPlugin(E2EHelpers, TestCase):
                                 sessie=self.sessie,
                                 sporterboog=self.sporterboog_r,
                                 wedstrijdklasse=self.wedstrijdklasse_r,
-                                bestelling=regel,
+                                bestelling_regel=regel,
                                 koper=self.account_100001)      # ander
         inschrijving.save()
 
@@ -491,7 +491,7 @@ class TestWedstrijdenBestellingPlugin(E2EHelpers, TestCase):
                                 sessie=self.sessie,
                                 sporterboog=self.sporterboog_r,
                                 wedstrijdklasse=self.wedstrijdklasse_r,
-                                bestelling=regel,
+                                bestelling_regel=regel,
                                 koper=self.account_100000,
                                 ontvangen_euro=Decimal(12.34))
         inschrijving.save()
@@ -532,7 +532,7 @@ class TestWedstrijdenBestellingPlugin(E2EHelpers, TestCase):
                                 sessie=self.sessie,
                                 sporterboog=self.sporterboog_r,
                                 wedstrijdklasse=self.wedstrijdklasse_r,
-                                bestelling=None,
+                                bestelling_regel=None,
                                 koper=self.account_100000)
         inschrijving.save()
 

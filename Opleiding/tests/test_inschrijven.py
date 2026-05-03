@@ -431,7 +431,7 @@ class TestOpleidingInschrijven(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('bestelling/toon-mandje.dtl', 'design/site_layout.dtl'))
 
         # verwijder uit het mandje
-        regel = inschrijving.bestelling
+        regel = inschrijving.bestelling_regel
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_mandje_verwijder % regel.pk, {'snel': 1})
         self.assert_is_redirect(resp, self.url_mandje_toon)

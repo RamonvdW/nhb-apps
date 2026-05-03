@@ -32,8 +32,8 @@ CONTENT_TYPE_CSV = 'text/csv; charset=UTF-8'
 
 
 def get_inschrijving_mh_bestel_nr(obj: WedstrijdInschrijving | WedstrijdAfgemeld):
-    if obj.bestelling:
-        regel = obj.bestelling
+    if obj.bestelling_regel:
+        regel = obj.bestelling_regel
         bestelling = regel.bestelling_set.first()
         if bestelling:      # pragma: no branch
             return bestelling.mh_bestel_nr()
@@ -410,7 +410,7 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
                 if voorkeuren.wedstrijd_geslacht_gekozen:
                     wedstrijd_geslacht = voorkeuren.wedstrijd_geslacht
 
-            regel = aanmelding.bestelling
+            regel = aanmelding.bestelling_regel
             if regel:
                 bedrag_euro_str = format_bedrag_euro(regel.bedrag_euro)
             else:

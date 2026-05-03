@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2024-2025 Ramon van der Winkel.
+#  Copyright (c) 2024-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -185,7 +185,7 @@ class TestEvenementAanmeldingen(E2EHelpers, TestCase):
                                 evenement=evenement,
                                 sporter=self.sporter_100022,
                                 koper=self.account_100022,
-                                bestelling=regel)
+                                bestelling_regel=regel)
         inschrijving.save()
         self.inschrijving = inschrijving
 
@@ -226,7 +226,7 @@ class TestEvenementAanmeldingen(E2EHelpers, TestCase):
                             koper=self.account_100022,
                             bedrag_ontvangen=10.0,
                             bedrag_retour=9.0,
-                            bestelling=regel,
+                            bestelling_regel=regel,
                             log='test')
         afgemeld.save()
         self.afgemeld = afgemeld

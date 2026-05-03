@@ -132,7 +132,7 @@ def bestel_mutatieverzoek_verwijder_regel_uit_mandje(account: Account, regel: Be
     mutatie, is_created = BestellingMutatie.objects.get_or_create(
                                     code=BESTELLING_MUTATIE_VERWIJDER,
                                     account=account,
-                                    regel=regel,
+                                    bestelling_regel=regel,
                                     is_verwerkt=False)
     if is_created:
         mutatie.save()

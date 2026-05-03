@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2025 Ramon van der Winkel.
+#  Copyright (c) 2022-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -186,7 +186,7 @@ class Command(BaseCommand):
                             sporterboog=sporterboog_r,
                             koper=self.account,
                             ontvangen_euro=Decimal('42.40'),
-                            bestelling=regel_r)
+                            bestelling_regel=regel_r)
         inschrijving_r.save()
 
         regel_c = BestellingRegel(
@@ -204,7 +204,7 @@ class Command(BaseCommand):
                             sporterboog=sporterboog_c,
                             koper=self.account,
                             ontvangen_euro=Decimal('22.41'),
-                            bestelling=regel_c)
+                            bestelling_regel=regel_c)
         inschrijving_c.save()
 
         instellingen = BetaalInstellingenVereniging(

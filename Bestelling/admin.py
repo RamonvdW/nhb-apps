@@ -178,7 +178,7 @@ class BestellingAdmin(admin.ModelAdmin):
 
 class BestellingMutatieAdmin(admin.ModelAdmin):
 
-    readonly_fields = ('when', 'account', 'code_plus', 'regel', 'bestelling')
+    readonly_fields = ('when', 'account', 'code_plus', 'bestelling_regel', 'bestelling')
 
     list_filter = ('is_verwerkt', 'code')
 
@@ -186,7 +186,7 @@ class BestellingMutatieAdmin(admin.ModelAdmin):
         ('BestellingMutatie',
          {'fields': ('when', 'code_plus', 'product_pk', 'is_verwerkt',
                      'account',
-                     'regel', 'korting', 'bestelling', 'betaling_is_gelukt', 'bedrag_euro')
+                     'bestelling_regel', 'korting', 'bestelling', 'betaling_is_gelukt', 'bedrag_euro')
           }),
     )
 
