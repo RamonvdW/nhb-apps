@@ -6,9 +6,6 @@ django>=5.2,<6.0
 # stick to v2 for now
 mollie-api-python<3.0
 
-# [2025-12] stick to 3.2.x for now due to too many deprecation warnings
-pyparsing<3.3
-
 # 2.48 heeft een nieuwe dependency op "cryptography" en "cffi"
 # geeft deze fout:
 #   File "/var/www/nhb-apps-venv/lib/python3.13/site-packages/google/auth/crypt/es.py", line 21, in <module>

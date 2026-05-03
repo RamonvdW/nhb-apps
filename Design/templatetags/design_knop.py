@@ -25,6 +25,8 @@ register = template.Library()
 def sv_knop_nav(url='', kleur='rood', icon='', tekst='##BUG', knop_id='',
                 smal=False, extra_class='', extra_style=''):
 
+    tekst = str(tekst)
+
     if kleur == 'rood':
         a_class = 'btn-sv-rood'
     else:
@@ -91,7 +93,7 @@ def sv_knop_mailto(kleur='rood', icon='email', email='', tekst='', usability_lab
         new_text += sv_icon('email', kleur='wit', use='button', extra_style='vertical-align:text-bottom')
         new_text += '</span>\n'
 
-    new_text += '<span style="display:inline">' + tekst + '</span>\n'
+    new_text += '<span style="display:inline">' + str(tekst) + '</span>\n'
 
     new_text += '</a>\n'
 
@@ -100,7 +102,9 @@ def sv_knop_mailto(kleur='rood', icon='email', email='', tekst='', usability_lab
 
 @register.simple_tag(name='sv-knop-ext')
 @functools.cache
-def sv_knop_ext(kleur='rood', icon='open url', tekst='tbd', url='', extra_style='', smal=False):
+def sv_knop_ext(kleur='rood', icon='open url', tekst='##BUG', url='', extra_style='', smal=False):
+
+    tekst = str(tekst)
 
     if kleur == 'rood':
         kleur_class = 'btn-sv-rood'

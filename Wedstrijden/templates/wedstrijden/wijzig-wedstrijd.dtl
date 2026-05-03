@@ -196,8 +196,8 @@
                                     {% for opt in opt_status %}
                                         <span class="{% if opt.selected %}sv-blauw-text{% else %}grey-text{% endif %}" style="white-space: nowrap">{{ opt.status_str }}</span><br>
                                     {% endfor %}
-                                    <br>
                                     {% if url_prev_tekst %}
+                                        <br>
                                         <button form="form_prev" class="btn-sv-blauw vertrek_knop" id="submit_knop2" type="submit">{{ url_prev_tekst }}</button>
                                         <span>&nbsp;&nbsp;</span>
                                     {% endif %}

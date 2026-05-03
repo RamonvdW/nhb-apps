@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2025 Ramon van der Winkel.
+#  Copyright (c) 2022-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -77,7 +77,7 @@ class OverzichtView(TemplateView):
 
         # iedereen mag de informatie over de spelden zien
         # begrenzing voor bestellen (alleen leden) volgt verderop
-        if settings.WEBWINKEL_TOON_PRESTATIESPELDEN:
+        if settings.WEBWINKEL_TOON_PRESTATIESPELDEN:                # pragma: no branch
             context['url_spelden'] = reverse('Spelden:begin')
             context['img_spelden'] = static_safe('spelden/ster_1200.webp')
 

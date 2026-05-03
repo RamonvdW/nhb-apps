@@ -30,6 +30,13 @@
                     <td>{{ wed.titel }}</td>
                 </tr>
 
+                {% if wed.locatie %}
+                    <tr>
+                        <th>Locatie</th>
+                        <td>{{ wed.locatie.adres|linebreaksbr }}</td>
+                    </tr>
+                {% endif %}
+
                 {% if wed.datum_begin == wed.datum_einde %}
                     <tr>
                         <th>Datum wedstrijd</th>
@@ -44,7 +51,13 @@
 
                 <tr>
                     <th>Eigen scheids<wbr>rechters (namen)</th>
-                    <td>{{ wed.scheidsrechters|linebreaksbr }}</td>
+                    <td>
+                        {% if wed.scheidsrechters %}
+                            <span>{{ wed.scheidsrechters|linebreaksbr }}</span>
+                        {% else %}
+                            <i>Geen</i>
+                        {% endif %}
+                    </td>
                 </tr>
 
                 <tr>

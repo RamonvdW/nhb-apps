@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2025 Ramon van der Winkel.
+#  Copyright (c) 2021-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -29,7 +29,7 @@ class Migration(migrations.Migration):
     # dit is de eerste
     initial = True
 
-    # migratie functies
+    # volgorde afdwingen
     dependencies = [
         ('Account', 'm0032_squashed'),
         ('BasisTypen', 'm0062_squashed'),

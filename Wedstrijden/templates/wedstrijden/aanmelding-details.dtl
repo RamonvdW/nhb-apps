@@ -92,7 +92,9 @@
                         <span>({{ inschrijving.wedstrijdklasse.afkorting }}) {{ inschrijving.wedstrijdklasse.beschrijving }}</span>
                         {% if inschrijving.status == 'A' %}</del>{% endif %}</td>
                     <td class="right-align">
-                        <a class="btn-sv-rood" href="{{ inschrijving.url_aanpassen }}" style="margin-right:10px">Aanpassen</a>
+                        {% if inschrijving.url_aanpassen %}
+                            <a class="btn-sv-rood" href="{{ inschrijving.url_aanpassen }}" style="margin-right:10px">Aanpassen</a>
+                        {% endif %}
                     </td>
                 </tr>
                 <tr>
