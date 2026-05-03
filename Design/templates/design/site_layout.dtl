@@ -67,7 +67,8 @@
                         <!-- mandje knopje -->
                         {% if menu_toon_mandje %}
                             <li>
-                                {% sv-knop-nav icon='mandje' tekst=menu_mandje_aantal url=url_toon_mandje %}
+                                <!-- position:relative voorkomt dat de knop achter het logo komt -->
+                                {% sv-knop-nav icon='mandje' tekst=menu_mandje_aantal url=url_toon_mandje extra_style='position:relative' %}
                             </li>
                         {% endif %}
 
