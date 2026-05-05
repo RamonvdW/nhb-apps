@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -51,14 +51,14 @@ def account_add_plugin_post_login(prio, func):
                return url om naartoe te navigeren of None voor "geen redirect"
 
         de plugin wordt aangeroepen na inlog
-        de functie reverse (uit django.urls) produceert url string
+        retourneer het resultaat van de reverse() functie (uit django.urls)
 
-        plugins are sorted on prio, lowest first
+        plugins are sorted on prio, highest first
         no predefined ranges
     """
     tup = (prio, func)
     account_plugins_post_login.append(tup)
-    account_plugins_post_login.sort(key=lambda x: x[0])
+    account_plugins_post_login.sort(key=lambda x: x[0], reverse=True)     # highest first
 
 
 def account_add_plugin_ww_vergeten(prio, func):

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -185,7 +185,7 @@ class LoginView(TemplateView):
                 next_url = ''
 
         if next_url:
-            # roep de redirect plugins aan
+            # roep de redirect plugins aan, maar ignore redirect verzoeken
             for _, func in account_plugins_post_login:
                 _ = func(self.request, account)
             # for
