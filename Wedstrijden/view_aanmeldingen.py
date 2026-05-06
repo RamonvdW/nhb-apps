@@ -14,11 +14,11 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.definities import GESLACHT2STR
 from Betaal.format import format_bedrag_euro
 from Functie.definities import Rol
-from Functie.rol import rol_get_huidige, rol_get_huidige_functie
+from Functie.rol import rol_get_huidige_functie
 from Sporter.models import SporterVoorkeuren
 from Wedstrijden.definities import (WEDSTRIJD_INSCHRIJVING_STATUS_TO_SHORT_STR,
                                     WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF)
-from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdInschrijving, WedstrijdAfgemeld
+from Wedstrijden.models import Wedstrijd, WedstrijdInschrijving, WedstrijdAfgemeld
 from Wedstrijden.operations.kwalificatie_scores import get_kwalificatie_scores
 from decimal import Decimal
 from codecs import BOM_UTF8
@@ -67,7 +67,8 @@ class WedstrijdAanmeldingenView(UserPassesTestMixin, TemplateView):
             wedstrijd_pk = str(kwargs['wedstrijd_pk'])[:7]     # afkappen voor de veiligheid
             wedstrijd = (Wedstrijd
                          .objects
-                         .select_related('organiserende_vereniging')
+                         .select_related('organiserende_vereniging',
+                                         'uitvoerende_vereniging')
                          .get(pk=wedstrijd_pk))
         except (ValueError, TypeError, Wedstrijd.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
@@ -173,7 +174,7 @@ class WedstrijdAanmeldingenView(UserPassesTestMixin, TemplateView):
         context['url_download_csv'] = reverse('Wedstrijden:download-aanmeldingen-csv',
                                               kwargs={'wedstrijd_pk': wedstrijd.pk})
 
-        if self.rol_nu == Rol.ROL_HWL:
+        if self.rol_nu == Rol.ROL_HWL and not uitvoerend:
             context['url_toevoegen'] = reverse('WedstrijdInschrijven:inschrijven-handmatig',
                                                kwargs={'wedstrijd_pk': wedstrijd.pk})
 

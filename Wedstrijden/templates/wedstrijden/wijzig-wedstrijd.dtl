@@ -81,6 +81,15 @@
         </div>
     </div>
 
+    {% if uitvoerend %}
+        <!-- blauw bordje -->
+        <div class="row sv-bordje-wrapper">
+            <div class="col s12 m8 offset-m2 l6 offset-l3 sv-bordje-rood">
+                <p>Je kan begrensd wijzigingen maken.<br><br>Deze wedstrijdwordt beheerd door <b>{{ wed.organiserende_vereniging }}</b></p>
+            </div>
+        </div>
+    {% endif %}
+
     <!-- blauwe balk met dialoog venster -->
     <div class="row-sv-blauw">
         <div class="col s12">
@@ -103,7 +112,7 @@
                             <tr>
                                 <th>Titel</th>
                                 <td>
-                                    {% if mag_wijzigen %}
+                                    {% if mag_wijzigen and not uitvoerend %}
                                         <input type="text" name="titel" value="{{ wed.titel }}" oninput="gewijzigd()">
                                     {% else %}
                                         <span>{{ wed.titel }}</span>
@@ -270,7 +279,7 @@
                                 <tr>
                                     <th>Wanneer moet de inschrijving sluiten?</th>
                                     <td>
-                                        {% if mag_wijzigen %}
+                                        {% if mag_wijzigen and not uitvoerend %}
                                             <select name="sluit" onchange="gewijzigd()">
                                                 {% for opt in opt_sluit %}
                                                     <option value="{{ opt.sel }}"{% if opt.selected %} selected{% endif %}>{{ opt.keuze_str }} (op {{ opt.datum }} om 00:00)</option>
@@ -288,7 +297,7 @@
                             {% endif %}
 
                             <tr>
-                                <th>Aanwezig melden</th>
+                                <th{% if uitvoerend %} class="sv-rood-text"{% endif %}>Aanwezig melden</th>
                                 <td>
                                     {% if block_edits %}
                                         <span>{{ wed.minuten_voor_begin_sessie_aanwezig_zijn }} minuten van te voren</span>
@@ -327,7 +336,7 @@
                            <tr>
                                 <th>Nieuwsbericht of brochure</th>
                                 <td>
-                                    {% if block_edits or not mag_wijzigen %}
+                                    {% if block_edits or not mag_wijzigen or uitvoerend %}
                                         {% if wed.url_flyer %}
                                             <span>{{ wed.url_flyer }}</span>
                                         {% else %}
@@ -342,7 +351,7 @@
                            <tr>
                                 <th>Gepubliceerde deelnemerslijst</th>
                                 <td>
-                                    {% if block_edits or not mag_wijzigen %}
+                                    {% if block_edits or not mag_wijzigen or uitvoerend %}
                                         {% if wed.url_deelnemerslijst %}
                                             <code>{{ wed.url_deelnemerslijst }}</code>
                                         {% else %}
@@ -355,7 +364,7 @@
                             </tr>
 
                             <tr>
-                                <th>Bijzonder<wbr>heden</th>
+                                <th{% if uitvoerend %} class="sv-rood-text"{% endif %}>Bijzonder<wbr>heden</th>
                                 <td>
                                     {% if block_edits %}
                                         <span>{{ wed.bijzonderheden|linebreaksbr }}</span>
@@ -368,7 +377,7 @@
                             <tr>
                                 <th>Discipline</th>
                                 <td>
-                                    {% if limit_edits %}
+                                    {% if limit_edits or uitvoerend %}
                                         <span>{{ wed.disc_str }}</span>
                                     {% else %}
                                         <span>Beschikbare disciplines van {{ wed.org_str }}:</span>
@@ -389,7 +398,7 @@
                             <tr>
                                 <th>Doelgroep</th>
                                 <td>
-                                    {% if block_edits or not mag_wijzigen %}
+                                    {% if block_edits or not mag_wijzigen or uitvoerend %}
                                         <span>{{ wed.begrenzing_str }}</span>
                                     {% else %}
                                         <ul id="id_doelgroep">
@@ -409,7 +418,7 @@
                             <tr>
                                 <th>Wedstrijd locatie</th>
                                 <td>
-                                    {% if block_edits or not mag_wijzigen %}
+                                    {% if block_edits or not mag_wijzigen or uitvoerend %}
                                         <span>{{ wed.locatie.adres|linebreaksbr }}</span>
                                     {% else %}
                                         {% if toon_uitvoerende %}
@@ -465,7 +474,7 @@
                             <tr>
                                 <th>Naam van contact<wbr>persoon / wedstrijd<wbr>leider</th>
                                 <td>
-                                    {% if block_edits %}
+                                    {% if block_edits or uitvoerend %}
                                         <span>{{ wed.contact_naam }}</span>
                                     {% else %}
                                         <input type="text" name="contact_naam" value="{{ wed.contact_naam }}" oninput="gewijzigd()">
@@ -476,7 +485,7 @@
                             <tr>
                                 <th>Telefoon<wbr>nummer</th>
                                 <td>
-                                    {% if block_edits %}
+                                    {% if block_edits or uitvoerend %}
                                         <span>{{ wed.contact_telefoon }}</span>
                                     {% else %}
                                         <input type="tel" name="contact_telefoon" value="{{ wed.contact_telefoon }}" oninput="gewijzigd()">
@@ -487,7 +496,7 @@
                             <tr>
                                 <th>E-mail<wbr>adres</th>
                                 <td>
-                                    {% if block_edits %}
+                                    {% if block_edits or uitvoerend %}
                                         <code>{{ wed.contact_email }}</code>
                                     {% else %}
                                         <input type="email" name="contact_email" value="{{ wed.contact_email }}" inputmode="email" oninput="gewijzigd()">
@@ -498,7 +507,7 @@
                             <tr>
                                 <th>Website</th>
                                 <td>
-                                    {% if block_edits or not mag_wijzigen %}
+                                    {% if block_edits or not mag_wijzigen or uitvoerend %}
                                         {% if wed.contact_website %}
                                             <code>{{ wed.contact_website }}</code>
                                         {% else %}
@@ -513,7 +522,7 @@
                             <tr>
                                 <th>Extern beheer</th>
                                 <td>
-                                    {% if block_edits or not mag_wijzigen %}
+                                    {% if block_edits or not mag_wijzigen or uitvoerend %}
                                         <span>{% if wed.extern_beheerd %}Ja{% else %}Nee{% endif %}</span>
                                     {% else %}
                                         <label class="black-text">
@@ -534,7 +543,7 @@
                                 <tr>
                                     <th>Standaard</th>
                                     <td>
-                                        {% if mag_wijzigen %}
+                                        {% if mag_wijzigen and not uitvoerend %}
                                             <span style="font-size:16px">&euro;&nbsp;</span>
                                             <input style="width:90%" type="text" name="prijs_normaal" value="{{ prijs_euro_normaal_str }}" pattern="^\d+(,\d{2})?$" placeholder="123,45" oninput="gewijzigd()">
                                         {% else %}
@@ -546,7 +555,7 @@
                                 <tr>
                                     <th>Tot 18 jaar</th>
                                     <td>
-                                        {% if mag_wijzigen %}
+                                        {% if mag_wijzigen and not uitvoerend %}
                                             <span style="font-size:16px">&euro;&nbsp;</span>
                                             <input style="width:90%" type="text" name="prijs_onder18" value="{{ prijs_euro_onder18_str }}" pattern="^\d+(,\d{2})?$" placeholder="123,45" oninput="gewijzigd()">
                                         {% else %}
@@ -624,7 +633,10 @@
                             </tr>
 
                             <tr>
-                                <th rowspan="4">Gepubliceerde uitslag<br>(verwijzing naar html of pdf, maximaal 4 delen)</th>
+                                <th rowspan="4">
+                                    <span{% if uitvoerend %} class="sv-rood-text"{% endif %}>Gepubliceerde uitslag</span><br>
+                                    <span>(verwijzing naar html of pdf, maximaal 4 delen)</span>
+                                </th>
                                 <td>
                                     {% if block_edits %}
                                         <span>{{ wed.url_uitslag_1 }}</span>
@@ -675,7 +687,7 @@
                             <tr>
                                 <th></th>
                                 <td>
-                                    {% if mag_wijzigen %}
+                                    {% if mag_wijzigen and not uitvoerend %}
                                         {% for klasse in opt_klasse %}
                                             <label class="black-text">
                                                 <input type="checkbox" name="{{ klasse.sel }}"
@@ -714,7 +726,7 @@
                             {% endif %}
 
                             <p>De wedstrijdklasse van de volwassenen is altijd de 'open' klasse waarin alle andere leeftijdsklassen mee mogen doen.</p>
-                            {% if mag_wijzigen %}
+                            {% if mag_wijzigen and not uitvoerend %}
                                 <p>Wedstrijdklassen en bogen die niet aangepast kunnen worden, zijn in gebruik in een sessie.</p>
                             {% endif %}
                         </div>

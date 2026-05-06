@@ -50,7 +50,7 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
         return False
 
     @staticmethod
-    def _actieve_accounts():
+    def _actieve_accounts_maand():
         # tel alle gebruikers die de afgelopen maand ingelogd hebben
         een_maand_geleden = timezone.now() - datetime.timedelta(days=31)
         user_list1 = Account.objects.filter(last_login__gte=een_maand_geleden).values_list('username', flat=True)
@@ -61,6 +61,12 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
 
         unique = set().union(user_list1, user_list2)
         return unique
+
+    @staticmethod
+    def _aantal_actieve_accounts_jaar():
+        een_jaar_geleden = timezone.now() - datetime.timedelta(days=365)
+        count = Account.objects.filter(last_login__gte=een_jaar_geleden).count()
+        return count
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -92,8 +98,10 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
         context['totaal'] = Account.objects.count()
         context['totaal_gast'] = Account.objects.filter(is_gast=True).count()
 
-        actieve_accounts = self._actieve_accounts()
-        context['aantal_actieve_gebruikers'] = len(actieve_accounts)
+        actieve_accounts = self._actieve_accounts_maand()
+        context['aantal_actieve_gebruikers_maand'] = len(actieve_accounts)
+
+        context['aantal_actieve_gebruikers_jaar'] = self._aantal_actieve_accounts_jaar()
 
         context['recente_activiteit'] = (Account
                                          .objects

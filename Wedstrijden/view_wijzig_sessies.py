@@ -80,13 +80,14 @@ class WedstrijdSessiesView(UserPassesTestMixin, View):
             #         klasse.beschrijving += ' [%s]' % klasse.afkorting
             #     # for
 
-            sessie.url_wijzig = reverse('Wedstrijden:wijzig-sessie',
-                                        kwargs={'wedstrijd_pk': wedstrijd.pk,
-                                                'sessie_pk': sessie.pk})
+            if not uitvoerend:
+                sessie.url_wijzig = reverse('Wedstrijden:wijzig-sessie',
+                                            kwargs={'wedstrijd_pk': wedstrijd.pk,
+                                                    'sessie_pk': sessie.pk})
         # for
         context['sessies'] = sessies
 
-        if wedstrijd.status != WEDSTRIJD_STATUS_GEANNULEERD:
+        if not uitvoerend and wedstrijd.status != WEDSTRIJD_STATUS_GEANNULEERD:
             context['url_nieuwe_sessie'] = reverse('Wedstrijden:wijzig-sessies',
                                                    kwargs={'wedstrijd_pk': wedstrijd.pk})
 

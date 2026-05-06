@@ -256,6 +256,31 @@ h1, h2, h3, h4, h5, h6 {
 
 
 //-----------------------------------
+// bordje: een balk in rood of blauw
+//
+.sv-bordje-wrapper {
+  padding: 10px;
+}
+
+.sv-bordje {
+  @extend .z-depth-3;
+  border-radius: 7px;
+  color: white;
+  text-align: center;
+}
+
+.sv-bordje-blauw {
+  @extend .sv-bordje;
+  background-color: $sv-donkerblauw-color;
+}
+
+.sv-bordje-rood {
+  @extend .sv-bordje;
+  background-color: $sv-rood-color;
+}
+
+
+//-----------------------------------
 // sv-card
 //
 .sv-card {

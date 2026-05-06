@@ -41,8 +41,12 @@
                     <td>{{ deze_maand_count_gast }}</td>
                 </tr>
                 <tr>
-                    <th>Aantal actieve gebruikers (afgelopen 31 dagen)</th>
-                    <td>{{ aantal_actieve_gebruikers }}</td>
+                    <th>Aantal actieve gebruikers afgelopen 31 dagen</th>
+                    <td>{{ aantal_actieve_gebruikers_maand }}</td>
+                </tr>
+                <tr>
+                    <th>Aantal actieve gebruikers, afgelopen jaar</th>
+                    <td>{{ aantal_actieve_gebruikers_jaar }}</td>
                 </tr>
             </table>
         </div>

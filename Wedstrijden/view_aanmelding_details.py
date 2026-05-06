@@ -78,9 +78,14 @@ class WedstrijdAanmeldingDetailsView(UserPassesTestMixin, TemplateView):
         except WedstrijdInschrijving.DoesNotExist:
             raise Http404('Inschrijving niet gevonden')
 
-        if self.rol_nu in (Rol.ROL_SEC, Rol.ROL_HWL):
+        mag_wijzigen = True
+        if self.rol_nu == Rol.ROL_HWL:
             # alleen van de eigen vereniging laten zien
-            if inschrijving.wedstrijd.organiserende_vereniging != self.functie_nu.vereniging:
+            ver = self.functie_nu.vereniging
+            wed = inschrijving.wedstrijd
+            if wed.uitvoerende_vereniging == ver:
+                mag_wijzigen = False
+            elif wed.organiserende_vereniging != ver:
                 raise Http404('Verkeerde vereniging')
 
         context['inschrijving'] = inschrijving
@@ -97,11 +102,12 @@ class WedstrijdAanmeldingDetailsView(UserPassesTestMixin, TemplateView):
 
         inschrijving.bestelnummer_str = get_inschrijving_mh_bestel_nr(inschrijving)
 
-        inschrijving.url_afmelden = reverse('Wedstrijden:afmelden',
-                                            kwargs={'inschrijving_pk': inschrijving.pk})
+        if mag_wijzigen:
+            inschrijving.url_afmelden = reverse('Wedstrijden:afmelden',
+                                                kwargs={'inschrijving_pk': inschrijving.pk})
 
-        inschrijving.url_aanpassen = reverse('Wedstrijden:aanpassen',
-                                             kwargs={'inschrijving_pk': inschrijving.pk})
+            inschrijving.url_aanpassen = reverse('Wedstrijden:aanpassen',
+                                                 kwargs={'inschrijving_pk': inschrijving.pk})
 
         if inschrijving.korting:
             inschrijving.korting_str = '%s%%' % inschrijving.korting.percentage
@@ -420,9 +426,11 @@ class WedstrijdAfgemeldDetailsView(UserPassesTestMixin, TemplateView):
         except WedstrijdAfgemeld.DoesNotExist:
             raise Http404('Afmelding niet gevonden')
 
-        if self.rol_nu in (Rol.ROL_SEC, Rol.ROL_HWL):
+        if self.rol_nu == Rol.ROL_HWL:
             # alleen van de eigen vereniging laten zien
-            if afgemeld.wedstrijd.organiserende_vereniging != self.functie_nu.vereniging:
+            ver = self.functie_nu.vereniging
+            wed = afgemeld.wedstrijd
+            if not (wed.organiserende_vereniging == ver or wed.uitvoerende_vereniging == ver):
                 raise Http404('Verkeerde vereniging')
 
         context['afgemeld'] = afgemeld

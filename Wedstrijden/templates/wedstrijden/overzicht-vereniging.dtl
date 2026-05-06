@@ -60,12 +60,12 @@
                             <td>{% if wed.titel %}{{ wed.titel }}{% else %}<i class="sv-rood-text">Nog niet ingevuld</i>{% endif %}</td>
                             <td>
                                 <div style="white-space:nowrap">     <!-- keeps buttons side by side -->
-                                    {% sv-knop-nav url=wed.url_wijzig icon='aanpassen' tekst='' smal=True %}
+                                    {% sv-knop-nav url=wed.url_wijzig icon='aanpassen' tekst='' smal=True kleur=wed.kleur %}
                                     {% if wed.url_sessies %}
-                                        {% sv-knop-nav url=wed.url_sessies icon='wedstrijd sessies' tekst='' smal=True %}
+                                        {% sv-knop-nav url=wed.url_sessies icon='wedstrijd sessies' tekst='' smal=True kleur=wed.kleur %}
                                     {% endif %}
                                     {% if wed.url_aanmeldingen %}
-                                        {% sv-knop-nav url=wed.url_aanmeldingen icon='wedstrijd aanmeldingen' tekst='' smal=True %}
+                                        {% sv-knop-nav url=wed.url_aanmeldingen icon='wedstrijd aanmeldingen' tekst='' smal=True kleur=wed.kleur %}
                                     {% endif %}
                                     {% if wed.url_check_kwalificatie_scores %}
                                         {% sv-knop-nav url=wed.url_check_kwalificatie_scores kleur='blauw' icon='wedstrijd kwalificatiescores' tekst='' smal=True %}
@@ -75,7 +75,7 @@
                         </tr>
                     {% empty %}
                         <tr data-tablefilter="stop">
-                            <td colspan="5"><i>Er zijn nog geen wedstrijden</i></td>
+                            <td colspan="5" class="center"><i>Er zijn nog geen wedstrijden</i></td>
                         </tr>
                     {% endfor %}
 

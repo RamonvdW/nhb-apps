@@ -85,8 +85,6 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
                 if wedstrijd.organiserende_vereniging != ver:
                     raise PermissionDenied('Wedstrijd niet van jouw vereniging')
 
-        context['mag_wijzigen'] = not uitvoerend
-
         # zorg dat de huidige datum weer gekozen kan worden
         context['now'] = now = timezone.now()
         context['begin_jaar'] = min(now.year, wedstrijd.datum_begin.year)
@@ -135,6 +133,8 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
             context['block_edits'] = True
             context['niet_verwijderbaar'] = True
 
+        context['mag_wijzigen'] = True
+        context['uitvoerend'] = uitvoerend
         if uitvoerend:
             context['niet_verwijderbaar'] = True
 
@@ -450,8 +450,14 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
         except Wedstrijd.DoesNotExist:
             raise Http404('Wedstrijd niet gevonden')
 
-        if self.rol_nu == Rol.ROL_HWL and wedstrijd.organiserende_vereniging != self.functie_nu.vereniging:
-            raise PermissionDenied('Wedstrijd niet van jouw vereniging')
+        uitvoerend = False
+        if self.rol_nu == Rol.ROL_HWL:
+            ver = self.functie_nu.vereniging
+            if wedstrijd.uitvoerende_vereniging == ver:
+                uitvoerend = True
+            else:
+                if wedstrijd.organiserende_vereniging != ver:
+                    raise PermissionDenied('Wedstrijd niet van jouw vereniging')
 
         limit_edits = False
         block_edits = False
@@ -463,7 +469,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
             block_edits = True
 
         # verwijderen alleen toestaan in de ontwerp fase
-        if wedstrijd.status == WEDSTRIJD_STATUS_ONTWERP and request.POST.get('verwijder_wedstrijd'):
+        if wedstrijd.status == WEDSTRIJD_STATUS_ONTWERP and request.POST.get('verwijder_wedstrijd') and not uitvoerend:
             wedstrijd.delete()
         else:
             oude_datum_begin = wedstrijd.datum_begin
@@ -520,7 +526,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
                     if 1 <= duur < 5:
                         wedstrijd.datum_einde += datetime.timedelta(days=duur)
 
-            if not block_edits:
+            if not block_edits and not uitvoerend:
                 sluit = request.POST.get('sluit', '')
                 if sluit.startswith('sluit_'):
                     try:
@@ -567,7 +573,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
 
                 wedstrijd.scheidsrechters = request.POST.get('scheidsrechters', wedstrijd.scheidsrechters)[:500]
 
-            if not block_edits:
+            if not block_edits and not uitvoerend:
                 # begrenzing is "doelgroep"
                 begrenzing = request.POST.get('begrenzing', '')[:20]     # afkappen voor de veiligheid
                 for code in WEDSTRIJD_BEGRENZING_TO_STR.keys():
@@ -585,44 +591,47 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
                 # for
                 wedstrijd.boogtypen.set(boog_pks)
 
-            wedstrijd.contact_naam = request.POST.get('contact_naam', wedstrijd.contact_naam)[:50]
-            wedstrijd.contact_email = request.POST.get('contact_email', wedstrijd.contact_email)[:150]
-            wedstrijd.contact_website = request.POST.get('contact_website', wedstrijd.contact_website)[:100]
-            wedstrijd.contact_telefoon = request.POST.get('contact_telefoon', wedstrijd.contact_telefoon)[:50]
+            if not uitvoerend:
+                wedstrijd.contact_naam = request.POST.get('contact_naam', wedstrijd.contact_naam)[:50]
+                wedstrijd.contact_email = request.POST.get('contact_email', wedstrijd.contact_email)[:150]
+                wedstrijd.contact_website = request.POST.get('contact_website', wedstrijd.contact_website)[:100]
+                wedstrijd.contact_telefoon = request.POST.get('contact_telefoon', wedstrijd.contact_telefoon)[:50]
 
             wedstrijd.bijzonderheden = request.POST.get('bijzonderheden', '')[:1000]
 
-            wedstrijd.uitvoerende_vereniging = None
-            if wedstrijd.organiserende_vereniging.ver_nr in settings.WEDSTRIJDEN_KIES_UITVOERENDE_VERENIGING:
-                # voor deze wedstrijd mag een andere uitvoerende vereniging gekozen worden
-                data = request.POST.get('uitvoerend', '')
-                if data:
-                    for ver in (Vereniging
-                                .objects
-                                .exclude(geen_wedstrijden=True)
-                                .annotate(aantal=Count('wedstrijdlocatie'))
-                                .filter(aantal__gte=1)):
-                        sel = 'ver_%s' % ver.ver_nr
-                        if data == sel:
-                            wedstrijd.uitvoerende_vereniging = ver
-                    # for
-                    if wedstrijd.uitvoerende_vereniging == wedstrijd.organiserende_vereniging:
-                        wedstrijd.uitvoerende_vereniging = None
+            if not uitvoerend:
+                wedstrijd.uitvoerende_vereniging = None
+                if wedstrijd.organiserende_vereniging.ver_nr in settings.WEDSTRIJDEN_KIES_UITVOERENDE_VERENIGING:
+                    # voor deze wedstrijd mag een andere uitvoerende vereniging gekozen worden
+                    data = request.POST.get('uitvoerend', '')
+                    if data:
+                        for ver in (Vereniging
+                                    .objects
+                                    .exclude(geen_wedstrijden=True)
+                                    .annotate(aantal=Count('wedstrijdlocatie'))
+                                    .filter(aantal__gte=1)):
+                            sel = 'ver_%s' % ver.ver_nr
+                            if data == sel:
+                                wedstrijd.uitvoerende_vereniging = ver
+                        # for
+                        if wedstrijd.uitvoerende_vereniging == wedstrijd.organiserende_vereniging:
+                            wedstrijd.uitvoerende_vereniging = None
 
-            data = request.POST.get('locatie', '')
-            if data:
-                if wedstrijd.uitvoerende_vereniging:
-                    ver = wedstrijd.uitvoerende_vereniging
-                else:
-                    ver = wedstrijd.organiserende_vereniging
-                for locatie in (ver
-                                .wedstrijdlocatie_set
-                                .exclude(zichtbaar=False)):
-                    sel = 'loc_%s' % locatie.pk
-                    if sel == data:
-                        wedstrijd.locatie = locatie
-                        break   # from the for
-                # for
+            if not uitvoerend:
+                data = request.POST.get('locatie', '')
+                if data:
+                    if wedstrijd.uitvoerende_vereniging:
+                        ver = wedstrijd.uitvoerende_vereniging
+                    else:
+                        ver = wedstrijd.organiserende_vereniging
+                    for locatie in (ver
+                                    .wedstrijdlocatie_set
+                                    .exclude(zichtbaar=False)):
+                        sel = 'loc_%s' % locatie.pk
+                        if sel == data:
+                            wedstrijd.locatie = locatie
+                            break   # from the for
+                    # for
 
             aanwezig = request.POST.get('aanwezig', '')     # bevat 'aanwezig_NN'
             if aanwezig.startswith('aanwezig_'):
@@ -633,36 +642,38 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
                         break       # from the for
                 # for
 
-            if request.POST.get('extern', ''):
-                wedstrijd.extern_beheerd = True
-            else:
-                wedstrijd.extern_beheerd = False
+            if not uitvoerend:
+                if request.POST.get('extern', ''):
+                    wedstrijd.extern_beheerd = True
+                else:
+                    wedstrijd.extern_beheerd = False
 
-            prijs = request.POST.get('prijs_normaal', '')
-            if prijs:
-                prijs = prijs.replace(',', '.')   # regionale verschillen afvangen
-                try:
-                    prijs = float(prijs[:6])      # afkappen voor de veiligheid
-                except ValueError:
-                    raise Http404('Geen toegestane prijs')
+            if not uitvoerend:
+                prijs = request.POST.get('prijs_normaal', '')
+                if prijs:
+                    prijs = prijs.replace(',', '.')   # regionale verschillen afvangen
+                    try:
+                        prijs = float(prijs[:6])      # afkappen voor de veiligheid
+                    except ValueError:
+                        raise Http404('Geen toegestane prijs')
 
-                if prijs < 0.0 or prijs > 999.99:
-                    raise Http404('Geen toegestane prijs')
+                    if prijs < 0.0 or prijs > 999.99:
+                        raise Http404('Geen toegestane prijs')
 
-                wedstrijd.prijs_euro_normaal = prijs
+                    wedstrijd.prijs_euro_normaal = prijs
 
-            prijs = request.POST.get('prijs_onder18', '')
-            if prijs:
-                prijs = prijs.replace(',', '.')   # regionale verschillen afvangen
-                try:
-                    prijs = float(prijs[:6])      # afkappen voor de veiligheid
-                except ValueError:
-                    raise Http404('Geen toegestane prijs')
+                prijs = request.POST.get('prijs_onder18', '')
+                if prijs:
+                    prijs = prijs.replace(',', '.')   # regionale verschillen afvangen
+                    try:
+                        prijs = float(prijs[:6])      # afkappen voor de veiligheid
+                    except ValueError:
+                        raise Http404('Geen toegestane prijs')
 
-                if prijs < 0.0 or prijs > 999.99:
-                    raise Http404('Geen toegestane prijs')
+                    if prijs < 0.0 or prijs > 999.99:
+                        raise Http404('Geen toegestane prijs')
 
-                wedstrijd.prijs_euro_onder18 = prijs
+                    wedstrijd.prijs_euro_onder18 = prijs
 
             if self.rol_nu == Rol.ROL_MWZ:
                 ter_info = request.POST.get('ter_info', '')
@@ -685,7 +696,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
                 if eis:
                     wedstrijd.eis_kwalificatie_scores = True
 
-            if not block_edits:
+            if not block_edits and not uitvoerend:
                 url = request.POST.get('url_deelnemers', '')
                 url = url[:200]     # voorkom fout tijdens save()
                 wedstrijd.url_deelnemerslijst = url
@@ -706,32 +717,33 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
                 wedstrijd.url_uitslag_3 = urls[2]
                 wedstrijd.url_uitslag_4 = urls[3]
 
-            if not block_edits:
+            if not block_edits and not uitvoerend:
                 url = request.POST.get('url_flyer', '')
                 url = url[:200]     # voorkom fout tijdens save()
                 wedstrijd.url_flyer = url
 
             wedstrijd.save()
 
-            boog_pks = list(wedstrijd.boogtypen.values_list('pk', flat=True))
-            gekozen_klassen = list()
-            for klasse in (KalenderWedstrijdklasse
-                           .objects
-                           .exclude(buiten_gebruik=True)
-                           .select_related('boogtype')
-                           .order_by('volgorde')):
+            if not uitvoerend:
+                boog_pks = list(wedstrijd.boogtypen.values_list('pk', flat=True))
+                gekozen_klassen = list()
+                for klasse in (KalenderWedstrijdklasse
+                               .objects
+                               .exclude(buiten_gebruik=True)
+                               .select_related('boogtype')
+                               .order_by('volgorde')):
 
-                if klasse.pk in klassen_pks_gebruikt_in_sessies or request.POST.get('klasse_%s' % klasse.pk, ''):
-                    # klasse is gewenst
-                    if klasse.boogtype.pk in boog_pks:
-                        # klasse boogtype is nog steeds gewenst
-                        gekozen_klassen.append(klasse)
-            # for
+                    if klasse.pk in klassen_pks_gebruikt_in_sessies or request.POST.get('klasse_%s' % klasse.pk, ''):
+                        # klasse is gewenst
+                        if klasse.boogtype.pk in boog_pks:
+                            # klasse boogtype is nog steeds gewenst
+                            gekozen_klassen.append(klasse)
+                # for
 
-            # werk de manytomany koppelingen bij
-            wedstrijd.wedstrijdklassen.set(gekozen_klassen)
+                # werk de manytomany koppelingen bij
+                wedstrijd.wedstrijdklassen.set(gekozen_klassen)
 
-            self._verplaats_sessies(wedstrijd, oude_datum_begin)
+                self._verplaats_sessies(wedstrijd, oude_datum_begin)
 
         if self.rol_nu == Rol.ROL_HWL:
             url = reverse('Wedstrijden:vereniging')

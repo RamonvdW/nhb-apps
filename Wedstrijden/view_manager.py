@@ -87,7 +87,8 @@ class KalenderManagerView(UserPassesTestMixin, View):
             status = None
 
         # begin 2 maanden terug in tijd (oudere wedstrijden zijn niet interessant)
-        datum_vanaf = timezone.now().date() - datetime.timedelta(days=61)
+        vandaag = timezone.now().date()
+        datum_vanaf = vandaag - datetime.timedelta(days=61)
 
         # pak de 50 meest recente wedstrijden
         wedstrijden = (Wedstrijd
@@ -101,11 +102,18 @@ class KalenderManagerView(UserPassesTestMixin, View):
 
         wedstrijden = wedstrijden[:100]
 
+        eerste_in_toekomst = True
         for wed in wedstrijden:
             disc2str = ORGANISATIE_WEDSTRIJD_DISCIPLINE_STRS[wed.organisatie]
             wed.disc_str = ORGANISATIES2SHORT_STR[wed.organisatie] + ' / ' + disc2str[wed.discipline]
             wed.status_str = WEDSTRIJD_STATUS_TO_STR[wed.status]
             wed.status_val_op = (wed.status == WEDSTRIJD_STATUS_WACHT_OP_GOEDKEURING)
+
+            # stuur de kleur van de knoppen aan de hand van de
+            wed.kleur = 'rood'
+            if wed.datum_einde < vandaag:
+                wed.kleur = 'alt'   # blauw
+
             wed.url_wijzig = reverse('Wedstrijden:wijzig-wedstrijd', kwargs={'wedstrijd_pk': wed.pk})
             if not wed.is_ter_info:
                 wed.url_sessies = reverse('Wedstrijden:wijzig-sessies', kwargs={'wedstrijd_pk': wed.pk})

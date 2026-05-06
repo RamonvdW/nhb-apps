@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2025 Ramon van der Winkel.
+#  Copyright (c) 2021-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -255,12 +255,14 @@ class TestWedstrijdenWijzigSessies(E2EHelpers, TestCase):
                                           'tijd_begin': '12:34',
                                           'duur': 'duur_60',
                                           'max_sporters': '42',
+                                          'beschrijving': 'whatever',
                                           'klasse_%s' % wkl.pk: 'jo!'})
         self.assert_is_redirect(resp, self.url_wedstrijden_sessies % wedstrijd.pk)
         sessie = WedstrijdSessie.objects.get(pk=sessie.pk)
         self.assertEqual(sessie.datum, wedstrijd.datum_begin)
         self.assertEqual(sessie.tijd_begin.hour, 12)
         self.assertEqual(sessie.tijd_begin.minute, 34)
+        self.assertEqual(sessie.beschrijving, 'whatever')
         self.assertEqual(str(sessie.tijd_einde), '13:34:00')
         self.assertEqual(sessie.max_sporters, 42)
 
@@ -429,5 +431,37 @@ class TestWedstrijdenWijzigSessies(E2EHelpers, TestCase):
         self.assert404(resp, 'Sessie hoort niet bij wedstrijd')
         resp = self.client.post(url)
         self.assert404(resp, 'Sessie hoort niet bij wedstrijd')
+
+    def test_hwl_uitvoerend(self):
+        # wissel naar HWL en maak een wedstrijd aan
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_wissel_naar_functie(self.functie_hwl)
+        self._maak_externe_locatie(self.ver1)
+        resp = self.client.post(self.url_wedstrijden_maak_nieuw, {'keuze': 'khsn'})
+        self.assert_is_redirect_not_plein(resp)
+
+        self.assertEqual(1, Wedstrijd.objects.count())
+        wedstrijd = Wedstrijd.objects.first()
+        url = self.url_wedstrijden_wijzig_wedstrijd % wedstrijd.pk
+        self.assert_is_redirect(resp, url)
+        wedstrijd.datum_einde = wedstrijd.datum_begin + datetime.timedelta(days=2)
+        wedstrijd.save()
+
+        url = self.url_wedstrijden_sessies % wedstrijd.pk
+        resp = self.client.post(url, {'nieuwe_sessie': 'graag'})
+        self.assert_is_redirect(resp, url)
+        self.assertEqual(1, WedstrijdSessie.objects.count())
+
+        wedstrijd.organiserende_vereniging = self.ver2
+        wedstrijd.uitvoerende_vereniging = self.ver1
+        wedstrijd.save()
+
+        # haal de wijzig pagina op
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('wedstrijden/wijzig-sessies.dtl', 'design/site_layout.dtl'))
+
 
 # end of file

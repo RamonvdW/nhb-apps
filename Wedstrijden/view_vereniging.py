@@ -58,8 +58,8 @@ class VerenigingWedstrijdenView(UserPassesTestMixin, View):
         if self.toon_meer:
             context['url_toon_meer'] = reverse(self.toon_meer)
 
-        datum = timezone.now().date()
-        datum -= datetime.timedelta(days=self.toon_dagen)
+        vandaag = timezone.now().date()
+        datum = vandaag - datetime.timedelta(days=self.toon_dagen)
 
         wedstrijden = (Wedstrijd
                        .objects
@@ -74,6 +74,12 @@ class VerenigingWedstrijdenView(UserPassesTestMixin, View):
             wed.disc_str += disc2str[wed.discipline]
             wed.status_str = WEDSTRIJD_STATUS_TO_STR[wed.status]
             wed.url_wijzig = reverse('Wedstrijden:wijzig-wedstrijd', kwargs={'wedstrijd_pk': wed.pk})
+
+            # stuur de kleur van de knoppen aan de hand van de
+            wed.kleur = 'rood'
+            if wed.datum_einde < vandaag:
+                wed.kleur = 'alt'   # blauw
+
             if not wed.is_ter_info:
                 wed.url_sessies = reverse('Wedstrijden:wijzig-sessies', kwargs={'wedstrijd_pk': wed.pk})
                 wed.url_aanmeldingen = reverse('Wedstrijden:aanmeldingen', kwargs={'wedstrijd_pk': wed.pk})

@@ -16,9 +16,20 @@
     <div class="row center">
         <div class="col s12">
             <h1 class="sv-kopje-pagina">Wedstrijd sessies</h1>
-            <p>Wijzig de sessies van een een wedstrijd</p>
+            {% if not uitvoerend %}
+                <p>Wijzig de sessies van een een wedstrijd</p>
+            {% endif %}
         </div>
     </div>
+
+    {% if uitvoerend %}
+        <!-- blauw bordje -->
+        <div class="row sv-bordje-wrapper">
+            <div class="col s12 m8 offset-m2 l6 offset-l3 sv-bordje-rood">
+                <p>Deze wedstrijd wordt beheerd door <b>{{ wed.organiserende_vereniging }}</b></p>
+            </div>
+        </div>
+    {% endif %}
 
     <!-- blauwe balk met informatie label : info -->
     <div class="row-sv-blauw">

@@ -251,6 +251,12 @@ class TestWedstrijdenAanmeldingen(E2EHelpers, TestCase):
                                          'design/site_layout.dtl'))
         self.assertEqual(3, WedstrijdInschrijving.objects.count())
 
+        self.ver2 = Vereniging(
+                            ver_nr=1001,
+                            naam="Kleine Club",
+                            regio=Regio.objects.get(regio_nr=112))
+        self.ver2.save()
+
     @staticmethod
     def _maak_afmelding(inschrijving: WedstrijdInschrijving):
         # zet een inschrijving om in een afmelding
@@ -471,5 +477,36 @@ class TestWedstrijdenAanmeldingen(E2EHelpers, TestCase):
 
         resp = self.client.get(self.url_aanmeldingen_download_csv % 999999)
         self.assert404(resp, 'Wedstrijd niet gevonden')
+
+    def test_hwl_uitvoerend(self):
+        # wordt HWL
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_wissel_naar_functie(self.functie_hwl)
+
+        self.wedstrijd.organiserende_vereniging = self.ver2
+        self.wedstrijd.uitvoerende_vereniging = self.ver1
+        self.wedstrijd.save()
+
+        url = self.url_aanmeldingen_wedstrijd % self.wedstrijd.pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('wedstrijden/aanmeldingen.dtl', 'design/site_layout.dtl'))
+
+        # download
+        url = self.url_aanmeldingen_download_tsv % self.wedstrijd.pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assert200_is_bestand_tsv(resp)
+
+        # corner case
+        self.wedstrijd.organiserende_vereniging = self.ver2
+        self.wedstrijd.uitvoerende_vereniging = None
+        self.wedstrijd.save()
+        url = self.url_aanmeldingen_wedstrijd % self.wedstrijd.pk
+        resp = self.client.get(url)
+        self.assert403(resp, 'Wedstrijd niet van jouw vereniging')
+
 
 # end of file
