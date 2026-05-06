@@ -33,6 +33,10 @@
                     <th>Aantal afgehandeld:</th>
                     <td style="width:10%">{{ count_afgehandeld }}</td>
                 </tr>
+                <tr>
+                    <th>Aantal open:</th>
+                    <td style="width:10%">{{ count_open }}</td>
+                </tr>
             </table>
         </div>
 

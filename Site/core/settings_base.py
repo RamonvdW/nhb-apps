@@ -62,7 +62,7 @@ APPS_DIR = os.path.dirname(BASE_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2026-05-03'
+SITE_VERSIE = '2026-05-06'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -322,23 +322,24 @@ RECORDS_TOEGESTANE_SOORTEN = (
     # Outdoor
     'WA1440',
     'WA1440 dubbel',
-    '90m',
-    '70m',
-    '60m',
-    '50m',
-    '50m (122cm)',
-    '40m',
     '30m',
     '30m (72p)',        # alleen voor VI
     '30m (144p)',       # alleen voor VI
+    '40m',
+    '50m',  # 36p
     '50m (72p)',
     '50m (144p)',
-    '60m (72p)',
-    '70m (72p)',
-    '70m (144p)',
+    '60m',  # 36p
+    '60m (72p)',        # 60m ronde
+    '60m (144p)',       # dubbele 60m ronde --> voor Onder 18 en 50+
+    '70m',  # 36p
+    '70m (72p)',        # 70m ronde
+    '70m (144p)',       # dubbele 70m ronde
+    '90m',  # 36p
     '50m (15p)',
     '60m (12p)',
     '70m (12p)',
+    '50m (122cm)',
 
     # Outdoor, FUTURE: still to be cleaned up
     'ShortMetric',

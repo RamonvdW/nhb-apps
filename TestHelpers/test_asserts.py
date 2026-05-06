@@ -19,8 +19,6 @@ import re
 # debug optie: toon waar in de code de queries vandaan komen
 FAIL_UNSAFE_DATABASE_MODIFICATION = False
 
-GLYPH_NAMES_PRESENT = list()        # TODO: obsolete
-
 
 class MyTestAsserts(TestCase):
 
@@ -213,11 +211,11 @@ class MyTestAsserts(TestCase):
                 if skip_smileys:
                     skip |= url.startswith('/feedback/')
 
-                if skip_mailto:
+                if skip_mailto:                 # pragma: no branch
                     skip |= url.startswith('mailto:')
 
                 if not (could_be_part_url and url[0].count('/') == 0):
-                    if skip_hash_links:
+                    if skip_hash_links:         # pragma: no branch
                         skip |= url[0] == '#'
                     if skip_external:
                         skip |= url[:4] == 'http'
@@ -577,7 +575,7 @@ class MyTestAsserts(TestCase):
                 #  onsubmit="submit_knop1.disabled=true; submit_knop2.disabled=true; return true;"
                 #  onsubmit="document.getElementById('submit_knop').disabled=true; return true;"
                 pos1 = form.find(' onsubmit="')
-                if pos1 >= 0:
+                if pos1 >= 0:                           # pragma: no branch
                     pos2 = form.find('"', pos1+11)
                     submit = form[pos1+11:pos2]
                     if '.disabled=true;' not in submit or 'return true;' not in submit:             # pragma: no cover
@@ -668,26 +666,6 @@ class MyTestAsserts(TestCase):
             pos_a = html.find('<a', pos_end+4)
         # while
 
-    def html_assert_material_icons(self, html, dtl):
-        # TODO: check allowed icons in Design/templatetags/design_icons
-        pos = html.find('<i class=')
-        while pos > 0:
-            pos2 = html.find('</i>', pos+1)
-            if pos2 > 0:                                                        # pragma: no branch
-                tag_i = html[pos:pos2]
-                if 'material-icons' in tag_i:
-                    # class secondary-content is used to dynamically plug an icon from within a script
-                    if 'secondary-content' not in tag_i:
-                        pos2 = tag_i.rfind('>')
-                        icon_name = tag_i[pos2+1:]
-                        # print('icon_name: %s' % repr(icon_name))
-                        if icon_name not in GLYPH_NAMES_PRESENT:                # pragma: no cover
-                            self.fail('Bug in template %s: Material Icon name %s is not in the reduced font!' % (
-                                        repr(dtl), repr(icon_name)))
-
-            pos = html.find('<i class=', pos+1)
-        # while
-
     def html_assert_no_kort_break(self, html, dtl):
         # strip all script sections because || is a valid javascript operator
         clean_html = ''
@@ -705,7 +683,7 @@ class MyTestAsserts(TestCase):
         while pos > 0:
             pos_end = html.find('>', pos+4)
             part = html[pos:pos_end]
-            if ' draggable="false"' not in part:
+            if ' draggable="false"' not in part:        # pragma: no cover
                 self.fail('Bug in template %s: Missing draggable="false" for img: %s' % (repr(dtl), repr(part)))
             pos = html.find('<img ', pos+1)
         # while
@@ -731,7 +709,7 @@ class MyTestAsserts(TestCase):
                 resp = self.client.get(resp.url)
 
             # "403 pagina" is een normale pagina met status_code 200
-            if resp.status_code != 200:
+            if resp.status_code != 200:                                 # pragma: no cover
                 # print('redirected from %s to %s' % (url, resp.url))
                 self.fail(msg='url %s geeft status code %s' % (url, resp.status_code))
 
@@ -745,7 +723,7 @@ class MyTestAsserts(TestCase):
             pagina = resp.content.decode('utf-8')
             is_403 = '<title>Geen toegang</title>' in pagina
 
-            if is_403:
+            if is_403:                                                  # pragma: no cover
                 pos = pagina.find('<code>')
                 msg = pagina[pos+6:]
                 pos = msg.find('</code>')
@@ -778,7 +756,7 @@ class MyTestAsserts(TestCase):
         # template containing class "collapsible-header" should also include Overige/js/collapsible_icons.js
         if "collapsible-header" in html:
             # note: template tags have been expanded and hash is inserted in the filename: name.hash.js
-            if '<script src="/static/overig_js/collapsible_icons' not in html:
+            if '<script src="/static/overig_js/collapsible_icons' not in html:      # pragma: no cover
                 # print(html)
                 self.fail(msg='Bug in template %s: Missing JS include for collapsible icons' % repr(dtl))
 
@@ -818,7 +796,6 @@ class MyTestAsserts(TestCase):
         self.html_assert_dubbelklik_bescherming(html, dtl)
         self.html_assert_notranslate(html, dtl)
         self.html_assert_template_bug(html, dtl)
-        self.html_assert_material_icons(html, dtl)
         self.html_assert_no_kort_break(html, dtl)
         self.html_assert_img_not_draggable(html, dtl)
         self.html_assert_urls_usable(resp, html, dtl)
@@ -897,7 +874,7 @@ class MyTestAsserts(TestCase):
                 msg += "; templates used: %s" % repr([tmpl.name for tmpl in resp.templates])
             self.fail(msg=msg)
         pos = expected_url.find('##')
-        if pos > 0:
+        if pos > 0:         # pragma: no cover
             self.assertTrue(resp.url.startswith(expected_url[:pos]))
         else:
             self.assertEqual(expected_url, resp.url)
@@ -1160,7 +1137,7 @@ class MyTestAsserts(TestCase):
 
         text = email.mail_text
         for tag in ('<a ', '<div', '<br', '<code>'):
-            if tag in text:
+            if tag in text:         # pragma: no cover
                 issues.append('Found html tag in plain text e-mail: %s' % tag)
         # for
 
@@ -1331,10 +1308,10 @@ class MyTestAsserts(TestCase):
                     continue
 
             # probeer als href
-            if line.startswith('http://') or line.startswith('https://'):       # pragma: no branch
+            if line.startswith('http://') or line.startswith('https://'):       # pragma: no cover
                 zoek = ' href="%s"' % line
                 pos = html.find(zoek)
-                if pos > 0:                                                     # pragma: no branch
+                if pos > 0:
                     html = html[:pos] + html[pos + len(zoek):]
                     continue
 
@@ -1373,7 +1350,7 @@ class MyTestAsserts(TestCase):
 
         # verwijder "href" en "target" parameters van een "a" tag
         pos = html.find('<a ')
-        while pos > 0:
+        while pos > 0:                              # pragma: no cover
             pos2 = html.find('>', pos + 4)
             html = html[:pos + 2] + html[pos2:]     # behoud <a en >
             pos = html.find('<a ')

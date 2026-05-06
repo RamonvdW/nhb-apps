@@ -74,6 +74,7 @@ def maak_mutatie_kamp_rk_wijzig_teams_cut(deelkamp: KampRK,
         ping_competitie_achtergrondtaak(mutatie, snel)
 
 
+# TODO: deze wordt niet gebruikt, dus kan weg?
 def maak_mutatie_kamp_rk_teams_nummeren(kamp: KampRK, team_klasse: CompetitieTeamKlasse,
                                         door_str: str, snel: bool):
 

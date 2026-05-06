@@ -10,6 +10,7 @@ from django.utils import timezone
 from django.shortcuts import render
 from django.views.generic import View
 from django.contrib.auth.mixins import UserPassesTestMixin
+from Account.models import get_account
 from Competitie.models import Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse
 from CompKampioenschap.models import SheetStatus
 from CompKampioenschap.operations import importeer_sheet_uitslag_indiv
@@ -19,6 +20,7 @@ from CompUitslagen.operations import (maak_url_uitslag_rk_indiv, maak_url_uitsla
                                       maak_url_uitslag_rk_teams, maak_url_uitslag_bk_teams)
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
+from Logboek.models import schrijf_in_logboek
 
 TEMPLATE_COMPKAMPIOENSCHAP_WF_RESULTAAT_IMPORT = 'compkampioenschap/wf-resultaat-import.dtl'
 
@@ -82,6 +84,12 @@ class ImporteerUitslagIndivView(UserPassesTestMixin, View):
             status.uitslag_ingelezen_op = timezone.now()
             status.save(update_fields=['uitslag_ingelezen_op'])
 
+            # schrijf in het logboek
+            account = get_account(request)
+            schrijf_in_logboek(account=account,
+                               gebruikte_functie="Importeer uitslag indiv",
+                               activiteit="%s klasse %s is ingelezen zonder fouten" % (deelkamp, klasse.beschrijving))
+
         return render(request, TEMPLATE_COMPKAMPIOENSCHAP_WF_RESULTAAT_IMPORT, context)
 
 
@@ -135,6 +143,12 @@ class ImporteerUitslagTeamsView(UserPassesTestMixin, View):
             context['url_uitslag'] = maak_url_uitslag_bk_teams(seizoen_url, team_type_url, klasse_str)
         else:
             context['url_uitslag'] = maak_url_uitslag_rk_teams(seizoen_url, bestand.rayon_nr, team_type_url, klasse_str)
+
+        # TODO: schrijf in het logboek
+        # account = get_account(request)
+        # schrijf_in_logboek(account=account,
+        #                    gebruikte_functie="Importeer uitslag teams",
+        #                    activiteit="%s klasse %s is ingelezen zonder fouten" % (deelkamp, klasse.beschrijving))
 
         raise Http404('Not implemented')
         context['bevat_fout'], context['blokjes_info'] = importeer_sheet_uitslag_teams(deelkamp, klasse, bestand)

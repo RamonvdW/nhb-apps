@@ -6,6 +6,7 @@
 
 from django.urls import reverse
 from django.http import HttpResponseRedirect, Http404
+from django.utils import timezone
 from django.views.generic import TemplateView, View
 from django.core.exceptions import PermissionDenied
 from django.utils.safestring import mark_safe
@@ -13,7 +14,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
 from BasisTypen.definities import ORGANISATIE_WA
 from BasisTypen.models import BoogType
-from Competitie.definities import DEELNAME_JA, DEELNAME_NEE
+from Competitie.definities import DEELNAME_JA, DEELNAME_NEE, DEELNAME2STR
 from CompLaagBond.operations import maak_mutatie_kamp_bk_teams_nummeren
 from CompLaagBond.models import KampBK, TeamBK
 from Functie.definities import Rol
@@ -193,24 +194,35 @@ class WijzigStatusBkTeamView(UserPassesTestMixin, View):
 
         opnieuw_nummeren = False
 
+        stamp = timezone.localtime(timezone.now()).strftime('%Y-%m-%d om %H:%M')
+
+        account = get_account(request)
+        door_str = 'BKO: ' + account.get_account_full_name()
+
         # TODO: onderstaande naar de achtergrondtaak verplaatsen
         if status in ("beschikbaar", "toch_ja"):
             # toch_ja is voor eerder afgemelde deelnemers
             # beschikbaar is voor reserve teams
+            msg = '[%s] Deelname status %s -> Ja door %s\n' % (stamp, DEELNAME2STR[team.deelname], door_str)
+            team.logboek += msg
             team.deelname = DEELNAME_JA
-            team.save(update_fields=['deelname'])
+            team.save(update_fields=['deelname', 'logboek'])
             opnieuw_nummeren = True
 
         elif status == "afmelden":
+            msg = '[%s] Deelname status %s -> Nee door %s\n' % (stamp, DEELNAME2STR[team.deelname], door_str)
+            team.logboek += msg
             team.deelname = DEELNAME_NEE
-            team.save(update_fields=['deelname'])
+            team.save(update_fields=['deelname', 'logboek'])
             opnieuw_nummeren = True
 
         elif status == "maak_deelnemer":
             # roep het reserve-team op
+            msg = '[%s] Reserve team: deelname status %s -> Ja door %s\n' % (stamp, DEELNAME2STR[team.deelname], door_str)
+            team.logboek += msg
             team.is_reserve = False
             team.deelname = DEELNAME_JA
-            team.save(update_fields=['deelname', 'is_reserve'])
+            team.save(update_fields=['deelname', 'is_reserve', 'logboek'])
             opnieuw_nummeren = True
 
         if opnieuw_nummeren:

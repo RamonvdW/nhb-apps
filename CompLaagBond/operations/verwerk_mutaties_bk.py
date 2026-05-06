@@ -43,6 +43,8 @@ class VerwerkMutatiesBond:
         deelkamp = mutatie.kamp_bk
         team_klasse = mutatie.team_klasse
 
+        stamp = timezone.localtime(timezone.now()).strftime('%Y-%m-%d om %H:%M')
+
         self.stdout.write('[INFO] BK teams opnieuw nummeren voor kampioenschap %s team klasse %s' % (deelkamp,
                                                                                                      team_klasse))
 
@@ -58,8 +60,10 @@ class VerwerkMutatiesBond:
 
             rank += 1
             if rank != team.rank:
+                msg = '[%s] Rank %s -> %s ivm BK teams opnieuw nummer gevraagd door %s\n' % (stamp, team.rank, rank, mutatie.door)
+                team.logboek += msg
                 team.rank = rank
-                team.save(update_fields=['rank'])
+                team.save(update_fields=['rank', 'logboek'])
         # for
 
         for team in (TeamBK
@@ -73,8 +77,10 @@ class VerwerkMutatiesBond:
 
             rank += 1
             if team.rank != rank:
+                msg = '[%s] Rank %s -> %s ivm BK teams opnieuw nummer gevraagd door %s\n' % (stamp, team.rank, rank, mutatie.door)
+                team.logboek += msg
                 team.rank = rank
-                team.save(update_fields=['rank'])
+                team.save(update_fields=['rank', 'logboek'])
         # for
 
         # zorg dat het google sheet bijgewerkt worden

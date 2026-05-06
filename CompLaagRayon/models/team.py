@@ -94,6 +94,9 @@ class TeamRK(models.Model):
     result_teamscore = models.PositiveSmallIntegerField(default=0)                  # max = 32767
     result_shootoff_str = models.CharField(max_length=20, default='', blank=True)   # "(SO: 27)"
 
+    # logboek voor bijhouden aanmelden/afmelden team
+    logboek = models.TextField(blank=True)
+
     class Meta:
         verbose_name = "TeamRK"
         verbose_name_plural = "TeamsRK"
