@@ -40,11 +40,9 @@
 
     {% if comp.rk_is_afgelast %}
         <!-- rood bordje -->
-        <div class="row">
-            <div style="padding:10px">
-                <div class="col s12 m8 offset-m2 sv-rood white-text z-depth-3 center">
-                    <p>{{ comp.rk_afgelast_bericht }}</p>
-                </div>
+        <div class="row sv-bordje-wrapper">
+            <div class="col s12 m8 offset-m2 sv-bordje-rood">
+                <p>{{ comp.rk_afgelast_bericht }}</p>
             </div>
         </div>
     {% endif %}
@@ -100,21 +98,19 @@
 
     {% if regiocomp_nog_actief %}
 
-        <div class="row">
-            <div style="padding:10px">
-                <p class="center sv-rood-text">De regiocompetitie is nog niet afgesloten, dus onderstaande lijst kan nog wijzigingen</p>
-                <p class="center">Sporters worden in de lijst opgenomen als ze {{ comp.aantal_scores_voor_rk_deelname }} of meer scores hebben</p>
+        <div class="row sv-bordje-wrapper">
+            <div class="col s12 m10 offset-m1 l8 offset-l2 sv-bordje-rood">
+                <p>De regiocompetitie is nog niet afgesloten, dus onderstaande lijst kan nog wijzigingen</p>
+                <p>Sporters worden in de lijst opgenomen als ze {{ comp.aantal_scores_voor_rk_deelname }} of meer scores hebben</p>
             </div>
         </div>
 
     {% elif bevestig_tot_datum %}
 
         <!-- rood bordje -->
-        <div class="row">
-            <div style="padding:10px">
-                <div class="col s12 m8 offset-m2 sv-rood white-text z-depth-3 center">
-                    <p>Aanmelden of afmelden voor de RK wedstrijd kan via Mijn pagina of bij je eigen vereniging tot en met <b>{{ bevestig_tot_datum }}</b></p>
-                </div>
+        <div class="row sv-bordje-wrapper">
+            <div class="col s12 m8 offset-m2 sv-bordje-rood">
+                <p>Aanmelden of afmelden voor de RK wedstrijd kan via Mijn pagina of bij je eigen vereniging tot en met <b>{{ bevestig_tot_datum }}</b></p>
             </div>
         </div>
 
@@ -124,11 +120,9 @@
     <!-- uitleg over tijdstippen -->
     {% if not comp.rk_is_afgelast and not deelkamp.is_klaar_indiv and comp.fase_indiv >= 'J' and comp.fase_indiv <= 'L' %}
         {% if not regiocomp_nog_actief %}
-            <div class="row">
-                <div style="padding:10px">
-                    <div class="col s12 center">
-                        <p>Hieronder genoemde tijdstippen zijn "aanvang wedstrijd". De accommodatie is een uur eerder open. Zorg dat je op tijd bent!</p>
-                    </div>
+            <div class="row sv-bordje-wrapper">
+                <div class="col s12 m10 offset-m1 l8 offset-l2 sv-bordje-blauw">
+                    <p>Hieronder genoemde tijdstippen zijn "aanvang wedstrijd".<br>De accommodatie is een uur eerder open. Zorg dat je op tijd bent!</p>
                 </div>
             </div>
         {% endif %}

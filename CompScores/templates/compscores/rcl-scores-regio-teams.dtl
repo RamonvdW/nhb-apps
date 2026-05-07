@@ -101,7 +101,7 @@
                                                     <ul id="{{ deelnemer.id_radio }}">
                                                         {% for wedstrijd, score in deelnemer.gevonden_scores %}
                                                             <li>
-                                                                <label class="black-text" for="{{ score.id_radio }}">
+                                                                <label class="black-text"{% if score.id_radio %} for="{{ score.id_radio }}"{% endif %}>
                                                                     <input class="with-gap" type="radio" name="{{ deelnemer.id_radio }}" value="{{ score.pk }}" {% if score.block_selection %}disabled{% else %}id="{{ score.id_radio }}"{% endif %}{% if score.is_selected %} checked{% endif %}>
                                                                     <span>{{ score.waarde }}</span><br>
                                                                 </label>
@@ -126,6 +126,7 @@
                                                     {% for wedstrijd, score in deelnemer.gevonden_scores %}
                                                         <!-- TODO: extra class nodig voor line-height compatible met input -->
                                                         {% if wedstrijd %}
+                                                            <!-- nowrap zorgt ervoor dat de datum/tijd/locatie label bij de score staan -->
                                                             <span class="input{% if score.block_selection %} grey-text{% endif %}" style="line-height:25px; white-space:nowrap">{{ wedstrijd.datum_wanneer }} om {{ wedstrijd.tijd_begin_wedstrijd }} bij {{ wedstrijd.vereniging.naam }}</span><br>
                                                         {% else %}
                                                             <span class="input" style="line-height:25px"><i>Niet geschoten</i></span><br>
@@ -148,9 +149,9 @@
                                         <tr>
                                             <td colspan="3">
                                                 <!-- rood bordje -->
-                                                <div style="padding:10px 30px 10px 30px">
-                                                    <div class="sv-rood white-text z-depth-3 center" style="padding:10px">
-                                                        <b>LET OP: dit team heeft 0 sporters; vraag de HWL dit te corrigeren</b>
+                                                <div class="row sv-bordje-wrapper">
+                                                    <div class="col s10 offset-s1 sv-bordje-rood">
+                                                        <p>LET OP: dit team heeft 0 sporters; vraag de HWL dit te corrigeren</p>
                                                     </div>
                                                 </div>
                                             </td>

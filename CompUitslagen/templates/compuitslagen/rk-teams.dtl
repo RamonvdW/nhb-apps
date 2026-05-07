@@ -20,11 +20,9 @@
 
     {% if comp.rk_is_afgelast %}
         <!-- rood bordje -->
-        <div class="row">
-            <div class="col s12 m8 offset-m2">
-                <div class="sv-rood white-text z-depth-3 center" style="padding:10px">
-                    <p>{{ comp.rk_afgelast_bericht|linebreaksbr }}</p>
-                </div>
+        <div class="row sv-bordje-wrapper">
+            <div class="col s12 m8 offset-m2 sv-bordje-rood">
+                <p>{{ comp.rk_afgelast_bericht|linebreaksbr }}</p>
             </div>
         </div>
     {% endif %}
@@ -99,15 +97,11 @@
 
     <!-- uitleg over tijdstippen -->
     {% if not comp.rk_is_afgelast and not deelkamp.is_klaar_teams and comp.fase_teams >= 'J' and comp.fase_teams <= 'L' %}
-
-        <div class="row">
-            <div style="padding:10px">
-                <div class="col s12 center">
-                    <p>Hieronder genoemde tijdstippen zijn "aanvang wedstrijd". De accommodatie is een uur eerder open. Zorg dat je op tijd bent!</p>
-                </div>
+        <div class="row sv-bordje-wrapper">
+            <div class="col s12 m10 offset-m1 l8 offset-l2 sv-bordje-blauw">
+                <p>Hieronder genoemde tijdstippen zijn "aanvang wedstrijd".<br>De accommodatie is een uur eerder open. Zorg dat je op tijd bent!</p>
             </div>
         </div>
-
     {% endif %}
 
     {% if not deelkamp.is_klaar_teams or geen_teams %}

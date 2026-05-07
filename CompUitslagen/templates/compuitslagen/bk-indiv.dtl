@@ -49,11 +49,9 @@
 
     {% if comp.bk_is_afgelast %}
         <!-- rood bordje -->
-        <div class="row">
-            <div style="padding:10px">
-                <div class="col s12 m8 offset-m2 sv-rood white-text z-depth-3 center">
-                    <p>{{ comp.bk_afgelast_bericht }}</p>
-                </div>
+        <div class="row sv-bordje-wrapper">
+            <div class="col s12 m8 offset-m2 sv-bordje-rood">
+                <p>{{ comp.bk_afgelast_bericht }}</p>
             </div>
         </div>
     {% endif %}
@@ -91,10 +89,11 @@
 
     {% if rk_nog_actief %}
 
-        <div class="row">
-            <div style="padding:10px">
-                <p class="center sv-rood-text">De rayonkampioenschappen zijn nog niet afgesloten</p>
-                <p class="center">Sporters worden in de lijst opgenomen als ze aan het RK deelgenomen hebben</p>
+        <!-- rood bordje -->
+        <div class="row sv-bordje-wrapper">
+            <div class="col s12 m10 offset-m1 l8 offset-l2 sv-bordje-rood">
+                <p>De rayonkampioenschappen zijn nog niet afgesloten</p>
+                <p>Sporters worden in de lijst opgenomen als ze aan het RK deelgenomen hebben</p>
             </div>
         </div>
 
@@ -105,23 +104,19 @@
 
         {% if bevestig_tot_datum and not comp.bk_is_afgelast %}
             <!-- rood bordje -->
-            <div class="row">
-                <div style="padding:10px">
-                    <div class="col s12 m8 offset-m2 sv-rood white-text z-depth-3 center">
-                        <p>Deelnemers krijgen persoonlijk bericht met verdere instructies</p>
-                        <!-- <p>Aanmelden of afmelden voor de BK wedstrijd kan bij het bondsbureau tot en met <b>{{ bevestig_tot_datum }}</b></p> -->
-                    </div>
+            <div class="row sv-bordje-wrapper">
+                <div class="col s12 m8 offset-m2 sv-bordje-rood">
+                    <p>Deelnemers krijgen persoonlijk bericht met verdere instructies</p>
+                    <!-- <p>Aanmelden of afmelden voor de BK wedstrijd kan bij het bondsbureau tot en met <b>{{ bevestig_tot_datum }}</b></p> -->
                 </div>
             </div>
         {% endif %}
 
         <!-- uitleg over tijdstippen -->
         {% if not comp.bk_is_afgelast and not deelkamp_bk.is_klaar_indiv and comp.fase_indiv >= 'N' and comp.fase_indiv <= 'P' %}
-            <div class="row">
-                <div style="padding:10px">
-                    <div class="col s12 center">
-                        <p>Hieronder genoemde tijdstippen zijn "aanvang wedstrijd". De accommodatie is een uur eerder open. Zorg dat je op tijd bent!</p>
-                    </div>
+            <div class="row sv-bordje-wrapper">
+                <div class="col s12 m10 offset-m1 l8 offset-l2 sv-bordje-blauw">
+                    <p>Hieronder genoemde tijdstippen zijn "aanvang wedstrijd".<br>De accommodatie is een uur eerder open. Zorg dat je op tijd bent!</p>
                 </div>
             </div>
         {% endif %}

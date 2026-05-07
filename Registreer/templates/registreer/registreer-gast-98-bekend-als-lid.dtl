@@ -24,11 +24,9 @@
             {% endif %}
 
             <!-- rood bordje -->
-            <div class="row">
-                <div style="padding:10px">
-                    <div class="col s12 m8 offset-m2 sv-rood white-text z-depth-3 center">
-                        <p>Het is niet mogelijk om een gastaccount aan te maken met e-mailadres<br><code>{{ email }}</code></p>
-                    </div>
+            <div class="row sv-bordje-wrapper">
+                <div class="col s12 m8 offset-m2 sv-bordje-rood">
+                    <p>Het is niet mogelijk om een gastaccount aan te maken met e-mailadres<br><code>{{ email }}</code></p>
                 </div>
             </div>
 

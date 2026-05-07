@@ -284,8 +284,8 @@
 
                 {% if hint_inloggen %}
                     <!-- rood bordje -->
-                    <div style="padding:10px">
-                        <div class="col s12 m10 offset-m1 l8 offset-l2 xl6 offset-xl3 sv-rood white-text z-depth-3 center">
+                    <div class="sv-bordje-wrapper">
+                        <div class="col s12 m10 offset-m1 l8 offset-l2 xl6 offset-xl3 sv-bordje-rood">
                             <p>Om in te schrijven op deze wedstrijd moet je een account aanmaken en inloggen</p>
                         </div>
                     </div>

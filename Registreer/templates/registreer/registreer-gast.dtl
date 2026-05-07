@@ -21,11 +21,9 @@
     {% if not gast_is_open %}
 
         <!-- rood bordje -->
-        <div class="row">
-            <div style="padding:10px">
-                <div class="col s12 m8 offset-m2 sv-rood white-text z-depth-3 center">
-                    <p>Registratie van gast-accounts is op dit moment niet mogelijk. Probeer het later nog eens.</p>
-                </div>
+        <div class="row sv-bordje-wrapper">
+            <div class="col s12 m8 offset-m2 sv-bordje-rood">
+                <p>Registratie van gast-accounts is op dit moment niet mogelijk. Probeer het later nog eens.</p>
             </div>
         </div>
 

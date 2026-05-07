@@ -68,19 +68,6 @@
         </div>
     </div>
 
-    <!-- uitleg over tijdstippen -->
-    {% if not comp.bk_is_afgelast and comp.fase_teams >= 'N' and comp.fase_teams <= 'P'%}
-
-        <div class="row">
-            <div style="padding:10px">
-                <div class="col s12 center">
-                    <p>Hieronder genoemde tijdstippen zijn "aanvang wedstrijd". De accommodatie is een uur eerder open. Zorg dat je op tijd bent!</p>
-                </div>
-            </div>
-        </div>
-
-    {% endif %}
-
     {% if heeft_teams %}
 
         <table class="sv-kader-tabel">
