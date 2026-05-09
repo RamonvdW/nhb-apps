@@ -30,7 +30,12 @@ def maak_afgemeld(apps, _):
     for inschrijving in (klas_inschrijving
                         .objects
                         .filter(status=WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD)
-                        .select_related('sessie')):
+                        .select_related('wedstrijd',
+                                        'sporterboog',
+                                        'wedstrijdklasse',
+                                        'bestelling',
+                                        'sessie',
+                                        'koper')):
 
         remove_pks.append(inschrijving.pk)
 
