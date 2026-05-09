@@ -81,6 +81,29 @@ class TestCompLaagBondLimieten(E2EHelpers, TestCase):
             resp = self.client.post(url, {isel_r0: 24, isel_r1: 8, 'snel': '1'})
         self.assert_is_redirect_not_plein(resp)
 
+        # laat de wijziging verwerken
+        f1, f2 = self.verwerk_competitie_mutaties()
+        # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
+
+        cut_r0 = CutBK.objects.filter(kamp=self.deelkamp_bk_18, indiv_klasse=self.klasse_indiv_r0).first()
+        cut_r1 = CutBK.objects.filter(kamp=self.deelkamp_bk_18, indiv_klasse=self.klasse_indiv_r1).first()
+
+        self.assertEqual(cut_r0.limiet, 24)
+        self.assertEqual(cut_r1.limiet, 8)
+
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {isel_r0: 20, isel_r1: 16, 'snel': '1'})
+        self.assert_is_redirect_not_plein(resp)
+
+        # laat de wijziging verwerken
+        f1, f2 = self.verwerk_competitie_mutaties()
+        print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
+
+        cut_r0.refresh_from_db()
+        cut_r1.refresh_from_db()
+        self.assertEqual(cut_r0.limiet, 20)
+        self.assertEqual(cut_r1.limiet, 16)
+
         # corner cases
         resp = self.client.post(url, {isel_r0: 0})
         self.assert404(resp, 'Geen valide keuze voor indiv')

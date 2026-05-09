@@ -153,25 +153,13 @@ class VerwerkMutatiesBond:
         cut_oud = mutatie.cut_oud
         cut_nieuw = mutatie.cut_nieuw
 
-        limiet = CutBK.objects.filter(kamp=mutatie.kamp_bk, indiv_klasse=mutatie.indiv_klasse).first()
+        limiet, _ = CutBK.objects.get_or_create(kamp=mutatie.kamp_bk, indiv_klasse=mutatie.indiv_klasse)
         deelkamp = mutatie.kamp_bk
-
-        if limiet:
-            is_nieuw = False
-        else:
-            # maak een nieuwe aan
-            is_nieuw = True
-            limiet = CutBK(kamp=mutatie.kamp_bk, indiv_klasse=mutatie.indiv_klasse)
 
         if cut_nieuw > cut_oud:
             # limiet verhogen is simpel, want deelnemers blijven deelnemers
-            if cut_nieuw == 24:
-                # verwijder het limiet record
-                if not is_nieuw:
-                    limiet.delete()
-            else:
-                limiet.limiet = cut_nieuw
-                limiet.save()
+            limiet.limiet = cut_nieuw
+            limiet.save()
 
             # de deelnemerslijst opnieuw sorteren op gemiddelde
             _indiv_verhoog_cut(deelkamp, mutatie.indiv_klasse, cut_nieuw)
@@ -179,7 +167,7 @@ class VerwerkMutatiesBond:
             # zorg dat het google sheet bijgewerkt worden
             self._zet_dirty(deelkamp, mutatie.indiv_klasse.pk, is_team=False)
 
-        elif cut_nieuw < cut_oud:
+        elif cut_nieuw < cut_oud:           # pragma: no branch
             # limiet is omlaag gezet
             # zorg dat de regiokampioenen er niet af vallen
             limiet.limiet = cut_nieuw
