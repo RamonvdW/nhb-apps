@@ -45,20 +45,21 @@ BEHEER_URLS = (
     '/beheer/CompLaagBond/kampbk/',
     '/beheer/CompLaagBond/teambk/',
     '/beheer/CompLaagRayon/cutrk/',
+    '/beheer/CompLaagRayon/cutteamrk/',
     '/beheer/CompLaagRayon/deelnemerrk/',
     '/beheer/CompLaagRayon/kamprk/',
     '/beheer/CompLaagRayon/teamrk/',
+    '/beheer/CompLaagRegio/regiocomp/',
+    '/beheer/CompLaagRegio/regiodeelnemer/',
+    '/beheer/CompLaagRegio/regiopoule/',
+    '/beheer/CompLaagRegio/regioronde/',
+    '/beheer/CompLaagRegio/regiorondeteam/',
+    '/beheer/CompLaagRegio/regioteam/',
     '/beheer/Competitie/competitie/',
     '/beheer/Competitie/competitieindivklasse/',
     '/beheer/Competitie/competitiematch/',
     '/beheer/Competitie/competitiemutatie/',
     '/beheer/Competitie/competitieteamklasse/',
-    '/beheer/Competitie/regiocompetitie/',
-    '/beheer/Competitie/regiocompetitieronde/',
-    '/beheer/Competitie/regiocompetitierondeteam/',
-    '/beheer/Competitie/regiocompetitiesporterboog/',
-    '/beheer/Competitie/regiocompetitieteam/',
-    '/beheer/Competitie/regiocompetitieteampoule/',
     '/beheer/Evenement/evenement/',
     '/beheer/Evenement/evenementafgemeld/',
     '/beheer/Evenement/evenementinschrijving/',
@@ -127,6 +128,7 @@ BEHEER_URLS = (
     '/beheer/Webwinkel/webwinkelproduct/',
     '/beheer/Wedstrijden/kwalificatiescore/',
     '/beheer/Wedstrijden/wedstrijd/',
+    '/beheer/Wedstrijden/wedstrijdafgemeld/',
     '/beheer/Wedstrijden/wedstrijdinschrijving/',
     '/beheer/Wedstrijden/wedstrijdkorting/',
     '/beheer/Wedstrijden/wedstrijdsessie/',
@@ -311,12 +313,12 @@ class TestBeheer(E2EHelpers, TestCase):
             '/beheer/Locatie/reistijd/?reistijd_vastgesteld=1',
 
             # Competitie
-            '/beheer/Competitie/regiocompetitiesporterboog/?Zelfstandig=HWL',
-            '/beheer/Competitie/regiocompetitiesporterboog/?Zelfstandig=Zelf',
-            '/beheer/Competitie/regiocompetitiesporterboog/?TeamAG=Ontbreekt',
-            '/beheer/Competitie/regiocompetitieteam/?TeamType=R2',
-            '/beheer/Competitie/regiocompetitierondeteam/?RondeTeamType=R2',
-            '/beheer/Competitie/regiocompetitierondeteam/?RondeTeamVer=1350',
+            '/beheer/CompLaagRegio/regiodeelnemer/?Zelfstandig=HWL',
+            '/beheer/CompLaagRegio/regiodeelnemer/?Zelfstandig=Zelf',
+            '/beheer/CompLaagRegio/regiodeelnemer/?TeamAG=Ontbreekt',
+            '/beheer/CompLaagRegio/regioteam/?TeamType=R2',
+            '/beheer/CompLaagRegio/regiorondeteam/?RondeTeamType=R2',
+            '/beheer/CompLaagRegio/regiorondeteam/?RondeTeamVer=1350',
             '/beheer/CompLaagRayon/deelnemerrk/',
             '/beheer/CompLaagRayon/deelnemerrk/?indiv_klasse_rk_bk=1100',
             '/beheer/CompLaagRayon/deelnemerrk/?mismatch=Geen',
@@ -337,6 +339,7 @@ class TestBeheer(E2EHelpers, TestCase):
         )
 
         for url in urls:
+            # print(url)
             resp = self.client.get(url)
             self.assertEqual(resp.status_code, 200)     # 200 = OK
             self.assert_template_used(resp, ('admin/base.html', 'admin/filter.html'))

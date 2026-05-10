@@ -822,7 +822,7 @@ class Inschrijfmethode1BehoefteView(UserPassesTestMixin, TemplateView):
         matches = (CompetitieMatch
                    .objects
                    .select_related('vereniging')
-                   .prefetch_related('RegioDeelnemer_set')
+                   .prefetch_related('regiodeelnemer_set')
                    .filter(pk__in=match_pks)
                    .order_by('datum_wanneer',
                              'tijd_begin_wedstrijd',
