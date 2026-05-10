@@ -175,7 +175,7 @@ class Command(BaseCommand):
         allowed_sporterboog_pks = list(qset.values_list('score__sporterboog__pk', flat=True))
 
         self.taken.hoogste_scorehist = scorehist_latest
-        self.taken.save(update_fields=['hoogste_scorehist'])
+        self.taken.save()  # update_fields=['hoogste_scorehist'])
         self.stdout.write('[INFO] nieuwe hoogste ScoreHist pk is %s' % self.taken.hoogste_scorehist.pk)
 
         # een regiocompetitie heeft ingeschreven deelnemer
