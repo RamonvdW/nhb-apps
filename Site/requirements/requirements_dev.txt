@@ -14,7 +14,7 @@ attrs==26.1.0
     #   trio
 beautifulsoup4==4.14.3
     # via -r requirements_dev.in
-certifi==2026.2.25
+certifi==2026.4.22
     # via
     #   -r requirements.txt
     #   requests
@@ -27,7 +27,7 @@ coverage==7.13.5
     # via
     #   -r requirements_dev.in
     #   django-coverage-plugin
-django==5.2.13
+django==5.2.14
     # via
     #   -r requirements.txt
     #   django-coverage-plugin
@@ -51,7 +51,7 @@ google-api-core==2.30.3
     #   google-api-python-client
     #   google-geo-type
     #   google-maps-routing
-google-api-python-client==2.194.0
+google-api-python-client==2.196.0
     # via -r requirements.txt
 google-auth==2.47.0
     # via
@@ -62,11 +62,11 @@ google-auth==2.47.0
     #   google-auth-oauthlib
     #   google-geo-type
     #   google-maps-routing
-google-auth-httplib2==0.3.1
+google-auth-httplib2==0.4.0
     # via
     #   -r requirements.txt
     #   google-api-python-client
-google-auth-oauthlib==1.3.1
+google-auth-oauthlib==1.4.0
     # via -r requirements.txt
 google-geo-type==0.6.0
     # via
@@ -74,7 +74,7 @@ google-geo-type==0.6.0
     #   google-maps-routing
 google-maps-routing==0.10.0
     # via -r requirements.txt
-googleapis-common-protos==1.74.0
+googleapis-common-protos==1.75.0
     # via
     #   -r requirements.txt
     #   google-api-core
@@ -101,7 +101,7 @@ httplib2==0.31.2
     #   -r requirements.txt
     #   google-api-python-client
     #   google-auth-httplib2
-idna==3.11
+idna==3.13
     # via
     #   -r requirements.txt
     #   requests
@@ -120,13 +120,13 @@ outcome==1.3.0.post0
     #   trio-websocket
 pillow==12.2.0
     # via -r requirements.txt
-pip-licenses-cli==4.0.0
+pip-licenses-cli==4.1.0
     # via -r requirements_dev.in
-pip-licenses-lib==1.1.0
+pip-licenses-lib==1.2.2
     # via pip-licenses-cli
 prettytable==3.17.0
     # via pip-licenses-cli
-proto-plus==1.27.2
+proto-plus==1.28.0
     # via
     #   -r requirements.txt
     #   google-api-core
@@ -141,7 +141,7 @@ protobuf==6.33.6
     #   googleapis-common-protos
     #   grpcio-status
     #   proto-plus
-psycopg==3.3.3
+psycopg==3.3.4
     # via -r requirements.txt
 pyasn1==0.6.3
     # via
@@ -158,7 +158,7 @@ pyparsing==3.3.2
     # via
     #   -r requirements.txt
     #   httplib2
-pypdf==6.10.2
+pypdf==6.11.0
     # via -r requirements.txt
 pysocks==1.7.1
     # via urllib3
@@ -211,13 +211,13 @@ uritemplate==4.2.0
     # via
     #   -r requirements.txt
     #   google-api-python-client
-urllib3==2.6.3
+urllib3==2.7.0
     # via
     #   -r requirements.txt
     #   mollie-api-python
     #   requests
     #   selenium
-wcwidth==0.6.0
+wcwidth==0.7.0
     # via prettytable
 websocket-client==1.9.0
     # via selenium
