@@ -9,12 +9,12 @@ from django.utils import timezone
 from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
 from Competitie.definities import INSCHRIJF_METHODE_1
-from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieMatch,
-                               Regiocompetitie, RegiocompetitieRonde)
+from Competitie.models import Competitie, CompetitieIndivKlasse, CompetitieMatch
 from Competitie.operations import competities_aanmaken
 from Competitie.test_utils.tijdlijn import (zet_competitie_fase_regio_wedstrijden, zet_competitie_fase_rk_prep,
                                             zet_competitie_fase_regio_inschrijven, zet_competitie_fase_afsluiten)
 from CompLaagRayon.models import KampRK
+from CompLaagRegio.models import RegioComp, RegioRonde
 from HistComp.definities import HISTCOMP_TYPE_18, HIST_BOGEN_DEFAULT
 from HistComp.models import HistCompSeizoen, HistCompRegioIndiv
 from Locatie.models import WedstrijdLocatie
@@ -185,8 +185,8 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         deelkamp.save()
         self.deelcomp_rk = deelkamp
 
-        ronde = RegiocompetitieRonde(
-                    regiocompetitie=self.deelcomp_regio,
+        ronde = RegioRonde(
+                    regiocomp=self.deelcomp_regio,
                     week_nr=99,
                     beschrijving='ronde')
         ronde.save()
@@ -258,7 +258,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.comp_18 = Competitie.objects.get(afstand='18')
         self.comp_25 = Competitie.objects.get(afstand='25')
 
-        self.deelcomp_regio = Regiocompetitie.objects.get(regio=self.regio_111,
+        self.deelcomp_regio = RegioComp.objects.get(regio=self.regio_111,
                                                           competitie__afstand=18)
         self.deelcomp_regio.inschrijf_methode = INSCHRIJF_METHODE_1
         self.deelcomp_regio.save()
@@ -306,7 +306,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.deelcomp_regio.save()
 
         zet_competitie_fase_regio_wedstrijden(self.comp_25)
-        deelcomp = Regiocompetitie.objects.get(competitie=self.comp_25,
+        deelcomp = RegioComp.objects.get(competitie=self.comp_25,
                                                regio=self.regio_111)
         deelcomp.regio_organiseert_teamcompetitie = False
         deelcomp.save(update_fields=['regio_organiseert_teamcompetitie'])
@@ -323,7 +323,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.comp_25.bepaal_fase()
         self.assertEqual(self.comp_25.fase_indiv, 'J')
 
-        RegiocompetitieRonde.objects.all().delete()
+        RegioRonde.objects.all().delete()
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_overzicht)

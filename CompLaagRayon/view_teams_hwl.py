@@ -12,7 +12,7 @@ from django.views.generic import TemplateView
 from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.models import TeamType
-from Competitie.models import RegiocompetitieSporterBoog
+from CompLaagRegio.models import RegioDeelnemer
 from CompLaagRayon.models import KampRK, DeelnemerRK, TeamRK
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
@@ -47,7 +47,7 @@ def bepaal_rk_team_tijdelijke_sterkte_en_klasse(rk_team, open_inschrijving):
 
     ags = list()
     if open_inschrijving:
-        for deelnemer in rk_team.tijdelijke_leden.all():
+        for deelnemer in rk_team.tijdelijke_deelnemers_regio.all():
             ag, _ = bepaal_regioschutter_gemiddelde_voor_rk_teams(deelnemer)
             ags.append(ag)
         # for
@@ -134,7 +134,7 @@ class TeamsRkView(UserPassesTestMixin, TemplateView):
                                 vereniging=self.functie_nu.vereniging)
                         .select_related('vereniging',
                                         'team_type')
-                        .annotate(schutters_count=Count('tijdelijke_leden'))
+                        .annotate(schutters_count=Count('tijdelijke_deelnemers_regio'))
                         .order_by('volg_nr'))
 
         else:
@@ -392,7 +392,7 @@ class WijzigRKTeamsView(UserPassesTestMixin, TemplateView):
 
                     # verwijder eventueel gekoppelde sporters bij wijziging rk_team type,
                     # om verkeerde boog typen te voorkomen
-                    rk_team.tijdelijke_leden.clear()
+                    rk_team.tijdelijke_deelnemers_regio.clear()
                     rk_team.gekoppelde_leden.clear()
                     # feitelijke schutters wordt pas later gebruikt
 
@@ -481,18 +481,18 @@ class RKTeamsKoppelLedenView(UserPassesTestMixin, TemplateView):
 
             context['onder_voorbehoud'] = True
 
-            pks = rk_team.tijdelijke_leden.values_list('pk', flat=True)
+            pks = rk_team.tijdelijke_deelnemers_regio.values_list('pk', flat=True)
 
             bezet_pks = (TeamRK
                          .objects
                          .filter(vereniging=ver)
                          .exclude(pk=rk_team_pk)
-                         .prefetch_related('tijdelijke_leden')
-                         .values_list('tijdelijke_leden__pk', flat=True))
+                         .prefetch_related('tijdelijke_deelnemers_regio')
+                         .values_list('tijdelijke_deelnemers_regio__pk', flat=True))
 
-            deelnemers = (RegiocompetitieSporterBoog
+            deelnemers = (RegioDeelnemer
                           .objects
-                          .filter(regiocompetitie__competitie=comp,
+                          .filter(regiocomp__competitie=comp,
                                   # inschrijf_voorkeur_team=True,
                                   bij_vereniging=ver,
                                   sporterboog__boogtype__in=boog_pks)
@@ -620,12 +620,12 @@ class RKTeamsKoppelLedenView(UserPassesTestMixin, TemplateView):
                          .filter(kamp=deelkamp,
                                  vereniging=ver)
                          .exclude(pk=rk_team_pk)
-                         .prefetch_related('tijdelijke_leden')
-                         .values_list('tijdelijke_leden__pk', flat=True))
+                         .prefetch_related('tijdelijke_deelnemers_regio')
+                         .values_list('tijdelijke_deelnemers_regio__pk', flat=True))
 
-            ok_pks = (RegiocompetitieSporterBoog
+            ok_pks = (RegioDeelnemer
                       .objects
-                      .filter(regiocompetitie__competitie=comp,
+                      .filter(regiocomp__competitie=comp,
                               bij_vereniging=ver,
                               sporterboog__boogtype__in=boog_pks)
                       .values_list('pk', flat=True))
@@ -662,8 +662,8 @@ class RKTeamsKoppelLedenView(UserPassesTestMixin, TemplateView):
         pks = pks[:3]   # limiteer tot maximaal 3 leden
 
         if open_inschrijving:
-            rk_team.tijdelijke_leden.clear()
-            rk_team.tijdelijke_leden.add(*pks)
+            rk_team.tijdelijke_deelnemers_regio.clear()
+            rk_team.tijdelijke_deelnemers_regio.add(*pks)
         else:
             rk_team.gekoppelde_leden.clear()
             rk_team.gekoppelde_leden.add(*pks)

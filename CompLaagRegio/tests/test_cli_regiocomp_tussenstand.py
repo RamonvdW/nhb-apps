@@ -6,11 +6,11 @@
 
 from django.test import TestCase
 from BasisTypen.models import BoogType
-from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieMatch,
-                               Regiocompetitie, RegiocompetitieRonde, RegiocompetitieSporterBoog)
+from Competitie.models import Competitie, CompetitieIndivKlasse, CompetitieMatch
 from Competitie.operations import competities_aanmaken, competitie_klassengrenzen_vaststellen
 from Competitie.test_utils.tijdlijn import zet_competitie_fases
 from CompLaagBond.models import KampBK
+from CompLaagRegio.models import RegioComp, RegioRonde, RegioDeelnemer
 from Geo.models import Regio
 from Score.definities import SCORE_WAARDE_VERWIJDERD
 from Score.models import Score, ScoreHist
@@ -46,8 +46,8 @@ class TestCompLaagRegioCliRegiocompTussenstand(E2EHelpers, TestCase):
         competitie_klassengrenzen_vaststellen(comp_18)
         competitie_klassengrenzen_vaststellen(comp_25)
 
-        self.deelcomp_r101 = Regiocompetitie.objects.filter(competitie=self.comp,
-                                                            regio=self.regio_101)[0]
+        self.deelcomp_r101 = RegioComp.objects.filter(competitie=self.comp,
+                                                      regio=self.regio_101)[0]
 
         # login als BB
         self.e2e_login_and_pass_otp(self.account_bb)
@@ -56,7 +56,7 @@ class TestCompLaagRegioCliRegiocompTussenstand(E2EHelpers, TestCase):
 
         # maak een regioplanning aan met 2 wedstrijden
         self.client.post(self.url_planning_regio % self.deelcomp_r101.pk)
-        ronde = RegiocompetitieRonde.objects.first()
+        ronde = RegioRonde.objects.first()
 
         # maak 7 wedstrijden aan
         self.client.post(self.url_planning_regio_ronde % ronde.pk, {})
@@ -191,8 +191,8 @@ class TestCompLaagRegioCliRegiocompTussenstand(E2EHelpers, TestCase):
                                boogtype=sporterboog.boogtype)
                        .order_by('volgorde'))
 
-            aanmelding = RegiocompetitieSporterBoog(regiocompetitie=deelcomp,
-                                                    sporterboog=sporterboog)
+            aanmelding = RegioDeelnemer(regiocomp=deelcomp,
+                                        sporterboog=sporterboog)
             aanmelding.bij_vereniging = aanmelding.sporterboog.sporter.bij_vereniging
 
             if len(sportersboog) < len(klassen):
@@ -275,7 +275,7 @@ class TestCompLaagRegioCliRegiocompTussenstand(E2EHelpers, TestCase):
             f1, f2 = self.run_management_command('regiocomp_tussenstand', '2', '--quick')
         self.assertTrue('Scores voor 1 deelnemers bijgewerkt' in f2.getvalue())
 
-        deelnemer = RegiocompetitieSporterBoog.objects.get(sporterboog=self.sporterboog_100001)
+        deelnemer = RegioDeelnemer.objects.get(sporterboog=self.sporterboog_100001)
         self.assertEqual(deelnemer.score1, 123)
         self.assertEqual(deelnemer.score2, 124)
         self.assertEqual(deelnemer.score3, 0)
@@ -316,7 +316,7 @@ class TestCompLaagRegioCliRegiocompTussenstand(E2EHelpers, TestCase):
         # print("f2: %s" % f2.getvalue())
         self.assertTrue('Scores voor 1 deelnemers bijgewerkt' in f2.getvalue())
 
-        deelnemer = RegiocompetitieSporterBoog.objects.get(sporterboog=self.sporterboog_100001)
+        deelnemer = RegioDeelnemer.objects.get(sporterboog=self.sporterboog_100001)
         self.assertEqual(deelnemer.score1, 123)
         self.assertEqual(deelnemer.score7, 129)
         self.assertEqual(deelnemer.totaal, 759)
@@ -340,7 +340,7 @@ class TestCompLaagRegioCliRegiocompTussenstand(E2EHelpers, TestCase):
         # print("f2: %s" % f2.getvalue())
         self.assertTrue('Scores voor 1 deelnemers bijgewerkt' in f2.getvalue())
 
-        deelnemer = RegiocompetitieSporterBoog.objects.get(sporterboog=self.sporterboog_100001)
+        deelnemer = RegioDeelnemer.objects.get(sporterboog=self.sporterboog_100001)
         self.assertEqual(deelnemer.score1, 123)
         self.assertEqual(deelnemer.score6, 128)
         self.assertEqual(deelnemer.score7, 0)
@@ -352,7 +352,7 @@ class TestCompLaagRegioCliRegiocompTussenstand(E2EHelpers, TestCase):
     def test_verplaats(self):
         # check het verplaatsen van een schutter uit klasse onbekend
 
-        deelnemer = RegiocompetitieSporterBoog.objects.filter(sporterboog=self.sporterboog_100001)[0]
+        deelnemer = RegioDeelnemer.objects.filter(sporterboog=self.sporterboog_100001)[0]
         self.assertTrue(deelnemer.indiv_klasse.is_onbekend)
 
         # 100001: 4 scores, gebruik eerste 3
@@ -375,12 +375,12 @@ class TestCompLaagRegioCliRegiocompTussenstand(E2EHelpers, TestCase):
                 break
         # for
 
-        deelnemer = RegiocompetitieSporterBoog.objects.get(sporterboog=self.sporterboog_100004)
+        deelnemer = RegioDeelnemer.objects.get(sporterboog=self.sporterboog_100004)
         deelnemer.indiv_klasse = klasse
         deelnemer.save()
 
         # pas het AG van 100005 aan
-        deelnemer = RegiocompetitieSporterBoog.objects.get(sporterboog=self.sporterboog_100005)
+        deelnemer = RegioDeelnemer.objects.get(sporterboog=self.sporterboog_100005)
         deelnemer.aanvangsgemiddelde = 9.000
         deelnemer.save()
 
@@ -407,7 +407,7 @@ class TestCompLaagRegioCliRegiocompTussenstand(E2EHelpers, TestCase):
     def test_verplaats_zeven(self):
         # check het verplaatsen van een schutter uit klasse onbekend
 
-        deelnemer = RegiocompetitieSporterBoog.objects.filter(sporterboog=self.sporterboog_100001)[0]
+        deelnemer = RegioDeelnemer.objects.filter(sporterboog=self.sporterboog_100001)[0]
         # print('deelnemer: %s (leeftijd: %s)' % (deelnemer, deelnemer.sporterboog.sporter.geboorte_datum))
         self.assertTrue(deelnemer.indiv_klasse.is_onbekend)
         # print('huidige klasse: %s (pk=%s)' % (deelnemer.indiv_klasse, deelnemer.indiv_klasse.pk))
@@ -437,7 +437,7 @@ class TestCompLaagRegioCliRegiocompTussenstand(E2EHelpers, TestCase):
             f1, f2 = self.run_management_command('regiocomp_tussenstand', '2', '--quick')
         self.assertTrue('Scores voor 1 deelnemers bijgewerkt' in f2.getvalue())
 
-        deelnemer = RegiocompetitieSporterBoog.objects.get(sporterboog=self.sporterboog_100001)
+        deelnemer = RegioDeelnemer.objects.get(sporterboog=self.sporterboog_100001)
         self.assertEqual(deelnemer.bij_vereniging.ver_nr, self.ver.ver_nr)
         sporter = self.sporterboog_100001.sporter
 
@@ -511,7 +511,7 @@ class TestCompLaagRegioCliRegiocompTussenstand(E2EHelpers, TestCase):
         # print("f2: %s" % f2.getvalue())
 
         # controleer dat de sporter op zijn oude vereniging blijft staan
-        deelnemer = RegiocompetitieSporterBoog.objects.get(sporterboog__sporter__lid_nr=100001)
+        deelnemer = RegioDeelnemer.objects.get(sporterboog__sporter__lid_nr=100001)
         self.assertIsNone(deelnemer.sporterboog.sporter.bij_vereniging)
         self.assertIsNotNone(deelnemer.bij_vereniging)
 

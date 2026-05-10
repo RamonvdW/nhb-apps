@@ -21,7 +21,7 @@ from Competitie.operations import (competities_aanmaken,
                                    uitslag_bk_indiv_naar_histcomp, uitslag_bk_teams_naar_histcomp)
 from CompKampioenschap.operations import maak_mutatie_update_dirty_wedstrijdformulieren
 from CompLaagBond.operations import maak_deelnemerslijst_bk_indiv, maak_deelnemerslijst_bk_teams
-from CompLaagRayon.operations import bepaal_deelnemers_rk_indiv, converteer_rk_teams_tijdelijke_leden
+from CompLaagRayon.operations import bepaal_deelnemers_rk_indiv, converteer_rk_teams_tijdelijke_deelnemers_regio
 
 
 # TODO: meer zaken in het logboek schrijven
@@ -65,7 +65,7 @@ class VerwerkCompBeheerMutaties:
             bepaal_deelnemers_rk_indiv(self.stdout, comp)
 
             # RK teams opzetten en RK deelnemers koppelen
-            converteer_rk_teams_tijdelijke_leden(self.stdout, comp)
+            converteer_rk_teams_tijdelijke_deelnemers_regio(self.stdout, comp)
 
             maak_mutatie_update_dirty_wedstrijdformulieren(comp)
 

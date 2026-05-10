@@ -9,8 +9,9 @@ from django.http import Http404
 from django.views.generic import TemplateView
 from django.utils.safestring import mark_safe
 from Account.models import get_account
-from Competitie.models import Competitie, Regiocompetitie, RegiocompetitieSporterBoog
+from Competitie.models import Competitie
 from Competitie.seizoenen import get_comp_pk
+from CompLaagRegio.models import RegioComp, RegioDeelnemer
 from Functie.rol import rol_get_huidige_functie
 from Sporter.models import get_sporter
 from Vereniging.models import Vereniging
@@ -84,26 +85,26 @@ class UitslagenVerenigingIndivView(TemplateView):
             regio_nr = 101
 
         try:
-            deelcomp = (Regiocompetitie
+            deelcomp = (RegioComp
                         .objects
                         .select_related('competitie', 'regio')
                         .get(competitie=comp,
                              competitie__is_afgesloten=False,
                              regio__regio_nr=regio_nr))
-        except Regiocompetitie.DoesNotExist:     # pragma: no cover
+        except RegioComp.DoesNotExist:     # pragma: no cover
             raise Http404('Competitie niet gevonden')
 
         return deelcomp
 
     @staticmethod
     def _get_deelnemers(deelcomp, boogtype, ver_nr):
-        deelnemers = (RegiocompetitieSporterBoog
+        deelnemers = (RegioDeelnemer
                       .objects
                       .select_related('sporterboog',
                                       'sporterboog__sporter',
                                       'indiv_klasse',
                                       'indiv_klasse__boogtype')
-                      .filter(regiocompetitie=deelcomp,
+                      .filter(regiocomp=deelcomp,
                               bij_vereniging__ver_nr=ver_nr,
                               indiv_klasse__boogtype=boogtype)
                       .order_by('-gemiddelde'))

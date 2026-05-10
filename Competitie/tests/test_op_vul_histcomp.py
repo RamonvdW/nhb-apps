@@ -7,14 +7,13 @@
 from django.test import TestCase
 from BasisTypen.models import BoogType, TeamType
 from Competitie.definities import DEELNAME_NEE
-from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
-                               Regiocompetitie, RegiocompetitieRonde,
-                               RegiocompetitieSporterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam)
+from Competitie.models import Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse
 from Competitie.operations.vul_histcomp import (uitslag_regio_indiv_naar_histcomp, uitslag_regio_teams_naar_histcomp,
                                                 uitslag_rk_indiv_naar_histcomp, uitslag_rk_teams_naar_histcomp,
                                                 uitslag_bk_indiv_naar_histcomp, uitslag_bk_teams_naar_histcomp)
 from CompLaagBond.models import KampBK, DeelnemerBK, TeamBK
 from CompLaagRayon.models import KampRK, DeelnemerRK, TeamRK
+from CompLaagRegio.models import RegioComp, RegioRonde, RegioDeelnemer, RegioTeam, RegioRondeTeam
 from Functie.tests.helpers import maak_functie
 from Geo.models import Regio, Rayon
 from HistComp.models import HistCompSeizoen, HistKampIndivRK, HistKampIndivBK
@@ -130,21 +129,21 @@ class TestCompetitieOperationsVulHistComp(E2EHelpers, TestCase):
                                     titel_bk='Lantaarn')
         self.team_klasse3.save()
 
-        self.deelcomp = Regiocompetitie(
+        self.deelcomp = RegioComp(
                             competitie=self.comp,
                             regio=regio_111,
                             functie=func_rcl)
         self.deelcomp.save()
 
-        self.ronde = RegiocompetitieRonde(
-                            regiocompetitie=self.deelcomp,
+        self.ronde = RegioRonde(
+                            regiocomp=self.deelcomp,
                             cluster=self.cluster,
                             week_nr=1,
                             beschrijving='test ronde 1')
         self.ronde.save()
 
-        self.regio_team1 = RegiocompetitieTeam(
-                                regiocompetitie=self.deelcomp,
+        self.regio_team1 = RegioTeam(
+                                regiocomp=self.deelcomp,
                                 vereniging=self.ver1,
                                 volg_nr=1,
                                 team_type=self.team_c,
@@ -152,8 +151,8 @@ class TestCompetitieOperationsVulHistComp(E2EHelpers, TestCase):
                                 team_klasse=self.team_klasse1)
         self.regio_team1.save()
 
-        self.regio_team2 = RegiocompetitieTeam(
-                                regiocompetitie=self.deelcomp,
+        self.regio_team2 = RegioTeam(
+                                regiocomp=self.deelcomp,
                                 vereniging=self.ver1,
                                 volg_nr=2,
                                 team_type=self.team_c,
@@ -161,8 +160,8 @@ class TestCompetitieOperationsVulHistComp(E2EHelpers, TestCase):
                                 team_klasse=self.team_klasse1)
         self.regio_team2.save()
 
-        self.regio_team3 = RegiocompetitieTeam(
-                                regiocompetitie=self.deelcomp,
+        self.regio_team3 = RegioTeam(
+                                regiocomp=self.deelcomp,
                                 vereniging=self.ver1,
                                 volg_nr=3,
                                 team_type=self.team_c,
@@ -219,8 +218,8 @@ class TestCompetitieOperationsVulHistComp(E2EHelpers, TestCase):
         # verwijdert vorige uitslag
         uitslag_regio_indiv_naar_histcomp(self.comp)
 
-        deelnemer = RegiocompetitieSporterBoog(
-                        regiocompetitie=self.deelcomp,
+        deelnemer = RegioDeelnemer(
+                        regiocomp=self.deelcomp,
                         sporterboog=self.sporterboog1,
                         bij_vereniging=self.sporter1.bij_vereniging,
                         indiv_klasse=self.indiv_klasse1,
@@ -237,8 +236,8 @@ class TestCompetitieOperationsVulHistComp(E2EHelpers, TestCase):
                         gemiddelde=6.0)
         deelnemer.save()
 
-        deelnemer = RegiocompetitieSporterBoog(
-                        regiocompetitie=self.deelcomp,
+        deelnemer = RegioDeelnemer(
+                        regiocomp=self.deelcomp,
                         sporterboog=self.sporterboog1,
                         bij_vereniging=self.sporter1.bij_vereniging,
                         indiv_klasse=self.indiv_klasse1,
@@ -255,8 +254,8 @@ class TestCompetitieOperationsVulHistComp(E2EHelpers, TestCase):
                         gemiddelde=6.0)
         deelnemer.save()
 
-        deelnemer = RegiocompetitieSporterBoog(
-                        regiocompetitie=self.deelcomp,
+        deelnemer = RegioDeelnemer(
+                        regiocomp=self.deelcomp,
                         sporterboog=self.sporterboog1,
                         bij_vereniging=self.sporter1.bij_vereniging,
                         indiv_klasse=self.indiv_klasse2,
@@ -273,8 +272,8 @@ class TestCompetitieOperationsVulHistComp(E2EHelpers, TestCase):
                         gemiddelde=5.0)
         deelnemer.save()
 
-        deelnemer = RegiocompetitieSporterBoog(
-                        regiocompetitie=self.deelcomp,
+        deelnemer = RegioDeelnemer(
+                        regiocomp=self.deelcomp,
                         sporterboog=self.sporterboog1,
                         bij_vereniging=self.sporter1.bij_vereniging,
                         indiv_klasse=self.indiv_klasse2,
@@ -406,7 +405,7 @@ class TestCompetitieOperationsVulHistComp(E2EHelpers, TestCase):
         uitslag_regio_indiv_naar_histcomp(self.comp)    # maakt het HistCompSeizoen aan
 
         # voor extra coverage
-        team = RegiocompetitieRondeTeam(
+        team = RegioRondeTeam(
                         team=self.regio_team1,
                         ronde_nr=0,             # rare ronde
                         team_score=0,           # geen score --> komt niet in uitslag
@@ -414,7 +413,7 @@ class TestCompetitieOperationsVulHistComp(E2EHelpers, TestCase):
         team.save()
 
         for lp in range(7):
-            team = RegiocompetitieRondeTeam(
+            team = RegioRondeTeam(
                             team=self.regio_team2,
                             ronde_nr=1 + lp,
                             team_score=200,
@@ -423,7 +422,7 @@ class TestCompetitieOperationsVulHistComp(E2EHelpers, TestCase):
         # for
 
         # voor extra coverage
-        team = RegiocompetitieRondeTeam(
+        team = RegioRondeTeam(
                         team=self.regio_team3,
                         ronde_nr=1,
                         team_score=0,           # geen score --> komt niet in uitslag
@@ -444,7 +443,7 @@ class TestCompetitieOperationsVulHistComp(E2EHelpers, TestCase):
         uitslag_regio_teams_naar_histcomp(self.comp)
 
         # cornercase: helemaal geen teams
-        RegiocompetitieRondeTeam.objects.all().delete()
+        RegioRondeTeam.objects.all().delete()
         uitslag_regio_teams_naar_histcomp(self.comp)
 
     def test_rk_test(self):

@@ -12,9 +12,9 @@ from Competitie.definities import (MUTATIE_TO_STR,
                                    MUTATIE_KAMP_RK_WIJZIG_INDIV_CUT, MUTATIE_KAMP_RK_WIJZIG_TEAMS_CUT,
                                    MUTATIE_KAMP_BK_WIJZIG_INDIV_CUT)
 from Competitie.models.competitie import Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse
-from Competitie.models.laag_regio import Regiocompetitie
 from CompLaagBond.models import KampBK, DeelnemerBK
 from CompLaagRayon.models import KampRK, DeelnemerRK
+from CompLaagRegio.models import RegioComp
 from Score.models import ScoreHist
 
 
@@ -43,9 +43,9 @@ class CompetitieMutatie(models.Model):
                                    null=True, blank=True)
 
     # op welke regiocompetitie heeft deze mutatie betrekking?
-    regiocompetitie = models.ForeignKey(Regiocompetitie,
-                                        on_delete=models.CASCADE,
-                                        null=True, blank=True)
+    regiocomp = models.ForeignKey(RegioComp,
+                                  on_delete=models.CASCADE,
+                                  null=True, blank=True)
 
     # op welke kampioenschap heeft deze mutatie betrekking?
     kamp_rk = models.ForeignKey(KampRK,

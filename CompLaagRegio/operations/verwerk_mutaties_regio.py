@@ -8,8 +8,8 @@ from django.utils import timezone
 from BasisTypen.definities import ORGANISATIE_KHSN
 from BasisTypen.operations import get_organisatie_teamtypen
 from Competitie.definities import MUTATIE_REGIO_TEAM_RONDE
-from Competitie.models import (RegiocompetitieSporterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam,
-                               CompetitieMutatie)
+from Competitie.models import CompetitieMutatie
+from CompLaagRegio.models import RegioDeelnemer, RegioTeam, RegioRondeTeam
 from Functie.models import Functie
 from Taken.operations import maak_taak
 import datetime
@@ -94,7 +94,7 @@ class VerwerkMutatiesRegio:
 
     def _verwerk_mutatie_regio_team_ronde(self, mutatie: CompetitieMutatie):
         self.stdout.write('[INFO] Verwerk mutatie %s: regio team ronde' % mutatie.pk)
-        deelcomp = mutatie.regiocompetitie
+        deelcomp = mutatie.regiocomp
 
         # bepaal de volgende ronde
         if deelcomp.huidige_team_ronde > 7:
@@ -110,17 +110,17 @@ class VerwerkMutatiesRegio:
         ronde_nr = deelcomp.huidige_team_ronde + 1
 
         if ronde_nr == 1:
-            teams = (RegiocompetitieTeam
+            teams = (RegioTeam
                      .objects
-                     .filter(regiocompetitie=deelcomp))
+                     .filter(regiocomp=deelcomp))
 
             if teams.count() == 0:
                 self.stdout.write('[WARNING] Team ronde doorzetten voor regio %s geweigerd want 0 teams' % deelcomp)
                 return
         else:
-            ronde_teams = (RegiocompetitieRondeTeam
+            ronde_teams = (RegioRondeTeam
                            .objects
-                           .filter(team__regiocompetitie=deelcomp,
+                           .filter(team__regiocomp=deelcomp,
                                    ronde_nr=deelcomp.huidige_team_ronde))
             if ronde_teams.count() == 0:
                 self.stdout.write(
@@ -140,12 +140,12 @@ class VerwerkMutatiesRegio:
         ver_dict = dict()       # [ver_nr] = list(vsg, deelnemer_pk, boog_type_pk)
 
         # voor elke deelnemer het gemiddelde_begin_team_ronde invullen
-        for deelnemer in (RegiocompetitieSporterBoog
+        for deelnemer in (RegioDeelnemer
                           .objects
                           .select_related('bij_vereniging',
                                           'sporterboog',
                                           'sporterboog__boogtype')
-                          .filter(regiocompetitie=deelcomp,
+                          .filter(regiocomp=deelcomp,
                                   inschrijf_voorkeur_team=True)):
 
             # let op: geen verschil vaste/vsg-teams meer sinds reglementswijziging 2021-06-28
@@ -172,7 +172,7 @@ class VerwerkMutatiesRegio:
         taak_ver = list()
 
         # verwijder eventuele oude team ronde records (veroorzaakt door het terugzetten van een ronde)
-        qset = RegiocompetitieRondeTeam.objects.filter(team__regiocompetitie=deelcomp, ronde_nr=ronde_nr)
+        qset = RegioRondeTeam.objects.filter(team__regiocomp=deelcomp, ronde_nr=ronde_nr)
         count = qset.count()
         if count > 0:
             self.stdout.write('[INFO] Verwijder %s oude records voor team ronde %s in regio %s' % (
@@ -185,15 +185,15 @@ class VerwerkMutatiesRegio:
 
             team_boogtypen = self._team_boogtypen[team_type_pk]
 
-            for team in (RegiocompetitieTeam
+            for team in (RegioTeam
                          .objects
                          .select_related('vereniging')
                          .prefetch_related('leden')
-                         .filter(regiocompetitie=deelcomp,
+                         .filter(regiocomp=deelcomp,
                                  team_type__pk=team_type_pk)
                          .order_by('-aanvangsgemiddelde')):     # hoogste eerst
 
-                ronde_team = RegiocompetitieRondeTeam(
+                ronde_team = RegioRondeTeam(
                                 team=team,
                                 ronde_nr=ronde_nr,
                                 logboek="[%s] Aangemaakt bij opstarten ronde %s\n" % (now_str, ronde_nr))
@@ -228,7 +228,7 @@ class VerwerkMutatiesRegio:
 
                 # schrijf de namen van de leden in het logboek
                 ronde_team.logboek += '[%s] Geselecteerde leden:\n' % now_str
-                for deelnemer in (RegiocompetitieSporterBoog
+                for deelnemer in (RegioDeelnemer
                                   .objects
                                   .select_related('sporterboog__sporter')
                                   .filter(pk__in=sporter_pks)):

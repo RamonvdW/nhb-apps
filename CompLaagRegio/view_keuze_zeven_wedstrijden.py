@@ -13,7 +13,8 @@ from Account.models import get_account
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie
 from Competitie.definities import INSCHRIJF_METHODE_1
-from Competitie.models import CompetitieMatch, RegiocompetitieRonde, RegiocompetitieSporterBoog
+from Competitie.models import CompetitieMatch
+from CompLaagRegio.models import RegioRonde, RegioDeelnemer
 
 
 TEMPLATE_SPORTER_KEUZE7WEDSTRIJDEN = 'complaagregio/keuze-zeven-wedstrijden-methode1.dtl'
@@ -38,17 +39,17 @@ class KeuzeZevenWedstrijdenView(UserPassesTestMixin, TemplateView):
 
         try:
             deelnemer_pk = int(self.kwargs['deelnemer_pk'][:7])       # afkappen voor de veiligheid
-            deelnemer = (RegiocompetitieSporterBoog
+            deelnemer = (RegioDeelnemer
                          .objects
-                         .select_related('regiocompetitie',
-                                         'regiocompetitie__competitie')
+                         .select_related('regiocomp',
+                                         'regiocomp__competitie')
                          .get(pk=deelnemer_pk,
-                              regiocompetitie__inschrijf_methode=INSCHRIJF_METHODE_1))
-        except (ValueError, TypeError, RegiocompetitieSporterBoog.DoesNotExist):
+                              regiocomp__inschrijf_methode=INSCHRIJF_METHODE_1))
+        except (ValueError, TypeError, RegioDeelnemer.DoesNotExist):
             raise Http404('Inschrijving niet gevonden')
 
         context['deelnemer'] = deelnemer
-        comp = deelnemer.regiocompetitie.competitie
+        comp = deelnemer.regiocomp.competitie
 
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
 
@@ -65,11 +66,11 @@ class KeuzeZevenWedstrijdenView(UserPassesTestMixin, TemplateView):
 
         # zoek alle dagdelen erbij
         pks = list()
-        for ronde in (RegiocompetitieRonde
+        for ronde in (RegioRonde
                       .objects
-                      .select_related('regiocompetitie')
+                      .select_related('regiocomp')
                       .prefetch_related('matches')
-                      .filter(regiocompetitie=deelnemer.regiocompetitie)):
+                      .filter(regiocomp=deelnemer.regiocomp)):
             pks.extend(ronde.matches.values_list('pk', flat=True))
         # for
 
@@ -89,7 +90,7 @@ class KeuzeZevenWedstrijdenView(UserPassesTestMixin, TemplateView):
         for cluster in (ver
                         .clusters
                         .prefetch_related('vereniging_set')
-                        .filter(gebruik=deelnemer.regiocompetitie.competitie.afstand)
+                        .filter(gebruik=deelnemer.regiocomp.competitie.afstand)
                         .all()):
             ver_nrs = list(cluster.vereniging_set.values_list('ver_nr', flat=True))
             for ver_nr in ver_nrs:
@@ -136,7 +137,7 @@ class KeuzeZevenWedstrijdenView(UserPassesTestMixin, TemplateView):
             context['kruimels'] = (
                 (url_overzicht, 'Beheer vereniging'),
                 (url_overzicht + anker, comp.beschrijving.replace(' competitie', '')),
-                (reverse('CompLaagRegio:wie-schiet-waar', kwargs={'deelcomp_pk': deelnemer.regiocompetitie.pk}),
+                (reverse('CompLaagRegio:wie-schiet-waar', kwargs={'deelcomp_pk': deelnemer.regiocomp.pk}),
                     'Wie schiet waar?'),
                 (None, 'Aanpassen')
             )
@@ -151,13 +152,13 @@ class KeuzeZevenWedstrijdenView(UserPassesTestMixin, TemplateView):
 
         try:
             deelnemer_pk = int(kwargs['deelnemer_pk'][:7])       # afkappen voor de veiligheid
-            deelnemer = (RegiocompetitieSporterBoog
+            deelnemer = (RegioDeelnemer
                          .objects
-                         .select_related('regiocompetitie',
-                                         'regiocompetitie__competitie')
+                         .select_related('regiocomp',
+                                         'regiocomp__competitie')
                          .get(pk=deelnemer_pk,
-                              regiocompetitie__inschrijf_methode=INSCHRIJF_METHODE_1))
-        except (ValueError, TypeError, RegiocompetitieSporterBoog.DoesNotExist):
+                              regiocomp__inschrijf_methode=INSCHRIJF_METHODE_1))
+        except (ValueError, TypeError, RegioDeelnemer.DoesNotExist):
             raise Http404('Inschrijving niet gevonden')
 
         rol_nu, functie_nu = rol_get_huidige_functie(request)
@@ -174,11 +175,11 @@ class KeuzeZevenWedstrijdenView(UserPassesTestMixin, TemplateView):
 
         # zoek alle wedstrijden erbij
         pks = list()
-        for ronde in (RegiocompetitieRonde
+        for ronde in (RegioRonde
                       .objects
-                      .select_related('regiocompetitie')
+                      .select_related('regiocomp')
                       .prefetch_related('matches')
-                      .filter(regiocompetitie=deelnemer.regiocompetitie)):
+                      .filter(regiocomp=deelnemer.regiocomp)):
             pks.extend(ronde.matches.values_list('pk', flat=True))
         # for
 
@@ -221,7 +222,7 @@ class KeuzeZevenWedstrijdenView(UserPassesTestMixin, TemplateView):
             url = reverse('Sporter:profiel')
         else:
             url = reverse('CompLaagRegio:wie-schiet-waar',
-                          kwargs={'deelcomp_pk': deelnemer.regiocompetitie.pk})
+                          kwargs={'deelcomp_pk': deelnemer.regiocomp.pk})
 
         return HttpResponseRedirect(url)
 

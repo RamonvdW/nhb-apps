@@ -9,9 +9,10 @@ from django.http import Http404, HttpResponseRedirect
 from django.views.generic import TemplateView
 from django.utils.safestring import mark_safe
 from Competitie.definities import DEELNAME_NEE, KAMP_RANK_RESERVE, KAMP_RANK_NO_SHOW, KAMP_RANK_BLANCO
-from Competitie.models import Competitie, CompetitieMatch, Regiocompetitie, RegiocompetitieSporterBoog
+from Competitie.models import Competitie, CompetitieMatch
 from Competitie.seizoenen import get_comp_pk
 from CompLaagRayon.models import KampRK, DeelnemerRK, CutRK
+from CompLaagRegio.models import RegioComp, RegioDeelnemer
 from Geo.models import Rayon
 from HistComp.operations import get_hist_url
 from Overig.helpers import make_valid_hashtag
@@ -187,16 +188,16 @@ class UitslagenRayonIndivView(TemplateView):
             context['regiocomp_nog_actief'] = True
 
             # sporters komen uit de 4 regio's van het rayon
-            deelcomp_pks = (Regiocompetitie
+            deelcomp_pks = (RegioComp
                             .objects
                             .filter(competitie=self.comp,
                                     competitie__is_afgesloten=False,
                                     regio__rayon_nr=rayon_nr)
                             .values_list('pk', flat=True))
 
-            deelnemers = (RegiocompetitieSporterBoog
+            deelnemers = (RegioDeelnemer
                           .objects
-                          .filter(regiocompetitie__pk__in=deelcomp_pks,
+                          .filter(regiocomp__pk__in=deelcomp_pks,
                                   indiv_klasse__boogtype=boogtype,
                                   aantal_scores__gte=self.comp.aantal_scores_voor_rk_deelname)
                           .select_related('indiv_klasse',
@@ -222,7 +223,7 @@ class UitslagenRayonIndivView(TemplateView):
         curr_teller = None
         for deelnemer in deelnemers:
             # deelnemer kan zijn:
-            #   is_lijst_rk == False --> RegiocompetitieSporterBoog
+            #   is_lijst_rk == False --> RegioDeelnemer
             #   is_lijst_rk == True  --> DeelkampRK
             deelnemer.break_klasse = (klasse != deelnemer.indiv_klasse.volgorde)
             if deelnemer.break_klasse:

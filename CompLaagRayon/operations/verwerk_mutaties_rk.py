@@ -9,12 +9,13 @@ from Competitie.definities import (DEELNAME_JA, DEELNAME_NEE, MUTATIE_KAMP_RK_RE
                                    MUTATIE_KAMP_RK_WIJZIG_INDIV_CUT, MUTATIE_KAMP_RK_WIJZIG_TEAMS_CUT,
                                    MUTATIE_KAMP_AANMELDEN_RK_INDIV, MUTATIE_KAMP_AFMELDEN_RK_INDIV,
                                    MUTATIE_EXTRA_RK_DEELNEMER, MUTATIE_KAMP_RK_TEAMS_NUMMEREN)
-from Competitie.models import CompetitieMutatie, RegiocompetitieSporterBoog
+from Competitie.models import CompetitieMutatie
 from CompKampioenschap.operations import (VerwerkCompKampMutaties, bepaal_kamp_indiv_deelnemerslijst,
                                           kamp_deelnemer_afmelden, kamp_deelnemer_opnieuw_aanmelden,
                                           _indiv_verlaag_cut, _indiv_verhoog_cut,
                                           maak_mutatie_update_dirty_wedstrijdformulieren, zet_dirty)
 from CompLaagRayon.models import KampRK, DeelnemerRK, TeamRK, CutRK, CutTeamRK
+from CompLaagRegio.models import RegioDeelnemer
 
 
 class VerwerkMutatiesRayon:
@@ -51,28 +52,28 @@ class VerwerkMutatiesRayon:
 
         stamp = timezone.localtime(timezone.now()).strftime('%Y-%m-%d om %H:%M')
 
-        # maak een look-up tabel van RegioCompetitieSporterBoog naar KampioenschapSporterBoog
-        sporterboog_pk2regiocompetitiesporterboog = dict()
-        for deelnemer in (RegiocompetitieSporterBoog
+        # maak een look-up tabel van RegioDeelnemer naar KampioenschapSporterBoog
+        sporterboog_pk2regiodeelnemer = dict()
+        for deelnemer in (RegioDeelnemer
                           .objects
                           .select_related('bij_vereniging')
-                          .filter(regiocompetitie__competitie=comp)):
-            sporterboog_pk2regiocompetitiesporterboog[deelnemer.sporterboog.pk] = deelnemer
+                          .filter(regiocomp__competitie=comp)):
+            sporterboog_pk2regiodeelnemer[deelnemer.sporterboog.pk] = deelnemer
         # for
 
-        regiocompetitiesporterboog_pk2kampioenschapsporterboog = dict()
+        regiodeelnemer_pk2kampioenschapsporterboog = dict()
         for deelnemer in (DeelnemerRK
                           .objects
                           .select_related('bij_vereniging')
                           .filter(kamp__competitie=comp)):
             try:
-                regio_deelnemer = sporterboog_pk2regiocompetitiesporterboog[deelnemer.sporterboog.pk]
+                regio_deelnemer = sporterboog_pk2regiodeelnemer[deelnemer.sporterboog.pk]
             except KeyError:
                 self.stdout.write(
                     '[WARNING] Kan regio deelnemer niet vinden voor kampioenschapsporterboog met pk=%s' %
                     deelnemer.pk)
             else:
-                regiocompetitiesporterboog_pk2kampioenschapsporterboog[regio_deelnemer.pk] = deelnemer
+                regiodeelnemer_pk2kampioenschapsporterboog[regio_deelnemer.pk] = deelnemer
         # for
 
         # sporters mogen maar aan 1 team gekoppeld worden
@@ -82,16 +83,16 @@ class VerwerkMutatiesRayon:
                      .objects
                      .filter(kamp__competitie=comp)
                      .select_related('vereniging')
-                     .prefetch_related('tijdelijke_leden')):
+                     .prefetch_related('tijdelijke_deelnemers_regio')):
 
             team_ver_nr = team.vereniging.ver_nr
             deelnemer_pks = list()
 
             ags = list()
 
-            for pk in team.tijdelijke_leden.values_list('pk', flat=True):
+            for pk in team.tijdelijke_deelnemers_regio.values_list('pk', flat=True):
                 try:
-                    deelnemer = regiocompetitiesporterboog_pk2kampioenschapsporterboog[pk]
+                    deelnemer = regiodeelnemer_pk2kampioenschapsporterboog[pk]
                 except KeyError:
                     # regio sporter is niet doorgekomen naar het RK en valt dus af
                     pass

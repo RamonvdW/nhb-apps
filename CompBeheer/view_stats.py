@@ -11,9 +11,10 @@ from django.views.generic import TemplateView
 from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.definities import DEELNAME_NEE
-from Competitie.models import Competitie, Regiocompetitie, RegiocompetitieSporterBoog, RegiocompetitieTeam
+from Competitie.models import Competitie
 from CompLaagBond.models import DeelnemerBK, TeamBK
 from CompLaagRayon.models import DeelnemerRK, TeamRK
+from CompLaagRegio.models import RegioComp, RegioDeelnemer, RegioTeam
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
 from Sporter.models import Sporter
@@ -84,17 +85,17 @@ class CompetitieStatistiekView(UserPassesTestMixin, TemplateView):
         for comp in actuele_comps:
             self.comp_pks.append(comp.pk)
 
-            aantal_indiv = (RegiocompetitieSporterBoog
+            aantal_indiv = (RegioDeelnemer
                             .objects
-                            .filter(regiocompetitie__competitie=comp)
+                            .filter(regiocomp__competitie=comp)
                             .count())
 
             floor = Decimal(0.001)
             aantal_teams_ag_nul = 0
 
-            for values in (RegiocompetitieTeam
+            for values in (RegioTeam
                            .objects
-                           .filter(regiocompetitie__competitie=comp)
+                           .filter(regiocomp__competitie=comp)
                            .values_list('vereniging__regio__regio_nr',
                                         'aanvangsgemiddelde')):
 
@@ -127,7 +128,7 @@ class CompetitieStatistiekView(UserPassesTestMixin, TemplateView):
             regio_organiseert_teamcompetitie[('18', regio_nr)] = False
             regio_organiseert_teamcompetitie[('25', regio_nr)] = False
         # for
-        for values in (Regiocompetitie
+        for values in (RegioComp
                        .objects
                        .filter(competitie__in=actuele_comps)
                        .values_list('competitie__afstand',
@@ -195,15 +196,15 @@ class CompetitieStatistiekView(UserPassesTestMixin, TemplateView):
         # for
 
         hoogste_aantal_scores = 0
-        for values in (RegiocompetitieSporterBoog       # 14ms
+        for values in (RegioDeelnemer       # 14ms
                        .objects
-                       .filter(regiocompetitie__competitie__pk__in=self.comp_pks)
+                       .filter(regiocomp__competitie__pk__in=self.comp_pks)
                        .values_list('bij_vereniging__regio__rayon_nr',
                                     'bij_vereniging__regio__regio_nr',
                                     'aangemeld_door',
                                     'sporterboog__sporter__geboorte_datum',
                                     'sporterboog__sporter__account',
-                                    'regiocompetitie__competitie__afstand',
+                                    'regiocomp__competitie__afstand',
                                     'inschrijf_voorkeur_rk_bk',
                                     'aantal_scores')):
 
@@ -267,9 +268,9 @@ class CompetitieStatistiekView(UserPassesTestMixin, TemplateView):
         pks1 = list()
         pks2 = list()
         zelfstandig = 0
-        for values in (RegiocompetitieSporterBoog       # 10,5ms
+        for values in (RegioDeelnemer       # 10,5ms
                        .objects
-                       .filter(regiocompetitie__competitie__pk__in=self.comp_pks)
+                       .filter(regiocomp__competitie__pk__in=self.comp_pks)
                        .values_list('sporterboog__pk',
                                     'sporterboog__sporter__lid_nr',
                                     'sporterboog__sporter__account',
@@ -331,12 +332,12 @@ class CompetitieStatistiekView(UserPassesTestMixin, TemplateView):
         if aantal_sportersboog > 0:
             context['procent_zelfstandig'] = '%.1f' % ((context['aantal_zelfstandig'] / aantal_sportersboog) * 100.0)
 
-        for values in (RegiocompetitieSporterBoog
+        for values in (RegioDeelnemer
                        .objects
-                       .annotate(c=Count('regiocompetitieteam'))
+                       .annotate(c=Count('regioteam'))
                        .exclude(c=0)
                        .values_list('sporterboog__sporter__geboorte_datum',
-                                    'regiocompetitie__competitie__afstand')):
+                                    'regiocomp__competitie__afstand')):
             geboorte_datum, afstand = values
 
             if afstand == '18':

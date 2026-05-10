@@ -8,12 +8,12 @@ from django.test import TestCase
 from django.utils import timezone
 from BasisTypen.models import BoogType
 from Competitie.definities import DEELNAME_NEE, DEELNAME_JA, KAMP_RANK_BLANCO, KAMP_RANK_NO_SHOW
-from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse, Regiocompetitie,
-                               RegiocompetitieSporterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam)
+from Competitie.models import Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse
 from Competitie.test_utils.tijdlijn import (zet_competitie_fases, zet_competitie_fase_regio_inschrijven,
                                             zet_competitie_fase_regio_wedstrijden, zet_competitie_fase_regio_afsluiten)
 from CompLaagBond.models import KampBK, DeelnemerBK
 from CompLaagRayon.models import KampRK, DeelnemerRK, TeamRK
+from CompLaagRegio.models import RegioComp, RegioDeelnemer, RegioTeam, RegioRondeTeam
 from Functie.tests.helpers import maak_functie
 from Geo.models import Rayon, Regio
 from HistComp.models import HistCompSeizoen, HistCompRegioTeam
@@ -192,10 +192,10 @@ class TestCompBeheerBko(E2EHelpers, TestCase):
 
         self.deelkamp_rayon1_25 = KampRK.objects.filter(competitie=self.comp_25,
                                                         rayon=self.rayon_1).first()
-        self.regiocomp25_101 = Regiocompetitie.objects.filter(competitie=self.comp_25,
-                                                              regio=self.regio_101).first()
-        self.regiocomp25_105 = Regiocompetitie.objects.filter(competitie=self.comp_25,
-                                                              regio=self.regio_105).first()
+        self.regiocomp25_101 = RegioComp.objects.filter(competitie=self.comp_25,
+                                                        regio=self.regio_101).first()
+        self.regiocomp25_105 = RegioComp.objects.filter(competitie=self.comp_25,
+                                                        regio=self.regio_105).first()
 
         self.deelkamp_bk_18 = KampBK.objects.filter(competitie=self.comp_18).first()
 
@@ -218,40 +218,40 @@ class TestCompBeheerBko(E2EHelpers, TestCase):
 
     def _inschrijven_regio_indiv(self):
         # recurve, lid 1
-        RegiocompetitieSporterBoog(regiocompetitie=self.regiocomp25_101,
-                                   sporterboog=self.sporterboog_1r,
-                                   bij_vereniging=self.sporterboog_1r.sporter.bij_vereniging,
-                                   indiv_klasse=self.comp25_klasse_r,
-                                   aantal_scores=7,
-                                   totaal=102).save()
+        RegioDeelnemer(regiocomp=self.regiocomp25_101,
+                       sporterboog=self.sporterboog_1r,
+                       bij_vereniging=self.sporterboog_1r.sporter.bij_vereniging,
+                       indiv_klasse=self.comp25_klasse_r,
+                       aantal_scores=7,
+                       totaal=102).save()
 
         # compound, lid 1
-        RegiocompetitieSporterBoog(regiocompetitie=self.regiocomp25_101,
-                                   sporterboog=self.sporterboog_1c,
-                                   bij_vereniging=self.sporterboog_1c.sporter.bij_vereniging,
-                                   indiv_klasse=self.comp25_klasse_c,
-                                   aantal_scores=6,
-                                   totaal=101).save()
+        RegioDeelnemer(regiocomp=self.regiocomp25_101,
+                       sporterboog=self.sporterboog_1c,
+                       bij_vereniging=self.sporterboog_1c.sporter.bij_vereniging,
+                       indiv_klasse=self.comp25_klasse_c,
+                       aantal_scores=6,
+                       totaal=101).save()
 
         # compound, lid 2
-        RegiocompetitieSporterBoog(regiocompetitie=self.regiocomp25_101,
-                                   sporterboog=self.sporterboog_2c,
-                                   bij_vereniging=self.sporterboog_2c.sporter.bij_vereniging,
-                                   indiv_klasse=self.comp25_klasse_c,
-                                   aantal_scores=6,
-                                   totaal=101).save()       # zelfde score als andere sporter in deze klasse
+        RegioDeelnemer(regiocomp=self.regiocomp25_101,
+                       sporterboog=self.sporterboog_2c,
+                       bij_vereniging=self.sporterboog_2c.sporter.bij_vereniging,
+                       indiv_klasse=self.comp25_klasse_c,
+                       aantal_scores=6,
+                       totaal=101).save()       # zelfde score als andere sporter in deze klasse
 
         # compound, lid 3
-        RegiocompetitieSporterBoog(regiocompetitie=self.regiocomp25_101,
-                                   sporterboog=self.sporterboog_3c,
-                                   bij_vereniging=self.sporterboog_3c.sporter.bij_vereniging,
-                                   indiv_klasse=self.comp25_klasse_c,
-                                   aantal_scores=4,     # te weinig scores
-                                   totaal=300).save()
+        RegioDeelnemer(regiocomp=self.regiocomp25_101,
+                       sporterboog=self.sporterboog_3c,
+                       bij_vereniging=self.sporterboog_3c.sporter.bij_vereniging,
+                       indiv_klasse=self.comp25_klasse_c,
+                       aantal_scores=4,     # te weinig scores
+                       totaal=300).save()
 
     def _inschrijven_regio_teams(self):
-        team = RegiocompetitieTeam(
-                    regiocompetitie=self.regiocomp25_101,
+        team = RegioTeam(
+                    regiocomp=self.regiocomp25_101,
                     vereniging=self.sporterboog_1r.sporter.bij_vereniging,
                     volg_nr=1,
                     team_type=self.testdata.afkorting2teamtype_khsn['R2'],
@@ -259,22 +259,22 @@ class TestCompBeheerBko(E2EHelpers, TestCase):
                     aanvangsgemiddelde="26.5",
                     team_klasse=self.comp25_teamklasse_regio_ere_r)
         team.save()
-        # team.leden = models.ManyToManyField(RegiocompetitieSporterBoog, blank=True)  # mag leeg zijn
+        # team.leden = models.ManyToManyField(RegioDeelnemer, blank=True)  # mag leeg zijn
 
         for ronde_nr in range(8):       # begin op 0, dat is goed
-            RegiocompetitieRondeTeam(
+            RegioRondeTeam(
                     team=team,
                     ronde_nr=ronde_nr,
                     team_score=123,
                     team_punten=2).save()
-        # deelnemers_geselecteerd = models.ManyToManyField(RegiocompetitieSporterBoog,
-        # deelnemers_feitelijk = models.ManyToManyField(RegiocompetitieSporterBoog,
+        # deelnemers_geselecteerd = models.ManyToManyField(RegioDeelnemer,
+        # deelnemers_feitelijk = models.ManyToManyField(RegioDeelnemer,
         # scores_feitelijk = models.ManyToManyField(Score,
         # scorehist_feitelijk = models.ManyToManyField(ScoreHist,
 
         # team zonder scores (wordt niet opgenomen in HistComp)
-        team = RegiocompetitieTeam(
-                    regiocompetitie=self.regiocomp25_101,
+        team = RegioTeam(
+                    regiocomp=self.regiocomp25_101,
                     vereniging=self.sporterboog_1r.sporter.bij_vereniging,
                     volg_nr=2,
                     team_type=self.testdata.afkorting2teamtype_khsn['C'],
@@ -282,10 +282,10 @@ class TestCompBeheerBko(E2EHelpers, TestCase):
                     aanvangsgemiddelde="29.8",
                     team_klasse=self.comp25_teamklasse_regio_ere_c)
         team.save()
-        # team.leden = models.ManyToManyField(RegiocompetitieSporterBoog, blank=True)  # mag leeg zijn
+        # team.leden = models.ManyToManyField(RegioDeelnemer, blank=True)  # mag leeg zijn
 
-        team = RegiocompetitieTeam(
-                    regiocompetitie=self.regiocomp25_101,
+        team = RegioTeam(
+                    regiocomp=self.regiocomp25_101,
                     vereniging=self.sporterboog_1r.sporter.bij_vereniging,
                     volg_nr=3,
                     team_type=self.testdata.afkorting2teamtype_khsn['R2'],
@@ -293,9 +293,9 @@ class TestCompBeheerBko(E2EHelpers, TestCase):
                     aanvangsgemiddelde="25.5",
                     team_klasse=self.comp25_teamklasse_regio_ere_r)
         team.save()
-        # team.leden = models.ManyToManyField(RegiocompetitieSporterBoog, blank=True)  # mag leeg zijn
+        # team.leden = models.ManyToManyField(RegioDeelnemer, blank=True)  # mag leeg zijn
 
-        RegiocompetitieRondeTeam(
+        RegioRondeTeam(
                 team=team,
                 ronde_nr=1,
                 team_score=90,
@@ -538,8 +538,8 @@ class TestCompBeheerBko(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('compbeheer/bko-doorzetten-1a-regio-naar-rk.dtl', 'design/site_layout.dtl'))
 
         # sluit alle regiocompetities
-        for obj in Regiocompetitie.objects.filter(competitie=self.comp_25,
-                                                  is_afgesloten=False):
+        for obj in RegioComp.objects.filter(competitie=self.comp_25,
+                                            is_afgesloten=False):
             obj.is_afgesloten = True
             obj.save()
         # for
@@ -557,7 +557,7 @@ class TestCompBeheerBko(E2EHelpers, TestCase):
         self._inschrijven_regio_indiv()
         self._inschrijven_regio_teams()
 
-        self.assertEqual(4, RegiocompetitieSporterBoog.objects.count())
+        self.assertEqual(4, RegioDeelnemer.objects.count())
         self.assertEqual(0, DeelnemerRK.objects.count())
         self.assertEqual(0, HistCompRegioTeam.objects.count())
 
@@ -582,7 +582,7 @@ class TestCompBeheerBko(E2EHelpers, TestCase):
 
         self._inschrijven_regio_indiv()
 
-        self.assertEqual(4, RegiocompetitieSporterBoog.objects.count())
+        self.assertEqual(4, RegioDeelnemer.objects.count())
         self.assertEqual(0, DeelnemerRK.objects.count())
 
         zet_competitie_fase_regio_afsluiten(self.comp_25)       # fase G

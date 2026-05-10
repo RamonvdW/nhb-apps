@@ -8,11 +8,12 @@ from django.test import TestCase
 from BasisTypen.definities import MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT
 from BasisTypen.models import BoogType
 from Competitie.definities import INSCHRIJF_METHODE_3
-from Competitie.models import Competitie, Regiocompetitie, RegiocompetitieSporterBoog
+from Competitie.models import Competitie
 from Competitie.operations import competities_aanmaken
 from Competitie.test_utils.tijdlijn import zet_competitie_fase_regio_inschrijven
 from CompLaagBond.models import KampBK
 from CompLaagRayon.models import KampRK
+from CompLaagRegio.models import RegioComp, RegioDeelnemer
 from Functie.tests.helpers import maak_functie
 from Geo.models import Rayon, Regio
 from Sporter.models import Sporter
@@ -105,7 +106,7 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
             deelkamp.functie.accounts.add(self.account_rko)
         # for
 
-        for deelcomp in Regiocompetitie.objects.filter(regio=self.regio_101).all():
+        for deelcomp in RegioComp.objects.filter(regio=self.regio_101).all():
             deelcomp.functie.accounts.add(self.account_rcl)
         # for
 
@@ -139,7 +140,7 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
         # zet de inschrijfmethode van regio 101 op 'methode 3' (=voorkeur dagdelen)
         dagdelen = ['GN', 'ZAT', 'ZON']   # uit: DAGDEEL_AFKORTINGEN
 
-        deelcomp = Regiocompetitie.objects.filter(regio=self.regio_101, competitie=comp)[0]
+        deelcomp = RegioComp.objects.filter(regio=self.regio_101, competitie=comp)[0]
         deelcomp.inschrijf_methode = INSCHRIJF_METHODE_3
         deelcomp.toegestane_dagdelen = ",".join(dagdelen)
         deelcomp.save(update_fields=['inschrijf_methode', 'toegestane_dagdelen'])
@@ -230,8 +231,8 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
 
     def test_behoefte3_18(self):
         comp = Competitie.objects.get(afstand='18')
-        functie_rcl = Regiocompetitie.objects.get(competitie=comp,
-                                                  regio=self.regio_101).functie
+        functie_rcl = RegioComp.objects.get(competitie=comp,
+                                            regio=self.regio_101).functie
 
         self.e2e_login_and_pass_otp(self.testdata.account_bb)        # geen account_hwl
         self.e2e_wisselnaarrol_bb()
@@ -255,7 +256,7 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
         self._ver2.regio = Regio.objects.get(pk=102)
         self._ver2.save()
 
-        obj = RegiocompetitieSporterBoog.objects.filter(bij_vereniging=self._ver).first()
+        obj = RegioDeelnemer.objects.filter(bij_vereniging=self._ver).first()
         obj.inschrijf_voorkeur_dagdeel = 'XX'
         obj.save()
 
@@ -267,7 +268,7 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
 
     def test_behoefte3_25(self):
         comp = Competitie.objects.filter(afstand='25').first()
-        functie_rcl = Regiocompetitie.objects.get(competitie=comp, regio=self.regio_101).functie
+        functie_rcl = RegioComp.objects.get(competitie=comp, regio=self.regio_101).functie
 
         self.e2e_login_and_pass_otp(self.testdata.account_bb)        # geen account_hwl
         self.e2e_wisselnaarrol_bb()
@@ -292,7 +293,7 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
         self._ver2.regio = Regio.objects.get(pk=102)
         self._ver2.save()
 
-        obj = RegiocompetitieSporterBoog.objects.filter(bij_vereniging=self._ver).first()
+        obj = RegioDeelnemer.objects.filter(bij_vereniging=self._ver).first()
         obj.inschrijf_voorkeur_dagdeel = 'XX'
         obj.save()
 
@@ -331,8 +332,8 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
 
     def test_bad_rcl(self):
         comp = Competitie.objects.get(afstand='25')
-        functie_rcl = Regiocompetitie.objects.get(competitie=comp,
-                                                  regio=self.regio_101).functie
+        functie_rcl = RegioComp.objects.get(competitie=comp,
+                                            regio=self.regio_101).functie
 
         self.e2e_login_and_pass_otp(self.account_rcl)
         self.e2e_wissel_naar_functie(functie_rcl)

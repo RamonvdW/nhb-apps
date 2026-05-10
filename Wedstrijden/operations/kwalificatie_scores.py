@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023-2025 Ramon van der Winkel.
+#  Copyright (c) 2023-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.utils import timezone
-from Competitie.models import RegiocompetitieSporterBoog
+from CompLaagRegio.models import RegioDeelnemer
 from Wedstrijden.definities import KWALIFICATIE_CHECK_AFGEKEURD, KWALIFICATIE_CHECK2STR
 from Wedstrijden.models import WedstrijdInschrijving, Kwalificatiescore
 
@@ -39,11 +39,11 @@ def get_kwalificatie_scores(inschrijving: WedstrijdInschrijving):
 
     # zoek de bondscompetitie Indoor scores erbij
     try:
-        deelnemer = (RegiocompetitieSporterBoog
+        deelnemer = (RegioDeelnemer
                      .objects
                      .get(sporterboog=inschrijving.sporterboog,
-                          regiocompetitie__competitie__afstand='18'))
-    except RegiocompetitieSporterBoog.DoesNotExist:
+                          regiocomp__competitie__afstand='18'))
+    except RegioDeelnemer.DoesNotExist:
         # doet niet mee aan de competitie
         pass
     else:

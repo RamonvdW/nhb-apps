@@ -7,14 +7,13 @@
 from django.test import TestCase
 from BasisTypen.models import BoogType, TeamType
 from Competitie.definities import TEAM_PUNTEN_MODEL_TWEE, TEAM_PUNTEN_MODEL_FORMULE1, TEAM_PUNTEN_MODEL_SOM_SCORES
-from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMutatie,
-                               Regiocompetitie, RegiocompetitieSporterBoog,
-                               RegiocompetitieTeam, RegiocompetitieTeamPoule, RegiocompetitieRondeTeam)
+from Competitie.models import Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMutatie
 from Competitie.operations import competities_aanmaken
 from Competitie.test_utils.tijdlijn import (zet_competitie_fase_rk_wedstrijden, zet_competitie_fase_regio_inschrijven,
                                             zet_competitie_fase_regio_afsluiten)
 from CompLaagBond.models import KampBK
 from CompLaagRayon.models import KampRK
+from CompLaagRegio.models import RegioComp, RegioDeelnemer, RegioTeam, RegioPoule, RegioRondeTeam
 from Functie.tests.helpers import maak_functie
 from Geo.models import Rayon, Regio, Cluster
 from Locatie.models import WedstrijdLocatie
@@ -169,9 +168,9 @@ class TestCompLaagRegioTeamsRCL(E2EHelpers, TestCase):
         self.deelcomp_bond_18 = KampBK.objects.filter(competitie=self.comp_18).first()
         self.deelcomp_rayon1_18 = KampRK.objects.filter(competitie=self.comp_18, rayon=self.rayon_1).first()
         self.deelcomp_rayon2_18 = KampRK.objects.filter(competitie=self.comp_18, rayon=self.rayon_2).first()
-        self.deelcomp_regio101_18 = Regiocompetitie.objects.filter(competitie=self.comp_18, regio=self.regio_101)[0]
-        self.deelcomp_regio101_25 = Regiocompetitie.objects.filter(competitie=self.comp_25, regio=self.regio_101)[0]
-        self.deelcomp_regio112_18 = Regiocompetitie.objects.filter(competitie=self.comp_18, regio=self.regio_112)[0]
+        self.deelcomp_regio101_18 = RegioComp.objects.filter(competitie=self.comp_18, regio=self.regio_101)[0]
+        self.deelcomp_regio101_25 = RegioComp.objects.filter(competitie=self.comp_25, regio=self.regio_101)[0]
+        self.deelcomp_regio112_18 = RegioComp.objects.filter(competitie=self.comp_18, regio=self.regio_112)[0]
 
         self.cluster_101a_18 = Cluster.objects.get(regio=self.regio_101, letter='a', gebruik='18')
         self.cluster_101e_25 = Cluster.objects.get(regio=self.regio_101, letter='e', gebruik='25')
@@ -208,8 +207,8 @@ class TestCompLaagRegioTeamsRCL(E2EHelpers, TestCase):
                                     volgorde=15,                      # Rec ERE
                                     is_voor_teams_rk_bk=False)        # zie WKL_TEAM in BasisTypen migrations
 
-        team1 = RegiocompetitieTeam(
-                    regiocompetitie=deelcomp,
+        team1 = RegioTeam(
+                    regiocomp=deelcomp,
                     vereniging=self.ver_112,
                     volg_nr=1,
                     team_type=teamtype_r,
@@ -218,8 +217,8 @@ class TestCompLaagRegioTeamsRCL(E2EHelpers, TestCase):
                     team_klasse=klasse_r_ere)
         team1.save()
 
-        team2 = RegiocompetitieTeam(
-                    regiocompetitie=deelcomp,
+        team2 = RegioTeam(
+                    regiocomp=deelcomp,
                     vereniging=self.ver_112,
                     volg_nr=2,
                     team_type=teamtype_r,
@@ -228,8 +227,8 @@ class TestCompLaagRegioTeamsRCL(E2EHelpers, TestCase):
                     team_klasse=klasse_r_ere)
         team2.save()
 
-        team3 = RegiocompetitieTeam(
-                    regiocompetitie=deelcomp,
+        team3 = RegioTeam(
+                    regiocomp=deelcomp,
                     vereniging=self.ver_112,
                     volg_nr=3,
                     team_type=teamtype_r,
@@ -238,8 +237,8 @@ class TestCompLaagRegioTeamsRCL(E2EHelpers, TestCase):
                     team_klasse=klasse_r_ere)
         team3.save()
 
-        poule = RegiocompetitieTeamPoule(
-                    regiocompetitie=deelcomp,
+        poule = RegioPoule(
+                    regiocomp=deelcomp,
                     beschrijving='Test poule')
         poule.save()
         poule.teams.add(team1)
@@ -260,8 +259,8 @@ class TestCompLaagRegioTeamsRCL(E2EHelpers, TestCase):
                                     volgorde=15,      # Rec ERE
                                     is_voor_teams_rk_bk=False)
         # create two complete teams
-        RegiocompetitieTeam(
-                regiocompetitie=self.deelcomp_regio112_18,
+        RegioTeam(
+                regiocomp=self.deelcomp_regio112_18,
                 vereniging=self.ver_112,
                 volg_nr=1,
                 team_type=team_r,
@@ -269,8 +268,8 @@ class TestCompLaagRegioTeamsRCL(E2EHelpers, TestCase):
                 aanvangsgemiddelde=25.0,
                 team_klasse=klasse_r_ere).save()
 
-        RegiocompetitieTeam(
-                regiocompetitie=self.deelcomp_regio112_18,
+        RegioTeam(
+                regiocomp=self.deelcomp_regio112_18,
                 vereniging=self.ver_112,
                 volg_nr=2,
                 team_type=team_r,
@@ -279,16 +278,16 @@ class TestCompLaagRegioTeamsRCL(E2EHelpers, TestCase):
                 team_klasse=klasse_r_ere).save()
 
         # create a partial team
-        RegiocompetitieTeam(
-                regiocompetitie=self.deelcomp_regio112_18,
+        RegioTeam(
+                regiocomp=self.deelcomp_regio112_18,
                 vereniging=self.ver_112,
                 volg_nr=3,
                 team_type=team_r,
                 team_naam='Test team 2',
                 aanvangsgemiddelde=0.0).save()
 
-        temp_team = RegiocompetitieTeam(
-                regiocompetitie=self.deelcomp_regio112_18,
+        temp_team = RegioTeam(
+                regiocomp=self.deelcomp_regio112_18,
                 vereniging=self.ver_112,
                 volg_nr=3,
                 team_type=team_r,
@@ -397,8 +396,8 @@ class TestCompLaagRegioTeamsRCL(E2EHelpers, TestCase):
                                     volgorde=15,      # Rec ERE
                                     is_voor_teams_rk_bk=False)
         # create two complete teams
-        RegiocompetitieTeam(
-                regiocompetitie=self.deelcomp_regio112_18,
+        RegioTeam(
+                regiocomp=self.deelcomp_regio112_18,
                 vereniging=self.ver_112,
                 volg_nr=1,
                 team_type=team_r,
@@ -406,8 +405,8 @@ class TestCompLaagRegioTeamsRCL(E2EHelpers, TestCase):
                 aanvangsgemiddelde=25.0,
                 team_klasse=klasse_r_ere).save()
 
-        RegiocompetitieTeam(
-                regiocompetitie=self.deelcomp_regio112_18,
+        RegioTeam(
+                regiocomp=self.deelcomp_regio112_18,
                 vereniging=self.ver_112,
                 volg_nr=2,
                 team_type=team_r,
@@ -416,16 +415,16 @@ class TestCompLaagRegioTeamsRCL(E2EHelpers, TestCase):
                 team_klasse=klasse_r_ere).save()
 
         # create a partial team
-        RegiocompetitieTeam(
-                regiocompetitie=self.deelcomp_regio112_18,
+        RegioTeam(
+                regiocomp=self.deelcomp_regio112_18,
                 vereniging=self.ver_112,
                 volg_nr=3,
                 team_type=team_r,
                 team_naam='Test team 2',
                 aanvangsgemiddelde=0.0).save()
 
-        temp_team = RegiocompetitieTeam(
-                regiocompetitie=self.deelcomp_regio112_18,
+        temp_team = RegioTeam(
+                regiocomp=self.deelcomp_regio112_18,
                 vereniging=self.ver_112,
                 volg_nr=3,
                 team_type=team_r,
@@ -471,10 +470,10 @@ class TestCompLaagRegioTeamsRCL(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('complaagregio/rcl-ag-controle.dtl', 'design/site_layout.dtl'))
 
         # maak een inschrijving met handmatig AG
-        RegiocompetitieSporterBoog(
+        RegioDeelnemer(
                 sporterboog=self.sporterboog,
                 bij_vereniging=self.sporterboog.sporter.bij_vereniging,
-                regiocompetitie=self.deelcomp_regio101_18,
+                regiocomp=self.deelcomp_regio101_18,
                 indiv_klasse=self.klasse_recurve_onbekend,
                 inschrijf_voorkeur_team=True,
                 ag_voor_team_mag_aangepast_worden=True,
@@ -559,7 +558,7 @@ class TestCompLaagRegioTeamsRCL(E2EHelpers, TestCase):
 
         self.verwerk_competitie_mutaties(show_warnings=False)
 
-        self.deelcomp_regio112_18 = Regiocompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
+        self.deelcomp_regio112_18 = RegioComp.objects.get(pk=self.deelcomp_regio112_18.pk)
         self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 1)
 
         # doorzetten zonder scores werkt niet
@@ -567,16 +566,16 @@ class TestCompLaagRegioTeamsRCL(E2EHelpers, TestCase):
             resp = self.client.post(url, {'snel': 1})
         self.assert404(resp, 'Te weinig scores')
 
-        self.deelcomp_regio112_18 = Regiocompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
+        self.deelcomp_regio112_18 = RegioComp.objects.get(pk=self.deelcomp_regio112_18.pk)
         self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 1)
 
         self.verwerk_competitie_mutaties()
 
-        self.deelcomp_regio112_18 = Regiocompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
+        self.deelcomp_regio112_18 = RegioComp.objects.get(pk=self.deelcomp_regio112_18.pk)
         self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 1)
 
         # voer een paar scores in
-        for ronde_team in RegiocompetitieRondeTeam.objects.all():
+        for ronde_team in RegioRondeTeam.objects.all():
             ronde_team.team_score = 100 + ronde_team.pk
             ronde_team.save(update_fields=['team_score'])
         # for
@@ -587,7 +586,7 @@ class TestCompLaagRegioTeamsRCL(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_overzicht_beheer % self.deelcomp_regio112_18.competitie.pk)
         self.verwerk_competitie_mutaties()
 
-        self.deelcomp_regio112_18 = Regiocompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
+        self.deelcomp_regio112_18 = RegioComp.objects.get(pk=self.deelcomp_regio112_18.pk)
         self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 2)
 
         with self.assert_max_queries(20):
@@ -599,7 +598,7 @@ class TestCompLaagRegioTeamsRCL(E2EHelpers, TestCase):
         # nog een rondje, dan komen in het schema met head-to-head wedstrijden
 
         # voer weer een paar scores in
-        for ronde_team in RegiocompetitieRondeTeam.objects.all():
+        for ronde_team in RegioRondeTeam.objects.all():
             ronde_team.team_score = 100 + ronde_team.pk
             ronde_team.save(update_fields=['team_score'])
         # for
@@ -610,7 +609,7 @@ class TestCompLaagRegioTeamsRCL(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_overzicht_beheer % self.deelcomp_regio112_18.competitie.pk)
         self.verwerk_competitie_mutaties()
 
-        self.deelcomp_regio112_18 = Regiocompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
+        self.deelcomp_regio112_18 = RegioComp.objects.get(pk=self.deelcomp_regio112_18.pk)
         self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 3)
 
     def test_team_ronde_f1(self):
@@ -658,7 +657,7 @@ class TestCompLaagRegioTeamsRCL(E2EHelpers, TestCase):
         # controleer dat de HWLs een taak gekregen hebben
         self.assertTrue(Taak.objects.count() > 0)
 
-        self.deelcomp_regio112_18 = Regiocompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
+        self.deelcomp_regio112_18 = RegioComp.objects.get(pk=self.deelcomp_regio112_18.pk)
         self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 1)
 
         url = self.url_team_ronde % self.deelcomp_regio112_18.pk
@@ -673,18 +672,18 @@ class TestCompLaagRegioTeamsRCL(E2EHelpers, TestCase):
             resp = self.client.post(url, {'snel': 1})
         self.assert404(resp, 'Te weinig scores')
 
-        self.deelcomp_regio112_18 = Regiocompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
+        self.deelcomp_regio112_18 = RegioComp.objects.get(pk=self.deelcomp_regio112_18.pk)
         self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 1)
 
         self.verwerk_competitie_mutaties()
 
-        self.deelcomp_regio112_18 = Regiocompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
+        self.deelcomp_regio112_18 = RegioComp.objects.get(pk=self.deelcomp_regio112_18.pk)
         self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 1)
 
         # voer een paar scores in
-        top_teams = list(RegiocompetitieRondeTeam.objects.values_list('pk', flat=True))
+        top_teams = list(RegioRondeTeam.objects.values_list('pk', flat=True))
         top_teams = top_teams[-2:]
-        for ronde_team in RegiocompetitieRondeTeam.objects.all():
+        for ronde_team in RegioRondeTeam.objects.all():
             if ronde_team.pk in top_teams:
                 ronde_team.team_score = 999
             else:
@@ -698,11 +697,11 @@ class TestCompLaagRegioTeamsRCL(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_overzicht_beheer % self.deelcomp_regio112_18.competitie.pk)
         self.verwerk_competitie_mutaties()
 
-        self.deelcomp_regio112_18 = Regiocompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
+        self.deelcomp_regio112_18 = RegioComp.objects.get(pk=self.deelcomp_regio112_18.pk)
         self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 2)
 
         # controleer de wp verdeling: de twee top teams hebben dezelfde score, dus dezelfde wp
-        wps = list(RegiocompetitieRondeTeam.objects.filter(pk__in=top_teams).values_list('team_punten', flat=True))
+        wps = list(RegioRondeTeam.objects.filter(pk__in=top_teams).values_list('team_punten', flat=True))
         self.assertEqual(wps, [10, 10])
 
     def test_team_ronde_som(self):
@@ -731,7 +730,7 @@ class TestCompLaagRegioTeamsRCL(E2EHelpers, TestCase):
 
         self.verwerk_competitie_mutaties()
 
-        self.deelcomp_regio112_18 = Regiocompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
+        self.deelcomp_regio112_18 = RegioComp.objects.get(pk=self.deelcomp_regio112_18.pk)
         self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 1)
 
         url = self.url_team_ronde % self.deelcomp_regio112_18.pk
@@ -746,16 +745,16 @@ class TestCompLaagRegioTeamsRCL(E2EHelpers, TestCase):
             resp = self.client.post(url, {'snel': 1})
         self.assert404(resp, 'Te weinig scores')
 
-        self.deelcomp_regio112_18 = Regiocompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
+        self.deelcomp_regio112_18 = RegioComp.objects.get(pk=self.deelcomp_regio112_18.pk)
         self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 1)
 
         self.verwerk_competitie_mutaties()
 
-        self.deelcomp_regio112_18 = Regiocompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
+        self.deelcomp_regio112_18 = RegioComp.objects.get(pk=self.deelcomp_regio112_18.pk)
         self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 1)
 
         # voor een paar scores in
-        for ronde_team in RegiocompetitieRondeTeam.objects.all():
+        for ronde_team in RegioRondeTeam.objects.all():
             ronde_team.team_score = 100 + ronde_team.pk
             ronde_team.save(update_fields=['team_score'])
         # for
@@ -766,7 +765,7 @@ class TestCompLaagRegioTeamsRCL(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_overzicht_beheer % self.deelcomp_regio112_18.competitie.pk)
         self.verwerk_competitie_mutaties()
 
-        self.deelcomp_regio112_18 = Regiocompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
+        self.deelcomp_regio112_18 = RegioComp.objects.get(pk=self.deelcomp_regio112_18.pk)
         self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 2)
 
     def test_laatste_ronde(self):
@@ -795,7 +794,7 @@ class TestCompLaagRegioTeamsRCL(E2EHelpers, TestCase):
 
         self.verwerk_competitie_mutaties()
 
-        self.deelcomp_regio112_18 = Regiocompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
+        self.deelcomp_regio112_18 = RegioComp.objects.get(pk=self.deelcomp_regio112_18.pk)
         self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 1)
 
         # forceer ronde 7
@@ -804,7 +803,7 @@ class TestCompLaagRegioTeamsRCL(E2EHelpers, TestCase):
         self.deelcomp_regio112_18.save(update_fields=['huidige_team_ronde', 'regio_heeft_vaste_teams'])
 
         # voor een paar scores in
-        for ronde_team in RegiocompetitieRondeTeam.objects.all():
+        for ronde_team in RegioRondeTeam.objects.all():
             ronde_team.team_score = 100 + ronde_team.pk
             ronde_team.ronde_nr = 7
             ronde_team.save(update_fields=['team_score', 'ronde_nr'])
@@ -831,7 +830,7 @@ class TestCompLaagRegioTeamsRCL(E2EHelpers, TestCase):
 
         self.assertEqual(0, Taak.objects.count())
 
-        self.deelcomp_regio112_18 = Regiocompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
+        self.deelcomp_regio112_18 = RegioComp.objects.get(pk=self.deelcomp_regio112_18.pk)
         self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 99)
 
         url = self.url_team_ronde % self.deelcomp_regio112_18.pk
@@ -854,7 +853,7 @@ class TestCompLaagRegioTeamsRCL(E2EHelpers, TestCase):
         # laat deze herstelde mutatie verwerken
         self.run_management_command('competitie_mutaties', '1', '--quick')
 
-        self.deelcomp_regio112_18 = Regiocompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
+        self.deelcomp_regio112_18 = RegioComp.objects.get(pk=self.deelcomp_regio112_18.pk)
         self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 99)
 
 

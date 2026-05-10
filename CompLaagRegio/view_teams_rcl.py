@@ -13,9 +13,9 @@ from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
 from Competitie.definities import TEAM_PUNTEN_MODEL_FORMULE1, TEAM_PUNTEN_MODEL_TWEE, TEAM_PUNTEN_F1
-from Competitie.models import (Competitie, CompetitieTeamKlasse, Regiocompetitie, RegiocompetitieSporterBoog,
-                               RegiocompetitieTeam, RegiocompetitieTeamPoule, RegiocompetitieRondeTeam)
+from Competitie.models import Competitie, CompetitieTeamKlasse
 from Competitie.operations.poules import maak_poule_schema
+from CompLaagRegio.models import RegioComp, RegioTeam, RegioPoule, RegioRondeTeam, RegioDeelnemer
 from CompLaagRegio.operations.maak_mutatie_regio import maak_mutatie_regio_team_ronde
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
@@ -80,7 +80,7 @@ class RegioTeamsTemplateView(TemplateView):
             if subset == 'alle':
                 # alle regios
                 context['rayon'] = 'Alle'
-                deelcomp_pks = (Regiocompetitie
+                deelcomp_pks = (RegioComp
                                 .objects
                                 .filter(competitie=comp)
                                 .values_list('pk', flat=True))
@@ -91,7 +91,7 @@ class RegioTeamsTemplateView(TemplateView):
                 except Rayon.DoesNotExist:
                     raise Http404('Selectie wordt niet ondersteund')
 
-                deelcomp_pks = (Regiocompetitie
+                deelcomp_pks = (RegioComp
                                 .objects
                                 .filter(competitie=comp,
                                         regio__rayon_nr=subset)
@@ -119,11 +119,11 @@ class RegioTeamsTemplateView(TemplateView):
             # RCL mode
             try:
                 deelcomp_pk = int(kwargs['deelcomp_pk'][:7])    # afkappen voor de veiligheid
-                deelcomp = (Regiocompetitie
+                deelcomp = (RegioComp
                             .objects
                             .select_related('competitie')
                             .get(pk=deelcomp_pk))
-            except (ValueError, Regiocompetitie.DoesNotExist):
+            except (ValueError, RegioComp.DoesNotExist):
                 raise Http404('Competitie niet gevonden')
 
             if deelcomp.functie != self.functie_nu:
@@ -179,15 +179,15 @@ class RegioTeamsTemplateView(TemplateView):
             prev_sterkte = min_ag_str
         # for
 
-        regioteams = (RegiocompetitieTeam
+        regioteams = (RegioTeam
                       .objects
                       .select_related('vereniging',
                                       'vereniging__regio',
                                       'team_type',
                                       'team_klasse')
-                      .prefetch_related('regiocompetitieteampoule_set')
+                      .prefetch_related('regiopoule_set')
                       .exclude(team_klasse=None)
-                      .filter(regiocompetitie__in=deelcomp_pks)
+                      .filter(regiocomp__in=deelcomp_pks)
                       .order_by('team_klasse__volgorde',
                                 '-aanvangsgemiddelde',
                                 'vereniging__ver_nr'))
@@ -202,7 +202,7 @@ class RegioTeamsTemplateView(TemplateView):
             ag_str = "%05.1f" % (float(team.aanvangsgemiddelde) * aantal_pijlen)
             team.ag_str = ag_str.replace('.', ',')
 
-            poule = team.regiocompetitieteampoule_set.first()
+            poule = team.regiopoule_set.first()
             team.in_poule = (poule is not None)
 
             if comp.fase_teams <= 'D' and self.rol_nu == Rol.ROL_RCL:
@@ -220,13 +220,13 @@ class RegioTeamsTemplateView(TemplateView):
         # for
 
         # zoek de teams die niet 'af' zijn
-        regioteams = (RegiocompetitieTeam
+        regioteams = (RegioTeam
                       .objects
                       .select_related('vereniging',
                                       'vereniging__regio',
                                       'team_type',
-                                      'regiocompetitie')
-                      .filter(regiocompetitie__in=deelcomp_pks,
+                                      'regiocomp')
+                      .filter(regiocomp__in=deelcomp_pks,
                               team_klasse=None)
                       .order_by('team_type__volgorde',
                                 '-aanvangsgemiddelde',
@@ -245,7 +245,7 @@ class RegioTeamsTemplateView(TemplateView):
 
                 if comp.fase_teams <= 'F' and deelcomp.huidige_team_ronde < 1:
                     team.url_verwijder = reverse('CompLaagRegio:teams-regio-wijzig',
-                                                 kwargs={'deelcomp_pk': team.regiocompetitie.pk,
+                                                 kwargs={'deelcomp_pk': team.regiocomp.pk,
                                                          'team_pk': team.pk})
             totaal_teams += 1
 
@@ -322,11 +322,11 @@ class RegioTeamsAlsBestand(UserPassesTestMixin, View):
 
         try:
             deelcomp_pk = int(kwargs['deelcomp_pk'][:7])    # afkappen voor de veiligheid
-            deelcomp = (Regiocompetitie
+            deelcomp = (RegioComp
                         .objects
                         .select_related('competitie')
                         .get(pk=deelcomp_pk))
-        except (ValueError, Regiocompetitie.DoesNotExist):
+        except (ValueError, RegioComp.DoesNotExist):
             raise Http404('Competitie niet gevonden')
 
         if deelcomp.functie != self.functie_nu:
@@ -355,13 +355,13 @@ class RegioTeamsAlsBestand(UserPassesTestMixin, View):
                          'Wedstrijdklasse', 'Sporters'])
 
         # zoek de teams die niet 'af' zijn
-        regioteams_niet_af = (RegiocompetitieTeam
+        regioteams_niet_af = (RegioTeam
                               .objects
                               .select_related('vereniging',
                                               'vereniging__regio',
                                               'team_type',
-                                              'regiocompetitie')
-                              .filter(regiocompetitie=deelcomp,
+                                              'regiocomp')
+                              .filter(regiocomp=deelcomp,
                                       team_klasse=None)
                               .prefetch_related('leden')
                               .order_by('team_type__volgorde',
@@ -386,14 +386,14 @@ class RegioTeamsAlsBestand(UserPassesTestMixin, View):
             writer.writerow(tup)
         # for
 
-        regioteams = (RegiocompetitieTeam
+        regioteams = (RegioTeam
                       .objects
                       .select_related('vereniging',
                                       'vereniging__regio',
                                       'team_type',
                                       'team_klasse')
                       .exclude(team_klasse=None)
-                      .filter(regiocompetitie=deelcomp)
+                      .filter(regiocomp=deelcomp)
                       .order_by('team_klasse__volgorde',
                                 '-aanvangsgemiddelde',
                                 'vereniging__ver_nr'))
@@ -443,12 +443,12 @@ class AGControleView(UserPassesTestMixin, TemplateView):
         try:
             regio_nr = int(kwargs['regio_nr'][:7])  # afkappen voor de veiligheid
             comp_pk = int(kwargs['comp_pk'][:7])    # afkappen voor de veiligheid
-            deelcomp = (Regiocompetitie
+            deelcomp = (RegioComp
                         .objects
                         .select_related('competitie', 'regio')
                         .get(competitie=comp_pk,
                              regio__regio_nr=regio_nr))
-        except (ValueError, Regiocompetitie.DoesNotExist):
+        except (ValueError, RegioComp.DoesNotExist):
             raise Http404('Competitie niet gevonden')
 
         if deelcomp.functie != self.functie_nu:
@@ -465,9 +465,9 @@ class AGControleView(UserPassesTestMixin, TemplateView):
         context['geen_ag'] = geen_ag_lijst = list()
 
         # zoek de sportersboog met handmatig_ag voor de teamcompetitie
-        for obj in (RegiocompetitieSporterBoog
+        for obj in (RegioDeelnemer
                     .objects
-                    .filter(regiocompetitie=deelcomp,
+                    .filter(regiocomp=deelcomp,
                             inschrijf_voorkeur_team=True,
                             ag_voor_team_mag_aangepast_worden=True)
                     .select_related('sporterboog',
@@ -543,14 +543,14 @@ class StartVolgendeTeamRondeView(UserPassesTestMixin, TemplateView):
         wp_model = deelcomp.regio_team_punten_model
 
         # TODO: poules sorteren
-        for poule in (RegiocompetitieTeamPoule
+        for poule in (RegioPoule
                       .objects
                       .prefetch_related('teams')
-                      .filter(regiocompetitie=deelcomp)):
+                      .filter(regiocomp=deelcomp)):
 
             team_pks = poule.teams.values_list('pk', flat=True)
 
-            ronde_teams = (RegiocompetitieRondeTeam
+            ronde_teams = (RegioRondeTeam
                            .objects
                            .select_related('team',
                                            'team__vereniging')
@@ -686,12 +686,12 @@ class StartVolgendeTeamRondeView(UserPassesTestMixin, TemplateView):
 
         try:
             deelcomp_pk = int(kwargs['deelcomp_pk'][:7])      # afkappen voor de veiligheid
-            deelcomp = (Regiocompetitie
+            deelcomp = (RegioComp
                         .objects
                         .select_related('competitie')
                         .get(pk=deelcomp_pk,
                              regio=self.functie_nu.regio))
-        except (ValueError, Regiocompetitie.DoesNotExist):
+        except (ValueError, RegioComp.DoesNotExist):
             raise Http404('Competitie bestaat niet')
 
         context['deelcomp'] = deelcomp
@@ -706,19 +706,19 @@ class StartVolgendeTeamRondeView(UserPassesTestMixin, TemplateView):
             # en dat alle teams in een poule zitten
 
             team_pk2poule = dict()
-            poules = RegiocompetitieTeamPoule.objects.filter(regiocompetitie=deelcomp).prefetch_related('teams')
+            poules = RegioPoule.objects.filter(regiocomp=deelcomp).prefetch_related('teams')
             for poule in poules:
                 for team in poule.teams.all():
                     team_pk2poule[team.pk] = poule
                 # for
             # for
 
-            regioteams = (RegiocompetitieTeam
+            regioteams = (RegioTeam
                           .objects
                           .select_related('vereniging',
                                           'vereniging__regio',
                                           'team_type')
-                          .filter(regiocompetitie=deelcomp)
+                          .filter(regiocomp=deelcomp)
                           .prefetch_related('leden')
                           .order_by('team_type__volgorde',
                                     '-aanvangsgemiddelde',
@@ -787,12 +787,12 @@ class StartVolgendeTeamRondeView(UserPassesTestMixin, TemplateView):
 
         try:
             deelcomp_pk = int(kwargs['deelcomp_pk'][:7])      # afkappen voor de veiligheid
-            deelcomp = (Regiocompetitie
+            deelcomp = (RegioComp
                         .objects
                         .select_related('competitie')
                         .get(pk=deelcomp_pk,
                              regio=self.functie_nu.regio))
-        except (ValueError, Regiocompetitie.DoesNotExist):
+        except (ValueError, RegioComp.DoesNotExist):
             raise Http404('Competitie bestaat niet')
 
         if deelcomp.huidige_team_ronde <= 7:

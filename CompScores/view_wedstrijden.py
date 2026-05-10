@@ -8,9 +8,10 @@ from django.urls import reverse
 from django.utils import timezone
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.models import CompetitieMatch, RegiocompetitieRonde
+from Competitie.models import CompetitieMatch
 from CompLaagBond.models import KampBK
 from CompLaagRayon.models import KampRK
+from CompLaagRegio.models import RegioRonde
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
 import datetime
@@ -46,9 +47,9 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
 
         context['geen_wedstrijden'] = True
 
-        pks1 = list(RegiocompetitieRonde
+        pks1 = list(RegioRonde
                     .objects
-                    .filter(regiocompetitie__is_afgesloten=False,
+                    .filter(regiocomp__is_afgesloten=False,
                             matches__vereniging=self.functie_nu.vereniging)
                     .values_list('matches', flat=True))
 
@@ -77,7 +78,7 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
                    .filter(pk__in=pks)
                    .prefetch_related('kamprk_set',
                                      'kampbk_set',
-                                     'regiocompetitieronde_set')
+                                     'regioronde_set')
                    .order_by('datum_wanneer',
                              'tijd_begin_wedstrijd'))
 
@@ -85,7 +86,7 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
 
         for match in matches:
 
-            rondes = match.regiocompetitieronde_set.all()
+            rondes = match.regioronde_set.all()
 
             match.deelkamp = None
             match.is_rk = False
@@ -108,7 +109,7 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
                 # maak een passende beschrijving voor deze wedstrijd
                 if len(rondes) > 0:
                     ronde = rondes[0]
-                    match.beschrijving1 = ronde.regiocompetitie.competitie.beschrijving
+                    match.beschrijving1 = ronde.regiocomp.competitie.beschrijving
                     match.beschrijving2 = ronde.beschrijving
                 else:
                     # TODO: onderstaande is niet meer nodig

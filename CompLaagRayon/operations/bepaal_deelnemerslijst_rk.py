@@ -6,9 +6,10 @@
 
 from django.utils import timezone
 from Competitie.definities import DEELNAME_NEE, DEELNAME_ONBEKEND
-from Competitie.models import Competitie, Regiocompetitie, RegiocompetitieSporterBoog
+from Competitie.models import Competitie
 from CompKampioenschap.operations import bepaal_kamp_indiv_deelnemerslijst, zet_dirty
 from CompLaagRayon.models import KampRK, DeelnemerRK, TeamRK
+from CompLaagRegio.models import RegioComp, RegioDeelnemer
 from Logboek.models import schrijf_in_logboek
 from Taken.operations import maak_taak
 
@@ -20,7 +21,7 @@ def _get_regio_sporters_rayon(comp: Competitie, rayon_nr: int):
 
     # sporter komen uit de 4 regio's van het rayon
     pks = list()
-    for deelcomp in (Regiocompetitie
+    for deelcomp in (RegioComp
                     .objects
                     .filter(competitie=comp,
                             regio__rayon_nr=rayon_nr)):
@@ -28,14 +29,14 @@ def _get_regio_sporters_rayon(comp: Competitie, rayon_nr: int):
     # for
 
     # TODO: sorteren en kampioenen eerst zetten kan allemaal weg, want: ...??
-    deelnemers = (RegiocompetitieSporterBoog
+    deelnemers = (RegioDeelnemer
                   .objects
                   .select_related('indiv_klasse',
                                   'bij_vereniging__regio',
                                   'sporterboog__sporter',
                                   'sporterboog__sporter__bij_vereniging',
                                   'sporterboog__sporter__bij_vereniging__regio__rayon')
-                  .filter(regiocompetitie__in=pks,
+                  .filter(regiocomp__in=pks,
                           aantal_scores__gte=comp.aantal_scores_voor_rk_deelname,
                           indiv_klasse__is_ook_voor_rk_bk=True)  # skip aspiranten
                   .order_by('indiv_klasse__volgorde',  # groepeer per klasse

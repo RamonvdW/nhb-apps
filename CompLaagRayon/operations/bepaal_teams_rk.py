@@ -4,14 +4,15 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from Competitie.models import Competitie, RegiocompetitieSporterBoog
+from Competitie.models import Competitie
 from CompLaagRayon.models import DeelnemerRK, TeamRK
+from CompLaagRegio.models import RegioDeelnemer
 
 
-def converteer_rk_teams_tijdelijke_leden(stdout, comp: Competitie):
+def converteer_rk_teams_tijdelijke_deelnemers_regio(stdout, comp: Competitie):
     """ converteer de sporters die gekoppeld zijn aan de RK teams
         de RK teams zijn die tijdens de regiocompetitie al aangemaakt door de verenigingen
-        en er zijn regiocompetitie sporters aan gekoppeld welke misschien niet gerechtigd zijn.
+        en er zijn regiocompetitie deelnemers aan gekoppeld, welke misschien niet gerechtigd zijn.
 
         controleer ook meteen de vereniging van de deelnemer
         als laatste wordt de team sterkte opnieuw berekend
@@ -19,27 +20,27 @@ def converteer_rk_teams_tijdelijke_leden(stdout, comp: Competitie):
         het vaststellen van de wedstrijdklasse voor de RK teams volgt later
     """
 
-    # maak een look-up tabel van RegioCompetitieSporterBoog naar KampioenschapSporterBoog
-    sporterboog_pk2regiocompetitiesporterboog = dict()
-    for deelnemer in (RegiocompetitieSporterBoog
+    # maak een look-up tabel van RegioDeelnemer naar KampioenschapSporterBoog
+    sporterboog_pk2regiodeelnemer = dict()
+    for deelnemer in (RegioDeelnemer
                       .objects
                       .select_related('bij_vereniging')
-                      .filter(regiocompetitie__competitie=comp)):
-        sporterboog_pk2regiocompetitiesporterboog[deelnemer.sporterboog.pk] = deelnemer
+                      .filter(regiocomp__competitie=comp)):
+        sporterboog_pk2regiodeelnemer[deelnemer.sporterboog.pk] = deelnemer
     # for
 
-    regiocompetitiesporterboog_pk2kampioenschapsporterboog = dict()
+    regiodeelnemer_pk2kampioenschapsporterboog = dict()
     for deelnemer in (DeelnemerRK
                       .objects
                       .select_related('bij_vereniging')
                       .filter(kamp__competitie=comp)):
         try:
-            regio_deelnemer = sporterboog_pk2regiocompetitiesporterboog[deelnemer.sporterboog.pk]
+            regio_deelnemer = sporterboog_pk2regiodeelnemer[deelnemer.sporterboog.pk]
         except KeyError:
             stdout.write('[WARNING] Kan regio deelnemer niet vinden voor kampioenschapsporterboog met pk=%s' %
                             deelnemer.pk)
         else:
-            regiocompetitiesporterboog_pk2kampioenschapsporterboog[regio_deelnemer.pk] = deelnemer
+            regiodeelnemer_pk2kampioenschapsporterboog[regio_deelnemer.pk] = deelnemer
     # for
 
     # sporters mogen maar aan 1 team gekoppeld worden
@@ -49,16 +50,16 @@ def converteer_rk_teams_tijdelijke_leden(stdout, comp: Competitie):
                  .objects
                  .filter(kamp__competitie=comp)
                  .select_related('vereniging')
-                 .prefetch_related('tijdelijke_leden')):
+                 .prefetch_related('tijdelijke_deelnemers_regio')):
 
         team_ver_nr = team.vereniging.ver_nr
         deelnemer_pks = list()
 
         ags = list()
 
-        for pk in team.tijdelijke_leden.values_list('pk', flat=True):
+        for pk in team.tijdelijke_deelnemers_regio.values_list('pk', flat=True):
             try:
-                deelnemer = regiocompetitiesporterboog_pk2kampioenschapsporterboog[pk]
+                deelnemer = regiodeelnemer_pk2kampioenschapsporterboog[pk]
             except KeyError:
                 # regio sporter is niet doorgekomen naar het RK en valt dus af
                 pass

@@ -7,9 +7,9 @@
 from django.contrib import admin
 from django.db.models import F
 from BasisTypen.models import TeamType
-from Competitie.models import (CompetitieIndivKlasse, CompetitieTeamKlasse,
-                               RegiocompetitieSporterBoog)
+from Competitie.models import CompetitieIndivKlasse, CompetitieTeamKlasse                               
 from CompLaagRayon.models import KampRK, DeelnemerRK, TeamRK, CutRK, CutTeamRK
+from CompLaagRegio.models import RegioDeelnemer
 
 
 class CreateOnlyAdmin(admin.ModelAdmin):
@@ -179,7 +179,7 @@ class TeamRKAdmin(CreateOnlyAdmin):
                         'team_klasse_volgende_ronde'),
              }),
         ('Leden',
-            {'fields': ('tijdelijke_leden',
+            {'fields': ('tijdelijke_deelnemers_regio',
                         'gekoppelde_leden',
                         'feitelijke_leden'),
              }),
@@ -191,7 +191,7 @@ class TeamRKAdmin(CreateOnlyAdmin):
              }),
     )
 
-    filter_horizontal = ('tijdelijke_leden',
+    filter_horizontal = ('tijdelijke_deelnemers_regio',
                          'gekoppelde_leden',
                          'feitelijke_leden')
 
@@ -236,23 +236,23 @@ class TeamRKAdmin(CreateOnlyAdmin):
         return super().get_form(request, obj, **kwargs)
 
     def formfield_for_manytomany(self, db_field, request, **kwargs):    # pragma: no cover
-        if db_field.name == 'tijdelijke_leden':
+        if db_field.name == 'tijdelijke_deelnemers_regio':
             # alleen leden van de juiste vereniging en boogtype laten kiezen
             if self.obj:
                 # Edit
-                kwargs['queryset'] = (RegiocompetitieSporterBoog
+                kwargs['queryset'] = (RegioDeelnemer
                                       .objects
                                       .select_related('sporterboog',
                                                       'sporterboog__sporter',
                                                       'sporterboog__boogtype',
                                                       'bij_vereniging')
-                                      .filter(regiocompetitie__competitie=self.competitie,
+                                      .filter(regiocomp__competitie=self.competitie,
                                               bij_vereniging=self.obj.vereniging,
                                               sporterboog__boogtype__pk__in=self.boog_pks)
                                       .order_by('sporterboog__sporter__lid_nr'))
             else:
                 # Add
-                kwargs['queryset'] = RegiocompetitieSporterBoog.objects.none()
+                kwargs['queryset'] = RegioDeelnemer.objects.none()
 
         elif db_field.name in ('gekoppelde_leden', 'feitelijke_leden'):
             if self.obj:

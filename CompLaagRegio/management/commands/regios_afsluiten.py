@@ -1,18 +1,19 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2024 Ramon van der Winkel.
+#  Copyright (c) 2020-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management.base import BaseCommand
-from Competitie.models import Competitie, Regiocompetitie
+from Competitie.models import Competitie
+from CompLaagRegio.models import RegioComp
 
 
 class Command(BaseCommand):
     help = "Sluit alle regiocompetities van een specifieke competitie"
 
     def _sluit_regios(self, comp, regio_van, regio_tot):
-        for deelcomp in (Regiocompetitie
+        for deelcomp in (RegioComp
                          .objects
                          .select_related('regio')
                          .filter(competitie=comp,

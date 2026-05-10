@@ -10,8 +10,9 @@ from django.utils import timezone
 from django.utils.formats import localize
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.models import CompetitieMatch, RegiocompetitieTeam
+from Competitie.models import CompetitieMatch
 from Competitie.operations.wedstrijdcapaciteit import bepaal_waarschijnlijke_deelnemers, bepaal_blazoen_behoefte
+from CompLaagRegio.models import RegioTeam
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
 from codecs import BOM_UTF8
@@ -64,10 +65,10 @@ class WaarschijnlijkeDeelnemersView(UserPassesTestMixin, TemplateView):
             match.beschrijving1 = msg
             match.beschrijving2 = ''
 
-        ronde = match.regiocompetitieronde_set.select_related('regiocompetitie', 'regiocompetitie__competitie').first()
+        ronde = match.regioronde_set.select_related('regiocomp', 'regiocomp__competitie').first()
         if not ronde:
             raise Http404('Geen competitie wedstrijd')
-        deelcomp = ronde.regiocompetitie
+        deelcomp = ronde.regiocomp
         comp = deelcomp.competitie
         afstand = comp.afstand
 
@@ -78,7 +79,7 @@ class WaarschijnlijkeDeelnemersView(UserPassesTestMixin, TemplateView):
 
         team_pk2naam = dict()
         team_pk2naam[0] = '-'
-        for team in RegiocompetitieTeam.objects.filter(regiocompetitie=deelcomp):
+        for team in RegioTeam.objects.filter(regiocomp=deelcomp):
             team_pk2naam[team.pk] = team.maak_team_naam_kort()
         # for
 
@@ -149,15 +150,15 @@ class WaarschijnlijkeDeelnemersAlsBestandView(UserPassesTestMixin, TemplateView)
         except (ValueError, CompetitieMatch.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
-        ronde = match.regiocompetitieronde_set.select_related('regiocompetitie', 'regiocompetitie__competitie').first()
+        ronde = match.regioronde_set.select_related('regiocomp', 'regiocomp__competitie').first()
         if not ronde:
             raise Http404('Geen competitie wedstrijd')
-        deelcomp = ronde.regiocompetitie
+        deelcomp = ronde.regiocomp
         afstand = deelcomp.competitie.afstand
 
         team_pk2naam = dict()
         team_pk2naam[0] = '-'
-        for team in RegiocompetitieTeam.objects.filter(regiocompetitie=deelcomp):
+        for team in RegioTeam.objects.filter(regiocomp=deelcomp):
             team_pk2naam[team.pk] = team.maak_team_naam_kort()
         # for
 

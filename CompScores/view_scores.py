@@ -14,9 +14,8 @@ from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
 from Competitie.operations.wedstrijdcapaciteit import bepaal_waarschijnlijke_deelnemers
-from Competitie.models import (CompetitieMatch, update_uitslag_teamcompetitie,
-                               Regiocompetitie, RegiocompetitieRonde, RegiocompetitieSporterBoog,
-                               RegiocompetitieTeam, RegiocompetitieRondeTeam, RegiocompetitieTeamPoule)
+from Competitie.models import CompetitieMatch, update_uitslag_teamcompetitie
+from CompLaagRegio.models import RegioComp, RegioRonde, RegioDeelnemer, RegioTeam, RegioRondeTeam, RegioPoule
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie
 from Score.definities import SCORE_WAARDE_VERWIJDERD, SCORE_TYPE_SCORE, SCORE_TYPE_GEEN
@@ -53,11 +52,11 @@ class ScoresRegioView(UserPassesTestMixin, TemplateView):
 
         try:
             deelcomp_pk = int(kwargs['deelcomp_pk'][:7])            # afkappen voor de veiligheid
-            deelcomp = (Regiocompetitie
+            deelcomp = (RegioComp
                         .objects
                         .select_related('competitie')
                         .get(pk=deelcomp_pk))
-        except (ValueError, Regiocompetitie.DoesNotExist):
+        except (ValueError, RegioComp.DoesNotExist):
             raise Http404('Competitie niet gevonden')
 
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
@@ -76,10 +75,10 @@ class ScoresRegioView(UserPassesTestMixin, TemplateView):
         match_pks = list()
         match2beschrijving = dict()
 
-        for ronde in (RegiocompetitieRonde
+        for ronde in (RegioRonde
                       .objects
                       .prefetch_related('matches')
-                      .filter(regiocompetitie=deelcomp)):
+                      .filter(regiocomp=deelcomp)):
 
             for match in ronde.matches.all():
                 match_pks.append(match.pk)
@@ -159,12 +158,12 @@ def bepaal_match_en_deelcomp_of_404(match_pk, mag_database_wijzigen=False):
     except (ValueError, CompetitieMatch.DoesNotExist):
         raise Http404('Wedstrijd niet gevonden')
 
-    rondes = match.regiocompetitieronde_set.all()
+    rondes = match.regioronde_set.all()
     if len(rondes) == 0:
         raise Http404('Geen regio wedstrijd')
     ronde = rondes[0]
 
-    deelcomp = ronde.regiocompetitie
+    deelcomp = ronde.regiocomp
 
     # maak de uitslag aan indien nog niet gedaan
     if not match.uitslag:
@@ -215,16 +214,16 @@ class WedstrijdUitslagInvoerenView(UserPassesTestMixin, TemplateView):
 
         sporterboog_pks = scores.values_list('sporterboog__pk', flat=True)
 
-        deelnemers = (RegiocompetitieSporterBoog
+        deelnemers = (RegioDeelnemer
                       .objects
-                      .filter(regiocompetitie=deelcomp,
+                      .filter(regiocomp=deelcomp,
                               sporterboog__pk__in=sporterboog_pks))
 
-        ronde_teams = (RegiocompetitieRondeTeam
+        ronde_teams = (RegioRondeTeam
                        .objects
                        .select_related('team')
                        .prefetch_related('deelnemers_feitelijk')
-                       .filter(team__regiocompetitie=deelcomp,
+                       .filter(team__regiocomp=deelcomp,
                                ronde_nr=deelcomp.huidige_team_ronde))
 
         deelnemer_pk2teamnaam = dict()
@@ -301,9 +300,9 @@ class WedstrijdUitslagInvoerenView(UserPassesTestMixin, TemplateView):
         if deelcomp.regio_organiseert_teamcompetitie:
             context['team_pk2naam'] = team_pk2naam = dict()
             team_pk2naam[0] = '-'
-            for team in (RegiocompetitieTeam
+            for team in (RegioTeam
                          .objects
-                         .filter(regiocompetitie=deelcomp)
+                         .filter(regiocomp=deelcomp)
                          .select_related('vereniging')):
                 team_pk2naam[team.pk] = team.maak_team_naam_kort()
             # for
@@ -390,11 +389,11 @@ class DynamicDeelnemersOphalenView(UserPassesTestMixin, View):
 
         try:
             deelcomp_pk = int(str(data['deelcomp_pk'])[:7])   # afkappen voor extra veiligheid
-            deelcomp = (Regiocompetitie
+            deelcomp = (RegioComp
                         .objects
                         .select_related('competitie')
                         .get(pk=deelcomp_pk))
-        except (KeyError, ValueError, Regiocompetitie.DoesNotExist):
+        except (KeyError, ValueError, RegioComp.DoesNotExist):
             raise Http404('Competitie niet gevonden')
 
         try:
@@ -460,21 +459,21 @@ class DynamicZoekOpBondsnummerView(UserPassesTestMixin, View):
             out['fail'] = 1
             # raise Http404('Geen valide verzoek')
         else:
-            rondes = match.regiocompetitieronde_set.all()
+            rondes = match.regioronde_set.all()
             if len(rondes) == 0:
                 raise Http404('Geen competitie wedstrijd')
             ronde = rondes[0]
 
             # zoek schuttersboog die ingeschreven zijn voor deze competitie
-            competitie = ronde.regiocompetitie.competitie
+            competitie = ronde.regiocomp.competitie
 
-            deelnemers = (RegiocompetitieSporterBoog
+            deelnemers = (RegioDeelnemer
                           .objects
                           .select_related('sporterboog',
                                           'sporterboog__boogtype',
                                           'sporterboog__sporter',
                                           'sporterboog__sporter__bij_vereniging')
-                          .filter(regiocompetitie__competitie=competitie,
+                          .filter(regiocomp__competitie=competitie,
                                   sporterboog__sporter__lid_nr=lid_nr))
 
             if len(deelnemers) == 0:
@@ -512,14 +511,14 @@ class DynamicZoekOpBondsnummerView(UserPassesTestMixin, View):
                     if deelnemer.inschrijf_voorkeur_team:
                         # TODO: gebruikt ronde team ag!
                         sub['team_gem'] = deelnemer.ag_voor_team
-                        if not ronde.regiocompetitie.regio_heeft_vaste_teams:
+                        if not ronde.regiocomp.regio_heeft_vaste_teams:
                             if deelnemer.aantal_scores > 0:
                                 sub['team_gem'] = deelnemer.gemiddelde
 
                         sub['vsg'] = sub['team_gem']        # TODO: obsolete vsg
 
                         # zoek het huidige team erbij
-                        teams = deelnemer.regiocompetitieteam_set.all()
+                        teams = deelnemer.regioteam_set.all()
                         if teams.count() > 0:
                             # sporter is gekoppeld aan een team
                             sub['team_pk'] = teams[0].pk
@@ -665,7 +664,7 @@ class DynamicScoresOpslaanView(UserPassesTestMixin, View):
         uitslag = match.uitslag
 
         rol_nu, functie_nu = rol_get_huidige_functie(request)
-        if not mag_deelcomp_wedstrijd_wijzigen(match, functie_nu, ronde.regiocompetitie):
+        if not mag_deelcomp_wedstrijd_wijzigen(match, functie_nu, ronde.regiocomp):
             raise PermissionDenied('Geen toegang')
 
         # voorkom wijzigingen bevroren wedstrijduitslag
@@ -714,7 +713,7 @@ class WedstrijdUitslagBekijkenView(UserPassesTestMixin, TemplateView):
 
         # maak een opzoektabel voor de huidige vereniging van elke sporterboog
         sporterboog_pks = [score.sporterboog.pk for score in scores]
-        regioschutters = (RegiocompetitieSporterBoog
+        regioschutters = (RegioDeelnemer
                           .objects
                           .select_related('sporterboog',
                                           'bij_vereniging')
@@ -786,11 +785,11 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
 
         deelnemer2sporter_cache: dict[int, tuple[int, str]] = dict()    # [deelnemer_pk] = (sporterboog_pk, naam_str)
         sporterboog_cache: dict[int, SporterBoog] = dict()              # [sporterboog_pk] = SporterBoog
-        for deelnemer in (RegiocompetitieSporterBoog
+        for deelnemer in (RegioDeelnemer
                           .objects
                           .select_related('sporterboog',
                                           'sporterboog__sporter')
-                          .filter(regiocompetitie=deelcomp)):
+                          .filter(regiocomp=deelcomp)):
 
             sporterboog = deelnemer.sporterboog
             sporterboog_cache[sporterboog.pk] = sporterboog
@@ -803,16 +802,16 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
         alle_sporterboog_pks = list()
         afstand = deelcomp.competitie.afstand
 
-        for poule in (RegiocompetitieTeamPoule
+        for poule in (RegioPoule
                       .objects
                       .prefetch_related('teams')
-                      .filter(regiocompetitie=deelcomp)
+                      .filter(regiocomp=deelcomp)
                       .order_by('beschrijving')):
 
             team_pks = poule.teams.values_list('pk', flat=True)
 
             # alle al gebruikte scores
-            used_scores = list(RegiocompetitieRondeTeam
+            used_scores = list(RegioRondeTeam
                                .objects
                                .prefetch_related('scores_feitelijk')
                                .filter(team__in=team_pks)
@@ -820,7 +819,7 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
                                .values_list('scores_feitelijk__pk', flat=True))
             used_score_pks.extend(used_scores)
 
-            ronde_teams = (RegiocompetitieRondeTeam
+            ronde_teams = (RegioRondeTeam
                            .objects
                            .select_related('team',
                                            'team__vereniging',
@@ -896,9 +895,9 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
         score2match = dict()
 
         match_pks = list()
-        for ronde in (RegiocompetitieRonde
+        for ronde in (RegioRonde
                       .objects
-                      .filter(regiocompetitie=deelcomp)
+                      .filter(regiocomp=deelcomp)
                       .prefetch_related('matches')):
             match_pks.extend(list(ronde.matches.values_list('pk', flat=True)))
         # for
@@ -1056,11 +1055,11 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
 
         try:
             deelcomp_pk = int(kwargs['deelcomp_pk'][:7])  # afkappen voor de veiligheid
-            deelcomp = (Regiocompetitie
+            deelcomp = (RegioComp
                         .objects
                         .select_related('competitie')
                         .get(pk=deelcomp_pk))
-        except (ValueError, Regiocompetitie.DoesNotExist):
+        except (ValueError, RegioComp.DoesNotExist):
             raise Http404('Competitie niet gevonden')
 
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
@@ -1098,8 +1097,8 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
 
         try:
             deelcomp_pk = int(kwargs['deelcomp_pk'][:7])  # afkappen voor de veiligheid
-            deelcomp = Regiocompetitie.objects.get(pk=deelcomp_pk)
-        except (ValueError, Regiocompetitie.DoesNotExist):
+            deelcomp = RegioComp.objects.get(pk=deelcomp_pk)
+        except (ValueError, RegioComp.DoesNotExist):
             raise Http404('Competitie niet gevonden')
 
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)

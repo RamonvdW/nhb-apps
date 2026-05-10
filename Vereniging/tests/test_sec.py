@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2025 Ramon van der Winkel.
+#  Copyright (c) 2020-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
 from Account.models import Account
-from Competitie.models import Competitie, CompetitieIndivKlasse, RegiocompetitieSporterBoog
+from Competitie.models import Competitie, CompetitieIndivKlasse
 from Competitie.test_utils.tijdlijn import zet_competitie_fase_regio_inschrijven
 from Competitie.operations import competities_aanmaken
+from CompLaagRegio.models import RegioDeelnemer
 from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
 from HistComp.definities import HISTCOMP_TYPE_18, HIST_BOGEN_DEFAULT
@@ -307,7 +308,7 @@ class TestVerenigingSEC(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
 
         # probeer iemand in te schrijven
-        self.assertEqual(RegiocompetitieSporterBoog.objects.count(), 0)
+        self.assertEqual(RegioDeelnemer.objects.count(), 0)
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'lid_100002_boogtype_1': 'on',        # 1=R
                                           'lid_100003_boogtype_3': 'on'})       # 3=BB

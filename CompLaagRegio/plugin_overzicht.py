@@ -7,7 +7,7 @@
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.formats import localize
-from Competitie.models import Regiocompetitie
+from CompLaagRegio.models import RegioComp
 from Functie.definities import Rol
 from Score.operations import wanneer_ag_vastgesteld
 from types import SimpleNamespace
@@ -15,7 +15,7 @@ import datetime
 
 
 def get_kaartjes_regio(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_indiv, kaartjes_teams):
-    """ Deze functies levert kaartjes voor op de competitie beheerders pagina gerelateerd aan de Regiocompetitie
+    """ Deze functies levert kaartjes voor op de competitie beheerders pagina gerelateerd aan de RegioComp
         comp.fase_indiv/fase_teams zijn gezet.
 
         Regiocompetitie loopt vanaf fase A t/m G.
@@ -93,8 +93,8 @@ def get_kaartjes_regio(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
 
         # pak de regiocompetitie erbij
         try:
-            regiocomp = Regiocompetitie.objects.select_related('regio').get(competitie=comp, functie=functie_nu)
-        except Regiocompetitie.DoesNotExist:
+            regiocomp = RegioComp.objects.select_related('regio').get(competitie=comp, functie=functie_nu)
+        except RegioComp.DoesNotExist:
             # verkeerde RCL (Indoor / 25m1pijl mix-up)
             pass
         else:

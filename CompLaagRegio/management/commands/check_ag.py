@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2024 Ramon van der Winkel.
+#  Copyright (c) 2021-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management.base import BaseCommand
-from Competitie.models import Regiocompetitie, RegiocompetitieSporterBoog
+from CompLaagRegio.models import RegioComp, RegioDeelnemer
 
 
 class Command(BaseCommand):
@@ -20,19 +20,19 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
 
-        self.stdout.write('RegioCompetitieSporterBoog met voorkeur voor teams maar zonder Team-AG:')
+        self.stdout.write('RegioDeelnemer met voorkeur voor teams maar zonder Team-AG:')
 
         for afstand in ('18', '25'):
-            deelcomp_pks = (Regiocompetitie
+            deelcomp_pks = (RegioComp
                             .objects
                             .filter(competitie__afstand=afstand,
                                     regio_organiseert_teamcompetitie=True)
                             .order_by('regio__regio_nr')
                             .values_list('pk', flat=True))
 
-            for deelnemer in (RegiocompetitieSporterBoog
+            for deelnemer in (RegioDeelnemer
                               .objects
-                              .filter(regiocompetitie__pk__in=deelcomp_pks,
+                              .filter(regiocomp__pk__in=deelcomp_pks,
                                       inschrijf_voorkeur_team=True,
                                       ag_voor_team_mag_aangepast_worden=True,
                                       ag_voor_team__lte="0.1")

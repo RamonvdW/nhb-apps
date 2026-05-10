@@ -7,12 +7,13 @@
 from django.test import TestCase
 from django.utils import timezone
 from BasisTypen.models import BoogType
-from Competitie.models import Competitie, Regiocompetitie, RegiocompetitieSporterBoog
+from Competitie.models import Competitie
 from Competitie.operations import competities_aanmaken
 from Competitie.test_utils.tijdlijn import (zet_competitie_fase_regio_inschrijven,
                                             zet_competitie_fase_regio_wedstrijden)
 from CompLaagBond.models import KampBK
 from CompLaagRayon.models import KampRK
+from CompLaagRegio.models import RegioComp, RegioDeelnemer
 from Functie.tests.helpers import maak_functie
 from Geo.models import Rayon, Regio
 from Sporter.models import Sporter
@@ -100,7 +101,7 @@ class TestCompBeheerOverzicht(E2EHelpers, TestCase):
             deelkamp.functie.accounts.add(self.account_rko)
         # for
 
-        for deelcomp in Regiocompetitie.objects.filter(regio=self.regio_101).all():
+        for deelcomp in RegioComp.objects.filter(regio=self.regio_101).all():
             deelcomp.functie.accounts.add(self.account_rcl)
         # for
 
@@ -298,7 +299,7 @@ class TestCompBeheerOverzicht(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('compbeheer/overzicht.dtl', 'design/site_layout.dtl'))
 
         # RCL
-        deelcomp = Regiocompetitie.objects.get(competitie=comp18, regio=self.regio_101)
+        deelcomp = RegioComp.objects.get(competitie=comp18, regio=self.regio_101)
         functie_rcl = deelcomp.functie
         self.e2e_login_and_pass_otp(self.account_rcl)
         self.e2e_wissel_naar_functie(functie_rcl)
@@ -370,7 +371,7 @@ class TestCompBeheerOverzicht(E2EHelpers, TestCase):
         # TODO: add WL
 
         # coverage voor models __str__
-        obj = RegiocompetitieSporterBoog.objects.first()
+        obj = RegioDeelnemer.objects.first()
         self.assertTrue(str(obj) != '')
 
 # end of file

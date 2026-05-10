@@ -6,10 +6,9 @@
 
 from django.test import TestCase
 from BasisTypen.models import TemplateCompetitieIndivKlasse, BoogType, TeamType, Leeftijdsklasse
-from Competitie.models import (Competitie, CompetitieMatch, CompetitieIndivKlasse, CompetitieTeamKlasse,
-                               Regiocompetitie, RegiocompetitieRonde,
-                               RegiocompetitieSporterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam)
+from Competitie.models import Competitie, CompetitieMatch, CompetitieIndivKlasse, CompetitieTeamKlasse
 from Competitie.test_utils.tijdlijn import zet_competitie_fases, zet_competitie_fase_regio_inschrijven
+from CompLaagRegio.models import RegioComp, RegioRonde, RegioDeelnemer, RegioTeam, RegioRondeTeam
 from Functie.models import Functie
 from Geo.models import Regio
 from Score.definities import AG_DOEL_INDIV, SCORE_TYPE_SCORE, SCORE_TYPE_GEEN
@@ -43,7 +42,7 @@ class TestCompLaagRegioCli(E2EHelpers, TestCase):
         self.comp = Competitie.objects.get(pk=comp.pk)
 
         dummy_functie = Functie.objects.filter(rol='RCL', regio__regio_nr=111)[0]
-        deelcomp = Regiocompetitie(
+        deelcomp = RegioComp(
                             competitie=comp,
                             regio=regio_111,
                             functie=dummy_functie)
@@ -132,8 +131,8 @@ class TestCompLaagRegioCli(E2EHelpers, TestCase):
         sporterboog_bb.save()
         self.sporterboog_bb = sporterboog_bb
 
-        deelnemer_r = RegiocompetitieSporterBoog(
-                            regiocompetitie=deelcomp,
+        deelnemer_r = RegioDeelnemer(
+                            regiocomp=deelcomp,
                             sporterboog=sporterboog_r,
                             bij_vereniging=ver,
                             indiv_klasse=klasse_r1,
@@ -141,8 +140,8 @@ class TestCompLaagRegioCli(E2EHelpers, TestCase):
         deelnemer_r.save()
         self.deelnemer_r = deelnemer_r
 
-        deelnemer_tr = RegiocompetitieSporterBoog(
-                            regiocompetitie=deelcomp,
+        deelnemer_tr = RegioDeelnemer(
+                            regiocomp=deelcomp,
                             sporterboog=sporterboog_tr,
                             bij_vereniging=ver,
                             indiv_klasse=klasse_tr,
@@ -159,8 +158,8 @@ class TestCompLaagRegioCli(E2EHelpers, TestCase):
         team_klasse_r.save()
         team_klasse_r.boog_typen.add(boog_r)
 
-        team = RegiocompetitieTeam(
-                            regiocompetitie=deelcomp,
+        team = RegioTeam(
+                            regiocomp=deelcomp,
                             vereniging=ver,
                             volg_nr=1,
                             team_type=teamtype_r,
@@ -170,8 +169,8 @@ class TestCompLaagRegioCli(E2EHelpers, TestCase):
         team.leden.add(deelnemer_tr)
         self.team1 = team
 
-        team = RegiocompetitieTeam(
-                            regiocompetitie=deelcomp,
+        team = RegioTeam(
+                            regiocomp=deelcomp,
                             vereniging=ver,
                             volg_nr=1,
                             team_type=teamtype_r,
@@ -429,15 +428,15 @@ class TestCompLaagRegioCli(E2EHelpers, TestCase):
     def test_ronde_teams_check(self):
 
         # maak de benodigde records aan
-        RegiocompetitieRondeTeam(team=self.team1, ronde_nr=1).save()
-        RegiocompetitieRondeTeam(team=self.team1, ronde_nr=2).save()
+        RegioRondeTeam(team=self.team1, ronde_nr=1).save()
+        RegioRondeTeam(team=self.team1, ronde_nr=2).save()
 
         with self.assert_max_queries(20):
             f1, f2 = self.run_management_command('ronde_teams_check')
         self.assertEqual(f1.getvalue(), '')
         self.assertEqual(f2.getvalue().count('\n'), 2)
 
-        RegiocompetitieRondeTeam(team=self.team2, ronde_nr=1).save()
+        RegioRondeTeam(team=self.team2, ronde_nr=1).save()
         with self.assert_max_queries(20):
             f1, f2 = self.run_management_command('ronde_teams_check')
         self.assertEqual(f1.getvalue(), '')
@@ -453,8 +452,8 @@ class TestCompLaagRegioCli(E2EHelpers, TestCase):
         self.assertTrue(f2.getvalue() == 'Geen duplicate data gevonden\n')
 
         # maak een echte dupe aan
-        dupe = RegiocompetitieSporterBoog(
-                    regiocompetitie=self.deelnemer_r.regiocompetitie,
+        dupe = RegioDeelnemer(
+                    regiocomp=self.deelnemer_r.regiocomp,
                     sporterboog=self.deelnemer_r.sporterboog,
                     bij_vereniging=self.deelnemer_r.bij_vereniging,
                     indiv_klasse=self.deelnemer_r.indiv_klasse)
@@ -466,8 +465,8 @@ class TestCompLaagRegioCli(E2EHelpers, TestCase):
         self.assertTrue('Gebruik --commit om' in f1.getvalue())
 
         # maak nog een dupe aan, voor extra coverage
-        dupe = RegiocompetitieSporterBoog(
-                    regiocompetitie=self.deelnemer_r.regiocompetitie,
+        dupe = RegioDeelnemer(
+                    regiocomp=self.deelnemer_r.regiocomp,
                     sporterboog=self.deelnemer_r.sporterboog,
                     bij_vereniging=self.deelnemer_r.bij_vereniging,
                     indiv_klasse=self.deelnemer_r.indiv_klasse)
@@ -483,7 +482,7 @@ class TestCompLaagRegioCli(E2EHelpers, TestCase):
         self.assertTrue(' 3 deelnemers' in f2.getvalue())
 
     def test_check_ag(self):
-        deelnemer = RegiocompetitieSporterBoog.objects.first()
+        deelnemer = RegioDeelnemer.objects.first()
         deelnemer.ag_voor_team_mag_aangepast_worden = True
         deelnemer.inschrijf_voorkeur_team = True
         deelnemer.save(update_fields=['ag_voor_team_mag_aangepast_worden', 'inschrijf_voorkeur_team'])
@@ -535,8 +534,8 @@ class TestCompLaagRegioCli(E2EHelpers, TestCase):
                         tijd_begin_wedstrijd='00:00',
                         uitslag=uitslag)
 
-        ronde = RegiocompetitieRonde.objects.create(
-                                    regiocompetitie=self.deelcomp,
+        ronde = RegioRonde.objects.create(
+                                    regiocomp=self.deelcomp,
                                     week_nr=50,
                                     beschrijving='Ronde 6')
         ronde.matches.add(match)

@@ -7,8 +7,7 @@
 from django.test import TestCase, override_settings
 from BasisTypen.models import BoogType
 from Competitie.definities import DEELNAME_JA, DEELNAME_NEE, DEELNAME_ONBEKEND, INSCHRIJF_METHODE_1
-from Competitie.models import (Regiocompetitie, RegiocompetitieSporterBoog,
-                               CompetitieIndivKlasse, CompetitieMatch)
+from Competitie.models import CompetitieIndivKlasse, CompetitieMatch
 from Competitie.test_utils.tijdlijn import (zet_competitie_fase_regio_prep, zet_competitie_fase_regio_inschrijven,
                                             zet_competitie_fase_regio_wedstrijden,
                                             zet_competitie_fase_rk_prep, zet_competitie_fase_rk_wedstrijden,
@@ -16,6 +15,7 @@ from Competitie.test_utils.tijdlijn import (zet_competitie_fase_regio_prep, zet_
 from Competitie.tests.test_helpers import maak_competities_en_zet_fase_c
 from CompLaagBond.models import KampBK, DeelnemerBK
 from CompLaagRayon.models import KampRK, DeelnemerRK
+from CompLaagRegio.models import RegioComp, RegioDeelnemer
 from Functie.tests.helpers import maak_functie
 from Geo.models import Regio, Rayon
 from Locatie.models import WedstrijdLocatie
@@ -156,7 +156,7 @@ class TestSporterProfielBondscompetities(E2EHelpers, TestCase):
         self._competitie_aanmaken()
 
         # zet de regiocompetitie op inschrijfmethode 1
-        deelcomp = Regiocompetitie.objects.get(competitie__afstand='18', regio=self.ver.regio)
+        deelcomp = RegioComp.objects.get(competitie__afstand='18', regio=self.ver.regio)
         deelcomp.inschrijf_methode = INSCHRIJF_METHODE_1
         deelcomp.save()
 
@@ -291,7 +291,7 @@ class TestSporterProfielBondscompetities(E2EHelpers, TestCase):
 
     def _regio_inschrijven(self, do_18=True, do_25=True, wil_rk_18=True, wil_rk_25=True):
         if do_18:
-            regiocomp18 = Regiocompetitie.objects.get(competitie=self.comp_18, regio=self.ver.regio)
+            regiocomp18 = RegioComp.objects.get(competitie=self.comp_18, regio=self.ver.regio)
             indiv18 = (CompetitieIndivKlasse
                        .objects
                        .filter(competitie=self.comp_18,
@@ -299,8 +299,8 @@ class TestSporterProfielBondscompetities(E2EHelpers, TestCase):
                        .order_by('volgorde')  # klasse 1 eerst
                        .first())
 
-            deelnemer18 = RegiocompetitieSporterBoog(
-                                regiocompetitie=regiocomp18,
+            deelnemer18 = RegioDeelnemer(
+                                regiocomp=regiocomp18,
                                 sporterboog=self.sporterboog,
                                 bij_vereniging=self.ver,
                                 # ag_voor_indiv="10,000",
@@ -318,7 +318,7 @@ class TestSporterProfielBondscompetities(E2EHelpers, TestCase):
             deelnemer18 = None
 
         if do_25:
-            regiocomp25 = Regiocompetitie.objects.get(competitie=self.comp_25, regio=self.ver.regio)
+            regiocomp25 = RegioComp.objects.get(competitie=self.comp_25, regio=self.ver.regio)
             indiv25 = (CompetitieIndivKlasse
                        .objects
                        .filter(competitie=self.comp_25,
@@ -326,8 +326,8 @@ class TestSporterProfielBondscompetities(E2EHelpers, TestCase):
                        .order_by('volgorde')  # klasse 1 eerst
                        .first())
 
-            deelnemer25 = RegiocompetitieSporterBoog(
-                                regiocompetitie=regiocomp25,
+            deelnemer25 = RegioDeelnemer(
+                                regiocomp=regiocomp25,
                                 sporterboog=self.sporterboog,
                                 bij_vereniging=self.ver,
                                 # ag_voor_indiv="10,000",
@@ -346,9 +346,9 @@ class TestSporterProfielBondscompetities(E2EHelpers, TestCase):
 
         return deelnemer18, deelnemer25
 
-    def _stroom_door_naar_rk(self, deelnemer: RegiocompetitieSporterBoog, set_rank=False) -> DeelnemerRK:
+    def _stroom_door_naar_rk(self, deelnemer: RegioDeelnemer, set_rank=False) -> DeelnemerRK:
 
-        kamp_rk = KampRK.objects.get(competitie=deelnemer.regiocompetitie.competitie,
+        kamp_rk = KampRK.objects.get(competitie=deelnemer.regiocomp.competitie,
                                      rayon=self.rayon)
 
         deelnemer_rk = DeelnemerRK(
@@ -450,7 +450,7 @@ class TestSporterProfielBondscompetities(E2EHelpers, TestCase):
         self.e2e_login(self.account_normaal)
         self._prep_voorkeuren(self.sporter1)        # zet R als wedstrijdboog
         self._competitie_aanmaken()                 # zet fase C, dus openbaar en klaar voor inschrijving
-        Regiocompetitie.objects.update(inschrijf_methode=INSCHRIJF_METHODE_1)
+        RegioComp.objects.update(inschrijf_methode=INSCHRIJF_METHODE_1)
 
         case_nr = "6a"
         case_tekst = 'wedstrijdmomenten aanpassen, tijdens inschrijven'

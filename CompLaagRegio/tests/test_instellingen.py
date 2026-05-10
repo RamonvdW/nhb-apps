@@ -7,13 +7,14 @@
 from django.test import TestCase
 from BasisTypen.models import BoogType
 from Competitie.definities import INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3
-from Competitie.models import Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse, Regiocompetitie
+from Competitie.models import Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse
 from Competitie.operations import competities_aanmaken
 from Competitie.test_utils.tijdlijn import (evaluatie_datum, zet_competitie_fases,
                                             zet_competitie_fase_regio_wedstrijden,
                                             zet_competitie_fase_regio_inschrijven)
 from CompLaagBond.models import KampBK
 from CompLaagRayon.models import KampRK
+from CompLaagRegio.models import RegioComp
 from Functie.tests.helpers import maak_functie
 from Geo.models import Rayon, Regio, Cluster
 from Locatie.models import WedstrijdLocatie
@@ -159,12 +160,12 @@ class TestCompLaagRegioInstellingen(E2EHelpers, TestCase):
         self.deelcomp_bond_18 = KampBK.objects.filter(competitie=self.comp_18).first()
         self.deelcomp_rayon1_18 = KampRK.objects.filter(competitie=self.comp_18, rayon=self.rayon_1).first()
         self.deelcomp_rayon2_18 = KampRK.objects.filter(competitie=self.comp_18, rayon=self.rayon_2).first()
-        self.deelcomp_regio101_18 = Regiocompetitie.objects.filter(competitie=self.comp_18,
-                                                                   regio=self.regio_101).first()
-        self.deelcomp_regio101_25 = Regiocompetitie.objects.filter(competitie=self.comp_25,
-                                                                   regio=self.regio_101).first()
-        self.deelcomp_regio112_18 = Regiocompetitie.objects.filter(competitie=self.comp_18,
-                                                                   regio=self.regio_112).first()
+        self.deelcomp_regio101_18 = RegioComp.objects.filter(competitie=self.comp_18,
+                                                             regio=self.regio_101).first()
+        self.deelcomp_regio101_25 = RegioComp.objects.filter(competitie=self.comp_25,
+                                                             regio=self.regio_101).first()
+        self.deelcomp_regio112_18 = RegioComp.objects.filter(competitie=self.comp_18,
+                                                             regio=self.regio_112).first()
 
         self.cluster_101a_18 = Cluster.objects.get(regio=self.regio_101, letter='a', gebruik='18')
         self.cluster_101e_25 = Cluster.objects.get(regio=self.regio_101, letter='e', gebruik='25')
@@ -269,7 +270,7 @@ class TestCompLaagRegioInstellingen(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('complaagregio/rcl-instellingen.dtl', 'design/site_layout.dtl'))
 
-        deelcomp_pre = Regiocompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
+        deelcomp_pre = RegioComp.objects.get(pk=self.deelcomp_regio112_18.pk)
         self.assertTrue(deelcomp_pre.regio_organiseert_teamcompetitie)
         self.assertTrue(deelcomp_pre.regio_heeft_vaste_teams)
         self.assertEqual(deelcomp_pre.regio_team_punten_model, oude_punten)
@@ -283,7 +284,7 @@ class TestCompLaagRegioInstellingen(E2EHelpers, TestCase):
                                           'begin_fase_D': post_datum_ok})
         self.assert_is_redirect_not_plein(resp)
 
-        deelcomp_post = Regiocompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
+        deelcomp_post = RegioComp.objects.get(pk=self.deelcomp_regio112_18.pk)
         self.assertTrue(deelcomp_post.regio_organiseert_teamcompetitie)
         self.assertTrue(deelcomp_post.regio_heeft_vaste_teams)
         self.assertEqual(deelcomp_post.regio_team_punten_model, nieuwe_punten)

@@ -15,8 +15,8 @@ from BasisTypen.definities import (COMPETITIE_BLAZOENEN, BLAZOEN_DT, BLAZOEN_60C
                                    BLAZOEN2STR, BLAZOEN2STR_COMPACT)
 from Competitie.definities import (DAGDELEN, DAGDEEL_AFKORTINGEN, DAGDEEL2LABEL,
                                    INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3)
-from Competitie.models import (Competitie, CompetitieMatch,
-                               Regiocompetitie, RegiocompetitieRonde, RegiocompetitieSporterBoog)
+from Competitie.models import Competitie, CompetitieMatch
+from CompLaagRegio.models import RegioComp, RegioRonde, RegioDeelnemer
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
 from Geo.models import Rayon, Regio
@@ -158,15 +158,15 @@ class LijstAangemeldRegiocompAllesView(UserPassesTestMixin, TemplateView):
 
         context['competitie'] = comp
 
-        objs = (RegiocompetitieSporterBoog
+        objs = (RegioDeelnemer
                 .objects
                 .select_related('indiv_klasse',
-                                'regiocompetitie',
-                                'regiocompetitie__regio',
+                                'regiocomp',
+                                'regiocomp__regio',
                                 'sporterboog',
                                 'sporterboog__sporter',
                                 'bij_vereniging')
-                .filter(regiocompetitie__competitie=comp)
+                .filter(regiocomp__competitie=comp)
                 .order_by('indiv_klasse__volgorde',
                           '-ag_voor_indiv'))
 
@@ -224,16 +224,16 @@ class LijstAangemeldRegiocompRayonView(UserPassesTestMixin, TemplateView):
 
         context['inhoud'] = 'in ' + str(rayon)
 
-        objs = (RegiocompetitieSporterBoog
+        objs = (RegioDeelnemer
                 .objects
                 .select_related('indiv_klasse',
-                                'regiocompetitie',
-                                'regiocompetitie__regio',
+                                'regiocomp',
+                                'regiocomp__regio',
                                 'sporterboog',
                                 'sporterboog__sporter',
                                 'bij_vereniging')
-                .filter(regiocompetitie__competitie=comp,
-                        regiocompetitie__regio__rayon_nr=rayon.rayon_nr)
+                .filter(regiocomp__competitie=comp,
+                        regiocomp__regio__rayon_nr=rayon.rayon_nr)
                 .order_by('indiv_klasse__volgorde',
                           '-ag_voor_indiv'))
 
@@ -295,22 +295,22 @@ class LijstAangemeldRegiocompRegioView(UserPassesTestMixin, TemplateView):
         context['inhoud'] = 'in ' + str(regio)
 
         try:
-            deelcomp = Regiocompetitie.objects.get(competitie=comp,
-                                                   regio=regio)
-        except Regiocompetitie.DoesNotExist:
+            deelcomp = RegioComp.objects.get(competitie=comp,
+                                             regio=regio)
+        except RegioComp.DoesNotExist:
             raise Http404('Competitie niet gevonden')
 
         context['deelcomp'] = deelcomp
 
-        objs = (RegiocompetitieSporterBoog
+        objs = (RegioDeelnemer
                 .objects
                 .select_related('indiv_klasse',
-                                'regiocompetitie',
+                                'regiocomp',
                                 'sporterboog',
                                 'sporterboog__sporter',
                                 'sporterboog__boogtype',
                                 'bij_vereniging')
-                .filter(regiocompetitie=deelcomp)
+                .filter(regiocomp=deelcomp)
                 .order_by('indiv_klasse__volgorde',
                           '-ag_voor_indiv'))
 
@@ -608,28 +608,28 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
         context['regio'] = regio
 
         try:
-            deelcomp = (Regiocompetitie
+            deelcomp = (RegioComp
                         .objects
                         .select_related('competitie')
                         .get(is_afgesloten=False,
                              competitie=comp,
                              regio=regio))
-        except Regiocompetitie.DoesNotExist:
+        except RegioComp.DoesNotExist:
             raise Http404('Competitie niet gevonden')
 
         if deelcomp.inschrijf_methode != INSCHRIJF_METHODE_3:
             raise Http404('Verkeerde inschrijfmethode')
 
-        deelnemers = (RegiocompetitieSporterBoog
+        deelnemers = (RegioDeelnemer
                       .objects
                       .select_related('indiv_klasse',
-                                      'regiocompetitie',
+                                      'regiocomp',
                                       'bij_vereniging',
                                       'sporterboog',
                                       'sporterboog__boogtype',
                                       'sporterboog__sporter',
                                       'sporterboog__sporter__bij_vereniging')
-                      .filter(regiocompetitie=deelcomp)
+                      .filter(regiocomp=deelcomp)
                       .order_by('indiv_klasse__volgorde',
                                 'ag_voor_indiv'))
 
@@ -686,27 +686,27 @@ class Inschrijfmethode3BehoefteAlsBestandView(Inschrijfmethode3BehoefteView):
             raise Http404('Regio niet gevonden')
 
         try:
-            deelcomp = (Regiocompetitie
+            deelcomp = (RegioComp
                         .objects
                         .select_related('competitie')
                         .get(is_afgesloten=False,
                              competitie=comp,
                              regio=regio))
-        except Regiocompetitie.DoesNotExist:
+        except RegioComp.DoesNotExist:
             raise Http404('Competitie niet gevonden')
 
         if deelcomp.inschrijf_methode != INSCHRIJF_METHODE_3:
             raise Http404('Verkeerde inschrijfmethode')
 
-        objs = (RegiocompetitieSporterBoog
+        objs = (RegioDeelnemer
                 .objects
                 .select_related('indiv_klasse',
-                                'regiocompetitie',
+                                'regiocomp',
                                 'bij_vereniging',
                                 'sporterboog',
                                 'sporterboog__sporter',
                                 'sporterboog__sporter__bij_vereniging')
-                .filter(regiocompetitie=deelcomp)
+                .filter(regiocomp=deelcomp)
                 .order_by('indiv_klasse__volgorde',
                           'ag_voor_indiv'))
 
@@ -788,14 +788,14 @@ class Inschrijfmethode1BehoefteView(UserPassesTestMixin, TemplateView):
         context['regio'] = regio
 
         try:
-            deelcomp = (Regiocompetitie
+            deelcomp = (RegioComp
                         .objects
                         .select_related('competitie',
                                         'regio')
                         .get(is_afgesloten=False,
                              competitie=comp,
                              regio=regio))
-        except Regiocompetitie.DoesNotExist:
+        except RegioComp.DoesNotExist:
             raise Http404('Competitie niet gevonden')
 
         if deelcomp.inschrijf_methode != INSCHRIJF_METHODE_1:
@@ -812,9 +812,9 @@ class Inschrijfmethode1BehoefteView(UserPassesTestMixin, TemplateView):
                                   .values_list('sporter__lid_nr', flat=True))
 
         match_pks = list()
-        for ronde in (RegiocompetitieRonde
+        for ronde in (RegioRonde
                       .objects
-                      .filter(regiocompetitie=deelcomp)
+                      .filter(regiocomp=deelcomp)
                       .prefetch_related('matches')):
             match_pks.extend(ronde.matches.values_list('pk', flat=True))
         # for
@@ -822,7 +822,7 @@ class Inschrijfmethode1BehoefteView(UserPassesTestMixin, TemplateView):
         matches = (CompetitieMatch
                    .objects
                    .select_related('vereniging')
-                   .prefetch_related('regiocompetitiesporterboog_set')
+                   .prefetch_related('RegioDeelnemer_set')
                    .filter(pk__in=match_pks)
                    .order_by('datum_wanneer',
                              'tijd_begin_wedstrijd',
@@ -834,16 +834,16 @@ class Inschrijfmethode1BehoefteView(UserPassesTestMixin, TemplateView):
             wedstrijd.beschrijving_str = "%s om %s" % (date_format(wedstrijd.datum_wanneer, "l j E Y"),
                                                        wedstrijd.tijd_begin_wedstrijd.strftime("%H:%M"))
             wedstrijd.locatie_str = str(wedstrijd.vereniging)
-            wedstrijd.keuze_count = wedstrijd.regiocompetitiesporterboog_set.count()
+            wedstrijd.keuze_count = wedstrijd.regiodeelnemer_set.count()
 
-            deelnemer_pks = list(wedstrijd.regiocompetitiesporterboog_set.values_list('pk', flat=True))
+            deelnemer_pks = list(wedstrijd.regiodeelnemer_set.values_list('pk', flat=True))
 
             blazoenen_dict = dict()
             for blazoen in COMPETITIE_BLAZOENEN[afstand]:
                 blazoenen_dict[blazoen] = 0
             # for
 
-            for deelnemer in (RegiocompetitieSporterBoog
+            for deelnemer in (RegioDeelnemer
                               .objects
                               .select_related('sporterboog',
                                               'sporterboog__boogtype',
@@ -919,13 +919,13 @@ class Inschrijfmethode1BehoefteAlsBestandView(Inschrijfmethode1BehoefteView):
             raise Http404('Regio niet gevonden')
 
         try:
-            deelcomp = (Regiocompetitie
+            deelcomp = (RegioComp
                         .objects
                         .select_related('competitie')
                         .get(is_afgesloten=False,
                              competitie=comp,
                              regio=regio))
-        except Regiocompetitie.DoesNotExist:
+        except RegioComp.DoesNotExist:
             raise Http404('Competitie niet gevonden')
 
         if deelcomp.inschrijf_methode != INSCHRIJF_METHODE_1:
@@ -952,9 +952,9 @@ class Inschrijfmethode1BehoefteAlsBestandView(Inschrijfmethode1BehoefteView):
         writer.writerow(['Nummer', 'Wedstrijd', 'Locatie', 'Blazoenen:'] + blazoen_headers)
 
         match_pks = list()
-        for ronde in (RegiocompetitieRonde
+        for ronde in (RegioRonde
                       .objects
-                      .filter(regiocompetitie=deelcomp)
+                      .filter(regiocomp=deelcomp)
                       .prefetch_related('matches')):
             match_pks.extend(ronde.matches.values_list('pk', flat=True))
         # for
@@ -977,14 +977,14 @@ class Inschrijfmethode1BehoefteAlsBestandView(Inschrijfmethode1BehoefteView):
             beschrijving_str = "%s om %s" % (date_format(wedstrijd.datum_wanneer, "l j E Y"),
                                              wedstrijd.tijd_begin_wedstrijd.strftime("%H:%M"))
 
-            deelnemer_pks = wedstrijd.regiocompetitiesporterboog_set.values_list('pk', flat=True)
+            deelnemer_pks = wedstrijd.regiodeelnemer_set.values_list('pk', flat=True)
 
             blazoenen_dict = dict()
             for blazoen in COMPETITIE_BLAZOENEN[afstand]:
                 blazoenen_dict[blazoen] = 0
             # for
 
-            for deelnemer in (RegiocompetitieSporterBoog
+            for deelnemer in (RegioDeelnemer
                               .objects
                               .select_related('sporterboog',
                                               'sporterboog__boogtype',
@@ -1016,14 +1016,14 @@ class Inschrijfmethode1BehoefteAlsBestandView(Inschrijfmethode1BehoefteView):
         nummers = [str(nummer) for nummer in range(1, nr + 1)]
         writer.writerow(['Bondsnummer', 'Sporter', 'Vereniging', 'Wedstrijdklasse (individueel)'] + nummers)
 
-        for deelnemer in (RegiocompetitieSporterBoog
+        for deelnemer in (RegioDeelnemer
                           .objects
                           .prefetch_related('inschrijf_gekozen_matches')
                           .select_related('indiv_klasse',
                                           'bij_vereniging',
                                           'sporterboog',
                                           'sporterboog__sporter')
-                          .filter(regiocompetitie=deelcomp)
+                          .filter(regiocomp=deelcomp)
                           .order_by('bij_vereniging__ver_nr',
                                     'sporterboog__sporter__lid_nr')):
 

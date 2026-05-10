@@ -15,10 +15,10 @@
         <div class="col s12">
             <h1 class="sv-kopje-pagina">Aanpassen</h1>
             {% if is_hwl %}
-                <p>Als HWL kan je via scherm de keuzes voor lid <b>{{ deelnemer.sporterboog.sporter.lid_nr_en_volledige_naam }}</b> van jouw vereniging aanpassen<br>voor de <b>{{ deelnemer.regiocompetitie.competitie.beschrijving }}</b></p>
+                <p>Als HWL kan je via scherm de keuzes voor lid <b>{{ deelnemer.sporterboog.sporter.lid_nr_en_volledige_naam }}</b> van jouw vereniging aanpassen<br>voor de <b>{{ deelnemer.regiocomp.competitie.beschrijving }}</b></p>
             {% else %}
                 <p>In jouw regio mag je zelf aangeven wanneer je kan schieten.</p>
-                <p>Hieronder staat je huidige keuze voor de <b>{{ deelnemer.regiocompetitie.competitie.beschrijving }}</b>.</p>
+                <p>Hieronder staat je huidige keuze voor de <b>{{ deelnemer.regiocomp.competitie.beschrijving }}</b>.</p>
             {% endif %}
         </div>
     </div>

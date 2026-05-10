@@ -165,7 +165,7 @@ class RayonTeamsTemplateView(TemplateView):
         # for
 
         if open_inschrijving:
-            tel_dit = 'tijdelijke_leden'
+            tel_dit = 'tijdelijke_deelnemers_regio'
         else:
             tel_dit = 'gekoppelde_leden'
 

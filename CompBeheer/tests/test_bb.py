@@ -7,12 +7,12 @@
 from django.test import TestCase
 from BasisTypen.models import BoogType
 from Competitie.definities import INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2, INSCHRIJF_METHODE_3, DAGDEEL_AFKORTINGEN
-from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse, Regiocompetitie,
-                               CompetitieMutatie)
+from Competitie.models import Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMutatie
 from Competitie.operations import competities_aanmaken, aanvangsgemiddelden_vaststellen_voor_afstand
 from Competitie.test_utils.tijdlijn import zet_competitie_fase_regio_prep, zet_competitie_fase_afsluiten
 from CompLaagBond.models import KampBK
 from CompLaagRayon.models import KampRK
+from CompLaagRegio.models import RegioComp
 from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
 from HistComp.definities import HISTCOMP_TYPE_18, HIST_BOGEN_DEFAULT
@@ -352,7 +352,7 @@ class TestCompBeheerBB(E2EHelpers, TestCase):
         # gebruik een post om de competitie aan te laten maken
         # geen parameters nodig
         self.assertEqual(Competitie.objects.count(), 0)
-        self.assertEqual(Regiocompetitie.objects.count(), 0)
+        self.assertEqual(RegioComp.objects.count(), 0)
         self.assertEqual(0, CompetitieMutatie.objects.count())
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_aanmaken, {'snel': 1})
@@ -380,7 +380,7 @@ class TestCompBeheerBB(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_kies)
 
         self.assertEqual(Competitie.objects.count(), 2)
-        self.assertEqual(Regiocompetitie.objects.count(), 2 * 16)
+        self.assertEqual(RegioComp.objects.count(), 2 * 16)
         self.assertEqual(KampBK.objects.count(), 2)
         self.assertEqual(KampRK.objects.count(), 2 * 4)
 
@@ -389,7 +389,7 @@ class TestCompBeheerBB(E2EHelpers, TestCase):
         self.e2e_wisselnaarrol_bb()
         self.e2e_check_rol('BB')
 
-        self.assertEqual(Regiocompetitie.objects.count(), 0)
+        self.assertEqual(RegioComp.objects.count(), 0)
 
         # maak een competitie aan
         competities_aanmaken(jaar=2019)
@@ -398,20 +398,20 @@ class TestCompBeheerBB(E2EHelpers, TestCase):
         dagdelen_105_25 = "%s,%s,%s" % (DAGDEEL_AFKORTINGEN[3], DAGDEEL_AFKORTINGEN[4], DAGDEEL_AFKORTINGEN[0])
 
         # pas regio-instellingen aan
-        deelcomp = Regiocompetitie.objects.get(
+        deelcomp = RegioComp.objects.get(
                                 competitie__afstand=18,
                                 regio__regio_nr=101)
         deelcomp.inschrijf_methode = INSCHRIJF_METHODE_1
         deelcomp.save()
 
-        deelcomp = Regiocompetitie.objects.get(
+        deelcomp = RegioComp.objects.get(
                                 competitie__afstand=18,
                                 regio__regio_nr=105)
         deelcomp.inschrijf_methode = INSCHRIJF_METHODE_3
         deelcomp.toegestane_dagdelen = dagdelen_105_18
         deelcomp.save()
 
-        deelcomp = Regiocompetitie.objects.get(
+        deelcomp = RegioComp.objects.get(
                                 competitie__afstand=25,
                                 regio__regio_nr=105)
         deelcomp.inschrijf_methode = INSCHRIJF_METHODE_3
@@ -422,7 +422,7 @@ class TestCompBeheerBB(E2EHelpers, TestCase):
         competities_aanmaken(jaar=2020)
 
         # controleer dat de settings overgenomen zijn
-        for deelcomp in (Regiocompetitie
+        for deelcomp in (RegioComp
                          .objects
                          .select_related('competitie', 'regio')
                          .filter(regio__regio_nr=101)):
@@ -432,7 +432,7 @@ class TestCompBeheerBB(E2EHelpers, TestCase):
                 self.assertEqual(deelcomp.inschrijf_methode, INSCHRIJF_METHODE_2)
         # for
 
-        for deelcomp in (Regiocompetitie
+        for deelcomp in (RegioComp
                          .objects
                          .select_related('competitie', 'regio')
                          .filter(regio__regio_nr=105)):

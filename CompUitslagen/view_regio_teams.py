@@ -9,10 +9,10 @@ from django.http import Http404, HttpResponseRedirect
 from django.views.generic import TemplateView
 from django.utils.safestring import mark_safe
 from Competitie.definities import TEAM_PUNTEN_MODEL_TWEE, TEAM_PUNTEN_MODEL_SOM_SCORES
-from Competitie.models import (Competitie, Regiocompetitie, RegiocompetitieTeam,
-                               RegiocompetitieRondeTeam, RegiocompetitieTeamPoule)
+from Competitie.models import Competitie
 from Competitie.seizoenen import get_comp_pk
 from Competitie.operations.poules import maak_poule_schema
+from CompLaagRegio.models import RegioComp, RegioTeam, RegioRondeTeam, RegioPoule
 from Geo.models import Regio
 from HistComp.operations import get_hist_url
 from Overig.helpers import make_valid_hashtag
@@ -98,9 +98,9 @@ class UitslagenRegioTeamsView(TemplateView):
         if context['teamtype']:
             ver_nrs = list()
             vers = list()
-            for team in (RegiocompetitieTeam
+            for team in (RegioTeam
                          .objects
-                         .filter(regiocompetitie__competitie=self.comp,
+                         .filter(regiocomp__competitie=self.comp,
                                  vereniging__regio__regio_nr=gekozen_regio_nr)
                          .select_related('vereniging')
                          .order_by('vereniging__ver_nr')):
@@ -146,13 +146,13 @@ class UitslagenRegioTeamsView(TemplateView):
             regio_nr = 101
 
         try:
-            deelcomp = (Regiocompetitie
+            deelcomp = (RegioComp
                         .objects
                         .select_related('competitie', 'regio')
                         .get(competitie=self.comp,
                              competitie__is_afgesloten=False,
                              regio__regio_nr=regio_nr))
-        except Regiocompetitie.DoesNotExist:
+        except RegioComp.DoesNotExist:
             raise Http404('Competitie niet gevonden')
 
         context['deelcomp'] = deelcomp
@@ -176,10 +176,10 @@ class UitslagenRegioTeamsView(TemplateView):
         # zoek alle regio teams erbij
 
         heeft_poules = False
-        poules = (RegiocompetitieTeamPoule
+        poules = (RegioPoule
                   .objects
                   .prefetch_related('teams')
-                  .filter(regiocompetitie=deelcomp))
+                  .filter(regiocomp=deelcomp))
 
         team_pk2poule = dict()                      # [team.pk] = poule
         poule_pk2laagste_klasse_volgorde = dict()   # [team.pk] = team_klasse.volgorde
@@ -205,10 +205,10 @@ class UitslagenRegioTeamsView(TemplateView):
                 poule.schema = None
         # for
 
-        teams = (RegiocompetitieTeam
+        teams = (RegioTeam
                  .objects
                  .exclude(team_klasse=None)
-                 .filter(regiocompetitie=deelcomp,
+                 .filter(regiocomp=deelcomp,
                          team_type=context['teamtype'])
                  .select_related('vereniging',
                                  'team_klasse')
@@ -224,7 +224,7 @@ class UitslagenRegioTeamsView(TemplateView):
             # team.leden_lijst = dict()     # [deelnemer.pk] = [ronde status, ..]
         # for
 
-        ronde_teams = (RegiocompetitieRondeTeam
+        ronde_teams = (RegioRondeTeam
                        .objects
                        .filter(team__in=teams)
                        .prefetch_related('deelnemers_geselecteerd',

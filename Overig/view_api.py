@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2025 Ramon van der Winkel.
+#  Copyright (c) 2025-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -11,7 +11,7 @@ from django.views.decorators.gzip import gzip_page
 from django.utils import timezone
 from BasisTypen.definities import ORGANISATIE_IFAA, ORGANISATIE_WA
 from BasisTypen.models import BoogType
-from Competitie.models import RegiocompetitieSporterBoog
+from CompLaagRegio.models import RegioDeelnemer
 from HistComp.models import HistCompRegioIndiv, HistCompSeizoen
 from Sporter.models import Sporter, SporterBoog
 from Wedstrijden.definities import WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF, WEDSTRIJD_DISCIPLINES
@@ -141,20 +141,20 @@ class ApiCsvLijstView(View):
             # for
 
             # informatie over de huidige competitie deelname
-            for lid_nr in (RegiocompetitieSporterBoog
+            for lid_nr in (RegioDeelnemer
                            .objects
-                           .select_related('regiocompetitie__competitie',
+                           .select_related('regiocomp__competitie',
                                            'sporterboog__sporter')
-                           .filter(regiocompetitie__competitie__afstand='18')
+                           .filter(regiocomp__competitie__afstand='18')
                            .exclude(aantal_scores=0)
                            .values_list('sporterboog__sporter__lid_nr', flat=True)):
                 lid2comp18[lid_nr] = lid2comp18.get(lid_nr, 0) + 1
             # for
-            for lid_nr in (RegiocompetitieSporterBoog
+            for lid_nr in (RegioDeelnemer
                            .objects
-                           .select_related('regiocompetitie__competitie',
+                           .select_related('regiocomp__competitie',
                                            'sporterboog__sporter')
-                           .filter(regiocompetitie__competitie__afstand='25')
+                           .filter(regiocomp__competitie__afstand='25')
                            .exclude(aantal_scores=0)
                            .values_list('sporterboog__sporter__lid_nr', flat=True)):
                 lid2comp25[lid_nr] = lid2comp25.get(lid_nr, 0) + 1

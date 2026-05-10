@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023-2024 Ramon van der Winkel.
+#  Copyright (c) 2023-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management.base import BaseCommand
-from Competitie.models import CompetitieTeamKlasse, RegiocompetitieSporterBoog, RegiocompetitieTeam
+from Competitie.models import CompetitieTeamKlasse
+from CompLaagRegio.models import RegioTeam, RegioDeelnemer
 from Score.definities import AG_NUL
 
 
@@ -26,7 +27,7 @@ class Command(BaseCommand):
             ag = sum(ags[:3])
 
             # bepaal de wedstrijdklasse
-            comp = team.regiocompetitie.competitie
+            comp = team.regiocomp.competitie
             for klasse in (CompetitieTeamKlasse
                            .objects
                            .filter(competitie=comp,
@@ -59,19 +60,19 @@ class Command(BaseCommand):
     def _zoek_en_fix(self, afstand, do_commit):
         check_team_pks = list()
 
-        nieuw_ag = dict()       # [regiocompetitiesporterboog.pk] = team_ag
+        nieuw_ag = dict()       # [RegioDeelnemer.pk] = team_ag
 
         # zoek indiv_ag != team_ag
-        for deelnemer in (RegiocompetitieSporterBoog
+        for deelnemer in (RegioDeelnemer
                           .objects
-                          .filter(regiocompetitie__competitie__afstand=afstand,
+                          .filter(regiocomp__competitie__afstand=afstand,
                                   ag_voor_team_mag_aangepast_worden=True,
                                   ag_voor_indiv__gt=AG_NUL)
-                          .prefetch_related('regiocompetitieteam_set')):
+                          .prefetch_related('regioteam_set')):
 
             if deelnemer.ag_voor_indiv != deelnemer.ag_voor_team:
 
-                team = deelnemer.regiocompetitieteam_set.first()
+                team = deelnemer.regioteam_set.first()
                 if team:
                     if team.pk not in check_team_pks:
                         check_team_pks.append(team.pk)
@@ -88,11 +89,11 @@ class Command(BaseCommand):
         # for
 
         # nu de team sterktes opnieuw berekenen
-        for team in (RegiocompetitieTeam
+        for team in (RegioTeam
                      .objects
                      .filter(pk__in=check_team_pks)
-                     .select_related('regiocompetitie',
-                                     'regiocompetitie__competitie',
+                     .select_related('regiocomp',
+                                     'regiocomp__competitie',
                                      'vereniging',
                                      'team_type')
                      .prefetch_related('leden')):

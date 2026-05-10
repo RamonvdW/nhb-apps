@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2025 Ramon van der Winkel.
+#  Copyright (c) 2020-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -8,7 +8,8 @@ from django.test import TestCase
 from django.conf import settings
 from django.utils import timezone
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
-from Competitie.models import Competitie, Regiocompetitie, RegiocompetitieSporterBoog, CompetitieIndivKlasse
+from Competitie.models import Competitie, CompetitieIndivKlasse
+from CompLaagRegio.models import RegioComp, RegioDeelnemer
 from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
 from HistComp.models import HistCompSeizoen, HistCompRegioIndiv
@@ -75,7 +76,7 @@ class TestOverigAPI(E2EHelpers, TestCase):
 
         functie_rcl = maak_functie('RCL 112', 'RCL')
 
-        regiocomp = Regiocompetitie(
+        regiocomp = RegioComp(
                         competitie=comp,
                         regio=Regio.objects.get(regio_nr=112),
                         functie=functie_rcl)
@@ -88,8 +89,8 @@ class TestOverigAPI(E2EHelpers, TestCase):
                         min_ag=0)
         klasse.save()
 
-        deelnemer = RegiocompetitieSporterBoog(
-                        regiocompetitie=regiocomp,
+        deelnemer = RegioDeelnemer(
+                        regiocomp=regiocomp,
                         sporterboog=sporterboog,
                         bij_vereniging=ver,
                         aantal_scores=5,

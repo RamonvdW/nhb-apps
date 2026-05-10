@@ -8,8 +8,9 @@ from django.urls import reverse
 from django.http import Http404, HttpResponseRedirect
 from django.views.generic import TemplateView
 from django.utils.safestring import mark_safe
-from Competitie.models import Competitie, Regiocompetitie, RegiocompetitieSporterBoog
+from Competitie.models import Competitie
 from Competitie.seizoenen import get_comp_pk
+from CompLaagRegio.models import RegioComp, RegioDeelnemer
 from Geo.models import Regio
 from HistComp.operations import get_hist_url
 from Overig.helpers import make_valid_hashtag
@@ -160,14 +161,14 @@ class UitslagenRegioIndivView(TemplateView):
             regio_nr = 101
 
         try:
-            deelcomp = (Regiocompetitie
+            deelcomp = (RegioComp
                         .objects
                         .select_related('competitie',
                                         'regio')
                         .get(competitie=self.comp,
                              competitie__is_afgesloten=False,
                              regio__regio_nr=regio_nr))
-        except Regiocompetitie.DoesNotExist:
+        except RegioComp.DoesNotExist:
             raise Http404('Competitie niet gevonden')
 
         context['deelcomp'] = deelcomp
@@ -183,9 +184,9 @@ class UitslagenRegioIndivView(TemplateView):
         if not boogtype:
             raise Http404('Boogtype niet bekend')
 
-        deelnemers = (RegiocompetitieSporterBoog
+        deelnemers = (RegioDeelnemer
                       .objects
-                      .filter(regiocompetitie=deelcomp)
+                      .filter(regiocomp=deelcomp)
                       .select_related('sporterboog__sporter',
                                       'bij_vereniging',
                                       'indiv_klasse__boogtype')

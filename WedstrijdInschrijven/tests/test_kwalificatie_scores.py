@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2025 Ramon van der Winkel.
+#  Copyright (c) 2021-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -8,8 +8,8 @@ from django.test import TestCase
 from django.utils import timezone
 from BasisTypen.definities import ORGANISATIE_KHSN
 from BasisTypen.models import KalenderWedstrijdklasse
-from Competitie.models import Regiocompetitie, RegiocompetitieSporterBoog
 from Competitie.tests.test_helpers import maak_competities_en_zet_fase_c
+from CompLaagRegio.models import RegioComp, RegioDeelnemer
 from Functie.models import Functie
 from Geo.models import Regio
 from Locatie.definities import BAAN_TYPE_EXTERN
@@ -362,7 +362,7 @@ class TestWedstrijdInschrijvenKwalificatieScores(E2EHelpers, TestCase):
         self.e2e_login(self.account_sporter1)
 
         # schrijf de sporter in voor de 18m Recurve
-        deelcomp = Regiocompetitie.objects.get(competitie__afstand='18', regio=self.ver.regio)
+        deelcomp = RegioComp.objects.get(competitie__afstand='18', regio=self.ver.regio)
         res = score_indiv_ag_opslaan(self.sporterboog1_r, 18, 8.18, None, 'Test')
         self.assertTrue(res)
         url = self.url_aanmelden % (deelcomp.pk, self.sporterboog1_r.pk)
@@ -370,8 +370,8 @@ class TestWedstrijdInschrijvenKwalificatieScores(E2EHelpers, TestCase):
             resp = self.client.post(url, {'opmerking': 'test van de 18m'})
         self.assert_is_redirect(resp, self.url_profiel)
 
-        self.assertEqual(1, RegiocompetitieSporterBoog.objects.count())
-        deelnemer = RegiocompetitieSporterBoog.objects.first()
+        self.assertEqual(1, RegioDeelnemer.objects.count())
+        deelnemer = RegioDeelnemer.objects.first()
         deelnemer.score1 = 234
         deelnemer.score2 = 245
         deelnemer.save(update_fields=['score1', 'score2'])

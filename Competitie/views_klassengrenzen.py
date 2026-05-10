@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -36,7 +36,7 @@ class KlassengrenzenTonenView(View):
                    .objects
                    .select_related('competitie')
                    .filter(competitie=comp)
-                   .prefetch_related('regiocompetitiesporterboog_set')
+                   .prefetch_related('regiodeelnemer_set')
                    .order_by('volgorde'))
 
         for obj in klassen:
@@ -45,7 +45,7 @@ class KlassengrenzenTonenView(View):
                 obj.min_ag_str = ag_str.replace('.', ',')       # Nederlands: komma ipv punt
 
             if toon_aantal:
-                obj.aantal = obj.regiocompetitiesporterboog_set.count()
+                obj.aantal = obj.regiodeelnemer_set.count()
 
             obj.blazoen_regio_str = BLAZOEN2STR[obj.blazoen1_regio]
             if obj.blazoen1_regio != obj.blazoen2_regio:

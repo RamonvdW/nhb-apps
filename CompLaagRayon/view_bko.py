@@ -13,10 +13,11 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
 from BasisTypen.definities import GESLACHT_ALLE
 from Competitie.definities import DEELNAME_JA, DEELNAME_NEE, KAMP_RANK_BLANCO
-from Competitie.models import Competitie, RegiocompetitieSporterBoog
+from Competitie.models import Competitie
 from Competitie.operations import KlasseBepaler
 from CompLaagRayon.models import KampRK, DeelnemerRK
 from CompLaagRayon.operations import maak_mutatie_extra_rk_deelnemer
+from CompLaagRegio.models import RegioDeelnemer
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
 from Logboek.models import schrijf_in_logboek
@@ -83,9 +84,9 @@ class ExtraDeelnemerView(UserPassesTestMixin, TemplateView):
         # zoek kandidaten met genoeg scores
         context['kandidaten'] = kandidaten = list()
         prev_klasse = None
-        for deelnemer in (RegiocompetitieSporterBoog
+        for deelnemer in (RegioDeelnemer
                           .objects
-                          .filter(regiocompetitie__competitie=comp,
+                          .filter(regiocomp__competitie=comp,
                                   aantal_scores__gte=comp.aantal_scores_voor_rk_deelname)
                           .select_related('sporterboog',
                                           'sporterboog__sporter',
@@ -160,7 +161,7 @@ class ExtraDeelnemerView(UserPassesTestMixin, TemplateView):
 
         try:
             deelnemer_pk = int(kwargs['deelnemer_pk'][:7])  # afkappen voor de veiligheid
-            deelnemer = (RegiocompetitieSporterBoog
+            deelnemer = (RegioDeelnemer
                          .objects
                          .select_related('sporterboog',
                                          'sporterboog__sporter',
@@ -169,7 +170,7 @@ class ExtraDeelnemerView(UserPassesTestMixin, TemplateView):
                                          'sporterboog__sporter__bij_vereniging__regio__rayon',
                                          'indiv_klasse')
                          .get(pk=deelnemer_pk))
-        except (KeyError, ValueError, RegiocompetitieSporterBoog.DoesNotExist):
+        except (KeyError, ValueError, RegioDeelnemer.DoesNotExist):
             raise Http404('Sporter niet gevonden')
 
         sporterboog = deelnemer.sporterboog

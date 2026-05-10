@@ -9,7 +9,8 @@ from django.urls import reverse
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.definities import INSCHRIJF_METHODE_1
-from Competitie.models import CompetitieMatch, Regiocompetitie, RegiocompetitieSporterBoog
+from Competitie.models import CompetitieMatch
+from CompLaagRegio.models import RegioComp, RegioDeelnemer
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
 
@@ -44,23 +45,23 @@ class WieSchietWaarView(UserPassesTestMixin, TemplateView):
 
         try:
             deelcomp_pk = int(self.kwargs['deelcomp_pk'][:7])       # afkappen voor de veiligheid
-            deelcomp = (Regiocompetitie
+            deelcomp = (RegioComp
                         .objects
                         .select_related('competitie')
                         .get(pk=deelcomp_pk,
                              inschrijf_methode=INSCHRIJF_METHODE_1))
-        except (ValueError, TypeError, Regiocompetitie.DoesNotExist):
+        except (ValueError, TypeError, RegioComp.DoesNotExist):
             raise Http404('Geen valide competitie')
 
         context['deelcomp'] = deelcomp
 
-        objs = (RegiocompetitieSporterBoog
+        objs = (RegioDeelnemer
                 .objects
                 .select_related('sporterboog',
                                 'sporterboog__sporter',
                                 'sporterboog__boogtype')
                 .prefetch_related('inschrijf_gekozen_matches')
-                .filter(regiocompetitie=deelcomp,
+                .filter(regiocomp=deelcomp,
                         bij_vereniging=self.functie_nu.vereniging)
                 .order_by('sporterboog__sporter__voornaam',
                           'sporterboog__sporter__achternaam'))

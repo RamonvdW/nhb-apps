@@ -13,9 +13,10 @@ from django.utils import timezone
 from django.utils.formats import localize
 from BasisTypen.models import BoogType
 from Competitie.definities import INSCHRIJF_METHODE_1, DEELNAME_NEE
-from Competitie.models import Competitie, Regiocompetitie, RegiocompetitieSporterBoog
+from Competitie.models import Competitie
 from CompLaagBond.models import DeelnemerBK
 from CompLaagRayon.models import DeelnemerRK
+from CompLaagRegio.models import RegioComp, RegioDeelnemer
 from Sporter.models import Sporter
 import copy
 
@@ -59,11 +60,11 @@ def get_sporter_competities(sporter: Sporter,
         .fase_str_kort: Korte tekstuele beschrijving van de fase (zie FASE2STR_KORT)
         .status_str: Beschrijving van de status, specifiek voor de fase
 
-        lijst_kan_inschrijven: lijst van competities waar sporter op in kan schrijven (basis: Regiocompetitie)
+        lijst_kan_inschrijven: lijst van competities waar sporter op in kan schrijven (basis: RegioComp)
         .boog_beschrijving: Tekstuele beschrijving van de boog, zoals "Recurve"
         .url_aanmelden: POST URL om aan te melden
 
-        lijst_inschrijvingen: lijst van inschrijvingen van sporter (basis: RegiocompetitieSporterBoog)
+        lijst_inschrijvingen: lijst van inschrijvingen van sporter (basis: RegioDeelnemer)
         .competitie: Competitie
         .competitie.fase
         .competitie.fase_str_lang, kort
@@ -155,22 +156,22 @@ def get_sporter_competities(sporter: Sporter,
     # for
 
     # zoek alle inschrijvingen van deze sporter erbij
-    inschrijvingen = list(RegiocompetitieSporterBoog
+    inschrijvingen = list(RegioDeelnemer
                           .objects
-                          .select_related('regiocompetitie',
+                          .select_related('regiocomp',
                                           'sporterboog',
                                           'sporterboog__boogtype')
                           .filter(sporterboog__sporter=sporter,
-                                  regiocompetitie__competitie__in=lijst_competities)
+                                  regiocomp__competitie__in=lijst_competities)
                           .order_by('sporterboog__boogtype__volgorde'))
 
     lijst_kan_inschrijven = list()
     lijst_inschrijvingen = list()
-    sb2inschrijving = dict()        # [sporterboog.pk] = RegiocompetitieSporterBoog
+    sb2inschrijving = dict()        # [sporterboog.pk] = RegioDeelnemer
 
     # zoek regiocompetities in deze regio (typisch zijn er 2 in de regio: 18m en 25m)
     regio = sporter.bij_vereniging.regio
-    for deelcomp in (Regiocompetitie
+    for deelcomp in (RegioComp
                      .objects
                      .select_related('competitie')
                      .filter(competitie__in=lijst_competities,
@@ -193,7 +194,7 @@ def get_sporter_competities(sporter: Sporter,
                 inschrijving = None
                 sporterboog = boog_afk2sporterboog[afk]
                 for zoek in inschrijvingen:
-                    if zoek.sporterboog == sporterboog and zoek.regiocompetitie == obj:
+                    if zoek.sporterboog == sporterboog and zoek.regiocomp == obj:
                         inschrijving = zoek
                         break   # from the for
                 # for
@@ -242,7 +243,7 @@ def get_sporter_competities(sporter: Sporter,
         inschrijving.boog_niet_meer = True
         inschrijving.boog_beschrijving = boog_dict[afk].beschrijving
 
-        comp = pk2comp[inschrijving.regiocompetitie.competitie.pk]
+        comp = pk2comp[inschrijving.regiocomp.competitie.pk]
         inschrijving.competitie = comp
 
         if comp.fase_indiv == 'C':

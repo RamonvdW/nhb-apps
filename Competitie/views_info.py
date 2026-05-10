@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2024 Ramon van der Winkel.
+#  Copyright (c) 2020-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -10,7 +10,7 @@ from django.views.generic import TemplateView
 from django.utils.safestring import mark_safe
 from Account.models import get_account
 from BasisTypen.models import TemplateCompetitieIndivKlasse
-from Competitie.models import Regiocompetitie, RegiocompetitieTeam
+from CompLaagRegio.models import RegioComp, RegioTeam
 from Geo.models import Regio
 from Sporter.models import Sporter
 
@@ -96,13 +96,13 @@ class InfoTeamCompetitieView(TemplateView):
                     # aantal teams tellen
                     aantal_18m = 0
                     aantal_25m = 0
-                    for team in (RegiocompetitieTeam
+                    for team in (RegioTeam
                                  .objects
                                  .filter(vereniging=ver)
-                                 .select_related('regiocompetitie__regio',
-                                                 'regiocompetitie__competitie')):
+                                 .select_related('regiocomp__regio',
+                                                 'regiocomp__competitie')):
 
-                        is_indoor = team.regiocompetitie.competitie.is_indoor()
+                        is_indoor = team.regiocomp.competitie.is_indoor()
                         if is_indoor:
                             aantal_18m += 1
                         else:
@@ -117,7 +117,7 @@ class InfoTeamCompetitieView(TemplateView):
                     vaste_teams_indoor = False
                     regio_teams_25m1pijl = False
                     vaste_teams_25m1pijl = False
-                    for deelcomp in (Regiocompetitie
+                    for deelcomp in (RegioComp
                                      .objects
                                      .filter(regio=ver.regio)
                                      .select_related('competitie')):

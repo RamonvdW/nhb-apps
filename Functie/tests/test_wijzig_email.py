@@ -5,10 +5,10 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from Competitie.models import Regiocompetitie
 from Competitie.operations import competities_aanmaken
 from CompLaagBond.models import KampBK
 from CompLaagRayon.models import KampRK
+from CompLaagRegio.models import RegioComp
 from Functie.models import Functie
 from Functie.tests.helpers import maak_functie
 from Geo.models import Rayon, Regio
@@ -42,8 +42,8 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
         self.functie_bko1 = deel1.functie
         self.functie_bko2 = KampBK.objects.exclude(pk=deel1.pk).first().functie
         self.functie_rko1 = KampRK.objects.filter(competitie=deel1.competitie, rayon=rayon_1).first().functie
-        self.functie_rcl101 = Regiocompetitie.objects.filter(competitie=deel1.competitie, regio=regio_101).first().functie
-        self.functie_rcl105 = Regiocompetitie.objects.filter(competitie=deel1.competitie, regio=regio_105).first().functie
+        self.functie_rcl101 = RegioComp.objects.filter(competitie=deel1.competitie, regio=regio_101).first().functie
+        self.functie_rcl105 = RegioComp.objects.filter(competitie=deel1.competitie, regio=regio_105).first().functie
 
         # maak een test vereniging
         ver = Vereniging(

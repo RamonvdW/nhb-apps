@@ -6,9 +6,9 @@
 
 from django.test import TestCase
 from django.utils import timezone
-from Competitie.models import RegiocompetitieSporterBoog
 from Competitie.operations import competities_aanmaken
 from Competitie.test_utils.tijdlijn import zet_competitie_fase_regio_prep
+from CompLaagRegio.models import RegioDeelnemer
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
@@ -70,7 +70,7 @@ class TestCompBeheerStats(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('compbeheer/statistiek.dtl', 'design/site_layout.dtl'))
 
         # cornercase: nul alle inschrijvingen
-        RegiocompetitieSporterBoog.objects.all().delete()
+        RegioDeelnemer.objects.all().delete()
         with self.assert_max_queries(56):
             resp = self.client.get(self.url_statistiek)
         self.assertEqual(resp.status_code, 200)     # 200 = OK

@@ -31,6 +31,7 @@ class MonitorGoogleSheetsWedstrijdformulieren:
                        .objects
                        .select_related('bestand')
                        .order_by('bekeken_op')):
+
             self._sheetstatus_cache[status.bestand.pk] = status
 
             if status.keep_monitoring():

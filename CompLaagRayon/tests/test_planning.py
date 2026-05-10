@@ -7,13 +7,13 @@
 from django.test import TestCase
 from BasisTypen.models import BoogType
 from Competitie.definities import DEELNAME_NEE, DEELNAME_JA, DEELNAME_ONBEKEND, INSCHRIJF_METHODE_1
-from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMutatie,
-                               Regiocompetitie, RegiocompetitieSporterBoog)
+from Competitie.models import Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMutatie
 from Competitie.operations import competities_aanmaken
 from Competitie.test_utils.tijdlijn import (evaluatie_datum, zet_competitie_fase_rk_prep,
                                             zet_competitie_fase_regio_afsluiten)
 from CompLaagBond.models import KampBK
 from CompLaagRayon.models import KampRK, DeelnemerRK, CutRK
+from CompLaagRegio.models import RegioComp, RegioDeelnemer
 from Functie.tests.helpers import maak_functie
 from Geo.models import Rayon, Regio, Cluster
 from Locatie.models import WedstrijdLocatie
@@ -156,9 +156,9 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
         self.deelcomp_bond_18 = KampBK.objects.filter(competitie=self.comp_18).first()
         self.deelkamp_rayon1_18 = KampRK.objects.filter(competitie=self.comp_18, rayon=self.rayon_1).first()
         self.deelkamp_rayon2_18 = KampRK.objects.filter(competitie=self.comp_18, rayon=self.rayon_2).first()
-        self.deelcomp_regio101_18 = Regiocompetitie.objects.filter(competitie=self.comp_18, regio=self.regio_101)[0]
-        self.deelcomp_regio101_25 = Regiocompetitie.objects.filter(competitie=self.comp_25, regio=self.regio_101)[0]
-        self.deelcomp_regio112_18 = Regiocompetitie.objects.filter(competitie=self.comp_18, regio=self.regio_112)[0]
+        self.deelcomp_regio101_18 = RegioComp.objects.filter(competitie=self.comp_18, regio=self.regio_101)[0]
+        self.deelcomp_regio101_25 = RegioComp.objects.filter(competitie=self.comp_25, regio=self.regio_101)[0]
+        self.deelcomp_regio112_18 = RegioComp.objects.filter(competitie=self.comp_18, regio=self.regio_112)[0]
 
         self.cluster_101a = Cluster.objects.get(regio=self.regio_101, letter='a', gebruik='18')
 
@@ -210,7 +210,7 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
         comp.bepaal_fase()
         self.assertEqual(comp.fase_indiv, 'G')
         self.assertEqual(comp.fase_teams, 'G')
-        for deelcomp in Regiocompetitie.objects.filter(competitie=comp):
+        for deelcomp in RegioComp.objects.filter(competitie=comp):
             if not deelcomp.is_afgesloten:          # pragma: no branch
                 deelcomp.is_afgesloten = True
                 deelcomp.save(update_fields=['is_afgesloten'])
@@ -292,8 +292,8 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
         self._deelnemers_aanmaken()
 
         # maak een regiowedstrijd aan, zodat deze geteld kan worden
-        deelcomp = Regiocompetitie.objects.get(competitie=self.comp_18,
-                                               regio=self.regio_101)
+        deelcomp = RegioComp.objects.get(competitie=self.comp_18,
+                                         regio=self.regio_101)
         deelcomp.inschrijf_methode = INSCHRIJF_METHODE_1
         deelcomp.save()
 
@@ -618,20 +618,20 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
 
     def test_alvast_afgemeld(self):
         # maak een deelnemer aan die wel mee wilt doen met het RK
-        deelnemer = RegiocompetitieSporterBoog(
+        deelnemer = RegioDeelnemer(
                                 sporterboog=self.sporterboog,
                                 bij_vereniging=self.sporterboog.sporter.bij_vereniging,
-                                regiocompetitie=self.deelcomp_regio101_18,
+                                regiocomp=self.deelcomp_regio101_18,
                                 indiv_klasse=self.klasse_r,
                                 aantal_scores=6,
                                 inschrijf_voorkeur_rk_bk=True)
         deelnemer.save()
 
         # maak een deelnemer aan die alvast afgemeld is voor het RK
-        deelnemer2 = RegiocompetitieSporterBoog(
+        deelnemer2 = RegioDeelnemer(
                                 sporterboog=self.sporterboog2,
                                 bij_vereniging=self.sporterboog2.sporter.bij_vereniging,
-                                regiocompetitie=self.deelcomp_regio101_18,
+                                regiocomp=self.deelcomp_regio101_18,
                                 indiv_klasse=self.klasse_r,
                                 aantal_scores=6,
                                 inschrijf_voorkeur_rk_bk=False)

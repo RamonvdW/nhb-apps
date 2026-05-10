@@ -8,9 +8,7 @@ from django.test import TestCase
 from django.core import management
 from BasisTypen.models import BoogType, TeamType
 from Competitie.definities import TEAM_PUNTEN_MODEL_FORMULE1
-from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
-                               Regiocompetitie, RegiocompetitieTeam, RegiocompetitieTeamPoule,
-                               RegiocompetitieRondeTeam)
+from Competitie.models import Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse
 from Competitie.operations import competities_aanmaken
 from Competitie.test_utils.tijdlijn import (evaluatie_datum, zet_competitie_fases,
                                             zet_competitie_fase_regio_wedstrijden,
@@ -18,6 +16,7 @@ from Competitie.test_utils.tijdlijn import (evaluatie_datum, zet_competitie_fase
                                             zet_competitie_fase_regio_afsluiten)
 from CompLaagBond.models import KampBK
 from CompLaagRayon.models import KampRK
+from CompLaagRegio.models import RegioComp, RegioTeam, RegioPoule, RegioRondeTeam
 from Functie.tests.helpers import maak_functie
 from Geo.models import Rayon, Regio, Cluster
 from Locatie.models import WedstrijdLocatie
@@ -164,12 +163,12 @@ class TestCompLaagRegioPoules(E2EHelpers, TestCase):
         self.deelcomp_bond_18 = KampBK.objects.filter(competitie=self.comp_18).first()
         self.deelcomp_rayon1_18 = KampRK.objects.filter(competitie=self.comp_18, rayon=self.rayon_1).first()
         self.deelcomp_rayon2_18 = KampRK.objects.filter(competitie=self.comp_18, rayon=self.rayon_2).first()
-        self.deelcomp_regio101_18 = Regiocompetitie.objects.filter(competitie=self.comp_18,
-                                                                   regio=self.regio_101).first()
-        self.deelcomp_regio101_25 = Regiocompetitie.objects.filter(competitie=self.comp_25,
-                                                                   regio=self.regio_101).first()
-        self.deelcomp_regio112_18 = Regiocompetitie.objects.filter(competitie=self.comp_18,
-                                                                   regio=self.regio_112).first()
+        self.deelcomp_regio101_18 = RegioComp.objects.filter(competitie=self.comp_18,
+                                                             regio=self.regio_101).first()
+        self.deelcomp_regio101_25 = RegioComp.objects.filter(competitie=self.comp_25,
+                                                             regio=self.regio_101).first()
+        self.deelcomp_regio112_18 = RegioComp.objects.filter(competitie=self.comp_18,
+                                                             regio=self.regio_112).first()
 
         self.cluster_101a_18 = Cluster.objects.get(regio=self.regio_101, letter='a', gebruik='18')
         self.cluster_101e_25 = Cluster.objects.get(regio=self.regio_101, letter='e', gebruik='25')
@@ -201,7 +200,7 @@ class TestCompLaagRegioPoules(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_rcl112_18)
         self.e2e_wissel_naar_functie(self.functie_rcl112_18)
 
-        deelcomp = Regiocompetitie.objects.get(competitie=self.comp_18, functie=self.functie_rcl112_18)
+        deelcomp = RegioComp.objects.get(competitie=self.comp_18, functie=self.functie_rcl112_18)
 
         url = self.url_regio_poules % deelcomp.pk
         with self.assert_max_queries(20):
@@ -215,12 +214,12 @@ class TestCompLaagRegioPoules(E2EHelpers, TestCase):
         zet_competitie_fases(comp, 'C', 'D')
 
         # maak een poule aan
-        self.assertEqual(0, RegiocompetitieTeamPoule.objects.count())
+        self.assertEqual(0, RegioPoule.objects.count())
         with self.assert_max_queries(20):
             resp = self.client.post(url)
         self.assert_is_redirect(resp, url)
-        self.assertEqual(1, RegiocompetitieTeamPoule.objects.count())
-        poule = RegiocompetitieTeamPoule.objects.first()
+        self.assertEqual(1, RegioPoule.objects.count())
+        poule = RegioPoule.objects.first()
 
         # coverage
         self.assertTrue(str(poule) != "")
@@ -250,7 +249,7 @@ class TestCompLaagRegioPoules(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'beschrijving': ' hoi test!'})
         self.assert_is_redirect_not_plein(resp)
-        poule = RegiocompetitieTeamPoule.objects.get(pk=poule.pk)
+        poule = RegioPoule.objects.get(pk=poule.pk)
         self.assertEqual(poule.beschrijving, 'hoi test!')
 
         # wijziging is geen wijziging
@@ -265,15 +264,15 @@ class TestCompLaagRegioPoules(E2EHelpers, TestCase):
         self.assert404(resp, 'Poule bestaat niet')
 
         # verkeerde beheerder
-        poule.regiocompetitie = self.deelcomp_regio101_25
-        poule.save(update_fields=['regiocompetitie'])
+        poule.regiocomp = self.deelcomp_regio101_25
+        poule.save(update_fields=['regiocomp'])
         bad_url = self.url_wijzig_poule % poule.pk
         resp = self.client.get(bad_url)
         self.assert403(resp)
         resp = self.client.post(bad_url)
         self.assert403(resp)
-        poule.regiocompetitie = self.deelcomp_regio112_18
-        poule.save(update_fields=['regiocompetitie'])
+        poule.regiocomp = self.deelcomp_regio112_18
+        poule.save(update_fields=['regiocomp'])
 
         # overzicht poules
         url = self.url_regio_poules % deelcomp.pk
@@ -294,11 +293,11 @@ class TestCompLaagRegioPoules(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('complaagregio/rcl-teams-poules.dtl', 'design/site_layout.dtl'))
 
         # bad: maak een poule aan
-        self.assertEqual(1, RegiocompetitieTeamPoule.objects.count())
+        self.assertEqual(1, RegioPoule.objects.count())
         with self.assert_max_queries(20):
             resp = self.client.post(url)
         self.assert_is_redirect_not_plein(resp)
-        self.assertEqual(2, RegiocompetitieTeamPoule.objects.count())
+        self.assertEqual(2, RegioPoule.objects.count())
 
         # wijzig de poule
         url = self.url_wijzig_poule % poule.pk
@@ -324,11 +323,11 @@ class TestCompLaagRegioPoules(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('complaagregio/rcl-teams-poules.dtl', 'design/site_layout.dtl'))
 
         # bad: maak een poule aan
-        self.assertEqual(2, RegiocompetitieTeamPoule.objects.count())
+        self.assertEqual(2, RegioPoule.objects.count())
         with self.assert_max_queries(20):
             resp = self.client.post(url)
         self.assert404(resp, 'Poules kunnen niet meer aangepast worden')
-        self.assertEqual(2, RegiocompetitieTeamPoule.objects.count())
+        self.assertEqual(2, RegioPoule.objects.count())
 
         # poule details (wijzig scherm, read-only)
         url = self.url_wijzig_poule % poule.pk
@@ -363,19 +362,19 @@ class TestCompLaagRegioPoules(E2EHelpers, TestCase):
         zet_competitie_fases(comp, 'C', 'D')
 
         # verwijder een poule
-        self.assertEqual(2, RegiocompetitieTeamPoule.objects.count())
+        self.assertEqual(2, RegioPoule.objects.count())
         url = self.url_wijzig_poule % poule.pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'verwijder_poule': 'aj'})
         self.assert_is_redirect_not_plein(resp)
-        self.assertEqual(1, RegiocompetitieTeamPoule.objects.count())
+        self.assertEqual(1, RegioPoule.objects.count())
 
     def test_poules_teams(self):
         self.e2e_login_and_pass_otp(self.account_rcl112_18)
         self.e2e_wissel_naar_functie(self.functie_rcl112_18)
 
         # maak een poule aan
-        deelcomp = Regiocompetitie.objects.get(competitie=self.comp_18, functie=self.functie_rcl112_18)
+        deelcomp = RegioComp.objects.get(competitie=self.comp_18, functie=self.functie_rcl112_18)
 
         # tot en met fase D mag alles nog
         comp = deelcomp.competitie
@@ -385,29 +384,29 @@ class TestCompLaagRegioPoules(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(url)
         self.assert_is_redirect(resp, url)
-        self.assertEqual(1, RegiocompetitieTeamPoule.objects.count())
-        poule = RegiocompetitieTeamPoule.objects.first()
+        self.assertEqual(1, RegioPoule.objects.count())
+        poule = RegioPoule.objects.first()
 
         # maak 9 teams aan
         type_r = TeamType.objects.get(afkorting='R2')
         klasse_r_ere = CompetitieTeamKlasse.objects.filter(team_type=type_r).order_by('volgorde')[0]
         for lp in range(9):
             # team zonder sporters maar wel in een klasse is genoeg voor een poule
-            RegiocompetitieTeam(
-                    regiocompetitie=deelcomp,
+            RegioTeam(
+                    regiocomp=deelcomp,
                     vereniging=self.ver_112,
                     volg_nr=lp + 1,
                     team_type=type_r,
                     team_naam='Recurve Testers %s' % (lp + 1),
                     team_klasse=klasse_r_ere).save()
         # for
-        team_pks = list(RegiocompetitieTeam.objects.values_list('pk', flat=True))
+        team_pks = list(RegioTeam.objects.values_list('pk', flat=True))
 
         # maak een compound team aan
         type_c = TeamType.objects.get(afkorting='C')
         klasse_c_ere = CompetitieTeamKlasse.objects.filter(team_type=type_c).order_by('volgorde')[0]
-        team_c = RegiocompetitieTeam(
-                        regiocompetitie=deelcomp,
+        team_c = RegioTeam(
+                        regiocomp=deelcomp,
                         vereniging=self.ver_112,
                         volg_nr=1,
                         team_type=type_c,
@@ -423,7 +422,7 @@ class TestCompLaagRegioPoules(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(url, params)
         self.assert_is_redirect_not_plein(resp)
-        poule = RegiocompetitieTeamPoule.objects.prefetch_related('teams').get(pk=poule.pk)
+        poule = RegioPoule.objects.prefetch_related('teams').get(pk=poule.pk)
         self.assertEqual(5, poule.teams.count())
 
         with self.assert_max_queries(20):
@@ -437,7 +436,7 @@ class TestCompLaagRegioPoules(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(url, params)
         self.assert_is_redirect_not_plein(resp)
-        poule = RegiocompetitieTeamPoule.objects.prefetch_related('teams').get(pk=poule.pk)
+        poule = RegioPoule.objects.prefetch_related('teams').get(pk=poule.pk)
         self.assertEqual(1, poule.teams.count())
 
         # koppel 9 teams aan de poule
@@ -448,23 +447,23 @@ class TestCompLaagRegioPoules(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(url, params)
         self.assert_is_redirect_not_plein(resp)
-        poule = RegiocompetitieTeamPoule.objects.prefetch_related('teams').get(pk=poule.pk)
+        poule = RegioPoule.objects.prefetch_related('teams').get(pk=poule.pk)
         self.assertEqual(8, poule.teams.count())
 
         # CLI test: Formule1 wedstrijdpunten
         deelcomp.regio_team_punten_model = TEAM_PUNTEN_MODEL_FORMULE1
         deelcomp.save(update_fields=['regio_team_punten_model'])
 
-        # maak een RegiocompetitieRondeTeam aan
+        # maak een RegioRondeTeam aan
         teams = poule.teams.all()
         bulk = list()
         for team in teams:
             bulk.extend([
-                RegiocompetitieRondeTeam(team=team, ronde_nr=1, team_score=5, team_punten=5),  # triggert melding
-                RegiocompetitieRondeTeam(team=team, ronde_nr=2, team_score=5, team_punten=team.pk),
-                RegiocompetitieRondeTeam(team=team, ronde_nr=3)])
+                RegioRondeTeam(team=team, ronde_nr=1, team_score=5, team_punten=5),  # triggert melding
+                RegioRondeTeam(team=team, ronde_nr=2, team_score=5, team_punten=team.pk),
+                RegioRondeTeam(team=team, ronde_nr=3)])
         # for
-        RegiocompetitieRondeTeam.objects.bulk_create(bulk)
+        RegioRondeTeam.objects.bulk_create(bulk)
 
         f1 = io.StringIO()
         f2 = io.StringIO()

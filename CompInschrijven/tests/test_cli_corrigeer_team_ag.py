@@ -7,9 +7,9 @@
 from django.test import TestCase
 from BasisTypen.definities import ORGANISATIE_WA
 from BasisTypen.models import BoogType, TeamType
-from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse, Regiocompetitie,
-                               RegiocompetitieSporterBoog, RegiocompetitieTeam)
+from Competitie.models import Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse
 from Competitie.operations import competities_aanmaken
+from CompLaagRegio.models import RegioComp, RegioDeelnemer, RegioTeam
 from Geo.models import Regio
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -39,8 +39,8 @@ class TestCompInschrijvenCliCorrigeerTeamAG(E2EHelpers, TestCase):
         sporterboog.save()
         self.sportersboog.append(sporterboog)
 
-        deelnemer = RegiocompetitieSporterBoog(
-                                regiocompetitie=self.deelcomp103_18m,
+        deelnemer = RegioDeelnemer(
+                                regiocomp=self.deelcomp103_18m,
                                 sporterboog=sporterboog,
                                 bij_vereniging=self.ver,
                                 indiv_klasse=self.indiv_klasse_c,
@@ -64,7 +64,7 @@ class TestCompInschrijvenCliCorrigeerTeamAG(E2EHelpers, TestCase):
 
         self.comp_18m = Competitie.objects.get(afstand='18')
 
-        self.deelcomp103_18m = (Regiocompetitie
+        self.deelcomp103_18m = (RegioComp
                                 .objects
                                 .get(competitie=self.comp_18m,
                                      regio__regio_nr=103))
@@ -99,8 +99,8 @@ class TestCompInschrijvenCliCorrigeerTeamAG(E2EHelpers, TestCase):
 
         self.beheerder = self.e2e_create_account('100002', 'beheerder@test.not', 'Beheerdertje')
 
-        self.team = RegiocompetitieTeam(
-                            regiocompetitie=self.deelcomp103_18m,
+        self.team = RegioTeam(
+                            regiocomp=self.deelcomp103_18m,
                             vereniging=self.ver,
                             volg_nr=1,
                             team_type=self.team_type_c,
@@ -128,7 +128,7 @@ class TestCompInschrijvenCliCorrigeerTeamAG(E2EHelpers, TestCase):
         # wijzigingen door laten voeren met volledig team
         self.team.leden.set(self.deelnemers)
         # --> team_ag wordt op 21 gezet
-        deelnemer = RegiocompetitieSporterBoog.objects.get(pk=self.deelnemers[0].pk)
+        deelnemer = RegioDeelnemer.objects.get(pk=self.deelnemers[0].pk)
         deelnemer.ag_voor_team = "5"
         deelnemer.ag_voor_team_mag_aangepast_worden = True
         deelnemer.save(update_fields=['ag_voor_team_mag_aangepast_worden', 'ag_voor_team'])
@@ -139,7 +139,7 @@ class TestCompInschrijvenCliCorrigeerTeamAG(E2EHelpers, TestCase):
         self.assertFalse('[ERROR]' in f2.getvalue())
 
         # nog een keer, nu zonder wijziging van team_ag
-        deelnemer = RegiocompetitieSporterBoog.objects.get(pk=self.deelnemers[0].pk)
+        deelnemer = RegioDeelnemer.objects.get(pk=self.deelnemers[0].pk)
         deelnemer.ag_voor_team = "5"
         deelnemer.ag_voor_team_mag_aangepast_worden = True
         deelnemer.save(update_fields=['ag_voor_team_mag_aangepast_worden', 'ag_voor_team'])

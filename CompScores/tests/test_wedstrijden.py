@@ -8,11 +8,12 @@ from django.test import TestCase
 from BasisTypen.models import BoogType
 from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
-from Competitie.models import CompetitieMatch, CompetitieIndivKlasse, Regiocompetitie, RegiocompetitieSporterBoog
+from Competitie.models import CompetitieMatch, CompetitieIndivKlasse
 from Competitie.operations import maak_regiocompetitie_ronde
 from Competitie.tests.test_helpers import maak_competities_en_zet_fase_c
 from CompLaagBond.models import KampBK
 from CompLaagRayon.models import KampRK
+from CompLaagRegio.models import RegioComp, RegioDeelnemer
 from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
 from Score.models import Score, Uitslag
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -182,11 +183,11 @@ class TestCompScoresWedstrijden(E2EHelpers, TestCase):
         self.assertEqual(CompetitieIndivKlasse.objects.count(), 0)
         self.comp_18, self.comp_25 = maak_competities_en_zet_fase_c()
 
-        self.deelcomp_regio_18 = Regiocompetitie.objects.get(regio=self.regio_111,
-                                                             competitie__afstand='18')
+        self.deelcomp_regio_18 = RegioComp.objects.get(regio=self.regio_111,
+                                                       competitie__afstand='18')
 
-        self.deelcomp_regio_25 = Regiocompetitie.objects.get(regio=self.regio_111,
-                                                             competitie__afstand='25')
+        self.deelcomp_regio_25 = RegioComp.objects.get(regio=self.regio_111,
+                                                       competitie__afstand='25')
 
         self.deelkamp18_rk1 = KampRK.objects.filter(competitie__afstand='18').order_by('rayon__rayon_nr').first()
         self.deelkamp18_bk = KampBK.objects.get(competitie__afstand='18')
@@ -265,8 +266,8 @@ class TestCompScoresWedstrijden(E2EHelpers, TestCase):
                                 boogtype=boog_r,
                                 is_onbekend=True))[0]
 
-        RegiocompetitieSporterBoog(
-                regiocompetitie=self.deelcomp_regio_18,
+        RegioDeelnemer(
+                regiocomp=self.deelcomp_regio_18,
                 sporterboog=sporterboog,
                 bij_vereniging=sporterboog.sporter.bij_vereniging,
                 indiv_klasse=indiv_klasse).save()
@@ -277,8 +278,8 @@ class TestCompScoresWedstrijden(E2EHelpers, TestCase):
                                 boogtype=boog_r,
                                 is_onbekend=True))[0]
 
-        RegiocompetitieSporterBoog(
-                regiocompetitie=self.deelcomp_regio_25,
+        RegioDeelnemer(
+                regiocomp=self.deelcomp_regio_25,
                 sporterboog=sporterboog,
                 bij_vereniging=sporterboog.sporter.bij_vereniging,
                 indiv_klasse=indiv_klasse).save()
@@ -296,10 +297,10 @@ class TestCompScoresWedstrijden(E2EHelpers, TestCase):
                                   voor_wedstrijd=True)
         sporterboog.save()
 
-        aanmelding = RegiocompetitieSporterBoog(regiocompetitie=self.deelcomp_regio_18,
-                                                sporterboog=sporterboog,
-                                                bij_vereniging=sporterboog.sporter.bij_vereniging,
-                                                indiv_klasse=indiv_klasse)
+        aanmelding = RegioDeelnemer(regiocomp=self.deelcomp_regio_18,
+                                    sporterboog=sporterboog,
+                                    bij_vereniging=sporterboog.sporter.bij_vereniging,
+                                    indiv_klasse=indiv_klasse)
         aanmelding.save()
 
         indiv_klasse = (CompetitieIndivKlasse
@@ -308,10 +309,10 @@ class TestCompScoresWedstrijden(E2EHelpers, TestCase):
                                 boogtype=boog_c,
                                 is_onbekend=False))[0]
 
-        aanmelding = RegiocompetitieSporterBoog(regiocompetitie=self.deelcomp_regio_25,
-                                                sporterboog=sporterboog,
-                                                bij_vereniging=sporterboog.sporter.bij_vereniging,
-                                                indiv_klasse=indiv_klasse)
+        aanmelding = RegioDeelnemer(regiocomp=self.deelcomp_regio_25,
+                                    sporterboog=sporterboog,
+                                    bij_vereniging=sporterboog.sporter.bij_vereniging,
+                                    indiv_klasse=indiv_klasse)
         aanmelding.save()
 
         # aspirant schutter aanmelden
@@ -330,10 +331,10 @@ class TestCompScoresWedstrijden(E2EHelpers, TestCase):
                                   voor_wedstrijd=True)
         sporterboog.save()
 
-        aanmelding = RegiocompetitieSporterBoog(regiocompetitie=self.deelcomp_regio_18,
-                                                sporterboog=sporterboog,
-                                                bij_vereniging=sporterboog.sporter.bij_vereniging,
-                                                indiv_klasse=indiv_klasse)
+        aanmelding = RegioDeelnemer(regiocomp=self.deelcomp_regio_18,
+                                    sporterboog=sporterboog,
+                                    bij_vereniging=sporterboog.sporter.bij_vereniging,
+                                    indiv_klasse=indiv_klasse)
         aanmelding.save()
 
         indiv_klasse = (CompetitieIndivKlasse
@@ -342,8 +343,8 @@ class TestCompScoresWedstrijden(E2EHelpers, TestCase):
                                 boogtype=boog_tr,
                                 beschrijving__contains="Onder 12 Jongens"))[0]
 
-        RegiocompetitieSporterBoog(
-                regiocompetitie=self.deelcomp_regio_25,
+        RegioDeelnemer(
+                regiocomp=self.deelcomp_regio_25,
                 sporterboog=sporterboog,
                 bij_vereniging=sporterboog.sporter.bij_vereniging,
                 indiv_klasse=indiv_klasse).save()
@@ -359,8 +360,8 @@ class TestCompScoresWedstrijden(E2EHelpers, TestCase):
                                   voor_wedstrijd=True)
         sporterboog.save()
 
-        RegiocompetitieSporterBoog(
-                regiocompetitie=self.deelcomp_regio_18,
+        RegioDeelnemer(
+                regiocomp=self.deelcomp_regio_18,
                 sporterboog=sporterboog,
                 bij_vereniging=sporterboog.sporter.bij_vereniging,
                 indiv_klasse=indiv_klasse).save()

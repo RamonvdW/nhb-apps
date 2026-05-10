@@ -9,7 +9,8 @@ from django.utils import timezone
 from BasisTypen.models import BoogType
 from Bestelling.models import Bestelling
 from Bestelling.operations import bestel_mutatieverzoek_maak_bestellingen
-from Competitie.models import Competitie, CompetitieIndivKlasse, Regiocompetitie, RegiocompetitieSporterBoog
+from Competitie.models import Competitie, CompetitieIndivKlasse
+from CompLaagRegio.models import RegioComp, RegioDeelnemer
 from Functie.models import Functie
 from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
@@ -394,14 +395,14 @@ class TestWedstrijdenAanmeldingen(E2EHelpers, TestCase):
                         boogtype=self.boog_r)
         klasse.save()
 
-        regiocomp = Regiocompetitie(
+        regiocomp = RegioComp(
                         competitie=competitie,
                         regio=self.regio112,
                         functie=self.functie_hwl)
         regiocomp.save()
 
-        deelnemer = RegiocompetitieSporterBoog(
-                        regiocompetitie=regiocomp,
+        deelnemer = RegioDeelnemer(
+                        regiocomp=regiocomp,
                         sporterboog=self.sporterboog1r,
                         bij_vereniging=self.ver1,
                         indiv_klasse=klasse,

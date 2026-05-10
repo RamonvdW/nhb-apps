@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2024 Ramon van der Winkel.
+#  Copyright (c) 2021-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management.base import BaseCommand
-from Competitie.models import Competitie, RegiocompetitieSporterBoog
+from Competitie.models import Competitie
 from Competitie.operations.klassengrenzen import KlasseBepaler
+from CompLaagRegio.models import RegioDeelnemer
 from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
 from Score.definities import AG_NUL, AG_DOEL_INDIV, SCORE_TYPE_GEEN
 from Score.models import Aanvangsgemiddelde, Score, ScoreHist
@@ -94,9 +95,9 @@ class Command(BaseCommand):
         del sporterboog
 
         # controleer dat de sporter niet al geschreven
-        count = (RegiocompetitieSporterBoog
+        count = (RegioDeelnemer
                  .objects
-                 .filter(regiocompetitie__competitie=comp,
+                 .filter(regiocomp__competitie=comp,
                          sporterboog=juiste_sporterboog)
                  .count())
         if count > 0:
@@ -107,13 +108,13 @@ class Command(BaseCommand):
         # juiste sporterboog is nog niet ingeschreven voor de competitie
 
         try:
-            deelnemer = (RegiocompetitieSporterBoog
+            deelnemer = (RegioDeelnemer
                          .objects
                          .select_related('sporterboog',
                                          'sporterboog__boogtype')
-                         .get(regiocompetitie__competitie=comp,
+                         .get(regiocomp__competitie=comp,
                               sporterboog__sporter__lid_nr=lid_nr))
-        except RegiocompetitieSporterBoog.MultipleObjectsReturned:
+        except RegioDeelnemer.MultipleObjectsReturned:
             self.stderr.write('[ERROR] Sporter met meerdere inschrijvingen wordt niet ondersteund')
             return
 
@@ -124,7 +125,7 @@ class Command(BaseCommand):
         self.stdout.write('[INFO] Huidige indiv_klasse: %s' % deelnemer.indiv_klasse)
 
         # controleer of de sporter in een team mee doet
-        if deelnemer.regiocompetitieteam_set.count() > 0:
+        if deelnemer.regioteam_set.count() > 0:
             self.stderr.write('[ERROR] Sporter is onderdeel van een team')
             return
 

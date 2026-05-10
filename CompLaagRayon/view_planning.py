@@ -12,9 +12,9 @@ from django.core.exceptions import PermissionDenied
 from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.definities import INSCHRIJF_METHODE_1, DEELNAME_NEE
-from Competitie.models import (CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMatch,
-                               Regiocompetitie, RegiocompetitieRonde)
+from Competitie.models import CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMatch
 from CompLaagRayon.models import KampRK, DeelnemerRK, TeamRK, CutRK
+from CompLaagRegio.models import RegioComp, RegioRonde
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
 from Locatie.models import WedstrijdLocatie
@@ -170,7 +170,7 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
                                                kwargs={'match_pk': wedstrijd.pk})
             # for
 
-        deelcomps = (Regiocompetitie
+        deelcomps = (RegioComp
                      .objects
                      .select_related('regio')
                      .filter(competitie=deelkamp.competitie,
@@ -180,9 +180,9 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
 
         # zoek het aantal regiowedstrijden erbij
         for deelcomp in deelcomps:
-            rondes = (RegiocompetitieRonde
+            rondes = (RegioRonde
                       .objects
-                      .filter(regiocompetitie=deelcomp)
+                      .filter(regiocomp=deelcomp)
                       .annotate(aantal_matches=Count('matches')))
             if deelcomp.inschrijf_methode == INSCHRIJF_METHODE_1:
                 deelcomp.rondes_count = "-"

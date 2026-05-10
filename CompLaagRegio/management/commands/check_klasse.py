@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2024 Ramon van der Winkel.
+#  Copyright (c) 2021-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management.base import BaseCommand
 from BasisTypen.definities import GESLACHT_MAN, GESLACHT_VROUW, GESLACHT_ANDERS
-from Competitie.models import CompetitieIndivKlasse, RegiocompetitieSporterBoog
+from Competitie.models import CompetitieIndivKlasse
 from Competitie.operations.klassengrenzen import KlasseBepaler
+from CompLaagRegio.models import RegioDeelnemer
 from Sporter.models import SporterVoorkeuren
 
 
@@ -83,21 +84,21 @@ class Command(BaseCommand):
         # for
 
         prev_comp_pk = jaartal = -1
-        for deelnemer in (RegiocompetitieSporterBoog
+        for deelnemer in (RegioDeelnemer
                           .objects
                           .select_related('indiv_klasse',
                                           'sporterboog',
                                           'sporterboog__sporter',
-                                          'regiocompetitie__competitie')
-                          .order_by('regiocompetitie__competitie__pk')):     # pragma: no cover
+                                          'regiocomp__competitie')
+                          .order_by('regiocomp__competitie__pk')):     # pragma: no cover
 
-            comp_pk = deelnemer.regiocompetitie.competitie.pk
+            comp_pk = deelnemer.regiocomp.competitie.pk
             volgorde = deelnemer.indiv_klasse.volgorde
 
             if comp_pk != prev_comp_pk:
-                bepaler = KlasseBepaler(deelnemer.regiocompetitie.competitie)
+                bepaler = KlasseBepaler(deelnemer.regiocomp.competitie)
                 prev_comp_pk = comp_pk
-                jaartal = deelnemer.regiocompetitie.competitie.begin_jaar + 1
+                jaartal = deelnemer.regiocomp.competitie.begin_jaar + 1
 
             try:
                 wedstrijdgeslacht = sporter_pk2wedstrijdgeslacht[deelnemer.sporterboog.sporter.pk]

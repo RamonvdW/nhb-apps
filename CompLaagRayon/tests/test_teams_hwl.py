@@ -8,10 +8,11 @@ from django.test import TestCase, override_settings
 from django.utils import timezone
 from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
-from Competitie.models import CompetitieIndivKlasse, Regiocompetitie, RegiocompetitieSporterBoog
+from Competitie.models import CompetitieIndivKlasse
 from Competitie.test_utils.tijdlijn import evaluatie_datum, zet_competitie_fase_regio_wedstrijden
 from Competitie.tests.test_helpers import maak_competities_en_zet_fase_c
 from CompLaagRayon.models import KampRK, TeamRK
+from CompLaagRegio.models import RegioComp, RegioDeelnemer
 from HistComp.definities import HISTCOMP_TYPE_18, HIST_BOGEN_DEFAULT
 from HistComp.models import HistCompSeizoen, HistCompRegioIndiv
 from Sporter.models import Sporter, SporterBoog
@@ -226,13 +227,13 @@ class TestCompLaagRayonVerenigingTeams(E2EHelpers, TestCase):
         self.assertEqual(CompetitieIndivKlasse.objects.count(), 0)
         self.comp_18, self.comp_25 = maak_competities_en_zet_fase_c()
 
-        self.deelcomp18_regio111 = Regiocompetitie.objects.get(regio=self.regio_111,
-                                                               competitie__afstand=18)
+        self.deelcomp18_regio111 = RegioComp.objects.get(regio=self.regio_111,
+                                                         competitie__afstand=18)
 
         # default instellingen voor regio 111: organiseert competitie, vaste teams
 
-        self.deelcomp25_regio111 = Regiocompetitie.objects.get(competitie=self.comp_25,
-                                                               regio=self.regio_111)
+        self.deelcomp25_regio111 = RegioComp.objects.get(competitie=self.comp_25,
+                                                         regio=self.regio_111)
 
     def _zet_schutter_voorkeuren(self, lid_nr):
         # deze functie kan alleen gebruikt worden als HWL
@@ -292,12 +293,12 @@ class TestCompLaagRayonVerenigingTeams(E2EHelpers, TestCase):
                                           'wil_in_team': 'ja!'})
         self.assert_is_redirect_not_plein(resp)     # check success
 
-        # print('aantal ingeschreven deelnemers:', RegioCompetitieSporterBoog.objects.count())
+        # print('aantal ingeschreven deelnemers:', RegioDeelnemer.objects.count())
 
-        for obj in (RegiocompetitieSporterBoog
+        for obj in (RegioDeelnemer
                     .objects
                     .select_related('sporterboog__sporter')
-                    .filter(regiocompetitie__competitie=self.comp_18)
+                    .filter(regiocomp__competitie=self.comp_18)
                     .all()):
             nr = obj.sporterboog.sporter.lid_nr
             if nr == 100002:

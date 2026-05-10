@@ -10,10 +10,11 @@ from django.utils.formats import localize
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.definities import INSCHRIJF_METHODE_1
-from Competitie.models import Competitie, Regiocompetitie, RegiocompetitieRonde
+from Competitie.models import Competitie
 from Competitie.tijdlijn import maak_comp_fase_beschrijvingen, is_open_voor_inschrijven_rk_teams
 from CompLaagBond.models import KampBK, TeamBK
 from CompLaagRayon.models import KampRK, TeamRK
+from CompLaagRegio.models import RegioComp, RegioRonde
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
 from Locatie.definities import BAAN_TYPE_EXTERN
@@ -66,7 +67,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                      .order_by('afstand',
                                'begin_jaar'))
 
-            deelcomps = (Regiocompetitie
+            deelcomps = (RegioComp
                          .objects
                          .filter(competitie__is_afgesloten=False,
                                  regio=self.ver.regio)
@@ -86,9 +87,9 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
             heeft_rk_teams = TeamRK.objects.filter(kamp__competitie__is_afgesloten=False).count() > 0
             heeft_bk_teams = TeamBK.objects.filter(kamp__competitie__is_afgesloten=False).count() > 0
 
-            if (RegiocompetitieRonde
+            if (RegioRonde
                 .objects
-                .filter(regiocompetitie__is_afgesloten=False,
+                .filter(regiocomp__is_afgesloten=False,
                         matches__vereniging=self.ver)).count() > 0:
                 # er zijn wedstrijden voor deze vereniging
                 context['heeft_wedstrijden'] = True

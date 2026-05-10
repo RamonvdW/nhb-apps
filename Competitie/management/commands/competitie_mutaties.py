@@ -110,8 +110,8 @@ class Command(BaseCommand):
             mutatie = (CompetitieMutatie
                        .objects
                        .select_related('competitie',
-                                       'regiocompetitie',
-                                       'regiocompetitie__competitie',
+                                       'regiocomp',
+                                       'regiocomp__competitie',
                                        'kamp_rk',
                                        'kamp_rk__competitie',
                                        'kamp_bk',

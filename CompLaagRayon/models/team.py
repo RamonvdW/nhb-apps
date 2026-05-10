@@ -7,7 +7,8 @@
 from django.db import models
 from BasisTypen.models import TeamType
 from Competitie.definities import DEELNAME_CHOICES, DEELNAME_ONBEKEND
-from Competitie.models import CompetitieTeamKlasse, RegiocompetitieSporterBoog
+from Competitie.models import CompetitieTeamKlasse
+from CompLaagRegio.models import RegioDeelnemer
 from .kampioenschap import KampRK
 from .deelnemer import DeelnemerRK
 from Vereniging.models import Vereniging
@@ -71,9 +72,9 @@ class TeamRK(models.Model):
                                                    related_name='teamrk_team_klasse_volgende_ronde')
 
     # preliminaire leden van het team (gekozen tijdens de regiocompetitie)
-    tijdelijke_leden = models.ManyToManyField(RegiocompetitieSporterBoog,
-                                              related_name='teamrk_tijdelijke_leden',
-                                              blank=True)    # mag leeg zijn
+    tijdelijke_deelnemers_regio = models.ManyToManyField(RegioDeelnemer,
+                                                         related_name='teamrk_tijdelijk',
+                                                         blank=True)    # mag leeg zijn
 
     # de voor het kampioenschap geplaatste sporters die ook lid zijn van het team
     gekoppelde_leden = models.ManyToManyField(DeelnemerRK,

@@ -11,7 +11,7 @@ from django.shortcuts import render
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
-from Competitie.models import RegiocompetitieSporterBoog
+from CompLaagRegio.models import RegioDeelnemer
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
 from Kalender.definities import MAAND2URL
@@ -76,11 +76,11 @@ class KwalificatieScoresOpgevenView(UserPassesTestMixin, TemplateView):
 
         # zoek de bondscompetitie Indoor scores erbij
         try:
-            deelnemer = (RegiocompetitieSporterBoog
+            deelnemer = (RegioDeelnemer
                          .objects
                          .get(sporterboog=inschrijving.sporterboog,
-                              regiocompetitie__competitie__afstand='18'))
-        except RegiocompetitieSporterBoog.DoesNotExist:
+                              regiocomp__competitie__afstand='18'))
+        except RegioDeelnemer.DoesNotExist:
             pass
         else:
             scores = [deelnemer.score1, deelnemer.score2, deelnemer.score3, deelnemer.score4,

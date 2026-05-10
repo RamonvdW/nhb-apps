@@ -6,16 +6,12 @@
 
 from .competitie import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMatch,
                          get_competitie_boog_typen, get_competitie_indiv_leeftijdsklassen)
-from .laag_regio import (Regiocompetitie, RegiocompetitieRonde, RegiocompetitieSporterBoog, RegiocompetitieTeam,
-                         RegiocompetitieTeamPoule, RegiocompetitieRondeTeam)
 from .mutatie import CompetitieMutatie, CompetitieTaken, update_uitslag_teamcompetitie
 
 
 __all__ = [
     'Competitie', 'CompetitieIndivKlasse', 'CompetitieTeamKlasse', 'CompetitieMatch',
     'get_competitie_boog_typen', 'get_competitie_indiv_leeftijdsklassen',
-    'Regiocompetitie', 'RegiocompetitieRonde', 'RegiocompetitieSporterBoog', 'RegiocompetitieTeam',
-    'RegiocompetitieTeamPoule', 'RegiocompetitieRondeTeam',
     'CompetitieMutatie', 'CompetitieTaken', 'update_uitslag_teamcompetitie'
 ]
 

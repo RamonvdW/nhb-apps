@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2024 Ramon van der Winkel.
+#  Copyright (c) 2022-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -9,7 +9,7 @@ from django.urls import reverse
 from django.views.generic import TemplateView
 from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.models import Regiocompetitie, RegiocompetitieSporterBoog
+from CompLaagRegio.models import RegioComp, RegioDeelnemer
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
 
@@ -85,9 +85,9 @@ class ToonMedailles(UserPassesTestMixin, TemplateView):
 
         uitslag = list()
 
-        deelnemers = (RegiocompetitieSporterBoog
+        deelnemers = (RegioDeelnemer
                       .objects
-                      .filter(regiocompetitie=deelcomp,
+                      .filter(regiocomp=deelcomp,
                               aantal_scores__gte=min_aantal_scores)
                       .exclude(indiv_klasse__is_onbekend=True)
                       .select_related('sporterboog__sporter',
@@ -157,7 +157,7 @@ class ToonMedailles(UserPassesTestMixin, TemplateView):
             regio_nr = int(str(kwargs['regio'][:3]))       # afkappen voor de veiligheid
             # niet nodig om te filteren op is_afgesloten=True
             # want het kaartje wordt toch pas getoond bij is_afgesloten=True
-            deelcomps = (Regiocompetitie
+            deelcomps = (RegioComp
                          .objects
                          .select_related('competitie')
                          .filter(competitie__afstand=self.functie_nu.comp_type,

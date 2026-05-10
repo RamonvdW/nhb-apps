@@ -5,7 +5,8 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management.base import BaseCommand
-from Competitie.models import Regiocompetitie, RegiocompetitieRonde, CompetitieMatch
+from Competitie.models import CompetitieMatch
+from CompLaagRegio.models import RegioComp, RegioRonde
 import csv
 
 
@@ -25,12 +26,12 @@ class Command(BaseCommand):
         regio_nr = options['regio_nr']
         out_fname = options['out_fname']
 
-        regiocomp = Regiocompetitie.objects.get(regio__regio_nr=regio_nr, competitie__afstand=afstand)
+        regiocomp = RegioComp.objects.get(regio__regio_nr=regio_nr, competitie__afstand=afstand)
 
         pks = list()
-        for pk in (RegiocompetitieRonde
+        for pk in (RegioRonde
                    .objects
-                   .filter(regiocompetitie=regiocomp)
+                   .filter(regiocomp=regiocomp)
                    .prefetch_related('matches')
                    .values_list('matches__pk', flat=True)):
             pks.append(pk)

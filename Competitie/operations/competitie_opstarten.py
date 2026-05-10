@@ -7,11 +7,11 @@
 from django.utils import timezone
 from BasisTypen.models import TemplateCompetitieIndivKlasse, TemplateCompetitieTeamKlasse
 from Competitie.definities import AFSTANDEN
-from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
-                               Regiocompetitie, RegiocompetitieRonde)
+from Competitie.models import Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse
 from Competitie.seizoenen import seizoen_cache
 from CompLaagBond.models import KampBK
 from CompLaagRayon.models import KampRK
+from CompLaagRegio.models import RegioComp, RegioRonde
 from Functie.models import Functie
 from Geo.models import Rayon, Regio
 from Score.definities import AG_NUL
@@ -60,9 +60,9 @@ def bepaal_volgende_week_nummer(deelcomp, cluster):
         last_week_in_year = 53
 
     # zoek de bestaande records
-    objs = (RegiocompetitieRonde
+    objs = (RegioRonde
             .objects
-            .filter(regiocompetitie=deelcomp,
+            .filter(regiocomp=deelcomp,
                     cluster=cluster))
 
     nrs = list()
@@ -101,10 +101,10 @@ def maak_regiocompetitie_ronde(deelcomp, cluster=None, mag_database_wijzigen=Fal
 
     if nieuwe_week_nr:
         # maak een eigen wedstrijdenplan aan voor deze ronde
-        ronde = RegiocompetitieRonde()
-        ronde.regiocompetitie = deelcomp
-        ronde.cluster = cluster
-        ronde.week_nr = nieuwe_week_nr
+        ronde = RegioRonde(
+                    regiocomp=deelcomp,
+                    cluster=cluster,
+                    week_nr=nieuwe_week_nr)
 
         if mag_database_wijzigen:
             ronde.save()
@@ -121,7 +121,7 @@ def _maak_regiocompetities(comp, regios, functies):
 
     # zoek de voorgaande regiocompetities erbij om instellingen over te kunnen nemen
     vorige_deelcomps = dict()   # [regio_nr] = DeelCompetitie()
-    for deelcomp in (Regiocompetitie
+    for deelcomp in (RegioComp
                      .objects
                      .select_related('competitie',
                                      'regio')
@@ -137,10 +137,10 @@ def _maak_regiocompetities(comp, regios, functies):
     bulk = list()
     for obj in regios:
         functie = functies[("RCL", comp.afstand, obj.regio_nr)]
-        deel = Regiocompetitie(competitie=comp,
-                               regio=obj,
-                               functie=functie,
-                               begin_fase_D=begin_fase_d)
+        deel = RegioComp(competitie=comp,
+                         regio=obj,
+                         functie=functie,
+                         begin_fase_D=begin_fase_d)
         try:
             vorige = vorige_deelcomps[obj.regio_nr]
         except KeyError:
@@ -155,7 +155,7 @@ def _maak_regiocompetities(comp, regios, functies):
         bulk.append(deel)
     # for
 
-    Regiocompetitie.objects.bulk_create(bulk)
+    RegioComp.objects.bulk_create(bulk)
 
 
 def _maak_kampioenschappen(comp, rayons, functies):

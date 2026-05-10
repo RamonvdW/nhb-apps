@@ -11,7 +11,7 @@ from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.models import Regiocompetitie, RegiocompetitieTeam, RegiocompetitieTeamPoule
+from CompLaagRegio.models import RegioComp, RegioTeam, RegioPoule
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
 
@@ -51,13 +51,13 @@ class RegioPoulesView(UserPassesTestMixin, TemplateView):
 
         try:
             deelcomp_pk = int(kwargs['deelcomp_pk'][:7])    # afkappen voor de veiligheid
-            deelcomp = (Regiocompetitie
+            deelcomp = (RegioComp
                         .objects
                         .select_related('competitie',
                                         'regio',
                                         'regio__rayon')
                         .get(pk=deelcomp_pk))
-        except (ValueError, Regiocompetitie.DoesNotExist):
+        except (ValueError, RegioComp.DoesNotExist):
             raise Http404('Competitie niet gevonden')
 
         if deelcomp.regio != self.functie_nu.regio:
@@ -75,10 +75,10 @@ class RegioPoulesView(UserPassesTestMixin, TemplateView):
 
         context['readonly'] = readonly
 
-        poules = (RegiocompetitieTeamPoule
+        poules = (RegioPoule
                   .objects
                   .prefetch_related('teams')
-                  .filter(regiocompetitie=deelcomp)
+                  .filter(regiocomp=deelcomp)
                   .annotate(team_count=Count('teams'))
                   .order_by('beschrijving', 'pk'))
 
@@ -93,9 +93,9 @@ class RegioPoulesView(UserPassesTestMixin, TemplateView):
 
         context['poules'] = poules
 
-        teams = (RegiocompetitieTeam
+        teams = (RegioTeam
                  .objects
-                 .filter(regiocompetitie=deelcomp)
+                 .filter(regiocomp=deelcomp)
                  .select_related('team_klasse')
                  .order_by('team_klasse__volgorde'))
 
@@ -127,13 +127,13 @@ class RegioPoulesView(UserPassesTestMixin, TemplateView):
         """ maak een nieuwe poule aan """
         try:
             deelcomp_pk = int(kwargs['deelcomp_pk'][:7])    # afkappen voor de veiligheid
-            deelcomp = (Regiocompetitie
+            deelcomp = (RegioComp
                         .objects
                         .select_related('competitie',
                                         'regio',
                                         'regio__rayon')
                         .get(pk=deelcomp_pk))
-        except (ValueError, Regiocompetitie.DoesNotExist):
+        except (ValueError, RegioComp.DoesNotExist):
             raise Http404('Competitie niet gevonden')
 
         if deelcomp.regio != self.functie_nu.regio:
@@ -149,15 +149,15 @@ class RegioPoulesView(UserPassesTestMixin, TemplateView):
         if readonly:
             raise Http404('Poules kunnen niet meer aangepast worden')
 
-        aantal = (RegiocompetitieTeamPoule
+        aantal = (RegioPoule
                   .objects
-                  .filter(regiocompetitie=deelcomp)
+                  .filter(regiocomp=deelcomp)
                   .count())
         nummer = aantal + 1
 
         # maak een nieuwe poule aan
-        RegiocompetitieTeamPoule(
-                regiocompetitie=deelcomp,
+        RegioPoule(
+                regiocomp=deelcomp,
                 beschrijving='poule %s' % nummer).save()
 
         url = reverse('CompLaagRegio:regio-poules',
@@ -189,17 +189,17 @@ class WijzigPouleView(UserPassesTestMixin, TemplateView):
 
         try:
             poule_pk = int(kwargs['poule_pk'][:7])      # afkappen voor de veiligheid
-            poule = (RegiocompetitieTeamPoule
+            poule = (RegioPoule
                      .objects
-                     .select_related('regiocompetitie',
-                                     'regiocompetitie__regio',
-                                     'regiocompetitie__competitie')
+                     .select_related('regiocomp',
+                                     'regiocomp__regio',
+                                     'regiocomp__competitie')
                      .prefetch_related('teams')
                      .get(pk=poule_pk))
-        except (ValueError, RegiocompetitieTeamPoule.DoesNotExist):
+        except (ValueError, RegioPoule.DoesNotExist):
             raise Http404('Poule bestaat niet')
 
-        deelcomp = poule.regiocompetitie
+        deelcomp = poule.regiocomp
         if deelcomp.regio != self.functie_nu.regio:
             raise PermissionDenied('Niet de beheerder van deze regio')
 
@@ -214,13 +214,13 @@ class WijzigPouleView(UserPassesTestMixin, TemplateView):
 
         team_pks = list(poule.teams.values_list('pk', flat=True))
 
-        teams = (RegiocompetitieTeam
+        teams = (RegioTeam
                  .objects
                  .select_related('team_klasse',
                                  'team_type',
                                  'vereniging')
-                 .prefetch_related('regiocompetitieteampoule_set')
-                 .filter(regiocompetitie=deelcomp)
+                 .prefetch_related('regiopoule_set')
+                 .filter(regiocomp=deelcomp)
                  .order_by('team_klasse__volgorde',
                            'vereniging__ver_nr',
                            'volg_nr'))
@@ -229,7 +229,7 @@ class WijzigPouleView(UserPassesTestMixin, TemplateView):
             if team.pk in team_pks:
                 team.geselecteerd = True
             else:
-                if team.regiocompetitieteampoule_set.count():
+                if team.regiopoule_set.count():
                     team.in_andere_poule = True
 
             team.team_str = '[%s] %s' % (team.vereniging.ver_nr, team.team_naam)
@@ -260,15 +260,15 @@ class WijzigPouleView(UserPassesTestMixin, TemplateView):
 
         try:
             poule_pk = int(kwargs['poule_pk'][:7])      # afkappen voor de veiligheid
-            poule = (RegiocompetitieTeamPoule
+            poule = (RegioPoule
                      .objects
-                     .select_related('regiocompetitie')
+                     .select_related('regiocomp')
                      .prefetch_related('teams')
                      .get(pk=poule_pk))
-        except (ValueError, RegiocompetitieTeamPoule.DoesNotExist):
+        except (ValueError, RegioPoule.DoesNotExist):
             raise Http404('Poule bestaat niet')
 
-        deelcomp = poule.regiocompetitie
+        deelcomp = poule.regiocomp
         if deelcomp.regio != self.functie_nu.regio:
             raise PermissionDenied('Niet de beheerder van deze regio')
 
@@ -294,21 +294,21 @@ class WijzigPouleView(UserPassesTestMixin, TemplateView):
             if mag_koppelen:
                 gekozen = list()
                 afk2teams = dict()
-                for team in (RegiocompetitieTeam
+                for team in (RegioTeam
                              .objects
                              .select_related('team_type')
-                             .filter(regiocompetitie=deelcomp)
-                             .prefetch_related('regiocompetitieteampoule_set')):
+                             .filter(regiocomp=deelcomp)
+                             .prefetch_related('regiopoule_set')):
 
                     sel_str = 'team_%s' % team.pk
                     if request.POST.get(sel_str, ''):
                         kies = False
 
-                        if team.regiocompetitieteampoule_set.count() == 0:
+                        if team.regiopoule_set.count() == 0:
                             # nog niet in te een poule, dus mag gekozen worden
                             kies = True
                         else:
-                            if team.regiocompetitieteampoule_set.all()[0].pk == poule.pk:
+                            if team.regiopoule_set.all()[0].pk == poule.pk:
                                 # herverkozen in dezelfde poule
                                 kies = True
 

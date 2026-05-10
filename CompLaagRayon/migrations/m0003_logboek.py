@@ -8,6 +8,7 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
+
     """ Migratie class voor dit deel van de applicatie """
 
     # volgorde afdwingen

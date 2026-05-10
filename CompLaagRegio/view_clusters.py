@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -11,7 +11,7 @@ from django.views.generic import TemplateView
 from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
-from Competitie.models import Regiocompetitie
+from CompLaagRegio.models import RegioComp
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
 from Geo.models import Cluster
@@ -107,13 +107,13 @@ class WijzigClustersView(UserPassesTestMixin, TemplateView):
         context['email_tech_support'] = settings.EMAIL_TECH_SUPPORT
 
         try:
-            regiocompetitie = (Regiocompetitie
+            regiocompetitie = (RegioComp
                                .objects
                                .filter(regio=self.functie_nu.regio,
                                        competitie__afstand=self.functie_nu.comp_type)
                                .order_by('-competitie__begin_jaar')     # hoogste (nieuwste) eerst
                                .first())
-        except Regiocompetitie.DoesNotExist:
+        except RegioComp.DoesNotExist:
             # geen competitie gevonden, dus ga naar de keuze pagina
             context['kruimels'] = (
                 (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
@@ -226,13 +226,13 @@ class WijzigClustersView(UserPassesTestMixin, TemplateView):
         url = reverse('Competitie:kies')
 
         try:
-            regiocompetitie = (Regiocompetitie
+            regiocompetitie = (RegioComp
                                .objects
                                .filter(regio=self.functie_nu.regio,
                                        competitie__afstand=self.functie_nu.comp_type)
                                .order_by('-competitie__begin_jaar')     # hoogste (nieuwste) eerst
                                .first())
-        except Regiocompetitie.DoesNotExist:
+        except RegioComp.DoesNotExist:
             pass
         else:
             # link terug naar de specifieke competitie

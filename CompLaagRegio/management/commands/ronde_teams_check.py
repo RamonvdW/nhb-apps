@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2024 Ramon van der Winkel.
+#  Copyright (c) 2021-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management.base import BaseCommand
-from Competitie.models import RegiocompetitieRondeTeam
+from CompLaagRegio.models import RegioRondeTeam
 
 
 class Command(BaseCommand):
@@ -19,17 +19,17 @@ class Command(BaseCommand):
 
         count = dict()      # [(comp_pk, regio_nr)] = [ronde_nr] = aantal
 
-        for ronde_team in (RegiocompetitieRondeTeam
+        for ronde_team in (RegioRondeTeam
                            .objects
-                           .select_related('team__regiocompetitie__competitie',
-                                           'team__regiocompetitie__regio',
+                           .select_related('team__regiocomp__competitie',
+                                           'team__regiocomp__regio',
                                            'team__team_type',
                                            'team__vereniging')
-                           .order_by('team__regiocompetitie__competitie',
+                           .order_by('team__regiocomp__competitie',
                                      'ronde_nr',
                                      'team__pk')):
 
-            tup = (ronde_team.team.regiocompetitie.competitie.pk,
+            tup = (ronde_team.team.regiocomp.competitie.pk,
                    ronde_team.ronde_nr,
                    ronde_team.team.vereniging.ver_nr,
                    ronde_team.team.team_type.pk,
@@ -41,7 +41,7 @@ class Command(BaseCommand):
                 found[tup] = ronde_team
             else:
                 # dubbele!
-                self.stdout.write('Dupe team in %s' % ronde_team.team.regiocompetitie)
+                self.stdout.write('Dupe team in %s' % ronde_team.team.regiocomp)
                 self.stdout.write('   %s' % other_team)
                 for line in other_team.logboek.split('\n'):
                     self.stdout.write('       %s' % line)
@@ -51,8 +51,8 @@ class Command(BaseCommand):
 
             del tup
 
-            tup2 = (ronde_team.team.regiocompetitie.competitie.pk,
-                    ronde_team.team.regiocompetitie.regio.regio_nr)
+            tup2 = (ronde_team.team.regiocomp.competitie.pk,
+                    ronde_team.team.regiocomp.regio.regio_nr)
 
             try:
                 count[tup2][ronde_team.ronde_nr] += 1

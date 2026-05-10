@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2025 Ramon van der Winkel.
+#  Copyright (c) 2025-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from Competitie.models import Competitie, Regiocompetitie, RegiocompetitieRonde
+from Competitie.models import Competitie
 from Competitie.operations.competitie_opstarten import bepaal_volgende_week_nummer
+from CompLaagRegio.models import RegioComp, RegioRonde
 from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -35,14 +36,14 @@ class TestCompetitieOperationsCompetitieOpstarten(E2EHelpers, TestCase):
                     begin_jaar=2019)
         self.comp.save()
 
-        self.deelcomp = Regiocompetitie(
+        self.deelcomp = RegioComp(
                             competitie=self.comp,
                             regio=regio_111,
                             functie=func_rcl)
         self.deelcomp.save()
 
-        self.ronde = RegiocompetitieRonde(
-                            regiocompetitie=self.deelcomp,
+        self.ronde = RegioRonde(
+                            regiocomp=self.deelcomp,
                             cluster=self.cluster,
                             week_nr=1,
                             beschrijving='test ronde 1')
@@ -78,14 +79,14 @@ class TestCompetitieOperationsCompetitieOpstarten(E2EHelpers, TestCase):
         self.assertEqual(nr, 53)
 
         # geen rondes
-        RegiocompetitieRonde.objects.all().delete()
+        RegioRonde.objects.all().delete()
         nr = bepaal_volgende_week_nummer(self.deelcomp, self.cluster)
         self.assertEqual(nr, 37)
 
         # te veel rondes
         for lp in range(16):
-            ronde = RegiocompetitieRonde(
-                            regiocompetitie=self.deelcomp,
+            ronde = RegioRonde(
+                            regiocomp=self.deelcomp,
                             cluster=self.cluster,
                             week_nr=1 + lp,
                             beschrijving='test ronde %s' % (lp + 1))

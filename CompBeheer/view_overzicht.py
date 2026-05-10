@@ -10,7 +10,7 @@ from django.views.generic import TemplateView
 from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from CompBeheer.operations.toegang import is_competitie_openbaar_voor_rol
-from Competitie.models import Competitie, Regiocompetitie
+from Competitie.models import Competitie
 from Competitie.tijdlijn import maak_comp_fase_beschrijvingen
 from CompBeheer.plugin_overzicht import get_kaartjes_beheer
 from CompLaagBond.models import KampBK
@@ -18,6 +18,7 @@ from CompLaagBond.plugin_overzicht import get_kaartjes_bond
 from CompLaagRegio.plugin_overzicht import get_kaartjes_regio
 from CompLaagRayon.models import KampRK
 from CompLaagRayon.plugin_overzicht import get_kaartjes_rayon
+from CompLaagRegio.models import RegioComp
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
 from Taken.operations import eval_open_taken
@@ -69,7 +70,7 @@ class CompetitieBeheerView(UserPassesTestMixin, TemplateView):
             context['rol_is_klaar'] = True
 
             # toon de competitie waar de functie een rol in heeft of had (BKO/RKO/RCL)
-            for deelcomp in (Regiocompetitie
+            for deelcomp in (RegioComp
                              .objects
                              .filter(competitie=comp,
                                      functie=self.functie_nu)):

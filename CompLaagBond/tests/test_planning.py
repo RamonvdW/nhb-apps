@@ -6,9 +6,10 @@
 
 from django.test import TestCase
 from django.utils import timezone
-from Competitie.models import CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMatch, Regiocompetitie
+from Competitie.models import CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMatch
 from CompLaagBond.models import KampBK
 from CompLaagRayon.models import KampRK
+from CompLaagRegio.models import RegioComp
 from Functie.tests.helpers import maak_functie
 from Locatie.models import WedstrijdLocatie
 from Score.models import Uitslag
@@ -136,10 +137,10 @@ class TestCompLaagBondPlanning(E2EHelpers, TestCase):
         self.deelkamp_bk_18 = KampBK.objects.filter(competitie=self.testdata.comp18).first()
         self.deelcomp_rayon1_18 = KampRK.objects.filter(competitie=self.testdata.comp18,
                                                         rayon=self.rayon_1).first()
-        self.deelcomp_regio_101 = Regiocompetitie.objects.filter(competitie=self.testdata.comp18,
-                                                                 regio=self.regio_101).first()
-        self.deelcomp_regio_105 = Regiocompetitie.objects.filter(competitie=self.testdata.comp18,
-                                                                 regio=self.regio_105).first()
+        self.deelcomp_regio_101 = RegioComp.objects.filter(competitie=self.testdata.comp18,
+                                                           regio=self.regio_101).first()
+        self.deelcomp_regio_105 = RegioComp.objects.filter(competitie=self.testdata.comp18,
+                                                           regio=self.regio_105).first()
 
         self.functie_bko_18 = self.deelkamp_bk_18.functie
         self.functie_bko_18.accounts.add(self.account_bko_18)

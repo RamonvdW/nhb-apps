@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2024 Ramon van der Winkel.
+#  Copyright (c) 2021-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management.base import BaseCommand
 from Competitie.definities import TEAM_PUNTEN_MODEL_FORMULE1
-from Competitie.models import RegiocompetitieTeamPoule, RegiocompetitieRondeTeam
+from CompLaagRegio.models import RegioPoule, RegioRondeTeam
 
 
 class Command(BaseCommand):
@@ -43,21 +43,21 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
 
-        for poule in (RegiocompetitieTeamPoule
+        for poule in (RegioPoule
                       .objects
-                      .filter(regiocompetitie__regio_team_punten_model=TEAM_PUNTEN_MODEL_FORMULE1)
-                      .order_by('regiocompetitie__competitie',
-                                'regiocompetitie__regio__regio_nr',
+                      .filter(regiocomp__regio_team_punten_model=TEAM_PUNTEN_MODEL_FORMULE1)
+                      .order_by('regiocomp__competitie',
+                                'regiocomp__regio__regio_nr',
                                 'beschrijving')):
 
-            self.deelcomp_poule_msg = "%s poule %s: %s" % (poule.regiocompetitie, poule.pk, poule)
+            self.deelcomp_poule_msg = "%s poule %s: %s" % (poule.regiocomp, poule.pk, poule)
 
             # poule bevat teams
             team_pks = list(poule.teams.values_list('pk', flat=True))
 
             # teams hebben rondes
             prev_ronde = -1
-            for team_ronde in (RegiocompetitieRondeTeam
+            for team_ronde in (RegioRondeTeam
                                .objects
                                .filter(team__pk__in=team_pks)
                                .order_by('ronde_nr',

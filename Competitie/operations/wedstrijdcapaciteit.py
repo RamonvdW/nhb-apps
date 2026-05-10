@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2024 Ramon van der Winkel.
+#  Copyright (c) 2021-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db.models import Q
 from BasisTypen.definities import BLAZOEN2STR, BLAZOEN_40CM, BLAZOEN_60CM, BLAZOEN_60CM_4SPOT, BLAZOEN_DT
 from Competitie.definities import INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2
-from Competitie.models import RegiocompetitieSporterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam
+from CompLaagRegio.models import RegioDeelnemer, RegioTeam, RegioRondeTeam
 from Sporter.models import SporterVoorkeuren
 from types import SimpleNamespace
 import math
@@ -29,7 +29,7 @@ def _query_wedstrijd_deelnemers(afstand, deelcomp, match):
     if deelcomp.inschrijf_methode == INSCHRIJF_METHODE_1:
         # specifiek aangemelde individuele sporters
         deelnemers_indiv = (match
-                            .regiocompetitiesporterboog_set
+                            .regiodeelnemer_set
                             .select_related('indiv_klasse',
                                             'sporterboog',
                                             'sporterboog__boogtype',
@@ -37,9 +37,9 @@ def _query_wedstrijd_deelnemers(afstand, deelcomp, match):
                                             'sporterboog__sporter__bij_vereniging'))
 
         if deelcomp.regio_organiseert_teamcompetitie:
-            deelnemers_teams = (RegiocompetitieTeam
+            deelnemers_teams = (RegioTeam
                                 .objects
-                                .filter(regiocompetitie=deelcomp)
+                                .filter(regiocomp=deelcomp)
                                 .prefetch_related('team_type__boog_typen')
                                 .select_related('vereniging',
                                                 'team_type',
@@ -54,9 +54,9 @@ def _query_wedstrijd_deelnemers(afstand, deelcomp, match):
                 ver_pks = clusters[0].vereniging_set.values_list('pk', flat=True)
 
         if len(ver_pks):
-            deelnemers_indiv = (RegiocompetitieSporterBoog
+            deelnemers_indiv = (RegioDeelnemer
                                 .objects
-                                .filter(regiocompetitie=deelcomp,
+                                .filter(regiocomp=deelcomp,
                                         bij_vereniging__in=ver_pks)
                                 .select_related('indiv_klasse',
                                                 'bij_vereniging',
@@ -66,9 +66,9 @@ def _query_wedstrijd_deelnemers(afstand, deelcomp, match):
                                                 'sporterboog__sporter__bij_vereniging'))
 
             if deelcomp.regio_organiseert_teamcompetitie:
-                deelnemers_teams = (RegiocompetitieTeam
+                deelnemers_teams = (RegioTeam
                                     .objects
-                                    .filter(regiocompetitie=deelcomp,
+                                    .filter(regiocomp=deelcomp,
                                             vereniging__in=ver_pks)
                                     .prefetch_related('team_type__boog_typen')
                                     .select_related('vereniging',
@@ -76,9 +76,9 @@ def _query_wedstrijd_deelnemers(afstand, deelcomp, match):
                                                     'team_klasse'))
         else:
             # fall-back: alle sporters in de hele regio
-            deelnemers_indiv = (RegiocompetitieSporterBoog
+            deelnemers_indiv = (RegioDeelnemer
                                 .objects
-                                .filter(regiocompetitie=deelcomp)
+                                .filter(regiocomp=deelcomp)
                                 .select_related('indiv_klasse',
                                                 'bij_vereniging',
                                                 'sporterboog',
@@ -87,9 +87,9 @@ def _query_wedstrijd_deelnemers(afstand, deelcomp, match):
                                                 'sporterboog__sporter__bij_vereniging'))
 
             if deelcomp.regio_organiseert_teamcompetitie:
-                deelnemers_teams = (RegiocompetitieTeam
+                deelnemers_teams = (RegioTeam
                                     .objects
-                                    .filter(regiocompetitie=deelcomp)
+                                    .filter(regiocomp=deelcomp)
                                     .prefetch_related('team_type__boog_typen')
                                     .select_related('vereniging',
                                                     'team_type',
@@ -102,7 +102,7 @@ def _query_wedstrijd_deelnemers(afstand, deelcomp, match):
                 # team klassen
                 team_pks = match.team_klassen.values_list('pk', flat=True)
                 # TODO: moet dit feitelijke sporters zijn??
-                leden_pks = (RegiocompetitieTeam
+                leden_pks = (RegioTeam
                              .objects
                              .filter(team_klasse__pk__in=team_pks)
                              .values_list('leden__pk', flat=True))
@@ -178,11 +178,11 @@ def bepaal_waarschijnlijke_deelnemers(afstand, deelcomp, wedstrijd):
     # bepaal voor elke deelnemer in welk team hij feitelijk zit in deze ronde
     # dit is goedkoper dan per deelnemer een reverse query te doen (deelnemer.teamronde_feitelijk...)
     deelnemer_pk2team_pk = dict()   # [deelnemer.pk] = team.pk
-    for rondeteam in (RegiocompetitieRondeTeam
+    for rondeteam in (RegioRondeTeam
                       .objects
                       .select_related('team')
                       .prefetch_related('deelnemers_feitelijk')
-                      .filter(team__regiocompetitie=deelcomp,
+                      .filter(team__regiocomp=deelcomp,
                               ronde_nr=deelcomp.huidige_team_ronde)):
         team_pk = rondeteam.team.pk
         for deelnemer in rondeteam.deelnemers_feitelijk.all():

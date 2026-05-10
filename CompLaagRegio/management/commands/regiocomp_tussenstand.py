@@ -12,9 +12,8 @@ from django.conf import settings
 from django.db.utils import DataError, OperationalError, IntegrityError, DEFAULT_DB_ALIAS
 from django.db.models import F, Q
 from django.core.management.base import BaseCommand
-from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTaken,
-                               Regiocompetitie, RegiocompetitieRonde, RegiocompetitieSporterBoog,
-                               RegiocompetitieTeam, RegiocompetitieRondeTeam)
+from Competitie.models import Competitie, CompetitieIndivKlasse, CompetitieTaken
+from CompLaagRegio.models import RegioComp, RegioRonde, RegioTeam, RegioRondeTeam, RegioDeelnemer
 from Score.definities import SCORE_WAARDE_VERWIJDERD
 from Score.models import ScoreHist
 import traceback
@@ -52,14 +51,14 @@ class Command(BaseCommand):
         parser.add_argument('--use-test-database', action='store_true')     # for testing
 
     def _verwerk_overstappers_regio(self, regio_comp_pks):
-        objs = (RegiocompetitieSporterBoog
+        objs = (RegioDeelnemer
                 .objects
                 .select_related('bij_vereniging',
                                 'bij_vereniging__regio',
                                 'sporterboog__sporter',
                                 'sporterboog__sporter__bij_vereniging',
                                 'sporterboog__sporter__bij_vereniging__regio')
-                .filter(regiocompetitie__competitie__pk__in=regio_comp_pks)
+                .filter(regiocomp__competitie__pk__in=regio_comp_pks)
                 .filter((~Q(bij_vereniging=F('sporterboog__sporter__bij_vereniging')) |     # bevat geen uitstappers
                          Q(sporterboog__sporter__bij_vereniging=None))))                    # bevat de uitstappers
         for obj in objs:
@@ -73,8 +72,8 @@ class Command(BaseCommand):
                 # overschrijven naar andere regiocompetitie
                 if obj.bij_vereniging.regio != sporter.bij_vereniging.regio:
                     # TODO: bij overstap naar ver in regio 100 mislukt onderstaande!
-                    obj.regiocompetitie = Regiocompetitie.objects.get(competitie=obj.regiocompetitie.competitie,
-                                                                      regio=sporter.bij_vereniging.regio)
+                    obj.regiocomp = RegioComp.objects.get(competitie=obj.regiocomp.competitie,
+                                                          regio=sporter.bij_vereniging.regio)
                 obj.bij_vereniging = sporter.bij_vereniging
                 obj.save()
         # for
@@ -87,7 +86,7 @@ class Command(BaseCommand):
         # 1. Sporter.bij_vereniging komt overeen met informatie uit CRM
 
         # 2. deelnemers in regiocompetitie kunnen elk moment overstappen
-        #    RegioCompetitieSporterBoog.bij_vereniging
+        #    RegioDeelnemer.bij_vereniging
         # FUTURE: voor de teamcompetitie moet dit pas gebeuren nadat de teamscores vastgesteld zijn
 
         # 3. Bij vaststellen RK/BK deelname/reserve wordt vereniging bevroren (afsluiten fase G)
@@ -179,18 +178,18 @@ class Command(BaseCommand):
         self.taken.save(update_fields=['hoogste_scorehist'])
         self.stdout.write('[INFO] nieuwe hoogste ScoreHist pk is %s' % self.taken.hoogste_scorehist.pk)
 
-        # een regiocompetitie heeft ingeschreven schuttersboog (RegioCompetitieSporterBoog);
-        # een regiocompetitie bestaat uit rondes (RegioCompetitieRonde);
+        # een regiocompetitie heeft ingeschreven deelnemer
+        # een regiocompetitie bestaat uit rondes (RegioRonde);
         # elke ronde bevat een plan met wedstrijden;
         # wedstrijden hebben een datum;
         # wedstrijden hebben een uitslag met scores;
         # scores refereren aan een sporterboog;
         # schutters kunnen in een wedstrijd buiten hun ingeschreven rayon geschoten hebben
         rondes = list()
-        for ronde in (RegiocompetitieRonde
+        for ronde in (RegioRonde
                       .objects
-                      .select_related('regiocompetitie')
-                      # .filter(regiocompetitie__is_afgesloten=False)   # geeft problemen tijdens afsluiten met sporters die verhuisd zijn
+                      .select_related('regiocomp')
+                      # .filter(regiocomp__is_afgesloten=False)   # geeft problemen tijdens afsluiten met sporters die verhuisd zijn
                       .all()):
 
             week_nr = ronde.week_nr
@@ -274,7 +273,7 @@ class Command(BaseCommand):
 
     def _update_regiocompetitiesportersboog(self):
         count = 0
-        for deelcomp in (Regiocompetitie
+        for deelcomp in (RegioComp
                          .objects
                          .exclude(is_afgesloten=True)
                          .select_related('competitie')
@@ -291,9 +290,9 @@ class Command(BaseCommand):
                 max_score = 250
                 comp_afstand = 25
 
-            for deelnemer in (RegiocompetitieSporterBoog
+            for deelnemer in (RegioDeelnemer
                               .objects
-                              .filter(regiocompetitie=deelcomp)
+                              .filter(regiocomp=deelcomp)
                               .select_related('sporterboog')
                               .prefetch_related('scores')
                               .all()):
@@ -384,14 +383,14 @@ class Command(BaseCommand):
     def _update_team_scores():
         """ Update alle team scores aan de hand van wie er in de teams zitten en de door de RCL geselecteerde scores
         """
-        for deelcomp in Regiocompetitie.objects.filter(is_afgesloten=False):
+        for deelcomp in RegioComp.objects.filter(is_afgesloten=False):
             ronde_nr = deelcomp.huidige_team_ronde
             if 1 <= ronde_nr <= 7:
                 # pak alle teams in deze regiocompetitie erbij
-                teams = RegiocompetitieTeam.objects.filter(regiocompetitie=deelcomp).values_list('pk', flat=True)
+                teams = RegioTeam.objects.filter(regiocomp=deelcomp).values_list('pk', flat=True)
 
                 # doorloop alle ronde-teams voor de huidige ronde van de regiocompetitie
-                for ronde_team in (RegiocompetitieRondeTeam
+                for ronde_team in (RegioRondeTeam
                                    .objects
                                    .prefetch_related('scores_feitelijk')
                                    .filter(team__in=teams,
@@ -443,10 +442,10 @@ class Command(BaseCommand):
     def _update_tussenstand(self):
         begin = datetime.datetime.now()
 
-        # stap 1: alle RegioCompetitieSporterBoog.scores vaststellen
+        # stap 1: alle RegioDeelnemer.scores vaststellen
         self._vind_scores()
 
-        # stap 2: overige velden bijwerken van aangepaste RegioCompetitieSporterBoog
+        # stap 2: overige velden bijwerken van aangepaste RegioDeelnemer
         self._update_regiocompetitiesportersboog()
 
         # stap 3: teams scores bijwerken

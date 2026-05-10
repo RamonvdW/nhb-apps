@@ -13,8 +13,8 @@ from BasisTypen.definities import GESLACHT_ALLE
 from BasisTypen.models import BoogType, TeamType, Leeftijdsklasse
 from Bestelling.models import BestellingMandje, BestellingHoogsteBestelNr
 from Betaal.models import BetaalInstellingenVereniging
-from Competitie.models import (Competitie, Regiocompetitie, RegiocompetitieRonde, RegiocompetitieSporterBoog,
-                               CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMatch)
+from Competitie.models import Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMatch
+from CompLaagRegio.models import RegioComp, RegioRonde, RegioDeelnemer
 from Functie.models import Functie, VerklaringHanterenPersoonsgegevens
 from Geo.models import Regio, Rayon, Cluster
 from Locatie.models import WedstrijdLocatie
@@ -81,10 +81,10 @@ class BrowserTestCase(TestCase):
     functie_hwl: Functie = None                             # account is hwl
     webwinkel_product: WebwinkelProduct = None              # product in de webwinkel
     comp: Competitie = None
-    regio_comp: Regiocompetitie = None                      # regiocompetitie voor regio van sporter
+    regio_comp: RegioComp = None                            # regiocompetitie voor regio van sporter
     regio_match: CompetitieMatch = None
-    regio_deelnemer_r: RegiocompetitieSporterBoog = None    # RegiocompetitieSporterBoog
-    regio_deelnemer_bb: RegiocompetitieSporterBoog = None   # RegiocompetitieSporterBoog
+    regio_deelnemer_r: RegioDeelnemer = None
+    regio_deelnemer_bb: RegioDeelnemer = None
     mandje: BestellingMandje = None
     wedstrijd_1: Wedstrijd = None
     locatie_outdoor = WedstrijdLocatie = None
@@ -800,13 +800,13 @@ def database_vullen(inst):
                                 min_ag=0.0,     # sporter heeft geen AG!
                                 is_voor_teams_rk_bk=True)
 
-    inst.regio_comp = Regiocompetitie.objects.create(
+    inst.regio_comp = RegioComp.objects.create(
                             competitie=inst.comp,
                             regio=inst.regio,
                             functie=inst.functie_hwl)   # zou moeten zijn: RCL
 
-    inst.regio_ronde = RegiocompetitieRonde.objects.create(
-                            regiocompetitie=inst.regio_comp,
+    inst.regio_ronde = RegioRonde.objects.create(
+                            regiocomp=inst.regio_comp,
                             week_nr=1,
                             beschrijving='Ronde 1')
 
@@ -836,8 +836,8 @@ def database_vullen(inst):
         inst.regio_ronde.matches.add(match)
     # for
 
-    inst.regio_deelnemer_r = RegiocompetitieSporterBoog.objects.create(
-                                    regiocompetitie=inst.regio_comp,
+    inst.regio_deelnemer_r = RegioDeelnemer.objects.create(
+                                    regiocomp=inst.regio_comp,
                                     sporterboog=inst.sporterboog_r,
                                     bij_vereniging=inst.sporterboog_r.sporter.bij_vereniging,
                                     indiv_klasse=inst.klasse_indiv_r,
@@ -845,14 +845,14 @@ def database_vullen(inst):
                                     ag_voor_team_mag_aangepast_worden=True,
                                     ag_voor_team=7.0)
 
-    inst.regio_deelnemer_bb = RegiocompetitieSporterBoog.objects.create(
-                                    regiocompetitie=inst.regio_comp,
+    inst.regio_deelnemer_bb = RegioDeelnemer.objects.create(
+                                    regiocomp=inst.regio_comp,
                                     sporterboog=inst.sporterboog_bb,
                                     bij_vereniging=inst.sporterboog_bb.sporter.bij_vereniging,
                                     indiv_klasse=inst.klasse_indiv_bb)
 
-    inst.regio_deelnemer2_r = RegiocompetitieSporterBoog.objects.create(
-                                    regiocompetitie=inst.regio_comp,
+    inst.regio_deelnemer2_r = RegioDeelnemer.objects.create(
+                                    regiocomp=inst.regio_comp,
                                     sporterboog=inst.sporterboog2_r,
                                     bij_vereniging=inst.sporterboog2_r.sporter.bij_vereniging,
                                     indiv_klasse=inst.klasse_indiv_r,

@@ -109,7 +109,7 @@ class Command(BaseCommand):
         for match in CompetitieMatch.objects.all():
             in_plans1 = match.kamprk_set.all()
             in_plans2 = match.kampbk_set.all()
-            in_plans3 = match.regiocompetitieronde_set.all()
+            in_plans3 = match.regioronde_set.all()
             count = in_plans1.count() + in_plans2.count() + in_plans3.count()
             if count == 0:
                 orphan_pks.append(match.pk)

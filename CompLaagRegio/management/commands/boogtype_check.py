@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2024 Ramon van der Winkel.
+#  Copyright (c) 2021-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management.base import BaseCommand
-from Competitie.models import RegiocompetitieSporterBoog
+from CompLaagRegio.models import RegioDeelnemer
 from Sporter.models import SporterBoog
 
 
@@ -27,7 +27,7 @@ class Command(BaseCommand):
         self.stdout.write('Deelnemers met ingeschreven boogtype niet meer actief als wedstrijdboog')
         # zoek alle leden met een andere voorkeur dan ingeschreven
         prev_comp = None
-        for deelnemer in (RegiocompetitieSporterBoog
+        for deelnemer in (RegioDeelnemer
                           .objects
                           .exclude(sporterboog__boogtype__afkorting='C')        # kan toch niet overzetten
                           .filter(sporterboog__voor_wedstrijd=False,
@@ -35,12 +35,12 @@ class Command(BaseCommand):
                           .select_related('sporterboog',
                                           'sporterboog__sporter',
                                           'sporterboog__boogtype',
-                                          'regiocompetitie')
-                          .order_by('regiocompetitie',
+                                          'regiocomp')
+                          .order_by('regiocomp',
                                     'bij_vereniging',
                                     'sporterboog__sporter__lid_nr')):
 
-            deelcomp = deelnemer.regiocompetitie
+            deelcomp = deelnemer.regiocomp
             if deelcomp.competitie != prev_comp:
                 prev_comp = deelcomp.competitie
                 self.stdout.write('\n%s:' % prev_comp)

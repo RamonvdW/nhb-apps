@@ -1,18 +1,18 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2024 Ramon van der Winkel.
+#  Copyright (c) 2024-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management.base import BaseCommand
-from Competitie.models import RegiocompetitieTeam
+from CompLaagRegio.models import RegioTeam
 
 
 class Command(BaseCommand):
     help = "Controleer vereniging voor alle team leden"
 
     def handle(self, *args, **options):
-        for team in RegiocompetitieTeam.objects.select_related('vereniging'):
+        for team in RegioTeam.objects.select_related('vereniging'):
             for lid in team.leden.select_related('bij_vereniging', 'sporterboog__sporter__bij_vereniging').all():
                 if lid.bij_vereniging != team.vereniging:
                     # dit gebeurt nooit

@@ -13,8 +13,9 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
 from BasisTypen.definities import MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT
 from Competitie.definities import INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3, DAGDELEN, DAGDEEL_AFKORTINGEN
-from Competitie.models import CompetitieMatch, Regiocompetitie, RegiocompetitieRonde, RegiocompetitieSporterBoog
+from Competitie.models import CompetitieMatch
 from Competitie.operations import KlasseBepaler
+from CompLaagRegio.models import RegioComp, RegioRonde, RegioDeelnemer
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
 from Score.definities import AG_NUL, AG_DOEL_INDIV, AG_DOEL_TEAM
@@ -54,13 +55,13 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
                            .select_related('sporter')
                            .get(pk=sporterboog_pk))
 
-            deelcomp = (Regiocompetitie
+            deelcomp = (RegioComp
                         .objects
                         .select_related('competitie',
                                         'regio')
                         .get(pk=deelcomp_pk))
 
-        except (ValueError, KeyError, SporterBoog.DoesNotExist, Regiocompetitie.DoesNotExist):
+        except (ValueError, KeyError, SporterBoog.DoesNotExist, RegioComp.DoesNotExist):
             # niet bestaand record
             raise Http404('Sporter of competitie niet gevonden')
 
@@ -78,9 +79,9 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
             raise Http404('Geen valide combinatie')
 
         # voorkom dubbele aanmelding
-        if (RegiocompetitieSporterBoog
+        if (RegioDeelnemer
                 .objects
-                .filter(regiocompetitie=deelcomp,
+                .filter(regiocomp=deelcomp,
                         sporterboog=sporterboog)
                 .count() > 0):
             # al aangemeld - zie niet hier moeten zijn gekomen
@@ -109,8 +110,8 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
                 context['ag_hist'] = hist[0]
         context['ag'] = ag
 
-        aanmelding = RegiocompetitieSporterBoog(
-                            regiocompetitie=deelcomp,
+        aanmelding = RegioDeelnemer(
+                            regiocomp=deelcomp,
                             sporterboog=sporterboog,
                             ag_voor_indiv=ag)
 
@@ -143,10 +144,10 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
         if methode == INSCHRIJF_METHODE_1:
             # toon de sporter alle wedstrijden in de regio, dus alle clusters
             pks = list()
-            for ronde in (RegiocompetitieRonde
+            for ronde in (RegioRonde
                           .objects
                           .prefetch_related('matches')
-                          .filter(regiocompetitie=deelcomp)):
+                          .filter(regiocomp=deelcomp)):
                 pks.extend(ronde.matches.values_list('pk', flat=True))
             # for
 
@@ -258,12 +259,12 @@ class RegiocompetitieAanmeldenView(UserPassesTestMixin, View):
                            .select_related('sporter')
                            .get(pk=sporterboog_pk))
 
-            deelcomp = (Regiocompetitie
+            deelcomp = (RegioComp
                         .objects
                         .select_related('competitie',
                                         'regio')
                         .get(pk=deelcomp_pk))
-        except (ValueError, KeyError, SporterBoog.DoesNotExist, Regiocompetitie.DoesNotExist):
+        except (ValueError, KeyError, SporterBoog.DoesNotExist, RegioComp.DoesNotExist):
             # niet bestaand record(s)
             raise Http404('Sporter of competitie niet gevonden')
 
@@ -279,9 +280,9 @@ class RegiocompetitieAanmeldenView(UserPassesTestMixin, View):
             raise Http404('Geen valide combinatie')
 
         # voorkom dubbele aanmelding
-        if (RegiocompetitieSporterBoog
+        if (RegioDeelnemer
                 .objects
-                .filter(regiocompetitie=deelcomp,
+                .filter(regiocomp=deelcomp,
                         sporterboog=sporterboog)
                 .count() > 0):
             # al aangemeld - zie niet hier moeten zijn gekomen
@@ -305,8 +306,8 @@ class RegiocompetitieAanmeldenView(UserPassesTestMixin, View):
         age = sporterboog.sporter.bereken_wedstrijdleeftijd_wa(deelcomp.competitie.begin_jaar + 1)
 
         msg = '[%s] Zelfstandig aangemeld\n' % when_str
-        aanmelding = RegiocompetitieSporterBoog(
-                            regiocompetitie=deelcomp,
+        aanmelding = RegioDeelnemer(
+                            regiocomp=deelcomp,
                             sporterboog=sporterboog,
                             bij_vereniging=sporterboog.sporter.bij_vereniging,
                             ag_voor_indiv=AG_NUL,
@@ -387,10 +388,10 @@ class RegiocompetitieAanmeldenView(UserPassesTestMixin, View):
 
         if methode == INSCHRIJF_METHODE_1:
             pks = list()
-            for ronde in (RegiocompetitieRonde
+            for ronde in (RegioRonde
                           .objects
                           .prefetch_related('matches')
-                          .filter(regiocompetitie=deelcomp)):
+                          .filter(regiocomp=deelcomp)):
                 # sta alle wedstrijden in de regio toe, dus alle clusters
                 pks.extend(ronde.matches.values_list('pk', flat=True))
             # for
@@ -426,12 +427,12 @@ class RegiocompetitieAfmeldenView(View):
         # converteer en doe eerste controle op de parameters
         try:
             deelnemer_pk = int(kwargs['deelnemer_pk'][:7])     # afkappen voor de veiligheid
-            deelnemer = (RegiocompetitieSporterBoog
+            deelnemer = (RegioDeelnemer
                          .objects
-                         .select_related('regiocompetitie__competitie',
+                         .select_related('regiocomp__competitie',
                                          'sporterboog__sporter')
                          .get(pk=deelnemer_pk))
-        except (ValueError, KeyError, RegiocompetitieSporterBoog.DoesNotExist):
+        except (ValueError, KeyError, RegioDeelnemer.DoesNotExist):
             # niet bestaand record
             raise Http404('Inschrijving niet gevonden')
 
@@ -440,7 +441,7 @@ class RegiocompetitieAfmeldenView(View):
             raise PermissionDenied('Je kan alleen jezelf uitschrijven')
 
         # controleer de fase van de competitie
-        comp = deelnemer.regiocompetitie.competitie
+        comp = deelnemer.regiocomp.competitie
         comp.bepaal_fase()
         if comp.fase_indiv != 'C':
             raise Http404('Competitie is in de verkeerde fase')
@@ -448,7 +449,7 @@ class RegiocompetitieAfmeldenView(View):
         # schrijf de sporter uit
         try:
             deelnemer.delete()
-        except RegiocompetitieSporterBoog.DoesNotExist:
+        except RegioDeelnemer.DoesNotExist:
             # silently ignore (kan voorkomen bij parallelle posts)
             pass
 

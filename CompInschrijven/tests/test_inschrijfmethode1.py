@@ -7,11 +7,12 @@
 from django.test import TestCase
 from BasisTypen.models import BoogType
 from Competitie.definities import INSCHRIJF_METHODE_1
-from Competitie.models import Competitie, CompetitieMatch, Regiocompetitie, RegiocompetitieRonde
+from Competitie.models import Competitie, CompetitieMatch
 from Competitie.operations import competities_aanmaken
 from Competitie.test_utils.tijdlijn import zet_competitie_fase_regio_inschrijven
 from CompLaagBond.models import KampBK
 from CompLaagRayon.models import KampRK
+from CompLaagRegio.models import RegioComp, RegioRonde
 from Functie.tests.helpers import maak_functie
 from Geo.models import Rayon, Regio, Cluster
 from Sporter.models import Sporter
@@ -108,15 +109,15 @@ class TestCompInschrijvenMethode1(E2EHelpers, TestCase):
             deelkamp.functie.accounts.add(self.account_rko)
         # for
 
-        for deelcomp in Regiocompetitie.objects.filter(regio=self.regio_101).all():
+        for deelcomp in RegioComp.objects.filter(regio=self.regio_101).all():
             deelcomp.functie.accounts.add(self.account_rcl)
         # for
 
-        self.deelcomp = Regiocompetitie.objects.filter(competitie=self.comp_18,
-                                                       regio=self.regio_101)[0]
+        self.deelcomp = RegioComp.objects.filter(competitie=self.comp_18,
+                                                 regio=self.regio_101)[0]
 
-        self.functie_rcl101_18 = Regiocompetitie.objects.get(competitie=self.comp_18,
-                                                             regio=self.regio_101).functie
+        self.functie_rcl101_18 = RegioComp.objects.get(competitie=self.comp_18,
+                                                       regio=self.regio_101).functie
 
         # maak nog een test vereniging, zonder HWL functie
         ver2 = Vereniging(
@@ -164,15 +165,15 @@ class TestCompInschrijvenMethode1(E2EHelpers, TestCase):
         # doe een POST om de rondes van inschrijfmethode1 aan te maken
         # 2 cluster-specifieke rondes + 1 niet-cluster ronde
         url = self.url_planning_regio % self.deelcomp.pk
-        self.assertEqual(RegiocompetitieRonde.objects.count(), 0)
+        self.assertEqual(RegioRonde.objects.count(), 0)
         with self.assert_max_queries(23):
             resp = self.client.post(url)
         self.assert_is_redirect(resp, url)
-        self.assertEqual(RegiocompetitieRonde.objects.count(), 3)
+        self.assertEqual(RegioRonde.objects.count(), 3)
 
-        ronde_pk = (RegiocompetitieRonde
+        ronde_pk = (RegioRonde
                     .objects
-                    .filter(regiocompetitie=self.deelcomp,
+                    .filter(regiocomp=self.deelcomp,
                             cluster=self.cluster_101a)
                     .first()).pk
         url_ronde = self.url_planning_regio_ronde_methode1 % ronde_pk
@@ -211,9 +212,9 @@ class TestCompInschrijvenMethode1(E2EHelpers, TestCase):
         # maak 2e keus wedstrijden voor inschrijfmethode 1
         # maak 4 wedstrijden aan voor de vereniging in cluster 101b
 
-        ronde_pk = (RegiocompetitieRonde
+        ronde_pk = (RegioRonde
                     .objects
-                    .filter(regiocompetitie=self.deelcomp,
+                    .filter(regiocomp=self.deelcomp,
                             cluster=self.cluster_101b)
                     .first()).pk
         url_ronde = self.url_planning_regio_ronde_methode1 % ronde_pk
@@ -413,8 +414,8 @@ class TestCompInschrijvenMethode1(E2EHelpers, TestCase):
 
     def test_bad_rcl(self):
         comp = Competitie.objects.get(afstand='25')
-        functie_rcl = Regiocompetitie.objects.get(competitie=comp,
-                                                  regio=self.regio_101).functie
+        functie_rcl = RegioComp.objects.get(competitie=comp,
+                                            regio=self.regio_101).functie
 
         self.e2e_login_and_pass_otp(self.account_rcl)
         self.e2e_wissel_naar_functie(functie_rcl)

@@ -15,8 +15,8 @@ from Account.models import get_account
 from BasisTypen.definities import ORGANISATIE_WA
 from BasisTypen.models import BoogType
 from Bestelling.models import Bestelling
-from Competitie.models import RegiocompetitieSporterBoog
 from Competitie.plugin_sporter import get_sporter_competities
+from CompLaagRegio.models import RegioDeelnemer
 from Evenement.definities import EVENEMENT_INSCHRIJVING_STATUS_DEFINITIEF
 from Evenement.models import EvenementInschrijving
 from Evenement.view_inschrijven import splits_evenement_workshop_keuzes
@@ -266,17 +266,17 @@ class ProfielView(UserPassesTestMixin, TemplateView):
     def _find_regio_scores(self):
         scores = list()
 
-        for deelnemer in (RegiocompetitieSporterBoog
+        for deelnemer in (RegioDeelnemer
                           .objects
-                          .select_related('regiocompetitie',
-                                          'regiocompetitie__competitie',
+                          .select_related('regiocomp',
+                                          'regiocomp__competitie',
                                           'sporterboog',
                                           'sporterboog__boogtype')
                           .filter(sporterboog__sporter=self.sporter,
-                                  regiocompetitie__competitie__is_afgesloten=False)
-                          .order_by('regiocompetitie__competitie__afstand')):
+                                  regiocomp__competitie__is_afgesloten=False)
+                          .order_by('regiocomp__competitie__afstand')):
 
-            comp = deelnemer.regiocompetitie.competitie
+            comp = deelnemer.regiocomp.competitie
 
             # na afsluiten BK wordt de histcomp voor het seizoen openbaar gemaakt
             # tussen afsluiten BK en afsluiten competitie de regio scores dus niet meer tonen

@@ -13,7 +13,8 @@ from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.definities import (INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2, TEAM_PUNTEN,
                                    TEAM_PUNTEN_MODEL_FORMULE1, TEAM_PUNTEN_MODEL_TWEE, TEAM_PUNTEN_MODEL_SOM_SCORES)
-from Competitie.models import Competitie, Regiocompetitie, RegiocompetitieRonde
+from Competitie.models import Competitie
+from CompLaagRegio.models import RegioComp, RegioRonde
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
 from Geo.models import Cluster
@@ -50,13 +51,13 @@ class RegioInstellingenView(UserPassesTestMixin, TemplateView):
         try:
             regio_nr = int(kwargs['regio_nr'][:7])  # afkappen voor de veiligheid
             comp_pk = int(kwargs['comp_pk'][:7])    # afkappen voor de veiligheid
-            deelcomp = (Regiocompetitie
+            deelcomp = (RegioComp
                         .objects
                         .select_related('competitie',
                                         'regio')
                         .get(competitie=comp_pk,
                              regio__regio_nr=regio_nr))
-        except (ValueError, Regiocompetitie.DoesNotExist):
+        except (ValueError, RegioComp.DoesNotExist):
             raise Http404('Competitie niet gevonden')
 
         if deelcomp.functie != self.functie_nu:
@@ -131,12 +132,12 @@ class RegioInstellingenView(UserPassesTestMixin, TemplateView):
         try:
             regio_nr = int(kwargs['regio_nr'][:7])  # afkappen voor de veiligheid
             comp_pk = int(kwargs['comp_pk'][:7])    # afkappen voor de veiligheid
-            deelcomp = (Regiocompetitie
+            deelcomp = (RegioComp
                         .objects
                         .select_related('competitie', 'regio')
                         .get(competitie=comp_pk,
                              regio__regio_nr=regio_nr))
-        except (ValueError, Regiocompetitie.DoesNotExist):
+        except (ValueError, RegioComp.DoesNotExist):
             raise Http404('Competitie niet gevonden')
 
         if deelcomp.functie != self.functie_nu:
@@ -216,13 +217,13 @@ class RegioInstellingenGlobaalView(UserPassesTestMixin, TemplateView):
 
     def _zoek_clusters(self, afstand: str):
         self.regio2clusters = dict()
-        for ronde in (RegiocompetitieRonde
+        for ronde in (RegioRonde
                       .objects
                       .exclude(cluster=None)
-                      .filter(regiocompetitie__competitie__afstand=afstand)
-                      .select_related('regiocompetitie__regio')):
+                      .filter(regiocomp__competitie__afstand=afstand)
+                      .select_related('regiocomp__regio')):
 
-            regio_nr = ronde.regiocompetitie.regio.regio_nr
+            regio_nr = ronde.regiocomp.regio.regio_nr
             self.regio2clusters[regio_nr] = self.regio2clusters.get(regio_nr, 0) + 1
         # for
 
@@ -238,7 +239,7 @@ class RegioInstellingenGlobaalView(UserPassesTestMixin, TemplateView):
 
         self._zoek_clusters(comp.afstand)
 
-        deelcomps = (Regiocompetitie
+        deelcomps = (RegioComp
                      .objects
                      .select_related('competitie',
                                      'regio',

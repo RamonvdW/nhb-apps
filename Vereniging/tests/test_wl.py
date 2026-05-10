@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2025 Ramon van der Winkel.
+#  Copyright (c) 2020-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
 from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
-from Competitie.models import Competitie, CompetitieIndivKlasse, Regiocompetitie
+from Competitie.models import Competitie, CompetitieIndivKlasse
 from Competitie.operations import competities_aanmaken
+from CompLaagRegio.models import RegioComp
 from HistComp.definities import HISTCOMP_TYPE_18, HIST_BOGEN_DEFAULT
 from HistComp.models import HistCompSeizoen, HistCompRegioIndiv
 from Locatie.models import WedstrijdLocatie
@@ -190,8 +191,8 @@ class TestVerenigingWL(E2EHelpers, TestCase):
         self.comp_18 = Competitie.objects.get(afstand='18')
         self.comp_25 = Competitie.objects.get(afstand='25')
 
-        self.deelcomp_regio = Regiocompetitie.objects.get(regio=self.regio_111,
-                                                          competitie__afstand=18)
+        self.deelcomp_regio = RegioComp.objects.get(regio=self.regio_111,
+                                                    competitie__afstand=18)
 
     def test_overzicht(self):
         # login als WL

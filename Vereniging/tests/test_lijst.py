@@ -5,10 +5,10 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from Competitie.models import Regiocompetitie
 from Competitie.operations import competities_aanmaken
 from CompLaagBond.models import KampBK
 from CompLaagRayon.models import KampRK
+from CompLaagRegio.models import RegioComp
 from Functie.tests.helpers import maak_functie
 from Geo.models import Rayon, Regio, Cluster
 from Locatie.definities import (BAAN_TYPE_BUITEN, BAAN_TYPE_EXTERN, BAAN_TYPE_ONBEKEND,
@@ -113,7 +113,7 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
 
         self.functie_bko = KampBK.objects.first().functie
         self.functie_rko = KampRK.objects.filter(rayon=self.rayon_2).first().functie
-        self.functie_rcl = Regiocompetitie.objects.filter(regio=self.regio_101).first().functie
+        self.functie_rcl = RegioComp.objects.filter(regio=self.regio_101).first().functie
 
         self.functie_bko.accounts.add(self.account_bko)
         self.functie_rko.accounts.add(self.account_rko)

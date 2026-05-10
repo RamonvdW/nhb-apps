@@ -7,11 +7,12 @@
 from django.test import TestCase
 from BasisTypen.models import BoogType
 from Competitie.definities import INSCHRIJF_METHODE_3
-from Competitie.models import Competitie, Regiocompetitie, RegiocompetitieSporterBoog
+from Competitie.models import Competitie
 from Competitie.operations import competities_aanmaken
 from Competitie.test_utils.tijdlijn import zet_competitie_fases, zet_competitie_fase_regio_inschrijven
 from CompLaagBond.models import KampBK
 from CompLaagRayon.models import KampRK
+from CompLaagRegio.models import RegioComp, RegioDeelnemer
 from Functie.tests.helpers import maak_functie
 from Geo.models import Rayon, Regio
 from Sporter.models import Sporter
@@ -101,7 +102,7 @@ class TestCompInschrijvenAangemeld(E2EHelpers, TestCase):
             deelkamp.functie.accounts.add(self.account_rko)
         # for
 
-        for deelcomp in Regiocompetitie.objects.filter(regio=self.regio_101).all():
+        for deelcomp in RegioComp.objects.filter(regio=self.regio_101).all():
             deelcomp.functie.accounts.add(self.account_rcl)
         # for
 
@@ -275,7 +276,7 @@ class TestCompInschrijvenAangemeld(E2EHelpers, TestCase):
         self.assert404(resp, 'Verkeerde competitie fase')
 
         # coverage voor models __str__
-        obj = RegiocompetitieSporterBoog.objects.first()
+        obj = RegioDeelnemer.objects.first()
         self.assertTrue(str(obj) != '')
 
     def test_overzicht_bko(self):
@@ -351,7 +352,7 @@ class TestCompInschrijvenAangemeld(E2EHelpers, TestCase):
 
     def test_overzicht_rcl(self):
         comp = Competitie.objects.get(afstand='18')
-        functie_rcl = Regiocompetitie.objects.get(competitie=comp, regio=self.regio_101).functie
+        functie_rcl = RegioComp.objects.get(competitie=comp, regio=self.regio_101).functie
 
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self._doe_inschrijven(comp)         # wisselt naar HWL rol
@@ -389,7 +390,7 @@ class TestCompInschrijvenAangemeld(E2EHelpers, TestCase):
         self.assert200_is_bestand_csv(resp)
 
         # regio 101, bestand met dagdeel
-        deelcomp = Regiocompetitie.objects.get(competitie=comp, regio=self.regio_101)
+        deelcomp = RegioComp.objects.get(competitie=comp, regio=self.regio_101)
         deelcomp.inschrijf_methode = INSCHRIJF_METHODE_3
         deelcomp.save(update_fields=['inschrijf_methode'])
         url = self.url_aangemeld_regio_bestand % (comp.pk, self.regio_101.pk)
@@ -399,7 +400,7 @@ class TestCompInschrijvenAangemeld(E2EHelpers, TestCase):
 
     def test_bad_rcl(self):
         comp = Competitie.objects.get(afstand='25')
-        functie_rcl = Regiocompetitie.objects.get(competitie=comp,
+        functie_rcl = RegioComp.objects.get(competitie=comp,
                                                   regio=self.regio_101).functie
 
         self.e2e_login_and_pass_otp(self.account_rcl)
@@ -432,7 +433,7 @@ class TestCompInschrijvenAangemeld(E2EHelpers, TestCase):
         resp = self.client.get(url)
         self.assert404(resp, 'Regio niet gevonden')
 
-        Regiocompetitie.objects.filter(regio=self.regio_101).delete()
+        RegioComp.objects.filter(regio=self.regio_101).delete()
         url = self.url_aangemeld_regio % (comp.pk, 101)
         resp = self.client.get(url)
         self.assert404(resp, 'Competitie niet gevonden')
@@ -470,16 +471,16 @@ class TestCompInschrijvenAangemeld(E2EHelpers, TestCase):
         self._doe_inschrijven(comp)         # wisselt naar HWL rol
 
         # wissel naar RCL rol
-        functie_rcl = Regiocompetitie.objects.get(competitie=comp,
-                                                  regio=self.regio_101).functie
+        functie_rcl = RegioComp.objects.get(competitie=comp,
+                                            regio=self.regio_101).functie
         self.e2e_wissel_naar_functie(functie_rcl)
 
-        inschrijving = RegiocompetitieSporterBoog.objects.filter(bij_vereniging=self._ver).first()
+        inschrijving = RegioDeelnemer.objects.filter(bij_vereniging=self._ver).first()
         naam_str = inschrijving.sporterboog.sporter.lid_nr_en_volledige_naam()
         ver_str = str(self._ver)            # [ver_nr] Vereniging
 
         # controleer dat de sporter bij de juiste vereniging staat
-        url = self.url_aangemeld_alles % inschrijving.regiocompetitie.competitie.pk
+        url = self.url_aangemeld_alles % inschrijving.regiocomp.competitie.pk
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)

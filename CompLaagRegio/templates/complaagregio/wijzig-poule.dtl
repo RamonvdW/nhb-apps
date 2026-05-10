@@ -36,7 +36,7 @@
 
                             <tr>
                                 <th>Competitie</th>
-                                <td>{{ poule.regiocompetitie }}</td>
+                                <td>{{ poule.regiocomp }}</td>
                             </tr>
 
                             <tr>

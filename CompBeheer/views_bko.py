@@ -12,13 +12,14 @@ from django.core.exceptions import PermissionDenied
 from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
-from Competitie.models import Competitie, CompetitieTeamKlasse, Regiocompetitie
+from Competitie.models import Competitie, CompetitieTeamKlasse
 from CompBeheer.operations.maak_mutaties_beheer import (maak_mutatie_doorzetten_regio_naar_rk,
                                                         maak_mutatie_kamp_indiv_doorzetten_naar_bk,
                                                         maak_mutatie_kamp_teams_doorzetten_naar_bk,
                                                         maak_mutatie_kamp_indiv_afsluiten, maak_mutatie_kamp_teams_afsluiten)
 from CompLaagBond.models import DeelnemerBK, TeamBK
 from CompLaagRayon.models import DeelnemerRK, TeamRK
+from CompLaagRegio.models import RegioComp
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
 
@@ -53,7 +54,7 @@ class DoorzettenRegioNaarRKView(UserPassesTestMixin, TemplateView):
     @staticmethod
     def _get_regio_status(competitie):
         # sporters komen uit de 4 regio's van het rayon
-        regio_deelcomps = (Regiocompetitie
+        regio_deelcomps = (RegioComp
                            .objects
                            .filter(competitie=competitie)
                            .select_related('regio')
@@ -205,7 +206,7 @@ class KlassengrenzenVaststellenRkBkTeamsView(UserPassesTestMixin, TemplateView):
                         .objects
                         .filter(kamp__competitie=comp)
                         .select_related('team_type')
-                        .annotate(sporter_count=Count('tijdelijke_leden'))
+                        .annotate(sporter_count=Count('tijdelijke_deelnemers_regio'))
                         .order_by('team_type__volgorde',
                                   '-aanvangsgemiddelde')):
 

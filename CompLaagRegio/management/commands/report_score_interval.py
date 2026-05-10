@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2024 Ramon van der Winkel.
+#  Copyright (c) 2024-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management.base import BaseCommand
-from Competitie.models import RegiocompetitieSporterBoog, Regiocompetitie
+from CompLaagRegio.models import RegioComp, RegioDeelnemer
 from Score.models import ScoreHist
 
 
@@ -20,11 +20,11 @@ class Command(BaseCommand):
         afstand = options['afstand']
         regio_nr = options['regio_nr']
 
-        regiocomp = Regiocompetitie.objects.get(regio__regio_nr=regio_nr, competitie__afstand=afstand)
+        regiocomp = RegioComp.objects.get(regio__regio_nr=regio_nr, competitie__afstand=afstand)
 
-        for obj in (RegiocompetitieSporterBoog
+        for obj in (RegioDeelnemer
                     .objects
-                    .filter(regiocompetitie=regiocomp)
+                    .filter(regiocomp=regiocomp)
                     .prefetch_related('scores')
                     .order_by('sporterboog__sporter__lid_nr')):
             score_pks = obj.scores.values_list('pk', flat=True)

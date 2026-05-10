@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2025 Ramon van der Winkel.
+#  Copyright (c) 2020-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
 from BasisTypen.models import TeamType
-from Competitie.models import Competitie, Regiocompetitie, RegiocompetitieTeam
+from Competitie.models import Competitie
+from CompLaagRegio.models import RegioComp, RegioTeam
 from Functie.definities import Rol
 from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
@@ -62,7 +63,7 @@ class TestCompetitieInfo(E2EHelpers, TestCase):
 
         functie = maak_functie('maak niet uit', Rol.ROL_BB)
 
-        regiocompetitie = Regiocompetitie(
+        regiocompetitie = RegioComp(
                             competitie=competitie,
                             regio=regio,
                             functie=functie,
@@ -73,8 +74,8 @@ class TestCompetitieInfo(E2EHelpers, TestCase):
 
         team_type = TeamType.objects.filter(afkorting='C').first()
 
-        team = RegiocompetitieTeam(
-                        regiocompetitie=regiocompetitie,
+        team = RegioTeam(
+                        regiocomp=regiocompetitie,
                         vereniging=ver,
                         volg_nr=1,
                         team_type=team_type)
@@ -89,7 +90,7 @@ class TestCompetitieInfo(E2EHelpers, TestCase):
 
         functie = maak_functie('maak niet uit', Rol.ROL_BB)
 
-        regiocompetitie = Regiocompetitie(
+        regiocompetitie = RegioComp(
                             competitie=competitie,
                             regio=regio,
                             functie=functie,
@@ -100,8 +101,8 @@ class TestCompetitieInfo(E2EHelpers, TestCase):
 
         team_type = TeamType.objects.filter(afkorting='C').first()
 
-        team = RegiocompetitieTeam(
-                        regiocompetitie=regiocompetitie,
+        team = RegioTeam(
+                        regiocomp=regiocompetitie,
                         vereniging=ver,
                         volg_nr=1,
                         team_type=team_type)

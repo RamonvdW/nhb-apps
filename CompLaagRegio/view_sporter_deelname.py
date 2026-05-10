@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2024 Ramon van der Winkel.
+#  Copyright (c) 2021-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -10,7 +10,7 @@ from django.utils import timezone
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
-from Competitie.models import RegiocompetitieSporterBoog
+from CompLaagRegio.models import RegioDeelnemer
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
 from Sporter.operations import get_sporter
@@ -41,12 +41,12 @@ class SporterVoorkeurRkView(UserPassesTestMixin, TemplateView):
 
         try:
             pk = int(pk)
-            deelnemer = RegiocompetitieSporterBoog.objects.get(pk=pk, sporterboog__sporter=sporter)
-        except (ValueError, TypeError, RegiocompetitieSporterBoog.DoesNotExist):
+            deelnemer = RegioDeelnemer.objects.get(pk=pk, sporterboog__sporter=sporter)
+        except (ValueError, TypeError, RegioDeelnemer.DoesNotExist):
             raise Http404('Niet gevonden')
 
         # check competitie fase
-        comp = deelnemer.regiocompetitie.competitie
+        comp = deelnemer.regiocomp.competitie
         comp.bepaal_fase()
         if comp.fase_indiv > 'G':
             raise Http404('Mag niet wijzigen')

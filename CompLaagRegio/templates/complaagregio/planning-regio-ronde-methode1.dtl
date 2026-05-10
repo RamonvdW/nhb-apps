@@ -25,15 +25,15 @@
             <table class="sv-kader-tabel">
                 <tr>
                     <th>Competitie</th>
-                    <td>{{ ronde.regiocompetitie.competitie.beschrijving }}</td>
+                    <td>{{ ronde.regiocomp.competitie.beschrijving }}</td>
                 </tr>
                 <tr>
                     <th>Rayon</th>
-                    <td>{{ ronde.regiocompetitie.regio.rayon}}</td>
+                    <td>{{ ronde.regiocomp.regio.rayon}}</td>
                 </tr>
                 <tr>
                     <th>Regio</th>
-                    <td>{{ ronde.regiocompetitie.regio }}</td>
+                    <td>{{ ronde.regiocomp.regio }}</td>
                 </tr>
                 {% if ronde.cluster %}
                     <tr>

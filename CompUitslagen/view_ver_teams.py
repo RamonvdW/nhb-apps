@@ -9,9 +9,9 @@ from django.http import Http404
 from django.views.generic import TemplateView
 from django.utils.safestring import mark_safe
 from Competitie.definities import TEAM_PUNTEN_MODEL_SOM_SCORES
-from Competitie.models import (Competitie, Regiocompetitie, RegiocompetitieSporterBoog,
-                               RegiocompetitieTeam, RegiocompetitieRondeTeam)
+from Competitie.models import Competitie
 from Competitie.seizoenen import get_comp_pk
+from CompLaagRegio.models import RegioComp, RegioTeam, RegioRondeTeam, RegioDeelnemer
 from Vereniging.models import Vereniging
 from types import SimpleNamespace
 
@@ -88,15 +88,15 @@ class UitslagenVerenigingTeamsView(TemplateView):
                                                'team_type': teamtype.afkorting.lower(),
                                                'regio_nr': regio_nr})
 
-        context['deelcomp'] = deelcomp = Regiocompetitie.objects.get(competitie=comp, regio=ver.regio)
+        context['deelcomp'] = deelcomp = RegioComp.objects.get(competitie=comp, regio=ver.regio)
 
         context['toon_punten'] = (deelcomp.regio_team_punten_model != TEAM_PUNTEN_MODEL_SOM_SCORES)
 
         # zoek alle verenigingsteams erbij
-        teams = (RegiocompetitieTeam
+        teams = (RegioTeam
                  .objects
                  .exclude(team_klasse=None)
-                 .filter(regiocompetitie=deelcomp,
+                 .filter(regiocomp=deelcomp,
                          team_type=context['teamtype'],
                          vereniging=ver)
                  .prefetch_related('leden')
@@ -115,7 +115,7 @@ class UitslagenVerenigingTeamsView(TemplateView):
         # for
 
         if deelcomp.huidige_team_ronde >= 1:
-            ronde_teams = (RegiocompetitieRondeTeam
+            ronde_teams = (RegioRondeTeam
                            .objects
                            .filter(team__in=teams)
                            .prefetch_related('deelnemers_geselecteerd',
@@ -228,7 +228,7 @@ class UitslagenVerenigingTeamsView(TemplateView):
         # for
 
         pk2deelnemer = dict()
-        for deelnemer in (RegiocompetitieSporterBoog
+        for deelnemer in (RegioDeelnemer
                           .objects
                           .select_related('sporterboog',
                                           'sporterboog__sporter')

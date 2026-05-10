@@ -8,7 +8,8 @@ from django.test import TestCase
 from django.utils import timezone
 from Score.models import Score
 from Competitie.definities import INSCHRIJF_METHODE_1
-from Competitie.models import CompetitieIndivKlasse, CompetitieMatch, RegiocompetitieRonde
+from Competitie.models import CompetitieIndivKlasse, CompetitieMatch
+from CompLaagRegio.models import RegioRonde
 from Score.models import Uitslag
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
@@ -87,8 +88,8 @@ class TestCompScoresScores(E2EHelpers, TestCase):
             self.client.post(self.url_planning_regio % self.testdata.deelcomp18_regio[101].pk)
         with self.assert_max_queries(20):
             self.client.post(self.url_planning_regio % self.testdata.deelcomp25_regio[101].pk)
-        self.ronde18 = RegiocompetitieRonde.objects.first()
-        ronde25 = RegiocompetitieRonde.objects.all()[1]
+        self.ronde18 = RegioRonde.objects.first()
+        ronde25 = RegioRonde.objects.all()[1]
 
         # maak een cluster planning aan
         # cluster = self.testdata.regio_cluster[101]
@@ -615,7 +616,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
         self.assertTrue('deelnemers' in json_data.keys())
         self.assertEqual(len(json_data['deelnemers']), 60)
 
-        deelcomp = self.ronde18.regiocompetitie
+        deelcomp = self.ronde18.regiocomp
         deelcomp.regio_organiseert_teamcompetitie = False
         deelcomp.save(update_fields=['regio_organiseert_teamcompetitie'])
 
@@ -636,7 +637,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.testdata.comp18_account_rcl[101])
         self.e2e_wissel_naar_functie(self.testdata.comp18_functie_rcl[101])
 
-        deelcomp = self.ronde18.regiocompetitie
+        deelcomp = self.ronde18.regiocomp
         deelcomp.inschrijf_methode = INSCHRIJF_METHODE_1
         deelcomp.save(update_fields=['inschrijf_methode'])
 
@@ -717,7 +718,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
         uitslag.save()
         uitslag.scores.add(score)
 
-        ronde = RegiocompetitieRonde.objects.filter(regiocompetitie=deelcomp).first()
+        ronde = RegioRonde.objects.filter(regiocomp=deelcomp).first()
         match = ronde.matches.first()
         match.uitslag = uitslag
         match.save()
