@@ -6,10 +6,10 @@
 
 from django.test import TestCase
 from django.utils import timezone
+from BasisTypen.models import TeamType
 from Competitie.models import CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMatch
-from CompLaagBond.models import KampBK
+from CompLaagBond.models import KampBK, DeelnemerBK, TeamBK
 from CompLaagRayon.models import KampRK
-from CompLaagRegio.models import RegioComp
 from Functie.tests.helpers import maak_functie
 from Locatie.models import WedstrijdLocatie
 from Score.models import Uitslag
@@ -137,10 +137,6 @@ class TestCompLaagBondPlanning(E2EHelpers, TestCase):
         self.deelkamp_bk_18 = KampBK.objects.filter(competitie=self.testdata.comp18).first()
         self.deelcomp_rayon1_18 = KampRK.objects.filter(competitie=self.testdata.comp18,
                                                         rayon=self.rayon_1).first()
-        self.deelcomp_regio_101 = RegioComp.objects.filter(competitie=self.testdata.comp18,
-                                                           regio=self.regio_101).first()
-        self.deelcomp_regio_105 = RegioComp.objects.filter(competitie=self.testdata.comp18,
-                                                           regio=self.regio_105).first()
 
         self.functie_bko_18 = self.deelkamp_bk_18.functie
         self.functie_bko_18.accounts.add(self.account_bko_18)
@@ -171,12 +167,17 @@ class TestCompLaagBondPlanning(E2EHelpers, TestCase):
         self.klasse_team_c0 = qset[0]
         self.klasse_team_c1 = qset[1]
 
+        self.team_type_c = TeamType.objects.get(afkorting='C')
+
         self.match = CompetitieMatch(
                         competitie=self.testdata.comp18,
                         beschrijving='test',
                         datum_wanneer='2000-01-01',
-                        tijd_begin_wedstrijd='01:01')
+                        tijd_begin_wedstrijd='01:01',
+                        locatie=self.loc)
         self.match.save()
+        self.match.indiv_klassen.add(self.klasse_indiv_r1)
+        self.match.team_klassen.add(self.klasse_team_c1)
 
     def test_anon(self):
         self.client.logout()
@@ -190,6 +191,29 @@ class TestCompLaagBondPlanning(E2EHelpers, TestCase):
         resp = self.client.get(self.url_planning % 999999)
         self.assert403(resp)
 
+    def _maak_deelnemers(self):
+        DeelnemerBK.objects.create(
+                            kamp=self.deelkamp_bk_18,
+                            sporterboog=self.sporterboog,
+                            indiv_klasse=self.klasse_indiv_r1,
+                            indiv_klasse_volgende_ronde=self.klasse_indiv_r1,
+                            bij_vereniging=self.ver_101,
+                            kampioen_label='Kampioen Rayon 4',
+                            gemiddelde=9.995,
+                            rank=1)         # rank moet >0 zijn
+
+        TeamBK.objects.create(
+                        kamp=self.deelkamp_bk_18,
+                        vereniging=self.ver_101,
+                        volg_nr=1,
+                        team_type=self.team_type_c,
+                        team_naam='De wieltjes',
+                        team_klasse=self.klasse_team_c1,
+                        rk_rank=1,
+                        rk_score=123,
+                        volgorde=1,
+                        rank=1)
+
     def test_planning(self):
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wissel_naar_functie(self.functie_bko_18)
@@ -199,6 +223,8 @@ class TestCompLaagBondPlanning(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('complaagbond/planning-landelijk.dtl', 'design/site_layout.dtl'))
+
+        self._maak_deelnemers()
 
         # maak een nieuwe wedstrijd aan
         CompetitieMatch.objects.all().delete()
@@ -244,7 +270,18 @@ class TestCompLaagBondPlanning(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wissel_naar_functie(self.functie_bko_18)
 
+        # maak nog een match aan
+        match2 = CompetitieMatch.objects.create(
+                        competitie=self.testdata.comp18,
+                        beschrijving='test 2',
+                        datum_wanneer='2000-01-01',
+                        tijd_begin_wedstrijd='01:01')
+        # koppel de andere klassen
+        match2.indiv_klassen.add(self.klasse_indiv_r0)
+        match2.team_klassen.add(self.klasse_team_c0)
+
         self.deelkamp_bk_18.matches.add(self.match)
+        self.deelkamp_bk_18.matches.add(match2)
 
         url = self.url_wijzig_wedstrijd % self.match.pk
         url_redir_expected = self.url_planning % self.deelkamp_bk_18.pk

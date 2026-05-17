@@ -499,6 +499,9 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
         comp = deelkamp.competitie
         is_25m = (comp.is_25m1pijl())
 
+        indiv_klasse_pks = list(CompetitieIndivKlasse.objects.filter(competitie=comp).values_list('pk', flat=True))
+        team_klasse_pks = list(CompetitieTeamKlasse.objects.filter(competitie=comp).values_list('pk', flat=True))
+
         # weekdag is een cijfer van 0 tm 6
         # aanvang bestaat uit vier cijfers, zoals 0830
         weekdag = request.POST.get('weekdag', '')[:2]           # afkappen voor de veiligheid
@@ -591,7 +594,9 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
                 except (IndexError, TypeError, ValueError):
                     pass
                 else:
-                    gekozen_indiv_klassen.append(pk)
+                    # check dat pk naar een echte indiv klasse verwijst
+                    if pk in indiv_klasse_pks:
+                        gekozen_indiv_klassen.append(pk)
 
             if key[:9] == "wkl_team_":
                 try:
@@ -599,7 +604,9 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
                 except (IndexError, TypeError, ValueError):
                     pass
                 else:
-                    gekozen_team_klassen.append(pk)
+                    # check dat pk naar een echte indiv klasse verwijst
+                    if pk in team_klasse_pks:
+                        gekozen_team_klassen.append(pk)
         # for
 
         for obj in match.indiv_klassen.all():

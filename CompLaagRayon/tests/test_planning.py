@@ -5,14 +5,14 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from BasisTypen.models import BoogType
+from BasisTypen.models import BoogType, TeamType
 from Competitie.definities import DEELNAME_NEE, DEELNAME_JA, DEELNAME_ONBEKEND, INSCHRIJF_METHODE_1
 from Competitie.models import Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMutatie
 from Competitie.operations import competities_aanmaken
 from Competitie.test_utils.tijdlijn import (evaluatie_datum, zet_competitie_fase_rk_prep,
                                             zet_competitie_fase_regio_afsluiten)
 from CompLaagBond.models import KampBK
-from CompLaagRayon.models import KampRK, DeelnemerRK, CutRK
+from CompLaagRayon.models import KampRK, DeelnemerRK, TeamRK, CutRK
 from CompLaagRegio.models import RegioComp, RegioDeelnemer
 from Functie.tests.helpers import maak_functie
 from Geo.models import Rayon, Regio, Cluster
@@ -197,6 +197,8 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
                                                              beschrijving='Recurve klasse ERE',
                                                              is_voor_teams_rk_bk=True)
 
+        self.team_type_r = TeamType.objects.get(afkorting='R2')
+
         # maak nog een test vereniging, zonder HWL functie
         ver = Vereniging(
                     naam="Kleine Club",
@@ -251,6 +253,16 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
                     indiv_klasse=self.klasse_c,
                     rank=23,
                     bij_vereniging=self.sporterboog.sporter.bij_vereniging).save()
+
+        TeamRK.objects.create(
+                    kamp=self.deelkamp_rayon1_18,
+                    vereniging=self.ver_101,
+                    volg_nr=1,
+                    team_type=self.team_type_r,
+                    team_naam='test',
+                    aanvangsgemiddelde=25.0,
+                    team_klasse=self.klasse_r_ere,
+                    team_klasse_volgende_ronde=self.klasse_r_ere)
 
     def test_buiten_eigen_rayon(self):
         # RKO probeert RK wedstrijd toe te voegen en wijzigen buiten eigen rayon
@@ -318,6 +330,12 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
             resp = self.client.post(url)
         self.assert_is_redirect_not_plein(resp)     # check success
 
+        # extra cut
+        CutRK.objects.create(
+                    kamp=self.deelkamp_rayon1_18,
+                    indiv_klasse=self.klasse_r,
+                    limiet=2)
+
         # haal het overzicht op met deze nieuwe wedstrijden
         with self.assert_max_queries(24):
             resp = self.client.get(url)
@@ -343,6 +361,7 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
         sel_indiv_1 = "wkl_indiv_%s" % self.klasse_r.pk
         sel_indiv_2 = "wkl_indiv_%s" % self.klasse_c.pk
         sel_indiv_3 = "wkl_indiv_%s" % self.klasse_ib.pk
+        sel_team_1 = "wkl_team_%s" % self.klasse_r_ere.pk
         with self.assert_max_queries(28):
             resp = self.client.post(url_w, {'weekdag': 1,
                                             'aanvang': '12:34',
@@ -351,6 +370,7 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
                                             sel_indiv_1: "on",
                                             sel_indiv_2: "on",
                                             sel_indiv_3: "on",
+                                            sel_team_1: "on",
                                             'wkl_indiv_': "on",         # bad
                                             'wkl_indiv_bad': "on",      # bad
                                             'snel': 1})
@@ -552,7 +572,8 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
             resp = self.client.post(url)
         self.assert_is_redirect_not_plein(resp)  # check for success
 
-        wedstrijd_r1_pk = KampRK.objects.get(pk=self.deelkamp_rayon1_18.pk).matches.first().pk
+        wedstrijd_r1 = KampRK.objects.get(pk=self.deelkamp_rayon1_18.pk).matches.first()
+        wedstrijd_r1_pk = wedstrijd_r1.pk
         url = self.url_wijzig_rk_wedstrijd % wedstrijd_r1_pk
 
         # wijzig de wedstrijd
@@ -616,6 +637,15 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
                                           'ver_pk': self.ver_112.ver_nr})
         self.assert404(resp, 'Geen valide rayon')
 
+        # slechte klasse pks
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'weekdag': 1,
+                                          'aanvang': '12:34',
+                                          'ver_pk': self.ver_101.ver_nr,
+                                          'sel_indiv_1': 999999,
+                                          'sel_team_1': 999999})
+        self.assert_is_redirect_not_plein(resp)
+
         # probeer wedstrijd van ander rayon te wijzigen
         self.e2e_login_and_pass_otp(self.account_rko2_18)
         self.e2e_wissel_naar_functie(self.functie_rko2_18)
@@ -625,6 +655,14 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
                                           'aanvang': '12:34',
                                           'ver_pk': self.ver_101.ver_nr})
         self.assert403(resp)
+
+        # geen RK match
+        wedstrijd_r1.kamprk_set.clear()
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'weekdag': 1,
+                                          'aanvang': '12:34',
+                                          'ver_pk': self.ver_101.ver_nr})
+        self.assert404(resp, 'Geen RK wedstrijd')
 
     def test_alvast_afgemeld(self):
         # maak een deelnemer aan die wel mee wilt doen met het RK
