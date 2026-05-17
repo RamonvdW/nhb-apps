@@ -205,6 +205,11 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
         ver.save()
         self.ver_1100 = ver
 
+        CutRK.objects.create(
+                    kamp=self.deelkamp_rayon1_18,
+                    indiv_klasse=self.klasse_c,
+                    limiet=20)
+
     def competitie_sluit_alle_regiocompetities(self, comp):
         # deze functie sluit alle regiocompetities af zodat de competitie in fase G komt
         comp.bepaal_fase()
@@ -220,26 +225,31 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
         DeelnemerRK(kamp=self.deelkamp_rayon1_18,
                     sporterboog=self.sporterboog,
                     indiv_klasse=self.klasse_r,
+                    rank=1,
                     bij_vereniging=self.sporterboog.sporter.bij_vereniging).save()
 
         DeelnemerRK(kamp=self.deelkamp_rayon1_18,
                     sporterboog=self.sporterboog,
                     indiv_klasse=self.klasse_r,
+                    rank=2,
                     bij_vereniging=self.sporterboog.sporter.bij_vereniging).save()
 
         DeelnemerRK(kamp=self.deelkamp_rayon1_18,
                     sporterboog=self.sporterboog,
                     indiv_klasse=self.klasse_r,
+                    rank=10,
                     bij_vereniging=self.sporterboog.sporter.bij_vereniging).save()
 
         DeelnemerRK(kamp=self.deelkamp_rayon1_18,
                     sporterboog=self.sporterboog,
                     indiv_klasse=self.klasse_c,
+                    rank=20,
                     bij_vereniging=self.sporterboog.sporter.bij_vereniging).save()
 
         DeelnemerRK(kamp=self.deelkamp_rayon1_18,
                     sporterboog=self.sporterboog,
                     indiv_klasse=self.klasse_c,
+                    rank=23,
                     bij_vereniging=self.sporterboog.sporter.bij_vereniging).save()
 
     def test_buiten_eigen_rayon(self):
