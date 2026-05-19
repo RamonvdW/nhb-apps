@@ -97,7 +97,7 @@ class TestCompLaagBondLimieten(E2EHelpers, TestCase):
 
         # laat de wijziging verwerken
         f1, f2 = self.verwerk_competitie_mutaties()
-        print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
+        # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
 
         cut_r0.refresh_from_db()
         cut_r1.refresh_from_db()
