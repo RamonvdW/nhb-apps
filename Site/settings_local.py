@@ -94,8 +94,8 @@ EMAIL_DEVELOPER_SUBJ = 'Internal Server Error: ' + NAAM_SITE
 # lege lijst --> mag naar iedereen mailen
 EMAIL_ADDRESS_WHITELIST = ()
 
-# url van het document privacyverklaring
-PRIVACYVERKLARING_URL = 'url to privacy statement html, pdf or googledoc, etc'
+# waar staat het text document privacyverklaring?
+PRIVACYVERKLARING_FILE = '/directory/on/server/nhbapps-venv/project/privacyverklaring.txt'   # noqa
 
 # url van het document met voorwaarden voor A-status wedstrijden / alcoholbeleid
 VOORWAARDEN_A_STATUS_URL = 'https://docs.google.com/document/d/random google document number/view'
@@ -167,9 +167,15 @@ WEBWINKEL_VERKOPER_VER_NR = 1368
 WEBWINKEL_VERKOPER_BTW_NR = "012345678B99"
 
 # verzendkosten webwinkel
-WEBWINKEL_ENVELOP_VERZENDKOSTEN_EURO = 1.21
-WEBWINKEL_PAKKET_2KG_VERZENDKOSTEN_EURO = 4.25
-WEBWINKEL_PAKKET_10KG_VERZENDKOSTEN_EURO = 6.95
+
+# envelop (maat t/m C4 (kan A4 in), gewicht t/m 20 gram) exclusief kosten envelop en afhandeling
+WEBWINKEL_ENVELOP_VERZENDKOSTEN_EURO = 1.40
+
+# klein = brievenbus-pakje (max 380x265x32mm, max 2kg) exclusief kosten doosje en afhandeling
+WEBWINKEL_PAKKET_2KG_VERZENDKOSTEN_EURO = 4.40
+
+# groot = bezorging op huisadres (max 1000x500x500mm, max 10kg), exclusief kosten doosje en afhandeling
+WEBWINKEL_PAKKET_10KG_VERZENDKOSTEN_EURO = 7.45
 
 # ophalen op bondsbureau aan/uit zetten
 WEBWINKEL_TRANSPORT_OPHALEN_MAG = True
@@ -227,6 +233,7 @@ INSTAPTOETS_LESMATERIAAL_KLEDINGVOORSCHRIFT = 'url'
 
 # met wie de wedstrijdformulieren folder delen?
 GOOGLE_DRIVE_SHARE_WITH = []
+GOOGLE_DRIVE_FOLDER_SITE = 'Subdir name'
 
 # waar staan de json bestanden voor de service accounts etc.
 # wordt gebruikt door diverse diensten: downloaders records/instaptoets, backup uploader, google drive toegang, etc.
