@@ -34,7 +34,7 @@ def download(out, fpath: str, local_filename: str):
         # TODO: something to prevent compression?
     }
 
-    out.write('[DEBUG] {download} fpath=%s, url_fpath=%s' % (repr(fpath), repr(url_fpath)))
+    # out.write('[DEBUG] {download} fpath=%s, url_fpath=%s' % (repr(fpath), repr(url_fpath)))
     try:
         with requests.get(url, headers=headers, stream=True) as r:
             if r.status_code != 200:
