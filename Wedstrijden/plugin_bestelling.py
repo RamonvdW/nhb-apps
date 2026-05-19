@@ -84,6 +84,9 @@ class WedstrijdBestelPlugin(BestelPluginBase):
         # hiermee geven we een garantie op een plekje
         # Noteer: geen concurrency risico want serialisatie via deze achtergrondtaak
         sessie = inschrijving.sessie
+        self.stdout.write('[DEBUG] Sessie %s aantal_inschrijvingen: %s --> %s' % (sessie,
+                                                                                  sessie.aantal_inschrijvingen,
+                                                                                  sessie.aantal_inschrijvingen + 1))
         sessie.aantal_inschrijvingen += 1
         sessie.save(update_fields=['aantal_inschrijvingen'])
 
@@ -138,7 +141,10 @@ class WedstrijdBestelPlugin(BestelPluginBase):
 
         # verlaag het aantal inschrijvingen op deze sessie
         sessie = inschrijving.sessie
-        sessie.aantal_inschrijvingen -= 1
+        self.stdout.write('[DEBUG] Sessie %s aantal_inschrijvingen: %s --> %s' % (sessie,
+                                                                                  sessie.aantal_inschrijvingen,
+                                                                                  sessie.aantal_inschrijvingen - 1))
+        sessie.aantal_inschrijvingen = max(sessie.aantal_inschrijvingen - 1, 0)     # voorkom -1
         sessie.save(update_fields=['aantal_inschrijvingen'])
 
         now = timezone.now()
@@ -200,9 +206,15 @@ class WedstrijdBestelPlugin(BestelPluginBase):
         if sessie != inschrijving.sessie:
             # aantallen aanpassen voor elke sessie
             oude_sessie = inschrijving.sessie
-            oude_sessie.aantal_inschrijvingen -= 1
+            self.stdout.write('[DEBUG] Sessie %s aantal_inschrijvingen: %s --> %s' % (oude_sessie,
+                                                                                      oude_sessie.aantal_inschrijvingen,
+                                                                                      oude_sessie.aantal_inschrijvingen - 1))
+            oude_sessie.aantal_inschrijvingen = max(oude_sessie.aantal_inschrijvingen - 1, 0)       # voorkom -1
             oude_sessie.save(update_fields=['aantal_inschrijvingen'])
 
+            self.stdout.write('[DEBUG] Sessie %s aantal_inschrijvingen: %s --> %s' % (sessie,
+                                                                                      sessie.aantal_inschrijvingen,
+                                                                                      sessie.aantal_inschrijvingen + 1))
             sessie.aantal_inschrijvingen += 1
             sessie.save(update_fields=['aantal_inschrijvingen'])
 
@@ -245,7 +257,10 @@ class WedstrijdBestelPlugin(BestelPluginBase):
 
         # verlaag het aantal inschrijvingen op deze sessie
         sessie = inschrijving.sessie
-        sessie.aantal_inschrijvingen -= 1
+        self.stdout.write('[DEBUG] Sessie %s aantal_inschrijvingen: %s --> %s' % (sessie,
+                                                                                  sessie.aantal_inschrijvingen,
+                                                                                  sessie.aantal_inschrijvingen - 1))
+        sessie.aantal_inschrijvingen = max(sessie.aantal_inschrijvingen - 1, 0)     # voorkom -1
         sessie.save(update_fields=['aantal_inschrijvingen'])
 
         # verwijder de inschrijving

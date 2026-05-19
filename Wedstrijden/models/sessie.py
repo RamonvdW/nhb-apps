@@ -19,7 +19,8 @@ class WedstrijdSessie(models.Model):
     tijd_einde = models.TimeField()
 
     # beschrijving
-    beschrijving = models.CharField(max_length=50, default='')
+    beschrijving = models.CharField(max_length=50, default='',
+                                    blank=True)     # mag leeg zijn
 
     # toegestane wedstrijdklassen
     wedstrijdklassen = models.ManyToManyField(KalenderWedstrijdklasse, blank=True)
