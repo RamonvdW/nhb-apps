@@ -18,11 +18,11 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         fpath = options['fpath'][0]
 
-        if '/' in fpath:
-            download_fpath = fpath[fpath.rfind('/')+1:]
-        else:
-            download_fpath = fpath
-        download_fpath = '/tmp/' + download_fpath
+        # if '/' in fpath:
+        #     download_fpath = fpath[fpath.rfind('/')+1:]
+        # else:
+        #     download_fpath = fpath
+        # download_fpath = '/tmp/' + download_fpath
 
         data = get_file_metadata(self.stdout, fpath)
 
@@ -34,9 +34,9 @@ class Command(BaseCommand):
 
                 out = pprint.pformat(data, indent=4)
                 self.stdout.write(out)
-            else:
-                out_fname = download(self.stdout, fpath, download_fpath)
-                if out_fname:
-                    self.stdout.write('[INFO] Download gelukt naar %s' % repr(out_fname))
+            # else:
+            #     out_fname = download(self.stdout, fpath, download_fpath)
+            #     if out_fname:
+            #         self.stdout.write('[INFO] Download gelukt naar %s' % repr(out_fname))
 
 # end of file
