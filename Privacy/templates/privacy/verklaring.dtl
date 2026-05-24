@@ -50,6 +50,13 @@
                 margin: 15px 0 5px 0;
             }
 
+            /* venster zet de tekst midden op de pagina */
+            .venster {
+                max-width: 750px;
+                margin-left: auto;
+                margin-right: auto;
+            }
+
             p {
                 margin: 0;
             }
@@ -61,35 +68,37 @@
     </head>
 
     <body>
-        {% for layout, inhoud in document %}
-            {% if layout == 'p' %}
-                <p>{{ inhoud }}</p>
-            {% elif layout == 'br' %}
-                <br>
-            {% elif layout == 'h1' %}
-                <h1>{{ inhoud }}</h1>
-            {% elif layout == 'h2' %}
-                <h2>{{ inhoud }}</h2>
-            {% elif layout == '*' %}
-                <li>{{ inhoud }}</li>
-            {% elif layout == '*+' %}
-                <ul>
-            {% elif layout == '*-' %}
-                </ul>
-            {% elif layout == '**+' %}
-                <li>{{ inhoud }}<ul>
-            {% elif layout == '**-' %}
-                </ul></li>
-            {% elif layout == 'p1' %}
-                <p><span>{{ inhoud }}</span>
-            {% elif layout == 'p2' %}
-                <span>{{ inhoud }}</span></p>
-            {% elif layout == 'a1' %}
-                <a href="{{ inhoud }}" target="_blank" rel="noopener noreferrer">
-            {% elif layout == 'a2' %}
-                <span>{{ inhoud }}</span></a>
-            {% endif %}
-        {% endfor %}
+        <div class="venster">
+            {% for layout, inhoud in document %}
+                {% if layout == 'p' %}
+                    <p>{{ inhoud }}</p>
+                {% elif layout == 'br' %}
+                    <br>
+                {% elif layout == 'h1' %}
+                    <h1>{{ inhoud }}</h1>
+                {% elif layout == 'h2' %}
+                    <h2>{{ inhoud }}</h2>
+                {% elif layout == '*' %}
+                    <li>{{ inhoud }}</li>
+                {% elif layout == '*+' %}
+                    <ul>
+                {% elif layout == '*-' %}
+                    </ul>
+                {% elif layout == '**+' %}
+                    <li>{{ inhoud }}<ul>
+                {% elif layout == '**-' %}
+                    </ul></li>
+                {% elif layout == 'p1' %}
+                    <p><span>{{ inhoud }}</span>
+                {% elif layout == 'p2' %}
+                    <span>{{ inhoud }}</span></p>
+                {% elif layout == 'a1' %}
+                    <a href="{{ inhoud }}" target="_blank" rel="noopener noreferrer">
+                {% elif layout == 'a2' %}
+                    <span>{{ inhoud }}</span></a>
+                {% endif %}
+            {% endfor %}
+        </div>
     </body>
 </html>
 
