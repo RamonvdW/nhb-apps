@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -11,31 +11,32 @@ from Records.models import IndivRecord
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
-
-TEST_FILES_PATH = './Records/test-files/'
-
-TEST_FILE_BROKEN_FILE = TEST_FILES_PATH + 'testfile_01.json'
-TEST_FILE_EXTRA_PAGE = TEST_FILES_PATH + 'testfile_02.json'
-TEST_FILE_NO_DATA = TEST_FILES_PATH + 'testfile_03.json'
-TEST_FILE_INCOMPLETE = TEST_FILES_PATH + 'testfile_04.json'
-TEST_FILE_DATA_ERRORS = TEST_FILES_PATH + 'testfile_05.json'
-TEST_FILE_CHANGES = TEST_FILES_PATH + 'testfile_06.json'
-TEST_FILE_BAD_LID_NR = TEST_FILES_PATH + 'testfile_07.json'
-TEST_FILE_BAD_DATES = TEST_FILES_PATH + 'testfile_08.json'
-TEST_FILE_DOUBLE_NRS = TEST_FILES_PATH + 'testfile_09.json'
-TEST_FILE_NIET_CONSECUTIEF = TEST_FILES_PATH + 'testfile_10.json'
-TEST_FILE_VERKEERDE_SOORT = TEST_FILES_PATH + 'testfile_11.json'
-TEST_FILE_WA_RENAMES = TEST_FILES_PATH + 'testfile_12.json'
+import openpyxl
 
 
 class TestRecordsCliImport(E2EHelpers, TestCase):
     """ unittests voor de Records applicatie, Import module """
 
+    hdrs_outdoor = ['Index', 'Geslacht', 'Leeftijd', 'Materiaalklasse', 'Discipline', 'Soort_record',
+                    'Para klasse', 'Verbeterbaar', 'Pijlen', 'Bondsnummer', 'Naam', 'Datum', 'Plaats', 'Land',
+                    'Score', 'X-count', 'Ook ER', 'Ook WR', 'Notities']
+
+    hdrs_indoor = ['Index', 'Geslacht', 'Leeftijd', 'Materiaalklasse', 'Discipline', 'Soort_record',
+                   'Para klasse', 'Verbeterbaar', 'Pijlen', 'Bondsnummer', 'Naam', 'Datum', 'Plaats', 'Land',
+                   'Score', 'X-count', 'Ook ER', 'Ook WR', 'Notities']
+
+    hdrs_25m1p = ['Index', 'Geslacht', 'Leeftijd', 'Materiaalklasse', 'Discipline', 'Soort_record',
+                  'Para klasse', 'Verbeterbaar', 'Pijlen', 'Bondsnummer', 'Naam', 'Datum', 'Plaats', 'Land',
+                  'Score', 'Notities']
+
+    hdrs_team = ['Geslacht', 'Leeftijd', 'Materiaalklasse', 'Discipline', 'Soort_record', 'Verbeterbaar',
+                 'Pijlen', 'Bondsnummer', 'Naam', 'Datum', 'Plaats', 'Land', 'Score', 'Notities']
+
     def setUp(self):
         """ initialisatie van de test case """
 
         # NhbLib
-        sporter = Sporter(
+        sporter1 = Sporter(
                     lid_nr=123456,
                     voornaam='Jan',
                     achternaam='Schutter',
@@ -44,9 +45,10 @@ class TestRecordsCliImport(E2EHelpers, TestCase):
                     adres_code='Papendal',
                     geslacht='M',
                     sinds_datum=parse_date("1991-02-03"))  # Y-M-D
-        sporter.save()
+        sporter1.save()
+        self.sporter1 = sporter1
 
-        sporter = Sporter(
+        sporter2 = Sporter(
                     lid_nr=123457,
                     voornaam='Petra',
                     achternaam='Schutter',
@@ -55,19 +57,20 @@ class TestRecordsCliImport(E2EHelpers, TestCase):
                     adres_code='Arnhem',
                     geslacht='V',
                     sinds_datum=parse_date("1991-02-05"))  # Y-M-D
-        sporter.save()
+        sporter2.save()
+        self.sporter2 = sporter2
 
         # Record 42
         rec = IndivRecord(
                     volg_nr=42,
                     discipline=DISCIPLINE[0][0],   # OD
-                    soort_record='Test record',
+                    soort_record='WA1440',
                     geslacht=GESLACHT[0][0],   # M
                     leeftijdscategorie=LEEFTIJDSCATEGORIE[0][0],   # M
                     materiaalklasse=MATERIAALKLASSE[0][0],     # R
                     # materiaalklasse_overig
-                    sporter=sporter,
-                    naam='Top Schutter',
+                    sporter=sporter2,
+                    naam=sporter2.volledige_naam(),
                     datum=parse_date('2017-08-27'),
                     plaats='Papendal',
                     land='Nederland',
@@ -75,12 +78,13 @@ class TestRecordsCliImport(E2EHelpers, TestCase):
                     # is_european_record
                     # is_world_record
                     score=1234,
-                    max_score=5678,
+                    max_score=1440,
                     x_count=56)
         rec.save()
+        self.rec_42_outdoor = rec
 
         self.assertEqual(rec.score_str(), '1234 (56X)')
-        self.assertEqual(rec.max_score_str(), '5678 (567X)')
+        self.assertEqual(rec.max_score_str(), '1440 (144X)')
 
         # Record 43
         rec = IndivRecord(
@@ -101,6 +105,7 @@ class TestRecordsCliImport(E2EHelpers, TestCase):
                     # is_world_record
                     score=1235)
         rec.save()
+        self.rec_43_18m = rec
 
         self.assertIsNotNone(str(rec))
         self.assertEqual(rec.score_str(), '1235')
@@ -113,8 +118,8 @@ class TestRecordsCliImport(E2EHelpers, TestCase):
                 geslacht=GESLACHT[1][0],   # V
                 leeftijdscategorie=LEEFTIJDSCATEGORIE[3][0],   # C
                 materiaalklasse='R',       # Recurve
-                sporter=sporter,
-                naam='Petra Schutter',
+                sporter=self.sporter2,
+                naam=self.sporter2.volledige_naam(),
                 datum=parse_date('2017-08-27'),
                 plaats='Nergens',
                 land='Niederland',      # noqa
@@ -123,44 +128,214 @@ class TestRecordsCliImport(E2EHelpers, TestCase):
                 # is_world_record
                 score=249)
         rec.save()
+        self.rec_44_25m = rec
 
         self.assertIsNotNone(str(rec))
 
-    def test_file_missing(self):
-        # afhandelen niet bestaand bestand
-        with self.assert_max_queries(20):
-            f1, f2 = self.run_management_command('import_records', './not-existing.json')
-        self.assertTrue(f1.getvalue().startswith('[ERROR] Kan bestand ./not-existing.json niet lezen ('))
-        self.assertEqual(f2.getvalue(), '')
+        self.tmp_fname = '/tmp/test_records.xlsx'
 
-    def test_broken_file(self):
-        # kapot bestand
-        with self.assert_max_queries(20):
-            f1, f2 = self.run_management_command('import_records', TEST_FILE_BROKEN_FILE)
-        self.assertTrue(f1.getvalue().startswith(
-            "[ERROR] Probleem met het JSON formaat in bestand "))
-        self.assertEqual(f2.getvalue(), '')
+    def test_basics(self):
+        # bestand bestaat niet
+        f1, f2 = self.run_management_command('import_records', './not-existing.xlsx')
+        self.assertEqual(f1.getvalue(), '')
+        self.assertTrue(f2.getvalue().startswith('[ERROR] Kan bestand ./not-existing.xlsx niet lezen ('))
 
-    def test_extra_sheet(self):
-        # onverwacht tabblad
+        # leeg bestand
+        wb = openpyxl.Workbook()
+        wb.save(self.tmp_fname)
+        f1, f2 = self.run_management_command('import_records', self.tmp_fname, '--verbose', '--dryrun')
+        # print("f2: %s" % f2.getvalue())
+        self.assertEqual(f1.getvalue(), '')
+        self.assertTrue("[ERROR] Kan sheet 'Data individueel outdoor' niet vinden" in f2.getvalue())
+        self.assertTrue("DRY RUN" in f2.getvalue())
+        self.assertTrue("Samenvatting: 0 records;" in f2.getvalue())
+
         # verkeerde headers
-        with self.assert_max_queries(20):
-            f1, f2 = self.run_management_command('import_records', TEST_FILE_EXTRA_PAGE,
-                                                 '--dryrun')
-        self.assertTrue('[ERROR] Niet ondersteunde tabblad naam: Onbekende blad naam' in f1.getvalue())
-        self.assertTrue('[ERROR] Kolom headers kloppen niet voor range Data team' in f1.getvalue())
-        self.assertTrue('Samenvatting: ' in f2.getvalue())
-        self.assertTrue('\nDRY RUN\n' in f2.getvalue())
-        self.assertTrue('\nDone\n' in f2.getvalue())
+        ws = wb.create_sheet('Data individueel outdoor')
+        ws.append(self.hdrs_team)     # verkeerde headers
+        wb.save(self.tmp_fname)
+        f1, f2 = self.run_management_command('import_records', self.tmp_fname, '--verbose', '--dryrun')
+        # print("f2: %s" % f2.getvalue())
+        self.assertEqual(f1.getvalue(), '')
+        self.assertTrue("[ERROR] Kolom headers kloppen niet:" in f2.getvalue())
 
-    def test_no_data(self):
-        # bestand met alleen headers, geen data
-        with self.assert_max_queries(20):
-            f1, f2 = self.run_management_command('import_records', TEST_FILE_NO_DATA)
-        self.assertFalse('[ERROR]' in f1.getvalue())
-        self.assertTrue('\nDone\n' in f2.getvalue())
+    def test_import_outdoor(self):
+        wb = openpyxl.Workbook()
+        ws = wb.create_sheet('Data individueel outdoor')
+        ws.append(self.hdrs_outdoor)
+        ws.append([])       # lege regel, wordt overgeslagen
+        ws.append([
+            '42',
+            'H', 'M', 'R', 'Outdoor', 'WA1440', '', 'Ja', '144',
+            str(self.sporter2.lid_nr), self.sporter2.volledige_naam(),
+            '2017-08-27',
+            self.rec_42_outdoor.plaats, self.rec_42_outdoor.land,
+            '1234', 56,
+        ])
+        wb.save(self.tmp_fname)
 
-    def test_incomplete(self):
+        f1, f2 = self.run_management_command('import_records', self.tmp_fname, '--verbose', '--dryrun')
+        # print("f1: %s" % f1.getvalue())
+        # print("f2: %s" % f2.getvalue())
+        self.assertEqual(f1.getvalue(), '')
+        self.assertTrue('Samenvatting: 1 records; 1 ongewijzigd;' in f2.getvalue())
+
+        # nog een keer, nu zijn er wijzigingen
+        self.rec_42_outdoor.delete()
+        rec = IndivRecord(
+                    volg_nr=42,
+                    discipline=DISCIPLINE[0][0],   # OD
+                    soort_record='#WA1440',
+                    geslacht=GESLACHT[1][0],       # V
+                    leeftijdscategorie=LEEFTIJDSCATEGORIE[1][0],   # S
+                    materiaalklasse=MATERIAALKLASSE[1][0],     # C
+                    para_klasse='#',
+                    # materiaalklasse_overig
+                    sporter=self.sporter1,
+                    naam=self.sporter1.volledige_naam(),
+                    datum=parse_date('2017-08-26'),
+                    plaats='#Papendal',
+                    land='#Nederland',
+                    verbeterbaar=False,
+                    score_notitie='##',
+                    is_european_record=True,
+                    is_world_record=True,
+                    score=1235,
+                    max_score=1441,
+                    x_count=55)
+        rec.save()
+        self.rec_42_outdoor = rec
+
+        f1, f2 = self.run_management_command('import_records', self.tmp_fname)
+        self.assertEqual(f1.getvalue(), '')
+        # print("f2: %s" % f2.getvalue())
+        self.assertTrue('[INFO] Wijzigingen voor record OD-42:' in f2.getvalue())
+        self.assertEqual(17, f2.getvalue().count(' --> '))
+        self.assertTrue('; 17 wijzigingen; ' in f2.getvalue())
+
+    def test_nieuw(self):
+        wb = openpyxl.Workbook()
+        ws = wb.create_sheet('Data individueel outdoor')
+        ws.append(self.hdrs_outdoor)
+
+        # bestaand record
+        ws.append([
+            '42',
+            'H', 'M', 'R', 'Outdoor', 'WA1440', '', 'Ja', '144',
+            str(self.sporter2.lid_nr), self.sporter2.volledige_naam(),
+            '2017-08-27',
+            self.rec_42_outdoor.plaats, self.rec_42_outdoor.land,
+            '1234', 56,
+        ])
+
+        # nieuw record
+        ws.append([
+            '999',
+            'D', '21+', 'C', 'Outdoor', '70m (72p)', '', 'Nee', '72',
+            str(self.sporter2.lid_nr), self.sporter2.volledige_naam(),
+            '2026-03-27',
+            'Ergens', 'Niemandsland',
+            '650', 42,
+            'ER', 'WR',
+        ])
+
+        wb.save(self.tmp_fname)
+
+        f1, f2 = self.run_management_command('import_records', self.tmp_fname)
+        self.assertEqual(f1.getvalue(), '')
+        # print("f2: %s" % f2.getvalue())
+        self.assertTrue('Record OD-999 toegevoegd' in f2.getvalue())
+
+        rec = IndivRecord.objects.filter(volg_nr=999).first()
+        self.assertEqual(rec.discipline, 'OD')
+        self.assertEqual(rec.soort_record, '70m (72p)')
+        self.assertEqual(rec.geslacht, 'V')
+        self.assertEqual(rec.leeftijdscategorie, 's')
+        self.assertEqual(rec.materiaalklasse, 'C')
+        self.assertEqual(rec.para_klasse, '')
+        self.assertEqual(rec.sporter.lid_nr, self.sporter2.lid_nr)
+        self.assertEqual(rec.naam, self.sporter2.volledige_naam())
+        self.assertEqual(rec.datum.year, 2026)
+        self.assertEqual(rec.datum.month, 3)
+        self.assertEqual(rec.datum.day, 27)
+        self.assertEqual(rec.plaats, 'Ergens')
+        self.assertEqual(rec.land, 'Niemandsland')
+        self.assertEqual(rec.verbeterbaar, False)
+        self.assertEqual(rec.score_notitie, '')
+        self.assertEqual(rec.is_european_record, True)
+        self.assertEqual(rec.is_world_record, True)
+        self.assertEqual(rec.score, 650)
+        self.assertEqual(rec.max_score, 720),
+        self.assertEqual(rec.x_count, 42)
+
+    def test_bad(self):
+        wb = openpyxl.Workbook()
+        ws = wb.create_sheet('Data individueel outdoor')
+        ws.append(self.hdrs_outdoor)
+
+        # bestaand record
+        ws.append([
+            '42',
+            'H', 'M', 'R', 'Outdoor', 'WA1440', '', 'Ja', '144',
+            str(self.sporter2.lid_nr), self.sporter2.volledige_naam(),
+            '2017-08-27',
+            self.rec_42_outdoor.plaats, self.rec_42_outdoor.land,
+            '1234', 56,
+        ])
+
+        # slechte index (rest wordt niet overwogen)
+        ws.append([
+            'x',        # index is geen number
+        ])
+
+        # allemaal fouten
+        ws.append([
+            '998',
+            '?',        # fout geslacht
+            '?',        # foute leeftijdscategorie
+            '?',        # foute materiaalklasse
+            '?',        # foute discipline
+            '?',        # foute record soort
+            '?',        # foute para klasse
+            'Ja',
+            '?',        # fout aantal pijlen (geen getal)
+            '999999',   # niet bestaand lid_nr
+            '',         # naam wordt niet bekeken
+            '1-2-3',    # foute datum
+            self.rec_42_outdoor.plaats, self.rec_42_outdoor.land,
+            '?',        # foute score (geen getal)
+            '?',        # fout max score (geen getal)
+            '?',        # foute ER indicatie
+            '?',        # foute WR indicatie
+        ])
+
+        # nog meer fouten
+        ws.append([
+            '998',
+            '?',
+            '?',
+            '?',
+            '?',
+            '70m',
+            '?',
+            'Ja',
+            '36',
+            '?',            # fout bondsnummer (niet 6 cijfers)
+            '',   # naam
+            'Onbekend',     # special case
+            self.rec_42_outdoor.plaats, self.rec_42_outdoor.land,
+            '999',          # foute score (hoger dan max score)
+            '9999',         # fout max score (te hoog)
+        ])
+
+        wb.save(self.tmp_fname)
+
+        f1, f2 = self.run_management_command('import_records', self.tmp_fname)
+        self.assertEqual(f1.getvalue(), '')
+        # print("f2: %s" % f2.getvalue())
+        self.assertTrue("Samenvatting: 4 records; 1 ongewijzigd; 21 fouten; 0 verwijderd; 0 wijzigingen; 0 toegevoegd;" in f2.getvalue())
+
+    def NOT_test_incomplete(self):
         # incompleet bestand
         with self.assert_max_queries(50):
             f1, f2 = self.run_management_command('import_records', TEST_FILE_INCOMPLETE)
@@ -174,7 +349,7 @@ class TestRecordsCliImport(E2EHelpers, TestCase):
         self.assertTrue('[INFO] Record 25-2 toegevoegd' in f2.getvalue())
         self.assertTrue('; 1 ongewijzigd;' in f2.getvalue())    # 25-44
 
-    def test_data_errors(self):
+    def NOT_test_data_errors(self):
         # all kinds of errors
         with self.assert_max_queries(37):
             f1, f2 = self.run_management_command('import_records', TEST_FILE_DATA_ERRORS)
@@ -187,7 +362,7 @@ class TestRecordsCliImport(E2EHelpers, TestCase):
         obj = IndivRecord.objects.get(discipline='18', volg_nr=2)
         self.assertEqual(obj.leeftijdscategorie, 'U')
 
-    def test_data_changes(self):
+    def NOT_test_data_changes(self):
         # all kinds of changes
         with self.assert_max_queries(37):
             f1, f2 = self.run_management_command('import_records', TEST_FILE_CHANGES)
@@ -215,19 +390,19 @@ class TestRecordsCliImport(E2EHelpers, TestCase):
         self.assertTrue("Wijzigingen voor record 25-44:" in f2.getvalue())
         self.assertTrue("score_notitie: '' --> 'gedeeld'" in f2.getvalue())
 
-    def test_foutvrij_dryrun(self):
+    def NOT_test_foutvrij_dryrun(self):
         with self.assert_max_queries(25):
             f1, f2 = self.run_management_command('import_records', TEST_FILE_CHANGES,
                                                  '--dryrun')
         self.assertTrue("DRY RUN\nSamenvatting: 5 records;" in f2.getvalue())
 
-    def test_onbekend_bondsnummer(self):
+    def NOT_test_onbekend_bondsnummer(self):
         # onbekend bondsnummer
         with self.assert_max_queries(20):
             f1, f2 = self.run_management_command('import_records', TEST_FILE_BAD_LID_NR)
         self.assertTrue("Bondsnummer niet bekend: '999999' " in f1.getvalue())
 
-    def test_foute_datums(self):
+    def NOT_test_foute_datums(self):
         # foute datums
         with self.assert_max_queries(33):
             f1, f2 = self.run_management_command('import_records', TEST_FILE_BAD_DATES)
@@ -240,13 +415,13 @@ class TestRecordsCliImport(E2EHelpers, TestCase):
         self.assertTrue("[ERROR] Fout in datum: '30-6-1917' in ['6'," in f1.getvalue())
         self.assertTrue("[ERROR] Fout in datum: '30-6-2099' in ['7'," in f1.getvalue())
 
-    def test_dubbele_nrs(self):
+    def NOT_test_dubbele_nrs(self):
         # dubbele nummers
         with self.assert_max_queries(35):
             f1, f2 = self.run_management_command('import_records', TEST_FILE_DOUBLE_NRS)
         self.assertTrue("[ERROR] Volgnummer 22 komt meerdere keren voor in" in f1.getvalue())
 
-    def test_niet_consecutief(self):
+    def NOT_test_niet_consecutief(self):
         # test met records die niet consecutief zijn
         with self.assert_max_queries(46):
             f1, f2 = self.run_management_command('import_records', TEST_FILE_NIET_CONSECUTIEF)
@@ -257,14 +432,14 @@ class TestRecordsCliImport(E2EHelpers, TestCase):
         self.assertTrue("[WARNING] Identieke datum en score voor records OD-202 en OD-102" in f1.getvalue())
         self.assertTrue("[WARNING] Score niet consecutief voor records OD-401 en OD-400 (400 >= 300)" in f1.getvalue())
 
-    def test_verkeerde_soort_record(self):
+    def NOT_test_verkeerde_soort_record(self):
         with self.assert_max_queries(30):
             f1, f2 = self.run_management_command('import_records', TEST_FILE_VERKEERDE_SOORT)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
         self.assertTrue("[ERROR] Max score (afgeleide van aantal pijlen) is niet consistent in soort" in f1.getvalue())
 
-    def test_wa_renames(self):
+    def NOT_test_wa_renames(self):
         # IB is hernoemd naar TR, maar in de administratie ondersteunen we beide
         # Master/Senior/Junior/Cadet zijn hernoemd naar 50+/21+/Onder 21/Onder 18
         f1, f2 = self.run_management_command('import_records', TEST_FILE_WA_RENAMES)

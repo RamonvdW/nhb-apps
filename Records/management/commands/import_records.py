@@ -194,8 +194,7 @@ class Command(BaseCommand):
                     val = None
                 if val and curr_record:
                     if record.max_score != curr_record.max_score:
-                        if curr_record.max_score != 0:
-                            wijzigingen.append('max_score: %s --> %s' % (curr_record.max_score, record.max_score))
+                        wijzigingen.append('max_score: %s --> %s' % (curr_record.max_score, record.max_score))
                         curr_record.max_score = record.max_score
 
             # 9 = Bondsnummer
@@ -558,7 +557,7 @@ class Command(BaseCommand):
         # for
 
         # rapporteer de samenvatting en schrijf deze ook in het logboek
-        samenvatting = "Samenvatting: %s records; %s ongewijzigd; %s overgeslagen i.v.m. fouten; %s verwijderd;"\
+        samenvatting = "Samenvatting: %s records; %s ongewijzigd; %s fouten; %s verwijderd; "\
                        "%s wijzigingen; %s toegevoegd; %s waarschuwingen, %s fouten" % (
                            self.count_read,
                            self.count_ongewijzigd,
@@ -586,7 +585,7 @@ class Command(BaseCommand):
         # lees het excel bestand met alle records
         try:
             wb = openpyxl.load_workbook(fname, read_only=True)
-        except IOError as exc:
+        except (IOError, openpyxl.utils.exceptions.InvalidFileException) as exc:
             self.stdout.write("[ERROR] Kan bestand %s niet lezen (%s)" % (fname, str(exc)))
             return
         else:
