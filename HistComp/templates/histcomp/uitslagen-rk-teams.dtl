@@ -137,19 +137,23 @@
 
                     <!-- RK scores -->
                     <td class="{% if toon_teamlid_scores %}right-align{% else %}center{% endif %}" style="padding-right:10px">
-                        <b>{{ team.team_score }}{% if team.heeft_shootoff_gewonnen %}&nbsp+{% endif %}</b>
-                        {% if toon_teamlid_scores %}
-                            {% for deelnemer in team.deelnemers %}
-                                <br>
-                                <span>{{ deelnemer.team_score }}</span>
-                            {% endfor %}
+                        {% if team.team_score_is_blanco %}
+                            <span>(blanco)</span>
+                        {% else %}
+                            <b>{{ team.team_score }}{% if team.heeft_shootoff_gewonnen %}&nbsp+{% endif %}</b>
+                            {% if toon_teamlid_scores %}
+                                {% for deelnemer in team.deelnemers %}
+                                    <br>
+                                    <span>{{ deelnemer.team_score }}</span>
+                                {% endfor %}
+                            {% endif %}
                         {% endif %}
                     </td>
 
                     <!-- team nummer + team leden -->
                     <td>
                         {% if toon_teamlid_scores %}
-                            <br>
+                            <span>{{ team.team_nr }}</span><br>
                         {% endif %}
                         {% for deelnemer in team.deelnemers %}
                             <span>{{ deelnemer.naam_str }}</span><br>

@@ -369,6 +369,9 @@ class HistRkTeamsView(TemplateView):
             if team.vereniging_plaats:
                 team.ver_str += ' (%s)' % team.vereniging_plaats
 
+            if team.team_score_is_blanco:
+                team.rank = ''
+
             team.deelnemers = [team.lid_1, team.lid_2, team.lid_3, team.lid_4]
             deelnemer_scores = [team.score_lid_1, team.score_lid_2, team.score_lid_3, team.score_lid_4]
             for lid in team.deelnemers:
