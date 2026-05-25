@@ -206,6 +206,10 @@ class TestRecordsCliImport(E2EHelpers, TestCase):
         rec.save()
         self.rec_42_outdoor = rec
 
+        # niet opslaan
+        self.run_management_command('import_records', self.tmp_fname, '--dryrun')
+
+        # wel opslaan
         f1, f2 = self.run_management_command('import_records', self.tmp_fname)
         self.assertEqual(f1.getvalue(), '')
         # print("f2: %s" % f2.getvalue())
@@ -335,19 +339,80 @@ class TestRecordsCliImport(E2EHelpers, TestCase):
         # print("f2: %s" % f2.getvalue())
         self.assertTrue("Samenvatting: 4 records; 1 ongewijzigd; 21 fouten; 0 verwijderd; 0 wijzigingen; 0 toegevoegd;" in f2.getvalue())
 
-    def NOT_test_incomplete(self):
-        # incompleet bestand
-        with self.assert_max_queries(50):
-            f1, f2 = self.run_management_command('import_records', TEST_FILE_INCOMPLETE)
+    def test_indoor(self):
+        wb = openpyxl.Workbook()
+        ws = wb.create_sheet('Data individueel indoor')
+        ws.append(self.hdrs_indoor)
+
+        # 50+
+        ws.append([
+            '1', 'D', '50+',
+            'BB', 'Indoor', '30m',
+            '', 'Nee', '36', '123456',
+            'F. Schietnie',             # verkeerde naam
+            'Onbekend', 'Plaats', 'Land',
+            '360',
+            '',     # X-count
+        ])
+        ws.append([
+            '2', 'D', '50+',
+            'BB', 'Indoor', '30m',
+            '', 'Nee', '36', '123456',
+            'Petra Schutter',
+            'Onbekend', 'Plaats', 'Land',
+            '360',
+            '',     # X-count
+
+        ])
+        wb.save(self.tmp_fname)
+
+        # dry-run: nieuwe record wordt niet opgeslagen
+        f1, f2 = self.run_management_command('import_records', self.tmp_fname, '--dryrun')
+        self.assertEqual(f1.getvalue(), '')
         # print("f2: %s" % f2.getvalue())
-        self.assertFalse('[ERROR]' in f1.getvalue())
-        self.assertTrue('[INFO] Record OD-1 toegevoegd' in f2.getvalue())
-        self.assertTrue('[INFO] Record OD-2 toegevoegd' in f2.getvalue())
-        self.assertTrue('[INFO] Record 18-1 toegevoegd' in f2.getvalue())
         self.assertTrue('[INFO] Record 18-2 toegevoegd' in f2.getvalue())
+        self.assertTrue("[ERROR] Foute naam: 'F. Schietnie' maar sporter naam is 'Jan Schutter'" in f2.getvalue())
+
+    def test_25m1pijl(self):
+        wb = openpyxl.Workbook()
+        ws = wb.create_sheet('Data individueel 25m1pijl')
+        ws.append(self.hdrs_25m1p)
+
+        ws.append([
+            '1', 'H', 'Onder 18', 'BB', '25m1p', '50m',
+            '', 'Nee', '50', '123456', 'Petra Schutter',
+            'Onbekend', 'Plaats', 'Land',
+            '500', 'Maximale score!'
+        ])
+
+        # Onder 21 + te oud
+        ws.append([
+            '2', 'H', 'Onder 21', 'BB', '25m1p', '50m',
+            '', 'Nee', '50', '123456', 'Petra Schutter',
+            '1900-01-01 00:00', 'Plaats', 'Land',
+            '500', 'Maximale score!'
+        ])
+
+        wb.save(self.tmp_fname)
+
+        f1, f2 = self.run_management_command('import_records', self.tmp_fname)
+        self.assertEqual(f1.getvalue(), '')
+        # print("f2: %s" % f2.getvalue())
         self.assertTrue('[INFO] Record 25-1 toegevoegd' in f2.getvalue())
-        self.assertTrue('[INFO] Record 25-2 toegevoegd' in f2.getvalue())
-        self.assertTrue('; 1 ongewijzigd;' in f2.getvalue())    # 25-44
+        self.assertTrue("[ERROR] Fout in datum: '1900-01-01'" in f2.getvalue())
+
+    def test_teams(self):
+        wb = openpyxl.Workbook()
+        ws = wb.create_sheet('Data team')
+        ws.append(self.hdrs_team)
+
+        wb.save(self.tmp_fname)
+
+        f1, f2 = self.run_management_command('import_records', self.tmp_fname)
+        self.assertEqual(f1.getvalue(), '')
+        # print("f2: %s" % f2.getvalue())
+        self.assertTrue("[INFO] Importeer van blad 'Data team'" in f2.getvalue())
+        self.assertTrue('[TODO] Team records worden nog niet ondersteund' in f2.getvalue())
 
     def NOT_test_data_errors(self):
         # all kinds of errors

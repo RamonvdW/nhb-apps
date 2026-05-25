@@ -419,10 +419,11 @@ class Command(BaseCommand):
 
         # alle overgebleven oude_volg_nrs zijn verwijderd
         if len(self._oude_volg_nrs):
-            nrs = repr(self._oude_volg_nrs[:5])
+            nrs = ", ".join([str(nr)
+                             for nr in self._oude_volg_nrs[:5]])
             if len(self._oude_volg_nrs) > 5:
                 nrs += ', ...'
-            self.stdout.write('[WARNING] %s records worden verwijderd (nummers %s)' % (len(self._oude_volg_nrs), nrs))
+            self.stdout.write('[WARNING] %s records worden verwijderd (nrs: %s)' % (len(self._oude_volg_nrs), nrs))
         if not self.dryrun:
             for volg_nr in self._oude_volg_nrs:
                 IndivRecord.objects.get(discipline=disc, volg_nr=volg_nr).delete()
