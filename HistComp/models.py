@@ -358,7 +358,11 @@ class HistKampTeam(models.Model):
 
     def __str__(self):
         """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
-        return "%s: %s - %s (%s)" % (self.rank, self.vereniging_nr, self.team_nr, self.teams_klasse)
+        msg = "%se: %s-%s (%s" % (self.rank, self.vereniging_nr, self.team_nr, self.teams_klasse)
+        if self.rayon_nr > 0:
+            msg += ", rayon %s" % self.rayon_nr
+        msg += ")"
+        return msg
 
     class Meta:
         """ meta data voor de admin interface """

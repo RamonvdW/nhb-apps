@@ -52,7 +52,7 @@ class HistKampTeamAdmin(admin.ModelAdmin):
 
     autocomplete_fields = ('lid_1', 'lid_2', 'lid_3', 'lid_4')
 
-    ordering = ['-seizoen', 'rank', 'team_type', 'teams_klasse']
+    ordering = ['-seizoen', 'team_type', 'teams_klasse', 'rank', 'rayon_nr']
 
     def __init__(self, model, admin_site):
         super().__init__(model, admin_site)
