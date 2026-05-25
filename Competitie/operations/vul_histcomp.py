@@ -200,6 +200,9 @@ def uitslag_rk_indiv_naar_histcomp(comp: Competitie):
     if not hist_seizoen:
         return
 
+    # verwijder eventueel eerder aangemakte histcomp records
+    HistKampIndivRK.objects.filter(seizoen=hist_seizoen).delete()
+
     beschrijving2boogtype_pk = dict()
     for boogtype in comp.boogtypen.all():
         beschrijving2boogtype_pk[boogtype.beschrijving] = boogtype.pk
@@ -264,6 +267,9 @@ def uitslag_bk_indiv_naar_histcomp(comp: Competitie):
     if not hist_seizoen:
         return
 
+    # verwijder eventueel eerder aangemakte histcomp records
+    HistKampIndivBK.objects.filter(seizoen=hist_seizoen).delete()
+
     bulk = list()
     for deelnemer in (DeelnemerBK
                       .objects
@@ -305,7 +311,6 @@ def uitslag_bk_indiv_naar_histcomp(comp: Competitie):
     # for
 
     HistKampIndivBK.objects.bulk_create(bulk)
-    del bulk
 
     hist_seizoen.heeft_uitslag_bk_indiv = True
     hist_seizoen.save(update_fields=['heeft_uitslag_bk_indiv'])
@@ -317,6 +322,9 @@ def uitslag_regio_teams_naar_histcomp(comp: Competitie):
     hist_seizoen = _get_seizoen(comp)
     if not hist_seizoen:
         return
+
+    # verwijder eventueel eerder aangemakte histcomp records
+    HistCompRegioTeam.objects.filter(seizoen=hist_seizoen).delete()
 
     bulk = list()
     prev_team = None
@@ -429,8 +437,7 @@ def uitslag_rk_teams_naar_histcomp(comp: Competitie):
     # for
 
     # voorkom dubbele records bij re-publish
-    qset = HistKampTeam.objects.filter(seizoen=hist_seizoen, rk_of_bk=HISTCOMP_RK)
-    qset.delete()
+    HistKampTeam.objects.filter(seizoen=hist_seizoen, rk_of_bk=HISTCOMP_RK).delete()
 
     bulk = list()
     for team in (TeamRK
@@ -528,6 +535,9 @@ def uitslag_bk_teams_naar_histcomp(comp: Competitie):
     hist_seizoen = _get_seizoen(comp)
     if not hist_seizoen:
         return
+
+    # voorkom dubbele records bij re-publish
+    HistKampTeam.objects.filter(seizoen=hist_seizoen, rk_of_bk=HISTCOMP_BK).delete()
 
     indiv_klasse_lid_nr2hist = dict()
     for hist in HistKampIndivRK.objects.filter(seizoen=hist_seizoen):
