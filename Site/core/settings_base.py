@@ -62,7 +62,7 @@ APPS_DIR = os.path.dirname(BASE_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2026-05-25'
+SITE_VERSIE = '2026-05-26'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -246,6 +246,7 @@ STATIC_URL = '/static/'             # url where the server is serving the files
 STATIC_ROOT = 'Site/.static'        # relative to project top-dir
 STATICFILES_DIRS = [
     ("webwinkel_fotos", WEBWINKEL_FOTOS_DIR),       # noqa
+    ("pdfs", STATIC_PDFS_DIR),
 ]
 STATICFILES_FINDERS = [
     'Site.core.transpose_js.AppJsFinder',                       # create static files from .js + minify/instrument

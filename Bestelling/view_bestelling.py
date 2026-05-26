@@ -275,7 +275,7 @@ class ToonBestellingDetailsView(UserPassesTestMixin, TemplateView):
         context['toon_kwalificatie_scores'] = len(kwalificatie_scores) > 0
         context['kwalificatie_scores'] = kwalificatie_scores
 
-        context['url_voorwaarden_wedstrijden'] = settings.VERKOOPVOORWAARDEN_WEDSTRIJDEN_URL
+        context['url_voorwaarden_wedstrijden'] = settings.VERKOOPVOORWAARDEN_EVENEMENTEN_URL
         context['url_voorwaarden_opleidingen'] = settings.VERKOOPVOORWAARDEN_OPLEIDINGEN_URL
         context['url_voorwaarden_webwinkel'] = settings.VERKOOPVOORWAARDEN_WEBWINKEL_URL
 

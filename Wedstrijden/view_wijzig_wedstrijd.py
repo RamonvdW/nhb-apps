@@ -337,7 +337,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
         context['prijs_euro_onder18_str'] = str(wedstrijd.prijs_euro_onder18).replace('.', ',')
 
         context['url_voorwaarden_a_status'] = settings.VOORWAARDEN_A_STATUS_URL
-        context['url_voorwaarden_verkoop'] = settings.VERKOOPVOORWAARDEN_WEDSTRIJDEN_URL
+        context['url_voorwaarden_verkoop'] = settings.VERKOOPVOORWAARDEN_EVENEMENTEN_URL
 
         # aantal banen waar uit gekozen kan worden
         max_banen = min(80, max_banen)

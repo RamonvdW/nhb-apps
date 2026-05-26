@@ -163,7 +163,7 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
 
         context['url_kies_transport'] = reverse('Bestelling:kies-transport')
         context['url_voorwaarden_webwinkel'] = settings.VERKOOPVOORWAARDEN_WEBWINKEL_URL
-        context['url_voorwaarden_wedstrijden'] = settings.VERKOOPVOORWAARDEN_WEDSTRIJDEN_URL
+        context['url_voorwaarden_wedstrijden'] = settings.VERKOOPVOORWAARDEN_EVENEMENTEN_URL
         context['url_voorwaarden_opleidingen'] = settings.VERKOOPVOORWAARDEN_OPLEIDINGEN_URL
 
         if not (bevat_fout or mandje_is_leeg or geen_afleveradres):

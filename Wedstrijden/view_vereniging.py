@@ -99,7 +99,7 @@ class VerenigingWedstrijdenView(UserPassesTestMixin, View):
         context['url_mollie'] = reverse('Betaal:vereniging-instellingen')
         context['url_overboeking_ontvangen'] = reverse('Bestelling:overboeking-ontvangen')
 
-        context['url_voorwaarden'] = settings.VERKOOPVOORWAARDEN_WEDSTRIJDEN_URL
+        context['url_voorwaarden'] = settings.VERKOOPVOORWAARDEN_EVENEMENTEN_URL
 
         context['kruimels'] = (
             (reverse('Vereniging:overzicht'), 'Beheer vereniging'),

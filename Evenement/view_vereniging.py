@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2024-2025 Ramon van der Winkel.
+#  Copyright (c) 2024-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -80,7 +80,7 @@ class VerenigingEvenementenView(UserPassesTestMixin, View):
         context['url_mollie'] = reverse('Betaal:vereniging-instellingen')
         context['url_overboeking_ontvangen'] = reverse('Bestelling:overboeking-ontvangen')
 
-        context['url_voorwaarden'] = settings.VERKOOPVOORWAARDEN_WEDSTRIJDEN_URL
+        context['url_voorwaarden'] = settings.VERKOOPVOORWAARDEN_EVENEMENTEN_URL
 
         context['kruimels'] = (
             (reverse('Vereniging:overzicht'), 'Beheer vereniging'),
