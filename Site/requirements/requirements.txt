@@ -6,7 +6,7 @@
 #
 asgiref==3.11.1
     # via django
-certifi==2026.4.22
+certifi==2026.5.20
     # via requests
 charset-normalizer==3.4.7
     # via requests
@@ -21,7 +21,7 @@ google-api-core==2.30.3
     #   google-api-python-client
     #   google-geo-type
     #   google-maps-routing
-google-api-python-client==2.196.0
+google-api-python-client==2.197.0
     # via -r requirements.in
 google-auth==2.47.0
     # via
@@ -59,7 +59,7 @@ httplib2==0.31.2
     # via
     #   google-api-python-client
     #   google-auth-httplib2
-idna==3.13
+idna==3.17
     # via requests
 mollie-api-python==2.13.0
     # via
@@ -96,11 +96,11 @@ pyotp==2.9.0
     # via -r requirements.in
 pyparsing==3.3.2
     # via httplib2
-pypdf==6.11.0
+pypdf==6.12.2
     # via -r requirements.in
 qrcode==8.2
     # via -r requirements.in
-requests==2.33.1
+requests==2.34.2
     # via
     #   google-api-core
     #   googlemaps
