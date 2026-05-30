@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -11,13 +11,12 @@ from Records.models import IndivRecord
 from Sporter.models import Sporter
 
 
-class TestRecordsRest(TestCase):
+class TestRecordsModels(TestCase):
     """ unittests voor de Records applicatie """
 
     def setUp(self):
         """ initialisatie van de test case """
 
-        # NhbLib
         sporter = Sporter(
                     lid_nr=123457,
                     voornaam='Petra',

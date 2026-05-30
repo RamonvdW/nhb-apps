@@ -588,7 +588,7 @@ class Command(BaseCommand):
         try:
             wb = openpyxl.load_workbook(fname, read_only=True)
         except (IOError, InvalidFileException) as exc:
-            self.stdout.write("[ERROR] Kan bestand %s niet lezen (%s)" % (fname, str(exc)))
+            self.stdout.write("[ERROR] Kan bestand %s niet lezen (%s)" % (repr(fname), str(exc)))
             return
         else:
             self._import_data(wb)

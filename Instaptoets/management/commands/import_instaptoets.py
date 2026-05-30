@@ -8,9 +8,13 @@
 
 from django.core.management.base import BaseCommand
 from Instaptoets.models import Vraag, Categorie
-from difflib import SequenceMatcher
 from openpyxl.utils.exceptions import InvalidFileException
+import traceback
 import openpyxl
+import logging
+import sys
+
+my_logger = logging.getLogger('MH.import_instaptoets')
 
 
 class Command(BaseCommand):
@@ -27,85 +31,39 @@ class Command(BaseCommand):
         parser.add_argument('--dryrun', action='store_true')
         parser.add_argument('--verbose', action='store_true')
 
-    @staticmethod
-    def _remove_newlines(v):
-        return v.replace('\r\n', ' ').replace('\n', ' ').replace('\r', ' ')
-
     def _lees_regel(self, ws, row_nr):
-        row = ws[row_nr]
         regel = list()
-        for col_nr in range(8):
-            cell = row[col_nr]
-            regel.append(cell.value)
-        # for
+        try:
+            row = ws[row_nr]
+        except IndexError:
+            # regel bestaat niet
+            regel = [None] * 8
+        else:
+            for col_nr in range(8):
+                cell = row[col_nr]
+                regel.append(cell.value)
+            # for
+
         if self.verbose:
             self.stdout.write('[DEBUG] Regel %s: %s' % (row_nr, repr(regel)))
         return regel
 
     def _vind_of_maak_vraag(self, v, a, b, c, d):
-        # kijk of de vraag te vinden is:
-        qset = Vraag.objects.filter(pk__in=self.vraag_pks)
+        # kijk of de vraag te vinden is
+        qset = (Vraag
+                .objects
+                .filter(pk__in=self.vraag_pks,
+                        vraag_tekst=v,
+                        antwoord_a=a,
+                        antwoord_b=b,
+                        antwoord_c=c,
+                        antwoord_d=d))
+        vraag = qset.first()
 
-        vraag = qset.filter(vraag_tekst=v, antwoord_a=a, antwoord_b=b, antwoord_c=c, antwoord_d=d).first()
-        if vraag:
-            # geen wijziging
-            # self.stdout.write('[WARNING] Vraag pk=%s: geen wijziging' % vraag.pk)
-            return vraag
+        # aangepaste vraag = nieuwe vraag
+        # dat is beter voor de statistiek over het beantwoorden van de vraag
 
-        vraag = qset.filter(vraag_tekst=v,               antwoord_b=b, antwoord_c=c, antwoord_d=d).first()
-        if vraag:
-            # antwoord A is aangepast
-            self.stdout.write('[WARNING] Vraag pk=%s: antwoord A is aangepast' % vraag.pk)
-            return vraag
-
-        vraag = qset.filter(vraag_tekst=v, antwoord_a=a,               antwoord_c=c, antwoord_d=d).first()
-        if vraag:
-            # antwoord B is aangepast
-            self.stdout.write('[WARNING] Vraag pk=%s: antwoord B is aangepast' % vraag.pk)
-            return vraag
-
-        vraag = qset.filter(vraag_tekst=v, antwoord_a=a, antwoord_b=b,               antwoord_d=d).first()
-        if vraag:
-            # antwoord C is aangepast
-            self.stdout.write('[WARNING] Vraag pk=%s: antwoord C is aangepast' % vraag.pk)
-            return vraag
-
-        vraag = qset.filter(vraag_tekst=v, antwoord_a=a, antwoord_b=b, antwoord_c=c              ).first()
-        if vraag:
-            # antwoord D is aangepast
-            self.stdout.write('[WARNING] Vraag pk=%s: antwoord D is aangepast' % vraag.pk)
-            return vraag
-
-        vraag = qset.filter(vraag_tekst=v).first()
-        if vraag:
-            # alle antwoorden zijn aangepast
-            self.stdout.write('[WARNING] Vraag pk=%s: alle antwoorden zijn aangepast' % vraag.pk)
-            self.stdout.write('[DEBUG] Vraag: %s' % repr(v))
-            return vraag
-
-        options = list()
-        for vraag in qset.filter(antwoord_a=a, antwoord_b=b, antwoord_c=c, antwoord_d=d):
-            print('option:', vraag)
-            s = SequenceMatcher(a=vraag.vraag_tekst, b=v)
-            ratio = s.ratio()
-            if ratio >= 0.75:
-                tup = (ratio, vraag)
-                options.append(tup)
-        # for
-
-        if len(options) > 1:
-            options.sort()
-            for option in options:
-                print(option)
-            krak        # is sorting in the correct order?
-
-        if len(options) == 1:
-            # vraag tekst is aanpast, of dit is een vraag met triviale antwoorden (goed/fout/-/-)
-            ratio, vraag = options[0]
-            self.stdout.write('[WARNING] Vraag pk=%s (ratio=%.2f): vraag is aangepast' % (vraag.pk, ratio))
-            return vraag
-
-        return None
+        return vraag
 
     def _import_categorie(self, ws, row_nr):
         # lees alle vragen in op deze pagina, vanaf row_nr+1
@@ -113,7 +71,7 @@ class Command(BaseCommand):
         self.stdout.write('[INFO] Import categorie %s' % repr(categorie))
         cat, _ = Categorie.objects.get_or_create(beschrijving=categorie)
 
-        while row_nr < 100:
+        while row_nr < 100:     # pragma: no branch
             row_nr += 1
             regel = self._lees_regel(ws, row_nr)
 
@@ -121,7 +79,7 @@ class Command(BaseCommand):
                 # einde van het sheet gevonden
                 break   # from the while
 
-            if regel.count(None) > 4:
+            if len(regel) < 8 or regel.count(None) > 4:
                 self.stdout.write('[WARNING] Incomplete vraag wordt overgeslagen: %s' % repr(regel))
                 continue
 
@@ -135,23 +93,12 @@ class Command(BaseCommand):
             if c == '-' or c is None:
                 c = ''
 
-            #v = self._remove_newlines(v)
-
             vraag = self._vind_of_maak_vraag(v, a, b, c, d)
 
             if vraag:
-                if vraag.pk in self.vraag_pks:
-                    self.vraag_pks.remove(vraag.pk)
-                else:
-                    self.stdout.write('[WARNING] Vraag pk %s is al eerder gebruikt' % vraag.pk)
-                    self.stdout.write('[DEBUG] Regel: %s' % repr(regel))
+                self.vraag_pks.remove(vraag.pk)
 
-                vraag.categorie = cat
-                vraag.vraag_tekst = v
-                vraag.antwoord_a = a
-                vraag.antwoord_b = b
-                vraag.antwoord_c = c
-                vraag.antwoord_d = d
+                # een paar velden mogen aangepast worden
                 vraag.juiste_antwoord = j
                 vraag.gebruik_voor_toets = t.upper() in ('J', 'JA')
                 vraag.gebruik_voor_quiz = q.upper() in ('J', 'JA')
@@ -203,23 +150,42 @@ class Command(BaseCommand):
         # lees het excel bestand met alle records
         try:
             wb = openpyxl.load_workbook(fname, read_only=True)
-        except (IOError, InvalidFileException) as exc:
-            self.stdout.write("[ERROR] Kan bestand %s niet lezen (%s)" % (fname, str(exc)))
+        except (IOError,  InvalidFileException) as exc:
+            self.stderr.write("[ERROR] Kan bestand %s niet lezen (%s)" % (repr(fname), str(exc)))
             return
 
         self.vraag_pks = list(Vraag.objects.values_list('pk', flat=True))
         self.stdout.write('[INFO] Aantal vragen was %s' % len(self.vraag_pks))
 
-        self._import_data(wb)
+        try:
+            self._import_data(wb)
 
-        if self.vraag_pks:
-            self.stdout.write('[INFO] Verouderde vragen: pks=%s' % repr(self.vraag_pks))
-            self.stdout.write('[WARNING] Deze vragen worden buiten gebruik genomen')
-            Vraag.objects.filter(pk__in=self.vraag_pks).update(gebruik_voor_quiz=False, gebruik_voor_toets=False)
+        except Exception as exc:        # pragma: no cover
+            # schrijf in de output
+            tups = sys.exc_info()
+            lst = traceback.format_tb(tups[2])
+            tb = traceback.format_exception(*tups)
 
-        self.stdout.write('[INFO] Aantal vragen is nu %s' % Vraag.objects.count())
-        self.stdout.write('[INFO] %s voor de toets' % Vraag.objects.filter(gebruik_voor_toets=True).count())
-        self.stdout.write('[INFO] %s voor de quiz' % Vraag.objects.filter(gebruik_voor_quiz=True).count())
+            tb_msg_start = 'Onverwachte fout tijdens import_instaptoets\n'
+            tb_msg_start += '\n'
+            tb_msg = tb_msg_start + '\n'.join(tb)
+
+            # full traceback to syslog
+            my_logger.error(tb_msg)
+
+            self.stdout.write('Onverwachte fout (%s): %s' % (type(exc), str(exc)))
+            self.stdout.write('Traceback:')
+            self.stdout.write(''.join(lst))
+
+        else:
+            if self.vraag_pks:
+                self.stdout.write('[INFO] Verouderde vragen: pks=%s' % repr(self.vraag_pks))
+                self.stdout.write('[WARNING] Deze vragen worden buiten gebruik genomen')
+                Vraag.objects.filter(pk__in=self.vraag_pks).update(gebruik_voor_quiz=False, gebruik_voor_toets=False)
+
+            self.stdout.write('[INFO] Aantal vragen is nu %s' % Vraag.objects.count())
+            self.stdout.write('[INFO] %s voor de toets' % Vraag.objects.filter(gebruik_voor_toets=True).count())
+            self.stdout.write('[INFO] %s voor de quiz' % Vraag.objects.filter(gebruik_voor_quiz=True).count())
 
         self.stdout.write('Done')
 

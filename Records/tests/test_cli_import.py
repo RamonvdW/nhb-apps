@@ -138,7 +138,7 @@ class TestRecordsCliImport(E2EHelpers, TestCase):
         # bestand bestaat niet
         f1, f2 = self.run_management_command('import_records', './not-existing.xlsx')
         self.assertEqual(f1.getvalue(), '')
-        self.assertTrue(f2.getvalue().startswith('[ERROR] Kan bestand ./not-existing.xlsx niet lezen ('))
+        self.assertTrue("[ERROR] Kan bestand './not-existing.xlsx' niet lezen (" in f2.getvalue())
 
         # leeg bestand
         wb = openpyxl.Workbook()
