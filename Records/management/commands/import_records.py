@@ -13,6 +13,7 @@ from Records.definities import MATERIAALKLASSEN
 from Records.models import IndivRecord
 from Sporter.models import Sporter
 from Logboek.models import schrijf_in_logboek
+from openpyxl.utils.exceptions import InvalidFileException
 import openpyxl
 import datetime
 
@@ -492,7 +493,7 @@ class Command(BaseCommand):
             # for
         # for
 
-    def _import_data(self, wb):
+    def _import_data(self, wb: openpyxl.Workbook):
         # doorloop de tabbladen
         bladen = [
             {
@@ -586,7 +587,7 @@ class Command(BaseCommand):
         # lees het excel bestand met alle records
         try:
             wb = openpyxl.load_workbook(fname, read_only=True)
-        except (IOError, openpyxl.utils.exceptions.InvalidFileException) as exc:
+        except (IOError, InvalidFileException) as exc:
             self.stdout.write("[ERROR] Kan bestand %s niet lezen (%s)" % (fname, str(exc)))
             return
         else:

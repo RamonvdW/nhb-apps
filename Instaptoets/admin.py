@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2024-2025 Ramon van der Winkel.
+#  Copyright (c) 2024-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -17,8 +17,14 @@ class InstaptoetsAdmin(admin.ModelAdmin):
     list_filter = ('geslaagd', 'aantal_goed')
 
 
+class VraagAdmin(admin.ModelAdmin):
+    search_fields = ('vraag_tekst',)
+
+    list_filter = ('categorie',)
+
+
 admin.site.register(Categorie)
-admin.site.register(Vraag)
+admin.site.register(Vraag, VraagAdmin)
 admin.site.register(ToetsAntwoord)
 admin.site.register(Instaptoets, InstaptoetsAdmin)
 admin.site.register(Quiz)
