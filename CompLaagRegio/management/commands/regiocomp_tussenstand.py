@@ -29,6 +29,13 @@ class Command(BaseCommand):
         super().__init__(stdout, stderr, no_color, force_color)
         self.stop_at = datetime.datetime(2000, 1, 1)
 
+        self.taken = None
+
+        self.sporterboog2scores = dict()   # [SporterBoog.pk] = [(afstand, Score), ..]
+
+        self._onbekend2beter = dict()       # [CompetitieIndivKlasse.pk] = [klasse, ..] met oplopend AG
+
+    def _load_records(self):
         # herstel test database van een flush actie
         if CompetitieTaken.objects.count() == 0:
             CompetitieTaken.objects.create()
@@ -36,9 +43,13 @@ class Command(BaseCommand):
         self.taken = CompetitieTaken.objects.first()
         assert self.taken is not None
 
-        self.sporterboog2scores = dict()   # [SporterBoog.pk] = [(afstand, Score), ..]
-
-        self._onbekend2beter = dict()       # [CompetitieIndivKlasse.pk] = [klasse, ..] met oplopend AG
+        if self.taken.hoogste_scorehist:
+            obj = ScoreHist.objects.filter(pk=self.taken.hoogste_scorehist.pk).first()
+            if obj is None:
+                # bestaat niet meer, dus reset
+                self.stdout.write('[WARNING] CompetitieTaken.hoogste_scorehist bestaat niet meer --> reset naar None.')
+                self.taken.hoogste_scorehist = None
+                self.taken.save(update_fields=['hoogste_scorehist'])
 
     def add_arguments(self, parser):
         parser.add_argument('duration', type=int,
@@ -169,7 +180,7 @@ class Command(BaseCommand):
                 qset = qset.filter(pk__gt=self.taken.hoogste_scorehist.pk)
         except ScoreHist.DoesNotExist:
             # CompetitieTaken bevat een ScoreHist die niet meer bestaat?!
-            self.stdout.write('[ERROR] CompetitieTaken.hoogste_scorehist bestaat niet meer!')
+            self.stdout.write('[ERROR] CompetitieTaken.hoogste_scorehist bestaat niet meer! count=%s, hoogste.pk=%s, latest.pk=%s' % (qset.count(), self.taken.hoogste_scorehist_id, scorehist_latest.pk))
 
         # bepaal de sporterboog pk's die we bij moeten werken
         allowed_sporterboog_pks = list(qset.values_list('score__sporterboog__pk', flat=True))
@@ -521,6 +532,9 @@ class Command(BaseCommand):
             test_database_name = "test_" + settings.DATABASES[DEFAULT_DB_ALIAS]["NAME"]
             settings.DATABASES[DEFAULT_DB_ALIAS]["NAME"] = test_database_name
             connection.settings_dict["NAME"] = test_database_name
+
+        # laad nu de records uit de juiste database
+        self._load_records()
 
         self._set_stop_time(**options)
 

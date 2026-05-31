@@ -50,13 +50,7 @@ class Command(BaseCommand):
 
         self._hoogste_mutatie_pk = None
 
-        # cache de redelijke statische instellingen (voor 1 uur)
-        try:
-            self._instellingen_bond = (BetaalInstellingenVereniging
-                                       .objects
-                                       .get(vereniging__ver_nr=settings.BETAAL_VIA_BOND_VER_NR))
-        except BetaalInstellingenVereniging.DoesNotExist:
-            self._instellingen_bond = None
+        self._instellingen_bond = None
 
         # maak de Mollie-client instantie aan
         # de API key zetten we later, afhankelijk van de vereniging waar we deze transactie voor doen
@@ -72,6 +66,15 @@ class Command(BaseCommand):
         self._mollie_client.UNAME = settings.NAAM_SITE      # MijnHandboogsport [test]
 
         self._mollie_webhook_url = ""
+
+    def _load_records(self):
+        # cache de redelijke statische instellingen (voor 1 uur)
+        try:
+            self._instellingen_bond = (BetaalInstellingenVereniging
+                                       .objects
+                                       .get(vereniging__ver_nr=settings.BETAAL_VIA_BOND_VER_NR))
+        except BetaalInstellingenVereniging.DoesNotExist:
+            self._instellingen_bond = None
 
     def _get_mollie_webhook_url(self, url_betaling_gedaan):
         if not self._mollie_webhook_url:
@@ -600,6 +603,9 @@ class Command(BaseCommand):
             test_database_name = "test_" + settings.DATABASES[DEFAULT_DB_ALIAS]["NAME"]
             settings.DATABASES[DEFAULT_DB_ALIAS]["NAME"] = test_database_name
             connection.settings_dict["NAME"] = test_database_name
+
+        # laad nu de records uit de juiste database
+        self._load_records()
 
         self._set_stop_time(**options)
 

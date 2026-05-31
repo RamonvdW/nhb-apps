@@ -39,10 +39,13 @@ class Command(BaseCommand):
 
         self.stop_at = datetime.datetime.now()
 
-        self.taken = CompetitieTaken.objects.first()
+        self.taken = None
 
         self._sync = BackgroundSync(settings.BACKGROUND_SYNC__COMPETITIE_MUTATIES)
         self._count_ping = 0
+
+    def _load_records(self):
+        self.taken = CompetitieTaken.objects.first()
 
     def _out_error(self, msg):
         self.stdout.write('[ERROR] {competitie_mutaties} %s' % msg)
@@ -207,6 +210,14 @@ class Command(BaseCommand):
             settings.DATABASES[DEFAULT_DB_ALIAS]["NAME"] = test_database_name
             connection.settings_dict["NAME"] = test_database_name
 
+        # laad nu de records uit de juiste database
+        self._load_records()
+
+        self._set_stop_time(**options)
+
+        # bij opstarten van de taak, doorloop alle mutaties die nog niet verwerkt zijn
+        self.taken.hoogste_mutatie = None
+
         self.verwerk_mutaties = [
             VerwerkCompBeheerMutaties(self.stdout, my_logger),
             VerwerkMutatiesRegio(self.stdout, my_logger),
@@ -214,11 +225,6 @@ class Command(BaseCommand):
             VerwerkMutatiesRayon(self.stdout),
             VerwerkMutatiesBond(self.stdout),
         ]
-
-        self._set_stop_time(**options)
-
-        # bij opstarten van de taak, doorloop alle mutaties die nog niet verwerkt zijn
-        self.taken.hoogste_mutatie = None
 
         competitie_hanteer_overstap_sporter(self.stdout)
 

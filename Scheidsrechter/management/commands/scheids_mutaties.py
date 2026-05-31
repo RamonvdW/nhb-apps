@@ -232,7 +232,11 @@ class Command(BaseCommand):
         self._count_ping = 0
 
         self._hoogste_mutatie_pk = None
+        self._email_cs = ''
+        self.ver_bondsbureau = None
+        self.locatie_placeholder = None
 
+    def _load_records(self):
         functie_cs = Functie.objects.get(rol='CS')
         self._email_cs = functie_cs.bevestigde_email
 
@@ -248,6 +252,7 @@ class Command(BaseCommand):
                                     notities='Automatisch aangemaakt voor opvragen SR naar RK/BK')
         if is_created:
             loc.verenigingen.add(self.ver_bondsbureau)
+
         self.locatie_placeholder = loc
 
     def add_arguments(self, parser):
@@ -882,6 +887,9 @@ class Command(BaseCommand):
             test_database_name = "test_" + settings.DATABASES[DEFAULT_DB_ALIAS]["NAME"]
             settings.DATABASES[DEFAULT_DB_ALIAS]["NAME"] = test_database_name
             connection.settings_dict["NAME"] = test_database_name
+
+        # laad nu de records uit de juiste database
+        self._load_records()
 
         self._set_stop_time(**options)
 
