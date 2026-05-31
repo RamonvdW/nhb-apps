@@ -1,21 +1,15 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2025 Ramon van der Winkel.
+#  Copyright (c) 2021-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from django.utils import timezone
-from Geo.models import Regio
-from Instaptoets.models import Instaptoets
-from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
-from Vereniging.models import Vereniging
-import datetime
 import openpyxl
 
 
-class TestInstaptoetsCli(E2EHelpers, TestCase):
+class TestInstaptoetsCliImport(E2EHelpers, TestCase):
     """ unittests voor de Instaptoets applicatie, management command import_instaptoets """
 
     hdrs = ['Vraagtekst', 'Antwoord A', 'Antwoord B', 'Antwoord C', 'Antwoord D', 'Juiste antwoord', 'Toets', 'Quiz']
@@ -46,6 +40,7 @@ class TestInstaptoetsCli(E2EHelpers, TestCase):
 
         # ws met juiste headers
         ws = wb.create_sheet('Test Categorie')
+        del wb['Sheet']
         ws.append(self.hdrs)
         wb.save(self.tmp_fname)
         f1, f2 = self.run_management_command('import_instaptoets', self.tmp_fname, '--verbose')
@@ -64,10 +59,13 @@ class TestInstaptoetsCli(E2EHelpers, TestCase):
         # verwijder een vraag
         wb = openpyxl.Workbook()
         ws = wb.create_sheet('Test Categorie')
+        del wb['Sheet']
         ws.append(self.hdrs)
         ws.append(self.vraag_1)
         wb.save(self.tmp_fname)
         f1, f2 = self.run_management_command('import_instaptoets', self.tmp_fname, '--verbose')
-        print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
+        # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
+        self.assertTrue("[INFO] Aantal vragen is nu 2" in f2.getvalue())
+        self.assertTrue("[INFO] Verouderde vragen: pks=" in f2.getvalue())
 
 # end of file
