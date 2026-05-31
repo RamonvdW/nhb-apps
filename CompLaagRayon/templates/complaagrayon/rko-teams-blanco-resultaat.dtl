@@ -28,7 +28,7 @@
                     {% if obj.break_klasse %}
 
                         <tr class="sv-table-sectie-header">
-                            <td colspan="4" class="center">
+                            <td colspan="3" class="center">
                                 <h2 class="sv-kopje-in-tabel">{{ obj.team_klasse.beschrijving }}</h2>
                             </td>
                         </tr>
@@ -51,7 +51,7 @@
                     </tr>
                 {% empty %}
                     <tr>
-                        <td class="center">Geen teams zonder resultaat gevonden</td>
+                        <td colspan="3" class="center">Geen teams zonder resultaat gevonden</td>
                     </tr>
                 {% endfor %}
             </table>
@@ -67,13 +67,13 @@
                     <p>Wil je <b>{{ obj.team_naam }}</b> een blanco RK resultaat geven?</p>
                     <p>Het team kan daarmee doorstromen naar de Bondskampioenschappen</p>
 
-                    <form action="{{ obj.url }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
+                    <form action="{{ obj.url }}" method="post" onsubmit="document.getElementById('submit_knop_{{ obj.pk }}').disabled=true; return true;">
                         {% csrf_token %}
                         <input type="hidden" name="toekennen" value="1">
 
                         <div class="modal-footer" style="text-align:center; display:block">
                             <div style="display:inline-block; width:49%">
-                                <button class="btn-sv-rood" id="submit_knop" type="submit">Ja</button>
+                                <button class="btn-sv-rood" id="submit_knop_{{ obj.pk }}" type="submit">Ja</button>
                             </div>
                             <div style="display:inline-block; width:49%">
                                 <a href="#" class="btn-sv-blauw modal-close">Nee</a>
