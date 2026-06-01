@@ -306,7 +306,6 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
 
         # blokkeer checkbox als de te blokkeren klassen niet uit te zetten zijn
         for klasse in opt_klasse:
-            print(klasse)
             if klasse.gebruikt and klasse.code_blokkeer > 0:
                 klasse2 = code2klasse[klasse.code_blokkeer]
                 if not klasse2.selected:
