@@ -23,7 +23,7 @@ class WedstrijdAdmin(admin.ModelAdmin):                 # pragma: no cover
 
     def __init__(self, model, admin_site):
         super().__init__(model, admin_site)
-        self.obj = None
+        self.obj: Wedstrijd | None = None
 
     def get_queryset(self, request):
         """ deze functie is voor prestatieverbetering
@@ -50,7 +50,10 @@ class WedstrijdAdmin(admin.ModelAdmin):                 # pragma: no cover
         """ bepaal de relevante keuzemogelijkheden voor specifieke velden
         """
         if db_field.name == 'locatie' and self.obj:
-            ver = self.obj.organiserende_vereniging
+            if self.obj.uitvoerende_vereniging:
+                ver = self.obj.uitvoerende_vereniging
+            else:
+                ver = self.obj.organiserende_vereniging
             kwargs['queryset'] = ver.wedstrijdlocatie_set.all()
 
         return super().formfield_for_foreignkey(db_field, request, **kwargs)

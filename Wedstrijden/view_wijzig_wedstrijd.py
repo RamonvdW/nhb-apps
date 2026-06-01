@@ -16,7 +16,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
 from BasisTypen.definities import (GESLACHT_ALLE,
                                    ORGANISATIES2LONG_STR, ORGANISATIES2SHORT_STR,
-                                   ORGANISATIE_WA, ORGANISATIE_IFAA)
+                                   ORGANISATIE_WA, ORGANISATIE_IFAA, ORGANISATIE_VETERANEN)
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
 from BasisTypen.operations import get_organisatie_boogtypen, get_organisatie_klassen
 from Functie.definities import Rol
@@ -268,10 +268,11 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
             klasse.gebruikt = (klasse.pk in klassen_gebruikt)
             klasse.selected = (klasse.pk in gekozen_pks)
 
-            if klasse.leeftijdsklasse.wedstrijd_geslacht == GESLACHT_ALLE:
+            if klasse.leeftijdsklasse.wedstrijd_geslacht == GESLACHT_ALLE and klasse.organisatie != ORGANISATIE_VETERANEN:
                 code += 1
                 klasse.code = code
                 code2klasse[code] = klasse
+
                 code += 1
                 klasse.code_blokkeer = code
                 blokkeer2klasse[code] = klasse
@@ -305,6 +306,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
 
         # blokkeer checkbox als de te blokkeren klassen niet uit te zetten zijn
         for klasse in opt_klasse:
+            print(klasse)
             if klasse.gebruikt and klasse.code_blokkeer > 0:
                 klasse2 = code2klasse[klasse.code_blokkeer]
                 if not klasse2.selected:

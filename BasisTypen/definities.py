@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -80,18 +80,21 @@ ORGANISATIE_WA = 'W'            # World Archery
 ORGANISATIE_KHSN = 'N'          # Nationaal
 ORGANISATIE_IFAA = 'F'          # International Field Archery Association
 ORGANISATIE_WA_STRIKT = 'S'     # WA klassen begrensd op eigen leeftijd (voor NK)
+ORGANISATIE_VETERANEN = 'V'     # Veterarenwedstrijden (met eigen klassen en regels voor wedstrijdleeftijd)
 
 ORGANISATIES = [
     (ORGANISATIE_WA, 'World Archery'),
     (ORGANISATIE_KHSN, 'KHSN'),
     (ORGANISATIE_IFAA, 'IFAA'),
     (ORGANISATIE_WA_STRIKT, 'WA strikt'),
+    (ORGANISATIE_VETERANEN, 'KHSN veteranen'),
 ]
 
 ORGANISATIES2SHORT_STR = {
     ORGANISATIE_WA: 'WA',
     ORGANISATIE_KHSN: 'KHSN',
     ORGANISATIE_IFAA: 'IFAA',
+    ORGANISATIE_VETERANEN: 'KHSN-V',
 }
 
 # wordt gebruikt in de zin:
@@ -100,6 +103,7 @@ ORGANISATIES2LONG_STR = {
     ORGANISATIE_WA: 'World Archery',
     ORGANISATIE_KHSN: 'de KHSN',
     ORGANISATIE_IFAA: 'de IFAA',
+    ORGANISATIE_VETERANEN: 'de KHSN veteranen',
 }
 
 BOOGTYPE_AFKORTING_RECURVE = 'R'

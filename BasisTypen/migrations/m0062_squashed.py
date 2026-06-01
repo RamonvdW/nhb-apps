@@ -1,18 +1,28 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2025 Ramon van der Winkel.
+#  Copyright (c) 2020-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import migrations, models
 from BasisTypen.definities import (BLAZOEN_40CM, BLAZOEN_DT, BLAZOEN_60CM, BLAZOEN_60CM_4SPOT,
                                    ORGANISATIE_WA, ORGANISATIE_KHSN, ORGANISATIE_IFAA, ORGANISATIE_WA_STRIKT,
-                                   GESLACHT_MAN, GESLACHT_VROUW, GESLACHT_ALLE)
+                                   ORGANISATIE_VETERANEN, GESLACHT_MAN, GESLACHT_VROUW, GESLACHT_ALLE)
 
 
 LEEFTIJDSKLASSEN = (
-    # WA + KHSN
+    # WA + KHSN + KHSN-Veteranen
     # volgorde afk    geslacht        min max  kort        beschrijving               organisatie
+
+    # # Veteranen
+    # (70,       'VAL', GESLACHT_ALLE,  50, 0,   '50+',      '50+ jaar',       ORGANISATIE_VETERANEN),
+    # (71,       'V50', GESLACHT_ALLE,  50, 54,  '50-54',    '50 t/m 54 jaar',          ORGANISATIE_VETERANEN),
+    # (72,       'V55', GESLACHT_ALLE,  55, 59,  '55-59',    '55 t/m 59 jaar',          ORGANISATIE_VETERANEN),
+    # (73,       'V60', GESLACHT_ALLE,  60, 64,  '60-64',    '60 t/m 64 jaar',          ORGANISATIE_VETERANEN),
+    # (74,       'V65', GESLACHT_ALLE,  65, 69,  '65-69',    '65 t/m 69 jaar',          ORGANISATIE_VETERANEN),
+    # (75,       'V70', GESLACHT_ALLE,  70, 74,  '70-74',    '70 t/m 74 jaar',          ORGANISATIE_VETERANEN),
+    # (76,       'V75', GESLACHT_ALLE,  75, 79,  '75-79',    '75 t/m 79 jaar',          ORGANISATIE_VETERANEN),
+    # (77,       'V80', GESLACHT_ALLE,  80, 0,   '80+',      '80+ jaar',                ORGANISATIE_VETERANEN),
 
     # 60+ (was: Veteranen)
     (61,       'VV',  GESLACHT_VROUW, 60, 0,   '60+',      '60+ Dames',               ORGANISATIE_KHSN),
@@ -249,6 +259,18 @@ KALENDERWEDSTRIJDENKLASSEN = (
     (161, 'R',  'AH1', 'RO12H',  'Recurve Onder 12 Jongens'),
     (162, 'R',  'AV1', 'RO12D',  'Recurve Onder 12 Meisjes'),
 
+    # (170, 'R',  'V50', 'RV50',    'Recurve Veteranen 50 t/m 54 jaar'),
+    # (171, 'R',  'V55', 'RV55',    'Recurve Veteranen 55 t/m 59 jaar'),
+    # (172, 'R',  'V60', 'RV60',    'Recurve Veteranen 60 t/m 64 jaar'),
+    # (173, 'R',  'V65', 'RV65',    'Recurve Veteranen 65 t/m 69 jaar'),
+    # (174, 'R',  'V70', 'RV70',    'Recurve Veteranen 70 t/m 74 jaar'),
+    # (175, 'R',  'V75', 'RV75',    'Recurve Veteranen 75 t/m 79 jaar'),
+    # (176, 'R',  'V80', 'RV80',    'Recurve Veteranen 80+ jaar'),
+
+    # (180, 'C', 'VAL', 'CVAL', 'Compound Veteranen 50+ jaar'),
+    # (181, 'BB', 'VAL', 'BVAL', 'Barebow Veteranen 50+ jaar'),
+    # (182, 'TR', 'VAL', 'TVAL', 'Traditional Veteranen 50+ jaar'),
+    # (183, 'LB', 'VAL', 'LVAL', 'Longbow Veteranen 50+ jaar'),
 
     (200, 'C',  'VA',  'C60U',   'Compound 60+ Gemengd'),
     (201, 'C',  'VH',  'C60H',   'Compound 60+ Heren'),
