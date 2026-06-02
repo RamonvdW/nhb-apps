@@ -170,7 +170,7 @@ class WedstrijdBestelPlugin(BestelPluginBase):
                             bedrag_ontvangen=inschrijving.ontvangen_euro,
                             bedrag_retour=inschrijving.retour_euro,
                             bestelling_regel=inschrijving.bestelling_regel,
-                            log=inschrijving.log + msg)
+                            log=inschrijving.log)
         afmelding.save()
 
         # verwijder de inschrijving

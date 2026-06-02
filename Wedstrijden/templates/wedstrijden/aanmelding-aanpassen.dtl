@@ -61,6 +61,7 @@
             <h1 class="sv-kopje-pagina">Aanmelding aanpassen</h1>
             <p>Boogtype, wedstrijdklasse of sessie aanpassen voor <b>{{ sporter.lid_nr_en_volledige_naam }}</b>.</p>
             <p>We tonen alleen de bogen die de sporter zelf als voorkeur ingesteld heeft.</p>
+            <p>De wedstrijdleeftijd van {{ sporter.voornaam }} voor deze wedstrijd is: <b>{{ sporter.wedstrijdleeftijd_getal }} jaar</b>.</p>
         </div>
     </div>
 

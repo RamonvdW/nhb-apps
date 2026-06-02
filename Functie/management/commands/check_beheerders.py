@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2024 Ramon van der Winkel.
+#  Copyright (c) 2021-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -39,10 +39,11 @@ class Command(BaseCommand):
                 if not sporter.bij_vereniging or not sporter.is_actief_lid:
                     # deze melding komt na 15 januari
                     let_op = 'LET OP: geen lid meer bij een vereniging'
+
                 elif functie.vereniging and sporter.bij_vereniging != functie.vereniging:
                     # functie voor beheerder van een vereniging
                     # lid is overgestapt
-                    let_op = 'LET OP: geen lid bij deze vereniging'
+                    let_op = 'LET OP: geen lid bij vereniging %s' % functie.vereniging.ver_nr
 
                 if toon_alle or len(let_op) > 0:
                     if not functie_getoond:                                         # pragma: no branch

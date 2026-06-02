@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -36,7 +36,7 @@ class OntvangerView(View):
         context = {
             'activiteit': '???',
             'verberg_login_knop': True,
-            'url': reverse('TijdelijkeCodes:tijdelijke-url', kwargs={'code': url_code})
+            'url': reverse('TijdelijkeCodes:tijdelijke-url', kwargs={'code': url_code}),
         }
 
         # kijk of deze tijdelijke url al verlopen is
@@ -95,6 +95,7 @@ class OntvangerView(View):
         else:
             if not url_or_response:
                 url_or_response = reverse('Plein:plein')
+
             response = HttpResponseRedirect(url_or_response)
 
         return response

@@ -7,22 +7,23 @@
 from django.db import migrations, models
 from BasisTypen.definities import (BLAZOEN_40CM, BLAZOEN_DT, BLAZOEN_60CM, BLAZOEN_60CM_4SPOT,
                                    ORGANISATIE_WA, ORGANISATIE_KHSN, ORGANISATIE_IFAA, ORGANISATIE_WA_STRIKT,
-                                   ORGANISATIE_VETERANEN, GESLACHT_MAN, GESLACHT_VROUW, GESLACHT_ALLE)
+                                   GESLACHT_MAN, GESLACHT_VROUW, GESLACHT_ALLE)
 
+# TODO: in plaats van code_blokkeer in Wedstrijden/view_wijzig_wedstrijd.py, hier de mutually-exclusive relaties vastleggen
 
 LEEFTIJDSKLASSEN = (
-    # WA + KHSN + KHSN-Veteranen
+    # WA + KHSN
     # volgorde afk    geslacht        min max  kort        beschrijving               organisatie
 
-    # # Veteranen
-    # (70,       'VAL', GESLACHT_ALLE,  50, 0,   '50+',      '50+ jaar',       ORGANISATIE_VETERANEN),
-    # (71,       'V50', GESLACHT_ALLE,  50, 54,  '50-54',    '50 t/m 54 jaar',          ORGANISATIE_VETERANEN),
-    # (72,       'V55', GESLACHT_ALLE,  55, 59,  '55-59',    '55 t/m 59 jaar',          ORGANISATIE_VETERANEN),
-    # (73,       'V60', GESLACHT_ALLE,  60, 64,  '60-64',    '60 t/m 64 jaar',          ORGANISATIE_VETERANEN),
-    # (74,       'V65', GESLACHT_ALLE,  65, 69,  '65-69',    '65 t/m 69 jaar',          ORGANISATIE_VETERANEN),
-    # (75,       'V70', GESLACHT_ALLE,  70, 74,  '70-74',    '70 t/m 74 jaar',          ORGANISATIE_VETERANEN),
-    # (76,       'V75', GESLACHT_ALLE,  75, 79,  '75-79',    '75 t/m 79 jaar',          ORGANISATIE_VETERANEN),
-    # (77,       'V80', GESLACHT_ALLE,  80, 0,   '80+',      '80+ jaar',                ORGANISATIE_VETERANEN),
+    # Veteranen
+    # (70,       'VAL', GESLACHT_ALLE,  50, 0,   '50+',      '50+ jaar',                ORGANISATIE_KHSN),
+    # (71,       'V50', GESLACHT_ALLE,  50, 54,  '50-54',    '50 t/m 54 jaar',          ORGANISATIE_KHSN),
+    # (72,       'V55', GESLACHT_ALLE,  55, 59,  '55-59',    '55 t/m 59 jaar',          ORGANISATIE_KHSN),
+    # (73,       'V60', GESLACHT_ALLE,  60, 64,  '60-64',    '60 t/m 64 jaar',          ORGANISATIE_KHSN),
+    # (74,       'V65', GESLACHT_ALLE,  65, 69,  '65-69',    '65 t/m 69 jaar',          ORGANISATIE_KHSN),
+    # (75,       'V70', GESLACHT_ALLE,  70, 74,  '70-74',    '70 t/m 74 jaar',          ORGANISATIE_KHSN),
+    # (76,       'V75', GESLACHT_ALLE,  75, 79,  '75-79',    '75 t/m 79 jaar',          ORGANISATIE_KHSN),
+    # (77,       'V80', GESLACHT_ALLE,  80, 0,   '80+',      '80+ jaar',                ORGANISATIE_KHSN),
 
     # 60+ (was: Veteranen)
     (61,       'VV',  GESLACHT_VROUW, 60, 0,   '60+',      '60+ Dames',               ORGANISATIE_KHSN),
@@ -259,19 +260,6 @@ KALENDERWEDSTRIJDENKLASSEN = (
     (161, 'R',  'AH1', 'RO12H',  'Recurve Onder 12 Jongens'),
     (162, 'R',  'AV1', 'RO12D',  'Recurve Onder 12 Meisjes'),
 
-    # (170, 'R',  'V50', 'RV50',    'Recurve Veteranen 50 t/m 54 jaar'),
-    # (171, 'R',  'V55', 'RV55',    'Recurve Veteranen 55 t/m 59 jaar'),
-    # (172, 'R',  'V60', 'RV60',    'Recurve Veteranen 60 t/m 64 jaar'),
-    # (173, 'R',  'V65', 'RV65',    'Recurve Veteranen 65 t/m 69 jaar'),
-    # (174, 'R',  'V70', 'RV70',    'Recurve Veteranen 70 t/m 74 jaar'),
-    # (175, 'R',  'V75', 'RV75',    'Recurve Veteranen 75 t/m 79 jaar'),
-    # (176, 'R',  'V80', 'RV80',    'Recurve Veteranen 80+ jaar'),
-
-    # (180, 'C', 'VAL', 'CVAL', 'Compound Veteranen 50+ jaar'),
-    # (181, 'BB', 'VAL', 'BVAL', 'Barebow Veteranen 50+ jaar'),
-    # (182, 'TR', 'VAL', 'TVAL', 'Traditional Veteranen 50+ jaar'),
-    # (183, 'LB', 'VAL', 'LVAL', 'Longbow Veteranen 50+ jaar'),
-
     (200, 'C',  'VA',  'C60U',   'Compound 60+ Gemengd'),
     (201, 'C',  'VH',  'C60H',   'Compound 60+ Heren'),
     (202, 'C',  'VV',  'C60D',   'Compound 60+ Dames'),
@@ -404,6 +392,21 @@ KALENDERWEDSTRIJDENKLASSEN = (
     (660, 'LB', 'AA1', 'LO12U',  'Longbow Onder 12 Gemengd'),
     (661, 'LB', 'AH1', 'LO12H',  'Longbow Onder 12 Jongens'),
     (662, 'LB', 'AV1', 'LO12D',  'Longbow Onder 12 Meisjes'),
+
+    # Veteranen
+    # (701, 'R',  'VAL', 'RVAL',   'Veteranen 50+ Recurve'),
+    # (702, 'C',  'VAL', 'CVAL',   'Veteranen 50+ Compound'),
+    # (703, 'BB', 'VAL', 'BVAL',   'Veteranen 50+ Barebow'),
+    # (704, 'TR', 'VAL', 'TVAL',   'Veteranen 50+ Traditional'),
+    # (705, 'LB', 'VAL', 'LVAL',   'Veteranen 50+ Longbow'),
+    #
+    # (710, 'R',  'V50', 'RV50',   'Veteranen 50 t/m 54 Recurve'),
+    # (711, 'R',  'V55', 'RV55',   'Veteranen 55 t/m 59 Recurve'),
+    # (712, 'R',  'V60', 'RV60',   'Veteranen 60 t/m 64 Recurve'),
+    # (713, 'R',  'V65', 'RV65',   'Veteranen 65 t/m 69 Recurve'),
+    # (714, 'R',  'V70', 'RV70',   'Veteranen 70 t/m 74 Recurve'),
+    # (715, 'R',  'V75', 'RV75',   'Veteranen 75 t/m 79 Recurve'),
+    # (716, 'R',  'V80', 'RV80',   'Veteranen 80+ Recurve'),
 )
 
 INDIV_COMP_KRIJGT_SCHEIDS_RK = (1100, 1110, 1120,       # R

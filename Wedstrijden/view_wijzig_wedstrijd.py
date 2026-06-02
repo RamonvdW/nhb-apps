@@ -16,7 +16,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
 from BasisTypen.definities import (GESLACHT_ALLE,
                                    ORGANISATIES2LONG_STR, ORGANISATIES2SHORT_STR,
-                                   ORGANISATIE_WA, ORGANISATIE_IFAA, ORGANISATIE_VETERANEN)
+                                   ORGANISATIE_WA, ORGANISATIE_IFAA)
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
 from BasisTypen.operations import get_organisatie_boogtypen, get_organisatie_klassen
 from Functie.definities import Rol
@@ -268,15 +268,18 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
             klasse.gebruikt = (klasse.pk in klassen_gebruikt)
             klasse.selected = (klasse.pk in gekozen_pks)
 
-            if klasse.leeftijdsklasse.wedstrijd_geslacht == GESLACHT_ALLE and klasse.organisatie != ORGANISATIE_VETERANEN:
+            if klasse.leeftijdsklasse.wedstrijd_geslacht == GESLACHT_ALLE:
+                # neem een nieuwe code uit voor deze klasse 'Gemengd'
                 code += 1
                 klasse.code = code
                 code2klasse[code] = klasse
 
+                # neem een nieuwe code uit voor de volgende klassen: dit zijn de Heren en Dames klassen
                 code += 1
                 klasse.code_blokkeer = code
                 blokkeer2klasse[code] = klasse
             else:
+                # gebruik de eerder uitgenomen code voor de Heren/Dames klasse
                 code2klasse[code] = klasse
                 klasse.code = code
                 klasse.code_blokkeer = 0
@@ -293,13 +296,9 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
 
         for klasse in opt_klasse:
             if klasse.code_blokkeer == 0:
-                # verwijs terug naar de klasse die deze blokkeert
-                try:
-                    klasse2 = blokkeer2klasse[klasse.code]
-                except KeyError:
-                    # niet nodig
-                    pass
-                else:
+                # verwijs terug naar de klasse die deze blokkeert (indien aanwezig)
+                klasse2 = blokkeer2klasse.get(klasse.code, None)
+                if klasse2:
                     klasse.code_blokkeer = klasse2.code
         # for
         del blokkeer2klasse
@@ -307,8 +306,8 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
         # blokkeer checkbox als de te blokkeren klassen niet uit te zetten zijn
         for klasse in opt_klasse:
             if klasse.gebruikt and klasse.code_blokkeer > 0:
-                klasse2 = code2klasse[klasse.code_blokkeer]
-                if not klasse2.selected:
+                klasse2 = code2klasse.get(klasse.code_blokkeer, None)
+                if klasse2 and not klasse2.selected:
                     klasse2.disabled = True
         # for
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -36,7 +36,10 @@ def receiver_account_wissel(request, account: Account):
 
     url_or_response = auto_login_as(request, account)
     if not url_or_response:
-        url_or_response = reverse('Plein:plein')
+        if account.is_staff:
+            url_or_response = reverse('Functie:wissel-van-rol')
+        else:
+            url_or_response = reverse('Plein:plein')
 
     return url_or_response
 

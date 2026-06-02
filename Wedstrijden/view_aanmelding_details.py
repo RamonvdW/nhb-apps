@@ -202,6 +202,9 @@ class AanpassenView(UserPassesTestMixin, TemplateView):
         context['sporter'] = sporter = inschrijving.sporterboog.sporter
         context['ver'] = sporter.bij_vereniging
 
+        wed = inschrijving.wedstrijd
+        sporter.wedstrijdleeftijd_getal = sporter.bereken_wedstrijdleeftijd(wed.datum_begin, wed.organisatie)
+
         inschrijving.reserveringsnummer = inschrijving.pk + settings.TICKET_NUMMER_START__WEDSTRIJD
         inschrijving.bestelnummer_str = get_inschrijving_mh_bestel_nr(inschrijving)
 
