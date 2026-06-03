@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -265,43 +265,49 @@ class TestSporterLeeftijdsklassen(E2EHelpers, TestCase):
         tup = bereken_leeftijdsklassen_khsn(self.huidige_jaar - 50, GESLACHT_MAN, self.huidige_jaar)
         self.assertEqual(tup,
                          (self.huidige_jaar, 50,
-                          '50+ Gemengd of 50+ Heren',
-                          ['Gemengd of Heren', '50+ Gemengd of 50+ Heren', '50+ Gemengd of 50+ Heren',
-                           '50+ Gemengd of 50+ Heren', '50+ Gemengd of 50+ Heren']))
+                          '50 t/m 54 jaar of 50+ Heren',
+                          ['Gemengd of Heren',
+                           '50 t/m 54 jaar of 50+ Heren', '50 t/m 54 jaar of 50+ Heren',
+                           '50 t/m 54 jaar of 50+ Heren', '50 t/m 54 jaar of 50+ Heren']))
 
         tup = bereken_leeftijdsklassen_khsn(self.huidige_jaar - 50, GESLACHT_VROUW, self.huidige_jaar)
         self.assertEqual(tup,
                          (self.huidige_jaar, 50,
-                          '50+ Gemengd of 50+ Dames',
-                          ['Gemengd of Dames', '50+ Gemengd of 50+ Dames', '50+ Gemengd of 50+ Dames',
-                           '50+ Gemengd of 50+ Dames', '50+ Gemengd of 50+ Dames']))
+                          '50 t/m 54 jaar of 50+ Dames',
+                          ['Gemengd of Dames',
+                           '50 t/m 54 jaar of 50+ Dames', '50 t/m 54 jaar of 50+ Dames',
+                           '50 t/m 54 jaar of 50+ Dames', '50 t/m 54 jaar of 50+ Dames']))
 
         tup = bereken_leeftijdsklassen_khsn(self.huidige_jaar - 50, GESLACHT_ANDERS, self.huidige_jaar)
         self.assertEqual(tup,
                          (self.huidige_jaar, 50,
-                          '50+ Gemengd',
-                          ['Gemengd', '50+ Gemengd', '50+ Gemengd', '50+ Gemengd', '50+ Gemengd']))
+                          '50 t/m 54 jaar',
+                          ['Gemengd',
+                           '50 t/m 54 jaar', '50 t/m 54 jaar', '50 t/m 54 jaar', '50 t/m 54 jaar']))
 
         # 60+
         tup = bereken_leeftijdsklassen_khsn(self.huidige_jaar - 60, GESLACHT_MAN, self.huidige_jaar)
         self.assertEqual(tup,
                          (self.huidige_jaar, 60,
-                          '60+ Gemengd of 60+ Heren',
-                          ['50+ Gemengd of 50+ Heren', '60+ Gemengd of 60+ Heren', '60+ Gemengd of 60+ Heren',
-                           '60+ Gemengd of 60+ Heren', '60+ Gemengd of 60+ Heren']))
+                          '60 t/m 64 jaar of 60+ Heren',
+                          ['55 t/m 59 jaar of 50+ Heren',
+                           '60 t/m 64 jaar of 60+ Heren', '60 t/m 64 jaar of 60+ Heren',
+                           '60 t/m 64 jaar of 60+ Heren', '60 t/m 64 jaar of 60+ Heren']))
 
         tup = bereken_leeftijdsklassen_khsn(self.huidige_jaar - 60, GESLACHT_VROUW, self.huidige_jaar)
         self.assertEqual(tup,
                          (self.huidige_jaar, 60,
-                          '60+ Gemengd of 60+ Dames',
-                          ['50+ Gemengd of 50+ Dames', '60+ Gemengd of 60+ Dames', '60+ Gemengd of 60+ Dames',
-                           '60+ Gemengd of 60+ Dames', '60+ Gemengd of 60+ Dames']))
+                          '60 t/m 64 jaar of 60+ Dames',
+                          ['55 t/m 59 jaar of 50+ Dames',
+                           '60 t/m 64 jaar of 60+ Dames', '60 t/m 64 jaar of 60+ Dames',
+                           '60 t/m 64 jaar of 60+ Dames', '60 t/m 64 jaar of 60+ Dames']))
 
         tup = bereken_leeftijdsklassen_khsn(self.huidige_jaar - 60, GESLACHT_ANDERS, self.huidige_jaar)
         self.assertEqual(tup,
                          (self.huidige_jaar, 60,
-                          '60+ Gemengd',
-                          ['50+ Gemengd', '60+ Gemengd', '60+ Gemengd', '60+ Gemengd', '60+ Gemengd']))
+                          '60 t/m 64 jaar',
+                          ['55 t/m 59 jaar',
+                           '60 t/m 64 jaar', '60 t/m 64 jaar', '60 t/m 64 jaar', '60 t/m 64 jaar']))
 
     def test_leeftijdsklasse_khsn(self):
         # Onder 12
@@ -362,7 +368,8 @@ class TestSporterLeeftijdsklassen(E2EHelpers, TestCase):
         self.assertEqual(tup, '50+ Dames')
 
         tup = bereken_leeftijdsklasse_khsn(50, GESLACHT_ANDERS)
-        self.assertEqual(tup, '50+ Gemengd')
+        # self.assertEqual(tup, '50+ Gemengd')
+        self.assertEqual(tup, '50 t/m 54 jaar')
 
         # 60+
         tup = bereken_leeftijdsklasse_khsn(60, GESLACHT_MAN)
@@ -372,7 +379,14 @@ class TestSporterLeeftijdsklassen(E2EHelpers, TestCase):
         self.assertEqual(tup, '60+ Dames')
 
         tup = bereken_leeftijdsklasse_khsn(60, GESLACHT_ANDERS)
-        self.assertEqual(tup, '60+ Gemengd')
+        # self.assertEqual(tup, '60+ Gemengd')
+        self.assertEqual(tup, '60 t/m 64 jaar')
+
+        tup = bereken_leeftijdsklasse_khsn(74, GESLACHT_ANDERS)
+        self.assertEqual(tup, '70 t/m 74 jaar')
+
+        tup = bereken_leeftijdsklasse_khsn(80, GESLACHT_ANDERS)
+        self.assertEqual(tup, '80+ jaar')
 
     def test_leeftijdsklassen_ifaa(self):
         tup = bereken_leeftijdsklassen_ifaa(self.huidige_jaar - 9, GESLACHT_MAN, self.huidige_jaar)

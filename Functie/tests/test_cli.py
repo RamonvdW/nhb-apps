@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2025 Ramon van der Winkel.
+#  Copyright (c) 2020-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -174,7 +174,8 @@ class TestFunctieCli(E2EHelpers, TestCase):
         with self.assert_max_queries(59):
             f1, f2 = self.run_management_command('check_beheerders')
         self.assertTrue(f1.getvalue() == '')
-        self.assertTrue("LET OP: geen lid bij deze vereniging" in f2.getvalue())
+        # print('f2:', f2.getvalue())
+        self.assertTrue("LET OP: geen lid bij vereniging 1001" in f2.getvalue())
 
         # nu alles goed zetten
         sporter.bij_vereniging = self.ver1

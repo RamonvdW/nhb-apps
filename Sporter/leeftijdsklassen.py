@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -415,7 +415,7 @@ def bereken_leeftijdsklasse_khsn(wedstrijdleeftijd, wedstrijdgeslacht):
                    Onder 18 Heren
     """
 
-    gevonden_lkl = None
+    gevonden_lkl = list()
 
     # eerste poging: selecteer een geslacht-specifieke wedstrijdklasse
     prev_lkl = None
@@ -423,7 +423,7 @@ def bereken_leeftijdsklasse_khsn(wedstrijdleeftijd, wedstrijdgeslacht):
                 .objects
                 .filter(organisatie__in=(ORGANISATIE_WA, ORGANISATIE_KHSN),
                         wedstrijd_geslacht=wedstrijdgeslacht)
-                .order_by('volgorde')):
+                .order_by('volgorde')):     # oplopende leeftijden
 
         # voorkom dat de jongste sporters ook in een hogere klasse passen
         if prev_lkl and lkl.min_wedstrijdleeftijd == 0:
@@ -431,12 +431,12 @@ def bereken_leeftijdsklasse_khsn(wedstrijdleeftijd, wedstrijdgeslacht):
 
         # check leeftijd is compatible
         if lkl.leeftijd_is_compatible(wedstrijdleeftijd):
-            gevonden_lkl = lkl
+            gevonden_lkl.append(lkl)
 
         prev_lkl = lkl
     # for
 
-    if not gevonden_lkl:
+    if len(gevonden_lkl) == 0:
         # tweede poging: selecteer een gender-neutrale wedstrijdklasse
         prev_lkl = None
         for lkl in (Leeftijdsklasse
@@ -451,16 +451,16 @@ def bereken_leeftijdsklasse_khsn(wedstrijdleeftijd, wedstrijdgeslacht):
 
             # check leeftijd is compatible
             if lkl.leeftijd_is_compatible(wedstrijdleeftijd):
-                gevonden_lkl = lkl
+                gevonden_lkl.append(lkl)
 
             prev_lkl = lkl
         # for
 
-    if not gevonden_lkl:        # pragma: no cover
+    if len(gevonden_lkl) == 0:        # pragma: no cover
         # uitzondering tijdens browser tests
         return "?"
 
-    return gevonden_lkl.beschrijving
+    return gevonden_lkl[-1].beschrijving
 
 
 # end of file

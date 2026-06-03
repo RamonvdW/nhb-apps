@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -136,7 +136,7 @@ class TestBasisTypen(TestCase):
 
         self.assertEqual(get_organisatie_klassen(ORGANISATIE_WA, ook_strikt=False).count(), 40)
         self.assertEqual(get_organisatie_klassen(ORGANISATIE_WA, ook_strikt=True).count(), 40 + 12)
-        self.assertEqual(get_organisatie_klassen(ORGANISATIE_KHSN, ook_strikt=False).count(), 105)
+        self.assertEqual(get_organisatie_klassen(ORGANISATIE_KHSN, ook_strikt=False).count(), 117)
         self.assertEqual(get_organisatie_klassen(ORGANISATIE_IFAA, ook_strikt=False).count(), 144)
 
     def test_boogtypen(self):
@@ -152,6 +152,6 @@ class TestBasisTypen(TestCase):
         klassen = get_organisatie_klassen(ORGANISATIE_KHSN, ook_strikt=False, filter_bogen=bogen_pks)
         # for klasse in klassen:
         #     print(klasse)
-        self.assertEqual(klassen.count(), 42)
+        self.assertEqual(klassen.count(), 51)
 
 # end of file
