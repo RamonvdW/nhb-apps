@@ -1,0 +1,116 @@
+{% extends 'design/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2026 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+{% load design_knop %}
+
+{% block title %}Bestelformulier{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h1 class="sv-kopje-pagina">Bestelformulier</h1>
+            <p>Bestel prestatiespelden, voor jezelf</p>
+        </div>
+    </div>
+
+    <!-- blauwe balk met informatie in tabel-vorm:  label - info -->
+    <div class="row-sv-blauw">
+        <div class="col s12 m10 offset-m1 l8 offset-l2">
+            <table class="sv-kader-tabel">
+                <tr>
+                    <th>Sporter</th>
+                    <td>{{ sporter_str }}</td>
+                </tr>
+                <tr>
+                    <th>Wedstrijddiscipline</th>
+                    <td>{{ discipline_str }}</td>
+                </tr>
+                <tr>
+                    <th>Gebruikte boog</th>
+                    <td>{{ boogtype_str }}</td>
+                </tr>
+                <tr>
+                    <th>Behaalde score</th>
+                    <td>{{ score }}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h2 class="sv-kopje-row">Stap 2</h2>
+        </div>
+    </div>
+
+    <!-- blauwe balk filters -->
+    <div class="row-sv-blauw" id="filters" data-url="{{ url_filters }}">
+        {% comment %}
+            context['url_filters'] = reverse('CompUitslagen:uitslagen-regio-indiv-n',
+                                             kwargs={'comp_pk_of_seizoen': comp.maak_seizoen_url(),
+                                                     'comp_boog': '~1',
+                                                     'regio_nr': '~2'})
+
+            Voor elke ~1, ~2 etc. moet er een input zijn met name="filter_1", "filter_2", etc.
+
+        {% endcomment %}
+
+        <!-- filter: afstand -->
+        <div class="col s6 m3 offset-m3" style="margin-bottom:15px">
+            <div class="sv-kader-filter">
+                <p><b>Kies de afstand:</b></p>
+                <ul>
+                    {% for filter in afstand_filters %}
+                        <li>
+                            <label class="black-text" for="id_{{ filter.sel }}">
+                                <input class="with-gap" type="radio" name="filter_##" value="{{ filter.sel }}" required id="id_{{ filter.sel }}" {% if filter.selected %}checked{% endif %} data-url="{{ filter.url_part }}">
+                                <span>{{ filter.opt_text }}</span>
+                            </label>
+                        </li>
+                    {% endfor %}
+                </ul>
+                <p style="margin-left:35px">
+                    <button class="btn-sv-rood btn-sv-activeer-filter">Activeer</button>
+                </p>
+            </div>
+        </div>
+
+        <!-- filter: aantal pijlen -->
+        <div class="col s6 m3" style="margin-bottom:15px">
+            <div class="sv-kader-filter">
+                <p><b>Kies het aantal pijlen:</b></p>
+                <ul>
+                    {% for filter in pijlen_filters %}
+                        <li>
+                            <label class="black-text" for="id_{{ filter.sel }}">
+                                <input class="with-gap" type="radio" name="filter_##" value="{{ filter.sel }}" required id="id_{{ filter.sel }}" {% if filter.selected %}checked{% endif %} data-url="{{ filter.url_part }}">
+                                <span>{{ filter.opt_text }}</span>
+                            </label>
+                        </li>
+                    {% endfor %}
+                </ul>
+                <p style="margin-left:35px">
+                    <button class="btn-sv-rood btn-sv-activeer-filter">Activeer</button>
+                </p>
+            </div>
+        </div>
+
+        <script src="{% static 'overig_js/pagina_filters.js' %}"></script>
+    </div>
+
+
+    <p class="center">
+        {% sv-knop-nav url=url_stap1 icon='terug' tekst='Terug naar stap 1' %}
+    </p>
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="spelden-bestel-stap2" %}
+
+{% endblock %}

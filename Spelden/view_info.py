@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2024-2025 Ramon van der Winkel.
+#  Copyright (c) 2024-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -16,8 +16,6 @@ from Spelden.definities import (SPELD_CATEGORIE_NL_GRAADSPELD_INDOOR, SPELD_CATE
 from Spelden.models import SpeldScore
 from Spelden.operations import get_hall_of_fame, tel_hall_of_fame
 
-
-TEMPLATE_PRESTATIESPELDEN_BEGIN = 'spelden/begin.dtl'
 TEMPLATE_PRESTATIESPELDEN_HALL_OF_FAME = 'spelden/khsn-meesterspelden_hall-of-fame.dtl'
 TEMPLATE_PRESTATIESPELDEN_MEESTERSPELDEN = 'spelden/khsn-meesterspelden.dtl'
 TEMPLATE_PRESTATIESPELDEN_GRAADSPELDEN = 'spelden/khsn-graadspelden.dtl'
@@ -25,28 +23,6 @@ TEMPLATE_PRESTATIESPELDEN_TUSSENSPELDEN = 'spelden/khsn-tussenspelden.dtl'
 TEMPLATE_PRESTATIESPELDEN_TARGET_AWARDS = 'spelden/wa-target-awards.dtl'
 TEMPLATE_PRESTATIESPELDEN_STERSPELDEN = 'spelden/wa-sterspelden.dtl'
 TEMPLATE_PRESTATIESPELDEN_ARROWHEAD = 'spelden/wa-arrowhead-spelden.dtl'
-
-
-class BeginView(TemplateView):
-
-    """ Via deze view laten we alle producten zien als kaartjes """
-
-    # class variables shared by all instances
-    template_name = TEMPLATE_PRESTATIESPELDEN_BEGIN
-
-    def get_context_data(self, **kwargs):
-        """ called by the template system to get the context data for the template """
-        context = super().get_context_data(**kwargs)
-
-        if rol_get_huidige(self.request) == Rol.ROL_SPORTER:
-            context['menu_toon_mandje'] = True
-
-        context['kruimels'] = (
-            (reverse('Webwinkel:overzicht'), 'Webwinkel'),
-            (None, 'Spelden'),
-        )
-
-        return context
 
 
 class HallOfFameView(TemplateView):

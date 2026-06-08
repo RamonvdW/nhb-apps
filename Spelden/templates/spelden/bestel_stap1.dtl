@@ -1,0 +1,113 @@
+{% extends 'design/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2026 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Bestelformulier{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h1 class="sv-kopje-pagina">Bestelformulier</h1>
+            <p>Bestel prestatiespelden, voor jezelf</p>
+
+            <p><b>Let op:</b> je hebt een scorebriefje met handtekening van de scheidsrechter nodig!</p>
+        </div>
+    </div>
+
+    <!-- blauwe balk met informatie in tabel-vorm:  label - info -->
+    <div class="row-sv-blauw">
+        <div class="col s12 m10 offset-m1 l8 offset-l2">
+            <table class="sv-kader-tabel">
+                <tr>
+                    <th>Sporter</th>
+                    <td>{{ sporter_str }}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h2 class="sv-kopje-row">Stap 1</h2>
+            <p>Vertel ons over de wedstrijd en voer de behaalde score in.</p>
+        </div>
+    </div>
+
+    <!-- blauwe balk filters -->
+    <div class="row-sv-blauw">
+
+        <form action="{{ url_opslaan }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
+            {% csrf_token %}
+
+            <!-- filter: wedstrijddiscipline -->
+            <div class="col s10 offset-s1 m6 offset-m3 l4 offset-l4 sv-kader-form">
+                <div class="form-padding">
+
+                    <table>
+                        <tr>
+                            <th>Discipline</th>
+                            <td>
+                                <ul id="id_discipline">
+                                    {% for opt in discipline_opties %}
+                                        <li>
+                                            <label class="black-text" for="id_{{ opt.afkorting }}">
+                                                <input class="with-gap" type="radio" name="discipline" value="{{ opt.afkorting }}" required id="id_{{ opt.afkorting }}"{% if opt.actief %} checked{% endif %}>
+                                                <span>{{ opt.beschrijving }}</span>
+                                            </label>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th>Gebruikte boog</th>
+                            <td>
+                                <ul id="id_boog">
+                                    {% for opt in boog_opties %}
+                                        <li>
+                                            <label class="black-text" for="id_{{ opt.afkorting }}">
+                                                <input class="with-gap" type="radio" name="boogtype" value="{{ opt.afkorting }}" required id="id_{{ opt.afkorting }}"{% if opt.actief %} checked{% endif %}>
+                                                <span>{{ opt.beschrijving }}</span>
+                                            </label>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th>Behaalde score</th>
+                            <td>
+                                <div class="input-field" style="max-width:100px">
+                                    <label for="invoer_score">Score</label>
+                                    <input id="invoer_score" name="score" type="number" min="1" max="2880" autofocus value="{{ score }}">
+                                </div>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td colspan="2" class="center">
+                                <button class="btn-sv-rood" id="submit_knop" type="submit">Volgende stap</button>
+                            </td>
+                        </tr>
+
+                    </table>
+
+                </div>
+            </div>
+
+        </form>
+    </div>
+
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="spelden-bestel-stap1" %}
+
+{% endblock %}

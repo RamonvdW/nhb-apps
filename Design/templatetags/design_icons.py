@@ -213,6 +213,8 @@ ICON_NAME2MATERIAL_SYMBOL_NAME = {
     'spelden graadspelden': 'zoom_out_map',
     'spelden meesterspelden': 'category',
     'spelden tussenspelden': 'trending_up',
+    'spelden bestel': 'shopping_cart',
+    'spelden vervang': 'sync_problem',
     'sporter voorkeuren': 'tune',
     'sporter afmelden': 'cancel',
     'sporter para opmerkingen': 'fact_check',

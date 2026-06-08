@@ -76,6 +76,29 @@
         </div>
     </div>
 
+    {% if url_bestel %}
+
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <h2 class="sv-kopje-row">Bestel de prestatiespelden</h2>
+            </div>
+        </div>
+
+        <div class="row-sv-blauw">
+            <div class="col s12">
+                <!-- bestel -->
+                {% include 'design/card_icon.dtl' with title="Bestellen" text="Formulier voor het bestellen van prestatiespelden" sv_icon="spelden bestel" url=url_bestel %}
+
+                <!-- vervang -->
+                {% include 'design/card_niet-beschikbaar.dtl' with title="Verloren" text="Een verloren prestatiespeld opnieuw bestellen." sv_icon="spelden vervang" waarom="Volgt binnenkort" %}
+                {% comment %}
+                {% include 'design/card_icon.dtl' with title="Verloren" text="Een verloren prestatiespeld opnieuw bestellen." sv_icon="spelden vervang" url=url_bestel %}
+                {% endcomment %}
+            </div>
+        </div>
+
+    {% endif %}
 
     {% include 'feedback/sidebar.dtl' with op_pagina="spelden-begin" %}
 
