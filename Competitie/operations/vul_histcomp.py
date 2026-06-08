@@ -549,6 +549,8 @@ def uitslag_bk_teams_naar_histcomp(comp: Competitie):
     for team in (TeamBK
                  .objects
                  .filter(kamp__competitie=comp)
+                 .exclude(result_rank=KAMP_RANK_NO_SHOW)
+                 .exclude(result_rank=KAMP_RANK_RESERVE)
                  .select_related('team_klasse',
                                  'team_type',
                                  'vereniging')

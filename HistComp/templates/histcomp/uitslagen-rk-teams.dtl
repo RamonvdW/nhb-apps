@@ -135,7 +135,7 @@
                         <span class="hide-on-small-only">{{ team.ver_str }}</span>
                     </td>
 
-                    <!-- RK scores -->
+                    <!-- RK score -->
                     <td class="{% if toon_teamlid_scores %}right-align{% else %}center{% endif %}" style="padding-right:10px">
                         {% if team.team_score_is_blanco %}
                             <span>(blanco)</span>
@@ -146,17 +146,20 @@
                                     <br>
                                     <span>{{ deelnemer.team_score }}</span>
                                 {% endfor %}
+                            {% else %}
+                                {% if team.team_score_shootoff_str %}
+                                    <br>
+                                    <span>{{ team.team_score_shootoff_str }}</span>
+                                {% endif %}
                             {% endif %}
                         {% endif %}
                     </td>
 
                     <!-- team nummer + team leden -->
                     <td>
-                        {% if toon_teamlid_scores %}
-                            <span>{{ team.team_nr }}</span><br>
-                        {% endif %}
+                        <span>{{ team.team_nr }}</span>
                         {% for deelnemer in team.deelnemers %}
-                            <span>{{ deelnemer.naam_str }}</span><br>
+                            <br><span>{{ deelnemer.naam_str }}</span>
                         {% endfor %}
                     </td>
 

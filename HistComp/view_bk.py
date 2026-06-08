@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023-2024 Ramon van der Winkel.
+#  Copyright (c) 2023-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -341,6 +341,7 @@ class HistBkTeamsView(TemplateView):
             team.is_eerste_groep = True
 
         context['heeft_teams'] = len(uitslag) > 0
+        context['toon_teamlid_scores'] = (hist_seizoen.head_to_head_teams_format == False)
 
         context['canonical'] = reverse('HistComp:uitslagen-bk-teams',       # TODO: keep?
                                        kwargs={'seizoen': seizoen_url,
