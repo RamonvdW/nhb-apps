@@ -192,6 +192,10 @@
                     <td class="center">
                         {% if team.klasse_heeft_uitslag %}
                             <b>{{ team.bk_score_str }}</b>
+                            {% if team.bk_shootoff_str %}
+                                <br>
+                                <span>{{ team.bk_shootoff_str }}</span>
+                            {% endif %}
                         {% else %}
                             {% if team.niet_deelgenomen %}
                                 <i class="grey-text">-</i>

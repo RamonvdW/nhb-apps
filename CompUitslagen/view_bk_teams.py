@@ -266,6 +266,8 @@ class UitslagenBKTeamsView(TemplateView):
 
                 else:
                     team.bk_score_str = str(team.result_teamscore)
+                    if team.result_shootoff_str:
+                        team.bk_shootoff_str = team.result_shootoff_str
 
                     # de volgende statement worden aparte database queries
                     originele_pks = list(team.gekoppelde_leden.values_list('pk', flat=True))
