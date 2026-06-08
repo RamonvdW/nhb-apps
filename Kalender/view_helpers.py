@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023-2025 Ramon van der Winkel.
+#  Copyright (c) 2023-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -11,7 +11,7 @@ from django.utils.formats import localize
 from Account.models import get_account
 from Kalender.definities import MAAND2URL
 from Sporter.models import SporterBoog, get_sporter
-from Wedstrijden.definities import WEDSTRIJD_STATUS_GEACCEPTEERD, WEDSTRIJD_DISCIPLINES, discipline2url, url2discipline
+from Wedstrijden.definities import WEDSTRIJD_STATUS_GEACCEPTEERD, WEDSTRIJD_DISCIPLINES, DISCIPLINE2URL, URL2DISCIPLINE
 from Wedstrijden.models import Wedstrijd
 from types import SimpleNamespace
 from datetime import timedelta
@@ -179,7 +179,7 @@ def maak_discipline_filter(context, gekozen_discipline):
         geeft de opgeschoonde gekozen_discipline terug die gebruikt kan worden in reverse() operaties.
     """
 
-    if gekozen_discipline not in url2discipline.keys():
+    if gekozen_discipline not in URL2DISCIPLINE.keys():
         gekozen_discipline = 'alle'
 
     context['soort_discipline'] = [
@@ -191,7 +191,7 @@ def maak_discipline_filter(context, gekozen_discipline):
     ]
 
     for code, text in WEDSTRIJD_DISCIPLINES:
-        url_part = discipline2url[code]
+        url_part = DISCIPLINE2URL[code]
         context['soort_discipline'].append(
             SimpleNamespace(
                 opt_text=text,
