@@ -140,13 +140,15 @@
                         {% if team.team_score_is_blanco %}
                             <span>(blanco)</span>
                         {% else %}
-                            <b>{{ team.team_score }}{% if team.heeft_shootoff_gewonnen %}&nbsp+{% endif %}</b>
+                            <b>{{ team.team_score }}</b>
                             {% if toon_teamlid_scores %}
+                                <!-- reglement t/m 2024/2025 -->
                                 {% for deelnemer in team.deelnemers %}
                                     <br>
                                     <span>{{ deelnemer.team_score }}</span>
                                 {% endfor %}
                             {% else %}
+                                <!-- reglement vanaf 2025/2026 -->
                                 {% if team.team_score_shootoff_str %}
                                     <br>
                                     <span>{{ team.team_score_shootoff_str }}</span>
