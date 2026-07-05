@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2024 Ramon van der Winkel.
+#  Copyright (c) 2024-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -32,6 +32,20 @@ SPELD_CATEGORIE_CHOICES = [
     (SPELD_CATEGORIE_NL_GRAADSPELD_ALGEMEEN, "NL graadspeld algemeen"),
     (SPELD_CATEGORIE_NL_TUSSENSPELD, "NL tussenspeld"),
 ]
+
+SPELD_CATEGORIE2STR = {
+    SPELD_CATEGORIE_WA_STER: "WA ster",
+    SPELD_CATEGORIE_WA_STER_ZILVER: "WA zilveren ster",
+    SPELD_CATEGORIE_WA_TARGET_AWARD: "WA target award",
+    SPELD_CATEGORIE_WA_TARGET_AWARD_ZILVER: "WA zilveren target award",
+    SPELD_CATEGORIE_WA_ARROWHEAD: "WA arrowhead speld",
+    SPELD_CATEGORIE_NL_GRAADSPELD_INDOOR: "NL graadspeld indoor",
+    SPELD_CATEGORIE_NL_GRAADSPELD_OUTDOOR: "NL graadspeld outdoor",
+    SPELD_CATEGORIE_NL_GRAADSPELD_VELD: "NL graadspeld veld",
+    SPELD_CATEGORIE_NL_GRAADSPELD_SHORT_METRIC: "NL graadspeld short metric",
+    SPELD_CATEGORIE_NL_GRAADSPELD_ALGEMEEN: "NL graadspeld algemeen",
+    SPELD_CATEGORIE_NL_TUSSENSPELD: "NL tussenspeld",
+}
 
 
 SOORT_BIJLAGE_SCOREBRIEFJE = 's'

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2024 Ramon van der Winkel.
+#  Copyright (c) 2024-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -43,6 +43,41 @@ def tel_hall_of_fame():
     as_count = leden_as.count()
 
     return gm_count, ms_count, as_count
+
+
+def get_mogelijke_spelden(discipline: str, boog: str, score: int | None, ):
+    """ Bepaalt de mogelijke spelden aan de hand van ingevoerde informatie
+
+        discipline: WEDSTRIJD_DISCIPLINE_* 'OD', 'IN', '25', 'CL', 'VE', 'RA', '3D'
+        boog:       BOOGTYPE_AFKORTING_*   'R', 'C', 'BB', 'LB', 'TR'
+        score:      De behaalde score
+
+        returns:    [
+                        (
+                            "speld_cat",     # SPELD_CATEGORIE_*
+                            "discipline",    # OD, VE, etc.
+                            "afstand(en)",   # een afstand ("18m") of setje afstanden ("90m, 70m, 50m, 30m")
+                        ),
+                        ...
+                    ]
+
+    """
+
+    print('{get_mogelijke_spelden} discpline=%s, boog=%s, score=%s' % (repr(discipline), repr(boog), score))
+
+    spelden = list()
+
+    # WA target awards
+    if discipline in ('OD', 'IN') and boog in ('R', 'C', 'BB'):
+        pass
+
+    # WA sterspelden
+    if discipline == 'OD' and score >= 1000:
+        pass
+
+
+
+    return spelden
 
 
 # end of file

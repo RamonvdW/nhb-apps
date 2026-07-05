@@ -18,6 +18,7 @@ from Spelden.definities import (SPELD_CATEGORIE_NL_GRAADSPELD_INDOOR, SPELD_CATE
                                 SPELD_CATEGORIE_NL_GRAADSPELD_VELD, SPELD_CATEGORIE_NL_GRAADSPELD_SHORT_METRIC,
                                 SPELD_CATEGORIE_WA_ARROWHEAD)
 from Spelden.models import SpeldScore
+from Spelden.operations import get_mogelijke_spelden
 from Sporter.models import get_sporter, SporterBoog
 from Wedstrijden.definities import (WEDSTRIJD_DISCIPLINES, WEDSTRIJD_DISCIPLINE_TO_STR_KHSN,
                                     WEDSTRIJD_DISCIPLINE_MAXLEN, DISCIPLINE2URL, URL2DISCIPLINE)
@@ -242,6 +243,9 @@ class BestelStap2View(TemplateView):
 
         self._get_sporter()
         self._get_filters(kwargs)
+
+        get_mogelijke_spelden(self.discipline, self.boogtype, self.score)
+
         self._prep_pagina(context)
 
         return context
