@@ -5,6 +5,7 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load design_knop %}
 
 {% block title %}Statistiek{% endblock %}
 
@@ -15,7 +16,8 @@
         <div class="col s12">
             <h1 class="sv-kopje-pagina">Statistiek</h1>
             {% if heeft_data %}
-                <p>Rapportage voor seizoen <b>{{ seizoen }}</b></p>
+                <p>Tabellen met data van de bondscompetities seizoen <b>{{ seizoen }}</b></p>
+                {% sv-knop-nav url=url_grafieken tekst='Grafieken' %}
             {% else %}
                 <p class="sv-rood-text">Geen data beschikbaar</p>
             {% endif %}
@@ -126,50 +128,6 @@
 
                     <tr>
                         <td colspan="4" class="center">
-                            <h2 class="sv-kopje-in-tabel">Leeftijdsgroepen regiocompetitie</h2>
-                        </td>
-                    </tr>
-
-                    {% for titel, total, age_groups in age_groups_regio %}
-                        {% if total > 0 %}
-                            <tr>
-                                <td colspan="4" class="center">
-                                    <h3 class="sv-kopje-klein">{{ titel }}</h3>
-                                    <p>Leeftijd van de {{ total }} sporters, gegroepeerd per 10 jaar.</p>
-                                </td>
-                            </tr>
-
-                            <tr>
-                                <th class="center">Leeftijdsgroep</th>
-                                <th class="right-align">Aantal</th>
-                                <th class="right-align">Aandeel</th>
-                                <th style="width:40%"><!-- chart --></th>
-                            </tr>
-
-                            {% for age1, age2, count, perc in age_groups %}
-                                <tr>
-                                    <td class="center">
-                                        {% if forloop.first %}
-                                            <span>onder {{ age2|add:1 }}</span>
-                                        {% elif forloop.last %}
-                                            <span>{{ age1 }} en ouder</span>
-                                        {% else %}
-                                            <span>{{ age1 }} .. {{ age2 }}</span>
-                                        {% endif %}
-                                    </td>
-                                    <td class="right-align">{{ count }}</td>
-                                    <td class="right-align">{{ perc }}%</td>
-                                    <td style="padding: 5px">
-                                        <div style="background: linear-gradient(to right, #f94137, #f94137 {{ perc }}%, white {{ perc }}%, white 100%); height: 36px">&nbsp;</div>
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                        {% endif %}
-                    {% endfor %}
-
-
-                    <tr>
-                        <td colspan="4" class="center">
                             <h2 class="sv-kopje-in-tabel">Rayonkampioenschappen individueel</h2>
                         </td>
                     </tr>
@@ -220,50 +178,6 @@
 
                     <tr>
                         <td colspan="4" class="center">
-                            <h2 class="sv-kopje-in-tabel">Leeftijdsgroepen rayonkampioenschappen</h2>
-                        </td>
-                    </tr>
-
-                    {% for titel, total, age_groups in age_groups_rk %}
-                        {% if total > 0 %}
-                            <tr>
-                                <td colspan="4" class="center">
-                                    <h3 class="sv-kopje-klein">{{ titel }}</h3>
-                                    <p>Leeftijd van de {{ total }} sporters, gegroepeerd per 10 jaar.</p>
-                                </td>
-                            </tr>
-
-                            <tr>
-                                <th class="center">Leeftijdsgroep</th>
-                                <th class="right-align">Aantal</th>
-                                <th class="right-align">Aandeel</th>
-                                <th style="width:40%"><!-- chart --></th>
-                            </tr>
-
-                            {% for age1, age2, count, perc in age_groups %}
-                                <tr>
-                                    <td class="center">
-                                        {% if forloop.first %}
-                                            <span>onder {{ age2|add:1 }}</span>
-                                        {% elif forloop.last %}
-                                            <span>{{ age1 }} en ouder</span>
-                                        {% else %}
-                                            <span>{{ age1 }} .. {{ age2 }}</span>
-                                        {% endif %}
-                                    </td>
-                                    <td class="right-align">{{ count }}</td>
-                                    <td class="right-align">{{ perc }}%</td>
-                                    <td style="padding: 5px">
-                                        <div style="background: linear-gradient(to right, #f94137, #f94137 {{ perc }}%, white {{ perc }}%, white 100%); height: 36px">&nbsp;</div>
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                        {% endif %}
-                    {% endfor %}
-
-
-                    <tr>
-                        <td colspan="4" class="center">
                             <h2 class="sv-kopje-in-tabel">Bondskampioenschappen individueel</h2>
                         </td>
                     </tr>
@@ -309,6 +223,6 @@
 
     {% endif %}     <!-- heeft_data -->
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="compbeheer-statistiek" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="compbeheer-statistiek-tabellen" %}
 
 {% endblock %}

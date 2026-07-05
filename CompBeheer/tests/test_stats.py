@@ -21,7 +21,8 @@ class TestCompBeheerStats(E2EHelpers, TestCase):
     test_after = ('BasisTypen', 'Functie', 'Competitie.tests.test_overzicht')
 
     url_kies = '/bondscompetities/'
-    url_statistiek = '/bondscompetities/beheer/statistiek/'
+    url_stats_tabellen = '/bondscompetities/beheer/statistiek/tabellen/'
+    url_stats_grafieken = '/bondscompetities/beheer/statistiek/grafieken/'
 
     testdata = None
 
@@ -60,26 +61,45 @@ class TestCompBeheerStats(E2EHelpers, TestCase):
         # controleer dat het "kies" scherm het kaartje statistiek bevat
         resp = self.client.get(self.url_kies)
         urls = self.extract_all_urls(resp, skip_menu=True)
-        self.assertIn(self.url_statistiek, urls)
+        self.assertIn(self.url_stats_tabellen, urls)
 
         # haal de statistiek pagina op
         with self.assert_max_queries(56):
-            resp = self.client.get(self.url_statistiek)
+            resp = self.client.get(self.url_stats_tabellen)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compbeheer/statistiek.dtl', 'design/site_layout.dtl'))
+        self.assert_template_used(resp, ('compbeheer/statistiek-tabellen.dtl', 'design/site_layout.dtl'))
+
+        # controleer dat de pagina een link naar de grafieken bevat
+        urls = self.extract_all_urls(resp, skip_menu=True)
+        self.assertIn(self.url_stats_grafieken, urls)
+
+        # haal de grafieken pagina op
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_stats_grafieken)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('compbeheer/statistiek-grafieken.dtl', 'design/site_layout.dtl'))
 
         # cornercase: nul alle inschrijvingen
         RegioDeelnemer.objects.all().delete()
         with self.assert_max_queries(56):
-            resp = self.client.get(self.url_statistiek)
+            resp = self.client.get(self.url_stats_tabellen)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compbeheer/statistiek.dtl', 'design/site_layout.dtl'))
+        self.assert_template_used(resp, ('compbeheer/statistiek-tabellen.dtl', 'design/site_layout.dtl'))
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_stats_grafieken)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('compbeheer/statistiek-grafieken.dtl', 'design/site_layout.dtl'))
 
         # anon test
         self.e2e_logout()
-        resp = self.client.get(self.url_statistiek)
+        resp = self.client.get(self.url_stats_tabellen)
+        self.assert403(resp)
+        resp = self.client.get(self.url_stats_grafieken)
         self.assert403(resp)
 
     def test_stats_rcl(self):
@@ -90,27 +110,38 @@ class TestCompBeheerStats(E2EHelpers, TestCase):
         # controleer dat het "kies" scherm het kaartje statistiek bevat
         resp = self.client.get(self.url_kies)
         urls = self.extract_all_urls(resp, skip_menu=True)
-        self.assertIn(self.url_statistiek, urls)
+        self.assertIn(self.url_stats_tabellen, urls)
 
         # maak nog een competitie aan (deze wordt niet getoond)
         competities_aanmaken(jaar=2018)
 
         # haal de statistiek pagina op
         with self.assert_max_queries(56):
-            resp = self.client.get(self.url_statistiek)
+            resp = self.client.get(self.url_stats_tabellen)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compbeheer/statistiek.dtl', 'design/site_layout.dtl'))
+        self.assert_template_used(resp, ('compbeheer/statistiek-tabellen.dtl', 'design/site_layout.dtl'))
+
+        # controleer dat de pagina een link naar de grafieken bevat
+        urls = self.extract_all_urls(resp, skip_menu=True)
+        self.assertIn(self.url_stats_grafieken, urls)
+
+        # haal de grafieken pagina op
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_stats_grafieken)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('compbeheer/statistiek-grafieken.dtl', 'design/site_layout.dtl'))
 
         # haal de (lege) statistiek pagina op als geen competitie in fase C of later is
         zet_competitie_fase_regio_prep(self.testdata.comp18)
         zet_competitie_fase_regio_prep(self.testdata.comp25)
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_statistiek)
+            resp = self.client.get(self.url_stats_tabellen)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compbeheer/statistiek.dtl', 'design/site_layout.dtl'))
+        self.assert_template_used(resp, ('compbeheer/statistiek-tabellen.dtl', 'design/site_layout.dtl'))
 
-        self.e2e_assert_other_http_commands_not_supported(self.url_statistiek)
+        self.e2e_assert_other_http_commands_not_supported(self.url_stats_tabellen)
 
 # end of file

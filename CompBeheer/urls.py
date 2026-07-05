@@ -32,9 +32,13 @@ urlpatterns = [
          views_bb.SeizoenAfsluitenView.as_view(),
          name='bb-seizoen-afsluiten'),
 
-    path('statistiek/',
+    path('statistiek/tabellen/',
          view_stats.CompetitieStatistiekView.as_view(),
-         name='statistiek'),
+         name='statistiek-tabellen'),
+
+    path('statistiek/grafieken/',
+         view_stats.CompetitieGrafiekView.as_view(),
+         name='statistiek-grafieken'),
 
     path('wedstrijdformulieren/toestemming/',
          views_wf.ToestemmingView.as_view(),
