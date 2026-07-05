@@ -140,7 +140,7 @@ class CompetitieKiesView(TemplateView):
 
             if rol_nu in (Rol.ROL_BB, Rol.ROL_BKO, Rol.ROL_RKO, Rol.ROL_RCL):
                 context['toon_management'] = True
-                context['url_statistiek'] = reverse('CompBeheer:statistiek')
+                context['url_statistiek'] = reverse('CompBeheer:statistiek-tabellen')
             else:
                 context['toon_management'] = False
 

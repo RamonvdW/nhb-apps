@@ -25,7 +25,7 @@ class GoogleApiFilesMock:
     def prime_error(self, error_str: str, match: str, error_type: str):
         self.next_error = (error_str, match, error_type)
 
-    def get(self, fileId: str, fields: list):
+    def get(self, fileId: str, fields: list):       # noqa
         if self.verbose:    # pragma: no cover
             print('[DEBUG] {GoogleApiFilesMock.get} body=%s, kwargs=%s' % (repr(fileId), repr(fields)))
 
