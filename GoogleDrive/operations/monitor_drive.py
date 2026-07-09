@@ -13,6 +13,7 @@ from googleapiclient.http import HttpRequest
 from google.oauth2.service_account import Credentials
 from google.auth.exceptions import TransportError
 from httplib2.error import ServerNotFoundError
+from http.client import IncompleteRead
 import datetime
 import socket
 import time
@@ -65,10 +66,14 @@ class MonitorDriveFiles:
                 self.stdout.write('[ERROR] {execute} Socket error: %s' % exc)
             except GoogleApiError as exc:           # aka HttpError
                 self.stdout.write('[ERROR] {execute} GoogleApiError: %s' % exc)
-            except TransportError as exc:
+            except TransportError as exc:           # pragma: no cover
                 self.stdout.write('[ERROR] {execute} google.auth.TransportError: %s' % exc)
-            except ServerNotFoundError as exc:
+            except ServerNotFoundError as exc:      # pragma: no cover
                 self.stdout.write('[ERROR] {execute} httplib2.error.ServerNotFoundError: %s' % exc)
+            except IncompleteRead as exc:           # pragma: no cover
+                self.stdout.write('[ERROR] {execute} http.client.IncompleteRead: %s' % exc)
+            except ConnectionResetError as exc:     # pragma: no cover
+                self.stdout.write('[ERROR] {execute} ConnectionResetError: %s' % exc)
             else:
                 # self.stdout.write('[DEBUG] {execute} response=%s' % repr(response))
                 return response

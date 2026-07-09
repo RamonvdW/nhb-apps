@@ -1,0 +1,126 @@
+{% extends 'design/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2022-2026 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Statistiek{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h1 class="sv-kopje-pagina">Grafieken</h1>
+            {% if heeft_data %}
+                <p>Grafieken over de data van de bondscompetities seizoen <b>{{ seizoen }}</b></p>
+            {% else %}
+                <p class="sv-rood-text">Geen data beschikbaar</p>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if heeft_data %}
+
+        <!-- blauwe balk met informatie label : info -->
+        <div class="row-sv-blauw">
+            <div class="col s12 m10 offset-m1 l8 offset-l2 xl6 offset-xl3">
+                <table class="sv-kader-tabel">
+                    <tr>
+                        <td colspan="4" class="center">
+                            <h2 class="sv-kopje-in-tabel">Leeftijdsgroepen regiocompetitie</h2>
+                        </td>
+                    </tr>
+
+                    {% for titel, total, age_groups in age_groups_regio %}
+                        {% if total > 0 %}
+                            <tr>
+                                <td colspan="4" class="center">
+                                    <h3 class="sv-kopje-klein">{{ titel }}</h3>
+                                    <p>Leeftijd van de {{ total }} sporters, gegroepeerd per 10 jaar.</p>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th class="center">Leeftijdsgroep</th>
+                                <th class="right-align">Aantal</th>
+                                <th class="right-align">Aandeel</th>
+                                <th style="width:40%"><!-- chart --></th>
+                            </tr>
+
+                            {% for age1, age2, count, perc in age_groups %}
+                                <tr>
+                                    <td class="center">
+                                        {% if forloop.first %}
+                                            <span>onder {{ age2|add:1 }}</span>
+                                        {% elif forloop.last %}
+                                            <span>{{ age1 }} en ouder</span>
+                                        {% else %}
+                                            <span>{{ age1 }} .. {{ age2 }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="right-align">{{ count }}</td>
+                                    <td class="right-align">{{ perc }}%</td>
+                                    <td style="padding: 5px">
+                                        <div style="background: linear-gradient(to right, #f94137, #f94137 {{ perc }}%, white {{ perc }}%, white 100%); height: 36px">&nbsp;</div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% endif %}
+                    {% endfor %}
+
+
+                    <tr>
+                        <td colspan="4" class="center">
+                            <h2 class="sv-kopje-in-tabel">Leeftijdsgroepen rayonkampioenschappen</h2>
+                        </td>
+                    </tr>
+
+                    {% for titel, total, age_groups in age_groups_rk %}
+                        {% if total > 0 %}
+                            <tr>
+                                <td colspan="4" class="center">
+                                    <h3 class="sv-kopje-klein">{{ titel }}</h3>
+                                    <p>Leeftijd van de {{ total }} sporters, gegroepeerd per 10 jaar.</p>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th class="center">Leeftijdsgroep</th>
+                                <th class="right-align">Aantal</th>
+                                <th class="right-align">Aandeel</th>
+                                <th style="width:40%"><!-- chart --></th>
+                            </tr>
+
+                            {% for age1, age2, count, perc in age_groups %}
+                                <tr>
+                                    <td class="center">
+                                        {% if forloop.first %}
+                                            <span>onder {{ age2|add:1 }}</span>
+                                        {% elif forloop.last %}
+                                            <span>{{ age1 }} en ouder</span>
+                                        {% else %}
+                                            <span>{{ age1 }} .. {{ age2 }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="right-align">{{ count }}</td>
+                                    <td class="right-align">{{ perc }}%</td>
+                                    <td style="padding: 5px">
+                                        <div style="background: linear-gradient(to right, #f94137, #f94137 {{ perc }}%, white {{ perc }}%, white 100%); height: 36px">&nbsp;</div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% endif %}
+                    {% endfor %}
+
+                </table>
+            </div>
+        </div>
+
+    {% endif %}     <!-- heeft_data -->
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="compbeheer-statistiek-grafieken" %}
+
+{% endblock %}

@@ -92,7 +92,7 @@
                             <span class="hide-on-med-and-up">Ver</span>
                             <span class="hide-on-small-only">Vereniging</span>
                         </th>
-                        <th class="right-align" style="padding-right:10px">BK scores</th>
+                        <th class="{% if toon_teamlid_scores %}right-align{% else %}center{% endif %}" style="padding-right:10px">BK scores</th>
                         <th>Team</th>
                         <th><!-- titel --></th>
                         <td rowspan="{{ team.aantal_in_groep }}" class="sv-table-zijrand"></td>
@@ -111,13 +111,19 @@
 
                     <!-- BK score -->
                     <td class="{% if toon_teamlid_scores %}right-align{% else %}center{% endif %}" style="padding-right:10px">
-                        <b>{{ team.team_score }}{% if team.heeft_shootoff_gewonnen %}&nbsp+{% endif %}</b>
+                        <b>{{ team.team_score }}</b>
                         {% if toon_teamlid_scores %}
+                            <!-- reglement t/m 2024/2025 -->
+                            {% if team.team_score_counts %}
+                                <!-- alleen in 2023/2024, 25m1pijl, BK -->
+                                <span> ({{ team.team_score_counts }})</span>
+                            {% endif %}
                             {% for deelnemer in team.deelnemers %}
                                 <br>
                                 <span>{{ deelnemer.team_score }}</span>
                             {% endfor %}
                         {% else %}
+                            <!-- reglement vanaf 2025/2026 -->
                             {% if team.team_score_shootoff_str %}
                                 <br>
                                 <span>{{ team.team_score_shootoff_str }}</span>

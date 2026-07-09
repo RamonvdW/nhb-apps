@@ -62,7 +62,7 @@ APPS_DIR = os.path.dirname(BASE_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2026-06-08'
+SITE_VERSIE = '2026-07-09'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -242,7 +242,7 @@ ROOT_URLCONF = 'Site.core.urls'
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
-STATIC_URL = '/static/'             # url where the server is serving the files
+STATIC_URL = '/mh-static/'          # url where the server is serving the files
 STATIC_ROOT = 'Site/.static'        # relative to project top-dir
 STATICFILES_DIRS = [
     ("webwinkel_fotos", WEBWINKEL_FOTOS_DIR),       # noqa

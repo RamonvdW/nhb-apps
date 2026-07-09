@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2024 Ramon van der Winkel.
+#  Copyright (c) 2024-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import models
 from Account.models import Account
 from BasisTypen.models import BoogType, Leeftijdsklasse
-from Spelden.definities import (SPELD_CATEGORIE_CHOICES, SPELD_CATEGORIE_WA_STER,
+from Spelden.definities import (SPELD_CATEGORIE_CHOICES, SPELD_CATEGORIE_WA_STER, SPELD_CATEGORIE2STR,
                                 SOORT_BIJLAGE_CHOICES, SOORT_BIJLAGE_SCOREBRIEFJE,
                                 SOORT_BESTAND_CHOICES, SOORT_BESTAND_FOTO,
                                 WEDSTRIJD_DISCIPLINE_CHOICES, WEDSTRIJD_DISCIPLINE_OUTDOOR)
@@ -39,7 +39,8 @@ class Speld(models.Model):
     prijs_euro = models.DecimalField(max_digits=6, decimal_places=2, default=Decimal(0))        # max 9999,99
 
     def __str__(self):
-        return "%s %s %s" % (self.categorie, self.volgorde, self.beschrijving)
+        cat_str = SPELD_CATEGORIE2STR.get(self.categorie, '?? (%s)' % self.categorie)
+        return "%s: %s, %s" % (self.volgorde, cat_str, self.beschrijving)
 
     class Meta:
         verbose_name = "Speld"

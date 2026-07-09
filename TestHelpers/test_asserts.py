@@ -30,7 +30,7 @@ class MyTestAsserts(TestCase):
     @staticmethod
     def remove_debug_toolbar(html):
         """ removes the debug toolbar code """
-        pos = html.find('<link rel="stylesheet" href="/static/debug_toolbar/css/print.css"')
+        pos = html.find('<link rel="stylesheet" href="/mh-static/debug_toolbar/css/print.css"')
         if pos > 0:     # pragma: no cover
             html = html[:pos] + '<!-- removed debug toolbar --></body></html>'
         return html
@@ -756,7 +756,7 @@ class MyTestAsserts(TestCase):
         # template containing class "collapsible-header" should also include Overige/js/collapsible_icons.js
         if "collapsible-header" in html:
             # note: template tags have been expanded and hash is inserted in the filename: name.hash.js
-            if '<script src="/static/overig_js/collapsible_icons' not in html:      # pragma: no cover
+            if '<script src="/mh-static/overig_js/collapsible_icons' not in html:      # pragma: no cover
                 # print(html)
                 self.fail(msg='Bug in template %s: Missing JS include for collapsible icons' % repr(dtl))
 
