@@ -255,6 +255,23 @@ class ProfielView(UserPassesTestMixin, TemplateView):
         sterktes = Speelsterkte.objects.filter(sporter=self.sporter).order_by('volgorde')
         if sterktes.count() == 0:           # pragma: no branch
             sterktes = None
+        else:
+            prev_cat_disc = None
+            for sterkte in sterktes:
+                cat_disc = sterkte.discipline
+                if sterkte.category == 'Cadet':
+                    # toon cadet codes totdat er een senior code geregistreerd is
+                    cat_disc += 'Senior'
+                else:
+                    cat_disc += sterkte.category  # Senior / Master
+
+                if cat_disc != prev_cat_disc:
+                    sterkte.code_pas_str = sterkte.pas_code
+                    prev_cat_disc = cat_disc
+                else:
+                    sterkte.code_pas_str = ''
+            # for
+
         return sterktes
 
     def _find_diplomas(self):

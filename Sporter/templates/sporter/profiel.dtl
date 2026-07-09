@@ -841,8 +841,9 @@
                         <tr>
                             <th class="center">Discipline</th>
                             <th class="center">Onder<wbr>scheiding</th>
-                            <th class="center">Categorie</th>
+                            <th class="center hide-on-small-only">Categorie</th>
                             <th class="center">Datum</th>
+                            <th class="center hide-on-small-only">Code bondspas</th>
                         </tr>
                     </thead>
 
@@ -850,8 +851,9 @@
                         <tr>
                             <td class="center">{{ obj.discipline }}</td>
                             <td class="center">{{ obj.beschrijving }}</td>
-                            <td class="center">{{ obj.category }}</td>
+                            <td class="center hide-on-small-only">{{ obj.category }}</td>
                             <td class="center">{{ obj.datum }}</td>
+                            <td class="center hide-on-small-only">{{ obj.code_pas_str }}</td>
                         </tr>
                     {% endfor %}
 
