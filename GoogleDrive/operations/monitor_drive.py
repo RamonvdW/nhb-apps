@@ -5,6 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 """ aanmaken en vinden van bestanden in een folder structuur in Google Drive """
+
 from django.conf import settings
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError as GoogleApiError
