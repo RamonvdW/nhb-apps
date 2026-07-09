@@ -385,11 +385,16 @@ class TestBondspasOnline(E2EHelpers, TestCase):
         # geen bondspas record
         BondspasJaar.objects.all().update(zichtbaar=False)
 
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_toon_sporter)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('bondspas/toon-bondspas-sporter.dtl', 'design/site_layout.dtl'))
+        # moet in de maand januari zijn
+        with patch('django.utils.timezone.now') as mock_timezone:
+            dt = make_aware(datetime.datetime(year=self.bondspas_jaar1, month=1, day=1, hour=1))
+            mock_timezone.return_value = dt
+
+            with self.assert_max_queries(20):
+                resp = self.client.get(self.url_toon_sporter)
+            self.assertEqual(resp.status_code, 200)     # 200 = OK
+            self.assert_html_ok(resp)
+            self.assert_template_used(resp, ('bondspas/toon-bondspas-sporter.dtl', 'design/site_layout.dtl'))
 
         # admin interface
         bondspas = BondspasJaar(jaar=1999, zichtbaar=False)

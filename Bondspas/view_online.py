@@ -14,7 +14,6 @@ from Bondspas.operations import bepaal_jaar_bondspas, maak_bondspas_regels, maak
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie
 from Sporter.models import Sporter, get_sporter
-import datetime
 import base64
 
 

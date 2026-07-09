@@ -99,7 +99,6 @@ def maak_bondspas_regels(sporter, jaar_pas):
 
     # speelsterkte
     afkortingen = list()
-    afkortingen_basis = list()
     prev_cat_disc = None
     for sterkte in sporter.speelsterkte_set.order_by('volgorde'):    # laagste eerst = beste eerst
         cat_disc = sterkte.discipline
@@ -110,17 +109,9 @@ def maak_bondspas_regels(sporter, jaar_pas):
             cat_disc += sterkte.category    # Senior / Master
 
         if cat_disc != prev_cat_disc:
-            if sterkte.volgorde >= 600:
-                afkortingen_basis.append(sterkte.pas_code)
-            else:
-                afkortingen.append(sterkte.pas_code)
+            afkortingen.append(sterkte.pas_code)
             prev_cat_disc = cat_disc
     # for
-
-    # toon de basis codes alleen als er geen hogere codes zijn
-    # iemand met "meesterschutter" hoeft geen beginner-awards meer te zien
-    if len(afkortingen) == 0:
-        afkortingen = afkortingen_basis
 
     if len(afkortingen):
         msg = ", ".join(afkortingen)
