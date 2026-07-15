@@ -72,7 +72,7 @@
 
                         <td>
                             {% if mag_wijzigen %}
-                                {% sv-knop-nav url=team.url_koppelen icon='comp team koppel leden' tekst='' extra_style='margin-right:15px' %}}">
+                                {% sv-knop-nav url=team.url_koppelen icon='comp team koppel leden' tekst='' extra_style='margin-right:15px' %}
                             {% endif %}
                             {% if team.url_wijzig %}
                                 {% sv-knop-nav url=team.url_wijzig icon='aanpassen' tekst='' %}
