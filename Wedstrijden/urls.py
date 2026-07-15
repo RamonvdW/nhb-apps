@@ -8,7 +8,7 @@ from django.urls import path
 from Wedstrijden import (view_vereniging, view_manager, view_korting,
                          view_wijzig_wedstrijd, view_wijzig_sessies,
                          view_kwalificatie_scores, view_wedstrijd_details,
-                         view_aanmeldingen, view_aanmelding_details)
+                         view_aanmeldingen, view_aanmelding_details, view_afmelding)
 
 app_name = 'Wedstrijden'
 
@@ -117,13 +117,14 @@ urlpatterns = [
          view_aanmelding_details.AanpassenView.as_view(),
          name='aanpassen'),
 
+
+    # afmelden
     path('afmelden/<inschrijving_pk>/',
-         view_aanmelding_details.AfmeldenView.as_view(),
+         view_afmelding.AfmeldenView.as_view(),
          name='afmelden'),
 
-    # afmelding details
     path('details-afmelding/<afgemeld_pk>/',
-         view_aanmelding_details.WedstrijdAfgemeldDetailsView.as_view(),
+         view_afmelding.WedstrijdAfgemeldDetailsView.as_view(),
          name='details-afmelding'),
 ]
 

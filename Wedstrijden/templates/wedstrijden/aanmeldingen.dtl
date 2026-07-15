@@ -135,7 +135,7 @@
     </div>
 
     <!-- witruimte -->
-    <div class="row center">
+    <div class="row center" id="afgemeld">
         <div class="col s12">
             <h2 class="sv-kopje-row">Afgemeld</h2>
             <p>Onderstaande lijst bevat alle afmeldingen</p>

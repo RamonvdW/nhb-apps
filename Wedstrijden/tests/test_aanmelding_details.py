@@ -28,6 +28,7 @@ class TestWedstrijdenAanmeldingDetails(E2EHelpers, TestCase):
 
     test_after = ('Wedstrijden.tests.test_aanmeldingen',)
 
+    url_aanmeldingen = '/wedstrijden/%s/aanmeldingen/'              # wedstrijd_pk
     url_aanmelding_details = '/wedstrijden/details-aanmelding/%s/'  # inschrijving_pk
     url_afgemeld_details = '/wedstrijden/details-afmelding/%s/'     # afgemeld_pk
     url_aanpassen = '/wedstrijden/aanpassen/%s/'                    # inschrijving_pk
@@ -241,6 +242,9 @@ class TestWedstrijdenAanmeldingDetails(E2EHelpers, TestCase):
         self.inschrijving1r.korting = self.korting
         self.inschrijving1r.save(update_fields=['korting'])
 
+        self.check_url = self.url_aanmeldingen % self.wedstrijd.pk
+        self.check_url += '#afgemeld'
+
     @staticmethod
     def _maak_afmelding(inschrijving: WedstrijdInschrijving):
         # zet een inschrijving om in een afmelding
@@ -341,7 +345,7 @@ class TestWedstrijdenAanmeldingDetails(E2EHelpers, TestCase):
         url = self.url_afmelden % self.inschrijving1r.pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'snel': 1})
-        self.assert_is_redirect(resp, self.url_aanmelding_details % self.inschrijving1r.pk)
+        self.assert_is_redirect(resp, self.check_url)
 
         # verwerk de mutaties
         # geeft fout bij "verwijder uit mandje" zonder bestelling regel
@@ -365,7 +369,7 @@ class TestWedstrijdenAanmeldingDetails(E2EHelpers, TestCase):
         url = self.url_afmelden % self.inschrijving1r.pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'snel': 1})
-        self.assert_is_redirect(resp, self.url_aanmelding_details % self.inschrijving1r.pk)
+        self.assert_is_redirect(resp, self.check_url)
 
         # zet het mandje om in een bestelling zodat er een bestelnummer aan komt te hangen
         #self.assertEqual(Bestelling.objects.count(), 0)
@@ -377,7 +381,7 @@ class TestWedstrijdenAanmeldingDetails(E2EHelpers, TestCase):
         url = self.url_afmelden % self.inschrijving1c.pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'snel': 1})
-        self.assert_is_redirect(resp, self.url_aanmelding_details % self.inschrijving1c.pk)
+        self.assert_is_redirect(resp, self.check_url)
 
         # maak een tweede vereniging
         ver2 = Vereniging(
@@ -399,7 +403,7 @@ class TestWedstrijdenAanmeldingDetails(E2EHelpers, TestCase):
         url = self.url_afmelden % self.inschrijving2.pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'snel': 1})
-        self.assert_is_redirect(resp, self.url_aanmelding_details % self.inschrijving2.pk)  # is afgemeld
+        self.assert_is_redirect(resp, self.check_url)
 
         self.e2e_assert_other_http_commands_not_supported(url, post=False)
 
