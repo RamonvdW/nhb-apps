@@ -149,7 +149,7 @@ class UitslagenVerenigingIndivView(TemplateView):
 
         try:
             ver = Vereniging.objects.select_related('regio').get(ver_nr=ver_nr)
-        except Vereniging.DoesNotExist:
+        except (ValueError, Vereniging.DoesNotExist):
             raise Http404('Vereniging niet gevonden')
 
         context['ver'] = ver

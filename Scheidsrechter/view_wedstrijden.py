@@ -153,7 +153,7 @@ class WedstrijdDetailsView(UserPassesTestMixin, TemplateView):
                          .prefetch_related('boogtypen',
                                            'sessies')
                          .get(pk=wedstrijd_pk))
-        except Wedstrijd.DoesNotExist:
+        except (ValueError, Wedstrijd.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
         context['wed'] = wedstrijd
@@ -280,7 +280,7 @@ class WedstrijdDetailsCSView(UserPassesTestMixin, TemplateView):
                          .prefetch_related('boogtypen',
                                            'sessies')
                          .get(pk=wedstrijd_pk))
-        except Wedstrijd.DoesNotExist:
+        except (ValueError, Wedstrijd.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
         context['wed'] = wedstrijd
@@ -636,7 +636,7 @@ class WedstrijdHWLContactView(UserPassesTestMixin, TemplateView):
                          .exclude(toon_op_kalender=False)
                          .exclude(aantal_scheids=AANTAL_SCHEIDS_GEEN_KEUZE)
                          .get(pk=wedstrijd_pk))
-        except Wedstrijd.DoesNotExist:
+        except (ValueError, Wedstrijd.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
         ver = self.functie_nu.vereniging

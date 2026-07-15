@@ -369,7 +369,7 @@ class WijzigRKTeamsView(UserPassesTestMixin, TemplateView):
                            .select_related('team_type')
                            .get(pk=rk_team_pk,
                                 kamp=deelkamp))
-            except TeamRK.DoesNotExist:
+            except (ValueError, TeamRK.DoesNotExist):
                 raise Http404('Team bestaat niet')
 
             if rk_team.vereniging != self.functie_nu.vereniging:

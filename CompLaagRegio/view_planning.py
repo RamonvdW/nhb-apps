@@ -1159,7 +1159,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
         if loc_pk:
             try:
                 loc = ver.wedstrijdlocatie_set.get(pk=loc_pk)
-            except WedstrijdLocatie.DoesNotExist:
+            except (ValueError, WedstrijdLocatie.DoesNotExist):
                 raise Http404('Geen valide verzoek')
         else:
             # formulier stuurt niets als er niet gekozen hoeft te worden

@@ -81,7 +81,7 @@ class WedstrijdInschrijvenSporter(UserPassesTestMixin, TemplateView):
                          .prefetch_related('boogtypen',
                                            'sessies')
                          .get(pk=wedstrijd_pk))
-        except Wedstrijd.DoesNotExist:
+        except (ValueError, Wedstrijd.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
         context['wed'] = wedstrijd
@@ -223,7 +223,7 @@ class WedstrijdInschrijvenGroepje(UserPassesTestMixin, TemplateView):
                          .prefetch_related('boogtypen',
                                            'sessies')
                          .get(pk=wedstrijd_pk))
-        except Wedstrijd.DoesNotExist:
+        except (ValueError, Wedstrijd.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
         context['wed'] = wedstrijd
@@ -425,7 +425,7 @@ class WedstrijdInschrijvenFamilie(UserPassesTestMixin, TemplateView):
                          .prefetch_related('boogtypen',
                                            'sessies')
                          .get(pk=wedstrijd_pk))
-        except Wedstrijd.DoesNotExist:
+        except (ValueError, Wedstrijd.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
         context['wed'] = wedstrijd
@@ -756,7 +756,7 @@ class WedstrijdInschrijvenHandmatig(UserPassesTestMixin, TemplateView):
                          .prefetch_related('boogtypen',
                                            'sessies')
                          .get(pk=wedstrijd_pk))
-        except Wedstrijd.DoesNotExist:
+        except (ValueError, Wedstrijd.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
         context['wed'] = wedstrijd
@@ -921,7 +921,7 @@ class WedstrijdInschrijvenHandmatig(UserPassesTestMixin, TemplateView):
                                            'sessies',
                                            'wedstrijdklassen')
                          .get(pk=wedstrijd_pk))
-        except Wedstrijd.DoesNotExist:
+        except (ValueError, Wedstrijd.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
         if wedstrijd.organiserende_vereniging.ver_nr != self.functie_nu.vereniging.ver_nr:

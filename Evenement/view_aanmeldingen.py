@@ -357,7 +357,7 @@ class EvenementDetailsAanmeldingView(UserPassesTestMixin, TemplateView):
                             .get(pk=inschrijving_pk,
                                  # alleen van de eigen vereniging laten zien
                                  evenement__organiserende_vereniging=self.functie_nu.vereniging))
-        except EvenementInschrijving.DoesNotExist:
+        except (ValueError, EvenementInschrijving.DoesNotExist):
             raise Http404('Aanmelding niet gevonden')
 
         context['inschrijving'] = inschrijving
@@ -448,7 +448,7 @@ class EvenementDetailsAfmeldingView(UserPassesTestMixin, TemplateView):
                          .get(pk=afmelding_pk,
                               # alleen van de eigen vereniging laten zien
                               evenement__organiserende_vereniging=self.functie_nu.vereniging))
-        except EvenementAfgemeld.DoesNotExist:
+        except (ValueError, EvenementAfgemeld.DoesNotExist):
             raise Http404('Afmelding niet gevonden')
 
         context['afmelding'] = afmelding

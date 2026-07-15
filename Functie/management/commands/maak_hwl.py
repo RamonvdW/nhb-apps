@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2024 Ramon van der Winkel.
+#  Copyright (c) 2020-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -31,7 +31,7 @@ class Command(BaseCommand):
     def get_vereniging(self, ver_nr):
         try:
             ver = Vereniging.objects.get(ver_nr=ver_nr)
-        except Vereniging.DoesNotExist:
+        except (ValueError, Vereniging.DoesNotExist):
             self.stderr.write("[ERROR] Kan vereniging %s niet vinden" % ver_nr)
             ver = None
         return ver

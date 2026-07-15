@@ -412,7 +412,7 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
                     .select_related('team_type')
                     .get(pk=team_pk,
                          regiocomp=deelcomp))
-        except RegioTeam.DoesNotExist:
+        except (ValueError, RegioTeam.DoesNotExist):
             raise Http404('Team niet gevonden')
 
         if self.rol_nu == Rol.ROL_HWL:

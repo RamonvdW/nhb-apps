@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -192,7 +192,7 @@ class RecordsZoekView(ListView):
                 # zoek het lid met dit nummer
                 try:
                     sporter = Sporter.objects.get(lid_nr=filter_nr)
-                except Sporter.DoesNotExist:
+                except (ValueError, Sporter.DoesNotExist):
                     # geen lid met dit nummer
                     # of slecht getal
                     pass

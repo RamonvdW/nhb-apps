@@ -557,7 +557,7 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
             if loc_pk:
                 try:
                     loc = ver.wedstrijdlocatie_set.get(pk=loc_pk)
-                except WedstrijdLocatie.DoesNotExist:
+                except (ValueError, WedstrijdLocatie.DoesNotExist):
                     raise Http404('Locatie niet gevonden')
             else:
                 # formulier stuurt niets als er niet gekozen hoeft te worden, of als er geen locatie is

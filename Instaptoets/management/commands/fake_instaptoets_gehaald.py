@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2025 Ramon van der Winkel.
+#  Copyright (c) 2025-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -27,7 +27,7 @@ class Command(BaseCommand):
     def _get_sporter(self, lid_nr: int):
         try:
             self.sporter = Sporter.objects.get(lid_nr=lid_nr)
-        except Sporter.DoesNotExist:
+        except (ValueError, Sporter.DoesNotExist):
             self.stderr.write('[ERROR] Sporter met bondsnummer %s niet gevonden' % repr(lid_nr))
 
     def _get_datum(self, datum_str):

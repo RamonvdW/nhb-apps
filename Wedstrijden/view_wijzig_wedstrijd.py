@@ -71,7 +71,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
                                            'sessies__wedstrijdklassen',
                                            'wedstrijdklassen')
                          .get(pk=wedstrijd_pk))
-        except Wedstrijd.DoesNotExist:
+        except (ValueError, Wedstrijd.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
         context['wed'] = wedstrijd
@@ -447,7 +447,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
                                            'sessies',
                                            'sessies__wedstrijdklassen')
                          .get(pk=wedstrijd_pk))
-        except Wedstrijd.DoesNotExist:
+        except (ValueError, Wedstrijd.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
         uitvoerend = False

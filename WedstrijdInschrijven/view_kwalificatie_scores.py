@@ -57,7 +57,7 @@ class KwalificatieScoresOpgevenView(UserPassesTestMixin, TemplateView):
                                             'koper')
                             .get(pk=inschrijving_pk,
                                  wedstrijd__eis_kwalificatie_scores=True))
-        except WedstrijdInschrijving.DoesNotExist:
+        except (ValueError, WedstrijdInschrijving.DoesNotExist):
             raise Http404('Inschrijving niet gevonden')
 
         # controleer dat de wijziging door de koper of de sporter zelf gedaan wordt
@@ -181,7 +181,7 @@ class KwalificatieScoresOpgevenView(UserPassesTestMixin, TemplateView):
                                             'koper')
                             .get(pk=inschrijving_pk,
                                  wedstrijd__eis_kwalificatie_scores=True))
-        except WedstrijdInschrijving.DoesNotExist:
+        except (ValueError, WedstrijdInschrijving.DoesNotExist):
             raise Http404('Inschrijving niet gevonden')
 
         # controleer dat de wijziging door de koper of de sporter zelf gedaan wordt

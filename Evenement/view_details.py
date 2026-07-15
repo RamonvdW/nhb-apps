@@ -40,7 +40,7 @@ class DetailsView(TemplateView):
                          .select_related('organiserende_vereniging',
                                          'locatie')
                          .get(pk=evenement_pk))
-        except Evenement.DoesNotExist:
+        except (ValueError, Evenement.DoesNotExist):
             raise Http404('Evenement niet gevonden')
 
         context['evenement'] = evenement

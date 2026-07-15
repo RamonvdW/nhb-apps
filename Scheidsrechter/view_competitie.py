@@ -220,7 +220,7 @@ class MatchDetailsView(UserPassesTestMixin, TemplateView):
                      .prefetch_related('indiv_klassen',
                                        'team_klassen')
                      .get(pk=match_pk))
-        except CompetitieMatch.DoesNotExist:
+        except (ValueError, CompetitieMatch.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
         context['match'] = match
@@ -352,7 +352,7 @@ class MatchDetailsCSView(UserPassesTestMixin, TemplateView):
                      .prefetch_related('indiv_klassen',
                                        'team_klassen')
                      .get(pk=match_pk))
-        except CompetitieMatch.DoesNotExist:
+        except (ValueError, CompetitieMatch.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
         context['match'] = match
@@ -599,7 +599,7 @@ class MatchDetailsCSView(UserPassesTestMixin, TemplateView):
                      .prefetch_related('indiv_klassen',
                                        'team_klassen')
                      .get(pk=match_pk))
-        except CompetitieMatch.DoesNotExist:
+        except (ValueError, CompetitieMatch.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
         # aantal scheidsrechters
@@ -723,7 +723,7 @@ class MatchHWLContactView(UserPassesTestMixin, TemplateView):
                      .prefetch_related('indiv_klassen',
                                        'team_klassen')
                      .get(pk=match_pk))
-        except CompetitieMatch.DoesNotExist:
+        except (ValueError, CompetitieMatch.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
         if match.vereniging != self.functie_nu.vereniging:

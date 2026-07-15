@@ -235,7 +235,7 @@ class ZetStatusWedstrijdView(UserPassesTestMixin, View):
                          .objects
                          .get(pk=wedstrijd_pk,
                               verstop_voor_mwz=False))
-        except Wedstrijd.DoesNotExist:
+        except (ValueError, Wedstrijd.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
         terug = request.POST.get('terug', '')

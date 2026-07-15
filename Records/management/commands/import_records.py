@@ -204,7 +204,7 @@ class Command(BaseCommand):
                 # 123456
                 try:
                     record.sporter = Sporter.objects.get(lid_nr=val)
-                except Sporter.DoesNotExist:
+                except (ValueError, Sporter.DoesNotExist):
                     # toch door, want niet alle oude leden zitten nog in de database
                     naam = row[10]
                     fout = 'Bondsnummer niet bekend: %s (voor sporter %s)' % (repr(val), repr(naam))

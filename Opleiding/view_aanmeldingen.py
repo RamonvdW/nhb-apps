@@ -364,7 +364,7 @@ class OpleidingDetailsAanmeldingView(UserPassesTestMixin, TemplateView):
                             .select_related('opleiding',
                                             'sporter')
                             .get(pk=inschrijving_pk))
-        except OpleidingInschrijving.DoesNotExist:
+        except (ValueError, OpleidingInschrijving.DoesNotExist):
             raise Http404('Aanmelding niet gevonden')
 
         context['inschrijving'] = inschrijving
@@ -451,7 +451,7 @@ class OpleidingDetailsAfmeldingView(UserPassesTestMixin, TemplateView):
                          .select_related('opleiding',
                                          'sporter')
                          .get(pk=afmelding_pk))
-        except OpleidingAfgemeld.DoesNotExist:
+        except (ValueError, OpleidingAfgemeld.DoesNotExist):
             raise Http404('Afmelding niet gevonden')
 
         context['afmelding'] = afmelding

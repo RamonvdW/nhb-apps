@@ -43,7 +43,7 @@ class WedstrijdDetailsView(TemplateView):
                          .prefetch_related('boogtypen',
                                            'sessies')
                          .get(pk=wedstrijd_pk))
-        except Wedstrijd.DoesNotExist:
+        except (ValueError, Wedstrijd.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
         context['wed'] = wedstrijd

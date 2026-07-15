@@ -547,7 +547,7 @@ class DynamicScoresOpslaanView(UserPassesTestMixin, View):
         # print('nieuwe score: %s = %s' % (sporterboog_pk, waarde))
         try:
             sporterboog = SporterBoog.objects.get(pk=sporterboog_pk)
-        except SporterBoog.DoesNotExist:
+        except (ValueError, SporterBoog.DoesNotExist):
             # garbage --> ignore
             return
 

@@ -160,9 +160,8 @@ class ToonBondspasBeheerderView(UserPassesTestMixin, View):
 
         try:
             lid_nr = kwargs['lid_nr'][:7]       # afkappen voor de veiligheid
-            lid_nr = int(lid_nr)
             sporter = Sporter.objects.get(lid_nr=lid_nr)
-        except Sporter.DoesNotExist:
+        except (ValueError, Sporter.DoesNotExist):
             raise Http404('Geen valide parameter')
 
         if sporter.is_gast:
@@ -190,9 +189,8 @@ class ToonBondspasBeheerderView(UserPassesTestMixin, View):
         """
         try:
             lid_nr = kwargs['lid_nr'][:7]       # afkappen voor de veiligheid
-            lid_nr = int(lid_nr)
             sporter = Sporter.objects.get(lid_nr=lid_nr)
-        except Sporter.DoesNotExist:
+        except (ValueError, Sporter.DoesNotExist):
             raise Http404('Geen valide parameter')
 
         if sporter.is_gast:
@@ -231,9 +229,8 @@ class ToonBondspasVerenigingView(UserPassesTestMixin, View):
 
         try:
             lid_nr = kwargs['lid_nr'][:7]       # afkappen voor de veiligheid
-            lid_nr = int(lid_nr)
             sporter = Sporter.objects.get(lid_nr=lid_nr)
-        except Sporter.DoesNotExist:
+        except (ValueError, Sporter.DoesNotExist):
             raise Http404('Geen valide parameter')
 
         if sporter.is_gast:
@@ -264,9 +261,8 @@ class ToonBondspasVerenigingView(UserPassesTestMixin, View):
         """
         try:
             lid_nr = kwargs['lid_nr'][:7]       # afkappen voor de veiligheid
-            lid_nr = int(lid_nr)
             sporter = Sporter.objects.get(lid_nr=lid_nr)
-        except Sporter.DoesNotExist:
+        except (ValueError, Sporter.DoesNotExist):
             raise Http404('Geen valide parameter')
 
         if sporter.is_gast:

@@ -52,7 +52,7 @@ class Command(BaseCommand):
                        .select_related('bij_vereniging',
                                        'bij_vereniging__regio')
                        .get(lid_nr=lid_nr))
-        except Sporter.DoesNotExist:
+        except (ValueError, Sporter.DoesNotExist):
             self.stderr.write('[ERROR] Sporter %s niet gevonden' % lid_nr)
             return
 

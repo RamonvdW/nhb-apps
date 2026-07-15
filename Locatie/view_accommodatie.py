@@ -54,7 +54,7 @@ class VerenigingAccommodatieDetailsView(UserPassesTestMixin, TemplateView):
         try:
             ver_nr = int(kwargs['ver_nr'][:4])    # afkappen voor de veiligheid
             ver = Vereniging.objects.select_related('regio').get(ver_nr=ver_nr)
-        except Vereniging.DoesNotExist:
+        except (ValueError, Vereniging.DoesNotExist):
             raise Http404('Geen valide vereniging')
 
         clusters = list()

@@ -61,7 +61,7 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
 
             try:
                 self.sporter = Sporter.objects.select_related('bij_vereniging', 'account').get(pk=sporter_pk)
-            except Sporter.DoesNotExist:
+            except (ValueError, Sporter.DoesNotExist):
                 raise Http404('Sporter niet gevonden')
 
             # laatste control: de sporter moet lid zijn bij de vereniging van de HWL

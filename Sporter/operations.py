@@ -152,7 +152,7 @@ def get_sporter_voorkeuren_wedstrijdbogen(lid_nr):
                    .objects
                    .prefetch_related('sportervoorkeuren_set')
                    .get(lid_nr=lid_nr))
-    except Sporter.DoesNotExist:
+    except (ValueError, Sporter.DoesNotExist):
         pass
     else:
         voorkeuren = get_sporter_voorkeuren(sporter)

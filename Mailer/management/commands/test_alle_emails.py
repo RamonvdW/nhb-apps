@@ -272,7 +272,7 @@ class Command(BaseCommand):
         """ zorg dat er niets in de database staat dat deze test in de weg zit """
         try:
             ver = Vereniging.objects.get(ver_nr=self.test_ver_nr)
-        except Vereniging.DoesNotExist:      # pragma: no cover
+        except (ValueError, Vereniging.DoesNotExist):      # pragma: no cover
             pass
         else:
             self.bestelling = None

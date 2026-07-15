@@ -88,7 +88,7 @@ class RegioTeamsTemplateView(TemplateView):
                 # alleen de regio's van het rayon
                 try:
                     context['rayon'] = Rayon.objects.get(rayon_nr=subset)
-                except Rayon.DoesNotExist:
+                except (ValueError, Rayon.DoesNotExist):
                     raise Http404('Selectie wordt niet ondersteund')
 
                 deelcomp_pks = (RegioComp

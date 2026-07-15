@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2025 Ramon van der Winkel.
+#  Copyright (c) 2020-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -243,7 +243,7 @@ class WijzigEmailView(UserPassesTestMixin, View):
         functie_pk = self.kwargs['functie_pk']
         try:
             functie = Functie.objects.get(pk=functie_pk)
-        except Functie.DoesNotExist:
+        except (ValueError, Functie.DoesNotExist):
             # foutieve functie_pk
             raise Http404('Foutieve functie')
         return functie
@@ -341,7 +341,7 @@ class OntvangBeheerderWijzigingenView(View):
         functie_pk = self.kwargs['functie_pk']
         try:
             functie = Functie.objects.get(pk=functie_pk)
-        except Functie.DoesNotExist:
+        except (ValueError, Functie.DoesNotExist):
             # foutieve functie_pk
             raise Http404('Verkeerde functie')
 
@@ -362,7 +362,7 @@ class OntvangBeheerderWijzigingenView(View):
 
         try:
             account = Account.objects.get(pk=account_pk)
-        except Account.DoesNotExist:
+        except (ValueError, Account.DoesNotExist):
             raise Http404('Account niet gevonden')
 
         if account.sporter_set.count() > 0:     # pragma: no branch
@@ -429,7 +429,7 @@ class WijzigBeheerdersView(UserPassesTestMixin, ListView):
         functie_pk = self.kwargs['functie_pk']
         try:
             self._functie = Functie.objects.get(pk=functie_pk)
-        except Functie.DoesNotExist:
+        except (ValueError, Functie.DoesNotExist):
             # foutieve functie_pk
             raise Http404('Verkeerde functie')
 

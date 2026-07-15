@@ -75,7 +75,7 @@ class WedstrijdAanmeldingDetailsView(UserPassesTestMixin, TemplateView):
                                             'sporterboog__sporter',
                                             'korting')
                             .get(pk=inschrijving_pk))
-        except WedstrijdInschrijving.DoesNotExist:
+        except (ValueError, WedstrijdInschrijving.DoesNotExist):
             raise Http404('Inschrijving niet gevonden')
 
         mag_wijzigen = True
@@ -190,7 +190,7 @@ class AanpassenView(UserPassesTestMixin, TemplateView):
                             .filter(status__in=(WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF,
                                                 WEDSTRIJD_INSCHRIJVING_STATUS_BESTELD))
                             .get(pk=inschrijving_pk))
-        except WedstrijdInschrijving.DoesNotExist:
+        except (ValueError, WedstrijdInschrijving.DoesNotExist):
             raise Http404('Inschrijving niet gevonden')
 
         if self.rol_nu == Rol.ROL_HWL:

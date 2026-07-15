@@ -50,7 +50,7 @@ class WedstrijdSessiesView(UserPassesTestMixin, View):
             wedstrijd = (Wedstrijd
                          .objects
                          .get(pk=wedstrijd_pk))
-        except Wedstrijd.DoesNotExist:
+        except (ValueError, Wedstrijd.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
         context['wed'] = wedstrijd
@@ -112,7 +112,7 @@ class WedstrijdSessiesView(UserPassesTestMixin, View):
             wedstrijd = (Wedstrijd
                          .objects
                          .get(pk=kwargs['wedstrijd_pk']))
-        except Wedstrijd.DoesNotExist:
+        except (ValueError, Wedstrijd.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
         if self.rol_nu == Rol.ROL_HWL and wedstrijd.organiserende_vereniging != self.functie_nu.vereniging:
@@ -238,7 +238,7 @@ class WijzigWedstrijdSessieView(UserPassesTestMixin, View):
             wedstrijd = (Wedstrijd
                          .objects
                          .get(pk=wedstrijd_pk))
-        except Wedstrijd.DoesNotExist:
+        except (ValueError, Wedstrijd.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
         if self.rol_nu == Rol.ROL_HWL and wedstrijd.organiserende_vereniging != self.functie_nu.vereniging:
@@ -251,7 +251,7 @@ class WijzigWedstrijdSessieView(UserPassesTestMixin, View):
             sessie = (WedstrijdSessie
                       .objects
                       .get(pk=sessie_pk))
-        except WedstrijdSessie.DoesNotExist:
+        except (ValueError, WedstrijdSessie.DoesNotExist):
             raise Http404('Sessie niet gevonden')
 
         context['sessie'] = sessie
@@ -301,7 +301,7 @@ class WijzigWedstrijdSessieView(UserPassesTestMixin, View):
             wedstrijd = (Wedstrijd
                          .objects
                          .get(pk=wedstrijd_pk))
-        except Wedstrijd.DoesNotExist:
+        except (ValueError, Wedstrijd.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
         if self.rol_nu == Rol.ROL_HWL and wedstrijd.organiserende_vereniging != self.functie_nu.vereniging:
@@ -312,7 +312,7 @@ class WijzigWedstrijdSessieView(UserPassesTestMixin, View):
             sessie = (WedstrijdSessie
                       .objects
                       .get(pk=sessie_pk))
-        except WedstrijdSessie.DoesNotExist:
+        except (ValueError, WedstrijdSessie.DoesNotExist):
             raise Http404('Sessie niet gevonden')
 
         if wedstrijd.sessies.filter(pk=sessie.pk).count() != 1:
