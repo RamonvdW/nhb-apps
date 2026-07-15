@@ -8,20 +8,27 @@
 {% load design_filters %}   <!-- wbr_email -->
 {% load design_knop %}
 
-{% block title %}Beheerders{% endblock %}
+{% block title %}Beheerders Bondscompetitie{% endblock %}
 
 {% block pagina %}
 
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h1 class="sv-kopje-pagina">Beheerders</h1>
+            <h1 class="sv-kopje-pagina">Beheerder Bondscompetitie</h1>
             {% if rol_is_hwl %}
                 <p>Hieronder staan relevante functies en de beheerders.</p>
             {% else %}
                 <p>Hieronder staan globale functies en de gekoppelde beheerders<br>Afhankelijk van je rol mag je hier wijzigingen in aanbrengen</p>
             {% endif %}
             <p>Jouw huidige rol is: <b>{{ huidige_rol }}</b></p>
+
+            {% if url_rcl %}
+                <p>
+                    {% sv-knop-nav url=url_rcl icon='email' tekst='E-mailadressen van de competitie beheerders' %}
+                </p>
+            {% endif %}
+
         </div>
     </div>
 
@@ -45,46 +52,6 @@
                         <th>E-mailadres</th>
                     </tr>
                 </thead>
-
-                {% if accounts_it %}
-                    <tr>
-                        <td style="vertical-align: top">
-                            <span class="hide-on-small-only">IT beheerder</span>
-                            <span class="hide-on-med-and-up">IT</span>
-                        </td>
-                        <td>
-                            {% for obj in accounts_it %}
-                                {% if not forloop.first %}
-                                    <br>
-                                {% endif %}
-                                <span>[{{ obj.username }}] {{ obj.volledige_naam }}</span>
-                            {% endfor %}
-                        </td>
-                        <td>
-                            <i>n.v.t.</i>   <!-- email -->
-                        </td>
-                    </tr>
-                {% endif %}
-
-                {% if accounts_bb %}
-                    <tr>
-                        <td style="vertical-align: top">
-                            <span class="hide-on-small-only">Manager MH</span>
-                            <span class="hide-on-med-and-up">BB</span>
-                        </td>
-                        <td>
-                            {% for obj in accounts_bb %}
-                                {% if not forloop.first %}
-                                    <br>
-                                {% endif %}
-                                <span>[{{ obj.username }}] {{ obj.volledige_naam }}</span>
-                            {% endfor %}
-                        </td>
-                        <td>
-                            <i>n.v.t.</i>   <!-- email -->
-                        </td>
-                    </tr>
-                {% endif %}
 
                 {% for obj in object_list %}
                     <tr>
@@ -134,29 +101,6 @@
                     <td colspan="3" style="padding:5px"></td>
                 </tr>
             </table>
-        </div>
-    </div>
-
-
-    <!-- witruimte -->
-    <div class="row center">
-        <div class="col s12">
-            <h2 class="sv-kopje-row">Andere beheerders</h2>
-        </div>
-    </div>
-
-    <!-- blauwe balk met kaartjes -->
-    <div class="row-sv-blauw">
-        <div class="col s12">
-            <!-- toon en koppel beheerders -->
-            {% url 'Functie:beheerders-competitie' as card_url %}
-            {% include 'design/card_icon.dtl' with title="Bondscompetities" text="Toon de beheerders van de bondscompetities." sv_icon="functie beheerders" url=card_url %}
-
-            <!-- beheerders van de verenigingen -->
-            {% if url_alle_vers %}
-                {% include 'design/card_icon.dtl' with title="Alle verenigingen" text="Controleer de beheerders van alle verenigingen." sv_icon="functie beheerders" url=url_alle_vers %}
-            {% endif %}
-
         </div>
     </div>
 

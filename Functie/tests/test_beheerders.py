@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -21,6 +21,7 @@ class TestFunctieBeheerders(E2EHelpers, TestCase):
     test_after = ('Account.tests.test_otp_controle',)
 
     url_beheerders = '/functie/beheerders/'
+    url_beheerders_competitie = '/functie/beheerders/bondscompetitie/'
     url_email_sec_hwl = '/functie/beheerders/email/sec-hwl/'
     url_email_competitie = '/functie/beheerders/email/competitie/'
     url_wijzig = '/functie/wijzig/'
@@ -166,7 +167,7 @@ class TestFunctieBeheerders(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/lijst-beheerders.dtl', 'design/site_layout.dtl'))
         urls = [url for url in self.extract_all_urls(resp) if url.startswith('/functie/wijzig/')]
-        self.assertEqual(len(urls), 8)      # MWZ, MWW, MLA, MO, CS, SUP, BKO 18m, BKO 25m
+        self.assertEqual(len(urls), 6)      # MWZ, MWW, MLA, MO, CS, SUP
 
         # controleer de Wijzig knoppen op de functie-overzicht pagina voor verschillende rollen
 
@@ -174,10 +175,10 @@ class TestFunctieBeheerders(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_bko_18)
         self.e2e_check_rol('BKO')
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_beheerders)
+            resp = self.client.get(self.url_beheerders_competitie)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('functie/lijst-beheerders.dtl', 'design/site_layout.dtl'))
+        self.assert_template_used(resp, ('functie/lijst-beheerders-competitie.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, "BKO Indoor")
         urls = [url for url in self.extract_all_urls(resp) if url.startswith(self.url_wijzig)]
         self.assertEqual(len(urls), 4)      # 4x RKO
@@ -186,10 +187,10 @@ class TestFunctieBeheerders(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_rko3_18)
         self.e2e_check_rol('RKO')
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_beheerders)
+            resp = self.client.get(self.url_beheerders_competitie)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('functie/lijst-beheerders.dtl', 'design/site_layout.dtl'))
+        self.assert_template_used(resp, ('functie/lijst-beheerders-competitie.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, "RKO Rayon 3 Indoor")
         urls = [url for url in self.extract_all_urls(resp) if url.startswith(self.url_wijzig)]
         self.assertEqual(len(urls), 4)      # 4x RCL
@@ -200,10 +201,10 @@ class TestFunctieBeheerders(E2EHelpers, TestCase):
 
         # controleer de Wijzig knoppen op de functie-overzicht pagina
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_beheerders)
+            resp = self.client.get(self.url_beheerders_competitie)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('functie/lijst-beheerders.dtl', 'design/site_layout.dtl'))
+        self.assert_template_used(resp, ('functie/lijst-beheerders-competitie.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, "RCL Regio 111 Indoor")
         urls = [url for url in self.extract_all_urls(resp) if url.startswith(self.url_wijzig)]
         self.assertEqual(len(urls), 0)      # geen wijzig knoppen voor de RCL
@@ -219,12 +220,19 @@ class TestFunctieBeheerders(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_hwl)
         self.e2e_check_rol('HWL')
 
-        # vraag het overzicht van competitie-bestuurders op
+        # vraag de beheerders van MH op
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_beheerders)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/lijst-beheerders.dtl', 'design/site_layout.dtl'))
+
+        # vraag het overzicht van competitie-bestuurders op
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_beheerders_competitie)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('functie/lijst-beheerders-competitie.dtl', 'design/site_layout.dtl'))
         self.assertContains(resp, "HWL")
         urls = [url for url in self.extract_all_urls(resp) if url.startswith(self.url_wijzig)]
         self.assertEqual(len(urls), 0)      # geen wijzig knoppen voor de HWL

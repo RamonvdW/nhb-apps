@@ -222,7 +222,7 @@
 
             <!-- beheerders vereniging -->
             {% url 'Functie:overzicht-vereniging' as card_url %}
-            {% include 'design/card_icon.dtl' with title="Beheerders" text="Beheerders en e-mailadressen van functies aanpassen." sv_icon="ver beheerders" url=card_url %}
+            {% include 'design/card_icon.dtl' with title="Beheerders" text="Beheerders van de vereniging instellen en e-mailadressen van functies aanpassen." sv_icon="ver beheerders" url=card_url %}
 
             <!-- instellingen leden -->
             {% url 'Vereniging:leden-voorkeuren' as card_url %}

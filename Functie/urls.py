@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2025 Ramon van der Winkel.
+#  Copyright (c) 2020-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
 
-from Functie import (view_activeer_rol, view_beheerders, view_beheerders_vereniging, view_email_beheerders,
-                     view_koppel_beheerder, view_vhpg, view_wisselvanrol)
+from Functie import (view_activeer_rol, view_vhpg, view_wisselvanrol,
+                     view_beheerders, view_beheerders_competitie, view_beheerders_vereniging, view_email_beheerders,
+                     view_koppel_beheerder)
 
 app_name = 'Functie'
 
@@ -32,6 +33,10 @@ urlpatterns = [
          view_beheerders_vereniging.BeheerdersVerenigingView.as_view(),
          name='overzicht-vereniging'),
 
+    path('beheerders/alle-verenigingen/',
+         view_beheerders_vereniging.BeheerdersAlleVerenigingenView.as_view(),
+         name='beheerders-alle-verenigingen'),
+
     path('beheerders/email/sec-hwl/',
          view_email_beheerders.OverzichtEmailsSecHwlView.as_view(),
          name='emails-sec-hwl'),
@@ -39,6 +44,10 @@ urlpatterns = [
     path('beheerders/email/competitie/',
          view_email_beheerders.OverzichtEmailsCompetitieBeheerdersView.as_view(),
          name='emails-beheerders'),
+
+    path('beheerders/bondscompetitie/',
+         view_beheerders_competitie.BeheerdersCompetitieView.as_view(),
+         name='beheerders-competitie'),
 
     path('beheerders/',
          view_beheerders.LijstBeheerdersView.as_view(),

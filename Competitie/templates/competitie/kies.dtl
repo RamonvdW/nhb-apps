@@ -129,7 +129,7 @@
                     {% include 'design/card_icon.dtl' with title="Seizoen afsluiten" text="Sluit het competitie seizoen af (Indoor + 25m1pijl)." sv_icon="comp seizoen afsluiten" url=url_seizoen_afsluiten %}
                 {% endif %}
 
-                {% url 'Functie:lijst-beheerders' as card_url %}
+                {% url 'Functie:beheerders-competitie' as card_url %}
                 {% include 'design/card_icon.dtl' with title="Beheerders" text="Toon wie beheerders van de bondscompetitie zijn, koppel andere beheerders of wijzig contactgegevens." sv_icon="functie beheerders" url=card_url %}
 
                 {% url 'Vereniging:lijst' as card_url %}
@@ -154,7 +154,7 @@
         <div class="col s12">
             <!-- toon en koppel beheerders -->
             {% if toon_beheerders_algemeen %}
-                {% url 'Functie:lijst-beheerders' as card_url %}
+                {% url 'Functie:beheerders-competitie' as card_url %}
                 {% include 'design/card_icon.dtl' with title="Beheerders" text="Toon wie beheerders van de bondscompetitie zijn, koppel andere beheerders of wijzig contactgegevens." sv_icon="functie beheerders" url=card_url %}
             {% endif %}
 

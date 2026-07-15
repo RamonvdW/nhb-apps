@@ -273,6 +273,14 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                                             kwargs={'comp_pk_of_seizoen': comp.maak_seizoen_url()}),
                                 sv_icon='comp uitslagen')
                 kaartjes.append(kaartje)
+
+            # beheerders competitie
+            kaartje = SimpleNamespace(
+                            titel="Beheerders",
+                            tekst="Toon wie beheerders van de bondscompetitie zijn.",
+                            url=reverse('Functie:beheerders-competitie'),
+                            sv_icon='functie beheerders')
+            kaartjes.append(kaartje)
         # for
 
         if len(kaartjes) and hasattr(kaartjes[-1], 'heading'):

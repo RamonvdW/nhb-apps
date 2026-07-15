@@ -1,0 +1,110 @@
+{% extends 'design/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2026 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+{% load design_filters %}   <!-- wbr_email -->
+{% load design_knop %}
+
+{% block title %}Beheerders verenigingen{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h1 class="sv-kopje-pagina">Beheerders van alle verenigingen</h1>
+            <p>Hieronder staan de beheerders van {{ object_list|length }} rollen binnen de verenigingen.</p>
+            <p>Jouw huidige rol is: <b>{{ huidige_rol }}</b></p>
+        </div>
+    </div>
+
+    <!-- toon de functies met huidige beheerders in een tabel -->
+
+    <!-- blauwe balk met informatie in een tabel -->
+    <div class="row-sv-blauw">
+        <div class="col s12">
+
+            <table class="sv-kader-tabel" id="table1">
+                <thead>
+                    <tr>        <!-- filter rij -->
+                        <td colspan="6" class="table-filter">
+                            <input class="table-filter" oninput="tabel_filter(this, 'table1')" placeholder="Zoeken"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th data-filter="on">Ver nr</th>
+                        <th data-filter="on" class="hide-on-med-and-down">Vereniging</th>
+                        <th data-filter="on">Rol</th>
+                        <th data-filter="on">Lid nr</th>
+                        <th data-filter="on" class="hide-on-small-only">Naam</th>
+                        <th data-filter="on">Notitie</th>
+                    </tr>
+                </thead>
+
+                {% for obj in object_list %}
+                    <tr>
+                        <td style="vertical-align: top">{{ obj.vereniging.ver_nr }}</td>
+                        <td style="vertical-align: top" class="hide-on-med-and-down">{{ obj.vereniging.naam }}</td>
+
+                        <td style="vertical-align: top">{{ obj.rol }}</td>
+
+                        <td style="vertical-align: top">
+                            {% for beheerder in obj.beheerders %}
+                                <span>{{ beheerder.lid_nr }}</span><br>
+                            {% endfor %}
+                        </td>
+
+                        <td style="vertical-align: top" class="hide-on-small-only">
+                            {% for beheerder in obj.beheerders %}
+                                <span>{{ beheerder.volledige_naam }}</span><br>
+                            {% empty %}
+                                <i class="grey-text">Nog niet gekoppeld</i>
+                            {% endfor %}
+                        </td>
+
+                        <td style="vertical-align: top">
+                            {% for notitie in obj.notities %}
+                                <span>{{ notitie }}</span><br>
+                            {% endfor %}
+                        </td>
+                    </tr>
+                {% endfor %}
+
+                <!-- lege regel die niet gefilterd wordt, zodat row border niet buiten afronding tabel uitsteekt -->
+                <tr data-tablefilter="stop">
+                    <td colspan="3" style="padding:5px"></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h2 class="sv-kopje-row">Andere beheerders</h2>
+        </div>
+    </div>
+
+    <!-- blauwe balk met kaartjes -->
+    <div class="row-sv-blauw">
+        <div class="col s12">
+            <!-- toon en koppel beheerders -->
+            {% url 'Functie:beheerders-competitie' as card_url %}
+            {% include 'design/card_icon.dtl' with title="Bondscompetities" text="Toon de beheerders van de bondscompetities." sv_icon="functie beheerders" url=card_url %}
+
+            <!-- beheerders van de verenigingen -->
+            {% url 'Functie:beheerders-verenigingen' as card_url %}
+            {% include 'design/card_icon.dtl' with title="Verenigingen" text="Toon de beheerders van de verenigingen." sv_icon="functie beheerders" url=card_url %}
+
+        </div>
+    </div>
+
+    <script src="{% static 'overig_js/tabel_filter.js' %}"></script>
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="functie-lijst-beheerders" %}
+
+{% endblock %}

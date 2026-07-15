@@ -87,7 +87,11 @@
 
             <!-- toon en koppel beheerders -->
             {% url 'Functie:lijst-beheerders' as card_url %}
-            {% include 'design/card_icon.dtl' with title="Beheerders" text="Toon en koppel beheerders aan rollen en wijzig contactgegevens." sv_icon="functie beheerders" url=card_url %}
+            {% if rol_is_sec or rol_is_hwl or rol_is_wl %}
+                {% include 'design/card_icon.dtl' with title="Beheerders" text="Toon beheerders van MijnHandboogsport." sv_icon="functie beheerders" url=card_url %}
+            {% else %}
+                {% include 'design/card_icon.dtl' with title="Beheerders" text="Toon en koppel beheerders aan rollen en wijzig contactgegevens." sv_icon="functie beheerders" url=card_url %}
+            {% endif %}
 
             <!-- verenigingen/accommodaties overzicht -->
             {% if rol_is_bb or rol_is_mwz or rol_is_mo or rol_is_cs or rol_is_mla %}
