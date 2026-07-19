@@ -446,7 +446,8 @@ h1, h2, h3, h4, h5, h6 {
 //
 .row-sv-blauw {
   @extend .row;
-  background-color: $primary-color;          /* medium blauw */
+  //background-color: $primary-color;          /* medium blauw */
+  background: linear-gradient(90deg, $sv-donkerblauw-color, $sv-blauw-color);
   color: white;
   text-align: center;
   padding: 25px;  //(2023-08-19)50px;
