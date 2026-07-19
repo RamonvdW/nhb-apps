@@ -14,6 +14,7 @@ from google.oauth2.service_account import Credentials
 from google.auth.exceptions import TransportError
 from httplib2.error import ServerNotFoundError
 from http.client import IncompleteRead
+from ssl import SSLError
 import datetime
 import socket
 import time
@@ -74,6 +75,8 @@ class MonitorDriveFiles:
                 self.stdout.write('[ERROR] {execute} http.client.IncompleteRead: %s' % exc)
             except ConnectionResetError as exc:     # pragma: no cover
                 self.stdout.write('[ERROR] {execute} ConnectionResetError: %s' % exc)
+            except SSLError as exc:                 # pragma: no cover
+                self.stdout.write('[ERROR] {execute} SSLError: %s' % exc)
             else:
                 # self.stdout.write('[DEBUG] {execute} response=%s' % repr(response))
                 return response
