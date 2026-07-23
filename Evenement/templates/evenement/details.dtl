@@ -122,7 +122,7 @@
                         </td>
                     </tr>
                 {% endif %}
-            
+
                 <tr>
                     <td colspan="2" class="center">
                         <h2 class="sv-kopje-in-tabel">Inschrijfgeld</h2>
@@ -131,17 +131,17 @@
 
                 <tr>
                     <th>KHSN lid</th>
-                    <td>&euro;&nbsp;{{ evenement.prijs_euro_normaal }}</td>
+                    <td>{% if evenement.prijs_euro_normaal < 0 %}<i>Nog niet bekend</i>{% else %}&euro;&nbsp;{{ evenement.prijs_euro_normaal }}{% endif %}</td>
                 </tr>
 
                 <tr>
                     <th>KHSN lid tot 18 jaar</th>
-                    <td>&euro;&nbsp;{{ evenement.prijs_euro_onder18 }}</td>
+                    <td>{% if evenement.prijs_euro_onder18 < 0 %}<i>Nog niet bekend</i>{% else %}&euro;&nbsp;{{ evenement.prijs_euro_onder18 }}{% endif %}</td>
                 </tr>
 
                 <tr>
                     <th>Gast-account</th>
-                    <td>&euro;&nbsp;{{ evenement.prijs_euro_gast }}</td>
+                    <td>{% if evenement.prijs_euro_gast < 0 %}<i>Nog niet bekend</i>{% else %}&euro;&nbsp;{{ evenement.prijs_euro_gast }}{% endif %}</td>
                 </tr>
             </table>
         </div>

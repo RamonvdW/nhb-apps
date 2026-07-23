@@ -62,7 +62,7 @@ class DetailsView(TemplateView):
             context['url_map'] = 'https://google.nl/maps?' + urlencode({'q': zoekterm})
 
         # inschrijven moet voor de sluitingsdatum
-        context['is_voor_sluitingsdatum'] = now_date < evenement.inschrijven_voor
+        context['is_voor_sluitingsdatum'] = (not evenement.is_ter_info) and (now_date < evenement.inschrijven_voor)
 
         # om aan te melden is een account nodig
         evenement.begrenzing_str = EVENEMENT_BEGRENZING_STR
