@@ -28,7 +28,7 @@
         <div class="row-sv-blauw" id="filters" data-url="{{ url_filters }}">
 
             <!-- filter: seizoen keuze -->
-            <div class="col s12 m6 l4 offset-l2 xl3 offset-xl3" style="margin-bottom:15px">
+            <div class="col s12 m6 l4 offset-l2 xl3 offset-xl3">
                 <div class="sv-kader-filter">
                     <p><b>Kies een seizoen:</b></p>
                     <ul id="id_seizoen">
@@ -52,7 +52,7 @@
             </div>
 
             <!-- filter: competitie type -->
-            <div class="col s12 m6 l4 xl3" style="margin-bottom:15px">
+            <div class="col s12 m6 l4 xl3">
                 <div class="sv-kader-filter">
                     <p><b>Kies een competitie:</b></p>
                     <ul id="id_histcomp_type">

@@ -23,7 +23,7 @@
     <div class="row-sv-blauw" style="margin-bottom:0; padding-bottom:0">
 
         <!-- filter: para classificatie -->
-        <div class="col s6 l3" style="margin-bottom:15px">
+        <div class="col s6 l3">
             <div class="sv-kader-filter">
                 <p><b>Para classificatie:</b></p>
                 <ul>
@@ -47,7 +47,7 @@
         </div>
 
         <!-- filter: leeftijdsklassen -->
-        <div class="col s6 l3" style="margin-bottom:15px">
+        <div class="col s6 l3">
             <div class="sv-kader-filter">
                 <p><b>Leeftijdsklasse:</b></p>
                 {% if toon_lcat %}
@@ -76,7 +76,7 @@
         </div>
 
         <!-- filter: materiaalklasse -->
-        <div class="col l3 hide-on-med-and-down" style="margin-bottom:15px">
+        <div class="col l3 hide-on-med-and-down">
             <div class="sv-kader-filter">
                 <p><b>Boog type:</b></p>
                 <ul>
@@ -102,7 +102,7 @@
 
         <!-- filter: record soorten -->
         {% if toon_soorten %}
-            <div class="col s6 l3 hide-on-med-and-down" style="margin-bottom:15px">
+            <div class="col s6 l3 hide-on-med-and-down">
                 <div class="sv-kader-filter">
                     <p><b>Soort record:</b></p>
                     <ul>
@@ -131,10 +131,10 @@
 
     </div>
 
-    <div class="row-sv-blauw hide-on-large-and-up" style="margin-bottom:0; padding-bottom:0; padding-top:15px">
+    <div class="row-sv-blauw hide-on-large-and-up" style="margin-bottom:0; padding-bottom:0; padding-top:0">
 
         <!-- filter: materiaalklasse -->
-        <div class="col s6 l3" style="margin-bottom:15px">
+        <div class="col s6 l3">
             <div class="sv-kader-filter">
                 <p><b>Boog type:</b></p>
                 <ul>
@@ -159,7 +159,7 @@
 
         <!-- filter: record soorten -->
         {% if toon_soorten %}
-            <div class="col s6 l3" style="margin-bottom:15px">
+            <div class="col s6 l3">
                 <div class="sv-kader-filter">
                     <p><b>Soort record:</b></p>
                     <ul>
@@ -184,7 +184,7 @@
         {% endif %}
     </div>
 
-    <div class="row-sv-blauw" style="padding-top:15px">
+    <div class="row-sv-blauw" style="padding-top:0">
 
         <!-- filter: geslacht -->
         <div class="col s6 l3">
@@ -211,7 +211,7 @@
         </div>
 
         <!-- filter: discipline -->
-        <div class="col s6 l3" style="margin-bottom:15px">
+        <div class="col s6 l3">
             <div class="sv-kader-filter">
                 <p><b>Discipline:</b></p>
                 <ul>

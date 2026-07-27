@@ -66,7 +66,7 @@
         <div class="row-sv-blauw">
 
             <!-- filter: rayon -->
-            <div class="col s6 offset-s3 m4 offset-m4 xl2 offset-xl5" style="margin-bottom:15px">
+            <div class="col s6 offset-s3 m4 offset-m4 xl2 offset-xl5">
                 <div class="sv-kader-filter">
                     <p><b>Kies een rayon:</b></p>
                     <ul id="id_subset">

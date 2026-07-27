@@ -48,7 +48,7 @@
 
     <!-- blauwe balk met filters -->
     <div class="row-sv-blauw">
-        <div class="col s12 m6 l4 offset-l2 xl3 offset-xl3" style="margin-bottom:15px">
+        <div class="col s12 m6 l4 offset-l2 xl3 offset-xl3">
             <div class="sv-kader-filter">
                 <p><b>Kies een boog type:</b></p>
                 <ul>
@@ -71,7 +71,7 @@
             </div>
         </div>
 
-        <div class="col s12 m6 l4 xl3" style="margin-bottom:15px">
+        <div class="col s12 m6 l4 xl3">
             <div class="sv-kader-filter">
                 <p><b>Kies een rayon:</b></p>
                 <ul>

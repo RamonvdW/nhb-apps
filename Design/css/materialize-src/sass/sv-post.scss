@@ -288,8 +288,9 @@ h1, h2, h3, h4, h5, h6 {
 
   // laat de kaartjes naast elkaar komen (in het display=block van de row)
   display: inline-flex;
-  margin-right: $element-top-margin;
-  margin-left: $element-bottom-margin;
+  margin: 0.75rem;
+  //margin-right: $element-top-margin;    // tot 2026-07-27
+  //margin-left: $element-bottom-margin;  // tot 2026-07-27
   padding: 0;
   border-radius: 7px;
   border: 3px solid white;
@@ -312,8 +313,9 @@ h1, h2, h3, h4, h5, h6 {
 
   // laat de kaartjes naast elkaar komen (in het display=block van de row)
   display: inline-flex;
-  margin-right: $element-top-margin;
-  margin-left: $element-bottom-margin;
+  margin: 0.75rem;
+  //margin-right: $element-top-margin;    // tot 2026-07-27
+  //margin-left: $element-bottom-margin;  // tot 2026-07-27
   padding: 3px;
   border-radius: 7px;
 
@@ -447,10 +449,16 @@ h1, h2, h3, h4, h5, h6 {
 .row-sv-blauw {
   @extend .row;
   //background-color: $primary-color;          /* medium blauw */
-  background: linear-gradient(90deg, $sv-donkerblauw-color, $sv-blauw-color);
+
+  // gradient horizontaal houden (90 of 270deg), om lijnen te voorkomen bij aansluitende rows
+  background: linear-gradient(270deg, $sv-donkerblauw-color, $sv-lichtblauw-color);
+
   color: white;
   text-align: center;
-  padding: 25px;  //(2023-08-19)50px;
+
+  //(tot 2023-08-19) padding: 50px;
+  //(tot 2026-07-27) padding: 25px;
+  padding: 0.75rem 0 0.75rem 0;   // half the gutter-width
 
   @media #{$small-and-down} {
     padding-left: 0;
@@ -487,7 +495,7 @@ h1, h2, h3, h4, h5, h6 {
 .sv-table-onderrand {
   @extend .sv-blauw-hoofd;
   padding: 0;
-  height: 3px;                  // (werkt op td)
+  height: 5px;                  // (werkt op td)
   border-bottom: none;          // (werkt op tr) geen separator line
   border-top: 1px solid white;  // overschrijft grijze lijn (none werkt niet)
 }
@@ -876,14 +884,18 @@ input.table-filter {
 //
 .sv-kader {
   @extend .white;
-  padding: 20px;
+  margin: 0.75rem;
+  width: calc(100% - 1.5rem);
   border-radius: 7px;   // scherpe hoekje eraf
+  padding: 1.5rem;
 }
 
 .sv-kader-tabel {
   @extend .sv-kader;
-  padding-top: 0;
-  padding-bottom: 0;
+  margin-left: 0;
+  margin-right: 0;
+  width: 100%;
+  padding: 0;
 }
 
 .sv-kader-form {
@@ -894,14 +906,18 @@ input.table-filter {
 
 .sv-kader-filter {
   @extend .sv-kader-form;
+  // filters zitten elk in een col en hoeven daarom geen margin
+  margin-left: 0;
+  margin-right: 0;
+  width: 100%;
 }
 
 /* minder marge op klein scherm */
-@media only screen and (max-width : 720px) {
-    .sv-kader {
-        padding: 10px;    // halveer de padding
-    }
-}
+//@media only screen and (max-width : 720px) {
+//    .sv-kader {
+//        padding: 10px;    // halveer de padding
+//    }
+//}
 
 //-----------------------------------
 // sv-foto

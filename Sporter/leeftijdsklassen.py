@@ -213,13 +213,13 @@ def bereken_leeftijdsklassen_bondscompetitie(geboorte_jaar, wedstrijdgeslacht_kh
     return wedstrijdleeftijd, lkl_lst
 
 
-def bereken_leeftijdsklassen_wa(geboorte_jaar, wedstrijdgeslacht, huidige_jaar):
+def bereken_leeftijdsklassen_wa(geboorte_jaar, wedstrijdgeslacht, huidige_jaar, lst_als_str: bool=True):
     """ retourneert de wedstrijdklassen voor een sporter vanaf 1 jaar terug tot 4 jaar vooruit.
         wedstrijdgeslacht moet zijn GESLACHT_MAN of GESLACHT_VROUW
 
         Retourneert: huidige jaar, leeftijd, lkl_dit_jaar, lkl_lst
                 lkl_lst is een lijst van wedstrijdklassen voor
-                de jaren -1, 0, +1, +2, +3 ten opzicht van Leeftijd
+                de jaren -1, 0, +1, +2, +3 ten opzicht van leeftijd
                 Voorbeeld:
                     huidige jaar = 2019
                     leeftijd = 20
@@ -258,10 +258,10 @@ def bereken_leeftijdsklassen_wa(geboorte_jaar, wedstrijdgeslacht, huidige_jaar):
     prev_lkl.max_wedstrijdleeftijd = 150
 
     # maak de look-up tabel met alle leeftijden
-    leeftijd2tekst = dict()
+    leeftijd2lkl = dict()
     for lkl in alle_lkl:
         for leeftijd in range(lkl.min_wedstrijdleeftijd, lkl.max_wedstrijdleeftijd+1):
-            leeftijd2tekst[leeftijd] = lkl.beschrijving
+            leeftijd2lkl[leeftijd] = lkl
         # for
     # for
 
@@ -269,10 +269,14 @@ def bereken_leeftijdsklassen_wa(geboorte_jaar, wedstrijdgeslacht, huidige_jaar):
     lkl_list = list()
     lkl_dit_jaar = ''
     for n in (-1, 0, 1, 2, 3):
-        lang = leeftijd2tekst[sporter_leeftijd + n]
-        lkl_list.append(lang)
+        lkl = leeftijd2lkl[sporter_leeftijd + n]
+        if lst_als_str:
+            lang = lkl.beschrijving
+            lkl_list.append(lang)
+        else:
+            lkl_list.append(lkl)
         if n == 0:
-            lkl_dit_jaar = lang
+            lkl_dit_jaar = lkl.beschrijving
     # for
 
     return huidige_jaar, sporter_leeftijd, lkl_dit_jaar, lkl_list

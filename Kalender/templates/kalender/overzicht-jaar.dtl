@@ -35,7 +35,7 @@
     <div class="row-sv-blauw">
 
         <!-- zoek tekst -->         <!-- margin is to separate filters -->
-        <div class="col s12 m12" style="margin-bottom:20px">
+        <div class="col s12 m12">
             <div class="sv-kader-form">
 
                 <p><b>Zoek naar:</b></p>
@@ -61,7 +61,7 @@
         </div>
 
         <!-- filter: bogen -->
-        <div class="col s12 m4 collapsible_filter" style="margin-bottom:15px; display:none">
+        <div class="col s12 m4 collapsible_filter" style="display:none">
             <div class="sv-kader-filter">
                 <p><b>Bogen:</b></p>
                 <ul>
@@ -81,7 +81,7 @@
         </div>
 
         <!-- filter: soort wedstrijd -->
-        <div class="col s12 m4 collapsible_filter" style="margin-bottom:15px; display:none">
+        <div class="col s12 m4 collapsible_filter" style="display:none">
             <div class="sv-kader-filter">
                 <p><b>Soort wedstrijd:</b></p>
                 <ul>

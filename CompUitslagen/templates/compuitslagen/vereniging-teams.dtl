@@ -73,7 +73,7 @@
 
         <!-- blauwe balk met filters -->
         <div class="row-sv-blauw">
-            <div class="col s12 m6 offset-m3 l4 offset-l4" style="margin-bottom:15px">
+            <div class="col s12 m6 offset-m3 l4 offset-l4">
                 <div class="sv-kader-filter">
                     <p><b>Kies een team type:</b></p>
                     <ul id="id_teamtype">

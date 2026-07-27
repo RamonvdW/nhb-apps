@@ -24,7 +24,7 @@
 
     <!-- witte rechthoek voor radiobuttons -->
     <div class="col s12 m5">
-        <div class="sv-kader left-align" style="margin-bottom:15px">
+        <div class="sv-kader left-align">
             <ul>
                 {% for optie, url, titel, is_actief in filters %}
                 <li>
