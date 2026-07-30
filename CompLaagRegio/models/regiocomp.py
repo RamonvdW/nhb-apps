@@ -60,6 +60,10 @@ class RegioComp(models.Model):
                                                default=TEAM_PUNTEN_MODEL_TWEE,
                                                choices=TEAM_PUNTEN)
 
+    # week nummer waarin de eerste wedstrijd gehouden wordt
+    # is normaal gelijk aan datum fase F, maar sommige regio's willen eerder beginnen
+    start_week = models.PositiveSmallIntegerField(default=0)
+
     def __str__(self):
         """ geef een tekstuele afkorting van dit object, voor in de admin interface """
         msg = "%s - %s" % (self.competitie, self.regio)

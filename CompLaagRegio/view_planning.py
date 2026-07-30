@@ -475,7 +475,8 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
             context['url_verwijderen'] = context['ronde_opslaan_url']
             context['heeft_wedstrijden'] = context['wedstrijden'].count() > 0
 
-        start_week = settings.COMPETITIES_START_WEEK
+        # gebruik de regio-specifieke start week, als deze niet nul is
+        start_week = ronde.regiocomp.start_week or settings.COMPETITIES_START_WEEK
         eind_week = settings.COMPETITIE_25M_LAATSTE_WEEK
         if ronde.regiocomp.competitie.is_indoor():
             eind_week = settings.COMPETITIE_18M_LAATSTE_WEEK
@@ -662,13 +663,15 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
                 eind_week = settings.COMPETITIE_18M_LAATSTE_WEEK
             # TODO: begrens verder met competitie.datum_einde_fase_F (regio wedstrijden)
 
-            if eind_week < settings.COMPETITIES_START_WEEK:
+            start_week = ronde.regiocomp.start_week or settings.COMPETITIES_START_WEEK
+
+            if eind_week < start_week:
                 # typisch voor 25m: week 11..37 mogen niet
-                if eind_week < week_nr < settings.COMPETITIES_START_WEEK:
+                if eind_week < week_nr < start_week:
                     raise Http404('Geen valide week nummer')
             else:
                 # typisch voor 18m: week 37..50 mogen, verder niet
-                if week_nr > eind_week or week_nr < settings.COMPETITIES_START_WEEK:
+                if week_nr > eind_week or week_nr < start_week:
                     raise Http404('Geen valide week nummer')
 
             beschrijving = request.POST.get('ronde_naam', '')
