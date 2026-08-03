@@ -984,7 +984,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
 
         if ronde.regiocomp.inschrijf_methode == INSCHRIJF_METHODE_1:
             jaar = ronde.regiocomp.competitie.begin_jaar
-            week = settings.COMPETITIES_START_WEEK
+            week = ronde.regiocomp.start_week or settings.COMPETITIES_START_WEEK
             context['datum_eerste'] = competitie_week_nr_to_date(jaar, week)
 
             if ronde.regiocomp.competitie.is_indoor():
