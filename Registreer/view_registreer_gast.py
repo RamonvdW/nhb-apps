@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023-2025 Ramon van der Winkel.
+#  Copyright (c) 2023-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -521,9 +521,13 @@ class RegistreerGastVolgendeVraagView(View):
             self.account.set_password(nieuw_ww)      # does not save the account
             self.account.save()
 
-            # houd de gebruiker ingelogd in deze sessie
+            # houd de gebruiker wel ingelogd in deze sessie
             update_session_auth_hash(request, self.account)
             # bovenstaande maakt een nieuwe sessie aan, waardoor de eerstvolgende GET de sessie aanpast en schrijft
+
+            # track het session_id in de log zodat we deze kunnen koppelen aan de webserver logs
+            session_id = request.session.session_key
+            my_logger.info('Account %s has SESSION %s' % (repr(self.account.username), repr(session_id)))
 
             gast.logboek += '[%s] Wachtwoord is gezet\n' % stamp_str
             gast.fase = REGISTRATIE_FASE_CLUB
