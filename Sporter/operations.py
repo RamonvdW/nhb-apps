@@ -6,81 +6,9 @@
 
 from django.db import transaction, IntegrityError
 from django.db.models import ProtectedError
-from Account.models import get_account
 from BasisTypen.definities import GESLACHT_ANDERS
 from BasisTypen.models import BoogType
-from Functie.definities import Rol
-from Functie.rol import rol_get_huidige_functie
-from Geo.models import Regio
-from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren, get_sporter
-
-
-def get_request_regio_nr(request, allow_admin_regio=True):
-    """ Geeft het regionummer van de ingelogde sporter terug,
-        of 101 als er geen regio vastgesteld kan worden
-
-        Als de gebruiker een rol gekozen heeft, neem dat het regionummer wat bij die rol past
-    """
-    regio_nr = 101
-
-    rol_nu, functie_nu = rol_get_huidige_functie(request)
-
-    if functie_nu:
-        if functie_nu.vereniging:
-            # HWL, WL
-            regio_nr = functie_nu.vereniging.regio.regio_nr
-        elif functie_nu.regio:
-            # RCL
-            regio_nr = functie_nu.regio.regio_nr
-        elif functie_nu.rayon:
-            # RKO
-            regio = (Regio
-                     .objects
-                     .filter(rayon=functie_nu.rayon,
-                             is_administratief=False)
-                     .order_by('regio_nr'))[0]
-            regio_nr = regio.regio_nr
-
-    elif rol_nu == Rol.ROL_SPORTER:
-        # sporter
-        account = get_account(request)
-        sporter = get_sporter(account)
-        if sporter and sporter.is_actief_lid and sporter.bij_vereniging:
-            regio_nr = sporter.bij_vereniging.regio.regio_nr
-
-    if regio_nr == 100 and not allow_admin_regio:
-        regio_nr = 101
-
-    return regio_nr
-
-
-def get_request_rayon_nr(request):
-    """ Geeft het rayon nummer van de ingelogde gebruiker/beheerder terug,
-        of 1 als er geen rayon vastgesteld kan worden
-    """
-    rayon_nr = 1
-
-    rol_nu, functie_nu = rol_get_huidige_functie(request)
-
-    if functie_nu:
-        if functie_nu.vereniging:
-            # HWL, WL
-            rayon_nr = functie_nu.vereniging.regio.rayon_nr
-        elif functie_nu.regio:
-            # RCL
-            rayon_nr = functie_nu.regio.rayon_nr
-        elif functie_nu.rayon:
-            # RKO
-            rayon_nr = functie_nu.rayon.rayon_nr
-
-    elif rol_nu == Rol.ROL_SPORTER:
-        if request.user.is_authenticated:                                    # pragma: no branch
-            account = get_account(request)
-            sporter = get_sporter(account)
-            if sporter and sporter.is_actief_lid and sporter.bij_vereniging:
-                rayon_nr = sporter.bij_vereniging.regio.rayon_nr
-
-    return rayon_nr
+from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
 
 
 def get_sporter_gekozen_bogen(sporter: Sporter, alle_bogen) -> tuple[dict[str, SporterBoog], list[str]]:

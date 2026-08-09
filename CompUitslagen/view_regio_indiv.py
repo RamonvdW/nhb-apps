@@ -11,10 +11,10 @@ from django.utils.safestring import mark_safe
 from Competitie.models import Competitie
 from Competitie.seizoenen import get_comp_pk
 from CompLaagRegio.models import RegioComp, RegioDeelnemer
+from Functie.operations import get_request_regio_nr
 from Geo.models import Regio
 from HistComp.operations import get_hist_url
 from Overig.helpers import make_valid_hashtag
-from Sporter.operations import get_request_regio_nr
 from Vereniging.models import Vereniging
 
 

@@ -219,7 +219,7 @@ def bereken_leeftijdsklassen_wa(geboorte_jaar, wedstrijdgeslacht, huidige_jaar, 
 
         Retourneert: huidige jaar, leeftijd, lkl_dit_jaar, lkl_lst
                 lkl_lst is een lijst van wedstrijdklassen voor
-                de jaren -1, 0, +1, +2, +3 ten opzicht van leeftijd
+                de jaren -1, 0, +1, +2, +3 ten opzichte van leeftijd
                 Voorbeeld:
                     huidige jaar = 2019
                     leeftijd = 20
@@ -280,6 +280,48 @@ def bereken_leeftijdsklassen_wa(geboorte_jaar, wedstrijdgeslacht, huidige_jaar, 
     # for
 
     return huidige_jaar, sporter_leeftijd, lkl_dit_jaar, lkl_list
+
+
+def hogere_en_lagere_lkl_wa(lkl: Leeftijdsklasse) -> list[Leeftijdsklasse]:
+
+    """
+        Expandeer een leeftijdsklasse naar hogere/lagere klassen, volgens de regels
+        Onder21 mag in hogere klasse uitkomen
+        50+ mag in lagere klasse uitkomen
+    """
+
+    lijst = list()
+
+    min_leeftijd, max_leeftijd = lkl.min_wedstrijdleeftijd, lkl.max_wedstrijdleeftijd
+    if min_leeftijd == 0 and max_leeftijd == 0:
+        # 21+ mag alleen zijn eigen klasse
+        lijst.append(lkl)
+
+    else:
+        if min_leeftijd == 0:
+            lijst.append(lkl)
+
+            if max_leeftijd == 17:
+                # Onder18 mag ook bij Onder21 en senioren uitkomen
+                lkl_onder21 = Leeftijdsklasse.objects.get(organisatie=ORGANISATIE_WA,
+                                                          wedstrijd_geslacht=lkl.wedstrijd_geslacht,
+                                                          min_wedstrijdleeftijd=0,
+                                                          max_wedstrijdleeftijd=20)
+                lijst.append(lkl_onder21)
+
+        # Onder18, Onder21 en 50+ mogen ook bij de senioren uitkomen
+        lkl_senioren = Leeftijdsklasse.objects.get(organisatie=ORGANISATIE_WA,
+                                                   wedstrijd_geslacht=lkl.wedstrijd_geslacht,
+                                                   min_wedstrijdleeftijd=0,
+                                                   max_wedstrijdleeftijd=0)
+        lijst.append(lkl_senioren)
+
+        if max_leeftijd > 0:
+            lijst.append(lkl)
+
+    return lijst
+
+
 
 
 def bereken_leeftijdsklassen_ifaa(geboorte_jaar, wedstrijdgeslacht, huidige_jaar):

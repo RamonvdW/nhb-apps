@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2023-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
 from Functie.tests.helpers import maak_functie
+from Functie.operations import get_request_regio_nr, get_request_rayon_nr
 from Geo.models import Regio, Rayon
 from Sporter.models import Sporter
-from Sporter.operations import get_request_regio_nr, get_request_rayon_nr
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
 import datetime
@@ -70,7 +70,6 @@ class TestSporterOperations(E2EHelpers, TestCase):
         self.functie_anders.accounts.add(self.account_normaal)
 
     def test_regio_nr(self):
-
         # bezoeker
         self.client.logout()
         resp = self.client.get('/plein/')

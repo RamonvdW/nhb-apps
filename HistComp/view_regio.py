@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023-2024 Ramon van der Winkel.
+#  Copyright (c) 2023-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -8,13 +8,13 @@ from django.urls import reverse
 from django.http import Http404
 from django.views.generic import TemplateView
 from django.utils.safestring import mark_safe
+from Functie.operations import get_request_regio_nr
 from Geo.models import Regio
 from HistComp.definities import (HISTCOMP_TYPE_18, HISTCOMP_TYPE2STR, HIST_KLASSE2VOLGORDE,
                                  HISTCOMP_TYPE2URL, URL2HISTCOMP_TYPE,
                                  HIST_BOOG2URL, URL2HIST_BOOG, HIST_BOOG_DEFAULT, HIST_BOOG2STR,
                                  HIST_TEAM2URL, URL2HIST_TEAM, HIST_TEAM_DEFAULT, HIST_TEAM2STR)
 from HistComp.models import HistCompSeizoen, HistCompRegioIndiv, HistCompRegioTeam
-from Sporter.operations import get_request_regio_nr
 from types import SimpleNamespace
 
 

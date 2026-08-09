@@ -13,10 +13,10 @@ from Competitie.models import Competitie
 from Competitie.seizoenen import get_comp_pk
 from Competitie.operations.poules import maak_poule_schema
 from CompLaagRegio.models import RegioComp, RegioTeam, RegioRondeTeam, RegioPoule
+from Functie.operations import get_request_regio_nr
 from Geo.models import Regio
 from HistComp.operations import get_hist_url
 from Overig.helpers import make_valid_hashtag
-from Sporter.operations import get_request_regio_nr
 from types import SimpleNamespace
 
 

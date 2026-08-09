@@ -13,10 +13,10 @@ from Competitie.models import Competitie, CompetitieMatch
 from Competitie.seizoenen import get_comp_pk
 from CompLaagRayon.models import KampRK, DeelnemerRK, CutRK
 from CompLaagRegio.models import RegioComp, RegioDeelnemer
+from Functie.operations import get_request_rayon_nr
 from Geo.models import Rayon
 from HistComp.operations import get_hist_url
 from Overig.helpers import make_valid_hashtag
-from Sporter.operations import get_request_rayon_nr
 import datetime
 
 TEMPLATE_COMPUITSLAGEN_RK_INDIV = 'compuitslagen/rk-indiv.dtl'
