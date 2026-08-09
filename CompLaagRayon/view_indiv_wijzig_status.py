@@ -15,7 +15,7 @@ from CompLaagRayon.operations import maak_mutatie_kamp_aanmelden_rk_indiv, maak_
 from CompLaagRayon.models import DeelnemerRK
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie, rol_get_huidige, rol_get_beschrijving
-from Sporter.operations import get_sporter
+from Sporter.models import get_sporter
 
 TEMPLATE_COMPRAYON_WIJZIG_STATUS_RK_DEELNEMER = 'complaagrayon/wijzig-status-rk-deelnemer.dtl'
 
