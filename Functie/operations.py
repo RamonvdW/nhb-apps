@@ -6,7 +6,7 @@
 
 from django.conf import settings
 from django.utils import timezone
-from Account.models import get_account
+from Account.models import get_account, Account
 from Functie.definities import Rol
 from Functie.models import Functie, VerklaringHanterenPersoonsgegevens
 from Functie.rol import rol_get_huidige_functie
@@ -14,8 +14,8 @@ from Geo.models import Regio
 from Mailer.operations import mailer_queue_email, render_email_template
 from Sporter.models import get_sporter
 from TijdelijkeCodes.operations import maak_tijdelijke_code_bevestig_email_functie
+from Vereniging.models import Vereniging
 import datetime
-
 
 EMAIL_TEMPLATE_ROLLEN_GEWIJZIGD = 'email_functie/rollen-gewijzigd.dtl'
 EMAIL_TEMPLATE_BEVESTIG_TOEGANG_EMAIL = 'email_functie/bevestig-toegang-email.dtl'
@@ -82,7 +82,7 @@ def functie_vraag_email_bevestiging(functie):
                        enforce_whitelist=False)
 
 
-def maak_account_vereniging_secretaris(ver, account):
+def koppel_account_aan_functie_sec(ver: Vereniging, account: Account):
     """ Geeft het account rechten om als secretaris van de vereniging de site te gebruiken
         Retourneert True als het account aan de SEC-functie toegevoegd is
     """
@@ -96,7 +96,7 @@ def maak_account_vereniging_secretaris(ver, account):
 
         # stuur eem e-mail, welke ook een link naar de handleiding kan bevatten
         if functie_wijziging_stuur_email_notificatie(account, 'Systeem', functie.beschrijving, add=True):
-            # het is gelukt een e-mail te sturen, dus maak het koppeling definitief
+            # het is gelukt een e-mail te sturen, dus maak de koppeling definitief
             # (als het e-mailadres nog niet bevestigd is, dan blijven we het proberen)
             functie.accounts.add(account)
             return True
@@ -104,7 +104,7 @@ def maak_account_vereniging_secretaris(ver, account):
     return False
 
 
-def account_needs_vhpg(account, show_only=False):
+def account_needs_vhpg(account: Account, show_only=False):
     """ Controleer of het Account een VHPG af moet leggen """
 
     if not account_needs_otp(account):
@@ -128,7 +128,7 @@ def account_needs_vhpg(account, show_only=False):
     return opnieuw < now, vhpg
 
 
-def account_needs_otp(account):
+def account_needs_otp(account: Account):
     """ Controleer of het Account OTP-verificatie nodig heeft
 
         Returns: True or False

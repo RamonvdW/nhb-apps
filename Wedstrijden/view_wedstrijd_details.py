@@ -12,7 +12,7 @@ from django.views.generic import TemplateView
 from Account.models import get_account
 from BasisTypen.definities import ORGANISATIE_WA, ORGANISATIE_IFAA
 from Kalender.definities import MAAND2URL
-from Sporter.operations import get_sporter
+from Sporter.models import get_sporter
 from Wedstrijden.definities import (WEDSTRIJD_ORGANISATIE_TO_STR, WEDSTRIJD_BEGRENZING_TO_STR,
                                     WEDSTRIJD_WA_STATUS_TO_STR)
 from Wedstrijden.models import Wedstrijd, WedstrijdSessie
