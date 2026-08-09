@@ -5,7 +5,17 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.conf import settings
+from django.utils import timezone
+from Spelden.definities import (SPELD_CATEGORIE_WA_STER, SPELD_CATEGORIE_WA_STER_ZILVER,
+                                SPELD_CATEGORIE_WA_TARGET_AWARD, SPELD_CATEGORIE_WA_TARGET_AWARD_ZILVER,
+                                SPELD_CATEGORIE_WA_ARROWHEAD,
+                                SPELD_CATEGORIE_NL_GRAADSPELD_INDOOR, SPELD_CATEGORIE_NL_GRAADSPELD_OUTDOOR,
+                                SPELD_CATEGORIE_NL_GRAADSPELD_VELD, SPELD_CATEGORIE_NL_GRAADSPELD_SHORT_METRIC,
+                                SPELD_CATEGORIE_NL_GRAADSPELD_ALGEMEEN, SPELD_CATEGORIE_NL_TUSSENSPELD)
+from Spelden.models import Speld, SpeldVoorwaarden
 from Sporter.models import Speelsterkte
+from Sporter.leeftijdsklassen import bereken_leeftijdsklassen_wa, hogere_en_lagere_lkl_wa
+from Wedstrijden.definities import WEDSTRIJD_DISCIPLINE_OUTDOOR, WEDSTRIJD_DISCIPLINE_INDOOR, WEDSTRIJD_DISCIPLINE_VELD
 
 
 def get_hall_of_fame():
@@ -45,39 +55,55 @@ def tel_hall_of_fame():
     return gm_count, ms_count, as_count
 
 
-def get_mogelijke_spelden(discipline: str, boog: str, score: int | None, ):
+def get_mogelijke_spelden(discipline: str, boog: str, score: int, wedstrijd_geslacht: str, geboorte_jaar: int):
     """ Bepaalt de mogelijke spelden aan de hand van ingevoerde informatie
 
-        discipline: WEDSTRIJD_DISCIPLINE_* 'OD', 'IN', '25', 'CL', 'VE', 'RA', '3D'
-        boog:       BOOGTYPE_AFKORTING_*   'R', 'C', 'BB', 'LB', 'TR'
-        score:      De behaalde score
+        discipline:         uit SPELD_DISCIPLINE_CHOICES: 'OD', 'IN', '25', 'VE'
+        boog:               uit SPELD_BOOGTYPE_CHOICES:   'R', 'C', 'BB'
+        score:              de behaalde score
+        wedstrijd_geslacht: uit GESLACHT_MV: 'M' of 'V'
+        geboorte_jaar:      geboortejaar van de sporter (1980, etc.)
 
-        returns:    [
-                        (
-                            "speld_cat",     # SPELD_CATEGORIE_*
-                            "discipline",    # OD, VE, etc.
-                            "afstand(en)",   # een afstand ("18m") of setje afstanden ("90m, 70m, 50m, 30m")
-                        ),
-                        ...
-                    ]
-
+        returns:    list of SpeldVoorwaarden
     """
 
-    print('{get_mogelijke_spelden} discpline=%s, boog=%s, score=%s' % (repr(discipline), repr(boog), score))
+    # print('{get_mogelijke_spelden} discpline=%s, boog=%s, score=%s, wedstrijd_geslacht=%s' % (
+    #               repr(discipline), repr(boog), score, repr(wedstrijd_geslacht)))
 
-    spelden = list()
+    qset = (SpeldVoorwaarden
+            .objects
+            .filter(discipline=discipline,
+                    boog_type__afkorting=boog,
+                    # benodigde_score__lte=score,
+                    leeftijdsklasse__wedstrijd_geslacht=wedstrijd_geslacht))
 
-    # WA target awards
-    if discipline in ('OD', 'IN') and boog in ('R', 'C', 'BB'):
+    if discipline == WEDSTRIJD_DISCIPLINE_VELD:
+        # alleen dames/heren opsplitsing, geen verdere leeftijdsklasse
         pass
+    else:
+        now = timezone.now()
+        _, _, _, lkl_lst = bereken_leeftijdsklassen_wa(geboorte_jaar, wedstrijd_geslacht, now.year, lst_als_str=False)
+        mogelijke_lkl = lkl_lst[0:0+2]      # vorige jaar en dit jaar
 
-    # WA sterspelden
-    if discipline == 'OD' and score >= 1000:
-        pass
+        if mogelijke_lkl[0] != mogelijke_lkl[1] and now.month <= 6:
+            # tijdens de eerste 6 maanden na overgang naar een andere wedstrijdklasse, ook de vorige klasse laten gebruiken
+            # beide behouden, in die specifieke volgorde
+            pass
+        else:
+            # alleen de nieuwste behouden
+            mogelijke_lkl = mogelijke_lkl[-1:]
 
+        print('{mogelijke_lkl}', mogelijke_lkl)
 
+        alle_lkl = list()
+        for lkl in mogelijke_lkl:
+            alle_lkl.extend(hogere_en_lagere_lkl_wa(lkl))
 
-    return spelden
+        print('{alle_lkl}', alle_lkl)
+
+        qset = qset.filter(leeftijdsklasse__in=alle_lkl)
+
+    return list(qset)
 
 
 # end of file

@@ -14,9 +14,9 @@
     <div class="row center">
         <div class="col s12">
             <h1 class="sv-kopje-pagina">Tussenspelden</h1>
-            <p>Tussenspelden zijn te behalen op het Rayonkampioenschap Outdoor van het eigen rayon.</p>
-            <p class="sv-rood-text">Waarom heten deze "tussenspelden"? Waar tussen? Hoeveel pijlen?</p>
-            <p>Kijk op de wedstrijdkalender wanneer deze georganiseerd wordt.</p>
+            <p>Tussenspelden zijn een uitbreiding op de ster-spelden (WA1440 ronde).</p>
+            <p>Ze zijn te behalen op het Rayonkampioenschap Outdoor van het eigen rayon. <b class="sv-rood-text">Klopt dit?</b></p>
+            <p>Kijk op de wedstrijdkalender wanneer deze georganiseerd worden.</p>
             <p><a class="btn-sv-blauw" href="{{ url_wedstrijdkalender }}">wedstrijdkalender</a></p>
         </div>
     </div>

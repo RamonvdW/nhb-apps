@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2025 Ramon van der Winkel.
+#  Copyright (c) 2020-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
 from Geo.models import Regio
-from Spelden.models import Speld, SpeldScore, SpeldAanvraag
+from Spelden.models import Speld, SpeldVoorwaarden, SpeldAanvraag
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
@@ -114,7 +114,7 @@ class TestSpeldenInfoViews(E2EHelpers, TestCase):
         speld = Speld.objects.first()
         self.assertTrue(str(speld) != '')
 
-        speld_score = SpeldScore.objects.first()
+        speld_score = SpeldVoorwaarden.objects.first()
         self.assertTrue(str(speld_score) != '')
 
         aanvraag = SpeldAanvraag(door_account=self.account_sporter, datum_wedstrijd='Hallo')

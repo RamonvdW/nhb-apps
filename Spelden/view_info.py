@@ -13,7 +13,7 @@ from Functie.rol import rol_get_huidige
 from Spelden.definities import (SPELD_CATEGORIE_NL_GRAADSPELD_INDOOR, SPELD_CATEGORIE_NL_GRAADSPELD_OUTDOOR,
                                 SPELD_CATEGORIE_NL_GRAADSPELD_VELD, SPELD_CATEGORIE_NL_GRAADSPELD_SHORT_METRIC,
                                 SPELD_CATEGORIE_WA_ARROWHEAD)
-from Spelden.models import SpeldScore
+from Spelden.models import SpeldVoorwaarden
 from Spelden.operations import get_hall_of_fame, tel_hall_of_fame
 
 TEMPLATE_PRESTATIESPELDEN_HALL_OF_FAME = 'spelden/khsn-meesterspelden_hall-of-fame.dtl'
@@ -82,7 +82,8 @@ class GraadspeldenView(TemplateView):
         if rol_get_huidige(self.request) == Rol.ROL_SPORTER:
             context['menu_toon_mandje'] = True
 
-        qset = (SpeldScore
+        # TODO: revise!
+        qset = (SpeldVoorwaarden
                 .objects
                 .filter(speld__categorie__in=(SPELD_CATEGORIE_NL_GRAADSPELD_INDOOR,
                                               SPELD_CATEGORIE_NL_GRAADSPELD_OUTDOOR,
@@ -141,11 +142,13 @@ class TussenspeldenView(TemplateView):
             context['menu_toon_mandje'] = True
 
         now = timezone.now()
-        context['url_wedstrijdkalender'] = reverse('Kalender:simpel',
+        context['url_wedstrijdkalender'] = reverse('Kalender:alles',
                                                    kwargs={'jaar_of_maand': 'jaar',
+                                                           'jaar': now.year,
                                                            'maand': now.month,
-                                                           'jaar': now.year})
-        context['url_wedstrijdkalender'] += '?zoek=Outdoor'
+                                                           'soort': 'wa-a',     # World Archery, A-status
+                                                           'bogen': 'mijn',
+                                                           'discipline': 'outdoor'})
 
         context['kruimels'] = (
             (reverse('Webwinkel:overzicht'), 'Webwinkel'),
@@ -210,7 +213,8 @@ class ArrowheadView(TemplateView):
         if rol_get_huidige(self.request) == Rol.ROL_SPORTER:
             context['menu_toon_mandje'] = True
 
-        qset = (SpeldScore
+        # TODO: revise!
+        qset = (SpeldVoorwaarden
                 .objects
                 .filter(speld__categorie=SPELD_CATEGORIE_WA_ARROWHEAD)
                 .select_related('leeftijdsklasse',

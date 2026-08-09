@@ -4,7 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from Wedstrijden.definities import WEDSTRIJD_DISCIPLINE_OUTDOOR, WEDSTRIJD_DISCIPLINE_INDOOR, WEDSTRIJD_DISCIPLINE_VELD
+from BasisTypen.definities import BOOGTYPE_AFKORTING_RECURVE, BOOGTYPE_AFKORTING_COMPOUND, BOOGTYPE_AFKORTING_BAREBOW
 
 # maxlength: 3
 SPELD_CATEGORIE_WA_STER = "Ws"                      # Outdoor 1440
@@ -68,10 +68,30 @@ SOORT_BESTAND_CHOICES = [
 ]
 
 
-WEDSTRIJD_DISCIPLINE_CHOICES = [
-    (WEDSTRIJD_DISCIPLINE_OUTDOOR, 'Outdoor'),
-    (WEDSTRIJD_DISCIPLINE_INDOOR, 'Indoor'),        # Indoor = 18m/25m 3pijl
-    (WEDSTRIJD_DISCIPLINE_VELD, 'Veld'),
+SPELD_DISCIPLINE_OUTDOOR = 'OD'
+SPELD_DISCIPLINE_INDOOR = 'IN'
+SPELD_DISCIPLINE_VELD = 'VE'
+SPELD_DISCIPLINE_NVT = 'XX'
+
+SPELD_DISCIPLINE_CHOICES = [
+    (SPELD_DISCIPLINE_OUTDOOR, 'Outdoor'),
+    (SPELD_DISCIPLINE_INDOOR, 'Indoor'),        # Indoor = 18m/25m 3pijl
+    (SPELD_DISCIPLINE_VELD, 'Veld'),
+    (SPELD_DISCIPLINE_NVT, 'n.v.t.'),           # voor meesterspelden
+]
+
+SPELD_DISCIPLINE2STR = {
+    SPELD_DISCIPLINE_OUTDOOR: 'Outdoor',
+    SPELD_DISCIPLINE_INDOOR: 'Indoor',        # Indoor = 18m/25m 3pijl
+    SPELD_DISCIPLINE_VELD: 'Veld',
+    SPELD_DISCIPLINE_NVT: 'n.v.t.',           # voor meesterspelden
+}
+
+
+SPELD_BOOGTYPE_CHOICES = [
+    (BOOGTYPE_AFKORTING_RECURVE, 'Recurve'),
+    (BOOGTYPE_AFKORTING_COMPOUND, 'Compound'),
+    (BOOGTYPE_AFKORTING_BAREBOW, 'Barebow'),
 ]
 
 

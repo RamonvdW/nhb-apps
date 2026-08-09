@@ -7,7 +7,7 @@
 {% load static %}
 {% load design_knop %}
 
-{% block title %}Bestelformulier{% endblock %}
+{% block title %}Bestelformulier, stap 3{% endblock %}
 
 {% block pagina %}
 
@@ -45,6 +45,24 @@
                     <th>Behaalde score</th>
                     <td>{{ score }}</td>
                 </tr>
+                {% if afstanden %}
+                    <tr>
+                        <th>Afstand(en)</th>
+                        <td>{{ afstanden }}</td>
+                    </tr>
+                {% endif %}
+                {% if aantal_pijlen %}
+                    <tr>
+                        <th>Aantal pijlen</th>
+                        <td>{{ aantal_pijlen }}</td>
+                    </tr>
+                {% endif %}
+                {% if aantal_doelen %}
+                    <tr>
+                        <th>Aantal doelen</th>
+                        <td>{{ aantal_doelen }}</td>
+                    </tr>
+                {% endif %}
             </table>
         </div>
     </div>
@@ -53,8 +71,8 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h2 class="sv-kopje-row">Stap 2</h2>
-            <p>Vertel ons wat meer over de wedstrijd.</p>
+            <h2 class="sv-kopje-row">Stap 3</h2>
+            <p>Hieronder zie je de spelden die je kunt bestellen.</p>
         </div>
     </div>
 
@@ -65,45 +83,27 @@
             {% csrf_token %}
 
             <!-- filter: wedstrijddiscipline -->
-            <div class="col s10 offset-s1 m6 offset-m3 l4 offset-l4 sv-kader-form">
+            <div class="col s10 offset-s1 sv-kader-form">
                 <div class="form-padding">
 
                     <table>
-                        {% if doelen_opties %}
+                        <thead>
                             <tr>
-                                <th>Aantal doelen</th>
-                                <td>
-                                    <ul id="id_doelen">
-                                        {% for opt in doelen_opties %}
-                                            <li>
-                                                <label class="black-text" for="id_{{ opt.afkorting }}">
-                                                    <input class="with-gap" type="radio" name="doelen" value="{{ opt.afkorting }}" required id="id_{{ opt.afkorting }}"{% if opt.actief %} checked{% endif %}>
-                                                    <span>{{ opt.beschrijving }}</span>
-                                                </label>
-                                            </li>
-                                        {% endfor %}
-                                    </ul>
-                                </td>
+                                <th>Soort speld</th>
+                                <th>Details</th>
+                                <th>Benodige score</th>
+                                <th>Opmerking</th>
                             </tr>
-                        {% endif %}
+                        </thead>
 
-                        {% if afstanden_opties %}
+                        {% for optie in mogelijke_spelden %}
                             <tr>
-                                <th>{{ afstanden_titel }}</th>
-                                <td>
-                                    <ul id="id_afstanden">
-                                        {% for opt in afstanden_opties %}
-                                            <li>
-                                                <label class="black-text" for="id_{{ opt.afkorting }}">
-                                                    <input class="with-gap" type="radio" name="afstand" value="{{ opt.afkorting }}" required id="id_{{ opt.afkorting }}"{% if opt.actief %} checked{% endif %}>
-                                                    <span>{{ opt.beschrijving }}</span>
-                                                </label>
-                                            </li>
-                                        {% endfor %}
-                                    </ul>
-                                </td>
+                                <td>{{ optie.speld.categorie_str }}</td>
+                                <td>{{ optie.speld.beschrijving }}</td>
+                                <td class="{% if optie.ok_score %}green-text{% else %}sv-rood-text{% endif %}">{{ optie.benodigde_score }}</td>
+                                <td>?</td>
                             </tr>
-                        {% endif %}
+                        {% endfor %}
 
                         <tr>
                             <td colspan="2" class="center">
@@ -121,9 +121,9 @@
 
 
     <p class="center">
-        {% sv-knop-nav url=url_stap1 icon='terug' tekst='Terug naar stap 1' kleur='blauw' %}
+        {% sv-knop-nav url=url_stap2 icon='terug' tekst='Terug naar stap 2' kleur='blauw' %}
     </p>
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="spelden-bestel-stap2" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="spelden-bestel-stap3" %}
 
 {% endblock %}
