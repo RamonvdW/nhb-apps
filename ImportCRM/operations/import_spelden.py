@@ -142,9 +142,8 @@ class ImportCrmSpelden(ImportCrmBase):
             if not sporter:
                 continue
 
-            if sporter.is_actief_lid:
-                skill_levels_data = member_data.get('skill_levels', [])
-                self._importeer_voor_sporter(sporter, skill_levels_data)
+            skill_levels_data = member_data.get('skill_levels', [])
+            self._importeer_voor_sporter(sporter, skill_levels_data)
 
         # for sporter
 

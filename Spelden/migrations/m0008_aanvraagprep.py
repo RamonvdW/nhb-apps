@@ -1330,7 +1330,8 @@ class Migration(migrations.Migration):
                 ('sporter', models.ForeignKey(on_delete=models.deletion.CASCADE, to='Sporter.sporter')),
             ],
             options={
-                'verbose_name': 'Speld Toegekend',
+                'verbose_name': 'Speld toegekend',
+                'verbose_name_plural': 'Speld toegekend'
             },
         ),
         migrations.RunPython(maak_voorwaarden_wa_ster_recurve, reverse_code=migrations.RunPython.noop),

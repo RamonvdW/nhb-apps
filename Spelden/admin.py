@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.contrib import admin
-from Spelden.models import Speld, SpeldVoorwaarden, SpeldAanvraagPrep, SpeldAanvraag, SpeldBijlage
+from Spelden.models import Speld, SpeldVoorwaarden, SpeldAanvraagPrep, SpeldAanvraag, SpeldBijlage, SpeldToegekend
 
 
 class SpeldAdmin(admin.ModelAdmin):
@@ -75,8 +75,9 @@ class SpeldAanvraagPrepAdmin(admin.ModelAdmin):
 
 admin.site.register(Speld, SpeldAdmin)
 admin.site.register(SpeldVoorwaarden, SpeldVoorwaardenAdmin)
-admin.site.register(SpeldAanvraag, SpeldAanvraagAdmin)
 admin.site.register(SpeldAanvraagPrep, SpeldAanvraagPrepAdmin)
+admin.site.register(SpeldAanvraag, SpeldAanvraagAdmin)
+admin.site.register(SpeldToegekend)
 admin.site.register(SpeldBijlage)
 
 # end of file

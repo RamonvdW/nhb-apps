@@ -31,7 +31,7 @@ class SpeldToegekend(models.Model):
 
     class Meta:
         """ meta data voor de admin interface """
-        verbose_name = "Speld Toegekend"
+        verbose_name = verbose_name_plural = "Speld toegekend"
 
 
 # end of file
