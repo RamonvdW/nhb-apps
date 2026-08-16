@@ -62,7 +62,7 @@ APPS_DIR = os.path.dirname(BASE_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2026-08-09'
+SITE_VERSIE = '2026-08-16'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -372,116 +372,42 @@ RECORDS_TOEGESTANE_PARA_KLASSEN = (
     # andere historische record typen zijn niet in gebruik dus niet in dit lijstje
 )
 
+CRM_IMPORT_SPELDEN_VERTAAL_PAS_CODE = {
+    # ster spelden cadet/master --> zilveren ster
+    'RC1000': 'R1000Z',
+    'RC1100': 'R1100Z',
+    'RC1200': 'R1200Z',
+    'RC1300': 'R1300Z',
 
-# vertaling van discipline en beschrijving uit CRM naar volgorde (voor tonen op de site)
-# volgorde: lager = beter
-SPEELSTERKTE_VOLGORDE = (
-    # discipline, beschrijving, volgorde
-    ('KHSN Graadspelden Schutter', 'Grootmeesterschutter', 1),       # 1e graad (3 van de 4)
-    ('KHSN Graadspelden Schutter', 'Meesterschutter', 2),            # 2e graad (3 van de 4)
-    ('KHSN Graadspelden Schutter', 'Allroundschutter', 3),           # 3e graad (4 van de 4)
+    'RM1000': 'R1000Z',
+    'RM1100': 'R1100Z',
+    'RM1200': 'R1200Z',
+    'RM1300': 'R1300Z',
 
-    ('KHSN Graadspelden Indoor', '1e Graad Indoor', 10),
-    ('KHSN Graadspelden Indoor', '2e Graad Indoor', 11),
-    ('KHSN Graadspelden Indoor', '3e Graad Indoor', 12),
+    'CC1000': 'C1000Z',
+    'CC1100': 'C1100Z',
+    'CC1200': 'C1200Z',
+    'CC1300': 'C1300Z',
 
-    ('KHSN Graadspelden Outdoor', '1e Graad Outdoor', 20),
-    ('KHSN Graadspelden Outdoor', '2e Graad Outdoor', 21),
-    ('KHSN Graadspelden Outdoor', '3e Graad Outdoor', 22),
+    'CM1000': 'C1000Z',
+    'CM1100': 'C1100Z',
+    'CM1200': 'C1200Z',
+    'CM1300': 'C1300Z',
 
-    ('KHSN Graadspelden Veld', '1e Graad Veld', 30),
-    ('KHSN Graadspelden Veld', '2e Graad Veld', 31),
-    ('KHSN Graadspelden Veld', '3e Graad Veld', 32),
+    # ster spelden cadet/master die niet bestaan als zilveren ster
+    'RC1350': 'R1350',
+    'CC1350': 'C1350',
+    'CM1350': 'C1350',
+    'CC1400': 'C1400',
 
-    ('KHSN Graadspelden Short Metric', '1e Graad Short Metric', 40),
-    ('KHSN Graadspelden Short Metric', '2e Graad Short Metric', 41),
-    ('KHSN Graadspelden Short Metric', '3e Graad Short Metric', 42),
-
-    ('Compound', 'Compound 1400', 100),
-    ('Compound', 'Compound 1350', 101),
-    ('Compound', 'Compound 1300', 102),
-    ('Compound', 'Compound 1200', 103),
-    ('Compound', 'Compound 1100', 104),
-    ('Compound', 'Compound 1000', 105),
-
-    # cadet / under18 is andere afstand dan senior
-    ('Compound', 'Compound Cadet 1400', 110),
-    ('Compound', 'Compound Cadet 1350', 111),
-    ('Compound', 'Compound Cadet 1300', 112),
-    ('Compound', 'Compound Cadet 1200', 113),
-    ('Compound', 'Compound Cadet 1100', 114),
-    ('Compound', 'Compound Cadet 1000', 115),
-
-    # master (50+) is andere afstand dan senior
-    ('Compound', 'Compound Master 1400', 120),
-    ('Compound', 'Compound Master 1350', 121),
-    ('Compound', 'Compound Master 1300', 122),
-    ('Compound', 'Compound Master 1200', 123),
-    ('Compound', 'Compound Master 1100', 124),
-    ('Compound', 'Compound Master 1000', 125),
-
-    # senior
-    ('Recurve', 'Recurve 1400', 130),
-    ('Recurve', 'Recurve 1350', 131),
-    ('Recurve', 'Recurve 1300', 132),
-    ('Recurve', 'Recurve 1200', 133),
-    ('Recurve', 'Recurve 1100', 134),
-    ('Recurve', 'Recurve 1000', 135),
-
-    # cadet is andere afstand dan senior
-    ('Recurve', 'Recurve Cadet 1350', 141),
-    ('Recurve', 'Recurve Cadet 1300', 142),
-    ('Recurve', 'Recurve Cadet 1200', 143),
-    ('Recurve', 'Recurve Cadet 1100', 144),
-    ('Recurve', 'Recurve Cadet 1000', 145),
-
-    # master (50+) is andere afstand dan senior (60 ipv 70 meter)
-    ('Recurve', 'Recurve Master 1350', 151),
-    ('Recurve', 'Recurve Master 1300', 152),
-    ('Recurve', 'Recurve Master 1200', 153),
-    ('Recurve', 'Recurve Master 1100', 154),
-    ('Recurve', 'Recurve Master 1000', 155),
-
-    # tussenspelden alleen op het RK in het eigen rayon
-    ('KHSN Tussenspelden', '1250', 200),
-    ('KHSN Tussenspelden', '1150', 201),
-    ('KHSN Tussenspelden', '1050', 202),
-    ('KHSN Tussenspelden', '950',  203),
-
-    # nieuwe arrowhead (sinds eind 2023)
-    ('Veld 24', 'Goud24',  290),
-    ('Veld 24', 'Zwart24', 291),
-    ('Veld 24', 'Wit24',   292),
-    ('Veld 24', 'Grijs24', 293),
-    ('Veld 24', 'Groen24', 294),
-
-    # arrowhead (historisch)
-    ('Veld', 'Goud',   300),
-    ('Veld', 'Zilver', 301),
-    ('Veld', 'Wit',    302),
-    ('Veld', 'Zwart',  303),
-    ('Veld', 'Grijs',  304),
-    ('Veld', 'Bruin',  305),
-    ('Veld', 'Groen',  306),
-
-    # Compound/Recurve
-    ('World Archery Target Awards', 'Purper', 500),
-    ('World Archery Target Awards', 'Goud',   501),
-    ('World Archery Target Awards', 'Rood',   502),
-    ('World Archery Target Awards', 'Blauw',  503),
-    ('World Archery Target Awards', 'Zwart',  504),
-    ('World Archery Target Awards', 'Wit',    505),
-
-    # beginners awards
-    ('Algemeen', 'Gouden Pijl', 600),
-    ('Algemeen', 'Rode Pijl',   601),
-    ('Algemeen', 'Blauwe Pijl', 602),
-    ('Algemeen', 'Zwarte Pijl', 603),
-    ('Algemeen', 'Witte Pijl',  604),
-    ('Algemeen', 'Gouden Veer', 605),
-    ('Algemeen', 'Rode Veer',   606),
-)
-
+    # target awards oude naar nieuwe code
+    'WA Wit': 'TA-WIT',
+    'WA Zwart': 'TA-ZWART',
+    'WA Blauw': 'TA-BLAUW',
+    'WA Rood': 'TA-ROOD',
+    'WA Goud': 'TA-GOUD',
+    'WA Purper': 'TA-PURPER',
+}
 
 OPLEIDING_CODES = (
     # code, afk-voor-pas, beschrijving, hogere-opleidingen

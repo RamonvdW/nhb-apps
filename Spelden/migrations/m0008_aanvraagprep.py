@@ -6,13 +6,7 @@
 
 from django.db import migrations, models
 from BasisTypen.definities import ORGANISATIE_WA
-from Spelden.definities import (SPELD_CATEGORIE_WA_STER, SPELD_CATEGORIE_WA_STER_ZILVER,
-                                SPELD_CATEGORIE_WA_TARGET_AWARD, SPELD_CATEGORIE_WA_TARGET_AWARD_ZILVER,
-                                SPELD_CATEGORIE_WA_ARROWHEAD, SPELD_CATEGORIE_NL_GRAADSPELD_INDOOR,
-                                SPELD_CATEGORIE_NL_GRAADSPELD_OUTDOOR, SPELD_CATEGORIE_NL_GRAADSPELD_VELD,
-                                SPELD_CATEGORIE_NL_GRAADSPELD_SHORT_METRIC, SPELD_CATEGORIE_NL_GRAADSPELD_ALGEMEEN,
-                                SPELD_CATEGORIE_NL_TUSSENSPELD,
-                                SPELD_DISCIPLINE_OUTDOOR, SPELD_DISCIPLINE_INDOOR, SPELD_DISCIPLINE_VELD)
+from Spelden.definities import SPELD_DISCIPLINE_OUTDOOR, SPELD_DISCIPLINE_INDOOR, SPELD_DISCIPLINE_VELD
 
 
 def maak_voorwaarden_wa_ster_recurve(apps, _):
@@ -1252,13 +1246,30 @@ class Migration(migrations.Migration):
 
     # volgorde afdwingen
     dependencies = [
-        ('Spelden', 'm0006_squashed'),
+        ('Spelden', 'm0007_nieuwe_spelden'),
         ('Sporter', 'm0033_squashed'),
     ]
 
     # migratie functies
     operations = [
-        migrations.DeleteModel(name='SpeldScore'),
+        migrations.AlterField(
+            model_name='speldaanvraag',
+            name='discipline',
+            field=models.CharField(choices=[('OD', 'Outdoor'), ('IN', 'Indoor'), ('VE', 'Veld'), ('XX', 'n.v.t.')],
+                                   default='XX', max_length=2),
+        ),
+        migrations.AlterField(
+            model_name='speldaanvraag',
+            name='soort_speld',
+            field=models.CharField(
+                choices=[('Wsr', 'WA ster recurve'), ('Wzsr', 'WA zilveren ster recurve'), ('Wsc', 'WA ster compound'),
+                         ('Wzsc', 'WA zilveren ster compound'), ('Wt', 'WA target award'),
+                         ('Wtz', 'WA zilveren target award'), ('Wa', 'WA arrowhead speld'),
+                         ('Wa24', 'WA arrowhead 2024 speld'), ('Waba', 'WA beginner award'),
+                         ('Ngi', 'NL graadspeld indoor'), ('Ngo', 'NL graadspeld outdoor'),
+                         ('Ngv', 'NL graadspeld veld'), ('Ngs', 'NL graadspeld short metric'),
+                         ('Nga', 'NL graadspeld algemeen'), ('Nt', 'NL tussenspeld')], default='Wsr', max_length=4),
+        ),
         migrations.CreateModel(
             name='SpeldVoorwaarden',
             fields=[
@@ -1309,11 +1320,18 @@ class Migration(migrations.Migration):
                 'verbose_name_plural': 'Speld aanvraag prep',
             },
         ),
-        migrations.AlterField(
-            model_name='speldaanvraag',
-            name='discipline',
-            field=models.CharField(choices=[('OD', 'Outdoor'), ('IN', 'Indoor'), ('VE', 'Veld'), ('XX', 'n.v.t.')],
-                                   default='XX', max_length=2),
+        migrations.CreateModel(
+            name='SpeldToegekend',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('datum', models.DateField()),
+                ('category', models.CharField(max_length=50)),
+                ('speld', models.ForeignKey(on_delete=models.deletion.PROTECT, to='Spelden.speld')),
+                ('sporter', models.ForeignKey(on_delete=models.deletion.CASCADE, to='Sporter.sporter')),
+            ],
+            options={
+                'verbose_name': 'Speld Toegekend',
+            },
         ),
         migrations.RunPython(maak_voorwaarden_wa_ster_recurve, reverse_code=migrations.RunPython.noop),
         migrations.RunPython(maak_voorwaarden_wa_ster_compound, reverse_code=migrations.RunPython.noop),

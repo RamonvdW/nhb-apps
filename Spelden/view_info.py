@@ -12,7 +12,7 @@ from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
 from Spelden.definities import (SPELD_CATEGORIE_NL_GRAADSPELD_INDOOR, SPELD_CATEGORIE_NL_GRAADSPELD_OUTDOOR,
                                 SPELD_CATEGORIE_NL_GRAADSPELD_VELD, SPELD_CATEGORIE_NL_GRAADSPELD_SHORT_METRIC,
-                                SPELD_CATEGORIE_WA_ARROWHEAD)
+                                SPELD_CATEGORIE_WA_ARROWHEAD_2024)
 from Spelden.models import SpeldVoorwaarden
 from Spelden.operations import get_hall_of_fame, tel_hall_of_fame
 
@@ -216,7 +216,7 @@ class ArrowheadView(TemplateView):
         # TODO: revise!
         qset = (SpeldVoorwaarden
                 .objects
-                .filter(speld__categorie=SPELD_CATEGORIE_WA_ARROWHEAD)
+                .filter(speld__categorie=SPELD_CATEGORIE_WA_ARROWHEAD_2024)
                 .select_related('leeftijdsklasse',
                                 'boog_type',
                                 'speld')

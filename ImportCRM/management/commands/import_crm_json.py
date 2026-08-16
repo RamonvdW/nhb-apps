@@ -157,7 +157,7 @@ class Command(BaseCommand):
             "%s recordhouders ex-lid" % self._import_sporters.count_recordhouders,
             "%s uitgeschreven" % self._import_sporters.count_uitgeschreven,
             "%s administratief aanwezig" % self._import_sporters.count_admin,
-            "%s speelsterktes" % self._import_spelden.count_sterkte,
+            "%s toegekende spelden" % self._import_spelden.count_toegekende_spelden,
             "%s opleiding diploma's" % self._import_opleidingen.count_diplomas,
             "%s verenigingen" % self._import_verenigingen.count_clubs,
             "%s secretarissen zonder account" % self._import_verenigingen.count_sec_no_account,

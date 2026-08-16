@@ -6,16 +6,10 @@
 
 from django.conf import settings
 from django.utils import timezone
-from Spelden.definities import (SPELD_CATEGORIE_WA_STER, SPELD_CATEGORIE_WA_STER_ZILVER,
-                                SPELD_CATEGORIE_WA_TARGET_AWARD, SPELD_CATEGORIE_WA_TARGET_AWARD_ZILVER,
-                                SPELD_CATEGORIE_WA_ARROWHEAD,
-                                SPELD_CATEGORIE_NL_GRAADSPELD_INDOOR, SPELD_CATEGORIE_NL_GRAADSPELD_OUTDOOR,
-                                SPELD_CATEGORIE_NL_GRAADSPELD_VELD, SPELD_CATEGORIE_NL_GRAADSPELD_SHORT_METRIC,
-                                SPELD_CATEGORIE_NL_GRAADSPELD_ALGEMEEN, SPELD_CATEGORIE_NL_TUSSENSPELD)
-from Spelden.models import Speld, SpeldVoorwaarden
+from Spelden.models import SpeldVoorwaarden
 from Sporter.models import Speelsterkte
 from Sporter.leeftijdsklassen import bereken_leeftijdsklassen_wa, hogere_en_lagere_lkl_wa
-from Wedstrijden.definities import WEDSTRIJD_DISCIPLINE_OUTDOOR, WEDSTRIJD_DISCIPLINE_INDOOR, WEDSTRIJD_DISCIPLINE_VELD
+from Wedstrijden.definities import WEDSTRIJD_DISCIPLINE_VELD
 
 
 def get_hall_of_fame():

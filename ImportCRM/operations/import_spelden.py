@@ -6,7 +6,7 @@
 
 from django.conf import settings
 from ImportCRM.import_base import ImportCrmBase
-from Sporter.models import Speelsterkte
+from Spelden.models import Speld, SpeldToegekend
 import datetime
 
 
@@ -17,135 +17,137 @@ class ImportCrmSpelden(ImportCrmBase):
 
         self._import_sporters = None
 
-        self._cache_sterk = dict()              # [lid_nr] = [SpeelSterkte(), ...]
-        self._speelsterkte2volgorde = dict()    # [(discipline, beschrijving)] = volgorde
-
+        self._cache_speld = dict()              # [pas_code] = Speld
+        self._cache_toegekend = dict()          # [lid_nr] = [SpeldToegekend, ...]
         self._vul_cache()
 
-        self.count_sterkte = Speelsterkte.objects.count()
+        self.count_toegekende_spelden = SpeldToegekend.objects.count()
 
     def zet_refs(self, import_sporters):
         self._import_sporters = import_sporters
 
     def _vul_cache(self):
-        for sterkte in Speelsterkte.objects.select_related('sporter').all():
+        for speld in Speld.objects.all():
+            self._cache_speld[speld.pas_code] = speld
+        # for
+
+        for toegekend in SpeldToegekend.objects.select_related('speld', 'sporter').all():
             try:
-                self._cache_sterk[sterkte.sporter.lid_nr].append(sterkte)
+                self._cache_toegekend[toegekend.sporter.lid_nr].append(toegekend)
             except KeyError:
-                self._cache_sterk[sterkte.sporter.lid_nr] = [sterkte]
+                self._cache_toegekend[toegekend.sporter.lid_nr] = [toegekend]
         # for
 
-        for disc, beschr, volgorde in settings.SPEELSTERKTE_VOLGORDE:
-            # discipline, beschrijving, volgorde
-            self._speelsterkte2volgorde[(disc, beschr)] = volgorde
-        # for
+    def _importeer_voor_sporter(self, sporter, data):
 
+        huidige_lijst = self._cache_toegekend.get(sporter.lid_nr, [])
+        nieuwe_lijst = list()
 
-    def importeer(self, data: list):
-        """ Importeert data van alle leden """
+        for was_toegekend in data:
+            """
+                'skill_level': [
+                    {
+                        "date": "1990-01-01",
+                        "skill_level_code": "R1000",            # pas code
+                        "skill_level_name": "Recurve 1000",
+                        "discipline_code": "REC",
+                        "discipline_name": "Recurve",
+                        "category_name": "Senior"
+                    },
+                    ...
+                ]
+            """
+            datum_raw = was_toegekend['date']
+            pas_code = was_toegekend['skill_level_code']
 
-        """ data:
-            [
-                {
-                    'member_number': int,
-                    'skill_level': [
-                        {
-                            "date": "1990-01-01",
-                            "skill_level_code": "R1000",
-                            "skill_level_name": "Recurve 1000",
-                            "discipline_code": "REC",
-                            "discipline_name": "Recurve",
-                            "category_name": "Senior"
-                        },
-                        ...
-                    ]
-                },
-                ...
-            ]
-        """
+            # vertaal de oude pas_code naar de nieuwe pas_code
+            pas_code = settings.CRM_IMPORT_SPELDEN_VERTAAL_PAS_CODE.get(pas_code, pas_code)
 
-        for member in data:
-            lid_nr = member['member_number']
-
-            obj = self._import_sporters.vind_sporter(lid_nr)
-            if not obj:
+            # vind de speld
+            speld = self._cache_speld.get(pas_code, None)
+            if not speld:
+                self.out_error('Lid %s heeft toegekende speld met onbekende pas_code %s' % (sporter.lid_nr,
+                                                                                            repr(pas_code)))
                 continue
 
-            huidige_lijst = self._cache_sterk.get(lid_nr, [])
+            # check en converteer de datum
+            try:
+                datum = datetime.datetime.strptime(datum_raw, "%Y-%m-%d").date()  # YYYY-MM-DD
+            except (ValueError, TypeError):
+                self.out_error('Lid %s heeft toegekende speld %s met slechte datum: %s' % (sporter.lid_nr,
+                                                                                           repr(pas_code),
+                                                                                           repr(datum_raw)))
+                continue
 
-            if obj.is_actief_lid:
-                nieuwe_lijst = list()
+            # kijk of deze al geimporteerd was
+            gevonden = False
+            for al_toegekend in huidige_lijst:
+                if al_toegekend.speld.pas_code == pas_code:
+                    # bestaat al
+                    # verwijderen uit de lijst zodat niet meer toegekende spelden kunnen vinden en verwijderen
+                    huidige_lijst.remove(al_toegekend)
+                    gevonden = True
+                    break
+            # for
 
-                for sterk in member.get('skill_levels', []):
-                    cat = sterk['category_name']
-                    disc = sterk['discipline_name']
-                    datum_raw = sterk['date']
-                    beschr = sterk['skill_level_name']
-                    code = sterk['skill_level_code']        # voor op de bondspas
+            if not gevonden:
+                # toevoegen
+                self.out_info('Nieuwe speld toegekend aan lid %s: %s, %s' % (sporter.lid_nr, datum, repr(pas_code)))
+                toegekend = SpeldToegekend(
+                                    speld=speld,
+                                    sporter=sporter,
+                                    datum=datum)
+                nieuwe_lijst.append(toegekend)
+                self.count_toevoegingen += 1
+        # for
 
-                    try:
-                        datum = datetime.datetime.strptime(datum_raw, "%Y-%m-%d").date()  # YYYY-MM-DD
-                    except (ValueError, TypeError):
-                        self.out_error('Lid %s heeft skill level met slechte datum: %s' % (
-                                                lid_nr, repr(datum_raw)))
-                    else:
-                        try:
-                            volgorde = self._speelsterkte2volgorde[(disc, beschr)]
-                        except KeyError:
-                            volgorde = 9999
-                            self.out_warning("Kan speelsterkte volgorde niet vaststellen voor: (%s, %s)" % (
-                                                repr(disc), repr(beschr)))
+        if len(nieuwe_lijst):
+            SpeldToegekend.objects.bulk_create(nieuwe_lijst)
 
-                        # kijk of deze al bestaat
-                        found = None
-                        for huidig in huidige_lijst:
-                            if huidig.beschrijving == beschr and huidig.discipline == disc and huidig.category == cat:
-                                # bestaat al
-                                found = huidig
-                                break   # from the for
-                        # for
+        # verwijder niet meer toegekende spelden
+        if len(huidige_lijst):
+            for was_toegekend in huidige_lijst:
+                self.out_info('Toegekend speld is vervallen: lid=%s: %s' % (sporter.lid_nr, was_toegekend.speld.pas_code))
+                self.count_verwijderingen += 1
+                was_toegekend.delete()
+            # for
 
-                        if found:
-                            # verwijderen uit de lijst zodat echt verwijderde speelsterktes kunnen vinden
-                            huidige_lijst.remove(found)
-                        else:
-                            # toevoegen
-                            self.out_info('Lid %s: nieuwe speelsterkte %s, %s, %s' % (
-                                                lid_nr, datum, disc, beschr))
+    def importeer(self, data: list):
+        """ Importeert data van alle leden
 
-                            try:
-                                volgorde = self._speelsterkte2volgorde[(disc, beschr)]
-                            except KeyError:
-                                volgorde = 9999
-                                self.out_warning('Kan speelsterkte volgorde niet vaststellen voor: (%s, %s)' % (
-                                                    repr(disc), repr(beschr)))
+            data:
+                [
+                    {
+                        'member_number': int,
+                        'skill_level': [
+                            {
+                                "date": "1990-01-01",
+                                "skill_level_code": "R1000",            # pas code
+                                "skill_level_name": "Recurve 1000",
+                                "discipline_code": "REC",
+                                "discipline_name": "Recurve",
+                                "category_name": "Senior"
+                            },
+                            ...
+                        ]
+                    },
+                    ...
+                ]
+        """
 
-                            sterk = Speelsterkte(
-                                         sporter=obj,
-                                         beschrijving=beschr,
-                                         discipline=disc,
-                                         category=cat,
-                                         volgorde=volgorde,
-                                         datum=datum,
-                                         pas_code=code)
-                            nieuwe_lijst.append(sterk)
-                            self.count_toevoegingen += 1
-                # for
+        for member_data in data:
+            lid_nr = member_data['member_number']
 
-                if len(nieuwe_lijst):
-                    Speelsterkte.objects.bulk_create(nieuwe_lijst)
-            else:
-                # sporter is geen actief lid meer
-                # behoud zijn speelsterktes, totdat de sporter echt verwijderd wordt
-                huidige_lijst = list()
+            sporter = self._import_sporters.vind_sporter(lid_nr)
+            if not sporter:
+                continue
 
-            # verwijder oude speelsterktes
-            if len(huidige_lijst):
-                for sterk in huidige_lijst:
-                    self.out_info('Speelsterkte is vervallen: lid=%s: %s' % (lid_nr, sterk))
-                    self.count_verwijderingen += 1
-                    sterk.delete()
-                # for
-        # for member
+            if sporter.is_actief_lid:
+                skill_levels_data = member_data.get('skill_levels', [])
+                self._importeer_voor_sporter(sporter, skill_levels_data)
+
+        # for sporter
+
+        self.count_toegekende_spelden = SpeldToegekend.objects.all().count()
 
 # end of file

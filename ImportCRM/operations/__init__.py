@@ -20,7 +20,7 @@ __all__ = [
     'ImportCrmLocaties',
     'ImportCrmOpleidingen',
     'ImportCrmVerenigingen',
-    ]
+]
 
 
 # end of file

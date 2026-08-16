@@ -5,6 +5,16 @@
 
 // Specific classes for our website
 
+.sv-bg-erachter {
+  position:fixed;
+  inset:0;
+  // background:url('desktop-background.jpg');
+  background-size: cover;     // when active, repeat-y is not needed
+  background-repeat: repeat-y;
+  filter:blur(10px);
+  //transform:scale(1.08);
+}
+
 // banner is voor de titel van de site
 
 h1, h2, h3, h4, h5, h6 {
@@ -20,6 +30,7 @@ h1, h2, h3, h4, h5, h6 {
   margin: 0;
   color: $secondary-color;    // rood
 }
+
 .sv-site-banner-kleiner {
   font-family: 'Fira Sans', sans-serif;
   font-size: 4.2rem;
