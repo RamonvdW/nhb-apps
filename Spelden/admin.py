@@ -58,7 +58,7 @@ class SpeldVoorwaardenAdmin(admin.ModelAdmin):
 
     list_select_related = ('boog_type', 'leeftijdsklasse',)
 
-    list_filter = ('discipline', 'wedstrijd_soort', BoogFilter,
+    list_filter = ('discipline', 'speld__categorie', 'wedstrijd_soort', BoogFilter,
                    'leeftijdsklasse__wedstrijd_geslacht', LeeftijdsklasseFilter,
                    'afstanden', 'aantal_pijlen', 'aantal_doelen', 'speld')
 

@@ -79,7 +79,7 @@ class OverzichtView(TemplateView):
         # begrenzing voor bestellen (alleen leden) volgt verderop
         if settings.WEBWINKEL_TOON_PRESTATIESPELDEN:                # pragma: no branch
             context['url_spelden'] = reverse('Spelden:begin')
-            context['img_spelden'] = static_safe('spelden/ster_1200.webp')
+            context['img_spelden'] = static_safe('spelden/ster_1200_recurve.webp')
 
         if rol_get_huidige(self.request) == Rol.ROL_SPORTER:
             context['menu_toon_mandje'] = True

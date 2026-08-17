@@ -23,14 +23,14 @@ class Speld(models.Model):
 
     # beschrijving
     # (Grijs, Wit, 1000, etc.)
-    beschrijving = models.CharField(max_length=30)
+    beschrijving = models.CharField(max_length=40)
 
     # ster spelden hebben aparte ontwerpen voor recurve en compound
     # voor de rest is dit veld niet gezet
     boog_type = models.ForeignKey(BoogType, on_delete=models.PROTECT,
                                   null=True, blank=True)
 
-    # afkorting om te tonen op de bondspas
+    # afkorting om te tonen op de bondspas (langste: AH24-ZWART)
     pas_code = models.CharField(max_length=10, default='', blank=True)
 
     # de prijs voor dit product

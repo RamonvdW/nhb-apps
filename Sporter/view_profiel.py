@@ -31,7 +31,8 @@ from Records.models import IndivRecord
 from Registreer.definities import REGISTRATIE_FASE_COMPLEET
 from Score.definities import AG_DOEL_TEAM, AG_DOEL_INDIV
 from Score.models import Aanvangsgemiddelde, AanvangsgemiddeldeHist
-from Sporter.models import SporterBoog, Speelsterkte
+from Spelden.models import SpeldToegekend
+from Sporter.models import SporterBoog
 from Sporter.operations import get_sporter_gekozen_bogen, get_sporter_voorkeuren
 from Wedstrijden.definities import (WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_MANDJE,
                                     WEDSTRIJD_INSCHRIJVING_STATUS_BESTELD,
@@ -251,28 +252,21 @@ class ProfielView(UserPassesTestMixin, TemplateView):
         context['bb_email'] = settings.EMAIL_BONDSBUREAU
         context['url_vcp_contact'] = settings.URL_VCP_CONTACTGEGEVENS
 
-    def _find_speelsterktes(self):
-        sterktes = Speelsterkte.objects.filter(sporter=self.sporter).order_by('volgorde')
-        if sterktes.count() == 0:           # pragma: no branch
-            sterktes = None
+    def _find_prestatiespelden(self):
+        prestatiespelden = SpeldToegekend.objects.filter(sporter=self.sporter).order_by('-speld__volgorde')
+        if prestatiespelden.count() == 0:           # pragma: no branch
+            prestatiespelden = None
         else:
-            prev_cat_disc = None
-            for sterkte in sterktes:
-                cat_disc = sterkte.discipline
-                if sterkte.category == 'Cadet':
-                    # toon cadet codes totdat er een senior code geregistreerd is
-                    cat_disc += 'Senior'
+            prev_cat = None
+            for al_toegekend in prestatiespelden:
+                if al_toegekend.speld.categorie != prev_cat:
+                    prev_cat = al_toegekend.speld.categorie
+                    al_toegekend.code_pas_str = al_toegekend.speld.pas_code
                 else:
-                    cat_disc += sterkte.category  # Senior / Master
-
-                if cat_disc != prev_cat_disc:
-                    sterkte.code_pas_str = sterkte.pas_code
-                    prev_cat_disc = cat_disc
-                else:
-                    sterkte.code_pas_str = ''
+                    al_toegekend.code_pas_str = ''
             # for
 
-        return sterktes
+        return prestatiespelden
 
     def _find_diplomas(self):
         diplomas = list(self.sporter.opleidingdiploma_set.order_by('-datum_begin'))
@@ -459,7 +453,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                     # niet ingeschreven en geen interesse
                     context['toon_bondscompetities'] = False
 
-            context['speelsterktes'] = self._find_speelsterktes()
+            context['prestatiespelden'] = self._find_prestatiespelden()
             context['url_procedures'] = settings.URL_PROCEDURES
 
             context['diplomas'] = self._find_diplomas()

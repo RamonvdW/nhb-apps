@@ -819,7 +819,7 @@
     {% endif %}
 
 
-    {% if speelsterktes %}
+    {% if prestatiespelden %}
 
         <!-- witruimte -->
         <div class="row center">
@@ -832,33 +832,25 @@
         <!-- blauwe balk met informatie -->
         <div class="row-sv-blauw">
             <div class="col s12">
-
-                <!-- details: https://worldarchery.sport/rulebook/article/17#article-723
-                  en: https://worldarchery.sport/sport/education/badge-awards -->
-
                 <table class="sv-kader-tabel">
                     <thead>
                         <tr>
-                            <th class="center">Discipline</th>
                             <th class="center">Onder<wbr>scheiding</th>
-                            <th class="center hide-on-small-only">Categorie</th>
-                            <th class="center">Datum</th>
-                            <th class="center hide-on-small-only">Code bondspas</th>
+                            <th class="center">Toegekend op</th>
+                            <th class="center hide-on-small-only">Code op bondspas</th>
                         </tr>
                     </thead>
 
-                    {% for obj in speelsterktes %}
+                    {% for obj in prestatiespelden %}
                         <tr>
-                            <td class="center">{{ obj.discipline }}</td>
-                            <td class="center">{{ obj.beschrijving }}</td>
-                            <td class="center hide-on-small-only">{{ obj.category }}</td>
+                            <td class="center">{{ obj.speld.beschrijving }}</td>
                             <td class="center">{{ obj.datum }}</td>
                             <td class="center hide-on-small-only">{{ obj.code_pas_str }}</td>
                         </tr>
                     {% endfor %}
 
                     <tr>
-                        <td colspan="4" class="center">
+                        <td colspan="3" class="center">
                             <span>Kijk op <code>www.handboogsport.nl</code> onder Procedures hoe je een prestatiespeld aan kan vragen:</span><br><br>
                             {% sv-knop-ext url=url_procedures tekst='Link' %}
                         </td>
@@ -867,7 +859,7 @@
             </div>
         </div>
 
-    {% endif %}     <!-- speelsterktes -->
+    {% endif %}     <!-- prestatiespelden -->
 
 
     {% if histcomp %}

@@ -770,7 +770,7 @@ def maak_voorwaarden_wa_arrowhead(apps, _):
     boog_bb = boog_klas.objects.get(afkorting='BB')
 
     spelden = dict()
-    for speld in speld_klas.objects.filter(volgorde__in=(2001, 2002, 2003, 2004, 2005)):
+    for speld in speld_klas.objects.filter(volgorde__in=(2010, 2011, 2012, 2013, 2014)):
         spelden[speld.volgorde] = speld
     # for
 
@@ -781,7 +781,7 @@ def maak_voorwaarden_wa_arrowhead(apps, _):
     bulk = [
         # Recurve heren
         voorwaarden_klas(
-            speld=spelden[2001],        # Groen
+            speld=spelden[2010],        # Groen
             discipline=SPELD_DISCIPLINE_VELD,
             wedstrijd_soort=soort,
             leeftijdsklasse=lkl_heren,
@@ -789,7 +789,7 @@ def maak_voorwaarden_wa_arrowhead(apps, _):
             aantal_doelen=24,
             benodigde_score=219),
         voorwaarden_klas(
-            speld=spelden[2002],        # Grijs
+            speld=spelden[2011],        # Grijs
             discipline=SPELD_DISCIPLINE_VELD,
             wedstrijd_soort=soort,
             leeftijdsklasse=lkl_heren,
@@ -797,7 +797,7 @@ def maak_voorwaarden_wa_arrowhead(apps, _):
             aantal_doelen=24,
             benodigde_score=275),
         voorwaarden_klas(
-            speld=spelden[2003],        # Wit
+            speld=spelden[2012],        # Wit
             discipline=SPELD_DISCIPLINE_VELD,
             wedstrijd_soort=soort,
             leeftijdsklasse=lkl_heren,
@@ -805,7 +805,7 @@ def maak_voorwaarden_wa_arrowhead(apps, _):
             aantal_doelen=24,
             benodigde_score=309),
         voorwaarden_klas(
-            speld=spelden[2004],        # Zwart
+            speld=spelden[2013],        # Zwart
             discipline=SPELD_DISCIPLINE_VELD,
             wedstrijd_soort=soort,
             leeftijdsklasse=lkl_heren,
@@ -813,7 +813,7 @@ def maak_voorwaarden_wa_arrowhead(apps, _):
             aantal_doelen=24,
             benodigde_score=333),
         voorwaarden_klas(
-            speld=spelden[2005],        # Goud
+            speld=spelden[2014],        # Goud
             discipline=SPELD_DISCIPLINE_VELD,
             wedstrijd_soort=soort,
             leeftijdsklasse=lkl_heren,
@@ -823,7 +823,7 @@ def maak_voorwaarden_wa_arrowhead(apps, _):
 
         # Recurve dames
         voorwaarden_klas(
-            speld=spelden[2001],        # Groen
+            speld=spelden[2010],        # Groen
             discipline=SPELD_DISCIPLINE_VELD,
             wedstrijd_soort=soort,
             leeftijdsklasse=lkl_dames,
@@ -831,7 +831,7 @@ def maak_voorwaarden_wa_arrowhead(apps, _):
             aantal_doelen=24,
             benodigde_score=196),
         voorwaarden_klas(
-            speld=spelden[2002],        # Grijs
+            speld=spelden[2011],        # Grijs
             discipline=SPELD_DISCIPLINE_VELD,
             wedstrijd_soort=soort,
             leeftijdsklasse=lkl_dames,
@@ -839,7 +839,7 @@ def maak_voorwaarden_wa_arrowhead(apps, _):
             aantal_doelen=24,
             benodigde_score=257),
         voorwaarden_klas(
-            speld=spelden[2003],        # Wit
+            speld=spelden[2012],        # Wit
             discipline=SPELD_DISCIPLINE_VELD,
             wedstrijd_soort=soort,
             leeftijdsklasse=lkl_dames,
@@ -847,7 +847,7 @@ def maak_voorwaarden_wa_arrowhead(apps, _):
             aantal_doelen=24,
             benodigde_score=293),
         voorwaarden_klas(
-            speld=spelden[2004],        # Zwart
+            speld=spelden[2013],        # Zwart
             discipline=SPELD_DISCIPLINE_VELD,
             wedstrijd_soort=soort,
             leeftijdsklasse=lkl_dames,
@@ -855,7 +855,7 @@ def maak_voorwaarden_wa_arrowhead(apps, _):
             aantal_doelen=24,
             benodigde_score=320),
         voorwaarden_klas(
-            speld=spelden[2005],        # Goud
+            speld=spelden[2014],        # Goud
             discipline=SPELD_DISCIPLINE_VELD,
             wedstrijd_soort=soort,
             leeftijdsklasse=lkl_dames,
@@ -865,7 +865,7 @@ def maak_voorwaarden_wa_arrowhead(apps, _):
 
         # Compound heren
         voorwaarden_klas(
-            speld=spelden[2001],        # Groen
+            speld=spelden[2010],        # Groen
             discipline=SPELD_DISCIPLINE_VELD,
             wedstrijd_soort=soort,
             leeftijdsklasse=lkl_heren,
@@ -873,7 +873,7 @@ def maak_voorwaarden_wa_arrowhead(apps, _):
             aantal_doelen=24,
             benodigde_score=292),
         voorwaarden_klas(
-            speld=spelden[2002],        # Grijs
+            speld=spelden[2011],        # Grijs
             discipline=SPELD_DISCIPLINE_VELD,
             wedstrijd_soort=soort,
             leeftijdsklasse=lkl_heren,
@@ -881,7 +881,7 @@ def maak_voorwaarden_wa_arrowhead(apps, _):
             aantal_doelen=24,
             benodigde_score=340),
         voorwaarden_klas(
-            speld=spelden[2003],        # Wit
+            speld=spelden[2012],        # Wit
             discipline=SPELD_DISCIPLINE_VELD,
             wedstrijd_soort=soort,
             leeftijdsklasse=lkl_heren,
@@ -889,7 +889,7 @@ def maak_voorwaarden_wa_arrowhead(apps, _):
             aantal_doelen=24,
             benodigde_score=367),
         voorwaarden_klas(
-            speld=spelden[2004],        # Zwart
+            speld=spelden[2013],        # Zwart
             discipline=SPELD_DISCIPLINE_VELD,
             wedstrijd_soort=soort,
             leeftijdsklasse=lkl_heren,
@@ -897,7 +897,7 @@ def maak_voorwaarden_wa_arrowhead(apps, _):
             aantal_doelen=24,
             benodigde_score=387),
         voorwaarden_klas(
-            speld=spelden[2005],        # Goud
+            speld=spelden[2014],        # Goud
             discipline=SPELD_DISCIPLINE_VELD,
             wedstrijd_soort=soort,
             leeftijdsklasse=lkl_heren,
@@ -907,7 +907,7 @@ def maak_voorwaarden_wa_arrowhead(apps, _):
 
         # Compound dames
         voorwaarden_klas(
-            speld=spelden[2001],        # Groen
+            speld=spelden[2010],        # Groen
             discipline=SPELD_DISCIPLINE_VELD,
             wedstrijd_soort=soort,
             leeftijdsklasse=lkl_dames,
@@ -915,7 +915,7 @@ def maak_voorwaarden_wa_arrowhead(apps, _):
             aantal_doelen=24,
             benodigde_score=275),
         voorwaarden_klas(
-            speld=spelden[2002],        # Grijs
+            speld=spelden[2011],        # Grijs
             discipline=SPELD_DISCIPLINE_VELD,
             wedstrijd_soort=soort,
             leeftijdsklasse=lkl_dames,
@@ -923,7 +923,7 @@ def maak_voorwaarden_wa_arrowhead(apps, _):
             aantal_doelen=24,
             benodigde_score=325),
         voorwaarden_klas(
-            speld=spelden[2003],        # Wit
+            speld=spelden[2012],        # Wit
             discipline=SPELD_DISCIPLINE_VELD,
             wedstrijd_soort=soort,
             leeftijdsklasse=lkl_dames,
@@ -931,7 +931,7 @@ def maak_voorwaarden_wa_arrowhead(apps, _):
             aantal_doelen=24,
             benodigde_score=352),
         voorwaarden_klas(
-            speld=spelden[2004],        # Zwart
+            speld=spelden[2013],        # Zwart
             discipline=SPELD_DISCIPLINE_VELD,
             wedstrijd_soort=soort,
             leeftijdsklasse=lkl_dames,
@@ -939,7 +939,7 @@ def maak_voorwaarden_wa_arrowhead(apps, _):
             aantal_doelen=24,
             benodigde_score=373),
         voorwaarden_klas(
-            speld=spelden[2005],        # Goud
+            speld=spelden[2014],        # Goud
             discipline=SPELD_DISCIPLINE_VELD,
             wedstrijd_soort=soort,
             leeftijdsklasse=lkl_dames,
@@ -949,7 +949,7 @@ def maak_voorwaarden_wa_arrowhead(apps, _):
 
         # Barebow heren
         voorwaarden_klas(
-            speld=spelden[2001],        # Groen
+            speld=spelden[2010],        # Groen
             discipline=SPELD_DISCIPLINE_VELD,
             wedstrijd_soort=soort,
             leeftijdsklasse=lkl_heren,
@@ -957,7 +957,7 @@ def maak_voorwaarden_wa_arrowhead(apps, _):
             aantal_doelen=24,
             benodigde_score=191),
         voorwaarden_klas(
-            speld=spelden[2002],        # Grijs
+            speld=spelden[2011],        # Grijs
             discipline=SPELD_DISCIPLINE_VELD,
             wedstrijd_soort=soort,
             leeftijdsklasse=lkl_heren,
@@ -965,7 +965,7 @@ def maak_voorwaarden_wa_arrowhead(apps, _):
             aantal_doelen=24,
             benodigde_score=250),
         voorwaarden_klas(
-            speld=spelden[2003],        # Wit
+            speld=spelden[2012],        # Wit
             discipline=SPELD_DISCIPLINE_VELD,
             wedstrijd_soort=soort,
             leeftijdsklasse=lkl_heren,
@@ -973,7 +973,7 @@ def maak_voorwaarden_wa_arrowhead(apps, _):
             aantal_doelen=24,
             benodigde_score=287),
         voorwaarden_klas(
-            speld=spelden[2004],        # Zwart
+            speld=spelden[2013],        # Zwart
             discipline=SPELD_DISCIPLINE_VELD,
             wedstrijd_soort=soort,
             leeftijdsklasse=lkl_heren,
@@ -981,7 +981,7 @@ def maak_voorwaarden_wa_arrowhead(apps, _):
             aantal_doelen=24,
             benodigde_score=315),
         voorwaarden_klas(
-            speld=spelden[2005],        # Goud
+            speld=spelden[2014],        # Goud
             discipline=SPELD_DISCIPLINE_VELD,
             wedstrijd_soort=soort,
             leeftijdsklasse=lkl_heren,
@@ -991,7 +991,7 @@ def maak_voorwaarden_wa_arrowhead(apps, _):
 
         # Barebow dames
         voorwaarden_klas(
-            speld=spelden[2001],        # Groen
+            speld=spelden[2010],        # Groen
             discipline=SPELD_DISCIPLINE_VELD,
             wedstrijd_soort=soort,
             leeftijdsklasse=lkl_dames,
@@ -999,7 +999,7 @@ def maak_voorwaarden_wa_arrowhead(apps, _):
             aantal_doelen=24,
             benodigde_score=182),
         voorwaarden_klas(
-            speld=spelden[2002],        # Grijs
+            speld=spelden[2011],        # Grijs
             discipline=SPELD_DISCIPLINE_VELD,
             wedstrijd_soort=soort,
             leeftijdsklasse=lkl_dames,
@@ -1007,7 +1007,7 @@ def maak_voorwaarden_wa_arrowhead(apps, _):
             aantal_doelen=24,
             benodigde_score=238),
         voorwaarden_klas(
-            speld=spelden[2003],        # Wit
+            speld=spelden[2012],        # Wit
             discipline=SPELD_DISCIPLINE_VELD,
             wedstrijd_soort=soort,
             leeftijdsklasse=lkl_dames,
@@ -1015,7 +1015,7 @@ def maak_voorwaarden_wa_arrowhead(apps, _):
             aantal_doelen=24,
             benodigde_score=272),
         voorwaarden_klas(
-            speld=spelden[2004],        # Zwart
+            speld=spelden[2013],        # Zwart
             discipline=SPELD_DISCIPLINE_VELD,
             wedstrijd_soort=soort,
             leeftijdsklasse=lkl_dames,
@@ -1023,7 +1023,7 @@ def maak_voorwaarden_wa_arrowhead(apps, _):
             aantal_doelen=24,
             benodigde_score=295),
         voorwaarden_klas(
-            speld=spelden[2005],        # Goud
+            speld=spelden[2014],        # Goud
             discipline=SPELD_DISCIPLINE_VELD,
             wedstrijd_soort=soort,
             leeftijdsklasse=lkl_dames,
@@ -1035,7 +1035,7 @@ def maak_voorwaarden_wa_arrowhead(apps, _):
 
     # maak nu de 48-doelen scores: dit is (in 2024) het dubbele van de 24-doelen scores
     bulk = list()
-    for obj in voorwaarden_klas.objects.filter(speld__volgorde__in=(2001, 2002, 2003, 2004, 2005)):
+    for obj in voorwaarden_klas.objects.filter(speld__volgorde__in=(2010, 2011, 2012, 2013, 2014)):
         obj.pk = None
         obj.aantal_doelen *= 2
         obj.benodigde_score *= 2

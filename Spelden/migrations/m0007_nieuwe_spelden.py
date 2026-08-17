@@ -37,37 +37,37 @@ def maak_spelden_wa_ster(apps, _):
         speld_klas(
             volgorde=1001,
             categorie=SPELD_CATEGORIE_WA_STER_R,
-            beschrijving="1000",
+            beschrijving="WA Ster Recurve 1000",
             pas_code="R1000",
             boog_type=boog_r),
         speld_klas(
             volgorde=1002,
             categorie=SPELD_CATEGORIE_WA_STER_R,
-            beschrijving="1100",
+            beschrijving="WA Ster Recurve 1100",
             pas_code="R1100",
             boog_type=boog_r),
         speld_klas(
             volgorde=1003,
             categorie=SPELD_CATEGORIE_WA_STER_R,
-            beschrijving="1200",
+            beschrijving="WA Ster Recurve 1200",
             pas_code="R1200",
             boog_type=boog_r),
         speld_klas(
             volgorde=1004,
             categorie=SPELD_CATEGORIE_WA_STER_R,
-            beschrijving="1300",
+            beschrijving="WA Ster Recurve 1300",
             pas_code="R1300",
             boog_type=boog_r),
         speld_klas(
             volgorde=1005,
             categorie=SPELD_CATEGORIE_WA_STER_R,
-            beschrijving="1350",
+            beschrijving="WA Ster Recurve 1350",
             pas_code="R1350",
             boog_type=boog_r),
         speld_klas(
             volgorde=1006,
             categorie=SPELD_CATEGORIE_WA_STER_R,
-            beschrijving="1400",
+            beschrijving="WA Ster Recurve 1400",
             pas_code="R1400",
             boog_type=boog_r),
 
@@ -75,37 +75,37 @@ def maak_spelden_wa_ster(apps, _):
         speld_klas(
             volgorde=1011,
             categorie=SPELD_CATEGORIE_WA_STER_C,
-            beschrijving="1000",
+            beschrijving="WA Ster Compound 1000",
             pas_code="C1000",
             boog_type=boog_c),
         speld_klas(
             volgorde=1012,
             categorie=SPELD_CATEGORIE_WA_STER_C,
-            beschrijving="1100",
+            beschrijving="WA Ster Compound 1100",
             pas_code="C1100",
             boog_type=boog_c),
         speld_klas(
             volgorde=1013,
             categorie=SPELD_CATEGORIE_WA_STER_C,
-            beschrijving="1200",
+            beschrijving="WA Ster Compound 1200",
             pas_code="C1200",
             boog_type=boog_c),
         speld_klas(
             volgorde=1014,
             categorie=SPELD_CATEGORIE_WA_STER_C,
-            beschrijving="1300",
+            beschrijving="WA Ster Compound 1300",
             pas_code="C1300",
             boog_type=boog_c),
         speld_klas(
             volgorde=1015,
             categorie=SPELD_CATEGORIE_WA_STER_C,
-            beschrijving="1350",
+            beschrijving="WA Ster Compound 1350",
             pas_code="C1350",
             boog_type=boog_c),
         speld_klas(
             volgorde=1016,
             categorie=SPELD_CATEGORIE_WA_STER_C,
-            beschrijving="1400",
+            beschrijving="WA Ster Compound 1400",
             pas_code="C1400",
             boog_type=boog_c),
 
@@ -113,52 +113,76 @@ def maak_spelden_wa_ster(apps, _):
         speld_klas(
             volgorde=1201,
             categorie=SPELD_CATEGORIE_WA_STER_ZILVER_R,
-            beschrijving="Zilveren ster Recurve 1000",
+            beschrijving="WA Zilveren ster Recurve 1000",
             pas_code="R1000Z",
             boog_type=boog_r),
         speld_klas(
             volgorde=1202,
             categorie=SPELD_CATEGORIE_WA_STER_ZILVER_R,
-            beschrijving="Zilveren ster Recurve 1100",
+            beschrijving="WA Zilveren ster Recurve 1100",
             pas_code="R1100Z",
             boog_type=boog_r),
         speld_klas(
             volgorde=1203,
             categorie=SPELD_CATEGORIE_WA_STER_ZILVER_R,
-            beschrijving="Zilveren ster Recurve 1200",
+            beschrijving="WA Zilveren ster Recurve 1200",
             pas_code="R1200Z",
             boog_type=boog_r),
         speld_klas(
             volgorde=1204,
             categorie=SPELD_CATEGORIE_WA_STER_ZILVER_R,
-            beschrijving="Zilveren Ster Recurve 1300",
+            beschrijving="WA Zilveren ster Recurve 1300",
             pas_code="R1300Z",
+            boog_type=boog_r),
+        speld_klas(
+            volgorde=1204,
+            categorie=SPELD_CATEGORIE_WA_STER_ZILVER_R,
+            beschrijving="WA Zilveren ster Recurve 1350",
+            pas_code="R1350Z",
+            boog_type=boog_r),
+        speld_klas(
+            volgorde=1204,
+            categorie=SPELD_CATEGORIE_WA_STER_ZILVER_R,
+            beschrijving="WA Zilveren ster Recurve 1400",
+            pas_code="R1400Z",
             boog_type=boog_r),
 
         # WA zilveren ster, Compound
         speld_klas(
             volgorde=1211,
             categorie=SPELD_CATEGORIE_WA_STER_ZILVER_C,
-            beschrijving="Zilveren ster Compound 1000",
+            beschrijving="WA Zilveren ster Compound 1000",
             pas_code="C1000Z",
             boog_type=boog_c),
         speld_klas(
             volgorde=1212,
             categorie=SPELD_CATEGORIE_WA_STER_ZILVER_C,
-            beschrijving="Zilveren ster Compound 1100",
+            beschrijving="WA Zilveren ster Compound 1100",
             pas_code="C1100Z",
             boog_type=boog_c),
         speld_klas(
             volgorde=1213,
             categorie=SPELD_CATEGORIE_WA_STER_ZILVER_C,
-            beschrijving="Zilveren ster Compound 1200",
+            beschrijving="WA Zilveren ster Compound 1200",
             pas_code="C1200Z",
             boog_type=boog_c),
         speld_klas(
             volgorde=1214,
             categorie=SPELD_CATEGORIE_WA_STER_ZILVER_C,
-            beschrijving="Zilveren ster Compound 1300",
+            beschrijving="WA Zilveren ster Compound 1300",
             pas_code="C1300Z",
+            boog_type=boog_c),
+        speld_klas(
+            volgorde=1215,
+            categorie=SPELD_CATEGORIE_WA_STER_ZILVER_C,
+            beschrijving="WA Zilveren ster Compound 1350",
+            pas_code="C1350Z",
+            boog_type=boog_c),
+        speld_klas(
+            volgorde=1216,
+            categorie=SPELD_CATEGORIE_WA_STER_ZILVER_C,
+            beschrijving="WA Zilveren ster Compound 1400",
+            pas_code="C1400Z",
             boog_type=boog_c),
     ]
 
@@ -182,38 +206,38 @@ def maak_spelden_wa_arrowhead(apps, _):
         speld_klas(
             volgorde=2001,
             categorie=SPELD_CATEGORIE_WA_ARROWHEAD,
-            beschrijving="Groen",
-            pas_code="GROEN"),
+            beschrijving="WA Arrowhead Groen",
+            pas_code="AH-GROEN"),
         speld_klas(
             volgorde=2002,
             categorie=SPELD_CATEGORIE_WA_ARROWHEAD,
-            beschrijving="Bruin",
-            pas_code="BRUIN"),
+            beschrijving="WA Arrowhead Bruin",
+            pas_code="AH-BRUIN"),
         speld_klas(
             volgorde=2003,
             categorie=SPELD_CATEGORIE_WA_ARROWHEAD,
-            beschrijving="Grijs",
-            pas_code="GRIJS"),
+            beschrijving="WA Arrowhead Grijs",
+            pas_code="AH-GRIJS"),
         speld_klas(
             volgorde=2004,
             categorie=SPELD_CATEGORIE_WA_ARROWHEAD,
-            beschrijving="Zwart",
-            pas_code="ZWART"),
+            beschrijving="WA Arrowhead Zwart",
+            pas_code="AH-ZWART"),
         speld_klas(
             volgorde=2005,
             categorie=SPELD_CATEGORIE_WA_ARROWHEAD,
-            beschrijving="Wit",
-            pas_code="WIT"),
+            beschrijving="WA Arrowhead Wit",
+            pas_code="AH-WIT"),
         speld_klas(
             volgorde=2006,
             categorie=SPELD_CATEGORIE_WA_ARROWHEAD,
-            beschrijving="Zilver",
-            pas_code="ZILVER"),
+            beschrijving="WA Arrowhead Zilver",
+            pas_code="AH-ZILVER"),
         speld_klas(
             volgorde=2007,
             categorie=SPELD_CATEGORIE_WA_ARROWHEAD,
-            beschrijving="Goud",
-            pas_code="GOUD"),
+            beschrijving="WA Arrowhead Goud",
+            pas_code="AH-GOUD"),
     ]
     speld_klas.objects.bulk_create(bulk)
 
@@ -222,28 +246,28 @@ def maak_spelden_wa_arrowhead(apps, _):
         speld_klas(
             volgorde=2010,
             categorie=SPELD_CATEGORIE_WA_ARROWHEAD_2024,
-            beschrijving="Groen 24",
-            pas_code="GROEN24"),
+            beschrijving="WA Arrowhead 2024 Groen",
+            pas_code="AH24-GROEN"),
         speld_klas(
             volgorde=2011,
             categorie=SPELD_CATEGORIE_WA_ARROWHEAD_2024,
-            beschrijving="Grijs 24",
-            pas_code="GRIJS24"),
+            beschrijving="WA Arrowhead 2024 Grijs",
+            pas_code="AH24-GRIJS"),
         speld_klas(
             volgorde=2012,
             categorie=SPELD_CATEGORIE_WA_ARROWHEAD_2024,
-            beschrijving="Wit 24",
-            pas_code="WIT24"),
+            beschrijving="WA Arrowhead 2024 Wit",
+            pas_code="AH24-WIT"),
         speld_klas(
             volgorde=2013,
             categorie=SPELD_CATEGORIE_WA_ARROWHEAD_2024,
-            beschrijving="Zwart 24",
-            pas_code="ZWART24"),
+            beschrijving="WA Arrowhead 2024 Zwart",
+            pas_code="AH24-ZWART"),
         speld_klas(
             volgorde=2014,
             categorie=SPELD_CATEGORIE_WA_ARROWHEAD_2024,
-            beschrijving="Goud 24",
-            pas_code="GOUD24"),
+            beschrijving="WA Arrowhead 2024 Goud",
+            pas_code="AH24-GOUD"),
     ]
     speld_klas.objects.bulk_create(bulk)
 
@@ -257,64 +281,64 @@ def maak_spelden_wa_target_awards(apps, _):
         speld_klas(
             volgorde=3001,
             categorie=SPELD_CATEGORIE_WA_TARGET_AWARD,
-            beschrijving="Wit",
+            beschrijving="WA Target Award Wit",
             pas_code="TA-WIT"),
         speld_klas(
             volgorde=3002,
             categorie=SPELD_CATEGORIE_WA_TARGET_AWARD,
-            beschrijving="Zwart",
+            beschrijving="WA Target Award Zwart",
             pas_code="TA-ZWART"),
         speld_klas(
             volgorde=3003,
             categorie=SPELD_CATEGORIE_WA_TARGET_AWARD,
-            beschrijving="Blauw",
+            beschrijving="WA Target Award Blauw",
             pas_code="TA-BLAUW"),
         speld_klas(
             volgorde=3004,
             categorie=SPELD_CATEGORIE_WA_TARGET_AWARD,
-            beschrijving="Rood",
+            beschrijving="WA Target Award Rood",
             pas_code="TA-ROOD"),
         speld_klas(
             volgorde=3005,
             categorie=SPELD_CATEGORIE_WA_TARGET_AWARD,
-            beschrijving="Goud",
+            beschrijving="WA Target Award Goud",
             pas_code="TA-GOUD"),
         speld_klas(
             volgorde=3006,
             categorie=SPELD_CATEGORIE_WA_TARGET_AWARD,
-            beschrijving="Purper",
+            beschrijving="WA Target Award Purper",
             pas_code="TA-PURPER"),
 
         # WA zilveren target award
         speld_klas(
             volgorde=3101,
             categorie=SPELD_CATEGORIE_WA_TARGET_AWARD_ZILVER,
-            beschrijving="Zilveren Target Award Wit",
+            beschrijving="WA Zilveren Target Award Wit",
             pas_code="ZTA-WIT"),
         speld_klas(
             volgorde=3102,
             categorie=SPELD_CATEGORIE_WA_TARGET_AWARD_ZILVER,
-            beschrijving="Zilveren Target Award Zwart",
+            beschrijving="WA Zilveren Target Award Zwart",
             pas_code="ZTA-ZWART"),
         speld_klas(
             volgorde=3103,
             categorie=SPELD_CATEGORIE_WA_TARGET_AWARD_ZILVER,
-            beschrijving="Zilveren Target Award Blauw",
+            beschrijving="WA Zilveren Target Award Blauw",
             pas_code="ZTA-BLAUW"),
         speld_klas(
             volgorde=3104,
             categorie=SPELD_CATEGORIE_WA_TARGET_AWARD_ZILVER,
-            beschrijving="Zilveren Target Award Rood",
+            beschrijving="WA Zilveren Target Award Rood",
             pas_code="ZTA-ROOD"),
         speld_klas(
             volgorde=3105,
             categorie=SPELD_CATEGORIE_WA_TARGET_AWARD_ZILVER,
-            beschrijving="Zilveren Target Award Goud",
+            beschrijving="WA Zilveren Target Award Goud",
             pas_code="ZTA-GOUD"),
         speld_klas(
             volgorde=3106,
             categorie=SPELD_CATEGORIE_WA_TARGET_AWARD_ZILVER,
-            beschrijving="Zilveren Target Award Purper",
+            beschrijving="WA Zilveren Target Award Purper",
             pas_code="ZTA-PURPER"),
     ]
     speld_klas.objects.bulk_create(bulk)
@@ -527,6 +551,11 @@ class Migration(migrations.Migration):
             model_name='speld',
             name='pas_code',
             field=models.CharField(blank=True, default='', max_length=10),
+        ),
+        migrations.AlterField(
+            model_name='speld',
+            name='beschrijving',
+            field=models.CharField(max_length=40),
         ),
         migrations.AlterField(
             model_name='speld',

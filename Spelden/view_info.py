@@ -213,7 +213,6 @@ class ArrowheadView(TemplateView):
         if rol_get_huidige(self.request) == Rol.ROL_SPORTER:
             context['menu_toon_mandje'] = True
 
-        # TODO: revise!
         qset = (SpeldVoorwaarden
                 .objects
                 .filter(speld__categorie=SPELD_CATEGORIE_WA_ARROWHEAD_2024)

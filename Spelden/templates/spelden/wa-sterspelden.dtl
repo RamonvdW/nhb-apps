@@ -111,13 +111,13 @@
                 <tr>
                     <td class="center">1350</td>
                     <td class="center"><img class="sv-foto-speld" draggable="false" src="{% static 'spelden/ster_1350.png' %}" alt="Ster 1350"></td>
-                    <td class="center">n.v.t.</td>
+                    <td class="center"><img class="sv-foto-speld" draggable="false" src="{% static 'spelden/zilveren_ster_1350_recurve.png' %}" alt="Zilveren ster 1350" style="filter:invert(1)"></td> <!-- TODO: juiste foto ontbreekt -->
                 </tr>
 
                 <tr>
                     <td class="center">1400</td>
                     <td class="center"><img class="sv-foto-speld" draggable="false" src="{% static 'spelden/ster_1400.webp' %}" alt="Ster 1400"></td>
-                    <td class="center">n.v.t.</td>
+                    <td class="center"><img class="sv-foto-speld" draggable="false" src="{% static 'spelden/zilveren_ster_1400_recurve.webp' %}" alt="Zilveren ster 1400" style="filter:invert(1)"></td> <!-- TODO: juiste foto ontbreekt -->
                 </tr>
 
             </table>
@@ -171,14 +171,14 @@
 
                 <tr>
                     <td class="center">1350</td>
-                    <td class="center"><img class="sv-foto-speld" draggable="false" src="{% static 'spelden/ster_1350_compound.webp' %}" alt="Ster 1350"></td>
-                    <td class="center">n.v.t.</td>
+                    <td class="center"><img class="sv-foto-speld" draggable="false" src="{% static 'spelden/ster_1350_compound.webp' %}" alt="Ster 1350" style="filter:invert(1)"></td> <!-- TODO: juiste foto ontbreekt -->
+                    <td class="center"><img class="sv-foto-speld" draggable="false" src="{% static 'spelden/zilveren_ster_1350_compound.webp' %}" alt="Zilveren ster 1350"></td>
                 </tr>
 
                 <tr>
                     <td class="center">1400</td>
-                    <td class="center"><img class="sv-foto-speld" draggable="false" src="{% static 'spelden/ster_1400_compound.webp' %}" alt="Ster 1400"></td>
-                    <td class="center">n.v.t.</td>
+                    <td class="center"><img class="sv-foto-speld" draggable="false" src="{% static 'spelden/ster_1400_compound.webp' %}" alt="Ster 1400" style="filter:invert(1)"></td>  <!-- TODO: juiste foto ontbreekt -->
+                    <td class="center"><img class="sv-foto-speld" draggable="false" src="{% static 'spelden/zilveren_ster_1400_compound.webp' %}" alt="Zilveren ster 1400"></td>
                 </tr>
 
             </table>

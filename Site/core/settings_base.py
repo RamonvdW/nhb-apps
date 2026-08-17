@@ -62,7 +62,7 @@ APPS_DIR = os.path.dirname(BASE_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2026-08-16'
+SITE_VERSIE = '2026-08-17'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -378,27 +378,29 @@ CRM_IMPORT_SPELDEN_VERTAAL_PAS_CODE = {
     'RC1100': 'R1100Z',
     'RC1200': 'R1200Z',
     'RC1300': 'R1300Z',
+    'RC1350': 'R1350Z',
+    'RC1400': 'R1400Z',
 
     'RM1000': 'R1000Z',
     'RM1100': 'R1100Z',
     'RM1200': 'R1200Z',
     'RM1300': 'R1300Z',
+    'RM1350': 'R1350Z',
+    'RM1400': 'R1400Z',
 
     'CC1000': 'C1000Z',
     'CC1100': 'C1100Z',
     'CC1200': 'C1200Z',
     'CC1300': 'C1300Z',
+    'CC1350': 'C1350Z',
+    'CC1400': 'C1400Z',
 
     'CM1000': 'C1000Z',
     'CM1100': 'C1100Z',
     'CM1200': 'C1200Z',
     'CM1300': 'C1300Z',
-
-    # ster spelden cadet/master die niet bestaan als zilveren ster
-    'RC1350': 'R1350',
-    'CC1350': 'C1350',
-    'CM1350': 'C1350',
-    'CC1400': 'C1400',
+    'CM1350': 'C1350Z',
+    'CM1400': 'C1400Z',
 
     # target awards oude naar nieuwe code
     'WA Wit': 'TA-WIT',
@@ -407,6 +409,21 @@ CRM_IMPORT_SPELDEN_VERTAAL_PAS_CODE = {
     'WA Rood': 'TA-ROOD',
     'WA Goud': 'TA-GOUD',
     'WA Purper': 'TA-PURPER',
+
+    # arrowhead oude naar nieuwe code
+    'GROEN': 'AH-GROEN',
+    'BRUIN': 'AH-BRUIN',
+    'GRIJS': 'AH-GRIJS',
+    'ZWART': 'AH-ZWART',
+    'WIT': 'AH-WIT',
+    'ZILVER': 'AH-ZILVER',
+    'GOUD': 'AH-GOUD',
+
+    'GROEN24': 'AH24-GROEN',
+    'GRIJS24': 'AH24-GRIJS',
+    'WIT24': 'AH24-WIT',
+    'ZWART24': 'AH24-ZWART',
+    'GOUD24': 'AH24-GOUD',
 }
 
 OPLEIDING_CODES = (
