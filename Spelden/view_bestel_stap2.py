@@ -8,6 +8,7 @@ from django.urls import reverse
 from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import render
 from django.views.generic import TemplateView
+from django.core.exceptions import PermissionDenied
 from Account.models import get_account
 from BasisTypen.definities import BOOGTYPE_AFKORTING2STR, GESLACHT2STR
 from Functie.definities import Rol
@@ -34,15 +35,17 @@ class BestelStap2View(TemplateView):
 
     def _load_prep(self):
         if rol_get_huidige(self.request) != Rol.ROL_SPORTER:
-            raise PermissionError('Niet ingelogd')
+            raise PermissionDenied('Niet ingelogd')
 
         account = get_account(self.request)
         sporter = get_sporter(account)
 
-        self.prep, _ = SpeldAanvraagPrep.objects.get_or_create(voor_sporter=sporter)
+        self.prep = SpeldAanvraagPrep.objects.filter(voor_sporter=sporter).select_related('voor_sporter').first()
+        if not self.prep:
+            raise Http404('Onvolledige verzoek (1)')
 
         if not self.prep.heeft_data_stap1:
-            raise Http404('Onvolledige verzoek')
+            raise Http404('Onvolledige verzoek (2)')
 
     def _prep_pagina(self, context, opties):
         """ herbruikbare code voor get and post handlers """
@@ -167,6 +170,7 @@ class BestelStap2View(TemplateView):
                              for optie in opties
                              if optie.afstanden == afstand]
             aantal_pijlen = list(set(aantal_pijlen))
+            # in principe mapt elke afstand op een uniek aantal pijlen
             if len(aantal_pijlen) != 1:
                 raise Http404('Kan aantal pijlen niet vaststellen')
 

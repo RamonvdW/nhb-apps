@@ -8,6 +8,7 @@ from django.urls import reverse
 from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import render
 from django.views.generic import TemplateView
+from django.core.exceptions import PermissionDenied
 from Account.models import get_account
 from BasisTypen.definities import ORGANISATIE_WA, GESLACHT_MAN
 from Functie.definities import Rol
@@ -37,30 +38,34 @@ class BestelStap1View(TemplateView):
         self.prep = None
         self.sporter_bogen = list()     # afkortingen
 
-    def _load_prep(self):
+    def _load_prep(self, mag_database_wijzigen=False):
         if rol_get_huidige(self.request) != Rol.ROL_SPORTER:
-            raise PermissionError('Niet ingelogd')
+            raise PermissionDenied('Niet ingelogd')
 
         account = get_account(self.request)
         sporter = get_sporter(account)
+        if not sporter:                                 # pragma: no branch
+            raise Http404('Onvolledige verzoek')        # pragma: no cover
 
-        self.prep, _ = SpeldAanvraagPrep.objects.get_or_create(voor_sporter=sporter)
+        if mag_database_wijzigen:
+            self.prep, _ = SpeldAanvraagPrep.objects.get_or_create(voor_sporter=sporter)
+        else:
+            self.prep = SpeldAanvraagPrep.objects.filter(voor_sporter=sporter).select_related('voor_sporter').first()
+            if not self.prep:
+                self.prep = SpeldAanvraagPrep(voor_sporter=sporter)
 
     def _load_boogtypen(self):
-        sporter = self.prep.voor_sporter
+        self.sporter_bogen = list(SporterBoog
+                                  .objects
+                                  .filter(sporter=self.prep.voor_sporter,
+                                          voor_wedstrijd=True,
+                                          boogtype__organisatie=ORGANISATIE_WA)
+                                  .order_by('boogtype__volgorde')
+                                  .values_list('boogtype__afkorting', flat=True))
 
-        if sporter:
-            self.sporter_bogen = list(SporterBoog
-                                      .objects
-                                      .filter(sporter=sporter,
-                                              voor_wedstrijd=True,
-                                              boogtype__organisatie=ORGANISATIE_WA)
-                                      .order_by('boogtype__volgorde')
-                                      .values_list('boogtype__afkorting', flat=True))
-
-            # selecteer automatisch de eerste boog van de sporter
-            if len(self.sporter_bogen):
-                self.sel_boogtype = self.sporter_bogen[0]
+        # selecteer automatisch de eerste boog van de sporter
+        if len(self.sporter_bogen):
+            self.sel_boogtype = self.sporter_bogen[0]
 
     def _prep_pagina(self, context):
         """ herbruikbare code voor get and post handlers """
@@ -114,7 +119,7 @@ class BestelStap1View(TemplateView):
     def post(self, request, *args, **kwargs):
         """ deze functie wordt aangeroepen als een POST ontvangen is van het invoer formulier. """
 
-        self._load_prep()
+        self._load_prep(mag_database_wijzigen=True)
 
         voorkeuren = get_sporter_voorkeuren(self.prep.voor_sporter, mag_database_wijzigen=True)
         if voorkeuren.wedstrijd_geslacht_gekozen:

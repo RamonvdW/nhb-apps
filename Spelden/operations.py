@@ -6,8 +6,7 @@
 
 from django.conf import settings
 from django.utils import timezone
-from Spelden.models import SpeldVoorwaarden
-from Sporter.models import Speelsterkte
+from Spelden.models import SpeldVoorwaarden, SpeldToegekend
 from Sporter.leeftijdsklassen import bereken_leeftijdsklassen_wa, hogere_en_lagere_lkl_wa
 from Wedstrijden.definities import WEDSTRIJD_DISCIPLINE_VELD
 
@@ -18,7 +17,7 @@ def get_hall_of_fame():
         Sporters die niet meer actief lid zijn van een vereniging worden eruit gefilterd.
     """
 
-    qset = (Speelsterkte
+    qset = (SpeldToegekend
             .objects
             .select_related('sporter',
                             'sporter__bij_vereniging')
@@ -27,12 +26,12 @@ def get_hall_of_fame():
             .order_by('datum',               # oudste eerst
                       'sporter__lid_nr'))
 
-    leden_gm = qset.filter(pas_code='GM')
+    leden_gm = qset.filter(speld__pas_code='GM')
     lid_nrs = list(leden_gm.values_list('sporter__lid_nr', flat=True))
 
-    leden_ms = qset.filter(pas_code='MS').exclude(sporter__lid_nr__in=lid_nrs)
+    leden_ms = qset.filter(speld__pas_code='MS').exclude(sporter__lid_nr__in=lid_nrs)
 
-    leden_as = qset.filter(pas_code='AS')
+    leden_as = qset.filter(speld__pas_code='AS')
 
     return leden_gm, leden_ms, leden_as
 
@@ -69,7 +68,10 @@ def get_mogelijke_spelden(discipline: str, boog: str, score: int, wedstrijd_gesl
             .filter(discipline=discipline,
                     boog_type__afkorting=boog,
                     # benodigde_score__lte=score,
-                    leeftijdsklasse__wedstrijd_geslacht=wedstrijd_geslacht))
+                    leeftijdsklasse__wedstrijd_geslacht=wedstrijd_geslacht)
+            .select_related('speld',
+                            'boog_type',
+                            'leeftijdsklasse'))
 
     if discipline == WEDSTRIJD_DISCIPLINE_VELD:
         # alleen dames/heren opsplitsing, geen verdere leeftijdsklasse
@@ -87,14 +89,13 @@ def get_mogelijke_spelden(discipline: str, boog: str, score: int, wedstrijd_gesl
             # alleen de nieuwste behouden
             mogelijke_lkl = mogelijke_lkl[-1:]
 
-        print('{mogelijke_lkl}', mogelijke_lkl)
-
+        # print('{mogelijke_lkl}', mogelijke_lkl)
         alle_lkl = list()
         for lkl in mogelijke_lkl:
             alle_lkl.extend(hogere_en_lagere_lkl_wa(lkl))
+        # for
 
-        print('{alle_lkl}', alle_lkl)
-
+        # print('{alle_lkl}', alle_lkl)
         qset = qset.filter(leeftijdsklasse__in=alle_lkl)
 
     return list(qset)

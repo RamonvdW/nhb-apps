@@ -7,6 +7,7 @@
 from django.urls import reverse
 from django.http import Http404
 from django.views.generic import TemplateView
+from django.core.exceptions import PermissionDenied
 from Account.models import get_account
 from BasisTypen.definities import BOOGTYPE_AFKORTING2STR, GESLACHT2STR
 from Functie.definities import Rol
@@ -33,15 +34,17 @@ class BestelStap3View(TemplateView):
 
     def _load_prep(self):
         if rol_get_huidige(self.request) != Rol.ROL_SPORTER:
-            raise PermissionError('Niet ingelogd')
+            raise PermissionDenied('Niet ingelogd')
 
         account = get_account(self.request)
         sporter = get_sporter(account)
 
-        self.prep, _ = SpeldAanvraagPrep.objects.get_or_create(voor_sporter=sporter)
+        self.prep = SpeldAanvraagPrep.objects.filter(voor_sporter=sporter).first()
+        if not self.prep:
+            raise Http404('Onvolledige verzoek (1)')
 
-        if not self.prep.heeft_data_stap1:
-            raise Http404('Onvolledige verzoek')
+        if not self.prep.heeft_data_stap2:
+            raise Http404('Onvolledige verzoek (2)')
 
     def _load_al_besteld(self):
         pass

@@ -1081,8 +1081,6 @@ def maak_voorwaarden_nl_tussenspelden(apps, _):
 
     voorwaarden_klas.objects.bulk_create(bulk)
 
-    krak
-
 
 def maak_voorwaarden_nl_graadspelden(apps, _):
     # haal de klassen op die van toepassing zijn op het moment van migratie
@@ -1106,138 +1104,194 @@ def maak_voorwaarden_nl_graadspelden(apps, _):
     soort_veld = 'Veld'
     soort_short_metric = 'Short Metric'
 
+    afstanden_indoor = "18"
+    afstanden_outdoor = "90, 70, 50, 30"
+    afstanden_short_metric = "50, 30"
+
+    aantal_pijlen_indoor = 3*30
+    aantal_pijlen_outdoor = 4*36
+    aantal_pijlen_short_metric = 2*36
+
     bulk = [
-        # graadspelden Indoor
+        # graadspelden Indoor, heren
         voorwaarden_klas(
             speld=spelden[5001],        # Indoor, 1e graad
+            afstanden=afstanden_indoor,
+            aantal_pijlen=aantal_pijlen_indoor,
             leeftijdsklasse=lkl_heren,
             wedstrijd_soort=soort_indoor,
             benodigde_score=560),
         voorwaarden_klas(
             speld=spelden[5002],        # Indoor, 2e graad
+            afstanden=afstanden_indoor,
+            aantal_pijlen=aantal_pijlen_indoor,
             leeftijdsklasse=lkl_heren,
             wedstrijd_soort=soort_indoor,
             benodigde_score=520),
         voorwaarden_klas(
             speld=spelden[5003],        # Indoor, 3e graad
+            afstanden=afstanden_indoor,
+            aantal_pijlen=aantal_pijlen_indoor,
             leeftijdsklasse=lkl_heren,
             wedstrijd_soort=soort_indoor,
             benodigde_score=460),
+
+        # graadspelden Indoor, dames
         voorwaarden_klas(
             speld=spelden[5001],        # Indoor, 1e graad
+            afstanden=afstanden_indoor,
+            aantal_pijlen=aantal_pijlen_indoor,
             leeftijdsklasse=lkl_dames,
             wedstrijd_soort=soort_indoor,
             benodigde_score=550),
         voorwaarden_klas(
             speld=spelden[5002],        # Indoor, 2e graad
+            afstanden=afstanden_indoor,
+            aantal_pijlen=aantal_pijlen_indoor,
             leeftijdsklasse=lkl_dames,
             wedstrijd_soort=soort_indoor,
             benodigde_score=510),
         voorwaarden_klas(
             speld=spelden[5003],        # Indoor, 3e graad
+            afstanden=afstanden_indoor,
+            aantal_pijlen=aantal_pijlen_indoor,
             leeftijdsklasse=lkl_dames,
             wedstrijd_soort=soort_indoor,
             benodigde_score=450),
 
-        # graadspelden Outdoor
+        # graadspelden Outdoor, heren
         voorwaarden_klas(
             speld=spelden[5101],        # Outdoor, 1e graad
+            afstanden=afstanden_outdoor,
+            aantal_pijlen=aantal_pijlen_outdoor,
             leeftijdsklasse=lkl_heren,
             wedstrijd_soort=soort_outdoor,
             benodigde_score=1250),
         voorwaarden_klas(
             speld=spelden[5102],        # Outdoor, 2e graad
+            afstanden=afstanden_outdoor,
+            aantal_pijlen=aantal_pijlen_outdoor,
             leeftijdsklasse=lkl_heren,
             wedstrijd_soort=soort_outdoor,
             benodigde_score=1150),
         voorwaarden_klas(
             speld=spelden[5103],        # Outdoor, 3e graad
+            afstanden=afstanden_outdoor,
+            aantal_pijlen=aantal_pijlen_outdoor,
             leeftijdsklasse=lkl_heren,
             wedstrijd_soort=soort_outdoor,
             benodigde_score=1025),
+
+        # graadspelden Outdoor, dames
         voorwaarden_klas(
             speld=spelden[5101],        # Outdoor, 1e graad
+            afstanden=afstanden_outdoor,
+            aantal_pijlen=aantal_pijlen_outdoor,
             leeftijdsklasse=lkl_dames,
             wedstrijd_soort=soort_outdoor,
             benodigde_score=1225),
         voorwaarden_klas(
             speld=spelden[5102],        # Outdoor, 2e graad
+            afstanden=afstanden_outdoor,
+            aantal_pijlen=aantal_pijlen_outdoor,
             leeftijdsklasse=lkl_dames,
             wedstrijd_soort=soort_outdoor,
             benodigde_score=1125),
         voorwaarden_klas(
             speld=spelden[5103],        # Outdoor, 3e graad
+            afstanden=afstanden_outdoor,
+            aantal_pijlen=aantal_pijlen_outdoor,
             leeftijdsklasse=lkl_dames,
             wedstrijd_soort=soort_outdoor,
             benodigde_score=1000),
 
-        # graadspelden Veld
+        # graadspelden Veld, heren
         voorwaarden_klas(
             speld=spelden[5201],        # Veld, 1e graad
             leeftijdsklasse=lkl_heren,
             wedstrijd_soort=soort_veld,
-            benodigde_score=300),
+            benodigde_score=300,
+            aantal_doelen=24),
         voorwaarden_klas(
             speld=spelden[5202],        # Veld, 2e graad
             leeftijdsklasse=lkl_heren,
             wedstrijd_soort=soort_veld,
-            benodigde_score=270),
+            benodigde_score=27,
+            aantal_doelen=240),
         voorwaarden_klas(
             speld=spelden[5203],        # Veld, 3e graad
             leeftijdsklasse=lkl_heren,
             wedstrijd_soort=soort_veld,
-            benodigde_score=220),
-        voorwaarden_klas(
-            speld=spelden[5201],        # Veld, 1e graad
-            leeftijdsklasse=lkl_dames,
-            wedstrijd_soort=soort_veld,
-            benodigde_score=260),
-        voorwaarden_klas(
-            speld=spelden[5202],        # Veld, 2e graad
-            leeftijdsklasse=lkl_dames,
-            wedstrijd_soort=soort_veld,
-            benodigde_score=230),
-        voorwaarden_klas(
-            speld=spelden[5203],        # Veld, 3e graad
-            leeftijdsklasse=lkl_dames,
-            wedstrijd_soort=soort_veld,
-            benodigde_score=180),
+            benodigde_score=220,
+            aantal_doelen=24),
 
-        # graadspelden Short Metric
+        # graadspelden Veld, dames
+        voorwaarden_klas(
+            speld=spelden[5201],        # Veld, 1e graad
+            leeftijdsklasse=lkl_dames,
+            wedstrijd_soort=soort_veld,
+            benodigde_score=260,
+            aantal_doelen=24),
+        voorwaarden_klas(
+            speld=spelden[5202],        # Veld, 2e graad
+            leeftijdsklasse=lkl_dames,
+            wedstrijd_soort=soort_veld,
+            benodigde_score=230,
+            aantal_doelen=24),
+        voorwaarden_klas(
+            speld=spelden[5203],        # Veld, 3e graad
+            leeftijdsklasse=lkl_dames,
+            wedstrijd_soort=soort_veld,
+            benodigde_score=180,
+            aantal_doelen=24),
+
+        # graadspelden Short Metric, heren
         voorwaarden_klas(
             speld=spelden[5301],        # Short Metric, 1e graad
+            afstanden=afstanden_short_metric,
+            aantal_pijlen=aantal_pijlen_short_metric,
             leeftijdsklasse=lkl_heren,
             wedstrijd_soort=soort_short_metric,
             benodigde_score=635),
         voorwaarden_klas(
             speld=spelden[5302],        # Short Metric, 2e graad
+            afstanden=afstanden_short_metric,
+            aantal_pijlen=aantal_pijlen_short_metric,
             leeftijdsklasse=lkl_heren,
             wedstrijd_soort=soort_short_metric,
             benodigde_score=585),
         voorwaarden_klas(
             speld=spelden[5303],        # Short Metric, 3e graad
+            afstanden=afstanden_short_metric,
+            aantal_pijlen=aantal_pijlen_short_metric,
             leeftijdsklasse=lkl_heren,
             wedstrijd_soort=soort_short_metric,
             benodigde_score=510),
+
+        # graadspelden Short Metric, dames
         voorwaarden_klas(
             speld=spelden[5301],        # Short Metric, 1e graad
+            afstanden=afstanden_short_metric,
+            aantal_pijlen=aantal_pijlen_short_metric,
             leeftijdsklasse=lkl_dames,
             wedstrijd_soort=soort_short_metric,
             benodigde_score=610),
         voorwaarden_klas(
             speld=spelden[5302],        # Short Metric, 2e graad
+            afstanden=afstanden_short_metric,
+            aantal_pijlen=aantal_pijlen_short_metric,
             leeftijdsklasse=lkl_dames,
             wedstrijd_soort=soort_short_metric,
             benodigde_score=560),
         voorwaarden_klas(
             speld=spelden[5303],        # Short Metric, 3e graad
+            afstanden=afstanden_short_metric,
+            aantal_pijlen=aantal_pijlen_short_metric,
             leeftijdsklasse=lkl_dames,
             wedstrijd_soort=soort_short_metric,
             benodigde_score=500),
     ]
     voorwaarden_klas.objects.bulk_create(bulk)
-
-    krak
 
 
 class Migration(migrations.Migration):
@@ -1338,8 +1392,8 @@ class Migration(migrations.Migration):
         migrations.RunPython(maak_voorwaarden_wa_ster_compound, reverse_code=migrations.RunPython.noop),
         migrations.RunPython(maak_voorwaarden_wa_target_awards, reverse_code=migrations.RunPython.noop),
         migrations.RunPython(maak_voorwaarden_wa_arrowhead, reverse_code=migrations.RunPython.noop),
-        # migrations.RunPython(maak_voorwaarden_nl_tussenspelden, reverse_code=migrations.RunPython.noop),
-        # migrations.RunPython(maak_voorwaarden_nl_graadspelden, reverse_code=migrations.RunPython.noop),
+        migrations.RunPython(maak_voorwaarden_nl_tussenspelden, reverse_code=migrations.RunPython.noop),
+        migrations.RunPython(maak_voorwaarden_nl_graadspelden, reverse_code=migrations.RunPython.noop),
     ]
 
 # end of file

@@ -44,7 +44,8 @@ class LeeftijdsklasseFilter(admin.SimpleListFilter):
         tups = list()
         for voorwaarde in SpeldVoorwaarden.objects.distinct('leeftijdsklasse'):
             lkl = voorwaarde.leeftijdsklasse
-            tups.append((lkl.afkorting, lkl.afkorting + ' ' + lkl.beschrijving))
+            if lkl:
+                tups.append((lkl.afkorting, lkl.afkorting + ' ' + lkl.beschrijving))
         # for
         return tups
 

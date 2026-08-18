@@ -6,7 +6,8 @@
 
 from django.test import TestCase
 from Geo.models import Regio
-from Spelden.models import Speld, SpeldVoorwaarden, SpeldAanvraag
+from Spelden.definities import SPELD_CATEGORIE_NL_GRAADSPELD_ALGEMEEN
+from Spelden.models import Speld, SpeldVoorwaarden, SpeldAanvraag, SpeldToegekend
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
@@ -51,6 +52,44 @@ class TestSpeldenInfoViews(E2EHelpers, TestCase):
                     email=self.account_sporter.email)
         sporter.save()
         self.sporter_100001 = sporter
+
+        # maak nog een sporter aan
+        self.account_sporter2 = self.e2e_create_account('100002', 'tweede@test.com', 'Tweede')
+        sporter2 = Sporter(
+                    lid_nr=100002,
+                    geslacht="M",
+                    voornaam="Tweede",
+                    achternaam="de Tester",
+                    geboorte_datum=datetime.date(year=1972, month=3, day=4),
+                    sinds_datum=datetime.date(year=2010, month=11, day=12),
+                    bij_vereniging=ver,
+                    account=self.account_sporter2,
+                    email=self.account_sporter2.email)
+        sporter2.save()
+        self.sporter_100002 = sporter2
+
+        speld_as = Speld.objects.get(volgorde=5401)   # allround schutter
+        speld_ms = Speld.objects.get(volgorde=5402)   # meesterschutter
+        speld_gs = Speld.objects.get(volgorde=5403)   # grootmeesterschutter
+
+        SpeldToegekend.objects.bulk_create([
+            SpeldToegekend(
+                    speld=speld_as,
+                    datum='2001-01-01',
+                    sporter=sporter),
+            SpeldToegekend(
+                    speld=speld_ms,
+                    datum='2001-01-01',
+                    sporter=sporter),           # wordt niet getoond, want ook grootmeesterschutter
+            SpeldToegekend(
+                    speld=speld_ms,
+                    datum='2001-01-01',
+                    sporter=sporter2),
+            SpeldToegekend(
+                    speld=speld_gs,
+                    datum='2001-01-01',
+                    sporter=sporter),
+        ])
 
     def test_anon(self):
         self.client.logout()
@@ -114,11 +153,17 @@ class TestSpeldenInfoViews(E2EHelpers, TestCase):
         speld = Speld.objects.first()
         self.assertTrue(str(speld) != '')
 
-        speld_score = SpeldVoorwaarden.objects.first()
-        self.assertTrue(str(speld_score) != '')
+        voorwaarden = SpeldVoorwaarden.objects.first()
+        self.assertTrue(str(voorwaarden) != '')
+
+        voorwaarden = SpeldVoorwaarden(aantal_doelen=1)
+        self.assertTrue(str(voorwaarden) != '')
 
         aanvraag = SpeldAanvraag(door_account=self.account_sporter, datum_wedstrijd='Hallo')
         self.assertTrue(str(aanvraag) != '')
+
+        toegekend = SpeldToegekend.objects.first()
+        self.assertTrue(str(toegekend) != '')
 
     def test_sporter(self):
         self.e2e_login(self.account_sporter)
