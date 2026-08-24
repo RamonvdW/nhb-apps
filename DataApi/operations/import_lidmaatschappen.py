@@ -83,11 +83,7 @@ class ImportCrmLidmaatschappen(ImportCrmBase):
             except KeyError:
                 self._cache_actieve_lidmaatschappen[lid_nr] = [lms]
             self.count_actief += 1
-            if lms.lid_nr == 144498:
-                self.out_debug('Lid %s is aangemaakt: lms %s' % (lid_nr, lms.pk))
-        else:
-            if lid_nr == 144498:
-                self.out_debug('Lid %s heeft lms %s' % (lid_nr, lms.pk))
+            self.count_toevoegingen += 1
 
         if afmeld_datum and lms.afmeld_datum == '':
             lms.afmeld_datum = afmeld_datum
@@ -95,8 +91,6 @@ class ImportCrmLidmaatschappen(ImportCrmBase):
             lms.save(update_fields=['afmeld_datum', 'ver_nr'])
             self.count_actief -= 1
             self.count_gestopt += 1
-            if lms.lid_nr == 144498:
-                self.out_debug('Lid %s, lms %s krijg afmeld_datum %s' % (lid_nr, lms.pk, afmeld_datum))
 
     def importeer(self, data: list):
         """ Importeert data van alle leden """
@@ -229,11 +223,9 @@ class ImportCrmLidmaatschappen(ImportCrmBase):
                 lid_nrs.remove(lid_nr)
         # for member
 
-        self._verwijder_sporters(lid_nrs)
+        self._lidmaatschappen_stoppen(lid_nrs)
 
-    def _verwijder_sporters(self, lid_nrs: list):
-        # self.stdout.write('[DEBUG] Volgende %s bondsnummers moeten verwijderd worden: %s' % (len(lid_nrs),
-        #                                                                                      repr(lid_nrs)))
+    def _lidmaatschappen_stoppen(self, lid_nrs: list):
         afmeld_datum = timezone.now().date().strftime('%Y-%m-%d')
 
         while len(lid_nrs) > 0:
@@ -241,8 +233,6 @@ class ImportCrmLidmaatschappen(ImportCrmBase):
 
             for lms in self._cache_actieve_lidmaatschappen.get(lid_nr, []):
                 if lms.afmeld_datum == '':
-                    if lms.lid_nr == 144498:
-                        self.out_debug('Lid %s is verwijderd; lms %s wordt afgemeld=%s' % (lid_nr, lms.pk, afmeld_datum))
                     lms.afmeld_datum = afmeld_datum
                     lms.ver_nr = 0
                     lms.save(update_fields=['afmeld_datum', 'ver_nr'])
