@@ -11,7 +11,6 @@ from django.core.management.base import BaseCommand
 from DataApi.operations import ImportCrmVerenigingen, ImportCrmLidmaatschappen
 from Logboek.models import schrijf_in_logboek
 from Mailer.operations import mailer_notify_internal_error
-from Opleiding.operations import opleiding_post_import_crm
 import traceback
 import logging
 import json
@@ -35,6 +34,8 @@ class Command(BaseCommand):
         self._import_lidmaatschappen = None
         self._import_verenigingen = None
 
+        self.dryrun = True
+        self._include_ver_null = False
         self._exit_code = 0
 
         self._count_errors = 0
@@ -43,22 +44,25 @@ class Command(BaseCommand):
         self._count_verwijderingen = 0
         self._count_toevoegingen = 0
 
-        self.dryrun = False
-
         self.aanmelddatum = ''
         self.afmelddatum = ''
+        self.forceer_mutatie_datum = ''
 
     def add_arguments(self, parser):
         parser.add_argument('filename', nargs=1, help="pad naar het JSON bestand")
         parser.add_argument('aanmelddatum', nargs=1, help='YYYY-MM-DD te gebruiken voor nieuwe leden/verenigingen')
         parser.add_argument('afmelddatum', nargs=1, help='YYYY-MM-DD te gebruiken voor verdwenen leden/verenigingen')
+        parser.add_argument('mutatie_datum', nargs=1, help='YYYY-MM-DD geforceerde mutatie moment')
         parser.add_argument('--dryrun', action='store_true')
+        parser.add_argument('--include_ver_null', action='store_true')
 
     def _init_modules(self):
-        self._import_verenigingen = ImportCrmVerenigingen(self.stdout, self.dryrun,
-                                                          self.aanmelddatum, self.afmelddatum)
-        self._import_lidmaatschappen = ImportCrmLidmaatschappen(self.stdout, self.dryrun,
-                                                                self.aanmelddatum, self.afmelddatum)
+        self._import_verenigingen = ImportCrmVerenigingen(self.stdout, self.dryrun, self._include_ver_null,
+                                                          self.aanmelddatum, self.afmelddatum,
+                                                          self.forceer_mutatie_datum)
+        self._import_lidmaatschappen = ImportCrmLidmaatschappen(self.stdout, self.dryrun, self._include_ver_null,
+                                                                self.aanmelddatum, self.afmelddatum,
+                                                                self.forceer_mutatie_datum)
 
     def _check_keys(self, keys, expected_keys, level):
         has_error = False
@@ -82,7 +86,7 @@ class Command(BaseCommand):
         self._import_verenigingen.importeer(data['clubs'])
 
         self._import_lidmaatschappen.zet_ver_nrs(self._import_verenigingen.get_ver_nrs())
-        self._import_lidmaatschappen.importeer(data['members'])
+        self._import_lidmaatschappen.importeer(data['members'], self.forceer_mutatie_datum)
 
         self.stdout.write('Import van historische CRM data is klaar')
 
@@ -115,6 +119,7 @@ class Command(BaseCommand):
             "%s actieve lidmaatschappen" % self._import_lidmaatschappen.count_actief,
             "%s gestopte verenigingen" % self._import_verenigingen.count_gestopt,
             "%s gestopte lidmaatschappen" % self._import_lidmaatschappen.count_gestopt,
+            "%s lidmaatschappen bij onbekende vereniging" % self._import_lidmaatschappen.count_ver_null,
         ]
 
         if self.dryrun:
@@ -156,19 +161,18 @@ class Command(BaseCommand):
                 return
 
         self._import_data(data)
-        opleiding_post_import_crm(self.stdout)
         self._report_stats()
 
         self.stdout.write('Done')
 
     def handle(self, *args, **options):
         self.dryrun = options['dryrun']
-        if self.dryrun:
-            self.stdout.write("DRY RUN")
+        self._include_ver_null = options['include_ver_null']
 
         fname = options['filename'][0]
         self.aanmelddatum = options['aanmelddatum'][0]
         self.afmelddatum = options['afmelddatum'][0]
+        self.forceer_mutatie_datum = options['mutatie_datum'][0]
 
         self._init_modules()
 
@@ -198,8 +202,9 @@ class Command(BaseCommand):
             tb_msg = tb_msg_start + '\n'.join(tb)
 
             # deze functie stuurt maximaal 1 mail per dag over hetzelfde probleem
-            self.stdout.write('[WARNING] Stuur crash mail naar ontwikkelaar')
-            mailer_notify_internal_error(tb_msg)
+            # TODO: re-enable
+            # self.stdout.write('[WARNING] Stuur crash mail naar ontwikkelaar')
+            # mailer_notify_internal_error(tb_msg)
 
             self._exit_code = 1
 

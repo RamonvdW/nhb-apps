@@ -5,77 +5,24 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from Evenement import view_aanmeldingen, view_afmelden, view_details, view_inschrijven, view_vereniging
+from DataApi import view_ver, view_lid
 
-app_name = 'Evenement'
+app_name = 'DataApi'
 
-# basis = /kalender/evenement/
+# basis = /data-api/
 
 urlpatterns = [
-    # evenement details (met knoppen om in te schrijven)
-    path('details/<evenement_pk>/',
-         view_details.DetailsView.as_view(),
-         name='details'),
+    path('v1/verenigingen/',
+         view_ver.VerenigingenView.as_view(),
+         name='verenigingen'),
 
-    # afmelden door beheerder evenement (POST)
-    path('afmelden/<inschrijving_pk>/',
-         view_afmelden.AfmeldenView.as_view(),
-         name='afmelden'),
+    path('v1/accommodaties/',
+         view_ver.AccommodatiesView.as_view(),
+         name='accommodaties'),
 
-
-    # inschrijven
-    path('inschrijven/<evenement_pk>/sporter/',
-         view_inschrijven.InschrijvenSporterView.as_view(),
-         name='inschrijven-sporter'),
-
-    path('inschrijven/<evenement_pk>/groep/',
-         view_inschrijven.InschrijvenGroepjeView.as_view(),
-         name='inschrijven-groepje'),
-
-    path('inschrijven/<evenement_pk>/familie/<lid_nr>/',
-         view_inschrijven.InschrijvenFamilieView.as_view(),
-         name='inschrijven-familie-lid'),
-
-    path('inschrijven/<evenement_pk>/familie/',
-         view_inschrijven.InschrijvenFamilieView.as_view(),
-         name='inschrijven-familie'),
-
-    path('inschrijven/<evenement_pk>/door-hwl/',
-         view_inschrijven.InschrijvenDoorHWL.as_view(),
-         name='inschrijven-door-hwl'),
-
-    # toevoegen aan winkelwagentje
-    path('inschrijven/toevoegen-mandje/',
-         view_inschrijven.ToevoegenAanMandjeView.as_view(),
-         name='inschrijven-toevoegen-aan-mandje'),
-
-
-    # vereniging
-    path('vereniging/lijst/',
-         view_vereniging.VerenigingEvenementenView.as_view(),
-         name='vereniging'),
-
-
-    # aanmeldingen
-    path('aanmeldingen/<evenement_pk>/',
-         view_aanmeldingen.EvenementAanmeldingenView.as_view(),
-         name='aanmeldingen'),
-
-    path('workshop-keuzes/<evenement_pk>/',
-         view_aanmeldingen.EvenementWorkshopKeuzesView.as_view(),
-         name='workshop-keuzes'),
-
-    path('details-aanmelding/<inschrijving_pk>/',
-         view_aanmeldingen.EvenementDetailsAanmeldingView.as_view(),
-         name='details-aanmelding'),
-
-    path('aanmeldingen/<evenement_pk>/download/csv/',
-         view_aanmeldingen.DownloadAanmeldingenBestandCSV.as_view(),
-         name='download-aanmeldingen-csv'),
-
-    path('details-afmelding/<afmelding_pk>/',
-         view_aanmeldingen.EvenementDetailsAfmeldingView.as_view(),
-         name='details-afmelding'),
+    path('v1/lidmaatschappen/',
+         view_lid.LidmaatschappenView.as_view(),
+         name='lidmaatschappen'),
 ]
 
 # end of file

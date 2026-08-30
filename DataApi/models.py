@@ -60,8 +60,23 @@ class DataApiVereniging(models.Model):
 class DataApiLidmaatschap(models.Model):
     """ representatie van een lidmaatschap """
 
+    # houd bij wanneer dit record bijgewerkt is
+    # wordt gebruikt voor het filteren op relevant records tijdens de query (peildatum query parameter)
+    mutatie_datum = models.DateField(auto_now=True)
+
     # uitgegeven nummer voor dit lid (kan hergebruikt worden)
     lid_nr = models.PositiveIntegerField()
+
+    # lid bij welke vereniging? (verplicht)
+    ver_nr = models.PositiveIntegerField()
+
+    # datum van aanmelden en afmelden
+    # formaat: YYYY-MM-DD
+    aanmeld_datum = models.CharField(max_length=10)
+    afmeld_datum = models.CharField(max_length=10, default='')      # leeg = niet afgemeld
+
+    # verdere informatie over dit lid: geboortedatum, geslacht, postcode + land
+    # (informatief, geen reden voor nieuw lidmaatschap bij wijziging)
 
     # geboortedatum van dit lid
     # formaat: YYYY-MM-DD
@@ -79,14 +94,10 @@ class DataApiLidmaatschap(models.Model):
     # voor buitenlandse postcode: alles mag
     postcode = models.CharField(max_length=20)
 
-    # datum van aanmelden en afmelden
-    # formaat: YYYY-MM-DD
-    aanmeld_datum = models.CharField(max_length=10)
-    afmeld_datum = models.CharField(max_length=10, default='')      # leeg = niet afgemeld
-
-    # lid bij welke vereniging? (verplicht)
-    ver_nr = models.PositiveIntegerField()
-
+    def __str__(self):
+        return "Lid %s ver %s: %s %s %s %s %s" % (self.lid_nr, self.ver_nr,
+                                                  self.geboorte_datum, self.geslacht, self.postcode,
+                                                  self.aanmeld_datum, self.afmeld_datum)
     class Meta:
         verbose_name = "DataApi Lidmaatschap"
         verbose_name_plural = "DataApi Lidmaatschappen"

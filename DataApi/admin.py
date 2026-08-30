@@ -39,6 +39,8 @@ class DataApiLidmaatschapAdmin(admin.ModelAdmin):
 
     search_fields = ('lid_nr',)
 
+    readonly_fields = ('mutatie_datum',)
+
 
 admin.site.register(DataApiVereniging, DataApiVerenigingAdmin)
 admin.site.register(DataApiLidmaatschap, DataApiLidmaatschapAdmin)

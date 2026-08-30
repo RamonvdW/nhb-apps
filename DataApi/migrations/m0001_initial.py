@@ -31,6 +31,7 @@ class Migration(migrations.Migration):
                 ('postcode', models.CharField(max_length=20)),
                 ('lid_nr', models.PositiveIntegerField()),
                 ('ver_nr', models.PositiveIntegerField()),
+                ('mutatie_datum', models.DateField(auto_now=True)),
             ],
             options={'verbose_name': 'DataApi Lidmaatschap',
                      'verbose_name_plural': 'DataApi Lidmaatschappen'},

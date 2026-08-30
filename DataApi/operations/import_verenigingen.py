@@ -50,7 +50,7 @@ class ImportCrmVerenigingen(ImportCrmBase):
             ver = DataApiVereniging(
                     ver_nr=ver_nr,
                     naam=naam,
-                    aanmeld_datum=self.aanmelddatum,
+                    aanmeld_datum=self.aanmelddatum_ver,
                     kvk_nummer=kvk,
                     straatnaam=straatnaam,
                     huisnummer=huis_nr,
@@ -60,7 +60,7 @@ class ImportCrmVerenigingen(ImportCrmBase):
                     lon=lon)
 
             self._cache_ver[ver_nr] = ver
-            self.out_info('Vereniging %s aangemaakt: %s' % (ver_nr, repr(ver.naam)))
+            # self.out_info('Vereniging %s aangemaakt: %s' % (ver_nr, repr(ver.naam)))
             self.count_toevoegingen += 1
 
             if not self.dryrun:
@@ -75,8 +75,8 @@ class ImportCrmVerenigingen(ImportCrmBase):
                 updated.append('naam')
 
             if kvk and kvk != ver.kvk_nummer:
-                self.out_info('Vereniging %s wijziging kvk_nummer: %s --> %s' %
-                                (ver_nr, repr(ver.kvk_nummer), repr(kvk)))
+                # self.out_info('Vereniging %s wijziging kvk_nummer: %s --> %s' %
+                #                 (ver_nr, repr(ver.kvk_nummer), repr(kvk)))
                 ver.kvk_nummer = kvk
                 updated.append('kvk_nummer')
 
