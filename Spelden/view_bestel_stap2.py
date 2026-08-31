@@ -170,9 +170,10 @@ class BestelStap2View(TemplateView):
                              for optie in opties
                              if optie.afstanden == afstand]
             aantal_pijlen = list(set(aantal_pijlen))
+
             # in principe mapt elke afstand op een uniek aantal pijlen
             if len(aantal_pijlen) != 1:
-                raise Http404('Kan aantal pijlen niet vaststellen')
+                raise Http404('Kan aantal pijlen niet vaststellen (%s)' % len(aantal_pijlen))
 
             self.prep.aantal_pijlen = aantal_pijlen[0]
 

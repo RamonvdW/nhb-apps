@@ -101,7 +101,7 @@
                                 <td>{{ optie.speld.categorie_str }}</td>
                                 <td>{{ optie.speld.beschrijving }}</td>
                                 <td class="{% if optie.ok_score %}green-text{% else %}sv-rood-text{% endif %}">{{ optie.benodigde_score }}</td>
-                                <td>?</td>
+                                <td>{{ optie.opmerking }}</td>
                             </tr>
                         {% endfor %}
 

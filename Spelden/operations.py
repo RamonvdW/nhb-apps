@@ -67,7 +67,6 @@ def get_mogelijke_spelden(discipline: str, boog: str, score: int, wedstrijd_gesl
             .objects
             .filter(discipline=discipline,
                     boog_type__afkorting=boog,
-                    # benodigde_score__lte=score,
                     leeftijdsklasse__wedstrijd_geslacht=wedstrijd_geslacht)
             .select_related('speld',
                             'boog_type',
@@ -77,6 +76,14 @@ def get_mogelijke_spelden(discipline: str, boog: str, score: int, wedstrijd_gesl
         # alleen dames/heren opsplitsing, geen verdere leeftijdsklasse
         pass
     else:
+        # bereken het minimale aantal pijlen dat geschoten moet zijn om deze score te halen
+        # verwijder afstanden waarop minder pijlen geschoten worden
+        aantal_pijlen_geschoten = int(score / 10)
+        if score > aantal_pijlen_geschoten * 10:
+            aantal_pijlen_geschoten += 1
+        # print('{get_mogelijke_spelden} score=%s --> aantal_pijlen=%s' % (score, aantal_pijlen_geschoten))
+        qset = qset.exclude(aantal_pijlen__lt=aantal_pijlen_geschoten)
+
         now = timezone.now()
         _, _, _, lkl_lst = bereken_leeftijdsklassen_wa(geboorte_jaar, wedstrijd_geslacht, now.year, lst_als_str=False)
         mogelijke_lkl = lkl_lst[0:0+2]      # vorige jaar en dit jaar

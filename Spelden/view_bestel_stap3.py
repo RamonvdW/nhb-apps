@@ -69,6 +69,7 @@ class BestelStap3View(TemplateView):
 
             for optie in opties:
                 if optie.aantal_doelen == self.prep.aantal_doelen:
+                    optie.opmerking = '?'
                     mogelijke_spelden.append(optie)
             # for
         else:
@@ -77,6 +78,7 @@ class BestelStap3View(TemplateView):
 
             for optie in opties:
                 if optie.aantal_pijlen == self.prep.aantal_pijlen and optie.afstanden == self.prep.afstanden:
+                    optie.opmerking = '?'
                     mogelijke_spelden.append(optie)
             # for
 
@@ -89,15 +91,17 @@ class BestelStap3View(TemplateView):
 
             # controleer dat de score hoog genoeg is
             optie.ok_score = self.prep.score >= optie.benodigde_score
+            if not optie.ok_score:
+                optie.opmerking = "Score niet hoog genoeg"
 
             # TODO: controleer dat de speld niet al besteld is
             optie.al_besteld = False
         # for
 
-        # verwijder spelden die niet besteld kunnen worden (met hogere score vereiste)
-        while len(mogelijke_spelden) and not mogelijke_spelden[-1].ok_score:
-            mogelijke_spelden.pop(-1)
-        # while
+        # # verwijder spelden die niet besteld kunnen worden (met hogere score vereiste)
+        # while len(mogelijke_spelden) and not mogelijke_spelden[-1].ok_score:
+        #     mogelijke_spelden.pop(-1)
+        # # while
 
         context['mogelijke_spelden'] = mogelijke_spelden
 

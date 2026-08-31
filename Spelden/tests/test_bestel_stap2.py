@@ -84,6 +84,7 @@ class TestSpeldenBestelStap2(E2EHelpers, TestCase):
 
         # GET, discipline outdoor
         self.prep.discipline = 'OD'
+        self.prep.score = 560           # acceptable for 70m
         self.prep.save()
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_bestel_stap2)
