@@ -1,25 +1,15 @@
 # -*- coding: utf-8 -*-
-import django.http.response
+
 #  Copyright (c) 2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.conf import settings
-from django.http import JsonResponse, Http404, HttpResponseBadRequest
+from django.http import JsonResponse, HttpResponseBadRequest
 from django.views import View
 from DataApi.models import DataApiLidmaatschap
+from DataApi.view_helpers import datum_n_jaar_geleden, is_auth_token_ok
 import datetime
 import hashlib
-
-
-def datum_n_jaar_geleden(jaren: int) -> str:
-    now = datetime.datetime.now()
-
-    dagen = jaren * 365
-    dagen += jaren // 4     # schrikkeljaren hebben 1 dag meer
-
-    now -= datetime.timedelta(days=dagen)
-    return now.strftime('%Y-%m-%d')
 
 
 class LidmaatschappenView(View):
@@ -30,7 +20,8 @@ class LidmaatschappenView(View):
         self._offset = 0
         self._peildatum = datum_n_jaar_geleden(5)
 
-    def _maak_lidmaatschapid(self, lms: DataApiLidmaatschap) -> str:
+    @staticmethod
+    def _maak_lidmaatschapid(lms: DataApiLidmaatschap) -> str:
         # maak een unieke code die stabiel is
         # gebruik: lid_nr, geboortedatum, geslacht, postcode, land, ver_nr, aanmelddatum
         calc = hashlib.sha1()
@@ -118,14 +109,10 @@ class LidmaatschappenView(View):
                 raise ValueError('Geen valide offset (range)')
 
     def get(self, request, *args, **kwargs):
-        """ Geeft een lijst met verenigingen terug
+        """ Geeft een lijst met verenigingen terug """
 
-            TODO: Auth token
-        """
-
-        # token = request.GET.get('token', '')
-        # if token not in settings.KALENDER_API_TOKENS:
-        #     token = None
+        if not is_auth_token_ok(request):
+            return HttpResponseBadRequest('No valid token\n')
 
         try:
             self._get_params(request)

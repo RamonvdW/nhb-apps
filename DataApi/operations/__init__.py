@@ -6,10 +6,12 @@
 
 from .import_lidmaatschappen import ImportCrmLidmaatschappen
 from .import_verenigingen import ImportCrmVerenigingen
+from .opschonen import dataapi_opschonen
 
 __all__ = [
     'ImportCrmLidmaatschappen',
     'ImportCrmVerenigingen',
+    'dataapi_opschonen',
 ]
 
 

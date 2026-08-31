@@ -4,22 +4,11 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.conf import settings
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseBadRequest
 from django.views import View
 from django.db.models import Q
-from DataApi.models import DataApiVereniging
-import datetime
-
-
-def datum_n_jaar_geleden(jaren: int) -> str:
-    now = datetime.datetime.now()
-
-    dagen = jaren * 365
-    dagen += jaren // 4     # schrikkeljaren hebben 1 dag meer
-
-    now -= datetime.timedelta(days=dagen)
-    return now.strftime('%Y-%m-%d')
+from DataApi.models import DataApiVereniging, DataApiLidmaatschap
+from DataApi.view_helpers import datum_n_jaar_geleden, is_auth_token_ok
 
 
 class VerenigingenView(View):
@@ -27,11 +16,13 @@ class VerenigingenView(View):
     @staticmethod
     def _maak_lijst():
 
-        min_date = datum_n_jaar_geleden(5)
-        # print('min_date: %s' % repr(min_date))
+        # verenigingen zonder leden moeten we niet rapporteren
+        # nadat de vereniging opgeheven is blijven we deze rapporteren,
+        # totdat alle DataApiLidmaatschappen die hiernaar verwijzen verwijderd zijn
+        ver_nrs_in_use = list(DataApiLidmaatschap.objects.distinct('ver_nr').values_list('ver_nr', flat=True))
 
         lijst = list()
-        for ver in DataApiVereniging.objects.filter(Q(afmeld_datum='') | Q(afmeld_datum__gte=min_date)).order_by('pk'):
+        for ver in DataApiVereniging.objects.filter(ver_nr__in=ver_nrs_in_use).order_by('pk'):
             lijst.append({
                 "Verenigingscode": str(ver.ver_nr),
                 "Naam": ver.naam,
@@ -46,17 +37,14 @@ class VerenigingenView(View):
                 ]
             })
         # for
+
         return lijst
 
     def get(self, request, *args, **kwargs):
-        """ Geeft een lijst met verenigingen terug
+        """ Geeft een lijst met verenigingen terug """
 
-            TODO: Auth token
-        """
-
-        # token = request.GET.get('token', '')
-        # if token not in settings.KALENDER_API_TOKENS:
-        #     token = None
+        if not is_auth_token_ok(request):
+            return HttpResponseBadRequest('No valid token\n')
 
         lijst = self._maak_lijst()
 
@@ -78,11 +66,13 @@ class AccommodatiesView(View):
     @staticmethod
     def _maak_lijst():
 
-        min_date = datum_n_jaar_geleden(5)
-        # print('min_date: %s' % repr(min_date))
+        # verenigingen zonder leden moeten we niet rapporteren
+        # nadat de vereniging opgeheven is blijven we deze rapporteren,
+        # totdat alle DataApiLidmaatschappen die hiernaar verwijzen verwijderd zijn
+        ver_nrs_in_use = list(DataApiLidmaatschap.objects.distinct('ver_nr').values_list('ver_nr', flat=True))
 
         lijst = list()
-        for ver in DataApiVereniging.objects.filter(Q(afmeld_datum='') | Q(afmeld_datum__gte=min_date)).order_by('pk'):
+        for ver in DataApiVereniging.objects.filter(ver_nr__in=ver_nrs_in_use).order_by('pk'):
             lijst.append({
                 "Naam": ver.naam,
                 "Postcode": ver.postcode,
@@ -94,17 +84,14 @@ class AccommodatiesView(View):
                 "Latitude": ver.lat,
             })
         # for
+
         return lijst
 
     def get(self, request, *args, **kwargs):
-        """ Geeft een lijst met verenigingen terug
+        """ Geeft een lijst met verenigingen terug """
 
-            TODO: Auth token
-        """
-
-        # token = request.GET.get('token', '')
-        # if token not in settings.KALENDER_API_TOKENS:
-        #     token = None
+        if not is_auth_token_ok(request):
+            return HttpResponseBadRequest('No valid token\n')
 
         lijst = self._maak_lijst()
 

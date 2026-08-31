@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2025 Ramon van der Winkel.
+#  Copyright (c) 2021-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -12,6 +12,7 @@ from Account.operations import accounts_opschonen
 from Beheer.views import beheer_opschonen
 from Bestelling.operations import bestel_opschonen
 from Betaal.operations import betaal_opschonen
+from DataApi.operations import dataapi_opschonen
 from Feedback.models import feedback_opschonen
 from Locatie.operations import reistijd_opschonen
 from Logboek.models import logboek_opschonen
@@ -30,6 +31,7 @@ class Command(BaseCommand):
         bestel_opschonen(self.stdout)
         betaal_opschonen(self.stdout)
         beheer_opschonen(self.stdout)
+        dataapi_opschonen(self.stdout)
         feedback_opschonen(self.stdout)
         logboek_opschonen(self.stdout)
         mailer_opschonen(self.stdout)
