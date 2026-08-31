@@ -48,10 +48,14 @@ class Command(BaseCommand):
         parser.add_argument('--dryrun', action='store_true')
         parser.add_argument('--verbose', action='store_true')
 
-    def _import_indiv_regel(self, row, disc):
+    def _import_indiv_regel(self, row: list, disc: str):
         wijzigingen = list()
         errors = list()
         record = IndivRecord()
+
+        # niet zeuren over extra spaties
+        row = [cell.strip()
+               for cell in row]
 
         if self.verbose:
             self.stdout.write('row: %s' % repr(row))
@@ -392,7 +396,7 @@ class Command(BaseCommand):
                 if not self.dryrun:
                     record.save()
 
-    def _import_indiv_sheet(self, ws, disc):
+    def _import_indiv_sheet(self, ws, disc: str):
 
         self._reported_lid_nrs = list()
 
