@@ -12,14 +12,14 @@ def migreer_regio(apps, _):
     regiodeelnemer_klas = apps.get_model('CompLaagRegio', 'RegioDeelnemer')
 
     sporterboog_pk_afstand2regiodeelnemer = dict()
-    for deelnemer in regiodeelnemer_klas.objects.select_related('sporterboog', 'regiocomp__competitie').all():
+    for deelnemer in regiodeelnemer_klas.objects.select_related('sporterboog', 'regiocomp__competitie').all():  # pragma: no cover
         sporterboog_pk = deelnemer.sporterboog.pk
         afstand = deelnemer.regiocomp.competitie.afstand
         tup = (sporterboog_pk, afstand)
         sporterboog_pk_afstand2regiodeelnemer[tup] = deelnemer
     # for
 
-    for teamrk in teamrk_klas.objects.prefetch_related('tijdelijke_leden').all():
+    for teamrk in teamrk_klas.objects.prefetch_related('tijdelijke_leden').all():   # pragma: no cover
 
         nieuwe_deelnemers = list()
         for rcsb in teamrk.tijdelijke_leden.select_related('sporterboog', 'regiocompetitie__competitie').all():
