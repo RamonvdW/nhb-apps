@@ -4,7 +4,6 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.conf import settings
 from django.core.management.base import BaseCommand
 from GraphDrive.operations import GraphSite, get_file_metadata, download_file
 import pprint
@@ -14,6 +13,7 @@ class Command(BaseCommand):
     help = "Download een bestand uit Sharepoint/Teams"
 
     def add_arguments(self, parser):
+        parser.add_argument('site_index', nargs=1, type=int, help="Welke id's gebruiken? (index in settings.GRAPH_IDS)")
         parser.add_argument('remote_fpath', nargs=1, help="volledige pad naar het Sharepoint/Teams bestand")
         parser.add_argument('local_fpath', nargs=1, help="pad waaronder het document opgelagen moet worden")
 
@@ -21,10 +21,9 @@ class Command(BaseCommand):
         remote_fpath = options['remote_fpath'][0]
         local_fpath = options['local_fpath'][0]
 
-        site = GraphSite(settings.GRAPH_TENANT_ID,
-                         settings.GRAPH_SITE_ID,
-                         settings.GRAPH_CLIENT_ID,
-                         settings.GRAPH_CLIENT_SECRET)
+        site = GraphSite(self.stdout)
+        if not site.setup(options['site_index'][0]):
+            return
 
         data = get_file_metadata(self.stdout, site, remote_fpath)
 

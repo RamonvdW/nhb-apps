@@ -587,7 +587,6 @@ GOOGLE_DRIVE_FOLDER_NAME_TOP = 'MH wedstrijdformulieren'        # moet uniek zij
 GOOGLE_DRIVE_FOLDER_NAME_TEMPLATES = 'MH templates RK/BK'       # moet uniek zijn in de drive
 GOOGLE_DRIVE_FOLDER_SITE = NAAM_SITE
 
-DDI_AUTH_TOKEN = ''     # your secret here
 
 # -------------------------------------------
 # defaults for 'dev' and 'test' options below

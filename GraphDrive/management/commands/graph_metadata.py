@@ -4,7 +4,6 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.conf import settings
 from django.core.management.base import BaseCommand
 from GraphDrive.operations import GraphSite, get_file_metadata
 import pprint
@@ -14,15 +13,15 @@ class Command(BaseCommand):
     help = "Toon de meta-data van een gedeeld bestand vanuit Sharepoint/Teams"
 
     def add_arguments(self, parser):
+        parser.add_argument('site_index', nargs=1, type=int, help="Welke id's gebruiken? (index in settings.GRAPH_IDS)")
         parser.add_argument('fpath', nargs=1, help="pad naar het bestand")
 
     def handle(self, *args, **options):
         fpath = options['fpath'][0]
 
-        site = GraphSite(settings.GRAPH_TENANT_ID,
-                         settings.GRAPH_SITE_ID,
-                         settings.GRAPH_CLIENT_ID,
-                         settings.GRAPH_CLIENT_SECRET)
+        site = GraphSite(self.stdout)
+        if not site.setup(options['site_index'][0]):
+            return
 
         data = get_file_metadata(self.stdout, site, fpath)
 
