@@ -13,8 +13,8 @@ import requests
 # https://learn.microsoft.com/en-us/graph/onedrive-addressing-driveitems
 
 
-def download_file(out, site: GraphSite, fpath: str, local_filename: str):
-    """ Download a file from the Graph Drive """
+def upload_file(out, site: GraphSite, local_filename: str, remote_fpath: str):
+    """ Upload a file to the Graph Drive """
 
     if not get_bearer_token(out, site):
         return None
@@ -22,32 +22,28 @@ def download_file(out, site: GraphSite, fpath: str, local_filename: str):
     if not get_drive_id(out, site):
         return None
 
-    url_fpath = quote(fpath)
+    url_fpath = quote(remote_fpath)
     url = "https://graph.microsoft.com/v1.0/sites/%s/drives/%s/root:/%s:/content" % (site.site_id, site.drive_id, url_fpath)
 
     headers = {
         'Authorization': 'Bearer %s' % site.bearer_token,
-        'Accept': 'application/octet-stream',
-        # TODO: something to prevent compression?
+        'Content-Type': 'application/gzip',
+        'Accept': 'application/json',
     }
 
-    # out.write('[DEBUG] {download} fpath=%s, url_fpath=%s' % (repr(fpath), repr(url_fpath)))
+    out.write('[DEBUG] {upload} fpath=%s, url_fpath=%s' % (repr(remote_fpath), repr(url_fpath)))
     try:
-        with requests.get(url, headers=headers, stream=True) as r:
-            if r.status_code != 200:
+        f = open(local_filename, 'rb')
+        with requests.put(url, data=f, headers=headers, stream=False) as r:
+            if r.status_code != 201:        # 201 Created is het normale antwoord
                 out.write(
-                    "[ERROR] download request gaf onverwacht antwoord! response encoding:%s, status_code:%s" % (
+                    "[ERROR] upload request gaf onverwacht antwoord! response encoding:%s, status_code:%s" % (
                         repr(r.encoding), repr(r.status_code)))
                 out.write("[ERROR] Full response: %s" % repr(r.text))
                 return None
 
-            with open(local_filename, 'wb') as f:
-                for chunk in r.iter_content(chunk_size=1*1024*1024):
-                    f.write(chunk)
-                # for
-            # with
-
-            return local_filename
+            out.write('[DEBUG] {upload} is gelukt')
+            return "OK"
 
     except (requests.exceptions.SSLError, requests.exceptions.ConnectionError) as exc:
         out.write("[ERROR] Exceptie tijdens download: %s" % str(exc))

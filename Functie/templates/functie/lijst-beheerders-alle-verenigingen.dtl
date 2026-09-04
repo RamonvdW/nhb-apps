@@ -105,6 +105,6 @@
 
     <script src="{% static 'overig_js/tabel_filter.js' %}"></script>
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="functie-lijst-beheerders" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="functie-lijst-beheerders-alle-verenigingen" %}
 
 {% endblock %}

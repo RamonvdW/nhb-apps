@@ -7,27 +7,25 @@
 from django.conf import settings
 from .access_token import get_bearer_token
 from .drives import get_drive_id
+from .site import GraphSite
 from urllib.parse import quote
 import requests
 
 
-def get_file_metadata(out, fpath: str) -> dict | None:
+def get_file_metadata(out, site: GraphSite, fpath: str) -> dict | None:
     """ Get the metadata for a file """
 
-    bearer_token = get_bearer_token(out)
-    if not bearer_token:
+    if not get_bearer_token(out, site):
         return None
 
-    site_id = settings.GRAPH_SITE_ID
-    drive_id, _ = get_drive_id(out)
-    if not drive_id:
+    if not get_drive_id(out, site):
         return None
 
     url_fpath = quote(fpath)
-    url = "https://graph.microsoft.com/v1.0/sites/%s/drives/%s/root:/%s" % (site_id, drive_id, url_fpath)
+    url = "https://graph.microsoft.com/v1.0/sites/%s/drives/%s/root:/%s" % (site.site_id, site.drive_id, url_fpath)
 
     headers = {
-        'Authorization': 'Bearer %s' % bearer_token,
+        'Authorization': 'Bearer %s' % site.bearer_token,
         'Accept': 'application/json',
     }
 
@@ -88,15 +86,15 @@ def get_file_metadata(out, fpath: str) -> dict | None:
     return resp.json()
 
 
-def get_file_last_modified(out, fpath: str) -> str:
+def get_file_last_modified(out, site: GraphSite, fpath: str) -> str:
     """ Get the last modified date/time for a file """
 
-    data = get_file_metadata(out, fpath)
+    data = get_file_metadata(out, site, fpath)
     out.write("[INFO] {get_last_modified} data=%s" % repr(data))
 
     last_mod = ''
     if data:
-        last_mod = data['lastModifiedDateTime']
+        last_mod = data.get('lastModifiedDateTime', '')
 
     return last_mod
 

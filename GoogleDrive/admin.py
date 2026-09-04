@@ -19,7 +19,7 @@ class BestandAdmin(admin.ModelAdmin):
 
     search_fields = ('fname', 'file_id', 'log')
 
-    list_filter = ('afstand', 'is_teams', 'is_bk', 'is_dirty', 'rayon_nr')
+    list_filter = ('begin_jaar', 'afstand', 'is_teams', 'is_bk', 'is_dirty', 'rayon_nr')
 
     exclude = ('gedeeld_met',)
 
@@ -38,6 +38,7 @@ class BestandAdmin(admin.ModelAdmin):
         return msg
 
     my_gedeeld_met.short_description = 'Bestand is gedeeld met'
+
 
 admin.site.register(Transactie, TransactieAdmin)
 admin.site.register(Token)
