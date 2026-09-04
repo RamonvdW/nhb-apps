@@ -24,6 +24,8 @@ class Command(BaseCommand):
         dir_lijst, file_lijst = list_folders_and_files(self.stdout, site, remote_folder)
 
         file_lijst.sort()       # oudste eerst
+        self.stdout.write('[INFO] Site: %s' % site.description)
+
         self.stdout.write('%-21s %10s %s' % ('modified', 'size', 'name'))
         self.stdout.write('%-21s %10s %s' % ('-'*21, '-'*10, '-'*50))
         for naam in dir_lijst:
