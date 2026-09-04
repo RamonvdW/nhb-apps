@@ -50,7 +50,7 @@ DAGDEEL2LABEL = {
     'VRa': ("V-Av", "Vrijdagavond"),
     'ZAT': ("Za", "Zaterdag"),
     'ZAo': ("Za-Och", "Zaterdagochtend"),
-    'ZAm': ("Zo-Mi", "Zaterdagmiddag"),
+    'ZAm': ("Za-Mi", "Zaterdagmiddag"),
     'ZAa': ("Za-Av", "Zaterdagavond"),
     'ZON': ("Zo", "Zondag"),
     'ZOo': ("Zo-Och", "Zondagochtend"),
