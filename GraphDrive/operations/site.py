@@ -29,6 +29,7 @@ class GraphSite:
         self.site_id = ''
         self.client_id = ''
         self.client_secret = ''
+        self.description = ''
 
         # will be retrieved upon first use
         self.bearer_token = ''
@@ -47,8 +48,7 @@ class GraphSite:
         self.site_id = ids['site_id']                       # sharepoint site
         self.client_id = ids['client_id']                   # application
         self.client_secret = ids['client_secret']
-
-        print(repr(self.tenant_id), repr(self.site_id), repr(self.client_id), repr(self.client_secret))
+        self.description = ids['description']
 
         return True
 
