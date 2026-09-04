@@ -4,8 +4,9 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
+from django.conf import settings
 from django.core.management.base import BaseCommand
-from GraphDrive.operations import get_file_metadata, download
+from GraphDrive.operations import GraphSite, get_file_metadata
 import pprint
 
 
@@ -18,7 +19,12 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         fpath = options['fpath'][0]
 
-        data = get_file_metadata(self.stdout, fpath)
+        site = GraphSite(settings.GRAPH_TENANT_ID,
+                         settings.GRAPH_SITE_ID,
+                         settings.GRAPH_CLIENT_ID,
+                         settings.GRAPH_CLIENT_SECRET)
+
+        data = get_file_metadata(self.stdout, site, fpath)
 
         if data:
             out = pprint.pformat(data, indent=4)

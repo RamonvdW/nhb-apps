@@ -4,55 +4,39 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.conf import settings
 from django.utils import timezone
 from django.utils.http import urlencode
+from .site import GraphSite
 from datetime import timedelta
 import requests
 
-_bearer_token = ''
-_bearer_valid_until = timezone.now()
 
-
-def clear_bearer_token():
-    global _bearer_token, _bearer_valid_until
-    _bearer_token = ''
-    _bearer_valid_until = timezone.now()
-
-
-def force_bearer_token(token, valid_until):
-    global _bearer_token, _bearer_valid_until
-    _bearer_token = token
-    _bearer_valid_until = valid_until
-
-
-
-def get_bearer_token(out) -> str | None:
+def get_bearer_token(out, site: GraphSite) -> bool:
 
     """ Deze functie probeert een bearer token te krijgen aan de hand van een setje credentials
 
         out must provide a write() function that access a string and adds a newlines when called
+
+        returns True if successful
     """
 
-    global _bearer_token, _bearer_valid_until
-
     now = timezone.now() + timedelta(seconds=30)
-    if _bearer_valid_until < now:
-        _bearer_token = ''
+    if site.bearer_valid_until < now:
+        site.bearer_token = ''
 
-    if _bearer_token:
-        return _bearer_token
+    if site.bearer_token:
+        return True
 
-    url = "https://login.microsoftonline.com/%s/oauth2/v2.0/token" % settings.GRAPH_TENANT_ID
+    url = "https://login.microsoftonline.com/%s/oauth2/v2.0/token" % site.tenant_id
 
     headers = {
         'Content-Type': 'application/x-www-form-urlencoded',
     }
 
     params = {
-        "client_id": settings.GRAPH_CLIENT_ID,
+        "client_id": site.client_id,
         "scope": "https://graph.microsoft.com/.default",
-        "client_secret": settings.GRAPH_CLIENT_SECRET,
+        "client_secret": site.client_secret,
         "grant_type": "client_credentials",
     }
 
@@ -68,14 +52,14 @@ def get_bearer_token(out) -> str | None:
 
     except (requests.exceptions.SSLError, requests.exceptions.ConnectionError) as exc:
         out.write("[ERROR] Exceptie bij versturen access token request: %s" % str(exc))
-        return None
+        return False
 
     if resp.status_code != 200:
         out.write(
             "[ERROR] Access token request gaf onverwacht antwoord! response encoding:%s, status_code:%s" % (
                 repr(resp.encoding), repr(resp.status_code)))
         out.write("[ERROR] Full response: %s" % repr(resp.text))
-        return None
+        return False
 
     # out.write("[INFO] Full response: %s" % repr(resp.text))
 
@@ -89,23 +73,21 @@ def get_bearer_token(out) -> str | None:
         }
     """
 
-    token = None
     try:
         if data["token_type"] != "Bearer":
             out.write("[ERROR] Not a bearer access token in %s" % repr(resp.text))
-            return None
+            return False
 
         token = data["access_token"]
         seconds = data["expires_in"]
 
-        _bearer_token = token
-        _bearer_valid_until = timezone.now() + timedelta(seconds=seconds)
+        site.bearer_token = token
+        site.bearer_valid_until = timezone.now() + timedelta(seconds=seconds)
 
     except KeyError:
         out.write("[ERROR] Not a complete bearer access token in %s" % repr(resp.text))
-        return None
+        return False
 
-    return token
-
+    return True
 
 # end of file

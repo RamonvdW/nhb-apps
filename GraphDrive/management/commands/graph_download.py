@@ -4,8 +4,9 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
+from django.conf import settings
 from django.core.management.base import BaseCommand
-from GraphDrive.operations import get_file_metadata, download
+from GraphDrive.operations import GraphSite, get_file_metadata, download_file
 import pprint
 
 
@@ -20,7 +21,12 @@ class Command(BaseCommand):
         remote_fpath = options['remote_fpath'][0]
         local_fpath = options['local_fpath'][0]
 
-        data = get_file_metadata(self.stdout, remote_fpath)
+        site = GraphSite(settings.GRAPH_TENANT_ID,
+                         settings.GRAPH_SITE_ID,
+                         settings.GRAPH_CLIENT_ID,
+                         settings.GRAPH_CLIENT_SECRET)
+
+        data = get_file_metadata(self.stdout, site, remote_fpath)
 
         if data:
             try:
@@ -31,7 +37,7 @@ class Command(BaseCommand):
                 out = pprint.pformat(data, indent=4)
                 self.stdout.write(out)
             else:
-                out_fname = download(self.stdout, remote_fpath, local_fpath)
+                out_fname = download_file(self.stdout, site, remote_fpath, local_fpath)
                 if out_fname:
                     self.stdout.write('[INFO] Download gelukt naar %s' % repr(out_fname))
 
