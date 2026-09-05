@@ -95,9 +95,10 @@ class DataApiLidmaatschap(models.Model):
     postcode = models.CharField(max_length=20)
 
     def __str__(self):
-        return "Lid %s ver %s: %s %s %s %s %s" % (self.lid_nr, self.ver_nr,
-                                                  self.geboorte_datum, self.geslacht, self.postcode,
-                                                  self.aanmeld_datum, self.afmeld_datum)
+        return "Lid %s [%s %s %s] ver %s van %s tot %s" % (self.lid_nr,
+                                                           self.geboorte_datum, self.geslacht, self.postcode,
+                                                           self.ver_nr,
+                                                           self.aanmeld_datum, self.afmeld_datum)
     class Meta:
         verbose_name = "DataApi Lidmaatschap"
         verbose_name_plural = "DataApi Lidmaatschappen"

@@ -37,7 +37,9 @@ class DataApiVerenigingAdmin(admin.ModelAdmin):
 
 class DataApiLidmaatschapAdmin(admin.ModelAdmin):
 
-    search_fields = ('lid_nr',)
+    search_fields = ('lid_nr', 'ver_nr')
+
+    list_filter = ('ver_nr',)
 
     readonly_fields = ('mutatie_datum',)
 
