@@ -5,10 +5,8 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.conf import settings
-from django.utils import timezone
-from django.db.models import ProtectedError
 from DataApi.import_base import ImportCrmBase
-from DataApi.models import DataApiLidmaatschap, DataApiVereniging
+from DataApi.models import DataApiLidmaatschap
 import datetime
 
 
@@ -20,7 +18,7 @@ OPTIONAL_MEMBER_KEYS = ('skill_levels', 'educations', 'latitude', 'longitude', '
                         'member_until', 'blocked', 'date_of_death')     # was vroeger niet aanwezig
 
 
-class ImportCrmLidmaatschappen(ImportCrmBase):
+class ImportHistCrmLidmaatschappen(ImportCrmBase):
 
     def __init__(self, *args):
         super().__init__(*args)

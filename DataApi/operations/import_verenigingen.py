@@ -16,7 +16,7 @@ OPTIONAL_CLUB_KEYS = ('region_number', 'smoke_free_status', 'has_disabled_facili
                       'coc_number')     # was vroeger niet aanwezig
 
 
-class ImportCrmVerenigingen(ImportCrmBase):
+class ImportHistCrmVerenigingen(ImportCrmBase):
 
     def __init__(self, *args):
         super().__init__(*args)
@@ -40,7 +40,7 @@ class ImportCrmVerenigingen(ImportCrmBase):
                 self.count_actief += 1
         # for
 
-    def get_ver_nrs(self):
+    def _get_ver_nrs(self):
         return list(self._cache_ver.keys())
 
     def _store_vereniging(self, ver_nr: int, naam: str, kvk: str, straatnaam: str, huis_nr: int, postcode: str, plaats: str, lat: str, lon: str):
@@ -122,14 +122,14 @@ class ImportCrmVerenigingen(ImportCrmBase):
         return
 
     def importeer(self, data: list):
-        """ Importeert alle verenigingen en gegevens over de primaire sportlocatie """
+        """ Importeert alle verenigingen + gegevens over de primaire sportlocatie """
 
         if self.check_keys(data[0].keys(), EXPECTED_CLUB_KEYS, OPTIONAL_CLUB_KEYS, "club{vereniging}"):
             return
 
         # houd bij welke verenigingsnummers in de database zitten
         # als deze niet meer voorkomen, dan zijn ze verwijderd
-        ver_nrs = list(self._cache_ver.keys())
+        ver_nrs = self._get_ver_nrs()
 
         """ JSON velden (string, except):
                 'club_number':             int
@@ -224,10 +224,13 @@ class ImportCrmVerenigingen(ImportCrmBase):
         while len(ver_nrs) > 0:
             ver_nr = ver_nrs.pop(0)
             ver = self.vind_vereniging(ver_nr)
-            if ver and ver.afmeld_datum == '':
-                if not self.dryrun:
-                    ver.afmeld_datum = self.afmelddatum
-                    ver.save(update_fields=['afmeld_datum'])
+            if ver:
+                if ver.afmeld_datum == '':
+                    if ver.aanmeld_datum == '' or ver.aanmeld_datum < self.afmelddatum:
+                        self.stdout.write('[INFO] Verwijder vereniging %s' % ver)
+                        if not self.dryrun:
+                            ver.afmeld_datum = self.afmelddatum
+                            ver.save(update_fields=['afmeld_datum'])
         # while
 
 # end of file

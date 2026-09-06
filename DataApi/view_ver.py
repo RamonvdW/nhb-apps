@@ -11,15 +11,29 @@ from DataApi.models import DataApiVereniging, DataApiLidmaatschap
 from DataApi.view_helpers import datum_n_jaar_geleden, is_auth_token_ok
 
 
+def _get_ver_nrs_in_use():
+    # verenigingen zonder leden moeten we niet rapporteren
+    # nadat de vereniging opgeheven is blijven we deze rapporteren,
+    # totdat alle DataApiLidmaatschappen die hiernaar verwijzen verwijderd zijn
+
+    # rapporteren maximaal 5 jaar aan lidmaatschappen
+    actief_datum = datum_n_jaar_geleden(5)
+    print('actief_datum=%s' % actief_datum)
+
+    ver_nrs = list(DataApiLidmaatschap
+                   .objects
+                   .exclude(afmeld_datum__lt=actief_datum)
+                   .distinct('ver_nr')
+                   .values_list('ver_nr', flat=True))
+    return ver_nrs
+
+
 class VerenigingenView(View):
 
     @staticmethod
     def _maak_lijst():
 
-        # verenigingen zonder leden moeten we niet rapporteren
-        # nadat de vereniging opgeheven is blijven we deze rapporteren,
-        # totdat alle DataApiLidmaatschappen die hiernaar verwijzen verwijderd zijn
-        ver_nrs_in_use = list(DataApiLidmaatschap.objects.distinct('ver_nr').values_list('ver_nr', flat=True))
+        ver_nrs_in_use = _get_ver_nrs_in_use()
 
         lijst = list()
         for ver in DataApiVereniging.objects.filter(ver_nr__in=ver_nrs_in_use).order_by('pk'):
@@ -66,10 +80,7 @@ class AccommodatiesView(View):
     @staticmethod
     def _maak_lijst():
 
-        # verenigingen zonder leden moeten we niet rapporteren
-        # nadat de vereniging opgeheven is blijven we deze rapporteren,
-        # totdat alle DataApiLidmaatschappen die hiernaar verwijzen verwijderd zijn
-        ver_nrs_in_use = list(DataApiLidmaatschap.objects.distinct('ver_nr').values_list('ver_nr', flat=True))
+        ver_nrs_in_use = _get_ver_nrs_in_use()
 
         lijst = list()
         for ver in DataApiVereniging.objects.filter(ver_nr__in=ver_nrs_in_use).order_by('pk'):

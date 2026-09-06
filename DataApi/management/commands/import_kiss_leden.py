@@ -69,17 +69,6 @@ class Command(BaseCommand):
 
         self.stdout.write('[INFO] %s leden met %s lidmaatschappen ingeladen' % (count_leden, count_lms))
 
-    def _ver_null_afmelden(self):
-        qset = DataApiLidmaatschap.objects.filter(afmeld_datum='', ver_nr=0)
-        c = qset.count()
-        self.stdout.write('[WARNING] %s lidmaatschappen met ver_nr=0 worden nu verwijderd' % c)
-        if not self.dry_run:
-            qset.delete()
-
-    def _tel_niet_gematcht(self):
-        qset = DataApiLidmaatschap.objects.filter(afmeld_datum='').exclude(lid_nr__in=self._gematchte_lid_nrs)
-        self.count_niet_gematcht = qset.count()
-
     def _overstap_weg_bij_ver(self, lid_nr: int, lms_lijst: list, ver_nr_oud: int, afmeld_datum: str):
         # zoek het lidmaatschap van de oude vereniging
         match_count = 0
@@ -136,7 +125,7 @@ class Command(BaseCommand):
         match_count = 0
         lms_gevonden = None
         for lms in lms_lijst:
-            if lms.ver_nr == ver_nr_nieuw:
+            if lms.afmeld_datum == '' and lms.ver_nr == ver_nr_nieuw:
                 match_count += 1
                 lms_gevonden = lms
         # for
@@ -175,6 +164,9 @@ class Command(BaseCommand):
             if lms_gevonden.aanmeld_datum == aanmeld_datum:
                 # niets te doen
                 return
+
+            if lms_gevonden.afmeld_datum != '':
+                self.stdout.write('[WARNING] Overstap lid %s naar ver %s: lms is afgemeld! %s' % (lid_nr, ver_nr_nieuw, lms_gevonden))
 
             # in de snapshot staat de eerste datum van lms
             # in het overstap bestand staat de exacte datum van lms
@@ -217,18 +209,24 @@ class Command(BaseCommand):
                 print('Overstapper %s niet bekend' % lid_nr)
                 continue
 
+            if ver_nr_oud == ver_nr_nieuw:
+                self.stdout.write('[WARNING] Lid %s stapt over naar dezelfde vereniging %s' % (lid_nr, ver_nr_oud))
+                continue
+
+            assert afmeld_datum < aanmeld_datum
             self._overstap_weg_bij_ver(lid_nr, lms_lijst, ver_nr_oud, afmeld_datum)
             self._overstap_naar_ver(lid_nr, lms_lijst, ver_nr_nieuw, aanmeld_datum)
         # for
 
-    def _check_update_of_maak_lms(self, lid_nr: int, geboortedatum: str, geslacht: str, postcode: str, ver_nr: int, aanvangsdatum: str):
+    def _check_update_of_maak_lms(self, lid_nr: int, geboortedatum: str, geslacht: str, postcode: str, ver_nr: int, aanmeld_datum: str):
         lms_lijst = self._lidnr2lms.get(lid_nr, [])
         lms = None
         for lms_lp in lms_lijst:
             if lms_lp.ver_nr == ver_nr:
                 # lid kan knipperlicht relatie hebben met vereniging
                 # we pakken het nieuwste record
-                # TODO: zouden we aanvangsdatum moeten controleren?
+
+                # aanmeld_datum kunnen we niet controleren omdat dit eigenlijk datum-eerste-lidmaatschap-bij-de-bond is
                 lms = lms_lp
         # for
 
@@ -261,10 +259,14 @@ class Command(BaseCommand):
             return
 
         # sluit alle voorgaande lidmaatschappen
-        vorige_jaar = self.jaar - 1
+        vorig_jaar = self.jaar - 1
+        afmeld_datum = '%s-12-31' % vorig_jaar
         for lms in lms_lijst:
+            assert isinstance(lms, DataApiLidmaatschap)
             if lms.afmeld_datum == '':
-                lms.afmeld_datum = '%s-12-31' % vorige_jaar
+                if afmeld_datum < lms.aanmeld_datum:
+                    self.stdout.write('[WARNING] Afmelding met te oude datum: %s' % lms)
+                lms.afmeld_datum = afmeld_datum
                 if not self.dry_run:
                    lms.save(update_fields=['afmeld_datum'])
         # for
@@ -276,7 +278,7 @@ class Command(BaseCommand):
             lms = DataApiLidmaatschap.objects.create(
                             lid_nr=lid_nr,
                             ver_nr=ver_nr,
-                            aanmeld_datum=aanvangsdatum,
+                            aanmeld_datum=aanmeld_datum,
                             afmeld_datum='',
                             geboorte_datum=geboortedatum,
                             geslacht=geslacht,
@@ -331,13 +333,14 @@ class Command(BaseCommand):
         return data
 
     def _verdwenen_lid_nrs_afmelden(self):
-        # zoek iedereen met een open lidmaatschap die we niet gevonden hebben in het KISS bestand
-        qset = DataApiLidmaatschap.objects.filter(afmeld_datum='').exclude(lid_nr__in=self._gevonden_lid_nrs)
-        self.count_afgemeld += qset.count()
-
         # forceer de afmelddatum
         vorig_jaar = self.jaar - 1
         afmeld_datum = '%s-12-31' % vorig_jaar
+
+        # zoek iedereen met een open lidmaatschap die we niet gevonden hebben in het KISS bestand
+        qset = DataApiLidmaatschap.objects.filter(afmeld_datum='', aanmeld_datum__lt=afmeld_datum).exclude(lid_nr__in=self._gevonden_lid_nrs)
+        self.count_afgemeld += qset.count()
+
         qset.update(afmeld_datum=afmeld_datum)
 
     def _lees_csv_bestanden(self):

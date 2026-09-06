@@ -8,7 +8,7 @@
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
-from DataApi.operations import ImportCrmVerenigingen, ImportCrmLidmaatschappen
+from DataApi.operations import ImportHistCrmVerenigingen, ImportHistCrmLidmaatschappen
 from Logboek.models import schrijf_in_logboek
 from Mailer.operations import mailer_notify_internal_error
 import traceback
@@ -35,7 +35,7 @@ class Command(BaseCommand):
         self._import_verenigingen = None
 
         self.dryrun = True
-        self._include_ver_null = False
+        self.afmelddatum = ''
         self._exit_code = 0
 
         self._count_errors = 0
@@ -44,25 +44,14 @@ class Command(BaseCommand):
         self._count_verwijderingen = 0
         self._count_toevoegingen = 0
 
-        self.aanmelddatum = ''
-        self.afmelddatum = ''
-        self.forceer_mutatie_datum = ''
-
     def add_arguments(self, parser):
         parser.add_argument('filename', nargs=1, help="pad naar het JSON bestand")
-        parser.add_argument('aanmelddatum', nargs=1, help='YYYY-MM-DD te gebruiken voor nieuwe leden/verenigingen')
-        parser.add_argument('afmelddatum', nargs=1, help='YYYY-MM-DD te gebruiken voor verdwenen leden/verenigingen')
-        parser.add_argument('mutatie_datum', nargs=1, help='YYYY-MM-DD geforceerde mutatie moment')
         parser.add_argument('--dryrun', action='store_true')
-        parser.add_argument('--include_ver_null', action='store_true')
+        parser.add_argument('afmelddatum', nargs=1, help='YYYY-MM-DD te gebruiken voor verdwenen leden/verenigingen')
 
     def _init_modules(self):
-        self._import_verenigingen = ImportCrmVerenigingen(self.stdout, self.dryrun, self._include_ver_null,
-                                                          self.aanmelddatum, self.afmelddatum,
-                                                          self.forceer_mutatie_datum)
-        self._import_lidmaatschappen = ImportCrmLidmaatschappen(self.stdout, self.dryrun, self._include_ver_null,
-                                                                self.aanmelddatum, self.afmelddatum,
-                                                                self.forceer_mutatie_datum)
+        self._import_verenigingen = ImportHistCrmVerenigingen(self.stdout, self.dryrun, self.afmelddatum)
+        self._import_lidmaatschappen = ImportHistCrmLidmaatschappen(self.stdout, self.dryrun, self.afmelddatum)
 
     def _check_keys(self, keys, expected_keys, level):
         has_error = False
@@ -85,8 +74,8 @@ class Command(BaseCommand):
         # volgorde is belangrijk
         self._import_verenigingen.importeer(data['clubs'])
 
-        self._import_lidmaatschappen.zet_ver_nrs(self._import_verenigingen.get_ver_nrs())
-        self._import_lidmaatschappen.importeer(data['members'], self.forceer_mutatie_datum)
+        #self._import_lidmaatschappen.zet_ver_nrs(self._import_verenigingen.get_ver_nrs())
+        #self._import_lidmaatschappen.importeer(data['members'], self.forceer_mutatie_datum)
 
         self.stdout.write('Import van historische CRM data is klaar')
 
@@ -167,12 +156,8 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         self.dryrun = options['dryrun']
-        self._include_ver_null = options['include_ver_null']
-
         fname = options['filename'][0]
-        self.aanmelddatum = options['aanmelddatum'][0]
         self.afmelddatum = options['afmelddatum'][0]
-        self.forceer_mutatie_datum = options['mutatie_datum'][0]
 
         self._init_modules()
 

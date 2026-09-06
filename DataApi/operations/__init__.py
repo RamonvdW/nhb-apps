@@ -4,13 +4,13 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from .import_lidmaatschappen import ImportCrmLidmaatschappen
-from .import_verenigingen import ImportCrmVerenigingen
+from .import_lidmaatschappen import ImportHistCrmLidmaatschappen
+from .import_verenigingen import ImportHistCrmVerenigingen
 from .opschonen import dataapi_opschonen
 
 __all__ = [
-    'ImportCrmLidmaatschappen',
-    'ImportCrmVerenigingen',
+    'ImportHistCrmLidmaatschappen',
+    'ImportHistCrmVerenigingen',
     'dataapi_opschonen',
 ]
 

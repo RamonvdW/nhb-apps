@@ -11,14 +11,10 @@ class ImportCrmBase:
         Hier bieden we de standaard interface aan en een paar helpers.
     """
 
-    def __init__(self, stdout, dryrun: bool, include_ver_null: bool, aanmelddatum: str, afmelddatum: str, mutatiedatum: str):
+    def __init__(self, stdout, dryrun: bool, afmelddatum: str):
         self.stdout = stdout
         self.dryrun = dryrun
-        self.include_ver_null = include_ver_null
         self.exit_error = False
-
-        self.aanmelddatum_ver = aanmelddatum
-        self.aanmelddatum_lid = mutatiedatum
         self.afmelddatum = afmelddatum
 
         self.count_errors = 0
