@@ -66,6 +66,21 @@ def bepaal_team_sterkte_en_klasse(team):
     team.save(update_fields=['team_klasse', 'aanvangsgemiddelde'])
 
 
+def mag_wijzigen_teams(deelcomp: RegioComp):
+    begin_fase_d = datetime.datetime(
+                        year=deelcomp.begin_fase_D.year,
+                        month=deelcomp.begin_fase_D.month,
+                        day=deelcomp.begin_fase_D.day,
+                        hour=0,
+                        minute=0,
+                        second=0)
+    begin_fase_d = timezone.make_aware(begin_fase_d)
+
+    # inschrijving sluit als fase C afgelopen is
+    # dus de eerste dag van fase D is het afgelopen
+    return timezone.now() < begin_fase_d
+
+
 class TeamsRegioView(UserPassesTestMixin, TemplateView):
 
     """ Laat de HWL de teams beheren die door deze vereniging opgesteld
@@ -125,15 +140,7 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
 
         context['readonly'] = self.readonly
 
-        now = timezone.now()
-        einde = datetime.datetime(year=deelcomp.begin_fase_D.year,
-                                  month=deelcomp.begin_fase_D.month,
-                                  day=deelcomp.begin_fase_D.day,
-                                  hour=0,
-                                  minute=0,
-                                  second=0)
-        einde = timezone.make_aware(einde)
-        mag_wijzigen = (now < einde) and not self.readonly
+        mag_wijzigen = mag_wijzigen_teams(deelcomp) and not self.readonly
         context['mag_wijzigen'] = mag_wijzigen
 
         if deelcomp.competitie.is_indoor():
@@ -227,15 +234,7 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
         # zoek de regiocompetitie waar de regio teams voor in kunnen stellen
         deelcomp = self._get_deelcomp(kwargs['deelcomp_pk'])
 
-        now = timezone.now()
-        einde = datetime.datetime(year=deelcomp.begin_fase_D.year,
-                                  month=deelcomp.begin_fase_D.month,
-                                  day=deelcomp.begin_fase_D.day,
-                                  hour=0,
-                                  minute=0,
-                                  second=0)
-        einde = timezone.make_aware(einde)
-        if not (now < einde):
+        if not mag_wijzigen_teams(deelcomp):
             raise Http404('De deadline is gepasseerd')
 
         # nieuw team aanmaken
@@ -342,15 +341,7 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
         context['deelcomp'] = deelcomp = self._get_deelcomp(kwargs['deelcomp_pk'])
         ver = self.functie_nu.vereniging
 
-        now = timezone.now()
-        einde = datetime.datetime(year=deelcomp.begin_fase_D.year,
-                                  month=deelcomp.begin_fase_D.month,
-                                  day=deelcomp.begin_fase_D.day,
-                                  hour=0,
-                                  minute=0,
-                                  second=0)
-        einde = timezone.make_aware(einde)
-        mag_wijzigen = (now <= einde)
+        mag_wijzigen = mag_wijzigen_teams(deelcomp)
 
         try:
             team_pk = int(kwargs['team_pk'][:7])        # afkappen voor de veiligheid
@@ -417,17 +408,7 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
 
         if self.rol_nu == Rol.ROL_HWL:
             ver = self.functie_nu.vereniging
-
-            now = timezone.now()
-            einde = datetime.datetime(year=deelcomp.begin_fase_D.year,
-                                      month=deelcomp.begin_fase_D.month,
-                                      day=deelcomp.begin_fase_D.day,
-                                      hour=0,
-                                      minute=0,
-                                      second=0)
-            einde = timezone.make_aware(einde)
-            mag_wijzigen = (now <= einde)
-            if not mag_wijzigen:
+            if not mag_wijzigen_teams(deelcomp):
                 raise Http404('Mag niet (meer) wijzigen')
         else:
             # RCL
@@ -700,15 +681,7 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
 
         if self.rol_nu == Rol.ROL_HWL:
             context['readonly'] = readonly = (comp.fase_teams > 'D')
-            now = timezone.now()
-            einde = datetime.datetime(year=deelcomp.begin_fase_D.year,
-                                      month=deelcomp.begin_fase_D.month,
-                                      day=deelcomp.begin_fase_D.day,
-                                      hour=0,
-                                      minute=0,
-                                      second=0)
-            einde = timezone.make_aware(einde)
-            mag_wijzigen = (now <= einde) and not readonly
+            mag_wijzigen = mag_wijzigen_teams(deelcomp) and not readonly
         else:
             # RCL
             context['readonly'] = (comp.fase_teams > 'D')       # TODO: de RCL langer rechten geven?
@@ -809,15 +782,7 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
 
         if self.rol_nu == Rol.ROL_HWL:
             readonly = (comp.fase_teams > 'D')
-            now = timezone.now()
-            einde = datetime.datetime(year=deelcomp.begin_fase_D.year,
-                                      month=deelcomp.begin_fase_D.month,
-                                      day=deelcomp.begin_fase_D.day,
-                                      hour=0,
-                                      minute=0,
-                                      second=0)
-            einde = timezone.make_aware(einde)
-            mag_wijzigen = (now <= einde) and not readonly
+            mag_wijzigen = mag_wijzigen_teams(deelcomp) and not readonly
         else:
             # RCL
             readonly = (comp.fase_teams > 'D')
