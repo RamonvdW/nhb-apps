@@ -6,9 +6,9 @@
 
 from django.http import JsonResponse, HttpResponseBadRequest
 from django.views import View
-from django.db.models import Q
 from DataApi.models import DataApiVereniging, DataApiLidmaatschap
 from DataApi.view_helpers import datum_n_jaar_geleden, is_auth_token_ok
+from Logboek.operations import schrijf_in_logboek
 
 
 def _get_ver_nrs_in_use():
@@ -18,7 +18,6 @@ def _get_ver_nrs_in_use():
 
     # rapporteren maximaal 5 jaar aan lidmaatschappen
     actief_datum = datum_n_jaar_geleden(5)
-    print('actief_datum=%s' % actief_datum)
 
     ver_nrs = list(DataApiLidmaatschap
                    .objects
@@ -36,20 +35,26 @@ class VerenigingenView(View):
         ver_nrs_in_use = _get_ver_nrs_in_use()
 
         lijst = list()
-        for ver in DataApiVereniging.objects.filter(ver_nr__in=ver_nrs_in_use).order_by('pk'):
-            lijst.append({
-                "Verenigingscode": str(ver.ver_nr),
-                "Naam": ver.naam,
-                "Aanmelddatum": ver.aanmeld_datum,
-                "Afmelddatum": ver.afmeld_datum,
-                "KVKnummer": ver.kvk_nummer,
-                "Accommodaties": [
-                    {
-                        "Postcode": ver.postcode,
-                        "Huisnummer": ver.huisnummer,
-                    }
-                ]
-            })
+        for ver in (DataApiVereniging
+                    .objects
+                    .filter(ver_nr__in=ver_nrs_in_use)
+                    .order_by('pk')):
+
+            lijst.append(
+                {
+                    "Verenigingscode": str(ver.ver_nr),
+                    "Naam": ver.naam,
+                    "Aanmelddatum": ver.aanmeld_datum,
+                    "Afmelddatum": ver.afmeld_datum,
+                    "KVKnummer": ver.kvk_nummer,
+                    "Accommodaties": [
+                        {
+                            "Postcode": ver.postcode,
+                            "Huisnummer": ver.huisnummer,
+                        }
+                    ]
+                }
+            )
         # for
 
         return lijst
@@ -62,15 +67,22 @@ class VerenigingenView(View):
 
         lijst = self._maak_lijst()
 
+        meta = {
+            "count": len(lijst),
+            "total": len(lijst),
+            "limit": 0,     # len(lijst),
+            "offset": 0,
+        }
+
         out = {
-            "meta": {
-                "count": len(lijst),
-                "total": len(lijst),
-                "limit": 0,     # len(lijst),
-                "offset": 0,
-            },
+            "meta": meta,
             "Verenigingsgegevens": lijst,
         }
+
+        schrijf_in_logboek(
+                None,    # systeem
+                'Data API',
+                'Verenigingen worden opgehaald. Meta: %s' % repr(meta))
 
         return JsonResponse(out)
 
@@ -83,17 +95,23 @@ class AccommodatiesView(View):
         ver_nrs_in_use = _get_ver_nrs_in_use()
 
         lijst = list()
-        for ver in DataApiVereniging.objects.filter(ver_nr__in=ver_nrs_in_use).order_by('pk'):
-            lijst.append({
-                "Naam": ver.naam,
-                "Postcode": ver.postcode,
-                "Straat": ver.straatnaam,
-                "Huisnummer": ver.huisnummer,
-                "Plaats": ver.plaats,
-                "Land": ver.land_iso,
-                "Longitude": ver.lon,
-                "Latitude": ver.lat,
-            })
+        for ver in (DataApiVereniging
+                    .objects
+                    .filter(ver_nr__in=ver_nrs_in_use)
+                    .order_by('pk')):
+
+            lijst.append(
+                {
+                    "Naam": ver.naam,
+                    "Postcode": ver.postcode,
+                    "Straat": ver.straatnaam,
+                    "Huisnummer": ver.huisnummer,
+                    "Plaats": ver.plaats,
+                    "Land": ver.land_iso,
+                    "Longitude": ver.lon,
+                    "Latitude": ver.lat,
+                }
+            )
         # for
 
         return lijst
@@ -106,15 +124,22 @@ class AccommodatiesView(View):
 
         lijst = self._maak_lijst()
 
+        meta = {
+            "count": len(lijst),
+            "total": len(lijst),
+            "limit": 0,     # len(lijst),
+            "offset": 0,
+        }
+
         out = {
-            "meta": {
-                "count": len(lijst),
-                "total": len(lijst),
-                "limit": 0,     # len(lijst),
-                "offset": 0,
-            },
+            "meta": meta,
             "Accommodatiegegevens": lijst,
         }
+
+        schrijf_in_logboek(
+                None,    # systeem
+                'Data API',
+                'Accommodaties worden opgehaald. Meta: %s' % repr(meta))
 
         return JsonResponse(out)
 

@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2025 Ramon van der Winkel.
+#  Copyright (c) 2020-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.shortcuts import render
 from Account.plugin_manager import account_add_plugin_login_gate, account_add_plugin_ww_vergeten
-from Logboek.models import schrijf_in_logboek
+from Logboek.operations import schrijf_in_logboek
 import logging
 
 """

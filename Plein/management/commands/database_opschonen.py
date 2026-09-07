@@ -15,7 +15,7 @@ from Betaal.operations import betaal_opschonen
 from DataApi.operations import dataapi_opschonen
 from Feedback.models import feedback_opschonen
 from Locatie.operations import reistijd_opschonen
-from Logboek.models import logboek_opschonen
+from Logboek.operations import logboek_opschonen
 from Mailer.models import mailer_opschonen
 from Registreer.operations import registreer_opschonen
 from Taken.models import taken_opschonen

@@ -8,7 +8,7 @@ from django.db import transaction
 from django.conf import settings
 from django.utils import timezone
 from django.db.models import ProtectedError
-from Logboek.models import schrijf_in_logboek
+from Logboek.operations import schrijf_in_logboek
 from Mailer.operations import mailer_queue_email, render_email_template
 from Registreer.definities import GAST_LID_NUMMER_FIXED_PK, REGISTRATIE_FASE_COMPLEET, REGISTRATIE_FASE_AFGEWEZEN
 from Registreer.models import GastLidNummer, GastRegistratie, GastRegistratieRateTracker

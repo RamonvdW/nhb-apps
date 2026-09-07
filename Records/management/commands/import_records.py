@@ -12,7 +12,7 @@ from BasisTypen.definities import GESLACHT_MAN, GESLACHT_VROUW
 from Records.definities import MATERIAALKLASSEN
 from Records.models import IndivRecord
 from Sporter.models import Sporter
-from Logboek.models import schrijf_in_logboek
+from Logboek.operations import schrijf_in_logboek
 from openpyxl.utils.exceptions import InvalidFileException
 import openpyxl
 import datetime

@@ -9,7 +9,7 @@
 from django.conf import settings
 from django.core.management.base import BaseCommand
 from DataApi.operations import ImportHistCrmVerenigingen, ImportHistCrmLidmaatschappen
-from Logboek.models import schrijf_in_logboek
+from Logboek.operations import schrijf_in_logboek
 from Mailer.operations import mailer_notify_internal_error
 import traceback
 import logging

@@ -11,7 +11,7 @@ from django.core.management.base import BaseCommand
 from Account.models import Account
 from ImportCRM.operations import (ImportCrmGeo, ImportCrmFuncties, ImportCrmSporters, ImportCrmSpelden,
                                   ImportCrmLocaties, ImportCrmOpleidingen, ImportCrmVerenigingen)
-from Logboek.models import schrijf_in_logboek
+from Logboek.operations import schrijf_in_logboek
 from Mailer.operations import mailer_notify_internal_error
 from Opleiding.operations import opleiding_post_import_crm
 import traceback

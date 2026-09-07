@@ -8,8 +8,13 @@ from django.http import JsonResponse, HttpResponseBadRequest
 from django.views import View
 from DataApi.models import DataApiLidmaatschap
 from DataApi.view_helpers import datum_n_jaar_geleden, is_auth_token_ok
+from Logboek.operations import schrijf_in_logboek
 import datetime
 import hashlib
+
+
+MAX_RECORDS_PER_VERZOEK = 1000      # hoger getal kost meer geheugen
+MAX_OFFSET = 100000                 # moet hoger zijn dan aantal lidmaatschappen (actief + historisch)
 
 
 class LidmaatschappenView(View):
@@ -92,7 +97,7 @@ class LidmaatschappenView(View):
             except (ValueError, TypeError, IndexError) as exc:
                 raise ValueError('Geen valide limit (getal)')
 
-            if 0 < n <= 5000:
+            if 0 < n <= MAX_RECORDS_PER_VERZOEK:
                 self._limit = n
             else:
                 raise ValueError('Geen valide limit (range)')
@@ -103,7 +108,7 @@ class LidmaatschappenView(View):
                 n = int(offset)
             except (ValueError, TypeError, IndexError):
                 raise ValueError('Geen valide offset (getal)')
-            if 0 <= n < 100000:
+            if 0 <= n < MAX_OFFSET:
                 self._offset = n
             else:
                 raise ValueError('Geen valide offset (range)')
@@ -122,15 +127,22 @@ class LidmaatschappenView(View):
 
         lijst, total = self._maak_lijst()
 
+        meta = {
+            "count": len(lijst),
+            "total": total,
+            "limit": self._limit,
+            "offset": self._offset,
+        }
+
         out = {
-            "meta": {
-                "count": len(lijst),
-                "total": total,
-                "limit": self._limit,
-                "offset": self._offset,
-            },
+            "meta": meta,
             "Lidmaatschapsgegevens": lijst,
         }
+
+        schrijf_in_logboek(
+                None,    # systeem
+                'Data API',
+                'Lidmaatschappen worden opgehaald. Meta: %s' % repr(meta))
 
         return JsonResponse(out)
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -9,7 +9,7 @@ from django.utils import timezone
 from Account.models import Account, AccountSessions, get_account
 from .session_vars import zet_sessionvar_if_changed     # must not rely on Account.operations.__init__
 from Account.plugin_manager import account_plugins_otp_was_reset
-from Logboek.models import schrijf_in_logboek
+from Logboek.operations import schrijf_in_logboek
 from Overig.helpers import get_safe_from_ip
 from Mailer.operations import mailer_queue_email, render_email_template
 import logging

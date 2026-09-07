@@ -20,7 +20,7 @@ from Functie.models import Functie
 from Functie.operations import functie_vraag_email_bevestiging, functie_wijziging_stuur_email_notificatie
 from Functie.rol import (rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving,
                          rol_zet_mag_wisselen_voor_account)
-from Logboek.models import schrijf_in_logboek
+from Logboek.operations import schrijf_in_logboek
 from Overig.helpers import get_safe_from_ip
 from Sporter.models import Sporter
 from TijdelijkeCodes.definities import RECEIVER_BEVESTIG_EMAIL_FUNCTIE

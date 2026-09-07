@@ -15,7 +15,7 @@ from Account.models import get_account
 from Account.operations import (AccountCreateError, account_create, account_test_wachtwoord_sterkte,
                                 auto_login_gast_account)
 from BasisTypen.definities import GESLACHT2STR
-from Logboek.models import schrijf_in_logboek
+from Logboek.operations import schrijf_in_logboek
 from Mailer.operations import mailer_queue_email, render_email_template
 from Overig.helpers import get_safe_from_ip, maak_unaccented
 from Registreer.definities import (REGISTRATIE_FASE_EMAIL, REGISTRATIE_FASE_PASS, REGISTRATIE_FASE_CLUB,

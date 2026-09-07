@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -8,6 +8,10 @@ from django.db import models
 from django.utils import timezone
 from Account.models import Account
 import datetime
+
+
+MAX_LEN_ACTIVITEIT = 500
+MAX_LEN_GEBRUIKTE_FUNCTIE = 100
 
 
 class LogboekRegel(models.Model):
@@ -22,11 +26,11 @@ class LogboekRegel(models.Model):
                                            null=True)  # allow NULL relation in database
 
     # welk deel van het logboek?
-    gebruikte_functie = models.CharField(max_length=100)
+    gebruikte_functie = models.CharField(max_length=MAX_LEN_GEBRUIKTE_FUNCTIE)
 
     # de logboek regel
     # let op: bevat newlines
-    activiteit = models.CharField(max_length=500)
+    activiteit = models.CharField(max_length=MAX_LEN_ACTIVITEIT)
 
     def bepaal_door(self):
         """ bepaal door wie actie uitgevoerd is """

@@ -14,7 +14,7 @@ from django.urls import reverse
 from Account.models import Account, get_account
 from Account.operations import auto_login_lid_account_ww_vergeten, account_test_wachtwoord_sterkte
 from Account.plugin_manager import account_plugins_ww_vergeten
-from Logboek.models import schrijf_in_logboek
+from Logboek.operations import schrijf_in_logboek
 from Mailer.operations import render_email_template, mailer_queue_email, mailer_email_is_valide
 from Overig.helpers import get_safe_from_ip
 from TijdelijkeCodes.definities import RECEIVER_WACHTWOORD_VERGETEN

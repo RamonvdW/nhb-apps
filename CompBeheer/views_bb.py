@@ -21,7 +21,7 @@ from CompBeheer.operations.maak_mutaties_beheer import maak_mutatie_competitie_o
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
 from HistComp.models import HistCompSeizoen
-from Logboek.models import schrijf_in_logboek
+from Logboek.operations import schrijf_in_logboek
 from Score.operations import wanneer_ag_vastgesteld
 
 TEMPLATE_COMPETITIE_INSTELLINGEN = 'compbeheer/bb-instellingen-nieuwe-competitie.dtl'

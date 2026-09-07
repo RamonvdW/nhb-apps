@@ -20,7 +20,7 @@ from CompLaagRegio.operations.maak_mutatie_regio import maak_mutatie_regio_team_
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
 from Geo.models import Rayon
-from Logboek.models import schrijf_in_logboek
+from Logboek.operations import schrijf_in_logboek
 from Score.definities import AG_NUL
 from codecs import BOM_UTF8
 from types import SimpleNamespace

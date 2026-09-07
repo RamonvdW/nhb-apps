@@ -20,7 +20,7 @@ from CompLaagRayon.operations import maak_mutatie_extra_rk_deelnemer
 from CompLaagRegio.models import RegioDeelnemer
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
-from Logboek.models import schrijf_in_logboek
+from Logboek.operations import schrijf_in_logboek
 
 TEMPLATE_COMPRAYON_EXTRA_DEELNEMER = 'complaagrayon/bko-extra-deelnemer.dtl'
 TEMPLATE_COMPRAYON_BLANCO_RESULTAAT = 'complaagrayon/bko-blanco-resultaat.dtl'

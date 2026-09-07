@@ -18,7 +18,7 @@ from CompLaagRayon.models import KampRK, TeamRK
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
 from Geo.models import Rayon
-from Logboek.models import schrijf_in_logboek
+from Logboek.operations import schrijf_in_logboek
 from Score.definities import AG_NUL
 
 TEMPLATE_COMPRAYON_RKO_TEAMS = 'complaagrayon/rko-teams.dtl'

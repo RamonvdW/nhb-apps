@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2025 Ramon van der Winkel.
+#  Copyright (c) 2020-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -16,7 +16,7 @@ from Functie.models import VerklaringHanterenPersoonsgegevens
 from Functie.operations import account_needs_vhpg
 from Functie.rol import rol_get_huidige
 from Functie.forms import AccepteerVHPGForm
-from Logboek.models import schrijf_in_logboek
+from Logboek.operations import schrijf_in_logboek
 
 
 TEMPLATE_VHPG_ACCEPTATIE = 'functie/vhpg-acceptatie.dtl'
