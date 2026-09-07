@@ -4,6 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
+from django.conf import settings
 from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.views.generic import TemplateView
@@ -52,6 +53,8 @@ class InfoCompetitieView(TemplateView):
                                     .objects
                                     .exclude(is_onbekend=True)
                                     .count())
+
+        context['url_fotobank_indoor'] = settings.URL_FOTOBANK_INDOOR
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
@@ -133,6 +136,8 @@ class InfoTeamCompetitieView(TemplateView):
                     tup = (regio_teams_indoor, regio_teams_25m1pijl)
                     context['jouw_regio_team_comp'] = self.jouw_regio_team_comp[tup]
                     context['jouw_regio_vaste_teams'] = vaste_teams_indoor or vaste_teams_25m1pijl
+
+        context['url_fotobank_indoor'] = settings.URL_FOTOBANK_INDOOR
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
