@@ -6,6 +6,7 @@
 
 from django.http import JsonResponse, HttpResponse
 from django.views import View
+from django.db.models import Q
 from DataApi.models import DataApiVereniging, DataApiLidmaatschap
 from DataApi.view_helpers import datum_n_jaar_geleden, is_auth_token_ok
 from Logboek.operations import schrijf_in_logboek
@@ -21,7 +22,7 @@ def _get_ver_nrs_in_use():
 
     ver_nrs = list(DataApiLidmaatschap
                    .objects
-                   .exclude(afmeld_datum__lt=actief_datum)
+                   .filter(Q(afmeld_datum='') | Q(afmeld_datum__gte=actief_datum))
                    .distinct('ver_nr')
                    .values_list('ver_nr', flat=True))
     return ver_nrs
