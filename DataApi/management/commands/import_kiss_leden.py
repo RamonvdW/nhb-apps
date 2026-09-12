@@ -30,8 +30,8 @@ class Command(BaseCommand):
         self.count_afgemeld = 0
         self.count_wijzigingen = 0
 
-        self._lidnr2lms = dict()      # [lidnr] = [DataApiLidmaatschap(afmeld_datum=''), ..]
-
+        self._lidnr2lms = dict()            # [lidnr] = [DataApiLidmaatschap(afmeld_datum=''), ..]
+        self._updated_lms = list()          # pk nummers
         self._gevonden_lid_nrs = list()
 
     def add_arguments(self, parser):
@@ -235,26 +235,27 @@ class Command(BaseCommand):
 
             assert isinstance(lms, DataApiLidmaatschap)
 
+            update = list()
             if lms.geboorte_datum != geboortedatum:
                 # self.stdout.write('[INFO] Lid %s geboortedatum %s -> %s' % (lid_nr, lms.geboorte_datum, geboortedatum))
                 lms.geboorte_datum = geboortedatum
-                if not self.dry_run:
-                    lms.save(update_fields=['geboorte_datum'])
-                self.count_wijzigingen += 1
+                update.append('geboorte_datum')
 
             if lms.postcode != postcode:
                 # self.stdout.write('[INFO] Lid %s postcode %s -> %s' % (lid_nr, lms.postcode, postcode))
                 lms.postcode = postcode
-                if not self.dry_run:
-                    lms.save(update_fields=['postcode'])
-                self.count_wijzigingen += 1
+                update.append('postcode')
 
             if lms.geslacht != geslacht:
                 # self.stdout.write('[INFO] Lid %s geslacht %s -> %s' % (lid_nr, lms.geslacht, geslacht))
                 lms.geslacht = geslacht
+                update.append('geslacht')
+
+            if len(update) > 0:
+                self.count_wijzigingen += len(update)
                 if not self.dry_run:
-                    lms.save(update_fields=['geslacht'])
-                self.count_wijzigingen += 1
+                    self._updated_lms.append(lms.pk)
+                    lms.save(update_fields=update)
 
             return
 
@@ -268,7 +269,8 @@ class Command(BaseCommand):
                     self.stdout.write('[WARNING] Afmelding met te oude datum: %s' % lms)
                 lms.afmeld_datum = afmeld_datum
                 if not self.dry_run:
-                   lms.save(update_fields=['afmeld_datum'])
+                    self._updated_lms.append(lms.pk)
+                    lms.save(update_fields=['afmeld_datum'])
         # for
 
         # maak een nieuw record aan
@@ -284,6 +286,7 @@ class Command(BaseCommand):
                             geslacht=geslacht,
                             land_iso='NL',
                             postcode=postcode)
+            self._updated_lms.append(lms.pk)
             try:
                 self._lidnr2lms[lid_nr].append(lms)
             except KeyError:
@@ -304,6 +307,7 @@ class Command(BaseCommand):
 
             # converteer en corrigeer het formaat van de data
             postcode = postcode.upper().replace(' ', '')        # verwijder de spatie
+            geboortedatum = self._dmy2ymd(geboortedatum)
             aanvangsdatum = self._dmy2ymd(aanvangsdatum)
 
             lid_nr = int(lid_nr)
@@ -338,8 +342,14 @@ class Command(BaseCommand):
         afmeld_datum = '%s-12-31' % vorig_jaar
 
         # zoek iedereen met een open lidmaatschap die we niet gevonden hebben in het KISS bestand
-        qset = DataApiLidmaatschap.objects.filter(afmeld_datum='', aanmeld_datum__lt=afmeld_datum).exclude(lid_nr__in=self._gevonden_lid_nrs)
+        qset = (DataApiLidmaatschap
+                .objects
+                .filter(afmeld_datum='', aanmeld_datum__lt=afmeld_datum)
+                .exclude(lid_nr__in=self._gevonden_lid_nrs))
         self.count_afgemeld += qset.count()
+
+        pks = list(qset.values_list('pk', flat=True))
+        self._updated_lms.extend(pks)
 
         qset.update(afmeld_datum=afmeld_datum)
 
@@ -361,28 +371,16 @@ class Command(BaseCommand):
         self._verwerk_overstappers(data_overstappers)
         self._verdwenen_lid_nrs_afmelden()
 
+        # forceer de mutatiedatum
+        mutatie_datum = '%s-01-14' % self.jaar
+        pks = list(set(self._updated_lms))
+        DataApiLidmaatschap.objects.filter(pk__in=pks).update(mutatie_datum=mutatie_datum)
+
         self.stdout.write('[INFO] Samenvatting jaar %s: %s gevonden, %s aangemaakt, %s afgemeld, %s wijzigingen' %
                           (self.jaar, self.count_gevonden, self.count_aangemaakt, self.count_afgemeld, self.count_wijzigingen))
 
         count = DataApiLidmaatschap.objects.filter(afmeld_datum='').count()
         self.stdout.write('[INFO] %s actieve lidmaatschappen' % count)
-
-    def _controleer_dubbele_records(self):
-        is_bad = False
-        lid_nr2lms = dict()
-        for lms in DataApiLidmaatschap.objects.filter(afmeld_datum=''):
-            if lms.lid_nr in lid_nr2lms:
-                self.stdout.write('[ERROR] %s heeft meerdere open lidmaatschappen' % lms.lid_nr)
-                if not is_bad:
-                    # eerste keer
-                    print(lid_nr2lms[lms.lid_nr])
-                    print(lms)
-                is_bad = True
-            lid_nr2lms[lms.lid_nr] = lms
-        # for
-        if is_bad:
-            self.stdout.write('Aborting')
-            sys.exit(1)
 
     def handle(self, *args, **options):
         self.pad = options['pad'][0]
@@ -394,7 +392,6 @@ class Command(BaseCommand):
         signal.signal(signal.SIGINT, signal.SIG_DFL)
         signal.signal(signal.SIGPIPE, signal.SIG_DFL)
 
-        self._controleer_dubbele_records()
         self._laad_alle_actieve_lidmaatschappen()
         self._lees_csv_bestanden()
 

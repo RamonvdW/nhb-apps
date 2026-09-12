@@ -35,17 +35,16 @@ class Command(BaseCommand):
         self._import_verenigingen = None
 
         self.dryrun = True
+        self.alleen_verenigingen = True
         self.afmelddatum = ''
         self._exit_code = 0
 
         self._count_errors = 0
         self._count_warnings = 0
-        self._count_wijzigingen = 0
-        self._count_verwijderingen = 0
-        self._count_toevoegingen = 0
 
     def add_arguments(self, parser):
         parser.add_argument('filename', nargs=1, help="pad naar het JSON bestand")
+        parser.add_argument('--alleen_verenigingen', action='store_true')
         parser.add_argument('--dryrun', action='store_true')
         parser.add_argument('afmelddatum', nargs=1, help='YYYY-MM-DD te gebruiken voor verdwenen leden/verenigingen')
 
@@ -73,9 +72,8 @@ class Command(BaseCommand):
     def _import_data(self, data: dict):
         # volgorde is belangrijk
         self._import_verenigingen.importeer(data['clubs'])
-
-        #self._import_lidmaatschappen.zet_ver_nrs(self._import_verenigingen.get_ver_nrs())
-        #self._import_lidmaatschappen.importeer(data['members'], self.forceer_mutatie_datum)
+        if not self.alleen_verenigingen:
+            self._import_lidmaatschappen.importeer(data['members'])
 
         self.stdout.write('Import van historische CRM data is klaar')
 
@@ -83,9 +81,9 @@ class Command(BaseCommand):
         # alle tellers optellen
         total_errors = self._count_errors
         total_warnings = self._count_warnings
-        total_wijzigingen = self._count_wijzigingen
-        total_toevoegingen = self._count_toevoegingen
-        total_verwijderingen = self._count_verwijderingen
+        total_wijzigingen = 0
+        total_toevoegingen = 0
+        total_afmeldingen = 0
 
         for imp_class in (self._import_verenigingen,
                           self._import_lidmaatschappen):
@@ -94,7 +92,7 @@ class Command(BaseCommand):
             total_warnings += imp_class.count_warnings
             total_wijzigingen += imp_class.count_wijzigingen
             total_toevoegingen += imp_class.count_toevoegingen
-            total_verwijderingen += imp_class.count_verwijderingen
+            total_afmeldingen += imp_class.count_afmeldingen
         # for
 
         # rapporteer de samenvatting en schrijf deze ook in het logboek
@@ -102,8 +100,8 @@ class Command(BaseCommand):
             "%s fouten" % total_errors,
             "%s waarschuwingen" % total_warnings,
             "%s nieuw" % total_toevoegingen,
+            "%s afmeldingen" % total_afmeldingen,
             "%s wijzigingen" % total_wijzigingen,
-            "%s verwijderingen" % total_verwijderingen,
             "%s actieve verenigingen" % self._import_verenigingen.count_actief,
             "%s actieve lidmaatschappen" % self._import_lidmaatschappen.count_actief,
             "%s gestopte verenigingen" % self._import_verenigingen.count_gestopt,
@@ -156,8 +154,14 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         self.dryrun = options['dryrun']
+        self.alleen_verenigingen = options['alleen_verenigingen']
         fname = options['filename'][0]
         self.afmelddatum = options['afmelddatum'][0]
+
+        # Don't turn these signal into exceptions, just die.
+        import signal
+        signal.signal(signal.SIGINT, signal.SIG_DFL)
+        signal.signal(signal.SIGPIPE, signal.SIG_DFL)
 
         self._init_modules()
 

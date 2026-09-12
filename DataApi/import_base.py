@@ -21,7 +21,7 @@ class ImportCrmBase:
         self.count_warnings = 0
         self.count_wijzigingen = 0
         self.count_toevoegingen = 0
-        self.count_verwijderingen = 0
+        self.count_afmeldingen = 0
 
     def out_warning(self, msg: str):
         assert msg[0] != '['

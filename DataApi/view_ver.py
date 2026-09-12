@@ -4,7 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.http import JsonResponse, HttpResponseBadRequest
+from django.http import JsonResponse, HttpResponse
 from django.views import View
 from DataApi.models import DataApiVereniging, DataApiLidmaatschap
 from DataApi.view_helpers import datum_n_jaar_geleden, is_auth_token_ok
@@ -63,15 +63,13 @@ class VerenigingenView(View):
         """ Geeft een lijst met verenigingen terug """
 
         if not is_auth_token_ok(request):
-            return HttpResponseBadRequest('No valid token\n')
+            return HttpResponse('No valid token\n', status=401)
 
         lijst = self._maak_lijst()
 
         meta = {
             "count": len(lijst),
             "total": len(lijst),
-            "limit": 0,     # len(lijst),
-            "offset": 0,
         }
 
         out = {
@@ -120,15 +118,13 @@ class AccommodatiesView(View):
         """ Geeft een lijst met verenigingen terug """
 
         if not is_auth_token_ok(request):
-            return HttpResponseBadRequest('No valid token\n')
+            return HttpResponse('No valid token\n', status=401)
 
         lijst = self._maak_lijst()
 
         meta = {
             "count": len(lijst),
             "total": len(lijst),
-            "limit": 0,     # len(lijst),
-            "offset": 0,
         }
 
         out = {
@@ -142,6 +138,12 @@ class AccommodatiesView(View):
                 'Accommodaties worden opgehaald. Meta: %s' % repr(meta))
 
         return JsonResponse(out)
+
+
+class BestaatNiet(View):
+
+    def dispatch(self, request, *args, **kwargs):
+        return HttpResponse('No such endpoint\n', status=400)
 
 
 # end of file

@@ -68,6 +68,12 @@ class ImportHistCrmVerenigingen(ImportCrmBase):
         else:
             # delta's opmerken en rapporteren
             updated = list()
+
+            if ver.afmeld_datum:
+                self.out_info('Vereniging %s wordt weer actief gemaakt' % ver_nr)
+                ver.afmeld_datum = ''
+                updated.append('afmeld_datum')
+
             if naam != ver.naam:
                 self.out_info('Vereniging %s wijziging naam: %s --> %s' %
                                 (ver_nr, repr(ver.naam), repr(naam)))
@@ -116,8 +122,10 @@ class ImportHistCrmVerenigingen(ImportCrmBase):
                 ver.lon = lon
                 updated.append('lon')
 
-            if len(updated) > 0 and not self.dryrun:
-                ver.save(update_fields=updated)
+            if len(updated) > 0:
+                self.count_wijzigingen += len(updated)
+                if not self.dryrun:
+                    ver.save(update_fields=updated)
 
         return
 
@@ -217,20 +225,24 @@ class ImportHistCrmVerenigingen(ImportCrmBase):
 
         # for club
 
-        # kijk of er verenigingen verwijderd moeten worden
-        self._verwijder_verenigingen(ver_nrs)
+        # verenigingen die niet meer genoemd worden, die melden we af
+        self._verenigingen_afmelden(ver_nrs)
 
-    def _verwijder_verenigingen(self, ver_nrs):
+    def _verenigingen_afmelden(self, ver_nrs):
         while len(ver_nrs) > 0:
             ver_nr = ver_nrs.pop(0)
             ver = self.vind_vereniging(ver_nr)
             if ver:
                 if ver.afmeld_datum == '':
                     if ver.aanmeld_datum == '' or ver.aanmeld_datum < self.afmelddatum:
-                        self.stdout.write('[INFO] Verwijder vereniging %s' % ver)
+                        self.stdout.write('[INFO] Vereniging %s wordt afgemeld' % ver)
                         if not self.dryrun:
                             ver.afmeld_datum = self.afmelddatum
                             ver.save(update_fields=['afmeld_datum'])
+
+                        self.count_afmeldingen += 1
+                        self.count_actief -= 1
+                        self.count_gestopt += 1
         # while
 
 # end of file

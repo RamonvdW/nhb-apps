@@ -27,14 +27,9 @@ class ImportHistCrmLidmaatschappen(ImportCrmBase):
         self.count_gestopt = 0
         self.count_ver_null = 0
 
-        self._ver_nrs = list()      # alle bestaande verenigingen
-
-        self._cache_actieve_lidmaatschappen = dict()    # [lid_nr] = DataApiLidmaatschap
+        self._cache_actieve_lidmaatschappen = dict()    # [lid_nr] = [DataApiLidmaatschap, ...]
         self._vul_cache()
         self._changed_and_new_lms_pks = list()
-
-    def zet_ver_nrs(self, ver_nrs):
-        self._ver_nrs = ver_nrs[:]
 
     def _vul_cache(self):
         for lms in DataApiLidmaatschap.objects.order_by('pk'):      # oudste eerst
@@ -69,14 +64,42 @@ class ImportHistCrmLidmaatschappen(ImportCrmBase):
         return laatste_lms
 
     def _afmelden(self, lms: DataApiLidmaatschap, afmeld_datum: str):
+        # let op: ver_nr behouden
+        lms.afmeld_datum = afmeld_datum
+        self.out_info('Einde lms: %s' % lms)
+
         if not self.dryrun:
-            # let op: ver_nr behouden
-            lms.afmeld_datum = afmeld_datum
             lms.save(update_fields=['afmeld_datum'])
             self._changed_and_new_lms_pks.append(lms.pk)
 
+        self.count_afmeldingen += 1
         self.count_actief -= 1
         self.count_gestopt += 1
+
+    def _maak_lms(self,
+                  lid_nr: int, ver_nr: int, geslacht: str,
+                  geboorte_datum: str, aanmeld_datum: str,
+                  land_iso: str, postcode: str):
+
+        lms = DataApiLidmaatschap(
+                    lid_nr=lid_nr,
+                    ver_nr=ver_nr,
+                    aanmeld_datum=aanmeld_datum,
+                    geboorte_datum=geboorte_datum,
+                    geslacht=geslacht,
+                    land_iso=land_iso,
+                    postcode=postcode)
+        if not self.dryrun:
+            lms.save()
+
+        self.count_toevoegingen += 1
+
+        try:
+            self._cache_actieve_lidmaatschappen[lid_nr].append(lms)
+        except KeyError:
+            self._cache_actieve_lidmaatschappen[lid_nr] = [lms]
+
+        return lms
 
     def _store_lid(self,
                    lid_nr: int, ver_nr: int, geslacht: str,
@@ -84,8 +107,84 @@ class ImportHistCrmLidmaatschappen(ImportCrmBase):
                    land_iso: str, postcode: str):
 
         geboorte_datum = geboorte_datum.strftime('%Y-%m-%d')
-        aanmeld_datum = lid_sinds.strftime('%Y-%m-%d')
+        aanmeld_datum = lid_sinds.strftime('%Y-%m-%d')          # dit is de historische aanmelddatum
         afmeld_datum = lid_tot.strftime('%Y-%m-%d') if lid_tot else ''
+
+        lms_lijst = self._cache_actieve_lidmaatschappen.get(lid_nr, [])
+        if len(lms_lijst) == 0:
+            if not ver_nr:
+                # al afgemeld, maar geen lms bekend
+                if afmeld_datum < "2021-01-01":
+                    # erg lang geleden --> niet meer melden
+                    return
+
+                self.out_warning('Onbekend lid: %s [%s %s %s] van %s tot %s' % (lid_nr, geboorte_datum, geslacht, postcode, aanmeld_datum, afmeld_datum))
+                return
+
+            # nieuw lid
+            lms = self._maak_lms(lid_nr, ver_nr, geslacht, geboorte_datum, aanmeld_datum, land_iso, postcode)
+            self.out_info('Nieuw lms: %s' % lms)
+            return
+
+        lms = lms_lijst[-1]
+
+        if not ver_nr:
+            if lms.afmeld_datum != '':
+                # al geregistreerd
+                return
+
+            # huidige record afsluiten
+            self._afmelden(lms, afmeld_datum or self.afmelddatum)
+            return
+
+        if lms.ver_nr != ver_nr:
+            self.out_info('Overstap lid %s naar ver %s' % (lid_nr, ver_nr))
+            for lms in lms_lijst:
+                self.out_debug(str(lms))
+
+            lms = lms_lijst[-1]
+            if lms.afmeld_datum == '':
+                # huidige record afsluiten en nieuwe beginnen
+                self._afmelden(lms, afmeld_datum or self.afmelddatum)
+
+                if lms.afmeld_datum < aanmeld_datum:
+                    self.out_error('Aanmelddatum vóór vorige afmelddatum: %s < %s' % (aanmeld_datum, lms.afmeld_datum))
+                    return
+
+            lms = self._maak_lms(lid_nr, ver_nr, geslacht, geboorte_datum, aanmeld_datum, land_iso, postcode)
+            self.out_info('Nieuw lms: %s' % lms)
+            return
+
+        # wijzigingen doorvoeren
+        updated = list()
+
+        if lms.geboorte_datum != geboorte_datum:
+            self.out_warning('Geboortedatum aangepast naar %s (was %s)' % (geboorte_datum, lms))
+            lms.geboorte_datum = geboorte_datum
+            updated.append('geboorte_datum')
+
+        if lms.geslacht != geslacht:
+            self.out_info('Geslacht aangepast naar %s (was %s)' % (geslacht, lms))
+            lms.geslacht = geslacht
+            updated.append('geslacht')
+
+        if lms.postcode != postcode:
+            self.out_info('Postcode aangepast naar %s (was %s)' % (postcode, lms))
+            lms.postcode = postcode
+            updated.append('postcode')
+
+        if len(updated) > 0:
+            self.count_wijzigingen += len(updated)
+            if not self.dryrun:
+                lms.save(update_fields=updated)
+
+        return
+
+        print('store_lid %s, ver %s, postcode %s, geslacht %s, geboren %s, sinds %s, tot %s' % (lid_nr, ver_nr, postcode, geslacht, geboorte_datum, lid_sinds, lid_tot))
+        for lms in lms_lijst:
+            print(lms)
+
+        return
 
         # zoek het meest recente record van dit lid
         lms = self._vind_lidmaatschap(lid_nr, aanmeld_datum)
@@ -203,9 +302,6 @@ class ImportHistCrmLidmaatschappen(ImportCrmBase):
                 except ValueError:
                     pass
 
-                if lid_ver_nr not in self._ver_nrs:
-                    self.out_error('Lid %s heeft onbekende vereniging %s' % (lid_nr, lid_ver_nr))
-
             if member['birthday'] and member['birthday'][0:0+2] not in ("19", "20"):
                 # poging tot repareren
                 if member['birthday'][0:0+2] == "00":
@@ -247,11 +343,6 @@ class ImportHistCrmLidmaatschappen(ImportCrmBase):
             # lid sinds
             if member['member_from'] and member['member_from'][0:0+2] not in ("19", "20"):
                 self.out_error('Lid %s heeft geen valide datum lidmaatschap: %s' % (lid_nr, member['member_from']))
-                continue
-
-            if member['member_from'] and member['member_from'] > self.aanmelddatum_lid:
-                # wacht met importeren
-                # self.out_info('Lidmaatschap voor %s gaat pas in op datum: %s' % (lid_nr, repr(member['member_from'])))
                 continue
 
             try:
@@ -305,13 +396,8 @@ class ImportHistCrmLidmaatschappen(ImportCrmBase):
             # for
         # while
 
-    def importeer(self, data: list, forceer_mutatie_datum: str):
+    def importeer(self, data: list):
         """ Importeert data van alle leden """
         self._importeer_data(data)
-
-        # forceer de mutatie datum van de geimporteerde lidmaatschappen
-        # save() zet deze automatisch, dus gebruik update()
-        pks = list(set(self._changed_and_new_lms_pks))
-        DataApiLidmaatschap.objects.filter(pk__in=pks).update(mutatie_datum=forceer_mutatie_datum)
 
 # end of file

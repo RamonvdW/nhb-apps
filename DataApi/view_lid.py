@@ -4,7 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.http import JsonResponse, HttpResponseBadRequest
+from django.http import JsonResponse, HttpResponse
 from django.views import View
 from DataApi.models import DataApiLidmaatschap
 from DataApi.view_helpers import datum_n_jaar_geleden, is_auth_token_ok
@@ -30,8 +30,7 @@ class LidmaatschappenView(View):
         # maak een unieke code die stabiel is
         # gebruik: lid_nr, geboortedatum, geslacht, postcode, land, ver_nr, aanmelddatum
         calc = hashlib.sha1()
-        data = "v1 %s %s %s %10s %s %s %s" % (lms.lid_nr, lms.geboorte_datum, lms.geslacht, lms.postcode,
-                                              lms.land_iso, lms.ver_nr, lms.aanmeld_datum)
+        data = "v1 %s %s %s" % (lms.lid_nr, lms.ver_nr, lms.aanmeld_datum)
         calc.update(data.encode())
         digest = calc.hexdigest()
         return digest
@@ -117,13 +116,13 @@ class LidmaatschappenView(View):
         """ Geeft een lijst met verenigingen terug """
 
         if not is_auth_token_ok(request):
-            return HttpResponseBadRequest('No valid token\n')
+            return HttpResponse('No valid token\n', status=401)
 
         try:
             self._get_params(request)
         except ValueError as exc:
             # geef antwoord met een status 400
-            return HttpResponseBadRequest("%s\n" % exc)
+            return HttpResponse("%s\n" % exc, status=400)
 
         lijst, total = self._maak_lijst()
 

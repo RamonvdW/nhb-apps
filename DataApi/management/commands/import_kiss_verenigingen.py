@@ -103,7 +103,6 @@ class Command(BaseCommand):
                 huis_nr = 0
 
             self._store_vereniging(ver_nr, naam, status, aanmeld_datum, kvk_nr, straatnaam, huis_nr, postcode, plaats)
-
         # for
 
     def _laad_csv_bestand(self, fname) -> list | None:
@@ -124,17 +123,6 @@ class Command(BaseCommand):
             self.stdout.write("[ERROR] Bestand heeft unicode problemen (%s)" % str(exc))
             data = None
         return data
-
-    def _verdwenen_lid_nrs_afmelden(self):
-        # forceer de afmelddatum
-        vorig_jaar = self.jaar - 1
-        afmeld_datum = '%s-12-31' % vorig_jaar
-
-        # zoek iedereen met een open lidmaatschap die we niet gevonden hebben in het KISS bestand
-        qset = DataApiLidmaatschap.objects.filter(afmeld_datum='', aanmeld_datum__lt=afmeld_datum).exclude(lid_nr__in=self._gevonden_lid_nrs)
-        self.count_afgemeld += qset.count()
-
-        qset.update(afmeld_datum=afmeld_datum)
 
     def _lees_csv_bestanden(self):
         data_verenigingen = self._laad_csv_bestand('all-verenigingen.csv')
