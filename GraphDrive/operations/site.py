@@ -31,6 +31,14 @@ class GraphSite:
         self.client_secret = ''
         self.description = ''
 
+        # token url, to allow override during testing
+        # %s is mandatory and will be replaced with the tenant_id
+        self.token_url_template = "https://login.microsoftonline.com/%s/oauth2/v2.0/token"
+
+        # metadata url, to allow override during testing
+        # %s are mandatory and will be replaced with site_id, drive_id and fpath
+        self.metadata_url_template = "https://graph.microsoft.com/v1.0/sites/%s/drives/%s/root:/%s"
+
         # will be retrieved upon first use
         self.bearer_token = ''
         self.bearer_valid_until = timezone.now()

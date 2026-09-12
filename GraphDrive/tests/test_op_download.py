@@ -5,11 +5,14 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
+from django.utils import timezone
 from django.core.management.base import OutputWrapper
-from GraphDrive.operations.download import download
+from GraphDrive.operations import GraphSite
+from GraphDrive.operations.download import download_file
 from TestHelpers.e2ehelpers import E2EHelpers
 from unittest.mock import patch
 from requests.exceptions import SSLError
+from datetime import timedelta
 import io
 
 
@@ -41,46 +44,52 @@ class TestGraphDriveOpDownload(E2EHelpers, TestCase):
         self.test_fname = '/tmp/local'
 
     def test_download(self):
+        out = OutputWrapper(io.StringIO())
+        site = GraphSite(out)
+        self.token_url_template = 'http://localhost:55555/%s/'      # avoid going to real site
 
         # no access token
-        with patch('GraphDrive.operations.download.get_bearer_token', return_value=''):
+        with patch('GraphDrive.operations.download.get_bearer_token', return_value=False):
             out = OutputWrapper(io.StringIO())
-            local_fname = download(out, 'remote', self.test_fname)
+            local_fname = download_file(out, site, 'remote', self.test_fname)
             self.assertIsNone(local_fname)
             # print('\nout:', out.getvalue())
 
-        with patch('GraphDrive.operations.download.get_bearer_token', return_value='token'):
-            with patch('GraphDrive.operations.download.get_drive_id', return_value=('', '')):
-                out = OutputWrapper(io.StringIO())
-                local_fname = download(out, 'remote', self.test_fname)
-                self.assertIsNone(local_fname)
-                # print('\nout:', out.getvalue())
+        # fake bearer token
+        site.bearer_token = 'test token'
+        site.bearer_valid_until = timezone.now() + + timedelta(seconds=60)
 
-        with patch('GraphDrive.operations.download.get_bearer_token', return_value='token'):
-            with patch('GraphDrive.operations.download.get_drive_id', return_value=('drive', '')):
+        with patch('GraphDrive.operations.download.get_drive_id', return_value=False):
+            out = OutputWrapper(io.StringIO())
+            local_fname = download_file(out, site, 'remote', self.test_fname)
+            self.assertIsNone(local_fname)
+            # print('\nout:', out.getvalue())
 
-                # connection error
-                out = OutputWrapper(io.StringIO())
-                with patch('requests.get', side_effect=SSLError('uitzondering')):
-                    local_fname = download(out, 'remote', self.test_fname)
-                    self.assertIsNone(local_fname)
-                # print('\nout:', out.getvalue())
-                self.assertTrue('[ERROR] Exceptie tijdens download: uitzondering' in out.getvalue())
+        # fake drives
+        site.drive_id = 'drive'
+        site.drive_web_url = 'x'
 
-                # status code != 200
-                rsp = ResponseMock(status_code=404)
-                out = OutputWrapper(io.StringIO())
-                with patch('requests.get', return_value=rsp):
-                    local_fname = download(out, 'remote', self.test_fname)
-                    self.assertIsNone(local_fname)
-                # print('\nout:', out.getvalue())
-                self.assertTrue("[ERROR] download request gaf onverwacht antwoord! response encoding:'mock', status_code:404" in out.getvalue())
+        # connection error
+        out = OutputWrapper(io.StringIO())
+        with patch('requests.get', side_effect=SSLError('uitzondering')):
+            local_fname = download_file(out, site, 'remote', self.test_fname)
+            self.assertIsNone(local_fname)
+        # print('\nout:', out.getvalue())
+        self.assertTrue('[ERROR] Exceptie tijdens download: uitzondering' in out.getvalue())
 
-                rsp = ResponseMock(status_code=200)
-                out = OutputWrapper(io.StringIO())
-                with patch('requests.get', return_value=rsp):
-                    local_fname = download(out, 'remote', self.test_fname)
-                    self.assertEqual(local_fname, self.test_fname)
+        # status code != 200
+        rsp = ResponseMock(status_code=404)
+        out = OutputWrapper(io.StringIO())
+        with patch('requests.get', return_value=rsp):
+            local_fname = download_file(out, site, 'remote', self.test_fname)
+            self.assertIsNone(local_fname)
+        # print('\nout:', out.getvalue())
+        self.assertTrue("[ERROR] download request gaf onverwacht antwoord! response encoding:'mock', status_code:404" in out.getvalue())
 
+        rsp = ResponseMock(status_code=200)
+        out = OutputWrapper(io.StringIO())
+        with patch('requests.get', return_value=rsp):
+            local_fname = download_file(out, site, 'remote', self.test_fname)
+            self.assertEqual(local_fname, self.test_fname)
 
 # end of file
