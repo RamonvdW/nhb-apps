@@ -41,6 +41,10 @@ class VerenigingenView(View):
                     .filter(ver_nr__in=ver_nrs_in_use)
                     .order_by('pk')):
 
+            # zonder postcode van de primary sportlocatie kunnen we deze niet rapporteren
+            if ver.postcode == '':
+                continue
+
             lijst.append(
                 {
                     "Verenigingscode": str(ver.ver_nr),
