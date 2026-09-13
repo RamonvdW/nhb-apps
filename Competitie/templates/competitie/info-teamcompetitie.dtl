@@ -32,7 +32,7 @@
         <img class="sv-foto-groot" src="{% static 'competitie/team_sfeer_1.webp' %}" loading="lazy" alt="sfeerfoto" draggable="false"><br>
         <code style="font-size:12px">Sfeerfoto van een teamwedstrijd</code>
         <p>
-            {% sv-knop-ext url='https://handboogsport.smugmug.com/Indoor/' tekst="Meer foto's" %}
+            {% sv-knop-ext url=url_fotobank_indoor tekst="Meer foto's" %}
         </p>
     </div>
 
@@ -156,7 +156,7 @@
         <img class="sv-foto-groot" src="{% static 'competitie/team_sfeer_4.webp' %}" loading="lazy" alt="sfeerfoto" draggable="false"><br>
         <code style="font-size:12px">Sfeerfoto van een teamwedstrijd</code>
         <p>
-            {% sv-knop-ext url='https://handboogsport.smugmug.com/Indoor/' tekst="Meer foto's" %}
+            {% sv-knop-ext url=url_fotobank_indoor tekst="Meer foto's" %}
         </p>
     </div>
 
@@ -237,7 +237,7 @@
         <img class="sv-foto-groot" src="{% static 'competitie/team_sfeer_5.webp' %}" loading="lazy" alt="sfeerfoto" draggable="false"><br>
         <code style="font-size:12px">Sfeerfoto van een teamwedstrijd</code>
         <p>
-            {% sv-knop-ext url='https://handboogsport.smugmug.com/Indoor/' tekst="Meer foto's" %}
+            {% sv-knop-ext url=url_fotobank_indoor tekst="Meer foto's" %}
         </p>
     </div>
 
@@ -326,7 +326,7 @@
         <img class="sv-foto-groot" src="{% static 'competitie/team_sfeer_2.webp' %}" loading="lazy" alt="sfeerfoto" draggable="false"><br>
         <code style="font-size:12px">Sfeerfoto van een teamwedstrijd</code>
         <p>
-            {% sv-knop-ext url='https://handboogsport.smugmug.com/Indoor/' tekst="Meer foto's" %}
+            {% sv-knop-ext url=url_fotobank_indoor tekst="Meer foto's" %}
         </p>
     </div>
 

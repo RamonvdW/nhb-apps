@@ -801,6 +801,7 @@ class WedstrijdInschrijvenHandmatig(UserPassesTestMixin, TemplateView):
             context['sportersboog'] = list(SporterBoog
                                            .objects
                                            .exclude(sporter__is_overleden=True)
+                                           .exclude(sporter__bij_vereniging=None)
                                            .filter(sporter__lid_nr=zoek_lid_nr,
                                                    voor_wedstrijd=True,
                                                    boogtype__pk__in=wedstrijd_boogtype_pks)  # alleen toegestane bogen
@@ -812,6 +813,7 @@ class WedstrijdInschrijvenHandmatig(UserPassesTestMixin, TemplateView):
             context['sportersboog'] = list(SporterBoog
                                            .objects
                                            .exclude(sporter__is_overleden=True)
+                                           .exclude(sporter__bij_vereniging=None)
                                            .filter(sporter__lid_nr=lid_nr,
                                                    voor_wedstrijd=True,
                                                    boogtype__pk__in=wedstrijd_boogtype_pks)  # alleen toegestane bogen
@@ -944,6 +946,7 @@ class WedstrijdInschrijvenHandmatig(UserPassesTestMixin, TemplateView):
             sporterboog = (SporterBoog
                            .objects
                            .select_related('sporter')
+                           .exclude(sporter__bij_vereniging=None)
                            .get(pk=sporterboog_pk))
         except ObjectDoesNotExist:
             raise Http404('Onderdeel van verzoek niet gevonden')
