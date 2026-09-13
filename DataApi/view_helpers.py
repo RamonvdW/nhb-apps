@@ -6,6 +6,9 @@
 
 from django.conf import settings
 import datetime
+import logging
+
+my_logger = logging.getLogger('MH.DataApi.get')
 
 
 def datum_n_jaar_geleden(jaren: int) -> str:
@@ -23,7 +26,7 @@ def is_auth_token_ok(request):
         Django geeft deze door in request.META als HTTP_DDI_TOKEN
     """
 
-    if settings.DDI_AUTH_TOKEN:
+    if settings.DDI_AUTH_TOKEN:     # pragma: no branch
         # is configured for DDI
         token_value = request.META.get('HTTP_DDI_TOKEN', None)
         if token_value:
@@ -34,6 +37,11 @@ def is_auth_token_ok(request):
                 return True
 
     return False
+
+
+def log_api_gebruik(msg):
+    # timestamp wordt door syslog toegevoegd
+    my_logger.info(msg)
 
 
 # end of file

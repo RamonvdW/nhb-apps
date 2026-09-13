@@ -117,7 +117,8 @@ class TestDataApiViews(E2EHelpers, TestCase):
         self.headers = {'DDI-Token': settings.DDI_AUTH_TOKEN}
 
     def test_no_token(self):
-        rsp = self.client.get(self.url_api_ver1)
+        with self.assert_max_queries(20):
+            rsp = self.client.get(self.url_api_ver1)
         self.assertEqual(rsp.status_code, 401)
         self.assertEqual(rsp.content, b'No valid token\n')
 
@@ -141,6 +142,11 @@ class TestDataApiViews(E2EHelpers, TestCase):
         self.assertEqual(rsp.status_code, 401)
         self.assertEqual(rsp.content, b'No valid token\n')
 
+        # bad token
+        rsp = self.client.get(self.url_api_lms2, headers={'DDI-Token': 'bad'})
+        self.assertEqual(rsp.status_code, 401)
+        self.assertEqual(rsp.content, b'No valid token\n')
+
     def test_no_endpoint(self):
         for url in (self.url_api_no_endpoint1, self.url_api_no_endpoint2, self.url_api_no_endpoint3,
                     self.url_api_no_endpoint4, self.url_api_no_endpoint5):
@@ -149,39 +155,41 @@ class TestDataApiViews(E2EHelpers, TestCase):
         # for
 
     def test_api_ver(self):
-        rsp = self.client.get(self.url_api_ver1, headers=self.headers)
+        with self.assert_max_queries(20):
+            rsp = self.client.get(self.url_api_ver1, headers=self.headers)
         self.assertEqual(rsp.status_code, 200)
         # print(rsp.content)
 
         data = json.loads(rsp.content)
         self.assertEqual(data['meta']['count'], 3)
         self.assertEqual(data['meta']['total'], 3)
-        vers = data['Verenigingsgegevens']
-        self.assertEqual(len(vers), 3)
+        ver_lijst = data['Verenigingsgegevens']
+        self.assertEqual(len(ver_lijst), 3)
 
-        ver = vers[0]
+        ver = ver_lijst[0]
         self.assertEqual(ver['Verenigingscode'], '1000')
         self.assertEqual(ver['Naam'], 'Grote club')
         self.assertEqual(ver['Aanmelddatum'], '2000-01-03')
         self.assertEqual(ver['KVKnummer'], '12345678')
-        accs = ver['Accommodaties']
-        self.assertEqual(len(accs), 1)
-        acc = accs[0]
+        acc_lijst = ver['Accommodaties']
+        self.assertEqual(len(acc_lijst), 1)
+        acc = acc_lijst[0]
         self.assertEqual(acc['Postcode'], '1111AA')
         self.assertEqual(acc['Huisnummer'], 42)
 
     def test_api_acc(self):
-        rsp = self.client.get(self.url_api_acc1, headers=self.headers)
+        with self.assert_max_queries(20):
+            rsp = self.client.get(self.url_api_acc1, headers=self.headers)
         self.assertEqual(rsp.status_code, 200)
         # print(rsp.content)
 
         data = json.loads(rsp.content)
         self.assertEqual(data['meta']['count'], 2)
         self.assertEqual(data['meta']['total'], 2)
-        accs = data['Accommodatiegegevens']
-        self.assertEqual(len(accs), 2)
+        acc_lijst = data['Accommodatiegegevens']
+        self.assertEqual(len(acc_lijst), 2)
 
-        acc = accs[0]
+        acc = acc_lijst[0]
         self.assertEqual(acc['Naam'], 'Grote club')
         self.assertEqual(acc['Postcode'], '1111AA')
         self.assertEqual(acc['Straat'], 'Pijlstraat')
@@ -191,5 +199,90 @@ class TestDataApiViews(E2EHelpers, TestCase):
         self.assertEqual(acc['Latitude'], '4.0')
         self.assertEqual(acc['Longitude'], '55.1')
 
+    def test_api_lms(self):
+        with self.assert_max_queries(20):
+            rsp = self.client.get(self.url_api_lms1, headers=self.headers)
+        self.assertEqual(rsp.status_code, 200)
+        # print(rsp.content)
+
+        data = json.loads(rsp.content)
+        self.assertEqual(data['meta']['count'], 3)
+        self.assertEqual(data['meta']['total'], 3)
+        self.assertEqual(data['meta']['limit'], 0)
+        self.assertEqual(data['meta']['offset'], 0)
+
+        lms_lijst = data['Lidmaatschapsgegevens']
+        self.assertEqual(len(lms_lijst), 3)
+
+        lms = lms_lijst[0]
+        self.assertEqual(lms['Lidcode'], '100001')
+        self.assertEqual(lms['Verenigingscode'], '1000')
+        self.assertEqual(lms['Postcode'], '1234AB')
+        self.assertEqual(lms['Land'], 'NL')
+        self.assertEqual(lms['Geboortedatum'], '1972-01-01')
+        self.assertEqual(lms['Geslacht'], 'x')
+        self.assertEqual(lms['Aanmelddatum'], '2001-06-01')
+        self.assertEqual(lms['Afmelddatum'], '')
+        tak_lijst = lms['Sporttak']
+        self.assertEqual(len(tak_lijst), 1)
+        self.assertEqual(tak_lijst[0], 'handboogsport')
+
+        # met peildatum en offset
+        rsp = self.client.get(self.url_api_lms2 + '?peildatum=2010-01-01&offset=2&limit=1', headers=self.headers)
+        data = json.loads(rsp.content)
+        self.assertEqual(data['meta']['count'], 1)
+        self.assertEqual(data['meta']['total'], 3)
+        self.assertEqual(data['meta']['limit'], 1)
+        self.assertEqual(data['meta']['offset'], 2)
+
+    def test_bad_params(self):
+        url = self.url_api_lms2 + '?'
+
+        # peildatum
+        rsp = self.client.get(url + 'peildatum=haha', headers=self.headers)
+        self.assertEqual(rsp.status_code, 400)
+        self.assertEqual(rsp.content, b'Geen valide peildatum lengte\n')
+
+        rsp = self.client.get(url + 'peildatum=hahahahaha', headers=self.headers)
+        self.assertEqual(rsp.status_code, 400)
+        self.assertEqual(rsp.content, b'Geen valide peildatum (YMD)\n')
+
+        rsp = self.client.get(url + 'peildatum=1900-01-01', headers=self.headers)
+        self.assertEqual(rsp.status_code, 400)
+        self.assertEqual(rsp.content, b'Geen valide peildatum eeuw\n')
+
+        rsp = self.client.get(url + 'peildatum=2000-99-01', headers=self.headers)
+        self.assertEqual(rsp.status_code, 400)
+        self.assertEqual(rsp.content, b'Geen valide peildatum (inhoudelijk)\n')
+
+        # limit
+        rsp = self.client.get(url + 'limit=haha', headers=self.headers)
+        self.assertEqual(rsp.status_code, 400)
+        self.assertEqual(rsp.content, b'Geen valide limit (getal)\n')
+
+        rsp = self.client.get(url + 'limit=0', headers=self.headers)
+        self.assertEqual(rsp.status_code, 400)
+        self.assertEqual(rsp.content, b'Geen valide limit (range)\n')
+
+        rsp = self.client.get(url + 'limit=-1', headers=self.headers)
+        self.assertEqual(rsp.status_code, 400)
+        self.assertEqual(rsp.content, b'Geen valide limit (range)\n')
+
+        rsp = self.client.get(url + 'limit=9999999', headers=self.headers)
+        self.assertEqual(rsp.status_code, 400)
+        self.assertEqual(rsp.content, b'Geen valide limit (range)\n')
+
+        # offset
+        rsp = self.client.get(url + 'offset=haha', headers=self.headers)
+        self.assertEqual(rsp.status_code, 400)
+        self.assertEqual(rsp.content, b'Geen valide offset (getal)\n')
+
+        rsp = self.client.get(url + 'offset=-1', headers=self.headers)
+        self.assertEqual(rsp.status_code, 400)
+        self.assertEqual(rsp.content, b'Geen valide offset (range)\n')
+
+        rsp = self.client.get(url + 'offset=999999999', headers=self.headers)
+        self.assertEqual(rsp.status_code, 400)
+        self.assertEqual(rsp.content, b'Geen valide offset (range)\n')
 
 # end of file

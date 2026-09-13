@@ -7,8 +7,7 @@
 from django.http import JsonResponse, HttpResponse
 from django.views import View
 from DataApi.models import DataApiLidmaatschap
-from DataApi.view_helpers import datum_n_jaar_geleden, is_auth_token_ok
-from Logboek.operations import schrijf_in_logboek
+from DataApi.view_helpers import datum_n_jaar_geleden, is_auth_token_ok, log_api_gebruik
 import datetime
 import hashlib
 
@@ -38,9 +37,7 @@ class LidmaatschappenView(View):
     def _maak_lijst(self):
         lijst = list()
 
-        qset = DataApiLidmaatschap.objects.all()
-        if self._peildatum:
-            qset = qset.filter(mutatie_datum__gte=self._peildatum)
+        qset = DataApiLidmaatschap.objects.filter(mutatie_datum__gte=self._peildatum)
         total = qset.count()
 
         start_nr = self._offset
@@ -138,10 +135,7 @@ class LidmaatschappenView(View):
             "Lidmaatschapsgegevens": lijst,
         }
 
-        schrijf_in_logboek(
-                None,    # systeem
-                'Data API',
-                'Lidmaatschappen worden opgehaald. Meta: %s' % repr(meta))
+        log_api_gebruik('Lidmaatschappen worden opgehaald. Meta: %s' % repr(meta))
 
         return JsonResponse(out)
 

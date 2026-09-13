@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path, re_path
-from DataApi import view_ver, view_lid
+from DataApi import view_ver, view_lms
 
 app_name = 'DataApi'
 
@@ -29,11 +29,11 @@ urlpatterns = [
          name='accommodaties2'),
 
     path('v1/lidmaatschappen/',
-         view_lid.LidmaatschappenView.as_view(),
+         view_lms.LidmaatschappenView.as_view(),
          name='lidmaatschappen1'),
 
     path('v1/lidmaatschappen',
-         view_lid.LidmaatschappenView.as_view(),
+         view_lms.LidmaatschappenView.as_view(),
          name='lidmaatschappen2'),
 
     # catch-all voor alle andere versies en endpoints

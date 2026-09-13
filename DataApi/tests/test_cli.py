@@ -276,15 +276,16 @@ class TestDataApiCli(E2EHelpers, TestCase):
                                              self.csv_path,
                                              self.jaar,
                                              report_exit_code=False)
-        print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
+        # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
 
         f1, f2 = self.run_management_command(CLI_IMPORT_KISS_LEDEN,
                                              self.csv_path,
                                              self.jaar,
                                              report_exit_code=False)
-        print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
+        # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
 
         lid = DataApiLidmaatschap.objects.first()
+        self.assertIsNotNone(lid)
         self.assertTrue(str(lid) != '')     # coverage
 
     def test_kwaliteit(self):

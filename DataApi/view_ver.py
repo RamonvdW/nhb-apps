@@ -8,8 +8,7 @@ from django.http import JsonResponse, HttpResponse
 from django.views import View
 from django.db.models import Q
 from DataApi.models import DataApiVereniging, DataApiLidmaatschap
-from DataApi.view_helpers import datum_n_jaar_geleden, is_auth_token_ok
-from Logboek.operations import schrijf_in_logboek
+from DataApi.view_helpers import datum_n_jaar_geleden, is_auth_token_ok, log_api_gebruik
 
 
 def _get_ver_nrs_in_use():
@@ -78,10 +77,7 @@ class VerenigingenView(View):
             "Verenigingsgegevens": lijst,
         }
 
-        schrijf_in_logboek(
-                None,    # systeem
-                'Data API',
-                'Verenigingen worden opgehaald. Meta: %s' % repr(meta))
+        log_api_gebruik('Verenigingen worden opgehaald. Meta: %s' % repr(meta))
 
         return JsonResponse(out)
 
@@ -137,10 +133,7 @@ class AccommodatiesView(View):
             "Accommodatiegegevens": lijst,
         }
 
-        schrijf_in_logboek(
-                None,    # systeem
-                'Data API',
-                'Accommodaties worden opgehaald. Meta: %s' % repr(meta))
+        log_api_gebruik('Accommodaties worden opgehaald. Meta: %s' % repr(meta))
 
         return JsonResponse(out)
 
