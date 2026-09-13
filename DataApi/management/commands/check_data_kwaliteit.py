@@ -101,7 +101,9 @@ class Command(BaseCommand):
         self._check_ver()
         self._check_lms()
 
-        print('%s errors, %s warnings, %s postcode issues' % (self.count_errors, self.count_warnings, self.count_postcode_issue))
+        self.stdout.write('%s errors, %s warnings, %s postcode issues' % (self.count_errors,
+                                                                          self.count_warnings,
+                                                                          self.count_postcode_issue))
 
         self.stdout.write('Done')
 

@@ -48,12 +48,6 @@ class Command(BaseCommand):
         y = dmy[6:6+4]
         return y + '-' + m + '-' + d
 
-    @staticmethod
-    def _bereken_dagen_tussen_datums(d1, d2):
-        d1 = datetime.datetime.strptime(d1, "%Y-%m-%d")
-        d2 = datetime.datetime.strptime(d2, "%Y-%m-%d")
-        return abs((d2 - d1).days)
-
     def _laad_alle_verenigingen(self):
         self._ver_nr2ver = dict()
         for ver in DataApiVereniging.objects.all():
@@ -65,11 +59,7 @@ class Command(BaseCommand):
     def _store_vereniging(self, ver_nr: int, naam: str, status: str, aanmeld_datum: str, kvk_nr: str, straatnaam: str, huis_nr: int, postcode: str, plaats: str):
         ver = self._ver_nr2ver.get(ver_nr, None)
         if ver:
-            krak
             self.count_gevonden += 1
-            assert isinstance(ver, DataApiVereniging)
-            if status != 'Actief' and ver.afmeld_datum == '':
-                self.stdout.write('[WARNING] Afmelddatum van vereniging %s ontbreekt' % ver_nr)
         else:
             self.count_aangemaakt += 1
             if not self.dry_run:
@@ -108,7 +98,7 @@ class Command(BaseCommand):
 
     def _laad_csv_bestand(self, fname) -> list | None:
         fpath = os.path.join(self.pad, fname)
-        self.stdout.write('[INFO] Lees %s' % repr(fname))
+        self.stdout.write('[INFO] Lees %s' % repr(fpath))
         data = list()
         try:
             with open(fpath, encoding='raw_unicode_escape') as csv_file:

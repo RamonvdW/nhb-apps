@@ -4,8 +4,8 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from .import_lidmaatschappen import ImportHistCrmLidmaatschappen
-from .import_verenigingen import ImportHistCrmVerenigingen
+from .import_histcrm_lms import ImportHistCrmLidmaatschappen
+from .import_histcrm_ver import ImportHistCrmVerenigingen
 from .opschonen import dataapi_opschonen
 
 __all__ = [
