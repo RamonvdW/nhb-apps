@@ -16,6 +16,9 @@ class Command(BaseCommand):
 
     def __init__(self):
         super().__init__()
+        self.count_errors = 0
+        self.count_warnings = 0
+        self.count_postcode_issue = 0
 
     def add_arguments(self, parser):
         # parser.add_argument('--dryrun', action='store_true')
@@ -33,12 +36,14 @@ class Command(BaseCommand):
 
         if len(lms_actief):
             self.stdout.write('[ERROR] Vereniging %s is afgemeld per %s maar heeft nog %s lidmaatschappen:' % (ver.ver_nr, ver.afmeld_datum, len(lms_actief)))
+            self.count_errors += 1
             for lms in lms_actief:
                 self.stdout.write('        %s' % lms)
             # for
 
         if len(lms_later_afgemeld):
-            self.stdout.write('[ERROR] Vereniging %s is afgemeld per %s maar %s lidmaatschappen lopen langer door:' % (ver.ver_nr, ver.afmeld_datum, len(lms_later_afgemeld)))
+            self.stdout.write('[WARNING] Vereniging %s is afgemeld per %s maar %s lidmaatschappen lopen langer door:' % (ver.ver_nr, ver.afmeld_datum, len(lms_later_afgemeld)))
+            self.count_warnings += 1
             for lms in lms_later_afgemeld:
                 self.stdout.write('        %s' % lms)
             # for
@@ -66,13 +71,23 @@ class Command(BaseCommand):
                 other_lms = lid_nr2lms.get(lms.lid_nr, None)
                 if other_lms:
                     self.stdout.write('[ERROR] Lid %s heeft meerdere actieve lms:\n%s\n%s' % (lms.lid_nr, other_lms, lms))
+                    self.count_errors += 1
                 else:
                     lid_nr2lms[lms.lid_nr] = lms
 
             ver = ver_nr2ver.get(lms.ver_nr, None)
             if not ver:
                 self.stdout.write('[ERROR] Onbekende vereniging %s voor lms %s' % (lms.ver_nr, lms))
-                continue
+                self.count_errors += 1
+
+            if lms.land_iso not in ('NL', 'BE', 'DE', 'LU', 'AE', 'AT', 'CH', 'HU', 'GB', 'SE'):
+                self.stdout.write('[WARNING] Onverwachte land code: %s in %s' % (repr(lms.land_iso), lms))
+                self.count_postcode_issue += 1
+
+            if lms.land_iso == 'NL':
+                if len(lms.postcode) != 6:
+                    self.stdout.write('[WARNING] Niet standaard postcode %s (land %s) voor %s' % (repr(lms.postcode), lms.land_iso, lms))
+                    self.count_postcode_issue += 1
         # for
 
     def handle(self, *args, **options):
@@ -85,6 +100,8 @@ class Command(BaseCommand):
 
         self._check_ver()
         self._check_lms()
+
+        print('%s errors, %s warnings, %s postcode issues' % (self.count_errors, self.count_warnings, self.count_postcode_issue))
 
         self.stdout.write('Done')
 

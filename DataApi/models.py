@@ -20,7 +20,7 @@ class DataApiVereniging(models.Model):
     # datum van aanmelden en afmelden
     # formaat: YYYY-MM-DD
     aanmeld_datum = models.CharField(max_length=10)
-    afmeld_datum = models.CharField(max_length=10, default='')      # leeg = niet afgemeld
+    afmeld_datum = models.CharField(max_length=10, default='', blank=True)      # leeg = niet afgemeld
 
     # KvK-nummer (optioneel)
     kvk_nummer = models.CharField(max_length=15, default='', blank=True)
@@ -73,7 +73,7 @@ class DataApiLidmaatschap(models.Model):
     # datum van aanmelden en afmelden
     # formaat: YYYY-MM-DD
     aanmeld_datum = models.CharField(max_length=10)
-    afmeld_datum = models.CharField(max_length=10, default='')      # leeg = niet afgemeld
+    afmeld_datum = models.CharField(max_length=10, default='', blank=True)      # leeg = niet afgemeld
 
     # verdere informatie over dit lid: geboortedatum, geslacht, postcode + land
     # (informatief, geen reden voor nieuw lidmaatschap bij wijziging)
@@ -95,10 +95,11 @@ class DataApiLidmaatschap(models.Model):
     postcode = models.CharField(max_length=20)
 
     def __str__(self):
-        return "Lid %s [%s %s %s] ver %s van %s tot %s" % (self.lid_nr,
-                                                           self.geboorte_datum, self.geslacht, self.postcode,
-                                                           self.ver_nr,
-                                                           self.aanmeld_datum, self.afmeld_datum)
+        return "Lid %s [%s %s %s %s] ver %s van %s tot %s" % (
+                        self.lid_nr,
+                        self.geboorte_datum, self.geslacht, self.postcode, self.land_iso,
+                        self.ver_nr,
+                        self.aanmeld_datum, self.afmeld_datum)
     class Meta:
         verbose_name = "DataApi Lidmaatschap"
         verbose_name_plural = "DataApi Lidmaatschappen"

@@ -101,6 +101,58 @@ class ImportHistCrmLidmaatschappen(ImportCrmBase):
 
         return lms
 
+    def _store_wijzigingen(self, lms: DataApiLidmaatschap, geboorte_datum: str, geslacht: str, postcode: str, land_iso: str):
+        # wijzigingen doorvoeren
+        updated = list()
+
+        if lms.geboorte_datum != geboorte_datum:
+            self.out_warning('Geboortedatum aangepast naar %s (was %s)' % (geboorte_datum, lms))
+            lms.geboorte_datum = geboorte_datum
+            updated.append('geboorte_datum')
+
+        if lms.geslacht != geslacht:
+            self.out_info('Geslacht aangepast naar %s (was %s)' % (geslacht, lms))
+            lms.geslacht = geslacht
+            updated.append('geslacht')
+
+        if lms.postcode != postcode:
+            if len(lms.postcode) == 6 and lms.land_iso == 'NL' and len(postcode) < 6 and lms.postcode.startswith(postcode):
+                self.out_debug('Postcode aanpassing van %s naar %s voorkomen voor %s' % (lms.postcode, postcode, lms))
+            else:
+                self.out_info('Postcode aangepast naar %s (was %s)' % (postcode, lms))
+                lms.postcode = postcode
+                updated.append('postcode')
+
+                # retroactief aanpassen in andere lms van dit lid
+                lms_lijst = self._cache_actieve_lidmaatschappen[lms.lid_nr]
+                for lms2 in lms_lijst:
+                    # zelfde postcode, andere land code?
+                    if lms2.postcode != postcode: # and postcode.startswith(lms2.postcode):
+                        self.out_info('Postcode retroactief aanpassen?? naar %s (was %s)' % (postcode, lms2))
+                        lms2.postcode = postcode
+                        #lms2.save(update_fields=['postcode'])
+                # for
+
+        if lms.land_iso != land_iso:
+            self.out_info('Land code aangepast naar %s (was %s)' % (land_iso, lms))
+            lms.land_iso = land_iso
+            updated.append('land_iso')
+
+            # retroactief aanpassen in andere lms van dit lid
+            lms_lijst = self._cache_actieve_lidmaatschappen[lms.lid_nr]
+            for lms2 in lms_lijst:
+                # zelfde postcode, andere land code?
+                if lms2.postcode == lms.postcode and lms2.land_iso != land_iso:
+                    self.out_info('Land code retroactief aangepast naar %s (was %s)' % (land_iso, lms2))
+                    lms2.land_iso = land_iso
+                    lms2.save(update_fields=['land_iso'])
+            # for
+
+        if len(updated) > 0:
+            self.count_wijzigingen += len(updated)
+            if not self.dryrun:
+                lms.save(update_fields=updated)
+
     def _store_lid(self,
                    lid_nr: int, ver_nr: int, geslacht: str,
                    geboorte_datum: datetime.date, lid_sinds: datetime.date, lid_tot: datetime.date | None,
@@ -128,6 +180,8 @@ class ImportHistCrmLidmaatschappen(ImportCrmBase):
 
         lms = lms_lijst[-1]
 
+        self._store_wijzigingen(lms, geboorte_datum, geslacht, postcode, land_iso)
+
         if not ver_nr:
             if lms.afmeld_datum != '':
                 # al geregistreerd
@@ -153,112 +207,6 @@ class ImportHistCrmLidmaatschappen(ImportCrmBase):
 
             lms = self._maak_lms(lid_nr, ver_nr, geslacht, geboorte_datum, aanmeld_datum, land_iso, postcode)
             self.out_info('Nieuw lms: %s' % lms)
-            return
-
-        # wijzigingen doorvoeren
-        updated = list()
-
-        if lms.geboorte_datum != geboorte_datum:
-            self.out_warning('Geboortedatum aangepast naar %s (was %s)' % (geboorte_datum, lms))
-            lms.geboorte_datum = geboorte_datum
-            updated.append('geboorte_datum')
-
-        if lms.geslacht != geslacht:
-            self.out_info('Geslacht aangepast naar %s (was %s)' % (geslacht, lms))
-            lms.geslacht = geslacht
-            updated.append('geslacht')
-
-        if lms.postcode != postcode:
-            self.out_info('Postcode aangepast naar %s (was %s)' % (postcode, lms))
-            lms.postcode = postcode
-            updated.append('postcode')
-
-        if len(updated) > 0:
-            self.count_wijzigingen += len(updated)
-            if not self.dryrun:
-                lms.save(update_fields=updated)
-
-        return
-
-        print('store_lid %s, ver %s, postcode %s, geslacht %s, geboren %s, sinds %s, tot %s' % (lid_nr, ver_nr, postcode, geslacht, geboorte_datum, lid_sinds, lid_tot))
-        for lms in lms_lijst:
-            print(lms)
-
-        return
-
-        # zoek het meest recente record van dit lid
-        lms = self._vind_lidmaatschap(lid_nr, aanmeld_datum)
-
-        if lms and lms.ver_nr != ver_nr:
-            # overgestapt naar een andere vereniging
-            if lms.afmeld_datum == '':
-                zeker_afmeld_datum = afmeld_datum or self.afmelddatum
-                self._afmelden(lms, zeker_afmeld_datum)
-            lms = None
-
-        if lms and lms.aanmeld_datum != aanmeld_datum:
-            # aanpassing van de aanmelddatum
-            self.stdout.write('[INFO] Lid %s wijziging aanmelddatum %s --> %s' % (lid_nr, lms.aanmeld_datum, aanmeld_datum))
-            if not self.dryrun:
-                lms.aanmeld_datum = aanmeld_datum
-                lms.save(update_fields=['aanmeld_datum'])
-            return
-
-        if not lms and ver_nr == 0:
-            if not self.include_ver_null:
-                return
-
-        if not lms:
-            # nieuw record nodig
-            if self.dryrun:
-                return
-
-            lms = DataApiLidmaatschap.objects.create(
-                        lid_nr=lid_nr,
-                        ver_nr=ver_nr,
-                        geslacht=geslacht,
-                        geboorte_datum=geboorte_datum,
-                        aanmeld_datum=aanmeld_datum,
-                        land_iso=land_iso,
-                        postcode=postcode)
-
-            self._changed_and_new_lms_pks.append(lms.pk)
-
-            try:
-                self._cache_actieve_lidmaatschappen[lid_nr].append(lms)
-            except KeyError:
-                self._cache_actieve_lidmaatschappen[lid_nr] = [lms]
-
-            self.count_actief += 1
-            self.count_toevoegingen += 1
-
-        if afmeld_datum != '' and lms.afmeld_datum == '':
-            self._afmelden(lms, afmeld_datum)
-            return
-
-        if lms.geboorte_datum != geboorte_datum:
-            # self.out_warning('Wijziging lid %s geboortedatum %s --> %s' % (lid_nr, repr(lms.geboorte_datum),
-            #                                                                        repr(geboorte_datum)))
-            if not self.dryrun:
-                lms.geboorte_datum = geboorte_datum
-                lms.save(update_fields=['geboorte_datum'])
-                self._changed_and_new_lms_pks.append(lms.pk)
-
-        if lms.geslacht != geslacht:
-            # self.out_warning('Wijziging lid %s geslacht %s --> %s' % (lid_nr, repr(lms.geslacht),
-            #                                                                    repr(geslacht)))
-            if not self.dryrun:
-                lms.geslacht = geslacht
-                lms.save(update_fields=['geslacht'])
-                self._changed_and_new_lms_pks.append(lms.pk)
-
-        if lms.postcode != postcode or lms.land_iso != land_iso:
-            # verhuisd
-            if not self.dryrun:
-                lms.postcode = postcode
-                lms.land_iso = land_iso
-                lms.save(update_fields=['postcode', 'land_iso'])
-                self._changed_and_new_lms_pks.append(lms.pk)
 
     def _importeer_data(self, data: list):
         """ Importeert data van alle leden """
@@ -329,16 +277,21 @@ class ImportHistCrmLidmaatschappen(ImportCrmBase):
             if lid_geslacht == 'F':
                 lid_geslacht = 'V'
 
+            land_iso = member['iso_abbr']
+            if not land_iso:
+                land_iso = 'NL'
+
             # postcode + huisnummer maken
             lid_postcode = ''
             postcode = member['postal_code']
             if postcode:
-                postcode = postcode.upper()     # sommige postcodes zijn kleine letters
-                lid_postcode = postcode.replace(' ', '')
-
-            land_iso = member['iso_abbr']
-            if not land_iso:
-                land_iso = 'NL'
+                lid_postcode = postcode.upper()     # sommige postcodes zijn kleine letters
+                if land_iso == 'NL':
+                    lid_postcode = lid_postcode.replace(' ', '')
+                    if len(lid_postcode) != 6:
+                        plaats = member['location_name']
+                        self.out_warning('Lid %s uit plaats %s, land %s heeft postcode %s' % (
+                                    lid_nr, plaats, land_iso, repr(lid_postcode)))
 
             # lid sinds
             if member['member_from'] and member['member_from'][0:0+2] not in ("19", "20"):

@@ -65,6 +65,7 @@ class Command(BaseCommand):
     def _store_vereniging(self, ver_nr: int, naam: str, status: str, aanmeld_datum: str, kvk_nr: str, straatnaam: str, huis_nr: int, postcode: str, plaats: str):
         ver = self._ver_nr2ver.get(ver_nr, None)
         if ver:
+            krak
             self.count_gevonden += 1
             assert isinstance(ver, DataApiVereniging)
             if status != 'Actief' and ver.afmeld_datum == '':
