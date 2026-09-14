@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2024 Ramon van der Winkel.
+#  Copyright (c) 2021-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -145,8 +145,8 @@ class RecordsIndivView(TemplateView):
             makl = url2makl[self.kwargs['makl']]
             verb = url2verb[self.kwargs['verb']]
             para = url2para[self.kwargs['para']]
-            nr = int(self.kwargs['nummer'])
-        except KeyError:
+            nr = int(self.kwargs['nummer'][:6])     # afkappen voor de veiligheid
+        except (KeyError, ValueError, TypeError):
             # initieel zijn er geen parameters
             # ook bij gerommel terugvallen op initieel
             gesl = 'M'
