@@ -75,15 +75,17 @@ class LidmaatschappenView(View):
         peildatum = request.GET.get('peildatum', '')[:20]   # afkappen voor de veiligheid
         if peildatum:
             if len(peildatum) != 10:
-                raise ValueError('Geen valide peildatum lengte')
+                return 'Geen valide peildatum lengte'
             if peildatum[4] != '-' or peildatum[7] != '-':
-                raise ValueError('Geen valide peildatum (YMD)')
+                return 'Geen valide peildatum (YMD)'
             if peildatum[:2] != '20':
-                raise ValueError('Geen valide peildatum eeuw')
+                return 'Geen valide peildatum eeuw'
+
             try:
                 datum_p = datetime.datetime.strptime(peildatum, '%Y-%m-%d')
             except (ValueError, TypeError, IndexError):
-                raise ValueError('Geen valide peildatum (inhoudelijk)')
+                return 'Geen valide peildatum (inhoudelijk)'
+
             self._peildatum = datum_p.strftime('%Y-%m-%d')
 
         limit = request.GET.get('limit', '')[:6]    # afkappen voor de veiligheid
@@ -91,23 +93,26 @@ class LidmaatschappenView(View):
             try:
                 n = int(limit)
             except (ValueError, TypeError, IndexError) as exc:
-                raise ValueError('Geen valide limit (getal)')
+                return 'Geen valide limit (getal)'
 
             if 0 < n <= MAX_RECORDS_PER_VERZOEK:
                 self._limit = n
             else:
-                raise ValueError('Geen valide limit (range)')
+                return 'Geen valide limit (range)'
 
         offset = request.GET.get('offset', '')[:6]    # afkappen voor de veiligheid
         if offset:
             try:
                 n = int(offset)
             except (ValueError, TypeError, IndexError):
-                raise ValueError('Geen valide offset (getal)')
+                return 'Geen valide offset (getal)'
+
             if 0 <= n < MAX_OFFSET:
                 self._offset = n
             else:
-                raise ValueError('Geen valide offset (range)')
+                return 'Geen valide offset (range)'
+
+        return ''       # no error
 
     def get(self, request, *args, **kwargs):
         """ Geeft een lijst met verenigingen terug """
@@ -115,12 +120,10 @@ class LidmaatschappenView(View):
         if not is_auth_token_ok(request):
             return HttpResponse('No valid token\n', status=401)
 
-        try:
-            self._get_params(request)
-        except ValueError as exc:
+        error_message = self._get_params(request)
+        if error_message:
             # geef antwoord met een status 400
-            msg = exc.args[0] if len(exc.args) > 0 else '?'
-            return HttpResponse("%s\n" % msg, status=400)
+            return HttpResponse("%s\n" % error_message, status=400)
 
         lijst, total = self._maak_lijst()
 
