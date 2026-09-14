@@ -119,7 +119,8 @@ class LidmaatschappenView(View):
             self._get_params(request)
         except ValueError as exc:
             # geef antwoord met een status 400
-            return HttpResponse("%s\n" % exc, status=400)
+            msg = exc.args[0] if len(exc.args) > 0 else '?'
+            return HttpResponse("%s\n" % msg, status=400)
 
         lijst, total = self._maak_lijst()
 
