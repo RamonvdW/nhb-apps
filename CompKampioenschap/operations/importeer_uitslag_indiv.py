@@ -5,6 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.utils import timezone
+from django.core.management.base import OutputWrapper
 from Competitie.definities import KAMP_RANK_NO_SHOW, DEELNAME_JA, DEELNAME2STR
 from Competitie.models import CompetitieIndivKlasse
 from CompKampioenschap.models import SheetStatus
@@ -12,7 +13,7 @@ from CompKampioenschap.operations.wedstrijdformulieren_indiv_lees import LeesInd
 from CompLaagBond.models import KampBK, DeelnemerBK
 from CompLaagRayon.models import KampRK, DeelnemerRK
 from GoogleDrive.operations import StorageGoogleSheet
-from TestHelpers.e2ehelpers import OutputBuffer
+import io
 
 
 class ImporteerSheetUitslagIndiv:
@@ -235,7 +236,7 @@ class ImporteerSheetUitslagIndiv:
         """
         self.afstand = bestand.afstand
 
-        stdout = OutputBuffer()
+        stdout = OutputWrapper(io.StringIO())
         sheets = StorageGoogleSheet(stdout)
         lezer = LeesIndivWedstrijdFormulier(stdout, bestand, sheets, lees_oppervlakkig=False)
 
