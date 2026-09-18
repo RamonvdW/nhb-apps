@@ -161,7 +161,7 @@ class KalenderView(TemplateView):
             boog_pks = context['boog_pks']      # ingevuld in maak_bogen_filter en gegarandeerd niet leeg
             # distinct is nodig om verdubbeling te voorkomen
             wedstrijden = wedstrijden.filter(boogtypen__pk__in=boog_pks).distinct('datum_begin', 'pk')
-            filtered.append('de door jouw ingestelde wedstrijdbogen')
+            filtered.append('de door jou ingestelde wedstrijdbogen')
 
         context['zoekterm'] = self.zoekterm
         if self.zoekterm:
