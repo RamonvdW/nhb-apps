@@ -7,9 +7,8 @@
 from django.test import TestCase
 from Competitie.operations.overstappen import competitie_hanteer_overstap_sporter
 from Competitie.test_utils.tijdlijn import zet_competitie_fase_rk_prep, zet_competitie_fase_bk_prep
-from TestHelpers.e2ehelpers import E2EHelpers
+from TestHelpers.e2ehelpers import E2EHelpers, OutputBuffer
 from TestHelpers import testdata
-import io
 
 
 class TestCompetitieOperationsOverstappen(E2EHelpers, TestCase):
@@ -53,7 +52,7 @@ class TestCompetitieOperationsOverstappen(E2EHelpers, TestCase):
 
     def test_overstappen_regio(self):
         # verkeerde fase
-        stdout = io.StringIO()
+        stdout = OutputBuffer()
         competitie_hanteer_overstap_sporter(stdout)
         self.assertFalse('geaccepteerd voor' in stdout.getvalue())
 
@@ -61,7 +60,7 @@ class TestCompetitieOperationsOverstappen(E2EHelpers, TestCase):
         # zet de competitie in de RK fase
         zet_competitie_fase_rk_prep(self.testdata.comp25)
 
-        stdout = io.StringIO()
+        stdout = OutputBuffer()
         competitie_hanteer_overstap_sporter(stdout)
         self.assertTrue('geaccepteerd voor' in stdout.getvalue())
 
@@ -69,7 +68,7 @@ class TestCompetitieOperationsOverstappen(E2EHelpers, TestCase):
         # zet de competitie in de BK fase
         zet_competitie_fase_bk_prep(self.testdata.comp25)
 
-        stdout = io.StringIO()
+        stdout = OutputBuffer()
         competitie_hanteer_overstap_sporter(stdout)
         # print('stdout: %s' % stdout.getvalue())
         self.assertTrue('geaccepteerd voor' in stdout.getvalue())

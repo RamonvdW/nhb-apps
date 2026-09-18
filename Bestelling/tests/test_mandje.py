@@ -7,7 +7,6 @@
 from django.conf import settings
 from django.test import TestCase, override_settings
 from django.utils import timezone
-from django.core.management.base import OutputWrapper
 from Bestelling.definities import (BESTELLING_TRANSPORT_VERZEND, BESTELLING_TRANSPORT_OPHALEN,
                                    BESTELLING_REGEL_CODE_WEDSTRIJD, BESTELLING_REGEL_CODE_WEBWINKEL)
 from Bestelling.models import Bestelling, BestellingMutatie, BestellingMandje, BestellingRegel
@@ -17,12 +16,11 @@ from Geo.models import Regio
 from Registreer.definities import REGISTRATIE_FASE_COMPLEET
 from Registreer.models import GastRegistratie
 from Sporter.models import Sporter
-from TestHelpers.e2ehelpers import E2EHelpers
+from TestHelpers.e2ehelpers import E2EHelpers, OutputBuffer
 from Vereniging.models import Vereniging
 from Webwinkel.models import WebwinkelKeuze, WebwinkelProduct
 from decimal import Decimal
 import datetime
-import io
 
 
 class TestBestellingMandje(E2EHelpers, TestCase):
@@ -288,6 +286,7 @@ class TestBestellingMandje(E2EHelpers, TestCase):
         self.assertEqual(0, Bestelling.objects.count())
 
         mutatie = BestellingMutatie.objects.first()
+        assert isinstance(mutatie, BestellingMutatie)
         self.assertTrue(str(mutatie) != '')
         mutatie.code = 99999
         mutatie.is_verwerkt = True
@@ -304,6 +303,7 @@ class TestBestellingMandje(E2EHelpers, TestCase):
         self.assertEqual(1, Bestelling.objects.count())
 
         bestelling = Bestelling.objects.first()
+        assert isinstance(bestelling, Bestelling)
         self.assertTrue(str(bestelling) != '')
 
     def test_bestellen_verzend(self):
@@ -384,7 +384,7 @@ class TestBestellingMandje(E2EHelpers, TestCase):
     def test_opschonen(self):
         # product dat al te lang in het mandje ligt wordt verwijdert
         # dit triggert opnieuw berekenen van de kortingen en verzendkosten
-        stdout = OutputWrapper(io.StringIO())
+        stdout = OutputBuffer()
         verwerk = VerwerkBestelMutaties(stdout)
 
         # vul het mandje
