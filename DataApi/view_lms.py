@@ -12,7 +12,7 @@ import datetime
 import hashlib
 
 
-MAX_RECORDS_PER_VERZOEK = 1000      # hoger getal kost meer geheugen
+MAX_RECORDS_PER_VERZOEK = 5000      # hoger getal kost meer geheugen
 MAX_OFFSET = 100000                 # moet hoger zijn dan aantal lidmaatschappen (actief + historisch)
 
 
