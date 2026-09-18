@@ -44,7 +44,9 @@ class ImportCrmBase:
     def check_keys(self, keys, verplichte_keys: tuple, optionale_keys: tuple, level: str):
         has_error = False
 
-        keys = list(keys)       # iterator --> lijst waar we element uit kunnen halen
+        # iterator naar list
+        # zodat we elementen uit deze lijst kunnen verwijderen
+        keys = list(keys)
 
         # check the verplichte keys
         for key in verplichte_keys:

@@ -6,9 +6,8 @@
 
 """ importeer de KISS-bestand met data voor DDI. """
 
-from django.conf import settings
 from django.core.management.base import BaseCommand
-from DataApi.models import DataApiLidmaatschap, DataApiVereniging
+from DataApi.models import DataApiLidmaatschap
 import datetime
 import csv
 import sys

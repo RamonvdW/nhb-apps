@@ -23,7 +23,6 @@ EXPECTED_DATA_KEYS = ('rayons', 'regions', 'clubs', 'members')
 SKIP_VER_NR = (settings.EXTERN_VER_NR,)
 
 
-
 class Command(BaseCommand):
 
     help = "Importeer een JSON file met data uit het CRM systeem van de bond"
@@ -191,9 +190,8 @@ class Command(BaseCommand):
             tb_msg = tb_msg_start + '\n'.join(tb)
 
             # deze functie stuurt maximaal 1 mail per dag over hetzelfde probleem
-            # TODO: re-enable
-            # self.stdout.write('[WARNING] Stuur crash mail naar ontwikkelaar')
-            # mailer_notify_internal_error(tb_msg)
+            self.stdout.write('[WARNING] Stuur crash mail naar ontwikkelaar')
+            mailer_notify_internal_error(tb_msg)
 
             self._exit_code = 1
 

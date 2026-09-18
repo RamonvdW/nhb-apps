@@ -80,7 +80,7 @@ class Command(BaseCommand):
                 self.stdout.write('[ERROR] Onbekende vereniging %s voor lms %s' % (lms.ver_nr, lms))
                 self.count_errors += 1
 
-            if lms.land_iso not in ('NL', 'BE', 'DE', 'LU', 'AE', 'AT', 'CH', 'HU', 'GB', 'SE'):
+            if lms.land_iso not in ('NL', 'BE', 'DE', 'LU', 'AE', 'AT', 'CH', 'HU', 'GB', 'SE', 'NO'):
                 self.stdout.write('[WARNING] Onverwachte land code: %s in %s' % (repr(lms.land_iso), lms))
                 self.count_postcode_issue += 1
 

@@ -6,10 +6,8 @@
 
 """ importeer de KISS-bestand met data voor DDI. """
 
-from django.conf import settings
 from django.core.management.base import BaseCommand
 from DataApi.models import DataApiVereniging
-import datetime
 import csv
 import sys
 import os
@@ -56,7 +54,7 @@ class Command(BaseCommand):
 
         self.stdout.write('[INFO] %s verenigingen ingeladen' % len(self._ver_nr2ver.keys()))
 
-    def _store_vereniging(self, ver_nr: int, naam: str, status: str, aanmeld_datum: str, kvk_nr: str, straatnaam: str, huis_nr: int, postcode: str, plaats: str):
+    def _store_vereniging(self, ver_nr: int, naam: str, aanmeld_datum: str, kvk_nr: str, straatnaam: str, huis_nr: int, postcode: str, plaats: str):
         ver = self._ver_nr2ver.get(ver_nr, None)
         if ver:
             self.count_gevonden += 1
@@ -82,7 +80,7 @@ class Command(BaseCommand):
 
         # voeg de twee datasets samen
         for regel in data_verenigingen:
-            ver_nr, naam, status, aanmeld_datum, kvk_nr, straatnaam, huis_nr, postcode, plaats = regel
+            ver_nr, naam, _, aanmeld_datum, kvk_nr, straatnaam, huis_nr, postcode, plaats = regel
 
             # converteer en corrigeer het formaat van de data
             ver_nr = int(ver_nr)
@@ -93,7 +91,7 @@ class Command(BaseCommand):
             else:
                 huis_nr = 0
 
-            self._store_vereniging(ver_nr, naam, status, aanmeld_datum, kvk_nr, straatnaam, huis_nr, postcode, plaats)
+            self._store_vereniging(ver_nr, naam, aanmeld_datum, kvk_nr, straatnaam, huis_nr, postcode, plaats)
         # for
 
     def _laad_csv_bestand(self, fname) -> list | None:

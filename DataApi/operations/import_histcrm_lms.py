@@ -11,11 +11,11 @@ import datetime
 
 
 EXPECTED_MEMBER_KEYS = ('club_number', 'member_number', 'birthday', 'gender', 'member_from',
-                        'postal_code', 'iso_abbr')
+                        'postal_code', 'iso_abbr', 'date_of_death', 'member_from_club', 'member_until_club')
 OPTIONAL_MEMBER_KEYS = ('skill_levels', 'educations', 'latitude', 'longitude', 'location_name',
                         'phone_business', 'phone_mobile', 'phone_private', 'para_code', 'address',
                         'initials', 'name', 'prefix', 'first_name', 'birthplace', 'email', 'wa_id',
-                        'member_until', 'blocked', 'date_of_death')     # was vroeger niet aanwezig
+                        'member_until', 'blocked')
 
 
 class ImportHistCrmLidmaatschappen(ImportCrmBase):
@@ -116,8 +116,8 @@ class ImportHistCrmLidmaatschappen(ImportCrmBase):
             updated.append('geslacht')
 
         if lms.postcode != postcode:
-            if len(lms.postcode) == 6 and lms.land_iso == 'NL' and len(postcode) < 6 and lms.postcode.startswith(postcode):
-                self.out_debug('Postcode aanpassing van %s naar %s voorkomen voor %s' % (lms.postcode, postcode, lms))
+            if len(lms.postcode) == 6 and lms.land_iso == 'NL' and len(postcode) < 6 and lms.postcode[:2] == postcode[:2]:
+                self.out_info('Postcode aanpassing van %s naar %s voorkomen voor %s' % (lms.postcode, postcode, lms))
             else:
                 self.out_info('Postcode aangepast naar %s (was %s)' % (postcode, lms))
                 lms.postcode = postcode
@@ -170,7 +170,12 @@ class ImportHistCrmLidmaatschappen(ImportCrmBase):
                     # erg lang geleden --> niet meer melden
                     return
 
-                self.out_warning('Onbekend lid: %s [%s %s %s] van %s tot %s' % (lid_nr, geboorte_datum, geslacht, postcode, aanmeld_datum, afmeld_datum))
+                if afmeld_datum != '':
+                    # vereniging is niet bekend, dus dit kunnen we niet meer opslaan
+                    self.out_warning('Lid %s was lid bij onbekende vereniging: [%s %s %s-%s] van %s tot %s' % (lid_nr, geboorte_datum, geslacht, land_iso, postcode, aanmeld_datum, afmeld_datum))
+                    return
+
+                self.out_warning('Onbekend lid: %s [%s %s %s-%s] van %s tot %s' % (lid_nr, geboorte_datum, geslacht, land_iso, postcode, aanmeld_datum, afmeld_datum))
                 return
 
             # nieuw lid
@@ -193,10 +198,9 @@ class ImportHistCrmLidmaatschappen(ImportCrmBase):
 
         if lms.ver_nr != ver_nr:
             self.out_info('Overstap lid %s naar ver %s' % (lid_nr, ver_nr))
-            for lms in lms_lijst:
-                self.out_debug(str(lms))
+            for lms2 in lms_lijst:
+                self.out_debug(str(lms2))
 
-            lms = lms_lijst[-1]
             if lms.afmeld_datum == '':
                 # huidige record afsluiten en nieuwe beginnen
                 self._afmelden(lms, afmeld_datum or self.afmelddatum)
@@ -207,6 +211,44 @@ class ImportHistCrmLidmaatschappen(ImportCrmBase):
 
             lms = self._maak_lms(lid_nr, ver_nr, geslacht, geboorte_datum, aanmeld_datum, land_iso, postcode)
             self.out_info('Nieuw lms: %s' % lms)
+            return
+
+        # ver_nr matcht
+
+        if afmeld_datum == '' and lms.afmeld_datum == '':
+            # lms is het actieve lidmaatschap bij een vereniging
+
+            # mogelijke correctie van de aanmeld_datum
+            if lms.aanmeld_datum == aanmeld_datum:
+                return
+
+            self.out_info('Correctie aanmelddatum voor lid %s bij ver %s: %s --> %s' % (lid_nr,
+                                                                                        ver_nr,
+                                                                                        lms.aanmeld_datum,
+                                                                                        aanmeld_datum))
+            lms.aanmeld_datum = aanmeld_datum
+            if not self.dryrun:
+                lms.save(update_fields=['aanmeld_datum'])
+            return
+
+        if lms.afmeld_datum != '' and afmeld_datum == '':
+            # we hebben een nieuw record nodig
+            lms = self._maak_lms(lid_nr, ver_nr, geslacht, geboorte_datum, aanmeld_datum, land_iso, postcode)
+            self.out_info('Nieuw lms: %s' % lms)
+            return
+
+        if lms.afmeld_datum == '' and afmeld_datum != '' and lms.aanmeld_datum == aanmeld_datum:
+            # einde van dit lidmaatschap
+            lms.afmeld_datum = afmeld_datum
+            self.out_info('Afmelding lms %s' % lms)
+            if not self.dryrun:
+                lms.save(update_fields=['afmeld_datum'])
+            return
+
+        self.out_debug('{store} Onduidelijk: lid_nr=%s ver_nr=%s aanmelddatum=%s afmelddatum=%s' % (lid_nr, ver_nr, aanmeld_datum, afmeld_datum))
+        for lms in lms_lijst:
+            print('   %s' % lms)
+        # for
 
     def _importeer_data(self, data: list):
         """ Importeert data van alle leden """
@@ -219,13 +261,15 @@ class ImportHistCrmLidmaatschappen(ImportCrmBase):
         # als deze niet meer voorkomen, dan zijn ze verwijderd
         lid_nrs = list(self._cache_actieve_lidmaatschappen.keys())
 
+        date_now = datetime.datetime.now().date()
+
         """ JSON velden (string, except):
              'member_number':       int,
              'club_number':         int,
              'birthday':            string YYYY-MM-DD
              'gender':              'M' of 'V'/'F' of 'X'
-             'member_from':         string YYYY-MM-DD
-             'member_until':        string YYYY-MM-DD
+             'member_from_club':    string YYYY-MM-DD  (huidige of toekomstige club)
+             'member_until_club':   string YYYY-MM-DD  (afgelopen lidmaatschap of 9999-12-31)
              'date_of_death':       string YYYY-MM-DD or null
              'postal_code',
              'iso_abbr': 'NL',      land code
@@ -294,29 +338,31 @@ class ImportHistCrmLidmaatschappen(ImportCrmBase):
                                     lid_nr, plaats, land_iso, repr(lid_postcode)))
 
             # lid sinds
-            if member['member_from'] and member['member_from'][0:0+2] not in ("19", "20"):
-                self.out_error('Lid %s heeft geen valide datum lidmaatschap: %s' % (lid_nr, member['member_from']))
+            lid_sinds_str = member.get('member_from_club', '') or member.get('member_from', '')
+            if lid_sinds_str and lid_sinds_str[:2] not in ("19", "20"):
+                self.out_error('Lid %s heeft geen valide datum lidmaatschap: %s' % (lid_nr, repr(lid_sinds_str)))
                 continue
-
             try:
-                lid_sinds = datetime.datetime.strptime(member['member_from'], "%Y-%m-%d").date()  # YYYY-MM-DD
+                lid_sinds = datetime.datetime.strptime(lid_sinds_str, "%Y-%m-%d").date()  # YYYY-MM-DD
             except (ValueError, TypeError):
                 self.out_error('Lid %s heeft geen valide lidmaatschapsdatum: %s' % (lid_nr,
-                                                                                    repr(member['member_from'])))
+                                                                                    repr(lid_sinds_str)))
                 continue
-
 
             # lid_tot
             lid_tot = None
-            tot_str = member.get('member_until', None)
-            if tot_str:
-                if not tot_str.startswith('9999-'):
-                    try:
-                        lid_tot = datetime.datetime.strptime(tot_str, "%Y-%m-%d").date()  # YYYY-MM-DD
-                    except (ValueError, TypeError):
-                        self.out_error('Lid %s heeft geen valide datum einde lidmaatschap: %s' % (
-                                                lid_nr, repr(member['member_until'])))
-                        continue
+            lid_tot_str = member.get('member_until_club', '') or member.get('member_until', '')
+            if lid_tot_str and not lid_tot_str.startswith('9999-'):
+                try:
+                    lid_tot = datetime.datetime.strptime(lid_tot_str, "%Y-%m-%d").date()  # YYYY-MM-DD
+                except (ValueError, TypeError):
+                    self.out_error('Lid %s heeft geen valide datum einde lidmaatschap: %s' % (
+                                            lid_nr, repr(lid_tot_str)))
+                    continue
+
+                # ignore toekomstige einddatums (die kunnen nog wijzigen)
+                if lid_tot > date_now:
+                    lid_tot = None
 
             # datum overlijden
             overleden_datum = member.get('date_of_death', None)

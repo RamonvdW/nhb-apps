@@ -86,7 +86,7 @@ class ImportHistCrmVerenigingen(ImportCrmBase):
                 ver.kvk_nummer = kvk
                 updated.append('kvk_nummer')
 
-            if straatnaam and straatnaam != ver.straatnaam:
+            if straatnaam != ver.straatnaam:
                 self.out_info('Vereniging %s wijziging straatnaam: %s --> %s' %
                                 (ver_nr, repr(ver.straatnaam), repr(straatnaam)))
                 ver.straatnaam = straatnaam
@@ -98,13 +98,13 @@ class ImportHistCrmVerenigingen(ImportCrmBase):
                 ver.huisnummer = huis_nr
                 updated.append('huisnummer')
 
-            if postcode and postcode != ver.postcode:
+            if postcode != ver.postcode:
                 self.out_info('Vereniging %s wijziging postcode: %s --> %s' %
                                 (ver_nr, repr(ver.postcode), repr(postcode)))
                 ver.postcode = postcode
                 updated.append('postcode')
 
-            if plaats and plaats != ver.plaats:
+            if plaats != ver.plaats:
                 self.out_info('Vereniging %s wijziging plaats: %s --> %s' %
                                 (ver_nr, repr(ver.plaats), repr(plaats)))
                 ver.plaats = plaats
@@ -198,7 +198,7 @@ class ImportHistCrmVerenigingen(ImportCrmBase):
                     ver_huisnummer = self.extract_huisnummer(straat_huisnr)
 
                     pos = straat_huisnr.find(str(ver_huisnummer))
-                    if pos > 0:
+                    if pos >= 0:
                         if straat_huisnr.count(str(ver_huisnummer)) != 1:
                             self.out_debug('Uitdaging: meerdere matches huisnr %s in %s' % (ver_huisnummer, straat_huisnr))
                         ver_straatnaam = straat_huisnr[:pos].strip()
@@ -232,17 +232,16 @@ class ImportHistCrmVerenigingen(ImportCrmBase):
         while len(ver_nrs) > 0:
             ver_nr = ver_nrs.pop(0)
             ver = self.vind_vereniging(ver_nr)
-            if ver:
-                if ver.afmeld_datum == '':
-                    if ver.aanmeld_datum == '' or ver.aanmeld_datum < self.afmelddatum:
-                        self.stdout.write('[INFO] Vereniging %s wordt afgemeld' % ver)
-                        if not self.dryrun:
-                            ver.afmeld_datum = self.afmelddatum
-                            ver.save(update_fields=['afmeld_datum'])
+            if ver and ver.afmeld_datum == '':
+                if ver.aanmeld_datum == '' or ver.aanmeld_datum < self.afmelddatum:
+                    self.stdout.write('[INFO] Vereniging %s wordt afgemeld' % ver)
+                    if not self.dryrun:
+                        ver.afmeld_datum = self.afmelddatum
+                        ver.save(update_fields=['afmeld_datum'])
 
-                        self.count_afmeldingen += 1
-                        self.count_actief -= 1
-                        self.count_gestopt += 1
+                    self.count_afmeldingen += 1
+                    self.count_actief -= 1
+                    self.count_gestopt += 1
         # while
 
 # end of file
