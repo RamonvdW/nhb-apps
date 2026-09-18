@@ -6,15 +6,13 @@
 
 from django.test import TestCase
 from django.utils import timezone
-from django.core.management.base import OutputWrapper
 from Opleiding.definities import OPLEIDING_STATUS_INSCHRIJVEN
 from Opleiding.models import Opleiding, OpleidingInschrijving
 from Opleiding.operations import opleiding_post_import_crm
 from Sporter.models import Sporter
 from Taken.models import Taak
-from TestHelpers.e2ehelpers import E2EHelpers
+from TestHelpers.e2ehelpers import E2EHelpers, OutputBuffer
 import datetime
-import io
 
 
 class TestOpleidingOperations(E2EHelpers, TestCase):
@@ -65,7 +63,7 @@ class TestOpleidingOperations(E2EHelpers, TestCase):
     def test_taak(self):
         # 1e keer wordt de taak aangemaakt
         self.assertEqual(Taak.objects.count(), 0)
-        stdout = OutputWrapper(io.StringIO())
+        stdout = OutputBuffer()
         opleiding_post_import_crm(stdout)
         # print(stdout.getvalue())
         self.assertTrue('[INFO] Inschrijving voor opleiding met geboorteplaats die afwijkt van CRM:' in stdout.getvalue())
@@ -85,7 +83,7 @@ class TestOpleidingOperations(E2EHelpers, TestCase):
 
         # niets te melden
         self.inschrijving.delete()
-        stdout = OutputWrapper(io.StringIO())
+        stdout = OutputBuffer()
         opleiding_post_import_crm(stdout)
         # print(stdout.getvalue())
         self.assertFalse('[INFO] Inschrijving voor opleiding met geboorteplaats die afwijkt van CRM:' in stdout.getvalue())

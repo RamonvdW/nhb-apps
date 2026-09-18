@@ -6,14 +6,12 @@
 
 from django.test import TestCase
 from django.utils import timezone
-from django.core.management.base import OutputWrapper
 from GraphDrive.operations import GraphSite
 from GraphDrive.operations.drives import get_drive_id
-from TestHelpers.e2ehelpers import E2EHelpers
-from unittest.mock import patch
+from TestHelpers.e2ehelpers import E2EHelpers, OutputBuffer
 from requests.exceptions import SSLError
+from unittest.mock import patch
 from datetime import timedelta
-import io
 
 
 class ResponseMock:
@@ -51,13 +49,13 @@ class TestGraphDriveOpDrives(E2EHelpers, TestCase):
     """ unittests voor de GraphDrive applicatie, operations module drives """
 
     def test_drives(self):
-        out = OutputWrapper(io.StringIO())
+        out = OutputBuffer()
         site = GraphSite(out)
         self.token_url_template = 'http://localhost:55555/%s/'      # avoid going to real site
 
         # no access token
         with patch('GraphDrive.operations.drives.get_bearer_token', return_value=False):
-            out = OutputWrapper(io.StringIO())
+            out = OutputBuffer()
             res = get_drive_id(out, site)
             self.assertFalse(res)
             self.assertEqual(site.drive_id, site.drive_web_url, '')
@@ -70,7 +68,7 @@ class TestGraphDriveOpDrives(E2EHelpers, TestCase):
         site.bearer_valid_until = timezone.now() + + timedelta(seconds=60)
 
         # exception
-        out = OutputWrapper(io.StringIO())
+        out = OutputBuffer()
         with patch('requests.get', side_effect=SSLError('uitzondering')):
             res = get_drive_id(out, site)
             self.assertFalse(res)
@@ -80,7 +78,7 @@ class TestGraphDriveOpDrives(E2EHelpers, TestCase):
         self.assertTrue('[ERROR] No drives' in out.getvalue())
 
         # foutcode
-        out = OutputWrapper(io.StringIO())
+        out = OutputBuffer()
         resp = ResponseMock(status_code=404)
         with patch('requests.get', return_value=resp):
             res = get_drive_id(out, site)
@@ -90,7 +88,7 @@ class TestGraphDriveOpDrives(E2EHelpers, TestCase):
         self.assertTrue('[ERROR] No drives' in out.getvalue())
 
         # niet compleet (1)
-        out = OutputWrapper(io.StringIO())
+        out = OutputBuffer()
         resp = ResponseMock(has_value=False)
         with patch('requests.get', return_value=resp):
             res = get_drive_id(out, site)
@@ -100,7 +98,7 @@ class TestGraphDriveOpDrives(E2EHelpers, TestCase):
         self.assertTrue('[ERROR] No drives' in out.getvalue())
 
         # meerdere drives
-        out = OutputWrapper(io.StringIO())
+        out = OutputBuffer()
         resp = ResponseMock(multiple_drives=True)
         with patch('requests.get', return_value=resp):
             res = get_drive_id(out, site)
@@ -111,7 +109,7 @@ class TestGraphDriveOpDrives(E2EHelpers, TestCase):
         self.assertTrue("Drive: {'id': 'drive2'}" in out.getvalue())
 
         # drive niet compleet
-        out = OutputWrapper(io.StringIO())
+        out = OutputBuffer()
         resp = ResponseMock()
         with patch('requests.get', return_value=resp):
             res = get_drive_id(out, site)
@@ -120,7 +118,7 @@ class TestGraphDriveOpDrives(E2EHelpers, TestCase):
         self.assertTrue("[ERROR] Not a complete drive response: {'id': 'drive1'}" in out.getvalue())
 
         # goed
-        out = OutputWrapper(io.StringIO())
+        out = OutputBuffer()
         resp = ResponseMock(set_web_url=True)
         with patch('requests.get', return_value=resp):
             res = get_drive_id(out, site)
@@ -131,7 +129,7 @@ class TestGraphDriveOpDrives(E2EHelpers, TestCase):
         self.assertFalse("[ERROR]" in out.getvalue())
 
         # get cached result
-        out = OutputWrapper(io.StringIO())
+        out = OutputBuffer()
         res = get_drive_id(out, site)
         self.assertTrue(res)
         self.assertEqual(site.drive_id, 'drive1')

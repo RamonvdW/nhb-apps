@@ -7,7 +7,6 @@
 from django.test import TestCase
 from django.conf import settings
 from django.utils import timezone
-from django.core.management.base import OutputWrapper
 from Bestelling.definities import BESTELLING_REGEL_CODE_OPLEIDING
 from Bestelling.models import BestellingRegel, BestellingMandje
 from Geo.models import Regio
@@ -21,11 +20,10 @@ from Opleiding.models import Opleiding, OpleidingInschrijving, OpleidingAfgemeld
 from Opleiding.plugin_bestelling import OpleidingBestelPlugin
 from Sporter.models import Sporter
 from Taken.models import Taak
-from TestHelpers.e2ehelpers import E2EHelpers
+from TestHelpers.e2ehelpers import E2EHelpers, OutputBuffer
 from Vereniging.models import Vereniging
 from decimal import Decimal
 import datetime
-import io
 
 
 class TestOpleidingBestellingPlugin(E2EHelpers, TestCase):
@@ -87,7 +85,7 @@ class TestOpleidingBestellingPlugin(E2EHelpers, TestCase):
         self.mandje.save()
 
     def test_opschonen(self):
-        stdout = OutputWrapper(io.StringIO())
+        stdout = OutputBuffer()
         plugin = OpleidingBestelPlugin()
         plugin.zet_stdout(stdout)
 
@@ -141,7 +139,7 @@ class TestOpleidingBestellingPlugin(E2EHelpers, TestCase):
         self.assertTrue('wordt verwijderd' in stdout.getvalue())
 
     def test_reserveer(self):
-        stdout = OutputWrapper(io.StringIO())
+        stdout = OutputBuffer()
         plugin = OpleidingBestelPlugin()
         plugin.zet_stdout(stdout)
 
@@ -155,6 +153,7 @@ class TestOpleidingBestellingPlugin(E2EHelpers, TestCase):
         inschrijving.save()
 
         regel = plugin.reserveer(inschrijving.pk, 'Mandje test')
+        assert isinstance(regel, BestellingRegel)
         self.assertEqual(regel.korte_beschrijving, 'Opleiding "Test opleiding"||voor [100000] Nor Maal')
 
         inschrijving.refresh_from_db()
@@ -162,7 +161,7 @@ class TestOpleidingBestellingPlugin(E2EHelpers, TestCase):
         self.assertEqual(inschrijving.status, OPLEIDING_INSCHRIJVING_STATUS_RESERVERING_MANDJE)
 
     def test_afmelden(self):
-        stdout = OutputWrapper(io.StringIO())
+        stdout = OutputBuffer()
         plugin = OpleidingBestelPlugin()
         plugin.zet_stdout(stdout)
 
@@ -203,7 +202,7 @@ class TestOpleidingBestellingPlugin(E2EHelpers, TestCase):
         self.assertTrue(afmelding.korte_beschrijving() != '')
 
     def test_annuleer_mandje(self):
-        stdout = OutputWrapper(io.StringIO())
+        stdout = OutputBuffer()
         plugin = OpleidingBestelPlugin()
         plugin.zet_stdout(stdout)
 
@@ -217,7 +216,7 @@ class TestOpleidingBestellingPlugin(E2EHelpers, TestCase):
         plugin.annuleer(regel)
         self.assertTrue("[ERROR] Kan OpleidingInschrijving voor regel met pk=" in stdout.getvalue())
 
-        stdout = OutputWrapper(io.StringIO())       # weer leeg
+        stdout = OutputBuffer()       # weer leeg
         plugin.zet_stdout(stdout)
 
         inschrijving = OpleidingInschrijving(
@@ -238,7 +237,7 @@ class TestOpleidingBestellingPlugin(E2EHelpers, TestCase):
         self.assertEqual(OpleidingAfgemeld.objects.count(), 0)
 
     def test_annuleer_besteld(self):
-        stdout = OutputWrapper(io.StringIO())
+        stdout = OutputBuffer()
         plugin = OpleidingBestelPlugin()
         plugin.zet_stdout(stdout)
 
@@ -276,7 +275,7 @@ class TestOpleidingBestellingPlugin(E2EHelpers, TestCase):
         self.assertEqual(afmelding.status, OPLEIDING_AFMELDING_STATUS_GEANNULEERD)
 
     def test_annuleer_definitief(self):
-        stdout = OutputWrapper(io.StringIO())
+        stdout = OutputBuffer()
         plugin = OpleidingBestelPlugin()
         plugin.zet_stdout(stdout)
 
@@ -314,7 +313,7 @@ class TestOpleidingBestellingPlugin(E2EHelpers, TestCase):
         self.assertEqual(afmelding.status, OPLEIDING_AFMELDING_STATUS_AFGEMELD)
 
     def test_is_besteld(self):
-        stdout = OutputWrapper(io.StringIO())
+        stdout = OutputBuffer()
         plugin = OpleidingBestelPlugin()
         plugin.zet_stdout(stdout)
 
@@ -343,7 +342,7 @@ class TestOpleidingBestellingPlugin(E2EHelpers, TestCase):
         self.assertTrue("Omgezet in een bestelling" in inschrijving.log)
 
     def test_is_betaald(self):
-        stdout = OutputWrapper(io.StringIO())
+        stdout = OutputBuffer()
         plugin = OpleidingBestelPlugin()
         plugin.zet_stdout(stdout)
 
@@ -384,7 +383,7 @@ class TestOpleidingBestellingPlugin(E2EHelpers, TestCase):
 
     def test_get_verkoper_ver_nr(self):
         plugin = OpleidingBestelPlugin()
-        stdout = OutputWrapper(io.StringIO())
+        stdout = OutputBuffer()
         plugin.zet_stdout(stdout)
 
         regel = BestellingRegel(

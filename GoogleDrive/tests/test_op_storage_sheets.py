@@ -5,13 +5,11 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from django.core.management.base import OutputWrapper
 from GoogleDrive.operations import StorageGoogleSheet, StorageError
-from TestHelpers.e2ehelpers import E2EHelpers
+from TestHelpers.e2ehelpers import E2EHelpers, OutputBuffer
 from googleapiclient.errors import HttpError as GoogleApiError
 from httplib2 import Response
 from unittest.mock import patch
-import io
 
 
 class GoogleApiSpreadsheetsMock:
@@ -98,10 +96,10 @@ class TestGoogleDriveStorageSheets(E2EHelpers, TestCase):
     """ tests voor de GoogleDrive applicatie, operations storage_sheets """
 
     def test_open(self):
-        out = OutputWrapper(io.StringIO())
+        out = OutputBuffer()
 
         # einde van "with" roept __exit__ aan
-        with StorageGoogleSheet(out) as sheet:
+        with StorageGoogleSheet(out) as _sheet:
             pass
 
         # einde van "with" roept __exit__ aan
@@ -118,7 +116,7 @@ class TestGoogleDriveStorageSheets(E2EHelpers, TestCase):
             sheet.selecteer_file('x')
 
     def test_spreadsheet_actions(self):
-        out = OutputWrapper(io.StringIO())
+        out = OutputBuffer()
 
         # einde van "with" roept __exit__ aan
         with StorageGoogleSheet(out) as sheet:
@@ -144,7 +142,7 @@ class TestGoogleDriveStorageSheets(E2EHelpers, TestCase):
 
     def test_range(self):
         # range actions are executed without queuing
-        out = OutputWrapper(io.StringIO())
+        out = OutputBuffer()
 
         # einde van "with" roept __exit__ aan
         with StorageGoogleSheet(out) as sheet:
@@ -162,7 +160,7 @@ class TestGoogleDriveStorageSheets(E2EHelpers, TestCase):
 
     def test_value_actions(self):
         # value actions are queued up
-        out = OutputWrapper(io.StringIO())
+        out = OutputBuffer()
 
         # einde van "with" roept __exit__ aan
         with StorageGoogleSheet(out) as sheet:

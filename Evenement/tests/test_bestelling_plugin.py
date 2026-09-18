@@ -6,7 +6,6 @@
 
 from django.test import TestCase
 from django.utils import timezone
-from django.core.management.base import OutputWrapper
 from Bestelling.definities import BESTELLING_REGEL_CODE_EVENEMENT
 from Bestelling.models import BestellingRegel, BestellingMandje
 from Evenement.plugin_bestelling import EvenementBestelPlugin
@@ -22,7 +21,7 @@ from Geo.models import Regio
 from Locatie.models import EvenementLocatie
 from Mailer.models import MailQueue
 from Sporter.models import Sporter
-from TestHelpers.e2ehelpers import E2EHelpers
+from TestHelpers.e2ehelpers import E2EHelpers, OutputBuffer
 from Vereniging.models import Vereniging
 from decimal import Decimal
 import datetime
@@ -130,7 +129,7 @@ class TestEvenementBestellingPlugin(E2EHelpers, TestCase):
         self.mandje.save()
 
     def test_opschonen(self):
-        stdout = OutputWrapper(io.StringIO())
+        stdout = OutputBuffer()
         plugin = EvenementBestelPlugin()
         plugin.zet_stdout(stdout)
 
@@ -180,7 +179,7 @@ class TestEvenementBestellingPlugin(E2EHelpers, TestCase):
         self.assertTrue('wordt verwijderd' in stdout.getvalue())
 
     def test_reserveer(self):
-        stdout = OutputWrapper(io.StringIO())
+        stdout = OutputBuffer()
         plugin = EvenementBestelPlugin()
         plugin.zet_stdout(stdout)
 
@@ -195,6 +194,7 @@ class TestEvenementBestellingPlugin(E2EHelpers, TestCase):
         inschrijving.save()
 
         regel = plugin.reserveer(inschrijving.pk, 'Mandje test')
+        assert isinstance(regel, BestellingRegel)
         self.assertEqual(regel.korte_beschrijving, 'Evenement "Test evenement 1"||voor [100000] Nor Maal')
 
         inschrijving.refresh_from_db()
@@ -202,7 +202,7 @@ class TestEvenementBestellingPlugin(E2EHelpers, TestCase):
         self.assertEqual(inschrijving.status, EVENEMENT_INSCHRIJVING_STATUS_RESERVERING_MANDJE)
 
     def test_afmelden(self):
-        stdout = OutputWrapper(io.StringIO())
+        stdout = OutputBuffer()
         plugin = EvenementBestelPlugin()
         plugin.zet_stdout(stdout)
 
@@ -238,7 +238,7 @@ class TestEvenementBestellingPlugin(E2EHelpers, TestCase):
         self.assertEqual(afmelding.bedrag_ontvangen, inschrijving.bedrag_ontvangen)
 
     def test_annuleer_mandje(self):
-        stdout = OutputWrapper(io.StringIO())
+        stdout = OutputBuffer()
         plugin = EvenementBestelPlugin()
         plugin.zet_stdout(stdout)
 
@@ -272,7 +272,7 @@ class TestEvenementBestellingPlugin(E2EHelpers, TestCase):
         self.assertEqual(EvenementAfgemeld.objects.count(), 0)
 
     def test_annuleer_besteld(self):
-        stdout = OutputWrapper(io.StringIO())
+        stdout = OutputBuffer()
         plugin = EvenementBestelPlugin()
         plugin.zet_stdout(stdout)
 
@@ -312,7 +312,7 @@ class TestEvenementBestellingPlugin(E2EHelpers, TestCase):
         self.assertEqual(afmelding.status, EVENEMENT_AFMELDING_STATUS_GEANNULEERD)
 
     def test_annuleer_definitief(self):
-        stdout = OutputWrapper(io.StringIO())
+        stdout = OutputBuffer()
         plugin = EvenementBestelPlugin()
         plugin.zet_stdout(stdout)
 
@@ -352,7 +352,7 @@ class TestEvenementBestellingPlugin(E2EHelpers, TestCase):
         self.assertEqual(afmelding.status, EVENEMENT_AFMELDING_STATUS_AFGEMELD)
 
     def test_is_besteld(self):
-        stdout = OutputWrapper(io.StringIO())
+        stdout = OutputBuffer()
         plugin = EvenementBestelPlugin()
         plugin.zet_stdout(stdout)
 
@@ -382,7 +382,7 @@ class TestEvenementBestellingPlugin(E2EHelpers, TestCase):
         self.assertTrue("Omgezet in een bestelling" in inschrijving.log)
 
     def test_is_betaald_zelf(self):
-        stdout = OutputWrapper(io.StringIO())
+        stdout = OutputBuffer()
         plugin = EvenementBestelPlugin()
         plugin.zet_stdout(stdout)
 
@@ -407,7 +407,7 @@ class TestEvenementBestellingPlugin(E2EHelpers, TestCase):
                             koper=self.account_100000)
         inschrijving.save()
 
-        stdout = OutputWrapper(io.StringIO())       # weer leeg
+        stdout = OutputBuffer()       # weer leeg
         plugin.zet_stdout(stdout)
 
         plugin.is_betaald(regel, bedrag_ontvangen)
@@ -423,7 +423,7 @@ class TestEvenementBestellingPlugin(E2EHelpers, TestCase):
 
     def test_is_betaald_koper(self):
         # koop evenement deelname voor iemand anders
-        stdout = OutputWrapper(io.StringIO())
+        stdout = OutputBuffer()
         plugin = EvenementBestelPlugin()
         plugin.zet_stdout(stdout)
 
@@ -443,7 +443,7 @@ class TestEvenementBestellingPlugin(E2EHelpers, TestCase):
                             koper=self.account_100000)
         inschrijving.save()
 
-        stdout = OutputWrapper(io.StringIO())       # weer leeg
+        stdout = OutputBuffer()       # weer leeg
         plugin.zet_stdout(stdout)
 
         bedrag_ontvangen = Decimal(10.22)
@@ -484,7 +484,7 @@ class TestEvenementBestellingPlugin(E2EHelpers, TestCase):
 
     def test_get_verkoper_ver_nr(self):
         plugin = EvenementBestelPlugin()
-        stdout = OutputWrapper(io.StringIO())
+        stdout = OutputBuffer()
         plugin.zet_stdout(stdout)
 
         regel = BestellingRegel(

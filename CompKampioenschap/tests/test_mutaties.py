@@ -5,7 +5,6 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from django.core.management.base import OutputWrapper
 from BasisTypen.models import BoogType, TeamType
 from Competitie.definities import MUTATIE_UPDATE_DIRTY_WEDSTRIJDFORMULIEREN, DEELNAME_NEE
 from Competitie.models import (CompetitieMutatie, Competitie, CompetitieMatch,
@@ -20,10 +19,9 @@ from Functie.tests.helpers import maak_functie
 from Geo.models import Regio, Rayon
 from GoogleDrive.models import Bestand
 from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
-from TestHelpers.e2ehelpers import E2EHelpers
+from TestHelpers.e2ehelpers import E2EHelpers, OutputBuffer
 from Vereniging.models import Vereniging
 from unittest.mock import patch
-import io
 
 
 class StorageMock:
@@ -291,7 +289,7 @@ class TestCompKampioenschapMutaties(E2EHelpers, TestCase):
                                 gemiddelde=9)
 
     def test_verwerk(self):
-        stdout = OutputWrapper(io.StringIO())
+        stdout = OutputBuffer()
         verwerk = VerwerkCompKampMutaties(stdout)
 
         # 1e aanroep maakt alles aan
@@ -432,7 +430,7 @@ class TestCompKampioenschapMutaties(E2EHelpers, TestCase):
         # cover simpele functies
         maak_mutatie_update_dirty_wedstrijdformulieren(self.comp_18)
 
-        stdout = OutputWrapper(io.StringIO())
+        stdout = OutputBuffer()
         verwerk = VerwerkCompKampMutaties(stdout)
 
         for mutatie in CompetitieMutatie.objects.all():

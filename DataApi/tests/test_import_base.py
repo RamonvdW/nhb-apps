@@ -6,8 +6,7 @@
 
 from django.test import TestCase
 from DataApi.import_base import ImportCrmBase
-from TestHelpers.e2ehelpers import E2EHelpers
-import io
+from TestHelpers.e2ehelpers import E2EHelpers, OutputBuffer
 
 
 class TestDataApiImportBase(E2EHelpers, TestCase):
@@ -18,37 +17,37 @@ class TestDataApiImportBase(E2EHelpers, TestCase):
         pass
 
     def test_import_base(self):
-        out = io.StringIO()
+        out = OutputBuffer()
         base = ImportCrmBase(out, True, 'hallo')
         self.assertTrue(base.dryrun)
         self.assertEqual(base.afmelddatum, 'hallo')
         base.out_warning('test')
         self.assertTrue('[WARNING] test' in out.getvalue())
 
-        out = io.StringIO()
+        out = OutputBuffer()
         base = ImportCrmBase(out, False, '')
         self.assertFalse(base.dryrun)
         base.out_error('test)')
         self.assertTrue('[ERROR] test' in out.getvalue())
 
-        out = io.StringIO()
+        out = OutputBuffer()
         base = ImportCrmBase(out, False, '')
         base.out_info('test')
         self.assertTrue('[INFO] test' in out.getvalue())
 
-        out = io.StringIO()
+        out = OutputBuffer()
         base = ImportCrmBase(out, False, '')
         base.out_debug('test')
         self.assertTrue('[DEBUG] test' in out.getvalue())
 
-        out = io.StringIO()
+        out = OutputBuffer()
         base = ImportCrmBase(out, False, '')
         self.assertFalse(base.exit_error)
         res = base.check_keys(['foo', 'bar'], ('foo',), ('bar', 'niet nodig'), 'test')
         self.assertFalse(res)        # geen error
         self.assertFalse(base.exit_error)
 
-        out = io.StringIO()
+        out = OutputBuffer()
         base = ImportCrmBase(out, False, '')
         res = base.check_keys(['foo', 'bar', 'extra'], ('foo', 'nodig'), ('bar', 'niet nodig'), 'test')
         # print('out: %s' % out.getvalue())
@@ -58,7 +57,7 @@ class TestDataApiImportBase(E2EHelpers, TestCase):
         self.assertTrue("[WARNING] Extra sleutel aanwezig in de 'test' data: ['extra']" in out.getvalue())
 
     def test_huisnummer(self):
-        out = io.StringIO()
+        out = OutputBuffer()
         base = ImportCrmBase(out, False, '')
         nr = base.extract_huisnummer('Eerste straat 1')
         self.assertEqual(nr, 1)

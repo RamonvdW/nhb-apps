@@ -6,14 +6,12 @@
 
 from django.test import TestCase
 from django.utils import timezone
-from django.core.management.base import OutputWrapper
 from GraphDrive.operations import GraphSite
 from GraphDrive.operations.download import download_file
-from TestHelpers.e2ehelpers import E2EHelpers
+from TestHelpers.e2ehelpers import E2EHelpers, OutputBuffer
 from unittest.mock import patch
 from requests.exceptions import SSLError
 from datetime import timedelta
-import io
 
 
 class ResponseMock:
@@ -44,13 +42,13 @@ class TestGraphDriveOpDownload(E2EHelpers, TestCase):
         self.test_fname = '/tmp/local'
 
     def test_download(self):
-        out = OutputWrapper(io.StringIO())
+        out = OutputBuffer()
         site = GraphSite(out)
         self.token_url_template = 'http://localhost:55555/%s/'      # avoid going to real site
 
         # no access token
         with patch('GraphDrive.operations.download.get_bearer_token', return_value=False):
-            out = OutputWrapper(io.StringIO())
+            out = OutputBuffer()
             local_fname = download_file(out, site, 'remote', self.test_fname)
             self.assertIsNone(local_fname)
             # print('\nout:', out.getvalue())
@@ -60,7 +58,7 @@ class TestGraphDriveOpDownload(E2EHelpers, TestCase):
         site.bearer_valid_until = timezone.now() + + timedelta(seconds=60)
 
         with patch('GraphDrive.operations.download.get_drive_id', return_value=False):
-            out = OutputWrapper(io.StringIO())
+            out = OutputBuffer()
             local_fname = download_file(out, site, 'remote', self.test_fname)
             self.assertIsNone(local_fname)
             # print('\nout:', out.getvalue())
@@ -70,7 +68,7 @@ class TestGraphDriveOpDownload(E2EHelpers, TestCase):
         site.drive_web_url = 'x'
 
         # connection error
-        out = OutputWrapper(io.StringIO())
+        out = OutputBuffer()
         with patch('requests.get', side_effect=SSLError('uitzondering')):
             local_fname = download_file(out, site, 'remote', self.test_fname)
             self.assertIsNone(local_fname)
@@ -79,7 +77,7 @@ class TestGraphDriveOpDownload(E2EHelpers, TestCase):
 
         # status code != 200
         rsp = ResponseMock(status_code=404)
-        out = OutputWrapper(io.StringIO())
+        out = OutputBuffer()
         with patch('requests.get', return_value=rsp):
             local_fname = download_file(out, site, 'remote', self.test_fname)
             self.assertIsNone(local_fname)
@@ -87,7 +85,7 @@ class TestGraphDriveOpDownload(E2EHelpers, TestCase):
         self.assertTrue("[ERROR] download request gaf onverwacht antwoord! response encoding:'mock', status_code:404" in out.getvalue())
 
         rsp = ResponseMock(status_code=200)
-        out = OutputWrapper(io.StringIO())
+        out = OutputBuffer()
         with patch('requests.get', return_value=rsp):
             local_fname = download_file(out, site, 'remote', self.test_fname)
             self.assertEqual(local_fname, self.test_fname)

@@ -6,14 +6,12 @@
 
 from django.test import TestCase
 from django.utils import timezone
-from django.core.management.base import OutputWrapper
 from GraphDrive.operations.access_token import get_bearer_token
 from GraphDrive.operations import GraphSite
-from TestHelpers.e2ehelpers import E2EHelpers
+from TestHelpers.e2ehelpers import E2EHelpers, OutputBuffer
 from unittest.mock import patch
 from requests.exceptions import SSLError
 from datetime import timedelta
-import io
 
 
 class ResponseMock:
@@ -40,13 +38,13 @@ class TestGraphDriveOpAccessToken(E2EHelpers, TestCase):
     """ unittests voor de GraphDrive applicatie, operations module access_token """
 
     def test_bearer(self):
-        out = OutputWrapper(io.StringIO())
+        out = OutputBuffer()
         site = GraphSite(out)
         self.token_url_template = 'http://localhost:55555/%s/'      # avoid going to real site
 
         # connection error
 
-        out = OutputWrapper(io.StringIO())
+        out = OutputBuffer()
         with patch('requests.post', side_effect=SSLError('uitzondering')):
             res = get_bearer_token(out, site)
             self.assertFalse(res)
@@ -54,7 +52,7 @@ class TestGraphDriveOpAccessToken(E2EHelpers, TestCase):
 
         # foutcode
         resp = ResponseMock(status_code=404)
-        out = OutputWrapper(io.StringIO())
+        out = OutputBuffer()
         with patch('requests.post', return_value=resp):
             res = get_bearer_token(out, site)
             self.assertFalse(res)
@@ -62,7 +60,7 @@ class TestGraphDriveOpAccessToken(E2EHelpers, TestCase):
 
         # verkeerd type
         resp = ResponseMock(token_type='Verkeerd')
-        out = OutputWrapper(io.StringIO())
+        out = OutputBuffer()
         with patch('requests.post', return_value=resp):
             res = get_bearer_token(out, site)
             self.assertFalse(res)
@@ -71,7 +69,7 @@ class TestGraphDriveOpAccessToken(E2EHelpers, TestCase):
 
         # velden ontbreken
         resp = ResponseMock(complete=False)
-        out = OutputWrapper(io.StringIO())
+        out = OutputBuffer()
         with patch('requests.post', return_value=resp):
             res = get_bearer_token(out, site)
             self.assertFalse(res)
@@ -80,7 +78,7 @@ class TestGraphDriveOpAccessToken(E2EHelpers, TestCase):
 
         # goed antwoord
         resp = ResponseMock()
-        out = OutputWrapper(io.StringIO())
+        out = OutputBuffer()
         with patch('requests.post', return_value=resp):
             res = get_bearer_token(out, site)
             self.assertTrue(res)
@@ -90,7 +88,7 @@ class TestGraphDriveOpAccessToken(E2EHelpers, TestCase):
         # check caching
         site.bearer_token = 'nog een test'
         site.bearer_valid_until = timezone.now() + timedelta(seconds=60)
-        out = OutputWrapper(io.StringIO())
+        out = OutputBuffer()
         res = get_bearer_token(out, site)
         # print('out:', out.getvalue())
         self.assertTrue(res)

@@ -1,18 +1,15 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2025 Ramon van der Winkel.
+#  Copyright (c) 2020-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase, override_settings
-from django.core import management
 from Mailer.models import MailQueue, mailer_opschonen
 from Mailer.operations import mailer_queue_email, mailer_notify_internal_error
-from TestHelpers.e2ehelpers import E2EHelpers
+from TestHelpers.e2ehelpers import E2EHelpers, OutputBuffer
 import datetime
 import time
-import io
-
 
 TEST_EMAIL_ADRES = 'schutter@test.not'
 
@@ -153,13 +150,13 @@ class TestMailerCliGoedBase(E2EHelpers, TestCase):
         mail.toegevoegd_op -= datetime.timedelta(days=92)
         mail.save()
 
-        f1 = io.StringIO()
-        mailer_opschonen(f1)
-        self.assertTrue('[INFO] Verwijder 1 oude emails' in f1.getvalue())
+        out = OutputBuffer()
+        mailer_opschonen(out)
+        self.assertTrue('[INFO] Verwijder 1 oude emails' in out.getvalue())
 
-        f1 = io.StringIO()
-        mailer_opschonen(f1)
-        self.assertFalse('Verwijder' in f1.getvalue())
+        out = OutputBuffer()
+        mailer_opschonen(out)
+        self.assertFalse('Verwijder' in out.getvalue())
 
     def test_stop_exactly(self):
         now = datetime.datetime.now()

@@ -5,15 +5,13 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from django.core.management.base import OutputWrapper
 from BasisTypen.models import BoogType, TeamType
 from Competitie.models import Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse
 from CompKampioenschap.operations import (StorageWedstrijdformulieren, StorageError,
                                           zet_dirty, iter_dirty_wedstrijdformulieren,
                                           aantal_ontbrekende_wedstrijdformulieren_rk_bk)
 from GoogleDrive.models import Bestand
-from TestHelpers.e2ehelpers import E2EHelpers
-import io
+from TestHelpers.e2ehelpers import E2EHelpers, OutputBuffer
 
 
 class TestCompKampioenschapOpStorageWf(E2EHelpers, TestCase):
@@ -25,7 +23,7 @@ class TestCompKampioenschapOpStorageWf(E2EHelpers, TestCase):
 
     def test_storage(self):
         # test de storage class
-        stdout = OutputWrapper(io.StringIO())
+        stdout = OutputBuffer()
         storage = StorageWedstrijdformulieren(stdout, 2025, [])
 
         res = storage._params_to_folder_name(18, True, True)

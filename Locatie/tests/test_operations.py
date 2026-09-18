@@ -1,17 +1,15 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023-2025 Ramon van der Winkel.
+#  Copyright (c) 2023-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase, override_settings
-from django.core.management.base import OutputWrapper
 from BasisTypen.definities import SCHEIDS_BOND
 from Locatie.models import WedstrijdLocatie, Reistijd
 from Locatie.operations import ReistijdBepaler, reistijd_opschonen
 from Sporter.models import Sporter
-from TestHelpers.e2ehelpers import E2EHelpers
-import io
+from TestHelpers.e2ehelpers import E2EHelpers, OutputBuffer
 
 
 class TestLocatieOperations(E2EHelpers, TestCase):
@@ -44,8 +42,8 @@ class TestLocatieOperations(E2EHelpers, TestCase):
     @staticmethod
     def _reistijd_bijwerken():
         # gebruik een verse instantie met "schone" stdout/stderr
-        stdout = OutputWrapper(io.StringIO())
-        stderr = OutputWrapper(io.StringIO())
+        stdout = OutputBuffer()
+        stderr = OutputBuffer()
 
         bepaler = ReistijdBepaler(stdout, stderr, 25)
         bepaler.run()
@@ -59,16 +57,16 @@ class TestLocatieOperations(E2EHelpers, TestCase):
         self.assertEqual(f1.getvalue(), '')
 
         # trigger hergebruik gmaps instantie
-        stdout = OutputWrapper(io.StringIO())
-        stderr = OutputWrapper(io.StringIO())
+        stdout = OutputBuffer()
+        stderr = OutputBuffer()
 
         bepaler = ReistijdBepaler(stdout, stderr, 25)
         bepaler.run()
         bepaler.run()  # triggers gmap connection already done
 
     def test_bad_key(self):
-        stdout = OutputWrapper(io.StringIO())
-        stderr = OutputWrapper(io.StringIO())
+        stdout = OutputBuffer()
+        stderr = OutputBuffer()
 
         with override_settings(GOOGLEMAPS_API_KEY='garbage'):
             bepaler = ReistijdBepaler(stdout, stderr, 25)
@@ -193,8 +191,8 @@ class TestLocatieOperations(E2EHelpers, TestCase):
                         adres_uit_crm=False)
         locatie.save()
 
-        f1, f2 = self._reistijd_bijwerken()
-        # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
+        _f1, _f2 = self._reistijd_bijwerken()
+        # print('\nf1: %s\nf2: %s' % (_f1.getvalue(), _f2.getvalue()))
 
         locatie.refresh_from_db()
         # print('lat/lon=%s/%s' % (repr(locatie.adres_lat), repr(locatie.adres_lon)))
@@ -354,9 +352,9 @@ class TestLocatieOperations(E2EHelpers, TestCase):
         Reistijd.objects.create(vanaf_lat=self.SR3_LAT, vanaf_lon=self.SR3_LON,
                                 naar_lat=self.ZELF_LAT, naar_lon=self.ZELF_LON,
                                 reistijd_min=10)
-        stdout = io.StringIO()
-        reistijd_opschonen(stdout)
-        self.assertTrue("[INFO] Verwijder reistijd zonder koppeling met sporter" in stdout.getvalue())
+        out = OutputBuffer()
+        reistijd_opschonen(out)
+        self.assertTrue("[INFO] Verwijder reistijd zonder koppeling met sporter" in out.getvalue())
 
         # reistijd wel gekoppeld aan sporter, maar niet aan een wedstrijdlocatie
         self.scheids.adres_lat = self.SR3_LAT
@@ -365,9 +363,9 @@ class TestLocatieOperations(E2EHelpers, TestCase):
         Reistijd.objects.create(vanaf_lat=self.SR3_LAT, vanaf_lon=self.SR3_LON,
                                 naar_lat=self.ZELF_LAT, naar_lon=self.ZELF_LON,
                                 reistijd_min=10)
-        stdout = io.StringIO()
-        reistijd_opschonen(stdout)
-        self.assertTrue("[INFO] Verwijder reistijd zonder koppeling met wedstrijdlocatie" in stdout.getvalue())
+        out = OutputBuffer()
+        reistijd_opschonen(out)
+        self.assertTrue("[INFO] Verwijder reistijd zonder koppeling met wedstrijdlocatie" in out.getvalue())
 
         # reistijd gekoppeld aan sporter en wedstrijdlocatie
         WedstrijdLocatie.objects.create(
@@ -376,14 +374,14 @@ class TestLocatieOperations(E2EHelpers, TestCase):
         Reistijd.objects.create(vanaf_lat=self.SR3_LAT, vanaf_lon=self.SR3_LON,
                                 naar_lat=self.ZELF_LAT, naar_lon=self.ZELF_LON,
                                 reistijd_min=10)
-        stdout = io.StringIO()
-        reistijd_opschonen(stdout)
-        self.assertFalse("[INFO] Verwijder reistijd" in stdout.getvalue())
+        out = OutputBuffer()
+        reistijd_opschonen(out)
+        self.assertFalse("[INFO] Verwijder reistijd" in out.getvalue())
 
         # no records
         Reistijd.objects.all().delete()
-        stdout = io.StringIO()
-        reistijd_opschonen(stdout)
-        self.assertFalse("[INFO] Verwijder reistijd" in stdout.getvalue())
+        out = OutputBuffer()
+        reistijd_opschonen(out)
+        self.assertFalse("[INFO] Verwijder reistijd" in out.getvalue())
 
 # end of file
