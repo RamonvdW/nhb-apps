@@ -15,6 +15,7 @@
         <div class="col s12">
             <h1 class="sv-kopje-pagina">Tijdlijn</h1>
             <p>{{ comp.beschrijving }}</p>
+            <p>Je huidige rol is <b>{{ rol }}</b></p>
         </div>
     </div>
 
@@ -252,41 +253,59 @@
 
 
                             <tr>
-                                <td class="center{% if comp.fase_teams == 'C' %} sv-rood white-text{% endif %}">C</td>
+                                <td class="center{% if comp.fase_teams == 'C' or comp.fase_c_teams_actief %} sv-rood white-text{% endif %}">C</td>
                                 <td>Aanmelden teams (HWL)<br>Handmatig AG invoeren (HWL)<br>Koppel leden aan teams (HWL)<br>AG controle (RCL)</td>
                                 <td>
                                     {% if comp.fase_teams > 'C' %}
                                         <span class="green-text">Afgerond</span>
                                     {% else %}
-                                        <span>vanaf {{ comp.begin_fase_C }} tot {% if comp.regio_begin_fase_D %}{{ comp.regio_begin_fase_D }}{% else %}regio specifieke einddatum{% endif %}</span>
+                                        <span>vanaf {{ comp.begin_fase_C }} tot regio-specifieke datum</span>
+                                        {% for deelcomp in comp.fase_c_per_regio %}
+                                            {% if forloop.first %}<span>:</span>{% endif %}
+                                            <br><span>Regio {{ deelcomp.regio.regio_nr }}: {{ deelcomp.begin_fase_D }}</span>
+                                        {% empty %}
+                                            {% if comp.begin_fase_D_teams %}
+                                                <span>:</span><br>
+                                                <span>{{ comp.begin_fase_D_teams }}</span>
+                                            {% endif %}
+                                        {% endfor %}
                                     {% endif %}
                                 </td>
                             </tr>
 
                             <tr>
-                                <td class="center{% if comp.fase_teams == 'D' %} sv-rood white-text{% endif %}">D</td>
+                                <td class="center{% if comp.fase_teams == 'D' or comp.fase_d_teams_actief %} sv-rood white-text{% endif %}">D</td>
                                 <td>Alle teams in een poule plaatsen (RCL)<br>Niet complete teams verwijderen (RCL)</td>
                                 <td>
                                     {% if comp.fase_teams > 'D' %}
                                         <span class="green-text">Afgerond</span>
                                     {% else %}
-                                        {% if comp.regio_begin_fase_D %}
-                                            <span>tot {{ comp.regio_begin_fase_D }}</span>
-                                        {% endif %}
+                                        <span>vanaf regio-specifieke datum:</span>
+                                        {% for deelcomp in comp.fase_d_per_regio %}
+                                            {% if forloop.first %}<span>:</span>{% endif %}
+                                            <br><span>Regio {{ deelcomp.regio.regio_nr }}: {{ deelcomp.begin_fase_D }}</span>
+                                        {% empty %}
+                                            {% if comp.begin_fase_D_teams%}
+                                                <span>:</span><br>
+                                                <span>{{ comp.begin_fase_D_teams }}</span>
+                                            {% endif %}
+                                        {% endfor %}
+                                        <span>tot start 1e team ronde</span>
                                     {% endif %}
                                 </td>
                             </tr>
 
                             <tr>
-                                <td class="center{% if comp.fase_teams == 'F' %} sv-rood white-text{% endif %}">F</td>
+                                <td class="center{% if comp.fase_teams == 'F' or comp.fase_f_teams_actief %} sv-rood white-text{% endif %}">F</td>
                                 <td>Koppel team invallers voor elke ronde (HWL)<br>Koppel scores aan teams (RCL)<br>Bepaal team wedstrijdpunten (automatisch)<br>Publiceer tussenstand teamcompetitie (automatisch)<br>Doorzetten naar volgende ronde (RCL)</td>
                                 <td>
                                     {% if comp.fase_teams > 'F' %}
                                         <span class="green-text">Afgerond</span>
-                                    {% elif comp.fase_teams == 'F' %}
-                                        <span>tot en met {{ comp.einde_fase_F }}</span>
                                     {% else %}
-                                        <span>vanaf {{ comp.begin_fase_F }} tot en met {{ comp.einde_fase_F }}</span>
+                                        <span>vanaf start 1e team ronde tot en met {{ comp.einde_fase_F }}</span>
+                                        {% for deelcomp in comp.fase_f_per_regio %}
+                                            <br><span>Regio {{ deelcomp.regio.regio_nr }}: ronde {{ deelcomp.huidige_team_ronde }}</span>
+                                        {% endfor %}
                                     {% endif %}
                                 </td>
                             </tr>

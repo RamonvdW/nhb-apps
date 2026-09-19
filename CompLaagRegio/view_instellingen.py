@@ -64,19 +64,21 @@ class RegioInstellingenView(UserPassesTestMixin, TemplateView):
             # niet de beheerder
             raise PermissionDenied('Niet de beheerder')
 
-        deelcomp.competitie.bepaal_fase()
-        if deelcomp.competitie.fase_teams > 'F':
+        deelcomp.bepaal_fase()
+        if deelcomp.fase_teams >= 'G':
             raise Http404('Verkeerde competitie fase')
 
-        # in fase A+B mag de teamcompetitie nog aan/uit gezet worden + keuze vast/vsg
-        if deelcomp.competitie.fase_teams > 'B':
-            context['readonly_blok_1'] = True
-
-            # in fase C mag nog aangepast worden: de deadline voor het aanmaken van de teams + WP model keuze
-            if deelcomp.competitie.fase_teams > 'C':
-                context['readonly_blok_2'] = True
-
         context['deelcomp'] = deelcomp
+
+        # in fase A+B mag de teamcompetitie nog aan/uit gezet worden + keuze vast/vsg
+        context['readonly_team_comp'] = deelcomp.fase_teams > 'B'
+        context['readonly_vast_vsg'] = deelcomp.fase_teams > 'B'
+
+        # in fase C mag nog aangepast worden: WP model keuze
+        context['readonly_wp'] = deelcomp.fase_teams > 'C'
+
+        # in fase D mag nog aangepast worden: de deadline voor het aanmaken van de teams
+        context['readonly_fase_d'] = deelcomp.fase_teams > 'D'
 
         context['opt_team_alloc'] = opts = list()
 
@@ -112,6 +114,11 @@ class RegioInstellingenView(UserPassesTestMixin, TemplateView):
         obj.actief = deelcomp.regio_team_punten_model == TEAM_PUNTEN_MODEL_SOM_SCORES
         opts.append(obj)
 
+        # in fase A+B mag de teamcompetitie nog aan/uit gezet worden + keuze vast/vsg
+        if context['readonly_team_comp'] and context['readonly_vast_vsg'] and context['readonly_wp'] and context['readonly_fase_d']:
+            # alles is readonly
+            context['url_sluiten'] = reverse('CompBeheer:overzicht', kwargs={'comp_pk': deelcomp.competitie.pk})
+
         context['url_opslaan'] = reverse('CompLaagRegio:regio-instellingen',
                                          kwargs={'comp_pk': deelcomp.competitie.pk,
                                                  'regio_nr': deelcomp.regio.regio_nr})
@@ -144,50 +151,62 @@ class RegioInstellingenView(UserPassesTestMixin, TemplateView):
             # niet de beheerder
             raise PermissionDenied('Niet de beheerder')
 
-        deelcomp.competitie.bepaal_fase()
-        if deelcomp.competitie.fase_teams > 'C':
+        deelcomp.bepaal_fase()
+        if deelcomp.fase_teams >= 'G':
             # niets meer te wijzigen
             raise Http404('Verkeerde competitie fase')
 
         # in fase A+B mag de teamcompetitie nog aan/uit gezet worden + keuze vast/vsg
-        readonly_blok_1 = (deelcomp.competitie.fase_teams > 'B')
+        readonly_team_comp = deelcomp.fase_teams > 'B'
+        readonly_vast_vsg = deelcomp.fase_teams > 'B'
+
+        # in fase C mag nog aangepast worden: WP model keuze
+        readonly_wp = deelcomp.fase_teams > 'C'
+
+        # in fase D mag nog aangepast worden: de deadline voor het aanmaken van de teams
+        readonly_fase_d = deelcomp.fase_teams > 'D'
 
         updated = list()
 
-        if not readonly_blok_1:
+        if not readonly_team_comp:
             # deze velden worden alleen doorgegeven als ze te wijzigen zijn
             teams = request.POST.get('teams', '?')[:3]  # ja/nee
-            alloc = request.POST.get('team_alloc', '?')[:4]  # vast/vsg
             if teams == 'nee':
                 deelcomp.regio_organiseert_teamcompetitie = False
                 updated.append('regio_organiseert_teamcompetitie')
             elif teams == 'ja':
                 deelcomp.regio_organiseert_teamcompetitie = True
                 updated.append('regio_organiseert_teamcompetitie')
+
+        if deelcomp.regio_organiseert_teamcompetitie:
+            # kijk alleen naar de andere velden als er een teamcompetitie georganiseerd wordt in de regio
+            # dit voorkomt foutmelding over de datum bij het uitzetten van de teamcompetitie
+
+            if not readonly_vast_vsg:
+                alloc = request.POST.get('team_alloc', '?')[:4]  # vast/vsg
                 deelcomp.regio_heeft_vaste_teams = (alloc == 'vast')
                 updated.append('regio_heeft_vaste_teams')
 
-        # kijk alleen naar de andere velden als er een teamcompetitie georganiseerd wordt in de regio
-        # dit voorkomt foutmelding over de datum bij het uitzetten van de teamcompetitie
-        if deelcomp.regio_organiseert_teamcompetitie:
-            punten = request.POST.get('team_punten', '?')[:2]    # 2p/ss/f1
-            if punten in (TEAM_PUNTEN_MODEL_TWEE, TEAM_PUNTEN_MODEL_FORMULE1, TEAM_PUNTEN_MODEL_SOM_SCORES):
-                deelcomp.regio_team_punten_model = punten
-                updated.append('regio_team_punten_model')
+            if not readonly_wp:
+                punten = request.POST.get('team_punten', '?')[:2]    # 2p/ss/f1
+                if punten in (TEAM_PUNTEN_MODEL_TWEE, TEAM_PUNTEN_MODEL_FORMULE1, TEAM_PUNTEN_MODEL_SOM_SCORES):
+                    deelcomp.regio_team_punten_model = punten
+                    updated.append('regio_team_punten_model')
 
-            einde_s = request.POST.get('begin_fase_D', '')[:10]       # yyyy-mm-dd
-            if einde_s:
-                try:
-                    einde_p = datetime.datetime.strptime(einde_s, '%Y-%m-%d')
-                except ValueError:
-                    raise Http404('Datum fout formaat')
-                else:
-                    einde_p = einde_p.date()
-                    comp = deelcomp.competitie
-                    if einde_p < comp.begin_fase_C or einde_p >= comp.begin_fase_F:
-                        raise Http404('Datum buiten toegestane reeks')
-                    deelcomp.begin_fase_D = einde_p
-                    updated.append('begin_fase_D')
+            if not readonly_fase_d:
+                einde_s = request.POST.get('begin_fase_D', '')[:10]       # yyyy-mm-dd
+                if einde_s:
+                    try:
+                        einde_p = datetime.datetime.strptime(einde_s, '%Y-%m-%d')
+                    except ValueError:
+                        raise Http404('Datum fout formaat')
+                    else:
+                        einde_p = einde_p.date()
+                        comp = deelcomp.competitie
+                        if einde_p < comp.begin_fase_C or einde_p >= comp.einde_fase_F:
+                            raise Http404('Datum buiten toegestane reeks')
+                        deelcomp.begin_fase_D = einde_p
+                        updated.append('begin_fase_D')
 
         deelcomp.save(update_fields=updated)
 

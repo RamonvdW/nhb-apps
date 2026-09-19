@@ -6,6 +6,7 @@
 {% endcomment %}
 {% load static %}
 {% load design_icons %}
+{% load design_knop %}
 
 {% block title %}Instellingen Teamcompetitie{% endblock %}
 
@@ -14,8 +15,9 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h1 class="sv-kopje-pagina">Instellingen Team<wbr>competitie</h1>
-            {% if readonly_blok_2 %}
+            <h1 class="sv-kopje-pagina">Instellingen team<wbr>competitie</h1>
+            <p>In jouw regio is de teamcompetitie in <b>fase {{ deelcomp.fase_teams }}</b>.</p>
+            {% if readonly_blok_3 %}
                 <p>Hieronder kan je de gemaakte keuzes maken voor jouw regiocompetitie inzien. Wijzigen is niet meer mogelijk.</p>
             {% else %}
                 <p>Hieronder kan je als RCL keuzes maken voor jouw regiocompetitie.</p>
@@ -58,117 +60,123 @@
     <!-- blauwe balk met informatie label : info -->
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
-            {% if not readonly_blok_2 %}
-                <div class="sv-kader-form">
-                    <form action="{{ url_opslaan }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
-                        {% csrf_token %}
-            {% endif %}
+            <div class="sv-kader-form">
+                <form action="{{ url_opslaan }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
+                    {% csrf_token %}
 
-                        <table class="sv-kader-tabel">
-                            <tr>
-                                <th>Regio organiseert team<wbr>competitie</th>
-                                <td>
-                                    {% if readonly_blok_1 %}
-                                        <span>{% if deelcomp.regio_organiseert_teamcompetitie %}Ja{% else %}Nee{% endif %}</span>
-                                    {% else %}
-                                        <ul id="id_teams">
-                                            <li>
-                                                <label class="black-text" for="id_teams_ja">
-                                                    <input class="with-gap" type="radio" name="teams" value="ja" required id="id_teams_ja"{% if deelcomp.regio_organiseert_teamcompetitie %} checked{% endif %} onchange="teams_gewijzigd(false)">
-                                                    <span>Ja</span>
-                                                </label>
-                                            </li>
-                                            <li>
-                                                <label class="black-text" for="id_teams_nee">
-                                                    <input class="with-gap" type="radio" name="teams" value="nee" required id="id_teams_nee"{% if not deelcomp.regio_organiseert_teamcompetitie %} checked{% endif %} onchange="teams_gewijzigd(true)">
-                                                    <span>Nee</span>
-                                                </label>
-                                            </li>
-                                        </ul>
-                                    {% endif %}
-                                </td>
-                            </tr>
+                    <table class="sv-kader-tabel">
+                        <tr>
+                            <th>Regio</th>
+                            <td>{{ deelcomp.regio.regio_nr }}</td>
+                        </tr>
 
-                            <tr>
-                                <th>Team samen<wbr>stellingen</th>
-                                <td>
-                                    {% if readonly_blok_1 %}
+                        <tr>
+                            <th>Regio organiseert team<wbr>competitie</th>
+                            <td>
+                                {% if readonly_team_comp %}
+                                    <span>{% if deelcomp.regio_organiseert_teamcompetitie %}Ja{% else %}Nee{% endif %}</span>
+                                {% else %}
+                                    <ul id="id_teams">
+                                        <li>
+                                            <label class="black-text" for="id_teams_ja">
+                                                <input class="with-gap" type="radio" name="teams" value="ja" required id="id_teams_ja"{% if deelcomp.regio_organiseert_teamcompetitie %} checked{% endif %} onchange="teams_gewijzigd(false)">
+                                                <span>Ja</span>
+                                            </label>
+                                        </li>
+                                        <li>
+                                            <label class="black-text" for="id_teams_nee">
+                                                <input class="with-gap" type="radio" name="teams" value="nee" required id="id_teams_nee"{% if not deelcomp.regio_organiseert_teamcompetitie %} checked{% endif %} onchange="teams_gewijzigd(true)">
+                                                <span>Nee</span>
+                                            </label>
+                                        </li>
+                                    </ul>
+                                {% endif %}
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th>Team samen<wbr>stellingen</th>
+                            <td>
+                                {% if readonly_vast_vsg %}
+                                    {% for opt in opt_team_alloc %}
+                                        {% if opt.actief %}
+                                            <span>{{ opt.beschrijving }}</span>
+                                        {% endif %}
+                                    {% endfor %}
+                                {% else %}
+                                    <ul>
                                         {% for opt in opt_team_alloc %}
-                                            {% if opt.actief %}
-                                                <span>{{ opt.beschrijving }}</span>
-                                            {% endif %}
+                                            <li>
+                                                <label class="black-text" for="id_{{ opt.choice_name }}">
+                                                    <input class="with-gap" type="radio" name="team_alloc" value="{{ opt.choice_name }}" required id="id_{{ opt.choice_name }}"{% if opt.actief %} checked{% endif %}{% if not deelcomp.regio_organiseert_teamcompetitie %} disabled{% endif %} onchange="gewijzigd()">
+                                                    <span>{{ opt.beschrijving }}</span>
+                                                </label>
+                                            </li>
                                         {% endfor %}
-                                    {% else %}
-                                        <ul>
-                                            {% for opt in opt_team_alloc %}
-                                                <li>
-                                                    <label class="black-text" for="id_{{ opt.choice_name }}">
-                                                        <input class="with-gap" type="radio" name="team_alloc" value="{{ opt.choice_name }}" required id="id_{{ opt.choice_name }}"{% if opt.actief %} checked{% endif %}{% if not deelcomp.regio_organiseert_teamcompetitie %} disabled{% endif %} onchange="gewijzigd()">
-                                                        <span>{{ opt.beschrijving }}</span>
-                                                    </label>
-                                                </li>
-                                            {% endfor %}
-                                        </ul>
-                                    {% endif %}
-                                </td>
-                            </tr>
+                                    </ul>
+                                {% endif %}
+                            </td>
+                        </tr>
 
-                            <tr>
-                                <th>Teams aanmaken toestaan tot en met</th>
-                                <td>{% if readonly_blok_2 %}
-                                        <span>{{ deelcomp.begin_fase_D|date:'Y-m-d' }}</span>
-                                    {% else %}
-                                        <input type="text" class="nl_datepicker" id="datum1" onchange="datum_gewijzigd(this)"{% if not deelcomp.regio_organiseert_teamcompetitie %} disabled{% endif %}>
-                                        <input type="hidden" name="begin_fase_D" id="datum1_out" value="{{ deelcomp.begin_fase_D|date:'Y-m-d' }}">
-                                    {% endif %}
-                                </td>
-                            </tr>
-
-                            <tr>
-                                <th>Wedstrijd<wbr>punten model</th>
-                                <td>
-                                    {% if readonly_blok_2 %}
+                        <tr>
+                            <th>Wedstrijd<wbr>punten model</th>
+                            <td>
+                                {% if readonly_wp %}
+                                    {% for opt in opt_team_punten %}
+                                        {% if opt.actief %}
+                                            <span>{{ opt.beschrijving }}</span>
+                                        {% endif %}
+                                    {% endfor %}
+                                {% else %}
+                                    <ul>
                                         {% for opt in opt_team_punten %}
-                                            {% if opt.actief %}
-                                                <span>{{ opt.beschrijving }}</span>
-                                            {% endif %}
+                                            <li>
+                                                <label class="black-text" for="id_{{ opt.choice_name }}">
+                                                    <input class="with-gap" type="radio" name="team_punten" value="{{ opt.choice_name }}" required id="id_{{ opt.choice_name }}"{% if opt.actief %} checked{% endif %}{% if not deelcomp.regio_organiseert_teamcompetitie %} disabled{% endif %} onchange="gewijzigd()">
+                                                    <span>{{ opt.beschrijving }}</span>
+                                                </label>
+                                            </li>
                                         {% endfor %}
-                                    {% else %}
-                                        <ul>
-                                            {% for opt in opt_team_punten %}
-                                                <li>
-                                                    <label class="black-text" for="id_{{ opt.choice_name }}">
-                                                        <input class="with-gap" type="radio" name="team_punten" value="{{ opt.choice_name }}" required id="id_{{ opt.choice_name }}"{% if opt.actief %} checked{% endif %}{% if not deelcomp.regio_organiseert_teamcompetitie %} disabled{% endif %} onchange="gewijzigd()">
-                                                        <span>{{ opt.beschrijving }}</span>
-                                                    </label>
-                                                </li>
-                                            {% endfor %}
-                                        </ul>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                        </table>
+                                    </ul>
+                                {% endif %}
+                            </td>
+                        </tr>
 
-            {% if not readonly_blok_2 %}
-                        <p>
-                            <button class="btn-sv-rood disabled" id="submit_knop" type="submit">
+                        <tr>
+                            <th>Teams aanmaken toestaan tot en met</th>
+                            <td>{% if readonly_fase_d %}
+                                    <span>{{ deelcomp.begin_fase_D|date:'Y-m-d' }}</span>
+                                {% else %}
+                                    <input type="text" class="nl_datepicker" id="datum1" onchange="datum_gewijzigd(this)"{% if not deelcomp.regio_organiseert_teamcompetitie %} disabled{% endif %}>
+                                    <input type="hidden" name="begin_fase_D" id="datum1_out" value="{{ deelcomp.begin_fase_D|date:'Y-m-d' }}">
+                                {% endif %}
+                            </td>
+                        </tr>
+
+                    </table>
+
+                    <p class="center">
+                        {% if url_sluiten %}
+                            {% sv-knop-nav url=url_sluiten tekst="sluiten" %}
+                        {% else %}
+                            <button class="btn-sv-rood" id="submit_knop" type="submit">
                                 {% sv-icon-op-button 'opslaan' tekst='Opslaan' %}
                             </button>
-                        </p>
-                    </form>
-                </div>
-            {% endif %}
+                        {% endif %}
+                    </p>
+                </form>
+            </div>
         </div>
     </div>
 
-    {% if not readonly_blok_2 %}
+    {% if not readonly_fase_d %}
 
         <!-- initialisatie van de datum pickers -->
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 const el = document.querySelector('#datum1');
                 let minDate = new Date("{{ deelcomp.competitie.begin_fase_C|date:'Y-m-d' }}");
-                let maxDate = new Date("{{ deelcomp.competitie.begin_fase_F|date:'Y-m-d' }}");
+                let maxDate = new Date("{{ deelcomp.competitie.einde_fase_F|date:'Y-m-d' }}");
                 maxDate.setDate(maxDate.getDate() - 1);      // get/setDate = day of month!!
                 const competitieJaren = [{{  deelcomp.competitie.begin_jaar }}, {{ deelcomp.competitie.begin_jaar }} + 1];
 
@@ -183,7 +191,7 @@
 
     {% endif %}
 
-    <p class="center">De eerste twee instellingen kunnen alleen in <b>fase A</b> van de competitie aangepast worden;<br>de andere twee instellingen tot en met <b>fase C</b>.</p>
+    <p class="center">De eerste twee instellingen kunnen alleen in fase A en B van de competitie aangepast worden;<br>de andere twee in fase C en fase D respectievelijk.</p>
 
     {% include 'feedback/sidebar.dtl' with op_pagina="complaagregio-rcl-instellingen" %}
 
