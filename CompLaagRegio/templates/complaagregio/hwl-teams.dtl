@@ -30,6 +30,7 @@
     <div class="row center">
         <div class="col s12">
             <h2 class="sv-kopje-row">Teams</h2>
+            <p>{{ fase_teams }}</p>
             {% if mag_wijzigen %}
                 <p>Wijzigen kan tot <b>{{ deelcomp.begin_fase_D }}</b></p>
             {% else %}

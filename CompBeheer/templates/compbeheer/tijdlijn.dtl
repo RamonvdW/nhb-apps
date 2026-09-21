@@ -280,7 +280,7 @@
                                     {% if comp.fase_teams > 'D' %}
                                         <span class="green-text">Afgerond</span>
                                     {% else %}
-                                        <span>vanaf regio-specifieke datum:</span>
+                                        <span>vanaf regio-specifieke datum</span>
                                         {% for deelcomp in comp.fase_d_per_regio %}
                                             {% if forloop.first %}<span>:</span>{% endif %}
                                             <br><span>Regio {{ deelcomp.regio.regio_nr }}: {{ deelcomp.begin_fase_D }}</span>
@@ -290,7 +290,7 @@
                                                 <span>{{ comp.begin_fase_D_teams }}</span>
                                             {% endif %}
                                         {% endfor %}
-                                        <span>tot start 1e team ronde</span>
+                                        <br><span>tot start 1e team ronde</span>
                                     {% endif %}
                                 </td>
                             </tr>

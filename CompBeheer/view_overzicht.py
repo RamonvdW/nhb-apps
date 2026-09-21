@@ -69,16 +69,18 @@ class CompetitieBeheerView(UserPassesTestMixin, TemplateView):
             # kijk of deze rol nog iets te doen heeft
             context['rol_is_klaar'] = True
 
-            # toon de competitie waar de functie een rol in heeft of had (BKO/RKO/RCL)
+            # toon de competitie waar de functie een rol in heeft of had (RCL)
             for deelcomp in (RegioComp
                              .objects
                              .filter(competitie=comp,
                                      functie=self.functie_nu)):
                 if not deelcomp.is_afgesloten:
                     context['rol_is_klaar'] = False
+                    deelcomp.bepaal_fase()
+                    comp.fase_indiv_str, comp.fase_teams_str = maak_comp_fase_beschrijvingen(comp, deelcomp)
             # for
 
-            # toon de competitie waar de functie een rol in heeft of had (BKO/RKO/RCL)
+            # toon het RK waar de functie een rol in heeft of had (RKO)
             for deelcomp in (KampRK
                              .objects
                              .filter(competitie=comp,
@@ -87,6 +89,7 @@ class CompetitieBeheerView(UserPassesTestMixin, TemplateView):
                     context['rol_is_klaar'] = False
             # for
 
+            # toon het BK waar de functie een rol in heeft of had (BKO)
             for deelcomp in (KampBK
                              .objects
                              .filter(competitie=comp,

@@ -12,6 +12,7 @@ from Competitie.test_utils.tijdlijn import (evaluatie_datum, zet_competitie_fase
                                             zet_competitie_fase_regio_inschrijven)
 from Competitie.tests.test_helpers import maak_competities_en_zet_fase_c
 from CompLaagRegio.models import RegioComp, RegioTeam, RegioDeelnemer, RegioRondeTeam
+from CompLaagRegio.operations.tijdlijn_regio import zet_regiocomp_team_fase_d, zet_regiocomp_team_fase_f
 from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
 from HistComp.definities import HISTCOMP_TYPE_18, HIST_BOGEN_DEFAULT
@@ -511,10 +512,8 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
 
         # team = RegioTeam.objects.first()
 
-        # voorbij einddatum aanmaken / wijzigen teams
-        now = timezone.now()
-        self.deelcomp18_regio111.begin_fase_D = datetime.date(now.year, now.month, now.day) - datetime.timedelta(days=1)
-        self.deelcomp18_regio111.save()
+        # zet de teamcompetitie in fase D
+        zet_regiocomp_team_fase_d(self.deelcomp18_regio111)
 
         resp = self.client.post(self.url_maak_team % self.deelcomp18_regio111.pk)
         self.assert404(resp, 'De deadline is gepasseerd')
@@ -718,9 +717,8 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
             resp = self.client.post(self.url_koppelen % team.pk, {})
         self.assert404(resp, 'Team is niet van jouw vereniging')
 
-        # koppel-scherm na uiterste datum wijzigen
-        self.deelcomp18_regio111.begin_fase_D -= datetime.timedelta(days=5)
-        self.deelcomp18_regio111.save()
+        # probeer koppel-scherm na einde fase D (eerste rond is opgestart)
+        zet_regiocomp_team_fase_f(self.deelcomp18_regio111)
         url = self.url_koppelen % team_18.pk
         with self.assert_max_queries(20):
             resp = self.client.get(url)
@@ -838,11 +836,14 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_regio_teams % self.deelcomp18_regio111.pk)
         self.assertEqual(1, RegioTeam.objects.count())
         team = RegioTeam.objects.first()
+        assert isinstance(team, RegioTeam)
         self.assertEqual(team.team_type.afkorting, 'R2')        # default = recurve team
 
+        assert isinstance(self.deelnemer_100003_18, RegioDeelnemer)
         self.deelnemer_100003_18.inschrijf_voorkeur_team = True
         self.deelnemer_100003_18.save(update_fields=['inschrijf_voorkeur_team'])
 
+        assert isinstance(self.deelnemer_100002_18, RegioDeelnemer)
         self.deelnemer_100002_18.inschrijf_voorkeur_team = True
         self.deelnemer_100002_18.save(update_fields=['inschrijf_voorkeur_team'])
 
@@ -989,6 +990,7 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
                                           'invaller_3': self.deelnemer_100012_18.pk})       # heeft team_ag=0,000
         self.assert404(resp, 'Geen valide selectie')
 
+        assert isinstance(self.deelnemer_100012_18, RegioDeelnemer)
         self.deelnemer_100012_18.ag_voor_team = 9.2
         self.deelnemer_100012_18.save(update_fields=['ag_voor_team'])
 

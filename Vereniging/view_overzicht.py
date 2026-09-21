@@ -109,6 +109,10 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
             begin_jaar = comp.begin_jaar
             comp.bepaal_fase()
 
+            for deelcomp in deelcomps:
+                deelcomp.bepaal_fase()
+            # for
+
             if prev_jaar != begin_jaar or prev_afstand != comp.afstand:     # pragma: no branch
                 if len(kaartjes) and hasattr(kaartjes[-1], 'heading'):
                     # er waren geen kaartjes voor die competitie - meld dat
@@ -121,7 +125,18 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                 kaartje = SimpleNamespace(
                             heading=comp.beschrijving,
                             anker='competitie_%s' % comp.pk)
-                kaartje.comp_fase_indiv, kaartje.comp_fase_teams = maak_comp_fase_beschrijvingen(comp)
+
+                # zoek de deelcompetitie erbij, voor de regiocompetitie teams status
+                found = False
+                for deelcomp in deelcomps:
+                    if deelcomp.competitie == comp:
+                        found = True
+                        kaartje.comp_fase_indiv, kaartje.comp_fase_teams = maak_comp_fase_beschrijvingen(comp, deelcomp)
+                        break
+                # for
+                if not found:
+                    kaartje.comp_fase_indiv, kaartje.comp_fase_teams = maak_comp_fase_beschrijvingen(comp)
+
                 kaartjes.append(kaartje)
 
                 prev_jaar = begin_jaar
@@ -154,7 +169,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                 if deelcomp.competitie == comp:
                     if deelcomp.regio_organiseert_teamcompetitie:
 
-                        if comp.fase_teams == 'F' and 1 <= deelcomp.huidige_team_ronde <= 7:
+                        if 1 <= deelcomp.huidige_team_ronde <= 7:
                             # team invallers opgeven
                             kaartje = SimpleNamespace(
                                         titel="Team Invallers",
@@ -165,7 +180,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                                         sv_icon='ver team invallers')
                             kaartjes.append(kaartje)
 
-                        elif comp.fase_teams == 'C':
+                        elif deelcomp.fase_teams == 'C':
                             # 2 - teams aanmaken
                             kaartje = SimpleNamespace(
                                             titel="Teams Regio",

@@ -4,6 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
+from django.utils import timezone
 from DataApi.import_base import ImportCrmBase
 from DataApi.models import DataApiVereniging
 
@@ -23,6 +24,8 @@ class ImportHistCrmVerenigingen(ImportCrmBase):
 
         self.count_actief = 0
         self.count_gestopt = 0
+
+        self.aanmelddatum_ver = timezone.now().date()
 
         self._cache_ver = dict()    # [ver_nr] = DataApiVereniging()
         self._vul_cache()
@@ -65,69 +68,69 @@ class ImportHistCrmVerenigingen(ImportCrmBase):
 
             if not self.dryrun:
                 ver.save()
-        else:
-            # delta's opmerken en rapporteren
-            updated = list()
 
-            if ver.afmeld_datum:
-                self.out_info('Vereniging %s wordt weer actief gemaakt' % ver_nr)
-                ver.afmeld_datum = ''
-                updated.append('afmeld_datum')
+            return
 
-            if naam != ver.naam:
-                self.out_info('Vereniging %s wijziging naam: %s --> %s' %
-                                (ver_nr, repr(ver.naam), repr(naam)))
-                ver.naam = naam
-                updated.append('naam')
+        # delta's opmerken en rapporteren
+        updated = list()
 
-            if kvk and kvk != ver.kvk_nummer:
-                # self.out_info('Vereniging %s wijziging kvk_nummer: %s --> %s' %
-                #                 (ver_nr, repr(ver.kvk_nummer), repr(kvk)))
-                ver.kvk_nummer = kvk
-                updated.append('kvk_nummer')
+        if ver.afmeld_datum:
+            self.out_info('Vereniging %s wordt weer actief gemaakt' % ver_nr)
+            ver.afmeld_datum = ''
+            updated.append('afmeld_datum')
 
-            if straatnaam != ver.straatnaam:
-                self.out_info('Vereniging %s wijziging straatnaam: %s --> %s' %
-                                (ver_nr, repr(ver.straatnaam), repr(straatnaam)))
-                ver.straatnaam = straatnaam
-                updated.append('straatnaam')
+        if naam != ver.naam:
+            self.out_info('Vereniging %s wijziging naam: %s --> %s' %
+                            (ver_nr, repr(ver.naam), repr(naam)))
+            ver.naam = naam
+            updated.append('naam')
 
-            if huis_nr != ver.huisnummer:
-                self.out_info('Vereniging %s wijziging huisnummer: %s --> %s' %
-                                (ver_nr, repr(ver.huisnummer), repr(huis_nr)))
-                ver.huisnummer = huis_nr
-                updated.append('huisnummer')
+        if kvk and kvk != ver.kvk_nummer:
+            # self.out_info('Vereniging %s wijziging kvk_nummer: %s --> %s' %
+            #                 (ver_nr, repr(ver.kvk_nummer), repr(kvk)))
+            ver.kvk_nummer = kvk
+            updated.append('kvk_nummer')
 
-            if postcode != ver.postcode:
-                self.out_info('Vereniging %s wijziging postcode: %s --> %s' %
-                                (ver_nr, repr(ver.postcode), repr(postcode)))
-                ver.postcode = postcode
-                updated.append('postcode')
+        if straatnaam != ver.straatnaam:
+            self.out_info('Vereniging %s wijziging straatnaam: %s --> %s' %
+                            (ver_nr, repr(ver.straatnaam), repr(straatnaam)))
+            ver.straatnaam = straatnaam
+            updated.append('straatnaam')
 
-            if plaats != ver.plaats:
-                self.out_info('Vereniging %s wijziging plaats: %s --> %s' %
-                                (ver_nr, repr(ver.plaats), repr(plaats)))
-                ver.plaats = plaats
-                updated.append('plaats')
+        if huis_nr != ver.huisnummer:
+            self.out_info('Vereniging %s wijziging huisnummer: %s --> %s' %
+                            (ver_nr, repr(ver.huisnummer), repr(huis_nr)))
+            ver.huisnummer = huis_nr
+            updated.append('huisnummer')
 
-            if lat != ver.lat:
-                self.out_info('Vereniging %s wijziging lat: %s --> %s' %
-                                (ver_nr, repr(ver.lat), repr(lat)))
-                ver.lat = lat
-                updated.append('lat')
+        if postcode != ver.postcode:
+            self.out_info('Vereniging %s wijziging postcode: %s --> %s' %
+                            (ver_nr, repr(ver.postcode), repr(postcode)))
+            ver.postcode = postcode
+            updated.append('postcode')
 
-            if lon != ver.lon:
-                self.out_info('Vereniging %s wijziging lon: %s --> %s' %
-                                (ver_nr, repr(ver.lon), repr(lon)))
-                ver.lon = lon
-                updated.append('lon')
+        if plaats != ver.plaats:
+            self.out_info('Vereniging %s wijziging plaats: %s --> %s' %
+                            (ver_nr, repr(ver.plaats), repr(plaats)))
+            ver.plaats = plaats
+            updated.append('plaats')
 
-            if len(updated) > 0:
-                self.count_wijzigingen += len(updated)
-                if not self.dryrun:
-                    ver.save(update_fields=updated)
+        if lat != ver.lat:
+            self.out_info('Vereniging %s wijziging lat: %s --> %s' %
+                            (ver_nr, repr(ver.lat), repr(lat)))
+            ver.lat = lat
+            updated.append('lat')
 
-        return
+        if lon != ver.lon:
+            self.out_info('Vereniging %s wijziging lon: %s --> %s' %
+                            (ver_nr, repr(ver.lon), repr(lon)))
+            ver.lon = lon
+            updated.append('lon')
+
+        if len(updated) > 0:
+            self.count_wijzigingen += len(updated)
+            if not self.dryrun:
+                ver.save(update_fields=updated)
 
     def importeer(self, data: list):
         """ Importeert alle verenigingen + gegevens over de primaire sportlocatie """

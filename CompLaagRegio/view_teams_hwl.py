@@ -15,6 +15,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
 from BasisTypen.models import TeamType
 from Competitie.models import CompetitieTeamKlasse, update_uitslag_teamcompetitie
+from Competitie.tijdlijn import maak_comp_fase_beschrijvingen
 from CompLaagRegio.models import RegioComp, RegioDeelnemer, RegioTeam, RegioRondeTeam
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
@@ -67,6 +68,10 @@ def bepaal_team_sterkte_en_klasse(team):
 
 
 def mag_wijzigen_teams(deelcomp: RegioComp):
+    # inschrijving sluit als fase C afgelopen is
+    # dus de eerste dag van fase D is het afgelopen
+    return deelcomp.fase_teams < 'D'
+
     begin_fase_d = datetime.datetime(
                         year=deelcomp.begin_fase_D.year,
                         month=deelcomp.begin_fase_D.month,
@@ -117,14 +122,13 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
         except (ValueError, RegioComp.DoesNotExist):
             raise Http404('Competitie niet gevonden')
 
-        comp = deelcomp.competitie
-        comp.bepaal_fase()
+        deelcomp.bepaal_fase()
 
-        if comp.fase_teams > 'F':
+        if deelcomp.fase_teams > 'F':
             # staat niet meer open voor instellen regiocompetitie teams
             raise Http404('Competitie is niet in de juiste fase')
 
-        self.readonly = comp.fase_teams > 'C'
+        self.readonly = deelcomp.fase_teams > 'C'
 
         if self.rol_nu == Rol.ROL_WL:
             self.readonly = True
@@ -137,11 +141,12 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
 
         # zoek de regiocompetitie waar de regio teams voor in kunnen stellen
         context['deelcomp'] = deelcomp = self._get_deelcomp(kwargs['deelcomp_pk'])
-
         context['readonly'] = self.readonly
 
         mag_wijzigen = mag_wijzigen_teams(deelcomp) and not self.readonly
         context['mag_wijzigen'] = mag_wijzigen
+
+        _, context['fase_teams'] = maak_comp_fase_beschrijvingen(deelcomp.competitie, deelcomp)
 
         if deelcomp.competitie.is_indoor():
             aantal_pijlen = 30
@@ -159,7 +164,7 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
 
         for obj in teams:
             obj.aantal = obj.leden_count
-            ag_str = "%05.1f" % (obj.aanvangsgemiddelde * aantal_pijlen)
+            ag_str = "%05.1f" % (float(obj.aanvangsgemiddelde) * aantal_pijlen)
             obj.ag_str = ag_str.replace('.', ',')
 
             if mag_wijzigen:
@@ -317,14 +322,11 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
         except (ValueError, RegioComp.DoesNotExist):
             raise Http404('Competitie niet gevonden')
 
-        comp = deelcomp.competitie
-        comp.bepaal_fase()
+        deelcomp.bepaal_fase()
 
-        if comp.fase_teams > 'D':
-            if self.rol_nu == Rol.ROL_RCL and comp.fase_teams == 'F' and deelcomp.huidige_team_ronde < 1:
-                # RCL mag nog wijzigingen maken voordat ronde 1 opgestart is
-                pass
-            else:
+        if deelcomp.fase_teams > 'D':
+            # RCL mag nog wijzigingen maken voordat ronde 1 opgestart is
+            if not (self.rol_nu == Rol.ROL_RCL and deelcomp.fase_teams < 'F'):
                 # mag niet meer wijzigen
                 raise Http404('Competitie is niet in de juiste fase')
 
@@ -533,10 +535,10 @@ class WijzigTeamAGView(UserPassesTestMixin, TemplateView):
         # for
         context['ag_hist'] = ag_hist
 
-        comp = deelnemer.regiocomp.competitie
-        comp.bepaal_fase()
+        deelcomp = deelnemer.regiocomp
+        deelcomp.bepaal_fase()
 
-        if comp.fase_teams <= 'F':
+        if deelcomp.fase_teams <= 'F':
             context['url_opslaan'] = reverse('CompLaagRegio:wijzig-ag',
                                              kwargs={'deelnemer_pk': deelnemer.pk})
 
@@ -544,18 +546,18 @@ class WijzigTeamAGView(UserPassesTestMixin, TemplateView):
             context['kruimels'] = (
                 (reverse('Vereniging:overzicht'), 'Beheer vereniging'),
                 (reverse('CompLaagRegio:teams-regio', kwargs={'deelcomp_pk': deelnemer.regiocomp.pk}),
-                    'Teams Regio %s' % comp.beschrijving.replace(' competitie', '')),
+                    'Teams Regio %s' % deelcomp.competitie.beschrijving.replace(' competitie', '')),
                 (None, 'Wijzig AG')
             )
         else:
             # RCL
+            comp = deelcomp.competitie
             context['kruimels'] = (
                 (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
                 (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}),
                  comp.beschrijving.replace(' competitie', '')),
-                (reverse('CompLaagRegio:regio-ag-controle',
-                         kwargs={'comp_pk': comp.pk,
-                                 'regio_nr': deelnemer.regiocomp.regio.regio_nr}),
+                (reverse('CompLaagRegio:regio-ag-controle', kwargs={'comp_pk': comp.pk,
+                                                                    'regio_nr': deelnemer.regiocomp.regio.regio_nr}),
                  'AG controle'),
                 (None, 'Wijzig AG')
             )
@@ -614,9 +616,9 @@ class WijzigTeamAGView(UserPassesTestMixin, TemplateView):
                 bepaal_team_sterkte_en_klasse(team)
 
         if self.rol_nu == Rol.ROL_HWL:
-            comp = deelnemer.regiocomp.competitie
-            comp.bepaal_fase()
-            if comp.fase_teams == 'C':
+            deelcomp = deelnemer.regiocomp
+            deelcomp.bepaal_fase()
+            if deelcomp.fase_teams == 'C':
                 url = reverse('CompLaagRegio:teams-regio',
                               kwargs={'deelcomp_pk': deelnemer.regiocomp.pk})
             else:
@@ -675,16 +677,14 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
         context['team'] = team
 
         context['deelcomp'] = deelcomp = team.regiocomp
-
-        comp = deelcomp.competitie
-        comp.bepaal_fase()
+        deelcomp.bepaal_fase()
 
         if self.rol_nu == Rol.ROL_HWL:
-            context['readonly'] = readonly = (comp.fase_teams > 'D')
+            context['readonly'] = readonly = (deelcomp.fase_teams > 'D')
             mag_wijzigen = mag_wijzigen_teams(deelcomp) and not readonly
         else:
             # RCL
-            context['readonly'] = (comp.fase_teams > 'D')       # TODO: de RCL langer rechten geven?
+            context['readonly'] = (deelcomp.fase_teams > 'D')       # TODO: de RCL langer rechten geven?
             mag_wijzigen = True
 
         context['mag_wijzigen'] = mag_wijzigen
@@ -697,7 +697,7 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
             aantal_pijlen = 30
         else:
             aantal_pijlen = 25
-        ag_str = "%05.1f" % (team.aanvangsgemiddelde * aantal_pijlen)
+        ag_str = "%05.1f" % (float(team.aanvangsgemiddelde) * aantal_pijlen)
         team.ag_str = ag_str.replace('.', ',')
 
         if mag_wijzigen:
@@ -747,7 +747,7 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
         context['kruimels'] = (
             (reverse('Vereniging:overzicht'), 'Beheer vereniging'),
             (reverse('CompLaagRegio:teams-regio', kwargs={'deelcomp_pk': deelcomp.pk}),
-                'Teams Regio %s' % comp.beschrijving.replace(' competitie', '')),
+                'Teams Regio %s' % deelcomp.competitie.beschrijving.replace(' competitie', '')),
             (None, 'Koppel teamleden')
         )
 
@@ -776,16 +776,14 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
             ver = team.vereniging
 
         deelcomp = team.regiocomp
-
-        comp = deelcomp.competitie
-        comp.bepaal_fase()
+        deelcomp.bepaal_fase()
 
         if self.rol_nu == Rol.ROL_HWL:
-            readonly = (comp.fase_teams > 'D')
+            readonly = (deelcomp.fase_teams > 'D')
             mag_wijzigen = mag_wijzigen_teams(deelcomp) and not readonly
         else:
             # RCL
-            readonly = (comp.fase_teams > 'D')
+            readonly = (deelcomp.fase_teams > 'D')
             mag_wijzigen = not readonly
 
         if not mag_wijzigen:

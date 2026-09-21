@@ -133,12 +133,15 @@ class RegioTeamsTemplateView(TemplateView):
             context['url_download'] = reverse('CompLaagRegio:regio-teams-als-bestand',
                                               kwargs={'deelcomp_pk': deelcomp.pk})
 
+            # alleen de eigen regio tonen
             deelcomp_pks = [deelcomp.pk]
 
-            context['comp'] = comp = deelcomp.competitie
-            comp.bepaal_fase()
-
             context['deelcomp'] = deelcomp
+            deelcomp.bepaal_fase()
+
+            comp = deelcomp.competitie
+            context['comp'] = comp
+
             context['rayon'] = self.functie_nu.regio.rayon
             context['regio'] = self.functie_nu.regio
 
@@ -205,7 +208,7 @@ class RegioTeamsTemplateView(TemplateView):
             poule = team.regiopoule_set.first()
             team.in_poule = (poule is not None)
 
-            if comp.fase_teams <= 'D' and self.rol_nu == Rol.ROL_RCL:
+            if self.rol_nu == Rol.ROL_RCL and deelcomp.fase_teams <= 'D':
                 team.url_aanpassen = reverse('CompLaagRegio:teams-regio-koppelen',
                                              kwargs={'team_pk': team.pk})
             totaal_teams += 1
@@ -239,11 +242,13 @@ class RegioTeamsTemplateView(TemplateView):
             team.ag_str = ag_str.replace('.', ',')
 
             if self.rol_nu == Rol.ROL_RCL:
-                if comp.fase_teams <= 'D':
+                assert isinstance(deelcomp, RegioComp)
+
+                if deelcomp.fase_teams <= 'D':
                     team.url_aanpassen = reverse('CompLaagRegio:teams-regio-koppelen',
                                                  kwargs={'team_pk': team.pk})
 
-                if comp.fase_teams <= 'F' and deelcomp.huidige_team_ronde < 1:
+                if deelcomp.fase_teams < 'F':
                     team.url_verwijder = reverse('CompLaagRegio:teams-regio-wijzig',
                                                  kwargs={'deelcomp_pk': team.regiocomp.pk,
                                                          'team_pk': team.pk})
@@ -455,8 +460,8 @@ class AGControleView(UserPassesTestMixin, TemplateView):
             # niet de beheerder
             raise PermissionDenied('Niet de beheerder')
 
-        deelcomp.competitie.bepaal_fase()
-        if deelcomp.competitie.fase_teams > 'G':
+        deelcomp.bepaal_fase()
+        if deelcomp.fase_teams >= 'F':
             raise Http404('Verkeerde competitie fase')
 
         context['deelcomp'] = deelcomp

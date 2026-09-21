@@ -7,6 +7,7 @@
 from django.utils import timezone
 from Competitie.tijdlijn import evaluatie_datum
 # from CompLaagRegio.models import RegioComp        # circular import
+import datetime
 
 
 def bepaal_fase_teams_regio(deelcomp) -> str:
@@ -49,5 +50,20 @@ def bepaal_fase_teams_regio(deelcomp) -> str:
 
     # teamcompetitie blijft hangen in fase D totdat de eerste ronde opgestart is
     return 'D'
+
+
+def zet_regiocomp_team_fase_d(deelcomp):
+    # fase D is na de begin datum voor fase D
+    # en voordat de eerste team ronde opgestart is
+    deelcomp.begin_fase_D = evaluatie_datum.gekozen_datum - datetime.timedelta(days=1)
+    deelcomp.huidige_team_ronde = 0
+    deelcomp.save(update_fields=['begin_fase_D', 'huidige_team_ronde'])
+
+
+def zet_regiocomp_team_fase_f(deelcomp):
+    # fase F begin zodra de eerste team ronde opgestart is
+    deelcomp.huidige_team_ronde = 1
+    deelcomp.save(update_fields=['huidige_team_ronde'])
+
 
 # end of file
