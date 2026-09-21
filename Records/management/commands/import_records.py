@@ -75,15 +75,20 @@ class Command(BaseCommand):
                 curr_record = IndivRecord.objects.get(volg_nr=val, discipline=disc)
             except IndivRecord.DoesNotExist:
                 # new record
-                pass
+                curr_record = None
             except IndivRecord.MultipleObjectsReturned:  # pragma: no cover
                 errors.append('Meerdere records voor %s-%s' % (disc, val))
+                # gevonden, dus voorkom verwijderen
+                if val in self._oude_volg_nrs:
+                    self._oude_volg_nrs.remove(val)
+                return
             else:
                 # gevonden, dus voorkom verwijderen
                 if val in self._oude_volg_nrs:
                     self._oude_volg_nrs.remove(val)
 
             if curr_record:
+                assert isinstance(curr_record, IndivRecord)
                 record.volg_nr = curr_record.volg_nr
                 record.discipline = curr_record.discipline
             else:
@@ -175,6 +180,9 @@ class Command(BaseCommand):
                 errors.append('Fout in para klasse: %s is niet bekend' % repr(val))
             else:
                 record.para_klasse = val
+                if val != '' and record.leeftijdscategorie != 'U':
+                    errors.append("Fout in para record %s: leeftijdsklasse %s moet 'nvt' zijn" %
+                                  (record.volg_nr, repr(record.leeftijdscategorie)))
             if curr_record:
                 if curr_record.para_klasse != record.para_klasse:
                     wijzigingen.append('para_klasse: %s --> %s' % (repr(curr_record.para_klasse),
