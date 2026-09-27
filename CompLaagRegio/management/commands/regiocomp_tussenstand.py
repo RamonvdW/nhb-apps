@@ -12,8 +12,10 @@ from django.conf import settings
 from django.db.utils import DataError, OperationalError, IntegrityError, DEFAULT_DB_ALIAS
 from django.db.models import F, Q
 from django.core.management.base import BaseCommand
+from Competitie.definities import TEAM_PUNTEN_MODEL_FORMULE1, TEAM_PUNTEN_MODEL_TWEE
 from Competitie.models import Competitie, CompetitieIndivKlasse, CompetitieTaken
 from CompLaagRegio.models import RegioComp, RegioRonde, RegioTeam, RegioRondeTeam, RegioDeelnemer
+from CompLaagRegio.operations.bepaal_wedstrijdpunten import bepaal_wedstrijdpunten
 from Score.definities import SCORE_WAARDE_VERWIJDERD
 from Score.models import ScoreHist
 import traceback
@@ -390,64 +392,90 @@ class Command(BaseCommand):
         # for
         self.stdout.write('[INFO] Scores voor %s deelnemers bijgewerkt' % count)
 
-    @staticmethod
-    def _update_team_scores():
+    def update_team_scores(self):
         """ Update alle team scores aan de hand van wie er in de teams zitten en de door de RCL geselecteerde scores
         """
-        for deelcomp in RegioComp.objects.filter(is_afgesloten=False):
-            ronde_nr = deelcomp.huidige_team_ronde
-            if 1 <= ronde_nr <= 7:
-                # pak alle teams in deze regiocompetitie erbij
-                teams = RegioTeam.objects.filter(regiocomp=deelcomp).values_list('pk', flat=True)
+        for deelcomp in RegioComp.objects.filter(is_afgesloten=False).order_by('competitie__afstand', 'regio__regio_nr'):
+            # pak alle teams in deze regiocompetitie erbij
+            teams = RegioTeam.objects.filter(regiocomp=deelcomp).values_list('pk', flat=True)
 
-                # doorloop alle ronde-teams voor de huidige ronde van de regiocompetitie
-                for ronde_team in (RegioRondeTeam
-                                   .objects
-                                   .prefetch_related('scores_feitelijk')
-                                   .filter(team__in=teams,
-                                           ronde_nr=ronde_nr)):
+            # omdat afgesloten rondes aangepast kunnen worden, bepaal altijd de score/punten van elke ronde
+            for ronde_nr in range(1, deelcomp.huidige_team_ronde+1):
+                if 1 <= ronde_nr <= 7:
+                    #self.stdout.write('{update_team_scores} ronde %s van %s' % (ronde_nr, deelcomp))
 
-                    team_scores = list()
-                    score_pks = list()
-                    for score in ronde_team.scores_feitelijk.exclude(waarde=SCORE_WAARDE_VERWIJDERD):
-                        team_scores.append(score.waarde)
-                        score_pks.append(score.pk)
-                    # for
-                    team_scores.sort(reverse=True)      # hoogste eerst
+                    # doorloop alle ronde-teams
+                    for ronde_team in (RegioRondeTeam
+                                       .objects
+                                       .prefetch_related('scores_feitelijk')
+                                       .filter(team__in=teams,
+                                               ronde_nr=ronde_nr)):
 
-                    # ScoreHist erbij zoeken
-                    hist_pks = list()
-                    for scorehist in (ScoreHist
-                                      .objects
-                                      .select_related('score')
-                                      .filter(score__in=score_pks)
-                                      .order_by('-when')):      # nieuwste eerst
-                        if scorehist.score.pk in score_pks:
-                            hist_pks.append(scorehist.pk)
-                            score_pks.remove(scorehist.score.pk)
+                        team_scores = list()
+                        score_pks = list()
+                        for score in ronde_team.scores_feitelijk.exclude(waarde=SCORE_WAARDE_VERWIJDERD):
+                            team_scores.append(score.waarde)
+                            score_pks.append(score.pk)
+                        # for
+                        team_scores.sort(reverse=True)      # hoogste eerst
 
-                        if len(score_pks) == 0:
-                            # no more scores for which to find a ScoreHist
-                            break       # from the for
-                    # for
+                        # ScoreHist erbij zoeken
+                        hist_pks = list()
+                        for scorehist in (ScoreHist
+                                          .objects
+                                          .select_related('score')
+                                          .filter(score__in=score_pks)
+                                          .order_by('-when')):      # nieuwste eerst
+                            if scorehist.score.pk in score_pks:
+                                hist_pks.append(scorehist.pk)
+                                score_pks.remove(scorehist.score.pk)
 
-                    # sla de ScoreHist op
-                    ronde_team.scorehist_feitelijk.set(hist_pks)
+                            if len(score_pks) == 0:
+                                # no more scores for which to find a ScoreHist
+                                break       # from the for
+                        # for
 
-                    # de hoogste 3 scores maken de teamscore
-                    team_score = 0
-                    for score in team_scores[:3]:
-                        team_score += score
-                    # for
+                        # sla de ScoreHist op
+                        ronde_team.scorehist_feitelijk.set(hist_pks)
 
-                    # is de team score aangepast?
-                    if ronde_team.team_score != team_score:
-                        # print('nieuwe team_score voor team %s: %s --> %s' % (
-                        #           ronde_team, ronde_team.team_score, team_score))
-                        ronde_team.team_score = team_score
-                        ronde_team.save(update_fields=['team_score'])
+                        # de hoogste 3 scores maken de teamscore
+                        team_score = 0
+                        for score in team_scores[:3]:
+                            team_score += score
+                        # for
 
-                # for (ronde team)
+                        # is de team score aangepast?
+                        if ronde_team.team_score != team_score:
+                            # print('nieuwe team_score voor team %s: %s --> %s' % (
+                            #           ronde_team, ronde_team.team_score, team_score))
+                            ronde_team.team_score = team_score
+                            ronde_team.save(update_fields=['team_score'])
+
+                    # for (ronde team)
+
+                    # bepaal de wedstrijdpunten opnieuw
+                    alle_regels, is_redelijk = bepaal_wedstrijdpunten(deelcomp, ronde_nr)
+                    #self.stdout.write('is_redelijk=%s' % is_redelijk)
+
+                    if is_redelijk:
+                        # pas de wedstrijdpunten toe
+                        if deelcomp.regio_team_punten_model == TEAM_PUNTEN_MODEL_TWEE:
+                            for regel in alle_regels:
+                                regel.ronde_team1.team_punten = regel.team1_wp
+                                regel.ronde_team1.save(update_fields=['team_punten'])
+
+                                if regel.ronde_team2:  # None == Bye
+                                    regel.ronde_team2.team_punten = regel.team2_wp
+                                    regel.ronde_team2.save(update_fields=['team_punten'])
+                            # for
+
+                        elif deelcomp.regio_team_punten_model == TEAM_PUNTEN_MODEL_FORMULE1:
+                            for ronde_team in alle_regels:
+                                ronde_team.team_punten = ronde_team.ronde_wp
+                                ronde_team.save(update_fields=['team_punten'])
+                            # for
+
+            # for ronde_nr
         # for (deelcomp)
 
     def _update_tussenstand(self):
@@ -460,7 +488,7 @@ class Command(BaseCommand):
         self._update_regiocompetitiesportersboog()
 
         # stap 3: teams scores bijwerken
-        self._update_team_scores()
+        self.update_team_scores()
 
         klaar = datetime.datetime.now()
         self.stdout.write('[INFO] Tussenstand bijgewerkt in %s seconden' % (klaar - begin))

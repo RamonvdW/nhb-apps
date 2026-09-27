@@ -782,7 +782,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
 
         # do een post
-        with self.assert_max_queries(66):
+        with self.assert_max_queries(21):
             resp = self.client.post(self.url_regio_teams % deelcomp.pk)
         self.assert_is_redirect_not_plein(resp)
 

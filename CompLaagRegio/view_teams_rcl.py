@@ -6,24 +6,22 @@
 
 from django.http import HttpResponseRedirect, Http404, HttpResponse
 from django.urls import reverse
-from django.db.models import Count
 from django.views.generic import TemplateView, View
 from django.core.exceptions import PermissionDenied
 from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
-from Competitie.definities import TEAM_PUNTEN_MODEL_FORMULE1, TEAM_PUNTEN_MODEL_TWEE, TEAM_PUNTEN_F1
+from Competitie.definities import TEAM_PUNTEN_MODEL_FORMULE1, TEAM_PUNTEN_MODEL_TWEE
 from Competitie.models import Competitie, CompetitieTeamKlasse
-from Competitie.operations.poules import maak_poule_schema
-from CompLaagRegio.models import RegioComp, RegioTeam, RegioPoule, RegioRondeTeam, RegioDeelnemer
+from CompLaagRegio.models import RegioComp, RegioTeam, RegioPoule, RegioDeelnemer
 from CompLaagRegio.operations.maak_mutatie_regio import maak_mutatie_regio_team_ronde
+from CompLaagRegio.operations.bepaal_wedstrijdpunten import bepaal_wedstrijdpunten
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
 from Geo.models import Rayon
 from Logboek.operations import schrijf_in_logboek
 from Score.definities import AG_NUL
 from codecs import BOM_UTF8
-from types import SimpleNamespace
 import csv
 
 TEMPLATE_COMPREGIO_RCL_TEAMS = 'complaagregio/rcl-teams.dtl'
@@ -532,159 +530,6 @@ class StartVolgendeTeamRondeView(UserPassesTestMixin, TemplateView):
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
         return self.rol_nu == Rol.ROL_RCL
 
-    @staticmethod
-    def _bepaal_wedstrijdpunten(deelcomp):
-        """ bepaal de wedstrijdpunten voor elk team in de huidige ronde (1..7),
-            afhankelijk van het team punten model dat in gebruik is
-            geeft terug:
-                2p:  lijst van tup(team1, team2) met elk: team1/2_str, team1/2_score, team1/2_wp = 0/1/2
-                f1:  ronde teams met voorstel wp in ronde_wp (10/8/6/5/4/3/2/1/0)
-                som: ronde teams (zonder wp)
-        """
-
-        alle_regels = list()
-        is_redelijk = False
-
-        wp_model = deelcomp.regio_team_punten_model
-
-        # TODO: poules sorteren
-        for poule in (RegioPoule
-                      .objects
-                      .prefetch_related('teams')
-                      .filter(regiocomp=deelcomp)):
-
-            team_pks = poule.teams.values_list('pk', flat=True)
-
-            ronde_teams = (RegioRondeTeam
-                           .objects
-                           .select_related('team',
-                                           'team__vereniging')
-                           .filter(team__in=team_pks,
-                                   ronde_nr=deelcomp.huidige_team_ronde)
-                           .annotate(score_count=Count('scores_feitelijk'))
-                           .order_by('-team_score'))        # belangrijke: hoogste score eerst
-
-            # common
-            for ronde_team in ronde_teams:
-                ronde_team.ronde_wp = 0
-                ronde_team.team_str = "[%s] %s" % (ronde_team.team.vereniging.ver_nr,
-                                                   ronde_team.team.maak_team_naam_kort())
-            # for
-
-            if wp_model == TEAM_PUNTEN_MODEL_TWEE:
-
-                # laat het hele wedstrijdschema maken
-                maak_poule_schema(poule)
-
-                # haal de juiste ronde eruit
-                schemas = [schema for nr, schema in poule.schema if nr == deelcomp.huidige_team_ronde]
-                if len(schemas) != 1:       # pragma: no cover
-                    raise Http404('Probleem met poule wedstrijdschema')
-
-                schema = schemas[0]
-
-                # uit het poule schema komen teams, die moeten we vertalen naar ronde teams
-                team_pk2ronde_team = dict()
-                for ronde_team in ronde_teams:
-                    team_pk2ronde_team[ronde_team.team.pk] = ronde_team
-                # for
-
-                is_eerste = True
-                for team1, team2 in schema:
-                    regel = SimpleNamespace()
-                    regel.team1_str = "[%s] %s" % (team1.vereniging.ver_nr, team1.team_naam)
-                    regel.team1_wp = 0
-                    regel.ronde_team1 = ronde_team1 = team_pk2ronde_team[team1.pk]
-                    regel.team1_score = ronde_team1.team_score
-                    regel.team1_score_count = ronde_team1.score_count
-
-                    if ronde_team1.team_score > 0:
-                        is_redelijk = True
-
-                    if team2.pk == -1:
-                        # van een bye win je altijd, als er maar een score neergezet is
-                        regel.team2_is_bye = True
-                        regel.team2_score = 0
-                        regel.ronde_team2 = None
-                        regel.team2_wp = 0
-                        if regel.team1_score > 0:
-                            regel.team1_wp = 2
-                    else:
-                        regel.team2_str = "[%s] %s" % (team2.vereniging.ver_nr, team2.team_naam)
-                        regel.team2_wp = 0
-                        regel.ronde_team2 = ronde_team2 = team_pk2ronde_team[team2.pk]
-                        regel.team2_score = ronde_team2.team_score
-                        regel.team2_score_count = ronde_team2.score_count
-
-                        if ronde_team2.team_score > ronde_team1.team_score:
-                            regel.team2_wp = 2
-                        elif ronde_team2.team_score < ronde_team1.team_score:
-                            regel.team1_wp = 2
-                        else:
-                            if regel.team1_score > 0:
-                                regel.team1_wp = 1
-                                regel.team2_wp = 1
-
-                    if is_eerste:
-                        regel.break_poule = True
-                        regel.poule_str = poule.beschrijving
-                        is_eerste = False
-
-                    alle_regels.append(regel)
-                # for
-
-            elif wp_model == TEAM_PUNTEN_MODEL_FORMULE1:
-
-                f1_scores = list(TEAM_PUNTEN_F1)
-                rank = 0
-                prev_team_score = 0
-                prev_team_wp = 0
-                for ronde_team in ronde_teams:
-                    if rank == 0:
-                        ronde_team.break_poule = True
-                        ronde_team.poule_str = poule.beschrijving
-
-                    rank += 1
-                    ronde_team.rank = rank
-
-                    # geen score dan geen wedstrijdpunten
-                    if ronde_team.team_score > 0 and len(f1_scores):
-                        # gelijke score, gelijke punten
-                        if ronde_team.team_score == prev_team_score:
-                            ronde_team.ronde_wp = prev_team_wp
-                        else:
-                            ronde_team.ronde_wp = f1_scores[0]
-
-                        prev_team_score = ronde_team.team_score
-                        prev_team_wp = ronde_team.ronde_wp
-
-                        f1_scores.pop(0)
-                        is_redelijk = True
-
-                    alle_regels.append(ronde_team)
-                # for
-
-            else:
-                # TEAM_PUNTEN_MODEL_SOM_SCORES
-                rank = 0
-                for ronde_team in ronde_teams:
-
-                    if rank == 0:
-                        ronde_team.break_poule = True
-                        ronde_team.poule_str = poule.beschrijving
-
-                    rank += 1
-                    ronde_team.rank = rank
-
-                    if ronde_team.team_score != 0:
-                        is_redelijk = True
-
-                    alle_regels.append(ronde_team)
-                # for
-        # for
-
-        return alle_regels, is_redelijk
-
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
@@ -755,7 +600,8 @@ class StartVolgendeTeamRondeView(UserPassesTestMixin, TemplateView):
 
         if not probleem_met_teams:
             if 1 <= deelcomp.huidige_team_ronde <= 7:
-                context['alle_regels'], context['is_redelijk'] = self._bepaal_wedstrijdpunten(deelcomp)
+                tup = bepaal_wedstrijdpunten(deelcomp, deelcomp.huidige_team_ronde)
+                context['alle_regels'], context['is_redelijk'] = tup
 
             if deelcomp.huidige_team_ronde <= 7:
                 context['url_team_scores'] = reverse('CompScores:selecteer-team-scores',
@@ -804,11 +650,12 @@ class StartVolgendeTeamRondeView(UserPassesTestMixin, TemplateView):
 
             # controleer dat het redelijk is om de volgende ronde op te starten
             if deelcomp.huidige_team_ronde > 0:
-                alle_regels, is_redelijk = self._bepaal_wedstrijdpunten(deelcomp)
+                alle_regels, is_redelijk = bepaal_wedstrijdpunten(deelcomp, deelcomp.huidige_team_ronde)
                 if not is_redelijk:
                     raise Http404('Te weinig scores')
 
                 # pas de wedstrijdpunten toe
+                # TODO: verplaats naar background task
                 if deelcomp.regio_team_punten_model == TEAM_PUNTEN_MODEL_TWEE:
                     for regel in alle_regels:
                         regel.ronde_team1.team_punten = regel.team1_wp
@@ -826,7 +673,9 @@ class StartVolgendeTeamRondeView(UserPassesTestMixin, TemplateView):
                     # for
 
             account = get_account(request)
-            schrijf_in_logboek(account, 'Competitie', 'Teamcompetitie doorzetten naar ronde %s voor %s' % (deelcomp.huidige_team_ronde+1, deelcomp))
+            schrijf_in_logboek(account, 'Competitie',
+                               'Teamcompetitie doorzetten naar ronde %s voor %s' % (deelcomp.huidige_team_ronde+1,
+                                                                                    deelcomp))
 
             # voor concurrency protection, laat de achtergrondtaak de ronde doorzetten
             door_str = "RCL %s" % account.volledige_naam()
