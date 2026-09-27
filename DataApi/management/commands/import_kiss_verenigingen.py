@@ -99,7 +99,7 @@ class Command(BaseCommand):
         self.stdout.write('[INFO] Lees %s' % repr(fpath))
         data = list()
         try:
-            with open(fpath, encoding='raw_unicode_escape') as csv_file:
+            with open(fpath, encoding='utf-8') as csv_file:
                 csv_reader = csv.reader(csv_file, delimiter=';')
                 for row in csv_reader:
                     data.append(row)

@@ -24,6 +24,12 @@ class Command(BaseCommand):
         # parser.add_argument('--dryrun', action='store_true')
         pass
 
+    def _check_ymd(self, datum: str, field_str: str, id_str: str):
+        # YYYY-MM-DD
+        # 0123456789
+        if len(datum) != 10 or datum[4] != '-' or datum[7] != '-':
+            self.stdout.write('[ERROR] Illegale %s %s in %s' % (field_str, repr(datum), id_str))
+
     def _check_no_lms_on_ver(self, ver: DataApiVereniging):
         lms_actief = list()
         lms_later_afgemeld = list()
@@ -51,6 +57,12 @@ class Command(BaseCommand):
     def _check_ver(self):
         self.stdout.write('[INFO] Controleer alle verenigingen')
         for ver in DataApiVereniging.objects.all():
+            id_str = '[ver %s (pk %s)]' % (ver.ver_nr, ver.pk)
+            if ver.aanmeld_datum:
+                self._check_ymd(ver.aanmeld_datum, 'aanmelddatum', id_str)
+            if ver.afmeld_datum:
+                self._check_ymd(ver.afmeld_datum, 'afmelddatum', id_str)
+
             if ver.afmeld_datum != '':
                 # vereniging is niet meer actief
                 # alle lidmaatschappen moeten voor deze datum geeindigd zijn
@@ -88,6 +100,12 @@ class Command(BaseCommand):
                 if len(lms.postcode) != 6:
                     self.stdout.write('[WARNING] Niet standaard postcode %s (land %s) voor %s' % (repr(lms.postcode), lms.land_iso, lms))
                     self.count_postcode_issue += 1
+
+            id_str = '[lms %s]' % lms.pk
+            self._check_ymd(lms.geboorte_datum, 'geboortedatum', id_str)
+            self._check_ymd(lms.aanmeld_datum, 'aanmelddatum', id_str)
+            if lms.afmeld_datum:
+                self._check_ymd(lms.afmeld_datum, 'afmelddatum', id_str)
         # for
 
     def handle(self, *args, **options):

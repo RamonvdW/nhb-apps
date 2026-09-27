@@ -172,7 +172,7 @@ class ImportHistCrmLidmaatschappen(ImportCrmBase):
 
                 if afmeld_datum != '':
                     # vereniging is niet bekend, dus dit kunnen we niet meer opslaan
-                    self.out_warning('Lid %s was lid bij onbekende vereniging: [%s %s %s-%s] van %s tot %s' % (lid_nr, geboorte_datum, geslacht, land_iso, postcode, aanmeld_datum, afmeld_datum))
+                    self.out_warning('Onbekend lidmaatschap %s [%s %s %s-%s] van %s tot %s bij vereniging ??' % (lid_nr, geboorte_datum, geslacht, land_iso, postcode, aanmeld_datum, afmeld_datum))
                     return
 
                 self.out_warning('Onbekend lid: %s [%s %s %s-%s] van %s tot %s' % (lid_nr, geboorte_datum, geslacht, land_iso, postcode, aanmeld_datum, afmeld_datum))
@@ -193,7 +193,9 @@ class ImportHistCrmLidmaatschappen(ImportCrmBase):
                 return
 
             # huidige record afsluiten
-            self._afmelden(lms, afmeld_datum or self.afmelddatum)
+            if not afmeld_datum:
+                self.out_error('Lid %s oude lms moet afgesloten worden, maar er is geen afmelddatum! (1)' % lid_nr)
+            self._afmelden(lms, afmeld_datum)
             return
 
         if lms.ver_nr != ver_nr:
@@ -203,11 +205,14 @@ class ImportHistCrmLidmaatschappen(ImportCrmBase):
 
             if lms.afmeld_datum == '':
                 # huidige record afsluiten en nieuwe beginnen
-                self._afmelden(lms, afmeld_datum or self.afmelddatum)
+                if not afmeld_datum:
+                    self.out_error('Lid %s oude lms moet afgesloten worden, maar er is geen afmelddatum! (2)' % lid_nr)
+                else:
+                    self._afmelden(lms, afmeld_datum)
 
-                if lms.afmeld_datum < aanmeld_datum:
-                    self.out_error('Aanmelddatum vóór vorige afmelddatum: %s < %s' % (aanmeld_datum, lms.afmeld_datum))
-                    return
+                    if aanmeld_datum < lms.afmeld_datum:
+                        self.out_error('Aanmelddatum vóór vorige afmelddatum: %s < %s' % (aanmeld_datum, lms.afmeld_datum))
+                        return
 
             lms = self._maak_lms(lid_nr, ver_nr, geslacht, geboorte_datum, aanmeld_datum, land_iso, postcode)
             self.out_info('Nieuw lms: %s' % lms)
@@ -295,19 +300,8 @@ class ImportHistCrmLidmaatschappen(ImportCrmBase):
                     pass
 
             if member['birthday'] and member['birthday'][0:0+2] not in ("19", "20"):
-                # poging tot repareren
-                if member['birthday'][0:0+2] == "00":
-                    old_birthday = member['birthday']
-                    year = int(old_birthday[2:2+2])
-                    if year < 25:
-                        member['birthday'] = '20' + old_birthday[2:]
-                    else:
-                        member['birthday'] = '19' + old_birthday[2:]
-                    self.out_warning("Lid %s geboortedatum gecorrigeerd van %s naar %s" % (
-                                            lid_nr, old_birthday, member['birthday']))
-                else:
-                    self.out_error('Lid %s heeft geen valide geboortedatum: %s' % (lid_nr, member['birthday']))
-                    continue
+                self.out_error('Lid %s heeft geen valide geboortedatum: %s' % (lid_nr, repr(member['birthday'])))
+                continue
             try:
                 lid_geboorte_datum = datetime.datetime.strptime(member['birthday'], "%Y-%m-%d").date()   # YYYY-MM-DD
             except (ValueError, TypeError):
@@ -333,19 +327,20 @@ class ImportHistCrmLidmaatschappen(ImportCrmBase):
                 if land_iso == 'NL':
                     lid_postcode = lid_postcode.replace(' ', '')
                     if len(lid_postcode) != 6:
-                        plaats = member['location_name']
+                        plaats = member.get('location_name', '?')   # optioneel veld
                         self.out_warning('Lid %s uit plaats %s, land %s heeft postcode %s' % (
                                     lid_nr, plaats, land_iso, repr(lid_postcode)))
 
             # lid sinds
             lid_sinds_str = member.get('member_from_club', '') or member.get('member_from', '')
             if lid_sinds_str and lid_sinds_str[:2] not in ("19", "20"):
-                self.out_error('Lid %s heeft geen valide datum lidmaatschap: %s' % (lid_nr, repr(lid_sinds_str)))
+                self.out_error('Lid %s heeft geen valide datum member_from[_club]: %s' % (lid_nr,
+                                                                                          repr(lid_sinds_str)))
                 continue
             try:
                 lid_sinds = datetime.datetime.strptime(lid_sinds_str, "%Y-%m-%d").date()  # YYYY-MM-DD
             except (ValueError, TypeError):
-                self.out_error('Lid %s heeft geen valide lidmaatschapsdatum: %s' % (lid_nr,
+                self.out_error('Lid %s heeft geen valide member_from[_club]: %s' % (lid_nr,
                                                                                     repr(lid_sinds_str)))
                 continue
 
@@ -356,8 +351,8 @@ class ImportHistCrmLidmaatschappen(ImportCrmBase):
                 try:
                     lid_tot = datetime.datetime.strptime(lid_tot_str, "%Y-%m-%d").date()  # YYYY-MM-DD
                 except (ValueError, TypeError):
-                    self.out_error('Lid %s heeft geen valide datum einde lidmaatschap: %s' % (
-                                            lid_nr, repr(lid_tot_str)))
+                    self.out_error('Lid %s heeft geen valide datum member_until[_club]: %s' % (lid_nr,
+                                                                                               repr(lid_tot_str)))
                     continue
 
                 # ignore toekomstige einddatums (die kunnen nog wijzigen)
@@ -368,11 +363,14 @@ class ImportHistCrmLidmaatschappen(ImportCrmBase):
             overleden_datum = member.get('date_of_death', None)
             if overleden_datum:
                 try:
-                    lid_tot = datetime.datetime.strptime(member['date_of_death'], "%Y-%m-%d").date()
+                    d_o = datetime.datetime.strptime(member['date_of_death'], "%Y-%m-%d").date()
                 except (ValueError, TypeError):
                     self.out_error('Lid %s heeft geen valide datum van overlijden: %s' %
                                         (lid_nr, repr(member['date_of_death'])))
                     continue
+
+                if not lid_tot:
+                    self.out_error('Lid %s heeft datum overlijden=%s maar is nog lid' % (lid_nr, d_o))
 
             self._store_lid(lid_nr, lid_ver_nr,
                             lid_geslacht, lid_geboorte_datum,
@@ -391,7 +389,8 @@ class ImportHistCrmLidmaatschappen(ImportCrmBase):
 
             for lms in self._cache_actieve_lidmaatschappen.get(lid_nr, []):
                 if lms.afmeld_datum == '':
-                    self._afmelden(lms, self.afmelddatum)
+                    self.out_error('Lid %s moet afgemeld worden (niet meer in CRM data), maar geen afmelddatum' % lid_nr)
+                    # self._afmelden(lms, self.afmelddatum)
             # for
         # while
 
