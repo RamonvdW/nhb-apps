@@ -49,6 +49,9 @@
     </head>
 
     <body class="white">
+        {% comment %}
+        <div class="sv-bg-erachter" style="background-image: url({% static 'design/site-background.png' %})"></div>
+        {% endcomment %}
 
         <!-- top navbar -->
         <div class="navbar-fixed">

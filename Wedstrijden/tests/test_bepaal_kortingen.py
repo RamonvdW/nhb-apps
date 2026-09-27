@@ -6,14 +6,13 @@
 
 from django.test import TestCase
 from django.utils import timezone
-from django.core.management.base import OutputWrapper
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
 from Bestelling.definities import BESTELLING_REGEL_CODE_WEDSTRIJD, BESTELLING_REGEL_CODE_WEDSTRIJD_KORTING
 from Bestelling.models import BestellingRegel
 from Geo.models import Regio
 from Locatie.models import WedstrijdLocatie
 from Sporter.models import Sporter, SporterBoog
-from TestHelpers.e2ehelpers import E2EHelpers
+from TestHelpers.e2ehelpers import E2EHelpers, OutputBuffer
 from Vereniging.models import Vereniging
 from Wedstrijden.definities import (WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_MANDJE,
                                     WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF,
@@ -23,7 +22,6 @@ from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdInschrijving
 from Wedstrijden.operations.bepaal_kortingen import BepaalAutomatischeKorting
 from datetime import timedelta
 from decimal import Decimal
-import io
 
 
 class TestWedstrijdenBepaalKortingen(E2EHelpers, TestCase):
@@ -314,7 +312,7 @@ class TestWedstrijdenBepaalKortingen(E2EHelpers, TestCase):
         self._maak_kortingen()
 
     def test_korting_persoonlijk(self):
-        stdout = OutputWrapper(io.StringIO())
+        stdout = OutputBuffer()
         bepaal = BepaalAutomatischeKorting(stdout, verbose=True)
         # regel1 en regel2 zijn wedstrijden
 
@@ -327,7 +325,7 @@ class TestWedstrijdenBepaalKortingen(E2EHelpers, TestCase):
         self.korting_s.voor_wedstrijden.add(self.wedstrijd1)
         self.korting_s.voor_wedstrijden.add(self.wedstrijd3)        # ligt niet in mandje
 
-        stdout = OutputWrapper(io.StringIO())
+        stdout = OutputBuffer()
         bepaal = BepaalAutomatischeKorting(stdout, verbose=True)
         regels = [self.regel1.pk, self.regel2.pk, self.regel3.pk]
         res = bepaal.kies_kortingen(regels)
@@ -359,7 +357,7 @@ class TestWedstrijdenBepaalKortingen(E2EHelpers, TestCase):
         self.assertEqual(res, leeg)
 
     def test_korting_vereniging(self):
-        stdout = OutputWrapper(io.StringIO())
+        stdout = OutputBuffer()
         bepaal = BepaalAutomatischeKorting(stdout, verbose=True)
         # regel1 en regel2 zijn wedstrijden
 
@@ -391,7 +389,7 @@ class TestWedstrijdenBepaalKortingen(E2EHelpers, TestCase):
         self.korting_c.voor_wedstrijden.add(self.wedstrijd1)
         self.korting_c.voor_wedstrijden.add(self.wedstrijd2)
 
-        stdout = OutputWrapper(io.StringIO())
+        stdout = OutputBuffer()
         bepaal = BepaalAutomatischeKorting(stdout, verbose=True)
         regels = [self.regel1.pk, self.regel2.pk, self.regel3.pk]
         res = bepaal.kies_kortingen(regels)
@@ -405,7 +403,7 @@ class TestWedstrijdenBepaalKortingen(E2EHelpers, TestCase):
         self.assertEqual(round(regel.bedrag_euro, 2), -25.00)
 
         # maar 1 van de wedstrijden van de combinatiekorting
-        stdout = OutputWrapper(io.StringIO())
+        stdout = OutputBuffer()
         bepaal = BepaalAutomatischeKorting(stdout, verbose=True)
         regels = [self.regel1.pk]
         res = bepaal.kies_kortingen(regels)
@@ -415,7 +413,7 @@ class TestWedstrijdenBepaalKortingen(E2EHelpers, TestCase):
 
         # zowel persoonlijke als combi kortingen
         self.korting_s.voor_wedstrijden.add(self.wedstrijd1)
-        stdout = OutputWrapper(io.StringIO())
+        stdout = OutputBuffer()
         bepaal = BepaalAutomatischeKorting(stdout, verbose=True)
         regels = [self.regel1.pk, self.regel2.pk, self.regel3.pk]
         res = bepaal.kies_kortingen(regels)
@@ -432,7 +430,7 @@ class TestWedstrijdenBepaalKortingen(E2EHelpers, TestCase):
         # persoonlijke korting wordt belangrijker
         self.regel1.bedrag_euro = Decimal(250.0)
         self.regel1.save(update_fields=['bedrag_euro'])
-        stdout = OutputWrapper(io.StringIO())
+        stdout = OutputBuffer()
         bepaal = BepaalAutomatischeKorting(stdout, verbose=True)
         regels = [self.regel1.pk, self.regel2.pk, self.regel3.pk]
         res = bepaal.kies_kortingen(regels)
@@ -448,7 +446,7 @@ class TestWedstrijdenBepaalKortingen(E2EHelpers, TestCase):
         # nog een keer, zonder verbose
         self.regel1.bedrag_euro = Decimal(250.0)
         self.regel1.save(update_fields=['bedrag_euro'])
-        stdout = OutputWrapper(io.StringIO())
+        stdout = OutputBuffer()
         bepaal = BepaalAutomatischeKorting(stdout, verbose=False)
         regels = [self.regel1.pk, self.regel2.pk, self.regel3.pk]
         res = bepaal.kies_kortingen(regels)
@@ -465,7 +463,7 @@ class TestWedstrijdenBepaalKortingen(E2EHelpers, TestCase):
         self.inschrijving1.status = WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF
         self.inschrijving1.save(update_fields=['status'])
 
-        stdout = OutputWrapper(io.StringIO())
+        stdout = OutputBuffer()
         bepaal = BepaalAutomatischeKorting(stdout, verbose=True)
         regels = [self.regel2.pk]
         res = bepaal.kies_kortingen(regels)

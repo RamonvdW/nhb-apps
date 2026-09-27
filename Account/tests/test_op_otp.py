@@ -48,30 +48,27 @@ class TestAccountOTP(E2EHelpers, TestCase):
         return otp.now()
 
     def test_controleer_code(self):
-        account = SimpleNamespace()
-        account.otp_code = ""
-        account.username = 'otp'
-        account.is_staff = False
-        account.is_BB = True
+        account = Account.objects.create(
+                        otp_code="",
+                        username='gebruiker',
+                        is_staff=False,
+                        is_BB=False)
 
         request = SimpleNamespace()
-        request.user = account
         request.session = self.client.session
 
         # niet ingelogd
-        account.is_authenticated = False
-        account.otp_is_actief = False
+        request.user = AnonymousUser()       # heeft is_authenticated = False
         res = otp_controleer_code(request, account, 0)
         self.assertEqual(res, False)
 
         # OTP niet actief
-        account.is_authenticated = True
+        request.user = self.account_otp      # heeft is_authenticated = True
         account.otp_is_actief = False
         res = otp_controleer_code(request, account, 0)
         self.assertEqual(res, False)
 
         # invalid code
-        account.is_authenticated = True
         account.otp_is_actief = True
         res = otp_controleer_code(request, account, 0)
         self.assertEqual(res, False)

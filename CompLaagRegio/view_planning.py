@@ -22,7 +22,7 @@ from Functie.definities import Rol
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie
 from Geo.models import Cluster
 from Locatie.models import WedstrijdLocatie
-from Logboek.models import schrijf_in_logboek
+from Logboek.operations import schrijf_in_logboek
 from Taken.operations import maak_taak
 from Vereniging.models import Vereniging
 from types import SimpleNamespace

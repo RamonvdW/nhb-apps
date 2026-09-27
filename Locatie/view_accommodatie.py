@@ -16,7 +16,7 @@ from Functie.rol import rol_get_huidige_functie
 from Locatie.definities import BAAN_TYPE_BUITEN, BAAN_TYPE_EXTERN, BAANTYPE2STR
 from Locatie.forms import AccommodatieDetailsForm
 from Locatie.models import WedstrijdLocatie
-from Logboek.models import schrijf_in_logboek
+from Logboek.operations import schrijf_in_logboek
 from Vereniging.models import Vereniging, Secretaris
 
 

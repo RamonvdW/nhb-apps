@@ -1,0 +1,129 @@
+{% extends 'design/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2026 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+{% load design_knop %}
+
+{% block title %}Bestelformulier, stap 3{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h1 class="sv-kopje-pagina">Bestelformulier</h1>
+            <p>Bestel prestatiespelden, voor jezelf</p>
+        </div>
+    </div>
+
+    <!-- blauwe balk met informatie in tabel-vorm:  label - info -->
+    <div class="row-sv-blauw">
+        <div class="col s12 m10 offset-m1 l8 offset-l2">
+            <table class="sv-kader-tabel">
+                <tr>
+                    <th>Sporter</th>
+                    <td>{{ sporter_str }}</td>
+                </tr>
+                <tr>
+                    <th>Wedstrijddiscipline</th>
+                    <td>{{ discipline_str }}</td>
+                </tr>
+                {% if geslacht_str %}
+                    <tr>
+                        <th>Wedstrijdgeslacht</th>
+                        <td>{{ geslacht_str }}</td>
+                    </tr>
+                {% endif %}
+                <tr>
+                    <th>Gebruikte boog</th>
+                    <td>{{ boogtype_str }}</td>
+                </tr>
+                <tr>
+                    <th>Behaalde score</th>
+                    <td>{{ score }}</td>
+                </tr>
+                {% if afstanden %}
+                    <tr>
+                        <th>Afstand(en)</th>
+                        <td>{{ afstanden }}</td>
+                    </tr>
+                {% endif %}
+                {% if aantal_pijlen %}
+                    <tr>
+                        <th>Aantal pijlen</th>
+                        <td>{{ aantal_pijlen }}</td>
+                    </tr>
+                {% endif %}
+                {% if aantal_doelen %}
+                    <tr>
+                        <th>Aantal doelen</th>
+                        <td>{{ aantal_doelen }}</td>
+                    </tr>
+                {% endif %}
+            </table>
+        </div>
+    </div>
+
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h2 class="sv-kopje-row">Stap 3</h2>
+            <p>Hieronder zie je de spelden die je kunt bestellen.</p>
+        </div>
+    </div>
+
+    <!-- blauwe balk filters -->
+    <div class="row-sv-blauw">
+
+        <form action="{{ url_opslaan }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
+            {% csrf_token %}
+
+            <!-- filter: wedstrijddiscipline -->
+            <div class="col s10 offset-s1 sv-kader-form">
+                <div class="form-padding">
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Soort speld</th>
+                                <th>Details</th>
+                                <th>Benodige score</th>
+                                <th>Opmerking</th>
+                            </tr>
+                        </thead>
+
+                        {% for optie in mogelijke_spelden %}
+                            <tr>
+                                <td>{{ optie.speld.categorie_str }}</td>
+                                <td>{{ optie.speld.beschrijving }}</td>
+                                <td class="{% if optie.ok_score %}green-text{% else %}sv-rood-text{% endif %}">{{ optie.benodigde_score }}</td>
+                                <td>{{ optie.opmerking }}</td>
+                            </tr>
+                        {% endfor %}
+
+                        <tr>
+                            <td colspan="2" class="center">
+                                <button class="btn-sv-rood" id="submit_knop" type="submit">Volgende stap</button>
+                            </td>
+                        </tr>
+
+                    </table>
+
+                </div>
+            </div>
+
+        </form>
+    </div>
+
+
+    <p class="center">
+        {% sv-knop-nav url=url_stap2 icon='terug' tekst='Terug naar stap 2' kleur='blauw' %}
+    </p>
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="spelden-bestel-stap3" %}
+
+{% endblock %}

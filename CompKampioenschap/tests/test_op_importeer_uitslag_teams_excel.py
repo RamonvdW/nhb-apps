@@ -5,7 +5,6 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from django.core.management.base import OutputWrapper
 from BasisTypen.models import BoogType, TeamType
 from Competitie.models import Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse
 from CompKampioenschap.operations import ImporteerUitslagTeamsExcel
@@ -13,12 +12,11 @@ from CompLaagRayon.models import KampRK, DeelnemerRK, TeamRK
 from Functie.tests.helpers import maak_functie
 from Geo.models import Regio, Rayon
 from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
-from TestHelpers.e2ehelpers import E2EHelpers
+from TestHelpers.e2ehelpers import E2EHelpers, OutputBuffer
 from Vereniging.models import Vereniging
 from unittest.mock import patch
 from types import SimpleNamespace
 from decimal import Decimal
-import io
 
 
 class TestCompKampioenschapOpImporteerUitslagTeamsExcel(E2EHelpers, TestCase):
@@ -196,8 +194,8 @@ class TestCompKampioenschapOpImporteerUitslagTeamsExcel(E2EHelpers, TestCase):
                 pass
 
         with patch('CompKampioenschap.operations.importeer_uitslag_teams_excel.LeesTeamsExcel', new=MockLeesTeamsExcel1):
-            stdout = OutputWrapper(io.StringIO())
-            stderr = OutputWrapper(io.StringIO())
+            stdout = OutputBuffer()
+            stderr = OutputBuffer()
 
             importeer = ImporteerUitslagTeamsExcel(stdout, stderr, dryrun=True, verbose=True, afstand='18', is_bk=False)
             importeer.importeer_bestand('fname.xlsx')
@@ -214,8 +212,8 @@ class TestCompKampioenschapOpImporteerUitslagTeamsExcel(E2EHelpers, TestCase):
                 pass
 
         with patch('CompKampioenschap.operations.importeer_uitslag_teams_excel.LeesTeamsExcel', new=MockLeesTeamsExcel2):
-            stdout = OutputWrapper(io.StringIO())
-            stderr = OutputWrapper(io.StringIO())
+            stdout = OutputBuffer()
+            stderr = OutputBuffer()
 
             importeer = ImporteerUitslagTeamsExcel(stdout, stderr, dryrun=True, verbose=True, afstand='18', is_bk=True)
             importeer.importeer_bestand('fname.xlsx')
@@ -249,8 +247,8 @@ class TestCompKampioenschapOpImporteerUitslagTeamsExcel(E2EHelpers, TestCase):
                 pass
 
         with patch('CompKampioenschap.operations.importeer_uitslag_teams_excel.LeesTeamsExcel', new=MockLeesTeamsExcel3):
-            stdout = OutputWrapper(io.StringIO())
-            stderr = OutputWrapper(io.StringIO())
+            stdout = OutputBuffer()
+            stderr = OutputBuffer()
 
             importeer = ImporteerUitslagTeamsExcel(stdout, stderr, dryrun=True, verbose=True, afstand='18', is_bk=False)
             importeer.importeer_bestand('fname.xlsx')
@@ -310,8 +308,8 @@ class TestCompKampioenschapOpImporteerUitslagTeamsExcel(E2EHelpers, TestCase):
                 pass
 
         with patch('CompKampioenschap.operations.importeer_uitslag_teams_excel.LeesTeamsExcel', new=MockLeesTeamsExcel4):
-            stdout = OutputWrapper(io.StringIO())
-            stderr = OutputWrapper(io.StringIO())
+            stdout = OutputBuffer()
+            stderr = OutputBuffer()
 
             importeer = ImporteerUitslagTeamsExcel(stdout, stderr, dryrun=True, verbose=True, afstand='18', is_bk=False)
             importeer.importeer_bestand('fname.xlsx')
@@ -348,8 +346,8 @@ class TestCompKampioenschapOpImporteerUitslagTeamsExcel(E2EHelpers, TestCase):
                 pass
 
         with patch('CompKampioenschap.operations.importeer_uitslag_teams_excel.LeesTeamsExcel', new=MockLeesTeamsExcel5):
-            stdout = OutputWrapper(io.StringIO())
-            stderr = OutputWrapper(io.StringIO())
+            stdout = OutputBuffer()
+            stderr = OutputBuffer()
 
             importeer = ImporteerUitslagTeamsExcel(stdout, stderr, dryrun=True, verbose=False, afstand='18', is_bk=False)
             importeer.importeer_bestand('fname.xlsx')
@@ -415,8 +413,8 @@ class TestCompKampioenschapOpImporteerUitslagTeamsExcel(E2EHelpers, TestCase):
                 pass
 
         with patch('CompKampioenschap.operations.importeer_uitslag_teams_excel.LeesTeamsExcel', new=MockLeesTeamsExcel):
-            stdout = OutputWrapper(io.StringIO())
-            stderr = OutputWrapper(io.StringIO())
+            stdout = OutputBuffer()
+            stderr = OutputBuffer()
 
             importeer = ImporteerUitslagTeamsExcel(stdout, stderr, dryrun=True, verbose=True, afstand='18', is_bk=False)
             importeer.importeer_bestand('fname.xlsx')

@@ -31,6 +31,12 @@
                     <th>Wedstrijddiscipline</th>
                     <td>{{ discipline_str }}</td>
                 </tr>
+                {% if geslacht_str %}
+                    <tr>
+                        <th>Wedstrijdgeslacht</th>
+                        <td>{{ geslacht_str }}</td>
+                    </tr>
+                {% endif %}
                 <tr>
                     <th>Gebruikte boog</th>
                     <td>{{ boogtype_str }}</td>
@@ -48,67 +54,74 @@
     <div class="row center">
         <div class="col s12">
             <h2 class="sv-kopje-row">Stap 2</h2>
+            <p>Vertel ons wat meer over de wedstrijd.</p>
         </div>
     </div>
 
     <!-- blauwe balk filters -->
-    <div class="row-sv-blauw" id="filters" data-url="{{ url_filters }}">
-        {% comment %}
-            context['url_filters'] = reverse('CompUitslagen:uitslagen-regio-indiv-n',
-                                             kwargs={'comp_pk_of_seizoen': comp.maak_seizoen_url(),
-                                                     'comp_boog': '~1',
-                                                     'regio_nr': '~2'})
+    <div class="row-sv-blauw">
 
-            Voor elke ~1, ~2 etc. moet er een input zijn met name="filter_1", "filter_2", etc.
+        <form action="{{ url_opslaan }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
+            {% csrf_token %}
 
-        {% endcomment %}
+            <!-- filter: wedstrijddiscipline -->
+            <div class="col s10 offset-s1 m6 offset-m3 l4 offset-l4 sv-kader-form">
+                <div class="form-padding">
 
-        <!-- filter: afstand -->
-        <div class="col s6 m3 offset-m3" style="margin-bottom:15px">
-            <div class="sv-kader-filter">
-                <p><b>Kies de afstand:</b></p>
-                <ul>
-                    {% for filter in afstand_filters %}
-                        <li>
-                            <label class="black-text" for="id_{{ filter.sel }}">
-                                <input class="with-gap" type="radio" name="filter_##" value="{{ filter.sel }}" required id="id_{{ filter.sel }}" {% if filter.selected %}checked{% endif %} data-url="{{ filter.url_part }}">
-                                <span>{{ filter.opt_text }}</span>
-                            </label>
-                        </li>
-                    {% endfor %}
-                </ul>
-                <p style="margin-left:35px">
-                    <button class="btn-sv-rood btn-sv-activeer-filter">Activeer</button>
-                </p>
+                    <table>
+                        {% if doelen_opties %}
+                            <tr>
+                                <th>Aantal doelen</th>
+                                <td>
+                                    <ul id="id_doelen">
+                                        {% for opt in doelen_opties %}
+                                            <li>
+                                                <label class="black-text" for="id_{{ opt.afkorting }}">
+                                                    <input class="with-gap" type="radio" name="doelen" value="{{ opt.afkorting }}" required id="id_{{ opt.afkorting }}"{% if opt.actief %} checked{% endif %}>
+                                                    <span>{{ opt.beschrijving }}</span>
+                                                </label>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                </td>
+                            </tr>
+                        {% endif %}
+
+                        {% if afstanden_opties %}
+                            <tr>
+                                <th>{{ afstanden_titel }}</th>
+                                <td>
+                                    <ul id="id_afstanden">
+                                        {% for opt in afstanden_opties %}
+                                            <li>
+                                                <label class="black-text" for="id_{{ opt.afkorting }}">
+                                                    <input class="with-gap" type="radio" name="afstand" value="{{ opt.afkorting }}" required id="id_{{ opt.afkorting }}"{% if opt.actief %} checked{% endif %}>
+                                                    <span>{{ opt.beschrijving }}</span>
+                                                </label>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                </td>
+                            </tr>
+                        {% endif %}
+
+                        <tr>
+                            <td colspan="2" class="center">
+                                <button class="btn-sv-rood" id="submit_knop" type="submit">Volgende stap</button>
+                            </td>
+                        </tr>
+
+                    </table>
+
+                </div>
             </div>
-        </div>
 
-        <!-- filter: aantal pijlen -->
-        <div class="col s6 m3" style="margin-bottom:15px">
-            <div class="sv-kader-filter">
-                <p><b>Kies het aantal pijlen:</b></p>
-                <ul>
-                    {% for filter in pijlen_filters %}
-                        <li>
-                            <label class="black-text" for="id_{{ filter.sel }}">
-                                <input class="with-gap" type="radio" name="filter_##" value="{{ filter.sel }}" required id="id_{{ filter.sel }}" {% if filter.selected %}checked{% endif %} data-url="{{ filter.url_part }}">
-                                <span>{{ filter.opt_text }}</span>
-                            </label>
-                        </li>
-                    {% endfor %}
-                </ul>
-                <p style="margin-left:35px">
-                    <button class="btn-sv-rood btn-sv-activeer-filter">Activeer</button>
-                </p>
-            </div>
-        </div>
-
-        <script src="{% static 'overig_js/pagina_filters.js' %}"></script>
+        </form>
     </div>
 
 
     <p class="center">
-        {% sv-knop-nav url=url_stap1 icon='terug' tekst='Terug naar stap 1' %}
+        {% sv-knop-nav url=url_stap1 icon='terug' tekst='Terug naar stap 1' kleur='blauw' %}
     </p>
 
     {% include 'feedback/sidebar.dtl' with op_pagina="spelden-bestel-stap2" %}

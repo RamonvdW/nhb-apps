@@ -154,7 +154,7 @@
         {% endcomment %}
 
         <!-- filter: xxx -->
-        <div class="col s3" style="margin-bottom:15px">
+        <div class="col s3">
             <div class="sv-kader-filter">
                 <p><b>Kies een xxx type:</b></p>
                 <ul>

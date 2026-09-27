@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -9,7 +9,7 @@ from django.contrib.auth import login, logout
 from Account.middleware import SESSIONVAR_ACCOUNT_LOGIN_AS_DATE
 from Account.models import Account
 from Account.plugin_manager import account_plugins_login_gate, account_plugins_post_login
-from Logboek.models import schrijf_in_logboek
+from Logboek.operations import schrijf_in_logboek
 from Overig.helpers import get_safe_from_ip
 from .session_vars import zet_sessionvar_if_changed                      # must not rely on Account.operations.__init__
 from .otp import otp_zet_controle_niet_gelukt, otp_zet_controle_gelukt   # must not rely on Account.operations.__init__

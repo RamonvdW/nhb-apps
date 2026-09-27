@@ -26,27 +26,27 @@
                 <thead>
                     <tr>
                         <th class="center">Speld</th>
-                        <th class="center">Behaald door</th>
                         <th class="center">Eisen</th>
+                        <th class="center">Behaald door</th>
                     </tr>
                 </thead>
 
                 <tr>
                     <td class="center">Grootmeesterschutter</td>
-                    <td class="center">{{ aantal_gm }} sporters</td>
                     <td class="center">1e graadspeld behaald in drie disciplines</td>
+                    <td class="center">{{ aantal_gm }} sporters</td>
                 </tr>
 
                 <tr>
                     <td class="center">Meesterschutter</td>
-                    <td class="center">{{ aantal_ms }} sporters</td>
                     <td class="center">2e graadspeld behaald in drie disciplines</td>
+                    <td class="center">{{ aantal_ms }} sporters</td>
                 </tr>
 
                 <tr>
                     <td class="center">Allroundschutter</td>
-                    <td class="center">{{ aantal_as }} sporters</td>
                     <td class="center">3e graadspeld behaald in alle vier de disciplines</td>
+                    <td class="center">{{ aantal_as }} sporters</td>
                 </tr>
             </table>
         </div>

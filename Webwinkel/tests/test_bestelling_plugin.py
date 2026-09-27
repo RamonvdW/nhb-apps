@@ -7,12 +7,11 @@
 from django.conf import settings
 from django.test import TestCase, override_settings
 from django.utils import timezone
-from django.core.management.base import OutputWrapper
 from Bestelling.definities import BESTELLING_REGEL_CODE_WEBWINKEL
 from Bestelling.models import BestellingRegel, BestellingMandje
 from Geo.models import Regio
 from Sporter.models import Sporter
-from TestHelpers.e2ehelpers import E2EHelpers
+from TestHelpers.e2ehelpers import E2EHelpers, OutputBuffer
 from Vereniging.models import Vereniging
 from Webwinkel.definities import (VERZENDKOSTEN_PAKKETPOST, VERZENDKOSTEN_BRIEFPOST,
                                   KEUZE_STATUS_RESERVERING_MANDJE, KEUZE_STATUS_BESTELD, KEUZE_STATUS_BACKOFFICE)
@@ -20,7 +19,6 @@ from Webwinkel.models import WebwinkelKeuze, WebwinkelProduct
 from Webwinkel.plugin_bestelling import WebwinkelBestelPlugin, VerzendkostenBestelPlugin
 from decimal import Decimal
 import datetime
-import io
 
 
 class TestWebwinkelBestellingPlugin(E2EHelpers, TestCase):
@@ -87,7 +85,7 @@ class TestWebwinkelBestellingPlugin(E2EHelpers, TestCase):
         self.mandje.save()
 
     def test_opschonen(self):
-        stdout = OutputWrapper(io.StringIO())
+        stdout = OutputBuffer()
         plugin = WebwinkelBestelPlugin()
         plugin.zet_stdout(stdout)
 
@@ -133,7 +131,7 @@ class TestWebwinkelBestellingPlugin(E2EHelpers, TestCase):
         self.assertTrue('[INFO] BestellingRegel met pk=' in stdout.getvalue())
         self.assertTrue('wordt verwijderd' in stdout.getvalue())
 
-        stdout = OutputWrapper(io.StringIO())
+        stdout = OutputBuffer()
         plugin = VerzendkostenBestelPlugin()
         plugin.zet_stdout(stdout)
 
@@ -143,7 +141,7 @@ class TestWebwinkelBestellingPlugin(E2EHelpers, TestCase):
         self.assertEqual(mandje_pks, [])
 
     def test_reserveer(self):
-        stdout = OutputWrapper(io.StringIO())
+        stdout = OutputBuffer()
         plugin = WebwinkelBestelPlugin()
         plugin.zet_stdout(stdout)
 
@@ -156,6 +154,7 @@ class TestWebwinkelBestellingPlugin(E2EHelpers, TestCase):
         keuze.save()
 
         regel = plugin.reserveer(keuze.pk, 'Mandje test')
+        assert isinstance(regel, BestellingRegel)
         self.assertEqual(regel.korte_beschrijving, '1 x product')
         self.assertEqual(regel.btw_percentage, '21')
         self.assertEqual(round(regel.btw_euro, 2), round(Decimal(1.74), 2))
@@ -169,10 +168,10 @@ class TestWebwinkelBestellingPlugin(E2EHelpers, TestCase):
         self.product.onbeperkte_voorraad = True
         self.product.save(update_fields=['onbeperkte_voorraad'])
         with override_settings(WEBWINKEL_BTW_PERCENTAGE=21.1):
-            regel = plugin.reserveer(keuze.pk, 'Mandje test')
+            plugin.reserveer(keuze.pk, 'Mandje test')
 
     def test_annuleer(self):
-        stdout = OutputWrapper(io.StringIO())
+        stdout = OutputBuffer()
         plugin = WebwinkelBestelPlugin()
         plugin.zet_stdout(stdout)
 
@@ -186,7 +185,7 @@ class TestWebwinkelBestellingPlugin(E2EHelpers, TestCase):
         plugin.annuleer(regel)
         self.assertTrue("[ERROR] Kan WebwinkelKeuze voor regel met pk=" in stdout.getvalue())
 
-        stdout = OutputWrapper(io.StringIO())       # weer leeg
+        stdout = OutputBuffer()       # weer leeg
         plugin.zet_stdout(stdout)
 
         keuze = WebwinkelKeuze(
@@ -219,7 +218,7 @@ class TestWebwinkelBestellingPlugin(E2EHelpers, TestCase):
         plugin.annuleer(regel)
 
     def test_is_besteld(self):
-        stdout = OutputWrapper(io.StringIO())
+        stdout = OutputBuffer()
         plugin = WebwinkelBestelPlugin()
         plugin.zet_stdout(stdout)
 
@@ -247,13 +246,13 @@ class TestWebwinkelBestellingPlugin(E2EHelpers, TestCase):
         self.assertTrue("] Reservering is omgezet in een bestelling\n" in keuze.log)
 
         # coverage
-        stdout = OutputWrapper(io.StringIO())
+        stdout = OutputBuffer()
         plugin = VerzendkostenBestelPlugin()
         plugin.zet_stdout(stdout)
         plugin.is_besteld(regel)
 
     def test_is_betaald(self):
-        stdout = OutputWrapper(io.StringIO())
+        stdout = OutputBuffer()
         plugin = WebwinkelBestelPlugin()
         plugin.zet_stdout(stdout)
 
@@ -283,14 +282,14 @@ class TestWebwinkelBestellingPlugin(E2EHelpers, TestCase):
         self.assertTrue("] Betaling is ontvangen" in keuze.log)
 
         # coverage
-        stdout = OutputWrapper(io.StringIO())
+        stdout = OutputBuffer()
         plugin = VerzendkostenBestelPlugin()
         plugin.zet_stdout(stdout)
         plugin.is_betaald(regel, bedrag_ontvangen)
 
     def test_get_verkoper_ver_nr(self):
         plugin = WebwinkelBestelPlugin()
-        stdout = OutputWrapper(io.StringIO())
+        stdout = OutputBuffer()
         plugin.zet_stdout(stdout)
 
         regel = BestellingRegel(
@@ -303,14 +302,14 @@ class TestWebwinkelBestellingPlugin(E2EHelpers, TestCase):
         self.assertEqual(ver_nr, settings.WEBWINKEL_VERKOPER_VER_NR)
 
         plugin = VerzendkostenBestelPlugin()
-        stdout = OutputWrapper(io.StringIO())
+        stdout = OutputBuffer()
         plugin.zet_stdout(stdout)
 
         ver_nr = plugin.get_verkoper_ver_nr(regel)
         self.assertEqual(ver_nr, settings.WEBWINKEL_VERKOPER_VER_NR)
 
     def test_verzendkosten(self):
-        stdout = OutputWrapper(io.StringIO())
+        stdout = OutputBuffer()
         plugin = VerzendkostenBestelPlugin()
         plugin.zet_stdout(stdout)
 

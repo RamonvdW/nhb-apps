@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -8,9 +8,8 @@ from django.test import TestCase
 from Feedback.models import Feedback, feedback_opschonen
 from Feedback.operations import store_feedback
 from Taken.models import Taak
-from TestHelpers.e2ehelpers import E2EHelpers
+from TestHelpers.e2ehelpers import E2EHelpers, OutputBuffer
 import datetime
-import io
 
 
 class TestFeedback(E2EHelpers, TestCase):
@@ -283,8 +282,8 @@ class TestFeedback(E2EHelpers, TestCase):
         self.assertEqual(Taak.objects.count(), 1)
 
     def test_opschonen(self):
-        f1 = io.StringIO()
-        feedback_opschonen(f1)
+        out = OutputBuffer
+        feedback_opschonen(out)
 
         # maak een oude, afgehandelde site feedback aan
         store_feedback('mij', 'rol', 'pagina', '/pagina/', Feedback.url2bev['plus'], 'feedback')
@@ -293,8 +292,8 @@ class TestFeedback(E2EHelpers, TestCase):
         feedback.is_afgehandeld = True
         feedback.save()
 
-        f1 = io.StringIO()
-        feedback_opschonen(f1)
-        self.assertTrue('[INFO] Verwijder 1 afgehandelde feedback' in f1.getvalue())
+        out = OutputBuffer()
+        feedback_opschonen(out)
+        self.assertTrue('[INFO] Verwijder 1 afgehandelde feedback' in out.getvalue())
 
 # end of file

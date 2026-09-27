@@ -27,7 +27,7 @@ def get_bearer_token(out, site: GraphSite) -> bool:
     if site.bearer_token:
         return True
 
-    url = "https://login.microsoftonline.com/%s/oauth2/v2.0/token" % site.tenant_id
+    url = site.token_url_template % site.tenant_id
 
     headers = {
         'Content-Type': 'application/x-www-form-urlencoded',

@@ -1,0 +1,49 @@
+{% extends 'design/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2026 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+{% load design_knop %}
+
+{% block title %}Kies afgesloten teamronde{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h1 class="sv-kopje-pagina">Kies een afgesloten teamronde</h1>
+        </div>
+    </div>
+
+    <!-- blauwe balk met informatie label : info -->
+    <div class="row-sv-blauw">
+        <div class="col s12 m10 offset-m1 l8 offset-l2">
+            <table class="sv-kader-tabel">
+                <thead>
+                    <tr>
+                        <th class="center">Regio</th>
+                        <th>Afgesloten rondes</th>
+                    </tr>
+                </thead>
+
+                {% for regio in regios %}
+                    <tr>
+                        <td class="center">{{ regio.regio_str }}</td>
+                        <td>
+                            {% for ronde in regio.rondes %}
+                                {% sv-knop-nav url=ronde.url tekst=ronde.tekst %}
+                            {% endfor %}
+                        </td>
+                    </tr>
+                {% endfor %}
+
+            </table>
+        </div>
+    </div>
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="compscores-bko-selecteer-regio-ronde" %}
+
+{% endblock %}

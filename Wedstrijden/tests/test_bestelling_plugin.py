@@ -6,7 +6,6 @@
 
 from django.test import TestCase
 from django.utils import timezone
-from django.core.management.base import OutputWrapper
 from BasisTypen.definities import ORGANISATIE_IFAA
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
 from Bestelling.definities import BESTELLING_REGEL_CODE_WEDSTRIJD, BESTELLING_REGEL_CODE_WEDSTRIJD_KORTING
@@ -15,7 +14,7 @@ from Geo.models import Regio
 from Locatie.models import WedstrijdLocatie
 from Mailer.models import MailQueue
 from Sporter.models import Sporter, SporterBoog
-from TestHelpers.e2ehelpers import E2EHelpers
+from TestHelpers.e2ehelpers import E2EHelpers, OutputBuffer
 from Vereniging.models import Vereniging
 from Wedstrijden.definities import (WEDSTRIJD_STATUS_GEACCEPTEERD,
                                     WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_MANDJE,
@@ -25,7 +24,6 @@ from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdInschrijving
 from Wedstrijden.plugin_bestelling import WedstrijdBestelPlugin, WedstrijdKortingBestelPlugin
 from decimal import Decimal
 import datetime
-import io
 
 
 # FUTURE: verplaats deze plugin naar WedstrijdInschrijvingen
@@ -137,7 +135,7 @@ class TestWedstrijdenBestellingPlugin(E2EHelpers, TestCase):
         self.mandje.save()
 
     def test_opschonen(self):
-        stdout = OutputWrapper(io.StringIO())
+        stdout = OutputBuffer()
         plugin = WedstrijdBestelPlugin()
         plugin.zet_stdout(stdout)
 
@@ -198,7 +196,7 @@ class TestWedstrijdenBestellingPlugin(E2EHelpers, TestCase):
         self.assertTrue('[INFO] BestellingRegel met pk=' in stdout.getvalue())
         self.assertTrue('wordt verwijderd' in stdout.getvalue())
 
-        stdout = OutputWrapper(io.StringIO())
+        stdout = OutputBuffer()
         plugin = WedstrijdKortingBestelPlugin()
         plugin.zet_stdout(stdout)
 
@@ -207,7 +205,7 @@ class TestWedstrijdenBestellingPlugin(E2EHelpers, TestCase):
         self.assertEqual(mandje_pks, [])
 
     def test_reserveer(self):
-        stdout = OutputWrapper(io.StringIO())
+        stdout = OutputBuffer()
         plugin = WedstrijdBestelPlugin()
         plugin.zet_stdout(stdout)
 
@@ -223,6 +221,7 @@ class TestWedstrijdenBestellingPlugin(E2EHelpers, TestCase):
         inschrijving.save()
 
         regel = plugin.reserveer(inschrijving.pk, 'Mandje test')
+        assert isinstance(regel, BestellingRegel)
         self.assertEqual(regel.korte_beschrijving,
                          'Wedstrijd "Test wedstrijd"||deelname door [100000] Nor Maal||met boog Recurve')
 
@@ -232,7 +231,7 @@ class TestWedstrijdenBestellingPlugin(E2EHelpers, TestCase):
         self.assertTrue("] Plekje gereserveerd voor de wedstrijd sessie" in inschrijving.log)
 
     def test_afmelden(self):
-        stdout = OutputWrapper(io.StringIO())
+        stdout = OutputBuffer()
         plugin = WedstrijdBestelPlugin()
         plugin.zet_stdout(stdout)
 
@@ -276,7 +275,7 @@ class TestWedstrijdenBestellingPlugin(E2EHelpers, TestCase):
         self.assertEqual(self.sessie.aantal_inschrijvingen, 0)
 
     def test_annuleer(self):
-        stdout = OutputWrapper(io.StringIO())
+        stdout = OutputBuffer()
         plugin = WedstrijdBestelPlugin()
         plugin.zet_stdout(stdout)
 
@@ -292,7 +291,7 @@ class TestWedstrijdenBestellingPlugin(E2EHelpers, TestCase):
         # print('f1: %s' % stdout.getvalue())
         self.assertTrue("[ERROR] {wedstrijden bestel plugin}.annuleer: kan WedstrijdInschrijving met bestelling regel met pk=" in stdout.getvalue())
 
-        stdout = OutputWrapper(io.StringIO())       # weer leeg
+        stdout = OutputBuffer()       # weer leeg
         plugin.zet_stdout(stdout)
 
         inschrijving = WedstrijdInschrijving(
@@ -316,14 +315,14 @@ class TestWedstrijdenBestellingPlugin(E2EHelpers, TestCase):
         self.assertEqual(WedstrijdInschrijving.objects.filter(pk=inschrijving.pk).count(), 0)
 
         # kortingen plugin
-        stdout = OutputWrapper(io.StringIO())
+        stdout = OutputBuffer()
         plugin = WedstrijdKortingBestelPlugin()
         plugin.zet_stdout(stdout)
 
         plugin.annuleer(regel)      # dummy implementatie
 
     def test_is_besteld(self):
-        stdout = OutputWrapper(io.StringIO())
+        stdout = OutputBuffer()
         plugin = WedstrijdBestelPlugin()
         plugin.zet_stdout(stdout)
 
@@ -362,7 +361,7 @@ class TestWedstrijdenBestellingPlugin(E2EHelpers, TestCase):
         plugin.is_besteld(regel)      # dummy implementatie
 
     def test_is_betaald_zelf(self):
-        stdout = OutputWrapper(io.StringIO())
+        stdout = OutputBuffer()
         plugin = WedstrijdBestelPlugin()
         plugin.zet_stdout(stdout)
 
@@ -406,7 +405,7 @@ class TestWedstrijdenBestellingPlugin(E2EHelpers, TestCase):
         self.assertEqual(MailQueue.objects.count(), 0)
 
     def test_is_betaald_ander(self):
-        stdout = OutputWrapper(io.StringIO())
+        stdout = OutputBuffer()
         plugin = WedstrijdBestelPlugin()
         plugin.zet_stdout(stdout)
 
@@ -470,7 +469,7 @@ class TestWedstrijdenBestellingPlugin(E2EHelpers, TestCase):
 
     def test_get_verkoper_ver_nr(self):
         plugin = WedstrijdBestelPlugin()
-        stdout = OutputWrapper(io.StringIO())
+        stdout = OutputBuffer()
         plugin.zet_stdout(stdout)
 
         regel = BestellingRegel(
@@ -501,7 +500,7 @@ class TestWedstrijdenBestellingPlugin(E2EHelpers, TestCase):
 
         # kortingen plugin
         plugin = WedstrijdKortingBestelPlugin()
-        stdout = OutputWrapper(io.StringIO())
+        stdout = OutputBuffer()
         plugin.zet_stdout(stdout)
 
         regel = BestellingRegel(
@@ -515,7 +514,7 @@ class TestWedstrijdenBestellingPlugin(E2EHelpers, TestCase):
         self.assertEqual(ver_nr, 1234)
 
     def test_kwalificatiescores(self):
-        stdout = OutputWrapper(io.StringIO())
+        stdout = OutputBuffer()
         plugin = WedstrijdBestelPlugin()
         plugin.zet_stdout(stdout)
 
@@ -537,11 +536,12 @@ class TestWedstrijdenBestellingPlugin(E2EHelpers, TestCase):
         inschrijving.save()
 
         regel = plugin.reserveer(inschrijving.pk, 'Mandje test')
+        assert isinstance(regel, BestellingRegel)
         self.assertEqual(regel.korte_beschrijving,
                          'Wedstrijd "Test wedstrijd"||deelname door [100000] Nor Maal||met boog Recurve')
 
         # wedstrijd heeft geen kwalificatie scores nodig
-        wedstrijd = plugin.wil_kwalificatiescores(regel)
+        res = plugin.wil_kwalificatiescores(regel)
         self.assertIsNone(res)
 
         self.wedstrijd.eis_kwalificatie_scores = True

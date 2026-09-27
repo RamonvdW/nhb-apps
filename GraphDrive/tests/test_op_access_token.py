@@ -6,13 +6,12 @@
 
 from django.test import TestCase
 from django.utils import timezone
-from django.core.management.base import OutputWrapper
-from GraphDrive.operations.access_token import get_bearer_token, clear_bearer_token, force_bearer_token
-from TestHelpers.e2ehelpers import E2EHelpers
+from GraphDrive.operations.access_token import get_bearer_token
+from GraphDrive.operations import GraphSite
+from TestHelpers.e2ehelpers import E2EHelpers, OutputBuffer
 from unittest.mock import patch
 from requests.exceptions import SSLError
 from datetime import timedelta
-import io
 
 
 class ResponseMock:
@@ -39,55 +38,61 @@ class TestGraphDriveOpAccessToken(E2EHelpers, TestCase):
     """ unittests voor de GraphDrive applicatie, operations module access_token """
 
     def test_bearer(self):
-        clear_bearer_token()
+        out = OutputBuffer()
+        site = GraphSite(out)
+        self.token_url_template = 'http://localhost:55555/%s/'      # avoid going to real site
 
         # connection error
-        out = OutputWrapper(io.StringIO())
+
+        out = OutputBuffer()
         with patch('requests.post', side_effect=SSLError('uitzondering')):
-            token = get_bearer_token(out)
-            self.assertIsNone(token)
+            res = get_bearer_token(out, site)
+            self.assertFalse(res)
         self.assertTrue('[ERROR] Exceptie bij versturen access token request: uitzondering' in out.getvalue())
 
         # foutcode
         resp = ResponseMock(status_code=404)
-        out = OutputWrapper(io.StringIO())
+        out = OutputBuffer()
         with patch('requests.post', return_value=resp):
-            token = get_bearer_token(out)
-            self.assertIsNone(token)
+            res = get_bearer_token(out, site)
+            self.assertFalse(res)
         self.assertTrue("[ERROR] Access token request gaf onverwacht antwoord! response encoding:'mock', status_code:404" in out.getvalue())
 
         # verkeerd type
         resp = ResponseMock(token_type='Verkeerd')
-        out = OutputWrapper(io.StringIO())
+        out = OutputBuffer()
         with patch('requests.post', return_value=resp):
-            token = get_bearer_token(out)
-            self.assertIsNone(token)
+            res = get_bearer_token(out, site)
+            self.assertFalse(res)
         # print('out:', out.getvalue())
         self.assertTrue("[ERROR] Not a bearer access token " in out.getvalue())
 
         # velden ontbreken
         resp = ResponseMock(complete=False)
-        out = OutputWrapper(io.StringIO())
+        out = OutputBuffer()
         with patch('requests.post', return_value=resp):
-            token = get_bearer_token(out)
-            self.assertIsNone(token)
+            res = get_bearer_token(out, site)
+            self.assertFalse(res)
         # print('out:', out.getvalue())
         self.assertTrue("[ERROR] Not a complete bearer access token" in out.getvalue())
 
         # goed antwoord
         resp = ResponseMock()
-        out = OutputWrapper(io.StringIO())
+        out = OutputBuffer()
         with patch('requests.post', return_value=resp):
-            token = get_bearer_token(out)
-            self.assertEqual(token, 'test token')
+            res = get_bearer_token(out, site)
+            self.assertTrue(res)
+            self.assertEqual(site.bearer_token, 'test token')
         # print('out:', out.getvalue())
 
         # check caching
-        force_bearer_token('nog een test', timezone.now() + timedelta(seconds=60))
-        out = OutputWrapper(io.StringIO())
-        token = get_bearer_token(out)
+        site.bearer_token = 'nog een test'
+        site.bearer_valid_until = timezone.now() + timedelta(seconds=60)
+        out = OutputBuffer()
+        res = get_bearer_token(out, site)
         # print('out:', out.getvalue())
-        self.assertEqual(token, 'nog een test')
+        self.assertTrue(res)
+        self.assertEqual(site.bearer_token, 'nog een test')     # niet ververst
 
 
 # end of file

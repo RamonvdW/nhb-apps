@@ -5,15 +5,13 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from django.core.management.base import OutputWrapper
 from GoogleDrive.models import Token, Bestand
 from GoogleDrive.operations import StorageGoogleDrive, StorageError
-from TestHelpers.e2ehelpers import E2EHelpers
+from TestHelpers.e2ehelpers import E2EHelpers, OutputBuffer
 from googleapiclient.errors import HttpError as GoogleApiError
 from google.auth.exceptions import RefreshError
 from httplib2 import Response
 from unittest.mock import patch
-import io
 
 
 class GoogleApiFilesMock:
@@ -224,7 +222,7 @@ class TestGoogleDriveOpStorageDrive(E2EHelpers, TestCase):
     """ tests voor de GoogleDrive applicatie, operations storage_drive """
 
     def test_check_access(self):
-        out = OutputWrapper(io.StringIO())
+        out = OutputBuffer()
         share_with_emails = ['mgr@test.not']
 
         # einde van "with" roept __exit__ aan
@@ -243,7 +241,7 @@ class TestGoogleDriveOpStorageDrive(E2EHelpers, TestCase):
         # with
 
     def test_copy(self):
-        out = OutputWrapper(io.StringIO())
+        out = OutputBuffer()
         share_with_emails = ['mgr@test.not']
 
         # einde van "with" roept __exit__ aan
@@ -261,6 +259,7 @@ class TestGoogleDriveOpStorageDrive(E2EHelpers, TestCase):
 
             self.assertEqual(Bestand.objects.count(), 1)
             bestand = Bestand.objects.first()
+            assert isinstance(bestand, Bestand)
             self.assertEqual(bestand.begin_jaar, 2025)
             self.assertEqual(bestand.afstand, 18)
             self.assertFalse(bestand.is_teams)
@@ -276,7 +275,7 @@ class TestGoogleDriveOpStorageDrive(E2EHelpers, TestCase):
 
     def test_vind_globale_folder(self):
         # fouten tijdens vind_globale_folder
-        out = OutputWrapper(io.StringIO())
+        out = OutputBuffer()
         share_with_emails = ['mgr@test.not']
 
         # GoogleApiError
@@ -321,7 +320,7 @@ class TestGoogleDriveOpStorageDrive(E2EHelpers, TestCase):
 
     def test_maak_folder(self):
         # fouten tijdens maak_folder
-        out = OutputWrapper(io.StringIO())
+        out = OutputBuffer()
         share_with_emails = ['mgr@test.not']
 
         # GoogleApiError
@@ -336,7 +335,7 @@ class TestGoogleDriveOpStorageDrive(E2EHelpers, TestCase):
 
     def test_list_folder(self):
         # fouten tijdens list_folder
-        out = OutputWrapper(io.StringIO())
+        out = OutputBuffer()
         share_with_emails = ['mgr@test.not']
 
         # trigger GoogleApiError tijdens list_folder
@@ -373,7 +372,7 @@ class TestGoogleDriveOpStorageDrive(E2EHelpers, TestCase):
 
     def test_share_seizoen(self):
         # speciale situaties tijdens share_seizoen_folder
-        out = OutputWrapper(io.StringIO())
+        out = OutputBuffer()
         share_with_emails = ['mgr@test.not', 'al-aanwezig@test.not']
 
         # voorkom dat de folder seizoen gevonden wordt

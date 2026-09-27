@@ -37,6 +37,7 @@
         <div class="col s12">
             <h2 class="sv-kopje-row">Stap 1</h2>
             <p>Vertel ons over de wedstrijd en voer de behaalde score in.</p>
+            <p>(we tonen alleen keuzes waarvoor spelden beschikbaar zijn)</p>
         </div>
     </div>
 

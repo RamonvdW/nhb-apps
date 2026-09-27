@@ -1,17 +1,13 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2025 Ramon van der Winkel.
+#  Copyright (c) 2025-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from django.core.management.base import OutputWrapper
-from Competitie.models import Competitie
-from GoogleDrive.models import Transactie, Token, Bestand
 from GoogleDrive.storage_base import StorageBase, StorageError
-from TestHelpers.e2ehelpers import E2EHelpers
+from TestHelpers.e2ehelpers import E2EHelpers, OutputBuffer
 from unittest.mock import patch
-import io
 
 
 class TestGoogleDriveStorageTemplate(E2EHelpers, TestCase):
@@ -19,7 +15,7 @@ class TestGoogleDriveStorageTemplate(E2EHelpers, TestCase):
     """ tests voor de GoogleDrive applicatie, module storage_template """
 
     def test_all(self):
-        out = OutputWrapper(io.StringIO())
+        out = OutputBuffer()
         share_with_emails = ['mgr@test.not']
         storage = StorageBase(out, 2025, share_with_emails)
 
@@ -44,7 +40,7 @@ class TestGoogleDriveStorageTemplate(E2EHelpers, TestCase):
         self.assertFalse('[WARN' in text_out)
         self.assertFalse('[ERROR]' in text_out)
 
-        out = OutputWrapper(io.StringIO())
+        out = OutputBuffer()
         storage = StorageBase(out, 2025, share_with_emails)
         with patch.object(storage, '_list_folder', return_value={}):
             with self.assertRaises(StorageError) as exc:
@@ -52,7 +48,7 @@ class TestGoogleDriveStorageTemplate(E2EHelpers, TestCase):
             self.assertEqual(str(exc.exception), 'Could not find all templates')
 
     def test_vind_top(self):
-        out = OutputWrapper(io.StringIO())
+        out = OutputBuffer()
         share_with_emails = ['mgr@test.not']
         storage = StorageBase(out, 2025, share_with_emails)
         with patch.object(storage, '_vind_globale_folder', return_value=None):
@@ -67,7 +63,7 @@ class TestGoogleDriveStorageTemplate(E2EHelpers, TestCase):
         return 'ok'
 
     def test_vind_templates(self):
-        out = OutputWrapper(io.StringIO())
+        out = OutputBuffer()
         share_with_emails = ['mgr@test.not']
         storage = StorageBase(out, 2025, share_with_emails)
         with patch.object(storage, '_vind_globale_folder', side_effect=self._iter_vind_results):

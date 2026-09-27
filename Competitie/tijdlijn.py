@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2024 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -27,6 +27,22 @@ comp_fase_kort = {
     'Z': 'afgesloten',
 }
 
+team_fase_kort = {
+    'A': 'opstarten',
+    'B': 'instellingen regio',
+    'C': 'aanmelden teams',
+    'D': 'poules samenstellen',
+    'F': 'wedstrijden regio',
+    'G': 'vaststellen uitslag regio',
+    'J': 'voorbereiding RK',
+    'K': 'voorbereiding RK',
+    'L': 'wedstrijden RK',
+    'N': 'kleine klassen samenvoegen BK',
+    'O': 'voorbereiding BK',
+    'P': 'wedstrijden BK',
+    'Q': 'einde competitie',
+    'Z': 'afgesloten',
+}
 
 def maak_comp_fase_beschrijvingen(comp):
     indiv = "Competitie fase individueel: %s (%s)" % (comp.fase_indiv, comp_fase_kort[comp.fase_indiv])

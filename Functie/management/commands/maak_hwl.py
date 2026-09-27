@@ -9,7 +9,7 @@
 from django.core.management.base import BaseCommand
 from Account.models import Account
 from Functie.models import Functie
-from Logboek.models import schrijf_in_logboek
+from Logboek.operations import schrijf_in_logboek
 from Vereniging.models import Vereniging
 
 

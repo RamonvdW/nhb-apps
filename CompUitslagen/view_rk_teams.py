@@ -13,12 +13,12 @@ from Competitie.definities import DEELNAME_NEE, KAMP_RANK_RESERVE, KAMP_RANK_NO_
 from Competitie.models import Competitie, CompetitieMatch
 from Competitie.seizoenen import get_comp_pk
 from CompLaagRayon.models import KampRK, TeamRK, CutTeamRK
+from Functie.operations import get_request_rayon_nr
 from Functie.rol import rol_get_huidige_functie
 from Geo.models import Rayon
 from HistComp.operations import get_hist_url
 from Overig.helpers import make_valid_hashtag
 from Sporter.models import Sporter
-from Sporter.operations import get_request_rayon_nr
 
 TEMPLATE_COMPUITSLAGEN_RK_TEAMS = 'compuitslagen/rk-teams.dtl'
 

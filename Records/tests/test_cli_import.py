@@ -269,7 +269,7 @@ class TestRecordsCliImport(E2EHelpers, TestCase):
         self.assertEqual(rec.is_european_record, True)
         self.assertEqual(rec.is_world_record, True)
         self.assertEqual(rec.score, 650)
-        self.assertEqual(rec.max_score, 720),
+        self.assertEqual(rec.max_score, 720)
         self.assertEqual(rec.x_count, 42)
 
     def test_bad(self):

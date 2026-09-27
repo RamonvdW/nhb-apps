@@ -22,7 +22,7 @@ def get_file_metadata(out, site: GraphSite, fpath: str) -> dict | None:
         return None
 
     url_fpath = quote(fpath)
-    url = "https://graph.microsoft.com/v1.0/sites/%s/drives/%s/root:/%s" % (site.site_id, site.drive_id, url_fpath)
+    url = site.metadata_url_template % (site.site_id, site.drive_id, url_fpath)
 
     headers = {
         'Authorization': 'Bearer %s' % site.bearer_token,

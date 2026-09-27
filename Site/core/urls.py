@@ -37,6 +37,7 @@ urlpatterns = [
     path('bondscompetities/hist/',              include('HistComp.urls')),
     path('bondscompetities/',                   include('Competitie.urls')),
     path('bondspas/',                           include('Bondspas.urls')),
+    path('data-api/',                           include('DataApi.urls')),
     path('feedback/',                           include('Feedback.urls')),
     path('functie/',                            include('Functie.urls')),
     path('google/',                             include('GoogleDrive.urls')),

@@ -1,16 +1,21 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.conf import settings
 from django.utils import timezone
+from Account.models import get_account, Account
+from Functie.definities import Rol
 from Functie.models import Functie, VerklaringHanterenPersoonsgegevens
+from Functie.rol import rol_get_huidige_functie
+from Geo.models import Regio
 from Mailer.operations import mailer_queue_email, render_email_template
+from Sporter.models import get_sporter
 from TijdelijkeCodes.operations import maak_tijdelijke_code_bevestig_email_functie
+from Vereniging.models import Vereniging
 import datetime
-
 
 EMAIL_TEMPLATE_ROLLEN_GEWIJZIGD = 'email_functie/rollen-gewijzigd.dtl'
 EMAIL_TEMPLATE_BEVESTIG_TOEGANG_EMAIL = 'email_functie/bevestig-toegang-email.dtl'
@@ -77,7 +82,7 @@ def functie_vraag_email_bevestiging(functie):
                        enforce_whitelist=False)
 
 
-def maak_account_vereniging_secretaris(ver, account):
+def koppel_account_aan_functie_sec(ver: Vereniging, account: Account):
     """ Geeft het account rechten om als secretaris van de vereniging de site te gebruiken
         Retourneert True als het account aan de SEC-functie toegevoegd is
     """
@@ -91,7 +96,7 @@ def maak_account_vereniging_secretaris(ver, account):
 
         # stuur eem e-mail, welke ook een link naar de handleiding kan bevatten
         if functie_wijziging_stuur_email_notificatie(account, 'Systeem', functie.beschrijving, add=True):
-            # het is gelukt een e-mail te sturen, dus maak het koppeling definitief
+            # het is gelukt een e-mail te sturen, dus maak de koppeling definitief
             # (als het e-mailadres nog niet bevestigd is, dan blijven we het proberen)
             functie.accounts.add(account)
             return True
@@ -99,7 +104,7 @@ def maak_account_vereniging_secretaris(ver, account):
     return False
 
 
-def account_needs_vhpg(account, show_only=False):
+def account_needs_vhpg(account: Account, show_only=False):
     """ Controleer of het Account een VHPG af moet leggen """
 
     if not account_needs_otp(account):
@@ -123,7 +128,7 @@ def account_needs_vhpg(account, show_only=False):
     return opnieuw < now, vhpg
 
 
-def account_needs_otp(account):
+def account_needs_otp(account: Account):
     """ Controleer of het Account OTP-verificatie nodig heeft
 
         Returns: True or False
@@ -141,5 +146,73 @@ def account_needs_otp(account):
             return True
 
     return False
+
+
+def get_request_regio_nr(request, allow_admin_regio=True):
+    """ Geeft het regionummer van de ingelogde sporter terug,
+        of 101 als er geen regio vastgesteld kan worden
+
+        Als de gebruiker een rol gekozen heeft, neem dat het regionummer wat bij die rol past
+    """
+    regio_nr = 101
+
+    rol_nu, functie_nu = rol_get_huidige_functie(request)
+
+    if functie_nu:
+        if functie_nu.vereniging:
+            # HWL, WL
+            regio_nr = functie_nu.vereniging.regio.regio_nr
+        elif functie_nu.regio:
+            # RCL
+            regio_nr = functie_nu.regio.regio_nr
+        elif functie_nu.rayon:
+            # RKO
+            regio = (Regio
+                     .objects
+                     .filter(rayon=functie_nu.rayon,
+                             is_administratief=False)
+                     .order_by('regio_nr'))[0]
+            regio_nr = regio.regio_nr
+
+    elif rol_nu == Rol.ROL_SPORTER:
+        # sporter
+        account = get_account(request)
+        sporter = get_sporter(account)
+        if sporter and sporter.is_actief_lid and sporter.bij_vereniging:
+            regio_nr = sporter.bij_vereniging.regio.regio_nr
+
+    if regio_nr == 100 and not allow_admin_regio:
+        regio_nr = 101
+
+    return regio_nr
+
+
+def get_request_rayon_nr(request):
+    """ Geeft het rayon nummer van de ingelogde gebruiker/beheerder terug,
+        of 1 als er geen rayon vastgesteld kan worden
+    """
+    rayon_nr = 1
+
+    rol_nu, functie_nu = rol_get_huidige_functie(request)
+
+    if functie_nu:
+        if functie_nu.vereniging:
+            # HWL, WL
+            rayon_nr = functie_nu.vereniging.regio.rayon_nr
+        elif functie_nu.regio:
+            # RCL
+            rayon_nr = functie_nu.regio.rayon_nr
+        elif functie_nu.rayon:
+            # RKO
+            rayon_nr = functie_nu.rayon.rayon_nr
+
+    elif rol_nu == Rol.ROL_SPORTER:
+        if request.user.is_authenticated:                                    # pragma: no branch
+            account = get_account(request)
+            sporter = get_sporter(account)
+            if sporter and sporter.is_actief_lid and sporter.bij_vereniging:
+                rayon_nr = sporter.bij_vereniging.regio.rayon_nr
+
+    return rayon_nr
 
 # end of file

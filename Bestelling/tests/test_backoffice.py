@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2025 Ramon van der Winkel.
+#  Copyright (c) 2022-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.conf import settings
 from django.test import TestCase
-from django.core.management.base import OutputWrapper
 from django.utils import timezone
 from Bestelling.definities import BESTELLING_STATUS_AFGEROND, BESTELLING_TRANSPORT_VERZEND, BESTELLING_TRANSPORT_OPHALEN
 from Bestelling.models import BestellingMandje, Bestelling
@@ -17,13 +16,12 @@ from Functie.models import Functie
 from Geo.models import Regio
 from Mailer.models import MailQueue
 from Sporter.models import Sporter
-from TestHelpers.e2ehelpers import E2EHelpers
+from TestHelpers.e2ehelpers import E2EHelpers, OutputBuffer
 from TestHelpers.betaal_sim import fake_betaling
 from Vereniging.models import Vereniging
 from Webwinkel.definities import VERZENDKOSTEN_BRIEFPOST
 from Webwinkel.models import WebwinkelProduct, WebwinkelKeuze
 from decimal import Decimal
-import io
 
 
 class TestBestellingBackoffice(E2EHelpers, TestCase):
@@ -136,6 +134,7 @@ class TestBestellingBackoffice(E2EHelpers, TestCase):
         self.assertEqual(1, Bestelling.objects.count())
 
         bestelling = Bestelling.objects.first()
+        assert isinstance(bestelling, Bestelling)
         fake_betaling(bestelling, self.instellingen_bond)
         self.verwerk_bestel_mutaties()
         bestelling.refresh_from_db()
@@ -187,6 +186,7 @@ class TestBestellingBackoffice(E2EHelpers, TestCase):
         self.assertEqual(1, Bestelling.objects.count())
 
         bestelling = Bestelling.objects.first()
+        assert isinstance(bestelling, Bestelling)
         fake_betaling(bestelling, self.instellingen_bond)
         self.verwerk_bestel_mutaties()
         bestelling.refresh_from_db()
@@ -210,6 +210,7 @@ class TestBestellingBackoffice(E2EHelpers, TestCase):
         self.verwerk_bestel_mutaties()
         self.assertEqual(1, Bestelling.objects.count())
         bestelling = Bestelling.objects.first()
+        assert isinstance(bestelling, Bestelling)
 
         bestelling.afleveradres_regel_1 = 'regel 1'
         bestelling.afleveradres_regel_2 = 'regel 2'
@@ -227,7 +228,7 @@ class TestBestellingBackoffice(E2EHelpers, TestCase):
         bestelling.save()
 
         MailQueue.objects.all().delete()
-        stdout = OutputWrapper(io.StringIO())
+        stdout = OutputBuffer()
         stuur_email_webwinkel_backoffice(stdout, bestelling)
         mail = MailQueue.objects.first()
         self.assert_email_html_ok(mail, 'email_bestelling/backoffice-versturen.dtl')
@@ -252,6 +253,7 @@ class TestBestellingBackoffice(E2EHelpers, TestCase):
         self.verwerk_bestel_mutaties()
         self.assertEqual(1, Bestelling.objects.count())
         bestelling = Bestelling.objects.first()
+        assert isinstance(bestelling, Bestelling)
         MailQueue.objects.all().delete()
 
         bestel_overboeking_ontvangen(bestelling, bestelling.totaal_euro, snel=True)

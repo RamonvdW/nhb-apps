@@ -15,7 +15,7 @@ from CompLaagBond.models import DeelnemerBK
 from CompLaagBond.operations import maak_mutatie_kamp_aanmelden_bk_indiv, maak_mutatie_kamp_afmelden_bk_indiv
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie, rol_get_huidige
-from Sporter.operations import get_sporter
+from Sporter.models import get_sporter
 
 TEMPLATE_COMPBOND_WIJZIG_STATUS_BK_DEELNEMER = 'complaagbond/wijzig-status-bk-deelnemer.dtl'
 

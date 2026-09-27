@@ -15,7 +15,7 @@ from Account.forms import LoginForm
 from Account.models import Account
 from Account.operations import otp_zet_controle_niet_gelukt
 from Account.plugin_manager import account_plugins_login_gate, account_plugins_post_login
-from Logboek.models import schrijf_in_logboek
+from Logboek.operations import schrijf_in_logboek
 from Overig.helpers import get_safe_from_ip
 from datetime import timedelta
 import logging

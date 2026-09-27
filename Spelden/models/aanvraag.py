@@ -6,79 +6,69 @@
 
 from django.db import models
 from Account.models import Account
+from BasisTypen.definities import GESLACHT_MV, GESLACHT_MAN
 from BasisTypen.models import BoogType, Leeftijdsklasse
-from Spelden.definities import (SPELD_CATEGORIE_CHOICES, SPELD_CATEGORIE_WA_STER, SPELD_CATEGORIE2STR,
+from Spelden.definities import (SPELD_CATEGORIE_CHOICES, SPELD_CATEGORIE_WA_STER_R,
+                                SPELD_DISCIPLINE_CHOICES, SPELD_DISCIPLINE_NVT,
+                                SPELD_BOOGTYPE_CHOICES,
                                 SOORT_BIJLAGE_CHOICES, SOORT_BIJLAGE_SCOREBRIEFJE,
-                                SOORT_BESTAND_CHOICES, SOORT_BESTAND_FOTO,
-                                WEDSTRIJD_DISCIPLINE_CHOICES, WEDSTRIJD_DISCIPLINE_OUTDOOR)
+                                SOORT_BESTAND_CHOICES, SOORT_BESTAND_FOTO)
 from Sporter.models import Sporter
 from Wedstrijden.models import Wedstrijd
-from decimal import Decimal
 
 
-class Speld(models.Model):
-    """ definitie van een fysieke speld """
+class SpeldAanvraagPrep(models.Model):
 
-    # volgorde voor tonen (lager = toon eerder)
-    volgorde = models.PositiveSmallIntegerField()
+    # een datumstempel om een aanvraag op te kunnen ruimen als deze niet afgemaakt wordt
+    aangemaakt_op = models.DateField(auto_now_add=True)
 
-    # sterspeld, target award, etc.
-    categorie = models.CharField(max_length=3,
-                                 choices=SPELD_CATEGORIE_CHOICES)
+    # door wie wordt de aanvraag gedaan?
+    voor_sporter = models.ForeignKey(Sporter, on_delete=models.PROTECT)
 
-    # beschrijving
-    # (Grijs, Wit, 1000, etc.)
-    beschrijving = models.CharField(max_length=30)
+    # voor arrowhead spelden (discipline veld) zijn de scores verschillend voor mannen en vrouwen
+    wedstrijd_geslacht = models.CharField(max_length=1, choices=GESLACHT_MV, default=GESLACHT_MAN)
 
-    # recurve, compound, etc.
-    # optioneel: niet gezet = geldt voor alle bogen
-    boog_type = models.ForeignKey(BoogType, on_delete=models.PROTECT,
-                                  null=True, blank=True)
+    # stap1 = discipline, boogtype, score
+    heeft_data_stap1 = models.BooleanField(default=False)
+    heeft_data_stap2 = models.BooleanField(default=False)
+    heeft_data_stap3 = models.BooleanField(default=False)
 
-    # de prijs voor dit product
-    prijs_euro = models.DecimalField(max_digits=6, decimal_places=2, default=Decimal(0))        # max 9999,99
+    ## STAP 1 ##
 
-    def __str__(self):
-        cat_str = SPELD_CATEGORIE2STR.get(self.categorie, '?? (%s)' % self.categorie)
-        return "%s: %s, %s" % (self.volgorde, cat_str, self.beschrijving)
+    # discipline outdoor/indoor/veld
+    # welke discipline is dit? (indoor/outdoor/veld, etc.)
+    discipline = models.CharField(max_length=2, choices=SPELD_DISCIPLINE_CHOICES, default=SPELD_DISCIPLINE_NVT)
 
-    class Meta:
-        verbose_name = "Speld"
-        verbose_name_plural = "Spelden"
+    # boogtype
+    boog = models.CharField(max_length=2, choices=SPELD_BOOGTYPE_CHOICES, default=SPELD_BOOGTYPE_CHOICES[0][0])
 
+    # behaalde score
+    score = models.PositiveSmallIntegerField(default=0)
 
-class SpeldScore(models.Model):
+    ## STAP 2 ##
 
-    # beschrijving van het soort wedstrijd waarop de speld te behalen is
-    wedstrijd_soort = models.CharField(max_length=20)
+    # enkele of meerdere afstanden
+    # langste: "90, 70, 50, 30" = 12
+    afstanden = models.CharField(max_length=15, default='')
 
-    # welke speld kan er behaald worden?
-    speld = models.ForeignKey(Speld, on_delete=models.PROTECT)
+    # aantal pijlen
+    aantal_pijlen = models.PositiveSmallIntegerField(default=0)
 
-    # (optioneel) recurve, compound, etc.
-    boog_type = models.ForeignKey(BoogType, on_delete=models.PROTECT,
-                                  null=True, blank=True)
-
-    # (optioneel) specialisatie in leeftijdsklasse en geslacht
-    # (O14/O18/O21/Senior/50+, M/V)
-    leeftijdsklasse = models.ForeignKey(Leeftijdsklasse, on_delete=models.PROTECT,
-                                        null=True, blank=True)
-
-    # benodigde score
-    benodigde_score = models.PositiveSmallIntegerField()
-
-    # (optioneel) afstand in meters
-    afstand = models.PositiveSmallIntegerField(default=0)
-
-    # (optioneel) aantal doelen - wordt alleen gebruikt bij Veld
+    # aantal doelen
     aantal_doelen = models.PositiveSmallIntegerField(default=0)
 
     def __str__(self):
-        return "%s %s %s" % (self.afstand, self.aantal_doelen, self.benodigde_score)
+        msg = "%s: " % self.voor_sporter.lid_nr_en_volledige_naam()
+        if self.heeft_data_stap3:
+            msg += ' stap 3'
+        elif self.heeft_data_stap2:
+            msg += ' stap 2'
+        elif self.heeft_data_stap1:
+            msg += ' stap 1'
+        return msg
 
     class Meta:
-        verbose_name = "Speld score"
-        verbose_name_plural = "Speld scores"
+        verbose_name = verbose_name_plural = "Speld aanvraag prep"
 
 
 class SpeldAanvraag(models.Model):
@@ -100,8 +90,8 @@ class SpeldAanvraag(models.Model):
     boog_type = models.ForeignKey(BoogType, on_delete=models.PROTECT)
 
     # wat voor soort aanvraag gaat het om?
-    soort_speld = models.CharField(max_length=3,
-                                   default=SPELD_CATEGORIE_WA_STER,
+    soort_speld = models.CharField(max_length=4,
+                                   default=SPELD_CATEGORIE_WA_STER_R,
                                    choices=SPELD_CATEGORIE_CHOICES)
 
     # op welke datum is de prestatie neergezet?
@@ -113,8 +103,8 @@ class SpeldAanvraag(models.Model):
 
     # discipline outdoor/indoor/veld
     discipline = models.CharField(max_length=2,
-                                  default=WEDSTRIJD_DISCIPLINE_OUTDOOR,
-                                  choices=WEDSTRIJD_DISCIPLINE_CHOICES)
+                                  choices=SPELD_DISCIPLINE_CHOICES,
+                                  default=SPELD_DISCIPLINE_NVT)
 
     # categorie (O14/O18/O21/Senior/50+, M/V)
     leeftijdsklasse = models.ForeignKey(Leeftijdsklasse, on_delete=models.PROTECT,

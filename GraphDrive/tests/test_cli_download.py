@@ -19,35 +19,36 @@ class TestGraphDriveCliDownload(E2EHelpers, TestCase):
 
     def setUp(self):
         self.mock_metadata_none = patch('GraphDrive.management.commands.graph_download.get_file_metadata', return_value=None)
-        self.mock_metadata_bad = patch('GraphDrive.management.commands.graph_download.get_file_metadata', return_value=self.bad_metadata)
+        self.mock_metadata_bad  = patch('GraphDrive.management.commands.graph_download.get_file_metadata', return_value=self.bad_metadata)
         self.mock_metadata_good = patch('GraphDrive.management.commands.graph_download.get_file_metadata', return_value=self.good_metadata)
 
-        self.mock_download_none = patch('GraphDrive.management.commands.graph_download.download', return_value=None)
-        self.mock_download_good = patch('GraphDrive.management.commands.graph_download.download', return_value='/tmp/local')
+        self.mock_download_none = patch('GraphDrive.management.commands.graph_download.download_file', return_value=None)
+        self.mock_download_good = patch('GraphDrive.management.commands.graph_download.download_file', return_value='/tmp/local')
 
     def test_download(self):
         self.mock_metadata_none.start()
+        site_index = 1
 
-        f1, f2 = self.run_management_command(self.cli_download, '/remote/does/not/exist/missing.txt', '/tmp/local')
+        f1, f2 = self.run_management_command(self.cli_download, site_index, '/remote/does/not/exist/missing.txt', '/tmp/local')
         self.assertEqual(f1.getvalue(), '')
         # print('f2:', f2.getvalue())
 
         self.mock_metadata_none.stop()
 
         self.mock_metadata_bad.start()
-        f1, f2 = self.run_management_command(self.cli_download, '/remote/does/not/exist/missing.txt', '/tmp/local')
+        f1, f2 = self.run_management_command(self.cli_download, site_index, '/remote/does/not/exist/missing.txt', '/tmp/local')
         self.assertEqual(f1.getvalue(), '')
         self.mock_metadata_bad.stop()
 
         self.mock_metadata_good.start()
 
         self.mock_download_none.start()
-        f1, f2 = self.run_management_command(self.cli_download, '/remote/does/not/exist/missing.txt', '/tmp/local')
+        f1, f2 = self.run_management_command(self.cli_download, site_index, '/remote/does/not/exist/missing.txt', '/tmp/local')
         self.assertEqual(f1.getvalue(), '')
         self.mock_download_none.stop()
 
         self.mock_download_good.start()
-        f1, f2 = self.run_management_command(self.cli_download, '/remote/does/not/exist/missing.txt', '/tmp/local')
+        f1, f2 = self.run_management_command(self.cli_download, site_index, '/remote/does/not/exist/missing.txt', '/tmp/local')
         self.assertEqual(f1.getvalue(), '')
         # print('f2:', f2.getvalue())
         self.assertTrue("[INFO] Download gelukt naar '/tmp/local'" in f2.getvalue())

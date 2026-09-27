@@ -5,14 +5,12 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from django.core.management.base import OutputWrapper
 from GoogleDrive.operations import MonitorDriveFiles
-from TestHelpers.e2ehelpers import E2EHelpers
+from TestHelpers.e2ehelpers import E2EHelpers, OutputBuffer
 from googleapiclient.errors import HttpError as GoogleApiError
 from httplib2 import Response
 from unittest.mock import patch
 import datetime
-import io
 
 
 class GoogleApiFilesMock:
@@ -96,7 +94,7 @@ class TestGoogleDriveOpMonitorDrive(E2EHelpers, TestCase):
     """ tests voor de GoogleDrive applicatie, operations monitor_drive """
 
     def test_laatste_wijziging(self):
-        out = OutputWrapper(io.StringIO())
+        out = OutputBuffer()
 
         my_service = GoogleApiMock(verbose=False)
         with patch('GoogleDrive.operations.monitor_drive.build', return_value=my_service):

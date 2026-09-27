@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -9,7 +9,7 @@ from django.utils import timezone
 from Account.models import Account, AccountSessions, get_account
 from .session_vars import zet_sessionvar_if_changed     # must not rely on Account.operations.__init__
 from Account.plugin_manager import account_plugins_otp_was_reset
-from Logboek.models import schrijf_in_logboek
+from Logboek.operations import schrijf_in_logboek
 from Overig.helpers import get_safe_from_ip
 from Mailer.operations import mailer_queue_email, render_email_template
 import logging
@@ -107,16 +107,19 @@ def otp_koppel_met_code(request, account, code):
         # controle is gelukt --> koppeling maken
         account.otp_is_actief = True
         account.save(update_fields=['otp_is_actief'])
-        my_logger.info('%s 2FA koppeling gelukt voor account %s' % (from_ip, account.username))
 
+        my_logger.info('%s 2FA koppeling gelukt voor account %s' % (from_ip, account.username))
         otp_zet_controle_gelukt(request)
+
+        schrijf_in_logboek(account=account,
+                           gebruikte_functie="OTP controle",
+                           activiteit='OTP geactiveerd vanaf IP %s' % from_ip)
         return True
 
     # controle is mislukt - schrijf dit in het logboek
-    schrijf_in_logboek(account=None,
+    schrijf_in_logboek(account=account,
                        gebruikte_functie="OTP controle",
-                       activiteit='Gebruiker %s OTP koppeling controle mislukt vanaf IP %s' % (
-                            repr(account.username), from_ip))
+                       activiteit='OTP koppeling controle mislukt vanaf IP %s' % from_ip)
     my_logger.info('%s 2FA koppeling mislukte controle voor account %s' % (from_ip, account.username))
     return False
 
@@ -148,10 +151,11 @@ def otp_controleer_code(request, account, code):
         return True
 
     # controle is mislukt - schrijf dit in het logboek
-    schrijf_in_logboek(account=None,
-                       gebruikte_functie="OTP controle",
-                       activiteit='Gebruiker %s OTP controle mislukt vanaf IP %s' % (repr(account.username), from_ip))
     my_logger.info('%s 2FA mislukt voor account %s met code %s' % (from_ip, account.username, repr(code)))
+
+    schrijf_in_logboek(account=account,
+                       gebruikte_functie="OTP controle",
+                       activiteit='OTP controle mislukt vanaf IP %s' % from_ip)
     return False
 
 
@@ -161,11 +165,13 @@ def otp_loskoppelen(request, account):
         Geeft True terug als OTP actief was en echt losgekoppeld is.
     """
 
-    # control dat gebruiker genoeg rechten heeft moet door aanroeper gedaan zijn
+    # simpele check om misbruik te voorkomen
+    # controle van recht om deze functie te gebruiken moet door caller gedaan zijn
     if not request.user.is_authenticated:
         return False
 
     if not account.otp_is_actief:
+        # account heeft helemaal geen OTP, dus niets los te koppelen
         return False
 
     from_ip = get_safe_from_ip(request)

@@ -89,6 +89,17 @@ def get_kaartjes_regio(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
                         url=url)
             kaartjes_teams.append(kaartje)
 
+    if rol_nu == Rol.ROL_BKO:
+        if comp.fase_teams == 'F':
+            url = reverse('CompScores:corrigeer-team-ronde-selecteer', kwargs={'comp_pk': comp.pk})
+            kaartje = SimpleNamespace(
+                        prio=99,
+                        titel="Correctie teamronde",
+                        sv_icon="comp rcl team scores",
+                        tekst="Correctie afgesloten ronde teamcompetities.",
+                        url=url)
+            kaartjes_teams.append(kaartje)
+
     if rol_nu == Rol.ROL_RCL:
 
         # pak de regiocompetitie erbij

@@ -13,10 +13,9 @@ from Beheer.views import beheer_opschonen
 from Geo.models import Regio
 from Bestelling.models import Bestelling
 from Betaal.models import BetaalActief, BetaalInstellingenVereniging, BetaalTransactie
-from TestHelpers.e2ehelpers import E2EHelpers
+from TestHelpers.e2ehelpers import E2EHelpers, OutputBuffer
 from Vereniging.models import Vereniging
 import datetime
-import io
 
 
 # updaten met dit commando (vereist ENABLE_DJANGO_EXTENSIONS = True in settings_dev.py):
@@ -355,7 +354,7 @@ class TestBeheer(E2EHelpers, TestCase):
             object_repr='test',
             action_flag=1).save()
 
-        stdout = io.StringIO()
+        stdout = OutputBuffer()
         beheer_opschonen(stdout)
 
         # geen records meer om op te schonen

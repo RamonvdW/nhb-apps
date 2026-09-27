@@ -5,13 +5,11 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from django.core.management.base import OutputWrapper
 from CompKampioenschap.models import SheetStatus
 from CompKampioenschap.operations import LeesIndivWedstrijdFormulier
 from GoogleDrive.models import Bestand
 from GoogleDrive.operations import StorageGoogleSheet
-from TestHelpers.e2ehelpers import E2EHelpers
-import io
+from TestHelpers.e2ehelpers import E2EHelpers, OutputBuffer
 
 
 class SheetMock(StorageGoogleSheet):
@@ -1186,7 +1184,7 @@ class TestCompKampioenschapOpWfIndivLees(E2EHelpers, TestCase):
                                 uitslag_is_compleet=False)
 
     def test_geen_deelnemers(self):
-        stdout = OutputWrapper(io.StringIO())
+        stdout = OutputBuffer()
         my_sheet = SheetMock(None, verbose=False, sheet_ranges=self.sheet_ranges_25_geen_deelnemers)
         lees = LeesIndivWedstrijdFormulier(stdout, self.bestand25, my_sheet, lees_oppervlakkig=True)
 
@@ -1200,7 +1198,7 @@ class TestCompKampioenschapOpWfIndivLees(E2EHelpers, TestCase):
         self.assertEqual(deelnemers, [])
 
     def test_geen_invoer(self):
-        stdout = OutputWrapper(io.StringIO())
+        stdout = OutputBuffer()
         my_sheet = SheetMock(None, verbose=False, sheet_ranges=self.sheet_ranges_25_geen_invoer)
         lees = LeesIndivWedstrijdFormulier(stdout, self.bestand25, my_sheet, lees_oppervlakkig=True)
 
@@ -1225,7 +1223,7 @@ class TestCompKampioenschapOpWfIndivLees(E2EHelpers, TestCase):
         self.assertEqual(uitslag, [])
 
     def test_voorronde_1(self):
-        stdout = OutputWrapper(io.StringIO())
+        stdout = OutputBuffer()
         my_sheet = SheetMock(None, verbose=False, sheet_ranges=self.sheet_ranges_25_voorronde1)
         lees = LeesIndivWedstrijdFormulier(stdout, self.bestand25, my_sheet, lees_oppervlakkig=True)
 
@@ -1241,7 +1239,7 @@ class TestCompKampioenschapOpWfIndivLees(E2EHelpers, TestCase):
         self.assertEqual(uitslag, [])
 
     def test_voorronde_2(self):
-        stdout = OutputWrapper(io.StringIO())
+        stdout = OutputBuffer()
         my_sheet = SheetMock(None, verbose=False, sheet_ranges=self.sheet_ranges_25_voorronde2)
         lees = LeesIndivWedstrijdFormulier(stdout, self.bestand25, my_sheet, lees_oppervlakkig=True)
 
@@ -1262,7 +1260,7 @@ class TestCompKampioenschapOpWfIndivLees(E2EHelpers, TestCase):
         self.assertEqual(uitslag, [])
 
     def test_uitslag(self):
-        stdout = OutputWrapper(io.StringIO())
+        stdout = OutputBuffer()
         my_sheet = SheetMock(None, verbose=False, sheet_ranges=self.sheet_ranges_25_uitslag)
         lees = LeesIndivWedstrijdFormulier(stdout, self.bestand25, my_sheet, lees_oppervlakkig=True)
 
@@ -1278,7 +1276,7 @@ class TestCompKampioenschapOpWfIndivLees(E2EHelpers, TestCase):
         self.assertEqual(res, [])
 
     def test_indoor_finales4(self):
-        stdout = OutputWrapper(io.StringIO())
+        stdout = OutputBuffer()
 
         # uitslag
         my_sheet = SheetMock(None, verbose=False, sheet_ranges=self.sheet_ranges_finales4_uitslag)
@@ -1297,8 +1295,8 @@ class TestCompKampioenschapOpWfIndivLees(E2EHelpers, TestCase):
         ])
 
         self.assertTrue(lees.heeft_uitslag())
-        res = lees.get_indiv_finales_uitslag()
-        # print(repr(res))
+        _res = lees.get_indiv_finales_uitslag()
+        # print(repr(_res))
 
         # extra coverage
         LeesIndivWedstrijdFormulier(stdout, self.bestand18, my_sheet, lees_oppervlakkig=True)
@@ -1329,7 +1327,7 @@ class TestCompKampioenschapOpWfIndivLees(E2EHelpers, TestCase):
         self.assertEqual(fase, '1/2 finales')
 
     def test_indoor_finales8(self):
-        stdout = OutputWrapper(io.StringIO())
+        stdout = OutputBuffer()
 
         # 1/4 finale
         my_sheet = SheetMock(None, verbose=False, sheet_ranges=self.sheet_ranges_finales8_kwart)
@@ -1407,7 +1405,7 @@ class TestCompKampioenschapOpWfIndivLees(E2EHelpers, TestCase):
         LeesIndivWedstrijdFormulier(stdout, self.bestand18, my_sheet, lees_oppervlakkig=True)
 
     def test_indoor_finales16(self):
-        stdout = OutputWrapper(io.StringIO())
+        stdout = OutputBuffer()
 
         # uitslag
         my_sheet = SheetMock(None, verbose=False, sheet_ranges=self.sheet_ranges_finales16_uitslag)
@@ -1427,8 +1425,8 @@ class TestCompKampioenschapOpWfIndivLees(E2EHelpers, TestCase):
         ])
 
         self.assertTrue(lees.heeft_uitslag())
-        res = lees.get_indiv_finales_uitslag()
-        # print(repr(res))
+        _res = lees.get_indiv_finales_uitslag()
+        # print(repr(_res))
 
         # extra coverage
         LeesIndivWedstrijdFormulier(stdout, self.bestand18, my_sheet, lees_oppervlakkig=True)

@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
+__all__ = ['E2EHelpers', 'TEST_WACHTWOORD', 'OutputBuffer']
+
 from django.contrib import auth
-from django.test import TestCase, Client
 from django.db import connection
+from django.test import TestCase, Client
+from django.core.management.base import OutputWrapper
 from Account.models import Account
 from Account.operations import account_create
 from Functie.models import Functie
@@ -20,6 +23,7 @@ from contextlib import contextmanager
 import tempfile
 import inspect
 import pyotp
+import io
 
 
 # debug optie: toon waar in de code de queries vandaan komen
@@ -27,6 +31,11 @@ FAIL_UNSAFE_DATABASE_MODIFICATION = False
 
 # sterk genoeg default wachtwoord
 TEST_WACHTWOORD = "qewretrytuyi"        # noqa
+
+
+class OutputBuffer(OutputWrapper):
+    def __init__(self):
+        super().__init__(out=io.StringIO())
 
 
 class E2EHelpers(MyTestAsserts, MyMgmtCommandHelper, TestCase):

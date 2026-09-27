@@ -21,18 +21,25 @@ class TestGraphDriveCliMetadata(E2EHelpers, TestCase):
         self.mock_metadata_bad = patch('GraphDrive.management.commands.graph_metadata.get_file_metadata', return_value=self.bad_metadata)
 
     def test_metadata(self):
+        site_index = 1
+
         self.mock_metadata_none.start()
-        f1, f2 = self.run_management_command(self.cli_metadata, '/remote/does/not/exist/missing.txt')
+        f1, f2 = self.run_management_command(self.cli_metadata, site_index, '/remote/does/not/exist/missing.txt')
         self.assertEqual(f1.getvalue(), '')
         # print('f2:', f2.getvalue())
         self.assertTrue('[ERROR] No data' in f2.getvalue())
         self.mock_metadata_none.stop()
 
         self.mock_metadata_bad.start()
-        f1, f2 = self.run_management_command(self.cli_metadata, '/remote/does/not/exist/missing.txt')
+        f1, f2 = self.run_management_command(self.cli_metadata, site_index, '/remote/does/not/exist/missing.txt')
         self.assertEqual(f1.getvalue(), '')
         # print('f2:', f2.getvalue())
         self.mock_metadata_bad.stop()
+
+        f1, f2 = self.run_management_command(self.cli_metadata, 9999, 'whatever')
+        self.assertEqual(f1.getvalue(), '')
+        # print('f2:', f2.getvalue())
+        self.assertTrue("[ERROR] Kan site index 9999 niet vinden in GRAPH_IDS" in f2.getvalue())
 
 
 # end of file

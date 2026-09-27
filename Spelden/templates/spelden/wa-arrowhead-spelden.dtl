@@ -15,6 +15,10 @@
         <div class="col s12">
             <h1 class="sv-kopje-pagina">Arrowhead spelden</h1>
             <p>Arrowhead spelden kunnen behaald worden op een World Archery veldwedstrijden van 24 of 48 doelen.</p>
+            <!-- 3 pijlen per doel
+                  max score per pijl is 6;
+                 24 doelen = 72 pijlen;
+                 48 doelen = 144 pijlen -->
             <p>Deze sterren zijn beschikbaar voor Recurve, Compound en Barebow.</p>
         </div>
     </div>

@@ -20,7 +20,7 @@ from CompUitslagen.operations import (maak_url_uitslag_rk_indiv, maak_url_uitsla
                                       maak_url_uitslag_rk_teams, maak_url_uitslag_bk_teams)
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
-from Logboek.models import schrijf_in_logboek
+from Logboek.operations import schrijf_in_logboek
 
 TEMPLATE_COMPKAMPIOENSCHAP_WF_RESULTAAT_IMPORT = 'compkampioenschap/wf-resultaat-import.dtl'
 

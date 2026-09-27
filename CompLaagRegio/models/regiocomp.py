@@ -8,6 +8,7 @@ from django.db import models
 from Competitie.definities import (INSCHRIJF_METHODES, INSCHRIJF_METHODE_2,
                                    TEAM_PUNTEN, TEAM_PUNTEN_MODEL_TWEE)
 from Competitie.models.competitie import Competitie
+from CompLaagRegio.operations.tijdlijn_regio import bepaal_fase_teams_regio
 from Functie.models import Functie
 from Geo.models import Regio
 
@@ -53,6 +54,7 @@ class RegioComp(models.Model):
     regio_heeft_vaste_teams = models.BooleanField(default=True)
 
     # tot welke datum mogen teams aangemeld aangemaakt worden (verschilt per regio)
+    # wordt standaard 2 weken voor fase F gezet, dus ergens in December
     begin_fase_D = models.DateField(default='2001-01-01')
 
     # punten model
@@ -63,6 +65,13 @@ class RegioComp(models.Model):
     # week nummer waarin de eerste wedstrijd gehouden wordt
     # is normaal gelijk aan datum fase F, maar sommige regio's willen eerder beginnen
     start_week = models.PositiveSmallIntegerField(default=0)
+
+    def bepaal_fase(self):
+        """ bepaalde huidige fase van de competitie en zet self.fase_indiv en self.fase_teams """
+        self.competitie.bepaal_fase()
+
+        self.fase_indiv = self.competitie.fase_indiv
+        self.fase_teams = bepaal_fase_teams_regio(self)
 
     def __str__(self):
         """ geef een tekstuele afkorting van dit object, voor in de admin interface """

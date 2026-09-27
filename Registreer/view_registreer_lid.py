@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2025 Ramon van der Winkel.
+#  Copyright (c) 2020-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -9,7 +9,7 @@ from django.shortcuts import render, reverse
 from django.views.generic import TemplateView
 from Account.operations import AccountCreateError, account_create, account_email_bevestiging_ontvangen
 from Functie.models import Functie
-from Logboek.models import schrijf_in_logboek
+from Logboek.operations import schrijf_in_logboek
 from Mailer.operations import mailer_email_is_valide, mailer_obfuscate_email, mailer_queue_email, render_email_template
 from Overig.helpers import get_safe_from_ip
 from Registreer.forms import RegistreerNormaalForm

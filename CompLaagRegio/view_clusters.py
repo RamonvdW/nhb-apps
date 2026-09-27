@@ -15,7 +15,7 @@ from CompLaagRegio.models import RegioComp
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
 from Geo.models import Cluster
-from Logboek.models import schrijf_in_logboek
+from Logboek.operations import schrijf_in_logboek
 from Vereniging.models import Vereniging
 import copy
 

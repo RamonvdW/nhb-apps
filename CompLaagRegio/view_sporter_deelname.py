@@ -13,7 +13,7 @@ from Account.models import get_account
 from CompLaagRegio.models import RegioDeelnemer
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
-from Sporter.operations import get_sporter
+from Sporter.models import get_sporter
 
 
 class SporterVoorkeurRkView(UserPassesTestMixin, TemplateView):

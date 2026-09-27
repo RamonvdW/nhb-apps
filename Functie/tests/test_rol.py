@@ -7,7 +7,7 @@
 from django.test import TestCase
 from Account.models import get_account
 from Functie.definities import Rol
-from Functie.operations import maak_account_vereniging_secretaris
+from Functie.operations import koppel_account_aan_functie_sec
 from Functie.tests.helpers import maak_functie
 from Functie.rol import (rol_mag_wisselen, rol_get_beschrijving, rol_zet_beschrijving, rol_activeer_functie,
                          rol_activeer_rol, rol_get_huidige, rol_get_huidige_functie)
@@ -59,14 +59,14 @@ class TestFunctieRol(E2EHelpers, TestCase):
         # e-mail moet bevestigd zijn (anders kunnen we de mail niet sturen)
         self.account_normaal.email_is_bevestigd = False
         self.account_normaal.save(update_fields=['email_is_bevestigd'])
-        added = maak_account_vereniging_secretaris(self.ver1, self.account_normaal)
+        added = koppel_account_aan_functie_sec(self.ver1, self.account_normaal)
         self.assertFalse(added)
         self.assertEqual(self.functie_sec.accounts.count(), 0)
 
         # normale situatie
         self.account_normaal.email_is_bevestigd = True
         self.account_normaal.save(update_fields=['email_is_bevestigd'])
-        added = maak_account_vereniging_secretaris(self.ver1, self.account_normaal)
+        added = koppel_account_aan_functie_sec(self.ver1, self.account_normaal)
         self.assertTrue(added)
         self.assertEqual(self.functie_sec.accounts.count(), 1)
 
@@ -76,7 +76,7 @@ class TestFunctieRol(E2EHelpers, TestCase):
         self.assert_consistent_email_html_text(mail)
 
         # dubbel koppelen wordt voorkomen
-        added = maak_account_vereniging_secretaris(self.ver1, self.account_normaal)
+        added = koppel_account_aan_functie_sec(self.ver1, self.account_normaal)
         self.assertFalse(added)
         self.assertEqual(self.functie_sec.accounts.count(), 1)
 

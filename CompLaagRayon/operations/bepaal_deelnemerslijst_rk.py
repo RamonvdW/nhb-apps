@@ -10,7 +10,7 @@ from Competitie.models import Competitie
 from CompKampioenschap.operations import bepaal_kamp_indiv_deelnemerslijst, zet_dirty
 from CompLaagRayon.models import KampRK, DeelnemerRK, TeamRK
 from CompLaagRegio.models import RegioComp, RegioDeelnemer
-from Logboek.models import schrijf_in_logboek
+from Logboek.operations import schrijf_in_logboek
 from Taken.operations import maak_taak
 
 

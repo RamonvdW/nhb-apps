@@ -6,14 +6,12 @@
 
 from django.test import TestCase
 from django.utils import timezone
-from django.core.management.base import OutputWrapper
 from CompKampioenschap.models import SheetStatus
 from CompKampioenschap.operations.monitor_wedstrijdformulieren import MonitorGoogleSheetsWedstrijdformulieren
 from GoogleDrive.models import Bestand
 from GoogleDrive.operations import StorageGoogleSheet
-from TestHelpers.e2ehelpers import E2EHelpers
+from TestHelpers.e2ehelpers import E2EHelpers, OutputBuffer
 from unittest.mock import patch
-import io
 
 
 class MockMonitorDriveFiles:
@@ -94,7 +92,7 @@ class TestCompKampioenschapOpMonitorWf(E2EHelpers, TestCase):
                                     file_id='file_id_2')
 
     def test_monitor(self):
-        out = OutputWrapper(io.StringIO())
+        out = OutputBuffer()
 
         werk = [
             (self.bestand1.begin_jaar, self.bestand1.afstand, self.bestand1.is_bk, self.bestand1.is_teams),
