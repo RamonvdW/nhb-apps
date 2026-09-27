@@ -65,7 +65,7 @@
                 <tr>
                     <td class="center">Goud</td>
                     <td class="center">
-                        <img class="sv-foto-speld" src="{% static 'spelden/arrowhead_goud.png' %}" alt="speld" draggable="false">
+                        <img class="sv-foto-speld" src="{% static 'spelden/arrowhead_goud.webp' %}" alt="speld" draggable="false">
                     </td>
                 </tr>
 

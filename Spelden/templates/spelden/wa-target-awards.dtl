@@ -132,14 +132,14 @@
 
                 <tr>
                     <td class="center">Goud</td>
-                    <td class="center"><img class="sv-foto-speld" draggable="false" src="{% static 'spelden/target_award_goud.png' %}" alt="Target award goud"></td>
-                    <td class="center"><img class="sv-foto-speld" draggable="false" src="{% static 'spelden/zilveren_target_award_goud.png' %}" alt="Zilveren target award goud"></td>
+                    <td class="center"><img class="sv-foto-speld" draggable="false" src="{% static 'spelden/target_award_goud.webp' %}" alt="Target award goud"></td>
+                    <td class="center"><img class="sv-foto-speld" draggable="false" src="{% static 'spelden/zilveren_target_award_goud.webp' %}" alt="Zilveren target award goud"></td>
                 </tr>
 
                 <tr>
                     <td class="center">Purper</td>
-                    <td class="center"><img class="sv-foto-speld" draggable="false" src="{% static 'spelden/target_award_purper.png' %}" alt="Target award purper"></td>
-                    <td class="center"><img class="sv-foto-speld" draggable="false" src="{% static 'spelden/zilveren_target_award_purper.png' %}" alt="Zilveren target award purper"></td>
+                    <td class="center"><img class="sv-foto-speld" draggable="false" src="{% static 'spelden/target_award_purper.webp' %}" alt="Target award purper"></td>
+                    <td class="center"><img class="sv-foto-speld" draggable="false" src="{% static 'spelden/zilveren_target_award_purper.webp' %}" alt="Zilveren target award purper"></td>
                 </tr>
 
             </table>
