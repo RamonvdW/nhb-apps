@@ -5,8 +5,8 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import reverse
+from django.conf import settings
 from django.http import HttpResponseRedirect, Http404
-from django.shortcuts import render
 from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from Account.models import get_account
@@ -36,6 +36,9 @@ class BestelStap2View(TemplateView):
     def _load_prep(self):
         if rol_get_huidige(self.request) != Rol.ROL_SPORTER:
             raise PermissionDenied('Niet ingelogd')
+
+        if not settings.TOON_SPELDEN_BESTELLEN:
+            raise Http404('Bestelling is niet mogelijk')
 
         account = get_account(self.request)
         sporter = get_sporter(account)
@@ -108,7 +111,7 @@ class BestelStap2View(TemplateView):
 
         context['kruimels'] = (
             (reverse('Webwinkel:overzicht'), 'Webwinkel'),
-            (reverse('Spelden:begin'), 'Spelden'),
+            (reverse('Spelden:begin'), 'Prestatiespelden'),
             (None, 'Bestellen - Stap 2'),
         )
 

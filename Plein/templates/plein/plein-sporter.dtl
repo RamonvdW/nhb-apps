@@ -86,6 +86,10 @@
             {% url 'Records:overzicht' as card_url %}
             {% include 'design/card_icon.dtl' with title="Records" text="Alle handboogsport records van Nederlandse sporters." sv_icon="records" url=card_url %}
 
+            <!-- prestatiespelden -->
+            {% url 'Spelden:begin' as card_url %}
+            {% include 'design/card_icon.dtl' with title="Prestatiespelden" text="Leuk om je best voor te doen: speldjes" sv_icon="spelden" url=card_url %}
+
             <!-- ledenvoordeel -->
             {% if url_voordeel %}
                 {% include 'design/card_icon.dtl' with title="Ledenvoordeel" text="Bekijk de aanbiedingen voor KHSN leden." sv_icon="ledenvoordeel" url=url_voordeel %}

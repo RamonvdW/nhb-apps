@@ -23,7 +23,7 @@
     <div class="row center">
         <div class="col s12">
             <h2 class="sv-kopje-row">World Archery</h2>
-            <p>De spelden van World Archery zijn opgedeeld in de volgende groepen. Maak een keuze voor meer details en het bestelformulier.</p>
+            <p>De spelden van World Archery zijn opgedeeld in de volgende categoriën. Maak een keuze voor meer details.</p>
         </div>
     </div>
 
@@ -55,7 +55,7 @@
     <div class="row center">
         <div class="col s12">
             <h2 class="sv-kopje-row">KHSN</h2>
-            <p>De spelden van KHSN zijn opgedeeld in de volgende groepen. Maak een keuze voor meer details en het bestelformulier.</p>
+            <p>De spelden van KHSN zijn opgedeeld in de volgende groepen. Maak een keuze voor meer details.</p>
         </div>
     </div>
 
@@ -63,8 +63,10 @@
     <div class="row-sv-blauw">
         <div class="col s12">
             <!-- KHSN tussenspelden (RK Outdoor) -->
+            {% comment %}
             {% url 'Spelden:groep-tussenspelden' as card_url %}
             {% include 'design/card_icon.dtl' with title="Tussenspelden" text="KHSN tussenspelden" sv_icon="spelden tussenspelden" url=card_url %}
+            {% endcomment %}
 
             <!-- KHSN graadspelden -->
             {% url 'Spelden:groep-graadspelden' as card_url %}
@@ -76,14 +78,15 @@
         </div>
     </div>
 
-    {% if url_bestel %}
 
-        <!-- witruimte -->
-        <div class="row center">
-            <div class="col s12">
-                <h2 class="sv-kopje-row">Bestel de prestatiespelden</h2>
-            </div>
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h2 class="sv-kopje-row">Bestel de prestatiespelden</h2>
         </div>
+    </div>
+
+    {% if url_bestel %}
 
         <div class="row-sv-blauw">
             <div class="col s12">
@@ -97,6 +100,10 @@
                 {% endcomment %}
             </div>
         </div>
+
+    {% else %}
+
+        <p class="center">Bestellen via MijnHandboogsport volgt binnenkort.<br>Gebruik voorlopig het bestelformulier op de hoofdsite.</p>
 
     {% endif %}
 

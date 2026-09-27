@@ -29,9 +29,9 @@ urlpatterns = [
          view_info.GraadspeldenView.as_view(),
          name='groep-graadspelden'),
 
-    path('tussenspelden/',
-         view_info.TussenspeldenView.as_view(),
-         name='groep-tussenspelden'),
+    # path('tussenspelden/',
+    #      view_info.TussenspeldenView.as_view(),
+    #      name='groep-tussenspelden'),
 
     path('target-awards/',
          view_info.TargetAwardsView.as_view(),

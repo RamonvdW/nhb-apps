@@ -52,6 +52,7 @@ urlpatterns = [
     path('privacy/',                            include('Privacy.urls')),
     path('records/',                            include('Records.urls')),
     path('scheidsrechter/',                     include('Scheidsrechter.urls')),
+    path('spelden/',                            include('Spelden.urls')),
     path('sporter/',                            include('Sporter.urls')),
     path('score/',                              include('Score.urls')),
     path('taken/',                              include('Taken.urls')),
@@ -59,7 +60,6 @@ urlpatterns = [
     path('vereniging/',                         include('Vereniging.urls')),
     path('vereniging/locatie/',                 include('Locatie.urls')),
     path('webwinkel/',                          include('Webwinkel.urls')),
-    path('webwinkel/spelden/',                  include('Spelden.urls')),
     path('wedstrijden/',                        include('Wedstrijden.urls')),
     path('wedstrijden/inschrijven/',            include('WedstrijdInschrijven.urls')),
 

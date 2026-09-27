@@ -37,8 +37,7 @@ class HallOfFameView(TemplateView):
         context['leden_gm'], context['leden_ms'], context['leden_as'] = get_hall_of_fame()
 
         context['kruimels'] = (
-            (reverse('Webwinkel:overzicht'), 'Webwinkel'),
-            (reverse('Spelden:begin'), 'Spelden'),
+            (reverse('Spelden:begin'), 'Prestatiespelden'),
             (reverse('Spelden:groep-meesterspelden'), 'Meesterspelden'),
             (None, 'Hall of Fame'),
         )
@@ -62,8 +61,7 @@ class MeesterspeldenView(TemplateView):
         context['url_hall_of_fame'] = reverse('Spelden:meesterspelden-hall-of-fame')
 
         context['kruimels'] = (
-            (reverse('Webwinkel:overzicht'), 'Webwinkel'),
-            (reverse('Spelden:begin'), 'Spelden'),
+            (reverse('Spelden:begin'), 'Prestatiespelden'),
             (None, 'Meesterspelden')
         )
 
@@ -121,8 +119,7 @@ class GraadspeldenView(TemplateView):
         # for
 
         context['kruimels'] = (
-            (reverse('Webwinkel:overzicht'), 'Webwinkel'),
-            (reverse('Spelden:begin'), 'Spelden'),
+            (reverse('Spelden:begin'), 'Prestatiespelden'),
             (None, 'Graadspelden')
         )
 
@@ -151,8 +148,7 @@ class TussenspeldenView(TemplateView):
                                                            'discipline': 'outdoor'})
 
         context['kruimels'] = (
-            (reverse('Webwinkel:overzicht'), 'Webwinkel'),
-            (reverse('Spelden:begin'), 'Spelden'),
+            (reverse('Spelden:begin'), 'Prestatiespelden'),
             (None, 'Tussenspelden')
         )
 
@@ -172,8 +168,7 @@ class TargetAwardsView(TemplateView):
             context['menu_toon_mandje'] = True
 
         context['kruimels'] = (
-            (reverse('Webwinkel:overzicht'), 'Webwinkel'),
-            (reverse('Spelden:begin'), 'Spelden'),
+            (reverse('Spelden:begin'), 'Prestatiespelden'),
             (None, 'Target awards')
         )
 
@@ -193,8 +188,7 @@ class SterspeldenView(TemplateView):
             context['menu_toon_mandje'] = True
 
         context['kruimels'] = (
-            (reverse('Webwinkel:overzicht'), 'Webwinkel'),
-            (reverse('Spelden:begin'), 'Spelden'),
+            (reverse('Spelden:begin'), 'Prestatiespelden'),
             (None, 'Sterspelden')
         )
 
@@ -258,8 +252,7 @@ class ArrowheadView(TemplateView):
         # for
 
         context['kruimels'] = (
-            (reverse('Webwinkel:overzicht'), 'Webwinkel'),
-            (reverse('Spelden:begin'), 'Spelden'),
+            (reverse('Spelden:begin'), 'Prestatiespelden'),
             (None, 'Arrowhead spelden')
         )
 

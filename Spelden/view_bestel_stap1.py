@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
-import django.http
+
 #  Copyright (c) 2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import reverse
+from django.conf import settings
 from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import render
 from django.views.generic import TemplateView
@@ -39,6 +40,10 @@ class BestelStap1View(TemplateView):
         self.sporter_bogen = list()     # afkortingen
 
     def _load_prep(self, mag_database_wijzigen=False):
+
+        if not settings.TOON_SPELDEN_BESTELLEN:
+            raise Http404('Bestelling is niet mogelijk')
+
         if rol_get_huidige(self.request) != Rol.ROL_SPORTER:
             raise PermissionDenied('Niet ingelogd')
 
@@ -101,7 +106,7 @@ class BestelStap1View(TemplateView):
 
         context['kruimels'] = (
             (reverse('Webwinkel:overzicht'), 'Webwinkel'),
-            (reverse('Spelden:begin'), 'Spelden'),
+            (reverse('Spelden:begin'), 'Prestatiespelden'),
             (None, 'Bestellen - Stap 1'),
         )
 

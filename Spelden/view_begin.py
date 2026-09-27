@@ -5,6 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import reverse
+from django.conf import settings
 from django.views.generic import TemplateView
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
@@ -24,13 +25,11 @@ class BeginView(TemplateView):
         context = super().get_context_data(**kwargs)
 
         if rol_get_huidige(self.request) == Rol.ROL_SPORTER:
-            context['menu_toon_mandje'] = True
-
-            context['url_bestel'] = reverse('Spelden:bestel-stap1')
+            if settings.TOON_SPELDEN_BESTELLEN:
+                context['url_bestel'] = reverse('Spelden:bestel-stap1')
 
         context['kruimels'] = (
-            (reverse('Webwinkel:overzicht'), 'Webwinkel'),
-            (None, 'Spelden'),
+            (None, 'Prestatiespelden'),
         )
 
         return context
