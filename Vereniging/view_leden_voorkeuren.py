@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2026 Ramon van der Winkel.
+#  Copyright (c) 2019-2025 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -8,49 +8,28 @@ from django.urls import reverse
 from django.utils import timezone
 from django.views.generic import ListView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Account.models import Account
-from BasisTypen.definities import MAXIMALE_LEEFTIJD_JEUGD, ORGANISATIE_KHSN
-from BasisTypen.models import Leeftijdsklasse
+from BasisTypen.definities import MAXIMALE_LEEFTIJD_JEUGD
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
 from Sporter.models import Sporter, SporterBoog
 
-TEMPLATE_LEDENLIJST = 'vereniging/ledenlijst.dtl'
+TEMPLATE_LEDEN_VOORKEUREN = 'vereniging/leden-voorkeuren.dtl'
 
 
-def format_last_login(now, account: Account):
-    dt = account.last_login
-    delta = now - dt
-    days = delta.days
-    if days <= 1:
-        return "Vandaag"
-    if days <= 7:
-        return "Afgelopen week"
-    if days <= 31:
-        return "Afgelopen maand"
-    maanden = days / (365 / 12)
-    maanden = round(maanden + 0.5)
-    # print('days: %s --> maanden: %s' % (days, maanden))
-    if maanden <= 14:
-        return "%s maanden geleden" % maanden
-    jaren = int(maanden / 12)
-    maanden -= (jaren * 12)
-    return "%s jaar en %s maanden geleden" % (jaren, maanden)
+class LedenVoorkeurenView(UserPassesTestMixin, ListView):
 
-
-class LedenLijstView(UserPassesTestMixin, ListView):
-
-    """ Deze view laat de HWL zijn ledenlijst zien """
+    """ Deze view laat de HWL de voorkeuren van de zijn leden aanpassen
+        en geeft de SEC en WL inzicht in de voorkeuren
+    """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_LEDENLIJST
+    template_name = TEMPLATE_LEDEN_VOORKEUREN
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
     permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.rol_nu, self.functie_nu = None, None
-        self.huidige_jaar = 0
         self.mag_wijzigen = False
 
     def test_func(self):
@@ -70,21 +49,9 @@ class LedenLijstView(UserPassesTestMixin, ListView):
         jeugdgrens = huidige_jaar - MAXIMALE_LEEFTIJD_JEUGD
         self.huidige_jaar = huidige_jaar
 
-        # deel 1: jeugd
-
-        lkls = list()
-        for lkl in (Leeftijdsklasse  # pragma: no branch
-                    .objects
-                    .filter(organisatie=ORGANISATIE_KHSN,
-                            min_wedstrijdleeftijd=0)    # exclude veel van de senioren klassen
-                    .order_by('volgorde')):             # aspirant eerst
-
-            lkls.append(lkl)
-        # for
-
-        prev_lkl = None
-        prev_wedstrijdleeftijd = 0
         objs = list()
+
+        # deel 1: jeugd
 
         # sorteer op geboorte jaar en daarna naam
         for obj in (Sporter
@@ -100,21 +67,6 @@ class LedenLijstView(UserPassesTestMixin, ListView):
             wedstrijdleeftijd = obj.bereken_wedstrijdleeftijd_wa(huidige_jaar)
             obj.leeftijd = wedstrijdleeftijd
             obj.is_jeugd = True
-
-            # de wedstrijdklasse voor dit hele jaar
-            if wedstrijdleeftijd == prev_wedstrijdleeftijd:
-                obj.leeftijdsklasse = prev_lkl
-            else:
-                obj.leeftijdsklasse = None      # fallback
-                for lkl in lkls:                                            # pragma: no branch
-                    if lkl.leeftijd_is_compatible(wedstrijdleeftijd):
-                        obj.leeftijdsklasse = lkl
-                        # stop op de eerste match: aspirant, cadet, junior, senior
-                        break
-                # for
-
-                prev_lkl = obj.leeftijdsklasse
-                prev_wedstrijdleeftijd = wedstrijdleeftijd
 
             obj.url_bondspas = reverse('Bondspas:vereniging-bondspas-van', kwargs={'lid_nr': obj.lid_nr})
             objs.append(obj)
@@ -142,20 +94,34 @@ class LedenLijstView(UserPassesTestMixin, ListView):
         # for
 
         # zoek de laatste-inlog bij elk lid
-        now = timezone.now()
         for sporter in objs:
             # voorkeuren van de sporters aanpassen
             if self.mag_wijzigen:
                 sporter.wijzig_url = reverse('Sporter:voorkeuren-sporter',
                                              kwargs={'sporter_pk': sporter.pk})
+        # for
 
-            if sporter.account:
-                if sporter.account.last_login:
-                    sporter.laatste_inlog = format_last_login(now, sporter.account)
-                else:
-                    sporter.geen_inlog = 2
+        sporter_dict = dict()
+        for sporter in objs:
+            sporter.wedstrijdbogen = list()
+            sporter_dict[sporter.lid_nr] = sporter
+        # for
+
+        # zoek de bogen informatie bij elk lid
+        for sporterboog in (SporterBoog
+                            .objects
+                            .filter(voor_wedstrijd=True)
+                            .select_related('sporter',
+                                            'boogtype')
+                            .only('sporter__lid_nr',
+                                  'boogtype__beschrijving')):
+            try:
+                sporter = sporter_dict[sporterboog.sporter.lid_nr]
+            except KeyError:
+                # sporter is niet van deze vereniging
+                pass
             else:
-                sporter.geen_inlog = 1
+                sporter.wedstrijdbogen.append(sporterboog.boogtype.beschrijving)
         # for
 
         return objs
@@ -169,28 +135,21 @@ class LedenLijstView(UserPassesTestMixin, ListView):
         # splits the ledenlijst op in jeugd, senior en inactief
         jeugd = list()
         senior = list()
-        inactief = list()
         for obj in context['object_list']:
-            if not obj.is_actief_lid:
-                inactief.append(obj)
-            elif obj.is_jeugd:
-                jeugd.append(obj)
-            else:
-                senior.append(obj)
+            if obj.is_actief_lid:
+                if obj.is_jeugd:
+                    jeugd.append(obj)
+                else:
+                    senior.append(obj)
         # for
 
         context['leden_jeugd'] = jeugd
         context['leden_senior'] = senior
-        context['leden_inactief'] = inactief
-        context['wedstrijdklasse_jaar'] = self.huidige_jaar
         context['toon_wijzig_kolom'] = self.rol_nu in (Rol.ROL_SEC, Rol.ROL_HWL)
-
-        if self.rol_nu in (Rol.ROL_SEC, Rol.ROL_LA):
-            context['toon_bondspas'] = True
 
         context['kruimels'] = (
             (reverse('Vereniging:overzicht'), 'Beheer vereniging'),
-            (None, 'Ledenlijst')
+            (None, 'Voorkeuren leden')
         )
 
         return context

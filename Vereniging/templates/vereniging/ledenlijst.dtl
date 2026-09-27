@@ -45,9 +45,6 @@
                             <th data-filter="on">Voor<wbr>naam</th>
                             <th data-filter="on">Achter<wbr>naam</th>
                             <th>Leeftijd</th>
-                            {% if not toon_bondspas %}
-                                <th>Leeftijds<wbr>klasse {{ wedstrijdklasse_jaar }}</th>
-                            {% endif %}
                             <th class="hide-on-small-only">Laatste inlog</th>
                             {% if toon_bondspas %}
                                 <th>Bondspas</th>
@@ -62,9 +59,6 @@
                             <td>{{ obj.voornaam }}</td>
                             <td>{{ obj.achternaam }}</td>
                             <td>{{ obj.leeftijd }}</td>
-                            {% if not toon_bondspas %}
-                                <td>{{ obj.leeftijdsklasse.klasse_kort }}</td>
-                            {% endif %}
                             <td class="hide-on-small-only">
                                 {% if obj.geen_inlog == 2 %}
                                     <i>Onvoltooid account</i>
@@ -113,9 +107,6 @@
                         <th>M/V</th>
                         <th data-filter="on">Voor<wbr>naam</th>
                         <th data-filter="on">Achter<wbr>naam</th>
-                        {% if not toon_bondspas %}
-                            <th>Leeftijds<wbr>klasse {{ wedstrijdklasse_jaar }}</th>
-                        {% endif %}
                         <th class="hide-on-small-only">Laatste inlog</th>
                         {% if toon_bondspas %}
                             <th>Bondspas</th>
@@ -129,9 +120,6 @@
                         <td>{{ obj.geslacht }}</td>
                         <td>{{ obj.voornaam }}</td>
                         <td>{{ obj.achternaam }}</td>
-                        {% if not toon_bondspas %}
-                            <td>{{ obj.leeftijdsklasse.klasse_kort }}</td>
-                        {% endif %}
 
                         <td class="hide-on-small-only">
                             {% if obj.geen_inlog == 2 %}

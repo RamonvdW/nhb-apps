@@ -203,11 +203,11 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h2 class="sv-kopje-row">Beheer vereniging</h2>
+            <h2 class="sv-kopje-row">Leden van de vereniging</h2>
         </div>
     </div>
 
-    <!-- blauwe balk -->
+        <!-- blauwe balk -->
     <div class="row-sv-blauw">
         <div class="col s12">
 
@@ -217,16 +217,34 @@
                 {% include 'design/card_icon.dtl' with title="Gast accounts" text="Toon de aangemaakte gast-accounts." sv_icon="ver gast accounts" url=card_url %}
             {% else %}
                 {% url 'Vereniging:ledenlijst' as card_url %}
-                {% include 'design/card_icon.dtl' with title="Ledenlijst" text="Leden van de vereniging, inclusief wedstrijdklasse jeugdleden en laatste inlog op deze website." sv_icon="ver ledenlijst" url=card_url %}
+                {% include 'design/card_icon.dtl' with title="Ledenlijst" text="Leden van de vereniging, inclusief laatste inlog op deze website." sv_icon="ver ledenlijst" url=card_url %}
             {% endif %}
 
-            <!-- beheerders vereniging -->
-            {% url 'Functie:overzicht-vereniging' as card_url %}
-            {% include 'design/card_icon.dtl' with title="Beheerders" text="Beheerders van de vereniging instellen en e-mailadressen van functies aanpassen." sv_icon="ver beheerders" url=card_url %}
+            <!-- leeftijdsklassen -->
+            {% url 'Vereniging:leden-leeftijdsklassen' as card_url %}
+            {% include 'design/card_icon.dtl' with title="Leeftijdsklassen" text="Bekijk in welke leeftijdsklassen jullie leden uit moet komen." sv_icon="leeftijdsklassen" url=card_url %}
 
             <!-- instellingen leden -->
             {% url 'Vereniging:leden-voorkeuren' as card_url %}
             {% include 'design/card_icon.dtl' with title="Voorkeuren leden" text="Voorkeuren van de leden inzien en boog type instellen." sv_icon="ver voorkeuren leden" url=card_url %}
+
+        </div>
+    </div>
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h2 class="sv-kopje-row">Beheer vereniging</h2>
+        </div>
+    </div>
+
+    <!-- blauwe balk -->
+    <div class="row-sv-blauw">
+        <div class="col s12">
+
+            <!-- beheerders vereniging -->
+            {% url 'Functie:overzicht-vereniging' as card_url %}
+            {% include 'design/card_icon.dtl' with title="Beheerders" text="Beheerders van de vereniging instellen en e-mailadressen van functies aanpassen." sv_icon="ver beheerders" url=card_url %}
 
             <!-- accommodatie details -->
             {% if accommodatie_details_url %}

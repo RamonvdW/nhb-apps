@@ -36,17 +36,14 @@
                         <thead>
                             <tr>        <!-- filter veld -->
                                 <td class="table-filter"><input class="table-filter" oninput="tabel_filter(this, 'table1')" placeholder="Zoeken"/></td>
-                                <td colspan="5"></td>
+                                <td colspan="4"></td>
                             </tr>
                             <tr>
                                 <th data-filter="on">Naam</th>
                                 <th>M/V</th>
                                 <th>Leeftijd</th>
-                                <th class="hide-on-small-only">Wedstrijd<wbr>klasse {{ wedstrijdklasse_jaar }}</th>
                                 <th>Schiet met</th>
-                                {% if toon_wijzig_kolom %}
-                                    <th><!-- kolom voor de Voorkeuren knop --></th>
-                                {% endif %}
+                                <th><!-- kolom voor de Voorkeuren knop --></th>
                             </tr>
                         </thead>
 
@@ -55,7 +52,6 @@
                                 <td>[{{ obj.lid_nr }}] {{ obj.volledige_naam }}</td>
                                 <td>{{ obj.geslacht }}</td>
                                 <td>{{ obj.leeftijd }}</td>
-                                <td class="hide-on-small-only">{{ obj.leeftijdsklasse.klasse_kort }}</td>
 
                                 <td>
                                     {% for boogtype in obj.wedstrijdbogen %}
@@ -65,14 +61,12 @@
                                     {% endfor %}
                                 </td>
 
-                                {% if toon_wijzig_kolom %}
-                                    <td class="right-align">
-                                        {% if obj.wijzig_url %}
-                                            {% sv-knop-nav url=obj.wijzig_url icon='ver voorkeuren leden' extra_class='hide-on-large-and-up' tekst='' %}
-                                            {% sv-knop-nav url=obj.wijzig_url icon='ver voorkeuren leden' extra_class='hide-on-med-and-down' tekst='Wijzig' %}
-                                        {% endif %}
-                                    </td>
-                                {% endif %}
+                                <td class="right-align">
+                                    {% if toon_wijzig_kolom and obj.wijzig_url %}
+                                        {% sv-knop-nav url=obj.wijzig_url icon='ver voorkeuren leden' extra_class='hide-on-large-and-up' tekst='' %}
+                                        {% sv-knop-nav url=obj.wijzig_url icon='ver voorkeuren leden' extra_class='hide-on-med-and-down' tekst='Wijzig' %}
+                                    {% endif %}
+                                </td>
                             </tr>
                         {% endfor %}
                     </table>
@@ -93,48 +87,46 @@
     <!-- blauwe balk -->
     <div class="row-sv-blauw">
         <div class="col s12">
+            <div class="sv-kader">
 
-            <table class="sv-kader-tabel" id="table2">   <!-- id is voor filter -->
-                <thead>
-                    <tr>        <!-- filter veld -->
-                        <td class="table-filter"><input class="table-filter" oninput="tabel_filter(this, 'table2')" placeholder="Zoeken"/></td>
-                        <td colspan="3"></td>
-                    </tr>
-                    <tr>
-                        <th data-filter="on">Naam</th>
-                        <th>M/V</th>
-                        <th>Schiet met</th>
-                        {% if toon_wijzig_kolom %}
+                <table class="sv-kader-tabel" id="table2">   <!-- id is voor filter -->
+                    <thead>
+                        <tr>        <!-- filter veld -->
+                            <td class="table-filter"><input class="table-filter" oninput="tabel_filter(this, 'table2')" placeholder="Zoeken"/></td>
+                            <td colspan="3"></td>
+                        </tr>
+                        <tr>
+                            <th data-filter="on">Naam</th>
+                            <th>M/V</th>
+                            <th>Schiet met</th>
                             <th><!-- kolom voor de Voorkeuren knop --></th>
-                        {% endif %}
-                    </tr>
-                </thead>
+                        </tr>
+                    </thead>
 
-                {% for obj in leden_senior %}
-                    <tr>
-                        <td>[{{ obj.lid_nr }}] {{ obj.volledige_naam }}</td>
-                        <td>{{ obj.geslacht }}</td>
+                    {% for obj in leden_senior %}
+                        <tr>
+                            <td>[{{ obj.lid_nr }}] {{ obj.volledige_naam }}</td>
+                            <td>{{ obj.geslacht }}</td>
 
-                        <td>
-                            {% for boogtype in obj.wedstrijdbogen %}
-                                <span>{% if not forloop.first %},<br>{% endif %}{{ boogtype }}</span>
-                            {% empty %}
-                                <span class="sv-rood-text">Niet ingesteld</span>
-                            {% endfor %}
-                        </td>
+                            <td>
+                                {% for boogtype in obj.wedstrijdbogen %}
+                                    <span>{% if not forloop.first %},<br>{% endif %}{{ boogtype }}</span>
+                                {% empty %}
+                                    <span class="sv-rood-text">Niet ingesteld</span>
+                                {% endfor %}
+                            </td>
 
-                        {% if toon_wijzig_kolom %}
                             <td class="right-align">
-                                {% if obj.wijzig_url %}
+                                {% if toon_wijzig_kolom and obj.wijzig_url %}
                                     {% sv-knop-nav url=obj.wijzig_url icon='ver voorkeuren leden' extra_class='hide-on-large-and-up' tekst='' %}
                                     {% sv-knop-nav url=obj.wijzig_url icon='ver voorkeuren leden' extra_class='hide-on-med-and-down' tekst='Wijzig' %}
                                 {% endif %}
                             </td>
-                        {% endif %}
-                    </tr>
-                {% endfor %}
-            </table>
+                        </tr>
+                    {% endfor %}
+                </table>
 
+            </div>
         </div>
     </div>
 

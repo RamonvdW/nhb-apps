@@ -22,7 +22,7 @@ TEMPLATE_LIJST_DETAILS = 'vereniging/lijst-details.dtl'
 TEMPLATE_CONTACT_GEEN_BEHEERDERS = 'vereniging/contact-geen-beheerders.dtl'
 
 
-class LijstView(UserPassesTestMixin, TemplateView):
+class LijstVerenigingenView(UserPassesTestMixin, TemplateView):
 
     """ Via deze view worden kunnen
             managers een lijst van alle verenigingen zien
@@ -203,7 +203,7 @@ class LijstView(UserPassesTestMixin, TemplateView):
         return context
 
 
-class DetailsView(UserPassesTestMixin, TemplateView):
+class VerenigingDetailsView(UserPassesTestMixin, TemplateView):
 
     """ Via deze view kunnen details van een locatie gewijzigd worden """
 

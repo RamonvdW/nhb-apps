@@ -1,0 +1,75 @@
+{% extends 'design/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2026 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+{% load design_knop %}
+
+{% block title %}Leeftijdsklassen leden{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h1 class="sv-kopje-pagina">Leeftijdsklassen leden</h1>
+            <p>van vereniging <b>{{ ver.ver_nr_en_naam }}</b> te {{ ver.plaats }}</p>
+
+            <p>Er zijn 4 leeftijdsklassen, afhankelijk van het soort wedstrijd</p>
+            <p>Er worden soms meerdere klassen getoond: jongere sporters mogen vaak in een hogere klasse uitkomen en oudere sporters in een lagere klasse;</p>
+
+            <p>Voor IFAA kan de leeftijdsklasse wijzigen op de verjaardag. De andere leeftijdsklassen gelden voor het hele kalenderjaar.</p>
+
+            <p>De bondscompetitie neemt de leeftijdsklasse van het laatste jaar van het seizoen.<br>Getoond wordt de leeftijdsklasse voor bondscompetitie <b>seizoen {{ seizoen }}</b>.</p>
+
+            <p>Gebruik het zoekveld om te filteren op lid nummer, naam of leeftijdsklasse.</p>
+        </div>
+    </div>
+
+
+    <!-- blauwe balk -->
+    <div class="row-sv-blauw">
+        <div class="col s12">
+            <div class="sv-kader">
+
+                <table class="sv-kader-tabel" id="table2">   <!-- id is voor filter -->
+                    <thead>
+                        <tr>        <!-- filter veld -->
+                            <td class="table-filter" colspan="4">
+                                <input class="table-filter" oninput="tabel_filter(this, 'table2')" placeholder="Zoeken"/>
+                            </td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <th data-filter="on" style="width:30%">Naam</th>
+                            <th data-filter="on">World Archery</th>
+                            <th data-filter="on">IFAA</th>
+                            <th data-filter="on">KHSN</th>
+                            <th>Bondscompetities</th>
+                        </tr>
+                    </thead>
+
+                    {% for obj in object_list %}
+                        <tr>
+                            <td>{{ obj.lid_nr_en_volledige_naam }}</td>
+                            <td>{{ obj.lkl_wa|linebreaksbr }}</td>
+                            <td>{{ obj.lkl_ifaa|linebreaksbr }}</td>
+                            <td>{{ obj.lkl_khsn|linebreaksbr }}</td>
+                            <td>{{ obj.lkl_comp|linebreaksbr }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+
+            </div>
+        </div>
+    </div>
+
+    <p class="center"><b>**X</b>: Voor wedstrijden met gender-specifieke klassen moeten sporters met geslacht X eerst een M/V keuze instellen.</p>
+
+    <script src="{% static 'overig_js/tabel_filter.js' %}"></script>
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="vereniging-leden-leeftijdsklassen" %}
+
+{% endblock %}
