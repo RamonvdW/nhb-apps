@@ -210,6 +210,7 @@ ICON_NAME2MATERIAL_SYMBOL_NAME = {
     'scheidsrechters': 'sports',
     'score geschiedenis': 'history',
     'scores invoeren': 'edit',
+    'spelden': 'local_police',
     'spelden graadspelden': 'zoom_out_map',
     'spelden meesterspelden': 'category',
     'spelden tussenspelden': 'trending_up',
