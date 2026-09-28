@@ -253,8 +253,8 @@ class TestDataApiCli(E2EHelpers, TestCase):
         self.assertTrue("[INFO] 2 actieve verenigingen" in f2.getvalue())
 
         # UnicodeDecodeError
-        with open(self.csv_4, "a") as f:
-            f.write('\\U')
+        with open(self.csv_4, "ab") as f:
+            f.write(b'10002;Kl\xE1 club;;99999999;Str\\U;;1111AA;Boogstad\n')
         f1, f2 = self.run_management_command(CLI_IMPORT_KISS_VERENIGINGEN,
                                              self.csv_path,
                                              report_exit_code=False)

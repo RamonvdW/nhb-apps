@@ -38,7 +38,7 @@ class BestelStap3View(TemplateView):
             raise PermissionDenied('Niet ingelogd')
 
         if not settings.TOON_SPELDEN_BESTELLEN:
-            raise Http404('Bestelling is niet mogelijk')
+            raise Http404('Bestellen is niet mogelijk')
 
         account = get_account(self.request)
         sporter = get_sporter(account)

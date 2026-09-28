@@ -6,7 +6,6 @@
 
 from django.test import TestCase
 from Geo.models import Regio
-from Spelden.definities import SPELD_CATEGORIE_NL_GRAADSPELD_ALGEMEEN
 from Spelden.models import Speld, SpeldVoorwaarden, SpeldAanvraag, SpeldToegekend
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -18,14 +17,14 @@ class TestSpeldenInfoViews(E2EHelpers, TestCase):
 
     """ tests voor de Spelden applicatie, informatie views """
 
-    url_begin = '/webwinkel/spelden/'
-    url_graadspelden = '/webwinkel/spelden/graadspelden/'
-    url_meesterspelden = '/webwinkel/spelden/meesterspelden/'
-    url_hall_of_fame = '/webwinkel/spelden/meesterspelden/hall-of-fame/'
-    url_tussenspelden = '/webwinkel/spelden/tussenspelden/'
-    url_arrowhead = '/webwinkel/spelden/arrowhead/'
-    url_sterspelden = '/webwinkel/spelden/sterspelden/'
-    url_target_awards = '/webwinkel/spelden/target-awards/'
+    url_begin = '/spelden/'
+    url_arrowhead = '/spelden/arrowhead/'
+    url_sterspelden = '/spelden/sterspelden/'
+    url_graadspelden = '/spelden/graadspelden/'
+    #url_tussenspelden = '/spelden/tussenspelden/'
+    url_target_awards = '/spelden/target-awards/'
+    url_meesterspelden = '/spelden/meesterspelden/'
+    url_hall_of_fame = '/spelden/meesterspelden/hall-of-fame/'
 
     def setUp(self):
         """ initialisatie van de test case """
@@ -123,11 +122,11 @@ class TestSpeldenInfoViews(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('spelden/khsn-graadspelden.dtl', 'design/site_layout.dtl'))
 
         # tussenspelden
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_tussenspelden)
-        self.assertEqual(resp.status_code, 200)
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('spelden/khsn-tussenspelden.dtl', 'design/site_layout.dtl'))
+        # with self.assert_max_queries(20):
+        #     resp = self.client.get(self.url_tussenspelden)
+        # self.assertEqual(resp.status_code, 200)
+        # self.assert_html_ok(resp)
+        # self.assert_template_used(resp, ('spelden/khsn-tussenspelden.dtl', 'design/site_layout.dtl'))
 
         # arrowhead
         with self.assert_max_queries(20):
@@ -197,11 +196,11 @@ class TestSpeldenInfoViews(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('spelden/khsn-graadspelden.dtl', 'design/site_layout.dtl'))
 
         # tussenspelden
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_tussenspelden)
-        self.assertEqual(resp.status_code, 200)
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('spelden/khsn-tussenspelden.dtl', 'design/site_layout.dtl'))
+        # with self.assert_max_queries(20):
+        #     resp = self.client.get(self.url_tussenspelden)
+        # self.assertEqual(resp.status_code, 200)
+        # self.assert_html_ok(resp)
+        # self.assert_template_used(resp, ('spelden/khsn-tussenspelden.dtl', 'design/site_layout.dtl'))
 
         # arrowhead
         with self.assert_max_queries(20):

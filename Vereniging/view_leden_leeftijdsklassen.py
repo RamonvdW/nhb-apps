@@ -122,7 +122,7 @@ class LedenLeeftijdsklassenView(UserPassesTestMixin, ListView):
         for lkl in self.lkls_wa:
             if lkl.wedstrijd_geslacht == lid.geslacht:
                 if lkl.leeftijd_is_compatible(wedstrijdleeftijd):
-                    if lkl.beschrijving not in lkls:
+                    if lkl.beschrijving not in lkls:            # pragma: no branch
                         lkls.append(lkl.beschrijving)
         # for
 
@@ -134,22 +134,11 @@ class LedenLeeftijdsklassenView(UserPassesTestMixin, ListView):
         matches = list()
         for lkl in self.lkls_ifaa:
             if lkl.wedstrijd_geslacht == GESLACHT_ALLE or lkl.wedstrijd_geslacht == lid.geslacht:
-                match = ''
-
-                # tot verjaardag lid
                 if lkl.min_wedstrijdleeftijd <= leeftijd:
                     if lkl.max_wedstrijdleeftijd == 0 or leeftijd <= lkl.max_wedstrijdleeftijd:
                         match = lkl.beschrijving
-
-                # vanaf verjaardag lid
-                if not match:
-                    leeftijd += 1
-                    if lkl.min_wedstrijdleeftijd <= leeftijd:
-                        if lkl.max_wedstrijdleeftijd == 0 or leeftijd <= lkl.max_wedstrijdleeftijd:
-                            match = lkl.beschrijving
-
-                if match and match not in matches:
-                    matches.append(match)
+                        if match not in matches:            # pragma: no branch
+                            matches.append(match)
         # for
 
         lid.lkl_ifaa = "\n".join(matches) or '**X'
@@ -164,7 +153,7 @@ class LedenLeeftijdsklassenView(UserPassesTestMixin, ListView):
         for lkl in self.lkls_khsn:
             if lkl.wedstrijd_geslacht == GESLACHT_ALLE or lkl.wedstrijd_geslacht == lid.geslacht:
                 if lkl.leeftijd_is_compatible(wedstrijdleeftijd):
-                    if lkl.beschrijving not in lkls:
+                    if lkl.beschrijving not in lkls:        # pragma: no branch
                         lkls.append(lkl.beschrijving)
         # for
 

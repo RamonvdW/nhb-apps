@@ -4,7 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from BasisTypen.models import BoogType
 from Geo.models import Regio
 from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
@@ -17,10 +17,10 @@ class TestSpeldenBestelStap1(E2EHelpers, TestCase):
 
     """ tests voor de Spelden applicatie, bestelprocess stap 1 """
 
-    url_begin = '/webwinkel/spelden/'
-    url_bestel_stap1 = '/webwinkel/spelden/bestel/stap1/'
-    url_bestel_stap2 = '/webwinkel/spelden/bestel/stap2/'
-    url_bestel_stap3 = '/webwinkel/spelden/bestel/stap3/'
+    url_begin = '/spelden/'
+    url_bestel_stap1 = '/spelden/bestel/stap1/'
+    url_bestel_stap2 = '/spelden/bestel/stap2/'
+    url_bestel_stap3 = '/spelden/bestel/stap3/'
 
     def setUp(self):
         """ initialisatie van de test case """
@@ -69,62 +69,67 @@ class TestSpeldenBestelStap1(E2EHelpers, TestCase):
     def test_stap1(self):
         self.e2e_login(self.account_sporter)
 
-        # GET zonder SpeldenAanvraagPrep
-        with self.assert_max_queries(20):
+        with override_settings(TOON_SPELDEN_BESTELLEN=False):
             resp = self.client.get(self.url_bestel_stap1)
-        self.assertEqual(resp.status_code, 200)
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('spelden/bestel_stap1.dtl', 'design/site_layout.dtl'))
+        self.assert404(resp, 'Bestellen is niet mogelijk')
 
-        # GET zonder bogen
-        self.sporterboog.delete()
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_bestel_stap1)
-        self.assertEqual(resp.status_code, 200)
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('spelden/bestel_stap1.dtl', 'design/site_layout.dtl'))
+        with override_settings(TOON_SPELDEN_BESTELLEN=True):
+            # GET zonder SpeldenAanvraagPrep
+            with self.assert_max_queries(20):
+                resp = self.client.get(self.url_bestel_stap1)
+            self.assertEqual(resp.status_code, 200)
+            self.assert_html_ok(resp)
+            self.assert_template_used(resp, ('spelden/bestel_stap1.dtl', 'design/site_layout.dtl'))
 
-        # POST, geen wedstrijdgeslacht, geen discipline
-        with self.assert_max_queries(20):
-            resp = self.client.post(self.url_bestel_stap1)
-        self.assert404(resp, 'Onbekende discipline')
+            # GET zonder bogen
+            self.sporterboog.delete()
+            with self.assert_max_queries(20):
+                resp = self.client.get(self.url_bestel_stap1)
+            self.assertEqual(resp.status_code, 200)
+            self.assert_html_ok(resp)
+            self.assert_template_used(resp, ('spelden/bestel_stap1.dtl', 'design/site_layout.dtl'))
 
-        self.voorkeuren.wedstrijd_geslacht_gekozen = True
-        self.voorkeuren.wedstrijd_geslacht = 'M'
-        self.voorkeuren.save()
+            # POST, geen wedstrijdgeslacht, geen discipline
+            with self.assert_max_queries(20):
+                resp = self.client.post(self.url_bestel_stap1)
+            self.assert404(resp, 'Onbekende discipline')
 
-        # POST, discipline, geen boogtype
-        with self.assert_max_queries(20):
-            resp = self.client.post(self.url_bestel_stap1, {'discipline': 'IN'})        # Indoor
-        self.assert404(resp, 'Onbekende boog')
+            self.voorkeuren.wedstrijd_geslacht_gekozen = True
+            self.voorkeuren.wedstrijd_geslacht = 'M'
+            self.voorkeuren.save()
 
-        # POST, discipline, boogtype, geen score
-        with self.assert_max_queries(20):
-            resp = self.client.post(self.url_bestel_stap1, {'discipline': 'IN',         # Indoor
-                                                            'boogtype': 'BB'})          # Barebow
-        self.assert404(resp, 'Slechte score')
+            # POST, discipline, geen boogtype
+            with self.assert_max_queries(20):
+                resp = self.client.post(self.url_bestel_stap1, {'discipline': 'IN'})        # Indoor
+            self.assert404(resp, 'Onbekende boog')
 
-        with self.assert_max_queries(20):
-            resp = self.client.post(self.url_bestel_stap1, {'discipline': 'IN',         # Indoor
-                                                            'boogtype': 'BB',           # Barebow
-                                                            'score': '1234'})
-        self.assert_is_redirect(resp, self.url_bestel_stap2)
+            # POST, discipline, boogtype, geen score
+            with self.assert_max_queries(20):
+                resp = self.client.post(self.url_bestel_stap1, {'discipline': 'IN',         # Indoor
+                                                                'boogtype': 'BB'})          # Barebow
+            self.assert404(resp, 'Slechte score')
 
-        # foute score
-        with self.assert_max_queries(20):
-            resp = self.client.post(self.url_bestel_stap1, {'discipline': 'IN',         # Indoor
-                                                            'boogtype': 'BB',           # Barebow
-                                                            'score': '0'})
-        self.assertEqual(resp.status_code, 200)
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('spelden/bestel_stap1.dtl', 'design/site_layout.dtl'))
+            with self.assert_max_queries(20):
+                resp = self.client.post(self.url_bestel_stap1, {'discipline': 'IN',         # Indoor
+                                                                'boogtype': 'BB',           # Barebow
+                                                                'score': '1234'})
+            self.assert_is_redirect(resp, self.url_bestel_stap2)
 
-        # GET met SpeldenAanvraagPrep
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_bestel_stap1)
-        self.assertEqual(resp.status_code, 200)
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('spelden/bestel_stap1.dtl', 'design/site_layout.dtl'))
+            # foute score
+            with self.assert_max_queries(20):
+                resp = self.client.post(self.url_bestel_stap1, {'discipline': 'IN',         # Indoor
+                                                                'boogtype': 'BB',           # Barebow
+                                                                'score': '0'})
+            self.assertEqual(resp.status_code, 200)
+            self.assert_html_ok(resp)
+            self.assert_template_used(resp, ('spelden/bestel_stap1.dtl', 'design/site_layout.dtl'))
+
+            # GET met SpeldenAanvraagPrep
+            with self.assert_max_queries(20):
+                resp = self.client.get(self.url_bestel_stap1)
+            self.assertEqual(resp.status_code, 200)
+            self.assert_html_ok(resp)
+            self.assert_template_used(resp, ('spelden/bestel_stap1.dtl', 'design/site_layout.dtl'))
 
 
 # end of file

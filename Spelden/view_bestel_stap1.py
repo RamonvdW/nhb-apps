@@ -41,11 +41,11 @@ class BestelStap1View(TemplateView):
 
     def _load_prep(self, mag_database_wijzigen=False):
 
-        if not settings.TOON_SPELDEN_BESTELLEN:
-            raise Http404('Bestelling is niet mogelijk')
-
         if rol_get_huidige(self.request) != Rol.ROL_SPORTER:
             raise PermissionDenied('Niet ingelogd')
+
+        if not settings.TOON_SPELDEN_BESTELLEN:
+            raise Http404('Bestellen is niet mogelijk')
 
         account = get_account(self.request)
         sporter = get_sporter(account)

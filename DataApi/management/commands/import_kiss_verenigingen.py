@@ -52,7 +52,7 @@ class Command(BaseCommand):
             self._ver_nr2ver[ver.ver_nr] = ver
         # for
 
-        self.stdout.write('[INFO] %s verenigingen ingeladen' % len(self._ver_nr2ver.keys()))
+        self.stdout.write('[INFO] %s bestaande verenigingen ingeladen' % len(self._ver_nr2ver.keys()))
 
     def _store_vereniging(self, ver_nr: int, naam: str, aanmeld_datum: str, kvk_nr: str, straatnaam: str, huis_nr: int, postcode: str, plaats: str):
         ver = self._ver_nr2ver.get(ver_nr, None)
