@@ -33,13 +33,20 @@ class BestelPluginBase:
         """
         raise NotImplementedError()             # pragma: no cover
 
+    def handmatig_toevoegen(self, product_pk):
+        """
+            Beheerder voegt handmatig een deelnemer toe.
+            product_pk kan verwijzen naar: Evenement, Opleiding, WebwinkelKeuze, WedstrijdInschrijving
+        """
+        raise NotImplementedError()             # pragma: no cover
+
     def aanpassen(self, product_pk, door_account_str: str, **kwargs):
         """
             Maak een aanpassing in een al gemaakte bestelling.
             Voorbeeld: sporter will van boogtype wisselen voor een wedstrijd
 
             product_pk kan verwijzen naar: Evenement, Opleiding, WebwinkelKeuze, WedstrijdInschrijving
-            kwargs is een dictionary met alle mutaties
+            kwargs is een dictionary met alle parameters
         """
         raise NotImplementedError()             # pragma: no cover
 

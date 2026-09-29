@@ -14,7 +14,7 @@ from Locatie.models import WedstrijdLocatie
 from Sporter.models import Sporter, SporterBoog
 from Sporter.operations import get_sporter_voorkeuren
 from Vereniging.models import Vereniging
-from Wedstrijden.definities import (WEDSTRIJD_BEGRENZING_VERENIGING,
+from Wedstrijden.definities import (WEDSTRIJD_BEGRENZING_VERENIGING, WEDSTRIJD_INSCHRIJVING_STATUS_BESTELD,
                                     WEDSTRIJD_BEGRENZING_REGIO, WEDSTRIJD_BEGRENZING_RAYON)
 from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdInschrijving
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -525,6 +525,19 @@ class TestWedstrijdInschrijven(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_aanmeldingen % self.wedstrijd.pk)
 
         self.assertEqual(1, WedstrijdInschrijving.objects.count())
+        inschrijving = WedstrijdInschrijving.objects.first()
+        self.assertEqual(inschrijving.status, WEDSTRIJD_INSCHRIJVING_STATUS_BESTELD)
+
+        # laat door de achtergrondtaak en de plugin verwerken
+        sessie = inschrijving.sessie
+        assert isinstance(sessie, WedstrijdSessie)
+        self.assertEqual(sessie.aantal_inschrijvingen, 0)
+
+        f1, f2 = self.verwerk_bestel_mutaties()
+        # print('f1:', f1.getvalue())
+        # print('f2:', f2.getvalue())
+        sessie.refresh_from_db()
+        self.assertEqual(sessie.aantal_inschrijvingen, 1)
 
         # doe een get met de sporter ingeschreven
         resp = self.client.get(url + '?bondsnummer=%s' % self.sporter.lid_nr)

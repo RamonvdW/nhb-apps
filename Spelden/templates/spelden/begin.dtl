@@ -15,7 +15,6 @@
         <div class="col s12">
             <h1 class="sv-kopje-pagina">Prestatiespelden</h1>
             <p>Bij KHSN kan je een prestatiespeld bestellen als je een score behaald hebt die daar recht op geeft.</p>
-            <p>Je moet de scorebriefjes met handtekening van de hoofdscheidsrechter toevoegen aan je aanvraag.</p>
         </div>
     </div>
 
@@ -104,6 +103,7 @@
     {% else %}
 
         <p class="center">Bestellen via MijnHandboogsport volgt binnenkort.<br>Gebruik voorlopig het bestelformulier op de hoofdsite.</p>
+        <p class="center">Let op: je moet de scorebriefjes met handtekening van de hoofdscheidsrechter toevoegen aan je aanvraag.</p>
 
     {% endif %}
 

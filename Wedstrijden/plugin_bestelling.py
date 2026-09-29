@@ -76,9 +76,7 @@ class WedstrijdBestelPlugin(BestelPluginBase):
                               'kan WedstrijdInschrijving met pk=%s niet vinden' % product_pk)
             return None
 
-        # handmatige inschrijving heeft meteen status definitief en hoeft dus niet betaald te worden
-        if inschrijving.status == WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF:
-            return None
+        assert isinstance(inschrijving, WedstrijdInschrijving)
 
         # verhoog het aantal inschrijvingen op deze sessie
         # hiermee geven we een garantie op een plekje
@@ -109,9 +107,6 @@ class WedstrijdBestelPlugin(BestelPluginBase):
 
         inschrijving.bestelling_regel = regel
 
-        #inschrijving.status = WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_MANDJE
-        #inschrijving.nummer = inschrijving.pk
-
         stamp_str = timezone.localtime(timezone.now()).strftime('%Y-%m-%d om %H:%M')
         msg = "[%s] Plekje gereserveerd voor de wedstrijd sessie\n" % stamp_str
         inschrijving.log += msg
@@ -119,6 +114,45 @@ class WedstrijdBestelPlugin(BestelPluginBase):
         inschrijving.save(update_fields=['bestelling_regel', 'log'])
 
         return regel
+
+    def handmatig_toevoegen(self, product_pk):
+        """
+            Beheerder voegt handmatig een deelnemer toe.
+            product_pk kan verwijzen naar: Evenement, Opleiding, WebwinkelKeuze, WedstrijdInschrijving
+        """
+        inschrijving = (WedstrijdInschrijving
+                        .objects
+                        .select_related('sessie',
+                                        'wedstrijd',
+                                        'sporterboog__sporter')
+                        .filter(pk=product_pk)
+                        .first())
+
+        if not inschrijving:
+            self.stdout.write('[ERROR] {wedstrijden bestel plugin}.handmatig_toevoegen: ' +
+                              'kan WedstrijdInschrijving met pk=%s niet vinden' % product_pk)
+            return
+
+        assert isinstance(inschrijving, WedstrijdInschrijving)
+
+        # verhoog het aantal inschrijvingen op deze sessie
+        # hiermee geven we een garantie op een plekje
+        # Noteer: geen concurrency risico want serialisatie via deze achtergrondtaak
+        sessie = inschrijving.sessie
+        self.stdout.write('[DEBUG] Sessie %s aantal_inschrijvingen: %s --> %s' % (sessie,
+                                                                                  sessie.aantal_inschrijvingen,
+                                                                                  sessie.aantal_inschrijvingen + 1))
+        sessie.aantal_inschrijvingen += 1
+        sessie.save(update_fields=['aantal_inschrijvingen'])
+
+        stamp_str = timezone.localtime(timezone.now()).strftime('%Y-%m-%d om %H:%M')
+        msg = "[%s] Plekje gereserveerd voor de wedstrijd sessie\n" % stamp_str
+        inschrijving.log += msg
+
+        # handmatig inschrijving hoeft niet betaald te worden en is meteen definitief
+        inschrijving.status = WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF
+
+        inschrijving.save(update_fields=['bestelling_regel', 'log', 'status'])
 
     def afmelden(self, inschrijving_pk: int):
         """
@@ -136,6 +170,8 @@ class WedstrijdBestelPlugin(BestelPluginBase):
             self.stdout.write('[ERROR] {wedstrijden bestel plugin}.afmelden: ' +
                               'kan WedstrijdInschrijving met pk=%s niet vinden' % inschrijving_pk)
             return
+
+        assert isinstance(inschrijving, WedstrijdInschrijving)
 
         self.stdout.write('[INFO] WedstrijdInschrijving met pk=%s afmelden' % inschrijving.pk)
 
@@ -202,6 +238,8 @@ class WedstrijdBestelPlugin(BestelPluginBase):
                               'kan WedstrijdInschrijving met pk=%s niet vinden' % product_pk)
             return
 
+        assert isinstance(inschrijving, WedstrijdInschrijving)
+
         aanpassingen = list()
         if sessie != inschrijving.sessie:
             # aantallen aanpassen voor elke sessie
@@ -255,6 +293,8 @@ class WedstrijdBestelPlugin(BestelPluginBase):
                               'kan WedstrijdInschrijving met bestelling regel met pk=%s niet vinden' % regel.pk)
             return
 
+        assert isinstance(inschrijving, WedstrijdInschrijving)
+
         # verlaag het aantal inschrijvingen op deze sessie
         sessie = inschrijving.sessie
         self.stdout.write('[DEBUG] Sessie %s aantal_inschrijvingen: %s --> %s' % (sessie,
@@ -279,6 +319,8 @@ class WedstrijdBestelPlugin(BestelPluginBase):
                               'kan WedstrijdInschrijving met bestelling regel met pk=%s niet vinden' % regel.pk)
             return
 
+        assert isinstance(inschrijving, WedstrijdInschrijving)
+
         now = timezone.now()
         stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
         msg = "[%s] Omgezet in een bestelling\n" % stamp_str
@@ -298,6 +340,8 @@ class WedstrijdBestelPlugin(BestelPluginBase):
             self.stdout.write('[ERROR] {wedstrijden bestel plugin}.is_betaald: ' +
                               'kan WedstrijdInschrijving met bestelling regel met pk=%s niet vinden' % regel.pk)
             return
+
+        assert isinstance(inschrijving, WedstrijdInschrijving)
 
         inschrijving.ontvangen_euro = bedrag_ontvangen
         inschrijving.status = WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF
@@ -366,7 +410,8 @@ class WedstrijdBestelPlugin(BestelPluginBase):
             }
 
             if inschrijving.wedstrijd.organisatie == ORGANISATIE_IFAA:
-                context['wed_klasse'] += ' [%s]' % inschrijving.wedstrijdklasse.afkorting
+                context['wed_klasse'] = '%s [%s]' % (inschrijving.wedstrijdklasse.beschrijving,
+                                                     inschrijving.wedstrijdklasse.afkorting)
 
             mail_body = render_email_template(context, EMAIL_TEMPLATE_INFO_INSCHRIJVING_WEDSTRIJD)
 

@@ -16,6 +16,7 @@ from .maak_mutaties_bestel import (bestel_mutatieverzoek_inschrijven_wedstrijd, 
                                    bestel_mutatieverzoek_afmelden_opleiding, bestel_mutatieverzoek_betaling_afgerond,
                                    bestel_mutatieverzoek_annuleer, bestel_mutatieverzoek_transport,
                                    bestel_mutatieverzoek_wedstrijdinschrijving_aanpassen,
+                                   bestel_mutatieverzoek_handmatig_toevoegen_wedstrijd,
                                    bestel_betaling_is_gestart, bestel_overboeking_ontvangen)
 
 __all__ = ['stuur_email_webwinkel_backoffice',
@@ -30,6 +31,7 @@ __all__ = ['stuur_email_webwinkel_backoffice',
            'bestel_mutatieverzoek_afmelden_opleiding', 'bestel_mutatieverzoek_betaling_afgerond',
            'bestel_mutatieverzoek_annuleer', 'bestel_mutatieverzoek_transport',
            'bestel_mutatieverzoek_wedstrijdinschrijving_aanpassen',
+           'bestel_mutatieverzoek_handmatig_toevoegen_wedstrijd',
            'bestel_betaling_is_gestart', 'bestel_overboeking_ontvangen']
 
 # end of file

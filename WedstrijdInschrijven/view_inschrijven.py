@@ -14,13 +14,14 @@ from django.core.exceptions import PermissionDenied
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
-from Bestelling.operations import mandje_tel_inhoud, bestel_mutatieverzoek_inschrijven_wedstrijd
+from Bestelling.operations import (bestel_mutatieverzoek_inschrijven_wedstrijd, mandje_tel_inhoud,
+                                   bestel_mutatieverzoek_handmatig_toevoegen_wedstrijd)
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie
 from Kalender.definities import MAAND2URL
 from Sporter.models import Sporter, SporterBoog, get_sporter
 from Sporter.operations import get_sporter_voorkeuren
-from Wedstrijden.definities import WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF, WEDSTRIJD_INSCHRIJVING_STATUS_TO_STR
+from Wedstrijden.definities import WEDSTRIJD_INSCHRIJVING_STATUS_BESTELD, WEDSTRIJD_INSCHRIJVING_STATUS_TO_STR
 from Wedstrijden.models import Wedstrijd, WedstrijdInschrijving
 from WedstrijdInschrijven.operations import get_sessies
 from datetime import timedelta
@@ -971,7 +972,7 @@ class WedstrijdInschrijvenHandmatig(UserPassesTestMixin, TemplateView):
                             wedstrijdklasse=klasse,
                             sporterboog=sporterboog,
                             koper=account_koper,
-                            status=WEDSTRIJD_INSCHRIJVING_STATUS_DEFINITIEF,
+                            status=WEDSTRIJD_INSCHRIJVING_STATUS_BESTELD,
                             log=msg)
 
         try:
@@ -984,7 +985,7 @@ class WedstrijdInschrijvenHandmatig(UserPassesTestMixin, TemplateView):
         else:
             # zet dit verzoek door naar de achtergrondtaak
             snel = str(request.POST.get('snel', ''))[:1]
-            bestel_mutatieverzoek_inschrijven_wedstrijd(account_koper, inschrijving, snel == '1')
+            bestel_mutatieverzoek_handmatig_toevoegen_wedstrijd(inschrijving, snel == '1')
 
         url = reverse('Wedstrijden:aanmeldingen', kwargs={'wedstrijd_pk': wedstrijd.pk})
 

@@ -7,7 +7,7 @@
 from django.conf import settings
 from django.utils import timezone
 from django.db import transaction
-from Bestelling.definities import (BESTELLING_MUTATIE_WEDSTRIJD_INSCHRIJVEN, BESTELLING_MUTATIE_WEBWINKEL_KEUZE,
+from Bestelling.definities import (BESTELLING_MUTATIE_WEDSTRIJD_INSCHRIJVEN, BESTELLING_MUTATIE_WEDSTRIJD_HANDMATIG,
                                    BESTELLING_MUTATIE_WEDSTRIJD_AFMELDEN, BESTELLING_MUTATIE_VERWIJDER,
                                    BESTELLING_MUTATIE_MAAK_BESTELLINGEN, BESTELLING_MUTATIE_BETALING_AFGEROND,
                                    BESTELLING_MUTATIE_OVERBOEKING_ONTVANGEN, BESTELLING_MUTATIE_ANNULEER,
@@ -15,7 +15,7 @@ from Bestelling.definities import (BESTELLING_MUTATIE_WEDSTRIJD_INSCHRIJVEN, BES
                                    BESTELLING_MUTATIE_EVENEMENT_AFMELDEN, BESTELLING_MUTATIE_OPLEIDING_INSCHRIJVEN,
                                    BESTELLING_MUTATIE_OPLEIDING_AFMELDEN, BESTELLING_MUTATIE_WEDSTRIJD_AANPASSEN,
                                    BESTELLING_TRANSPORT_NVT, BESTELLING_TRANSPORT_VERZEND, BESTELLING_TRANSPORT_OPHALEN,
-                                   BESTELLING_REGEL_CODE_VERZENDKOSTEN)
+                                   BESTELLING_MUTATIE_WEBWINKEL_KEUZE, BESTELLING_REGEL_CODE_VERZENDKOSTEN)
 from Bestelling.definities import (BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_BETALING_ACTIEF,
                                    BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_MISLUKT, BESTELLING_STATUS_GEANNULEERD,
                                    BESTELLING_HOOGSTE_BESTEL_NR_FIXED_PK,
@@ -336,6 +336,13 @@ class VerwerkBestelMutaties:
                 mandje.bepaal_totaalprijs_opnieuw()
         else:
             self.stdout.write('[WARNING] Kan mandje niet vinden voor mutatie pk=%s' % mutatie.pk)
+
+    def _verwerk_mutatie_wedstrijd_handmatig_toevoegen(self, mutatie: BestellingMutatie):
+        """ Verwerk een mutatie via de achtergrondtaak voor handmatige toevoeging aan een wedstrijd door beheerder
+        """
+        self.stdout.write('[INFO] Verwerk mutatie %s: handmatig toevoegen aan wedstrijd (product_pk=%s)' % (mutatie.pk,
+                                                                                                   mutatie.product_pk))
+        wedstrijd_bestel_plugin.handmatig_toevoegen(mutatie.product_pk)
 
     def _verwerk_mutatie_evenement_inschrijven(self, mutatie: BestellingMutatie):
         """ Verwerk een mutatie via de achtergrondtaak voor inschrijving op een evenement
@@ -839,6 +846,7 @@ class VerwerkBestelMutaties:
         BESTELLING_MUTATIE_EVENEMENT_AFMELDEN: _verwerk_mutatie_evenement_afmelden,
         BESTELLING_MUTATIE_OPLEIDING_AFMELDEN: _verwerk_mutatie_opleiding_afmelden,
         BESTELLING_MUTATIE_WEDSTRIJD_AANPASSEN: _verwerk_mutatie_wedstrijd_aanpassen,
+        BESTELLING_MUTATIE_WEDSTRIJD_HANDMATIG: _verwerk_mutatie_wedstrijd_handmatig_toevoegen,
     }
 
     def verwerk(self, mutatie: BestellingMutatie):

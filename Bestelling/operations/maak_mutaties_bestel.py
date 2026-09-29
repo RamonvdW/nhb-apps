@@ -15,7 +15,7 @@ from Bestelling.definities import (BESTELLING_MUTATIE_WEDSTRIJD_INSCHRIJVEN, BES
                                    BESTELLING_MUTATIE_TRANSPORT, BESTELLING_STATUS_BETALING_ACTIEF,
                                    BESTELLING_MUTATIE_EVENEMENT_INSCHRIJVEN, BESTELLING_MUTATIE_EVENEMENT_AFMELDEN,
                                    BESTELLING_MUTATIE_OPLEIDING_INSCHRIJVEN, BESTELLING_MUTATIE_OPLEIDING_AFMELDEN,
-                                   BESTELLING_MUTATIE_WEDSTRIJD_AANPASSEN)
+                                   BESTELLING_MUTATIE_WEDSTRIJD_AANPASSEN, BESTELLING_MUTATIE_WEDSTRIJD_HANDMATIG)
 from Bestelling.models import BestellingMutatie, Bestelling, BestellingRegel
 from Betaal.models import BetaalActief
 from Evenement.models import EvenementInschrijving
@@ -63,6 +63,20 @@ def bestel_mutatieverzoek_inschrijven_wedstrijd(account: Account, inschrijving: 
     if is_created:
         mutatie.save()
 
+        # wacht kort op de achtergrondtaak
+        _bestel_ping_achtergrondtaak(mutatie, snel)
+
+
+def bestel_mutatieverzoek_handmatig_toevoegen_wedstrijd(inschrijving: WedstrijdInschrijving, snel: bool):
+
+    # zet dit verzoek door naar het mutaties process
+    # voorkom duplicates (niet 100%)
+    mutatie, is_created = BestellingMutatie.objects.get_or_create(
+                                    code=BESTELLING_MUTATIE_WEDSTRIJD_HANDMATIG,
+                                    product_pk=inschrijving.pk,
+                                    is_verwerkt=False)
+
+    if is_created:
         # wacht kort op de achtergrondtaak
         _bestel_ping_achtergrondtaak(mutatie, snel)
 
