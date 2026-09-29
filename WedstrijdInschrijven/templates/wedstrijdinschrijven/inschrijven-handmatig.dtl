@@ -254,7 +254,6 @@
                             <th>Sessie</th>
                             <th class="center">Plekken</th>
                             <th class="center">Wedstrijd<wbr/>klasse</th>
-                            <th class="center">Prijs</th>
                             <th><!-- kolom voor de knoppen --></th>
                         </tr>
 
@@ -266,7 +265,6 @@
                                         <td>{{ sessie.beschrijving }}</td>
                                         <td class="center">{{ sessie.aantal_beschikbaar }} / {{ sessie.max_sporters }}</td>
                                         <td class="center">{{ klasse.beschrijving }}</td>
-                                        <td class="center">{% if sessie.kan_aanmelden %}&euro;&nbsp;{{ prijs_euro_sporter }}{% else %}-{% endif %}</td>
                                         <td class="center">
                                             {% if sessie.kan_aanmelden %}
                                                 <button class="btn-sv-rood" id="id_toevoegen_{{ sessie.pk }}_{{ klasse.pk }}" onclick="toevoegen('id_toevoegen_{{ sessie.pk }}_{{ klasse.pk }}')" data-wedstrijd="{{ wed.pk }}" data-sessie="{{ sessie.pk }}" data-klasse="{{ klasse.pk }}" data-sporterboog="{{ geselecteerd.pk }}">
