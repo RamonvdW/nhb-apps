@@ -10,7 +10,7 @@ check_url() {
     URL="$1"
     # first line is "HTTP/2 200 "
     RES=$(curl -is "$URL" | head -n 1 | cut -d\  -f2)
-    if [ "$RES" = "200" ]
+    if [ "$RES" = "200" -o "$RES" = "301" ]
     then
         echo "[OK]  $URL"
     else
