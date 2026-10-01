@@ -82,7 +82,7 @@ class DataApiLidmaatschap(models.Model):
     # formaat: YYYY-MM-DD
     geboorte_datum = models.CharField(max_length=10)
 
-    # geslacht (m/v/x)
+    # geslacht (M/V/X)
     geslacht = models.CharField(max_length=1)
 
     # land code volgens ISO 3166-1

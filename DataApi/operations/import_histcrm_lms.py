@@ -118,6 +118,8 @@ class ImportHistCrmLidmaatschappen(ImportCrmBase):
         if lms.postcode != postcode:
             if len(lms.postcode) == 6 and lms.land_iso == 'NL' and len(postcode) < 6 and lms.postcode[:2] == postcode[:2]:
                 self.out_info('Postcode aanpassing van %s naar %s voorkomen voor %s' % (lms.postcode, postcode, lms))
+            elif len(lms.postcode) == 6 and lms.land_iso == 'NL' and postcode == '':
+                self.out_info('Postcode aanpassing van %s naar %s voorkomen voor %s' % (lms.postcode, repr(postcode), lms))
             else:
                 self.out_info('Postcode aangepast naar %s (was %s)' % (postcode, lms))
                 lms.postcode = postcode

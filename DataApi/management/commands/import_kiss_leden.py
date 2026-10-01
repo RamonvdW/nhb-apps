@@ -98,6 +98,7 @@ class Command(BaseCommand):
                 # afmelddatum is bekend geworden
                 lms_gevonden.afmeld_datum = afmeld_datum
                 if not self.dry_run:
+                    # self.stdout.write('[DEBUG] Overstapper lms wordt afgesloten: %s' % lms_gevonden)
                     lms_gevonden.save(update_fields=['afmeld_datum'])
                 self.count_wijzigingen += 1
                 return
@@ -105,6 +106,7 @@ class Command(BaseCommand):
             dagen = self._bereken_dagen_tussen_datums(lms_gevonden.afmeld_datum, afmeld_datum)
             if dagen <= 300:
                 # klein correct accepteren we
+                # self.stdout.write('[DEBUG] Overstapper afmeld_datum wordt aangepast van %s naar %s' % (lms_gevonden, afmeld_datum))
                 lms_gevonden.afmeld_datum = afmeld_datum
                 if not self.dry_run:
                     lms_gevonden.save(update_fields=['afmeld_datum'])
@@ -149,6 +151,9 @@ class Command(BaseCommand):
                     postcode=lms_lijst[0].postcode,
                     geslacht=lms_lijst[0].geslacht,
                     geboorte_datum=lms_lijst[0].geboorte_datum)
+
+                # self.stdout.write('[DEBUG] Overstapper nieuw lms %s' % lms)
+
                 try:
                     self._lidnr2lms[lid_nr].append(lms)
                 except KeyError:
@@ -205,7 +210,7 @@ class Command(BaseCommand):
 
             lms_lijst = self._lidnr2lms.get(lid_nr, [])
             if not lms_lijst:
-                print('Overstapper %s niet bekend' % lid_nr)
+                self.stdout.write('[ERROR] Geen lms gevonden voor overstapper lid %s' % lid_nr)
                 continue
 
             if ver_nr_oud == ver_nr_nieuw:
@@ -220,12 +225,18 @@ class Command(BaseCommand):
     def _check_update_of_maak_lms(self, lid_nr: int, geboortedatum: str, geslacht: str, postcode: str, ver_nr: int, aanmeld_datum: str):
         lms_lijst = self._lidnr2lms.get(lid_nr, [])
         lms = None
+
         for lms_lp in lms_lijst:
             if lms_lp.ver_nr == ver_nr:
                 # lid kan knipperlicht relatie hebben met vereniging
-                # we pakken het nieuwste record
 
                 # aanmeld_datum kunnen we niet controleren omdat dit eigenlijk datum-eerste-lidmaatschap-bij-de-bond is
+                # sinds 2026-09-17 hebben we wel de juiste informatie
+
+                # we pakken een exact-match op aanmelddatum, of het nieuwste record
+                if lms_lp.aanmeld_datum == aanmeld_datum:
+                    return
+
                 lms = lms_lp
         # for
 
@@ -269,6 +280,7 @@ class Command(BaseCommand):
                 lms.afmeld_datum = afmeld_datum
                 if not self.dry_run:
                     self._updated_lms.append(lms.pk)
+                    # self.stdout.write('[DEBUG] Lms wordt afgesloten: %s' % lms)
                     lms.save(update_fields=['afmeld_datum'])
         # for
 
@@ -276,6 +288,8 @@ class Command(BaseCommand):
         self.count_aangemaakt += 1
 
         if not self.dry_run:
+            # self.stdout.write('[DEBUG] Maak lms voor lid %s bij ver %s vanaf %s' % (lid_nr, ver_nr, aanmeld_datum))
+
             lms = DataApiLidmaatschap.objects.create(
                             lid_nr=lid_nr,
                             ver_nr=ver_nr,

@@ -116,14 +116,16 @@ class ImportHistCrmVerenigingen(ImportCrmBase):
             updated.append('plaats')
 
         if lat != ver.lat:
-            self.out_info('Vereniging %s wijziging lat: %s --> %s' %
-                            (ver_nr, repr(ver.lat), repr(lat)))
+            if ver.lat != '':
+                self.out_info('Vereniging %s wijziging lat: %s --> %s' %
+                                (ver_nr, repr(ver.lat), repr(lat)))
             ver.lat = lat
             updated.append('lat')
 
         if lon != ver.lon:
-            self.out_info('Vereniging %s wijziging lon: %s --> %s' %
-                            (ver_nr, repr(ver.lon), repr(lon)))
+            if ver.lon != '':
+                self.out_info('Vereniging %s wijziging lon: %s --> %s' %
+                                (ver_nr, repr(ver.lon), repr(lon)))
             ver.lon = lon
             updated.append('lon')
 
