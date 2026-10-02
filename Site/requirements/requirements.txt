@@ -8,7 +8,7 @@ asgiref==3.12.1
     # via django
 certifi==2026.7.22
     # via requests
-charset-normalizer==3.5.1
+charset-normalizer==3.5.2
     # via requests
 django==5.2.17
     # via
@@ -16,12 +16,12 @@ django==5.2.17
     #   -r requirements.in
 et-xmlfile==2.0.0
     # via openpyxl
-google-api-core==2.34.0
+google-api-core==2.40.0
     # via
     #   google-api-python-client
     #   google-geo-type
     #   google-maps-routing
-google-api-python-client==2.198.0
+google-api-python-client==2.201.0
     # via -r requirements.in
 google-auth==2.47.0
     # via
@@ -33,50 +33,52 @@ google-auth==2.47.0
     #   google-auth-oauthlib
     #   google-geo-type
     #   google-maps-routing
-google-auth-httplib2==0.4.1
+google-auth-httplib2==0.4.4
     # via google-api-python-client
-google-auth-oauthlib==1.4.0
+google-auth-oauthlib==1.5.0
     # via -r requirements.in
-google-geo-type==0.7.0
+google-geo-type==0.7.1
     # via google-maps-routing
-google-maps-routing==0.11.0
+google-maps-routing==0.11.2
     # via -r requirements.in
-googleapis-common-protos==1.75.1
+googleapis-common-protos==1.75.5
     # via
     #   google-api-core
     #   grpcio-status
 googlemaps==4.10.0
     # via -r requirements.in
-grpcio==1.83.0
+grpcio==1.84.0
     # via
     #   google-api-core
     #   google-geo-type
     #   google-maps-routing
     #   grpcio-status
-grpcio-status==1.83.0
+grpcio-status==1.84.0
     # via google-api-core
 httplib2==0.32.0
     # via
     #   google-api-python-client
     #   google-auth-httplib2
-idna==3.18
+idna==3.20
     # via requests
 mollie-api-python==2.13.0
     # via
     #   -c constraints.in
     #   -r requirements.in
-oauthlib==3.3.1
+oauthlib==4.0.0
     # via requests-oauthlib
 openpyxl==3.1.5
     # via -r requirements.in
+#opentelemetry-api==1.45.0
+    # via google-api-core
 pillow==12.3.0
     # via -r requirements.in
-proto-plus==1.28.3
+proto-plus==1.29.0
     # via
     #   google-api-core
     #   google-geo-type
     #   google-maps-routing
-protobuf==7.35.1
+protobuf==7.36.2
     # via
     #   google-api-core
     #   google-geo-type
@@ -84,7 +86,7 @@ protobuf==7.35.1
     #   googleapis-common-protos
     #   grpcio-status
     #   proto-plus
-psycopg==3.3.4
+psycopg==3.3.6
     # via -r requirements.in
 pyasn1==0.6.4
     # via
@@ -94,9 +96,9 @@ pyasn1-modules==0.4.2
     # via google-auth
 pyotp==2.10.0
     # via -r requirements.in
-pyparsing==3.3.2
+pyparsing==3.3.3
     # via httplib2
-pypdf==6.16.1
+pypdf==6.19.0
     # via -r requirements.in
 qrcode==8.2
     # via -r requirements.in
@@ -115,10 +117,12 @@ rsa==4.9.1
 sqlparse==0.6.0
     # via django
 typing-extensions==4.16.0
-    # via grpcio
+    # via
+    #   grpcio
+    #   #opentelemetry-api
 uritemplate==4.2.0
     # via google-api-python-client
-urllib3==2.7.0
+urllib3==2.8.0
     # via
     #   mollie-api-python
     #   requests

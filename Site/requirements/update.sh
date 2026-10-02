@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -17,6 +17,12 @@ do
     [ -f "$OUT" ] && rm "$OUT"
     pip-compile --resolver=backtracking --strip-extras -q "$IN"
     sed -i -- "s#$SCRIPT_DIR/##g" "$OUT"
+done
+
+# remove opentelemetry
+for req in requirements.txt requirements_dev.txt
+do
+    sed -i -- 's/opentelemetry/#opentelemetry/g' "$req"
 done
 
 echo
