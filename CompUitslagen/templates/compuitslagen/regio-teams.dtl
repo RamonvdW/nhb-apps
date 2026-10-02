@@ -179,13 +179,13 @@
                 {% if team.break_poule %}
                     {% if team.schema %}
                         <tr class="sv-table-sectie-header">
-                            <td colspan="20" class="center">
+                            <td colspan="27" class="center">
                                 <h3 class="sv-kopje-klein">Wedstrijdschema</h3>
                             </td>
                         </tr>
 
                         <tr>
-                            <td colspan="20" style="padding:0">
+                            <td colspan="27" style="padding:0">
                                 <table>
                                     <tr class="sv-table-header">
                                         <td class="sv-table-zijrand" rowspan="9"></td>

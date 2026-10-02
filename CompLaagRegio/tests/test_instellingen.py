@@ -332,7 +332,7 @@ class TestCompLaagRegioInstellingen(E2EHelpers, TestCase):
         url = self.url_regio_instellingen % (self.comp_18.pk, 112)
 
         # na fase G zijn de instellingen niet meer in te zien
-        zet_competitie_fases(self.comp_18, 'G', 'G')
+        zet_competitie_fases(self.comp_18, 'J', 'J')
 
         resp = self.client.get(url)
         self.assert404(resp, 'Verkeerde competitie fase')

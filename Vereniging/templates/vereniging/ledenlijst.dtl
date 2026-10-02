@@ -46,9 +46,7 @@
                             <th data-filter="on">Achter<wbr>naam</th>
                             <th>Leeftijd</th>
                             <th class="hide-on-small-only">Laatste inlog</th>
-                            {% if toon_bondspas %}
-                                <th>Bondspas</th>
-                            {% endif %}
+                            <th>{% if toon_bondspas %}Bondspas{% endif %}</th>
                         </tr>
                     </thead>
 
@@ -68,11 +66,11 @@
                                     <span>{{ obj.laatste_inlog }}</span>
                                 {% endif %}
                             </td>
-                            {% if toon_bondspas %}
-                                <td>
+                            <td>
+                                {% if toon_bondspas %}
                                     <a class="btn-sv-rood" href="{{ obj.url_bondspas }}">Toon</a>
-                                </td>
-                            {% endif %}
+                                {% endif %}
+                            </td>
                         </tr>
                     {% endfor %}
                 </table>
@@ -108,9 +106,7 @@
                         <th data-filter="on">Voor<wbr>naam</th>
                         <th data-filter="on">Achter<wbr>naam</th>
                         <th class="hide-on-small-only">Laatste inlog</th>
-                        {% if toon_bondspas %}
-                            <th>Bondspas</th>
-                        {% endif %}
+                        <th>{% if toon_bondspas %}Bondspas{% endif %}</th>
                     </tr>
                 </thead>
 
@@ -131,11 +127,11 @@
                             {% endif %}
                         </td>
 
-                        {% if toon_bondspas %}
-                            <td>
+                        <td>
+                            {% if toon_bondspas %}
                                 <a class="btn-sv-rood" href="{{ obj.url_bondspas }}">Toon</a>
-                            </td>
-                        {% endif %}
+                            {% endif %}
+                        </td>
                     </tr>
                 {% endfor %}
             </table>

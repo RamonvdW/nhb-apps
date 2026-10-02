@@ -17,7 +17,6 @@ from Competitie.models import Competitie
 from CompLaagRegio.models import RegioComp, RegioRonde
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
-from Geo.models import Cluster
 from types import SimpleNamespace
 import datetime
 
@@ -65,7 +64,7 @@ class RegioInstellingenView(UserPassesTestMixin, TemplateView):
             raise PermissionDenied('Niet de beheerder')
 
         deelcomp.bepaal_fase()
-        if deelcomp.fase_teams >= 'G':
+        if deelcomp.fase_teams > 'G':
             raise Http404('Verkeerde competitie fase')
 
         context['deelcomp'] = deelcomp

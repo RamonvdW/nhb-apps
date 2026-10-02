@@ -100,7 +100,7 @@ class TestDataApiImportHistCrmLms(E2EHelpers, TestCase):
 
         # intentie, want dry-run
         v.importeer(data)
-        print('\nout: %s' % out.getvalue())
+        # print('\nout: %s' % out.getvalue())
 
     def test_bad(self):
         out = OutputBuffer()
@@ -218,7 +218,7 @@ class TestDataApiImportHistCrmLms(E2EHelpers, TestCase):
         ]
 
         v.importeer(data)
-        print('\nout: %s' % out.getvalue())
+        # print('\nout: %s' % out.getvalue())
 
         self.assertTrue("[ERROR] Foutief bondsnummer: x (geen getal)" in out.getvalue())
         self.assertTrue("[ERROR] Lid 100001 heeft geen valide geboortedatum: 'ymd'" in out.getvalue())

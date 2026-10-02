@@ -63,8 +63,8 @@ class BestelStap2View(TemplateView):
         if self.prep.discipline == SPELD_DISCIPLINE_VELD:
             context['geslacht_str'] = GESLACHT2STR[self.prep.wedstrijd_geslacht]
 
-        for optie in opties:
-            print('{optie} %s' % repr(optie))
+        # for optie in opties:
+        #     print('{optie} %s' % repr(optie))
 
         # filter opties
         if self.prep.discipline == SPELD_DISCIPLINE_VELD:

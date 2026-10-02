@@ -53,8 +53,8 @@ class MeesterspeldenView(TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        if rol_get_huidige(self.request) == Rol.ROL_SPORTER:
-            context['menu_toon_mandje'] = True
+        # if rol_get_huidige(self.request) == Rol.ROL_SPORTER:
+        #     context['menu_toon_mandje'] = True
 
         context['aantal_gm'], context['aantal_ms'], context['aantal_as'] = tel_hall_of_fame()
 
@@ -77,8 +77,8 @@ class GraadspeldenView(TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        if rol_get_huidige(self.request) == Rol.ROL_SPORTER:
-            context['menu_toon_mandje'] = True
+        # if rol_get_huidige(self.request) == Rol.ROL_SPORTER:
+        #     context['menu_toon_mandje'] = True
 
         # TODO: revise!
         qset = (SpeldVoorwaarden
@@ -135,8 +135,8 @@ class TussenspeldenView(TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        if rol_get_huidige(self.request) == Rol.ROL_SPORTER:
-            context['menu_toon_mandje'] = True
+        # if rol_get_huidige(self.request) == Rol.ROL_SPORTER:
+        #     context['menu_toon_mandje'] = True
 
         now = timezone.now()
         context['url_wedstrijdkalender'] = reverse('Kalender:alles',
@@ -164,8 +164,8 @@ class TargetAwardsView(TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        if rol_get_huidige(self.request) == Rol.ROL_SPORTER:
-            context['menu_toon_mandje'] = True
+        # if rol_get_huidige(self.request) == Rol.ROL_SPORTER:
+        #     context['menu_toon_mandje'] = True
 
         context['kruimels'] = (
             (reverse('Spelden:begin'), 'Prestatiespelden'),
@@ -184,8 +184,8 @@ class SterspeldenView(TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        if rol_get_huidige(self.request) == Rol.ROL_SPORTER:
-            context['menu_toon_mandje'] = True
+        # if rol_get_huidige(self.request) == Rol.ROL_SPORTER:
+        #     context['menu_toon_mandje'] = True
 
         context['kruimels'] = (
             (reverse('Spelden:begin'), 'Prestatiespelden'),
@@ -204,8 +204,8 @@ class ArrowheadView(TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        if rol_get_huidige(self.request) == Rol.ROL_SPORTER:
-            context['menu_toon_mandje'] = True
+        # if rol_get_huidige(self.request) == Rol.ROL_SPORTER:
+        #     context['menu_toon_mandje'] = True
 
         qset = (SpeldVoorwaarden
                 .objects
