@@ -156,15 +156,21 @@ class TestVerenigingLedenLeeftijdsklassen(E2EHelpers, TestCase):
             dt = date(year=2020, month=6, day=1)        # <= month 6
             mock_timezone.return_value = dt
 
-            resp = self.client.get(self.url_leden_leeftijdsklassen)
-
+            with self.assert_max_queries(20):
+                resp = self.client.get(self.url_leden_leeftijdsklassen)
+            self.assertEqual(resp.status_code, 200)     # 200 = OK
+            self.assert_html_ok(resp)
+            self.assert_template_used(resp, ('vereniging/leden-leeftijdsklassen.dtl', 'design/site_layout.dtl'))
 
         with patch('django.utils.timezone.localtime') as mock_timezone:
             dt = date(year=2020, month=7, day=1)        # > month 6
             mock_timezone.return_value = dt
 
-            resp = self.client.get(self.url_leden_leeftijdsklassen)
-
+            with self.assert_max_queries(20):
+                resp = self.client.get(self.url_leden_leeftijdsklassen)
+            self.assertEqual(resp.status_code, 200)  # 200 = OK
+            self.assert_html_ok(resp)
+            self.assert_template_used(resp, ('vereniging/leden-leeftijdsklassen.dtl', 'design/site_layout.dtl'))
 
 
 # end of file

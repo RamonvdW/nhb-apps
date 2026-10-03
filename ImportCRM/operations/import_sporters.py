@@ -22,7 +22,7 @@ EXPECTED_MEMBER_KEYS = ('club_number', 'member_number', 'name', 'prefix', 'first
                         'para_code', 'address', 'postal_code', 'location_name',
                         'phone_business', 'phone_mobile', 'phone_private',
                         'iso_abbr', 'latitude', 'longitude', 'blocked', 'wa_id', 'date_of_death')
-OPTIONAL_MEMBER_KEYS = ('skill_levels', 'educations')
+OPTIONAL_MEMBER_KEYS = ('skill_levels', 'educations', 'member_from_club', 'member_until_club')
 
 
 class ImportCrmSporters(ImportCrmBase):

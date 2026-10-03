@@ -21,6 +21,7 @@ class TestFunctieBeheerders(E2EHelpers, TestCase):
     test_after = ('Account.tests.test_otp_controle',)
 
     url_beheerders = '/functie/beheerders/'
+    url_beheerders_alle_vers = '/functie/beheerders/alle-verenigingen/'
     url_beheerders_competitie = '/functie/beheerders/bondscompetitie/'
     url_email_sec_hwl = '/functie/beheerders/email/sec-hwl/'
     url_email_competitie = '/functie/beheerders/email/competitie/'
@@ -209,6 +210,13 @@ class TestFunctieBeheerders(E2EHelpers, TestCase):
         urls = [url for url in self.extract_all_urls(resp) if url.startswith(self.url_wijzig)]
         self.assertEqual(len(urls), 0)      # geen wijzig knoppen voor de RCL
 
+        self.e2e_wisselnaarrol_bb()
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_beheerders_alle_vers)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('functie/lijst-beheerders-alle-verenigingen.dtl', 'design/site_layout.dtl'))
+
         self.e2e_assert_other_http_commands_not_supported(self.url_beheerders)
 
     def test_hwl(self):
@@ -219,6 +227,9 @@ class TestFunctieBeheerders(E2EHelpers, TestCase):
 
         self.e2e_wissel_naar_functie(self.functie_hwl)
         self.e2e_check_rol('HWL')
+
+        resp = self.client.get(self.url_beheerders_alle_vers)
+        self.assert403(resp)
 
         # vraag de beheerders van MH op
         with self.assert_max_queries(20):
@@ -261,6 +272,9 @@ class TestFunctieBeheerders(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_wl)
         self.e2e_check_rol('WL')
 
+        resp = self.client.get(self.url_beheerders_alle_vers)
+        self.assert403(resp)
+
         # vraag het overzicht van competitie-bestuurders op
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_beheerders)
@@ -282,6 +296,9 @@ class TestFunctieBeheerders(E2EHelpers, TestCase):
 
         self.e2e_wissel_naar_functie(self.functie_sec)
         self.e2e_check_rol('SEC')
+
+        resp = self.client.get(self.url_beheerders_alle_vers)
+        self.assert403(resp)
 
         # vraag het overzicht van competitie-bestuurders op
         with self.assert_max_queries(20):
