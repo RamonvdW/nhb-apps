@@ -72,7 +72,9 @@ EMAIL_BONDSBUREAU = "info@yourdomain.com"
 EMAIL_SUPPORT = EMAIL_BONDSBUREAU
 EMAIL_TECH_SUPPORT = 'support@yourdomain.com'
 
-# manuals (pdf)
+SITE_STATIC_PDFS = SITE_URL + '/mh-static/pdfs/'
+
+# handleidingen
 URL_PDF_HANDLEIDING_LEDEN = 'https://yoursite/static/manual_members.pdf'
 URL_PDF_HANDLEIDING_BEHEERDERS = 'https://yoursite/static/manual_managers.pdf'
 URL_PDF_HANDLEIDING_VERENIGINGEN = 'https://yoursite/static/manual_clubs.pdf'
@@ -98,23 +100,12 @@ EMAIL_ADDRESS_WHITELIST = ()
 PRIVACYVERKLARING_FILE = '/directory/on/server/nhbapps-venv/project/privacyverklaring.txt'   # noqa
 
 # url van het document met voorwaarden voor A-status wedstrijden / alcoholbeleid
-VOORWAARDEN_A_STATUS_URL = 'https://docs.google.com/document/d/random google document number/view'
+VOORWAARDEN_A_STATUS_URL = SITE_STATIC_PDFS + 'voorwaarden-a-status-wedstrijd.pdf'
 
 # url van de documenten met de verkoopvoorwaarden
-VERKOOPVOORWAARDEN_WEBWINKEL_URL   = 'https://docs.google.com/document/d/yet another random google document number/pub'
-VERKOOPVOORWAARDEN_WEDSTRIJDEN_URL = 'https://docs.google.com/document/d/another random google document number/pub'
-VERKOOPVOORWAARDEN_OPLEIDINGEN_URL = 'https://docs.google.com/document/d/yet another random google document number/pub'
-
-# google doc id van het gsheet document
-RECORDS_GSHEET_FILE_ID = 'random gsheet doc id'
-
-# door de naam van een sheet te gebruiken as 'Range' krijg je alle cellen uit de sheet
-RECORDS_GSHEET_SHEET_NAMES = [
-    'Data individueel outdoor',
-    'Data individueel indoor',
-    'Data individueel 25m1pijl',
-    'Data team'
-]
+VERKOOPVOORWAARDEN_WEBWINKEL_URL   = SITE_STATIC_PDFS + 'verkoopvoorwaarden-webwinkel.pdf'
+VERKOOPVOORWAARDEN_EVENEMENTEN_URL = SITE_STATIC_PDFS + 'verkoopvoorwaarden-evenementen.pdf'
+VERKOOPVOORWAARDEN_OPLEIDINGEN_URL = SITE_STATIC_PDFS + 'verkoopvoorwaarden-opleidingen.pdf'
 
 # fonts die gebruikt worden om de bondspas text te tekenen
 # deze moeten geïnstalleerd staan op het OS.
@@ -157,10 +148,14 @@ URL_RECORD_AANVRAAGFORMULIER = 'https://docs.google.com/spreadsheets/1234_your_d
 # landing page voor alle opleidingen
 URL_OPLEIDINGEN = 'https://your.site/relevant/url/'
 
+# let op: zonder / aan het einde, want die geeft een redirect (302) en dat rapporteert de href checker
+URL_FOTOBANK_INDOOR = 'https://your.site/photos/Indoor'
+
 # locatie op disk waar de foto's staan (bron)
 # deze worden door collectstatic naar deployment gezet  # noqa
 # het veld WebwinkelProduct.locatie is onder dit punt
 WEBWINKEL_FOTOS_DIR = '/directory/on/server/webwinkel_fotos'    # noqa
+STATIC_PDFS_DIR = '/directory/on/server/static_pdfs'
 
 # welke vereniging is de verkoper
 WEBWINKEL_VERKOPER_VER_NR = 1368
@@ -172,7 +167,7 @@ WEBWINKEL_VERKOPER_BTW_NR = "012345678B99"
 WEBWINKEL_ENVELOP_VERZENDKOSTEN_EURO = 1.40
 
 # klein = brievenbus-pakje (max 380x265x32mm, max 2kg) exclusief kosten doosje en afhandeling
-WEBWINKEL_PAKKET_2KG_VERZENDKOSTEN_EURO = 4.40
+WEBWINKEL_PAKKET_2KG_VERZENDKOSTEN_EURO = 4.55
 
 # groot = bezorging op huisadres (max 1000x500x500mm, max 10kg), exclusief kosten doosje en afhandeling
 WEBWINKEL_PAKKET_10KG_VERZENDKOSTEN_EURO = 7.45
@@ -184,7 +179,7 @@ WEBWINKEL_TRANSPORT_OPHALEN_MAG = True
 WEBWINKEL_BTW_PERCENTAGE = 21.0
 
 # Prestatiespelden tonen in de webwinkel?
-WEBWINKEL_TOON_PRESTATIESPELDEN = False
+TOON_SPELDEN_BESTELLEN = False
 
 # welke vereniging(en) mogen evenementen op de kalender zetten?
 # deze krijgen het kaartje Evenementen op het verenigingen overzicht
@@ -224,9 +219,6 @@ KALENDER_API_TOKENS = ()
 
 OVERIG_API_TOKENS = ()
 
-# google doc id van het gsheet document
-INSTAPTOETS_GSHEET_FILE_ID = 'another.google.sheets.id'     # noqa
-
 INSTAPTOETS_LESMATERIAAL_WA_BOEKEN = 'url'
 INSTAPTOETS_LESMATERIAAL_COMPETITIE = 'url'
 INSTAPTOETS_LESMATERIAAL_KLEDINGVOORSCHRIFT = 'url'
@@ -246,9 +238,6 @@ CREDENTIALS_OAUTH_GOOGLE_DRIVE = 'file_with_credentials.json'
 # wedstrijdenformulieren zijn gedeeld met dit service account, voor updaten en importeren
 CREDENTIALS_SERVICE_ACCOUNT_WEDSTRIJDFORMULIEREN = 'file1_with_credentials_service-account.json'
 
-# instaptoets en records bestanden zijn gedeeld met dit service account, voor download
-CREDENTIALS_SERVICE_ACCOUNT_DOWNLOADER = 'file2_with_credentials_service-account.json'
-
 # link naar het CRM systeem
 CRM_URL = 'url'
 CRM_TITEL = 'title'
@@ -256,15 +245,26 @@ CRM_BESCHRIJVING = 'Persoonsgegevens van leden worden geadministreerd in een apa
 
 
 # voeg /_api/site/id/ toe om aan de site url (vereist dat je ingelogd bent en toegang hebt)
-# https://yoursite.sharepoint.com/sites/Folder-Name/_api/site/id/
 # retourneert een kort xml doc met het site id:
-# <d:Id m:type="Edm.Guid">12345678-1234-1234-1234-123456789abc</d:Id>
-
-GRAPH_SITE_ID = "12345678-1234-1234-1234-123456789abc"
 
 # credentials voor toegang to shared document op Sharepoint/Teams site van de bond
-GRAPH_TENANT_ID = "b9999999-8888-7777-6666-543210123456"
-GRAPH_CLIENT_ID = "b8888888-9999-4444-6666-543210123456"
-GRAPH_CLIENT_SECRET = "sssst"
+GRAPH_IDS = {
+    'tenant_id': 'b9999999-8888-7777-6666-543210123456',        # company
+
+    # for each site, add a numerical index
+    # these numbers can be used from the management commands graph_*, parameter site_index
+
+    # https://yoursite.sharepoint.com/sites/Folder-Name/_api/site/id/
+    # <d:Id m:type="Edm.Guid">12345678-1234-1234-1234-123456789abc</d:Id>
+    1: {
+        'description': 'YourSite-Docs',
+        'site_id': '12345678-1234-1234-1234-123456789abc',
+        'client_id: 'b8888888-9999-4444-6666-543210123456',
+        'client_secret': 'sssst',
+    },
+}
+
+# token required to access the DataApi
+DDI_AUTH_TOKEN="your Secret Here"
 
 # end of file
