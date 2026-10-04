@@ -445,7 +445,10 @@ class KoppelScoresRegioTeamsView(UserPassesTestMixin, TemplateScoresRegioTeamsVi
         self._get_deelcomp_or_404(kwargs)
         assert isinstance(self.deelcomp, RegioComp)
 
-        self._verwerk_post(request)
+        if 1 <= self.deelcomp.huidige_team_ronde <= 7:
+            self.ronde_nr = self.deelcomp.huidige_team_ronde
+
+            self._verwerk_post(request)
 
         url = reverse('CompLaagRegio:start-volgende-team-ronde', kwargs={'deelcomp_pk': self.deelcomp.pk})
         return HttpResponseRedirect(url)
