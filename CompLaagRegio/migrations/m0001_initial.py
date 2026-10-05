@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2025 Ramon van der Winkel.
+#  Copyright (c) 2020-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -21,7 +21,7 @@ def migreer_uit_competitie(apps, _):
         regiocomp_klas = apps.get_model('CompLaagRegio', 'RegioComp')
 
         count = 0
-        for obj in (regiocompetitie_klas
+        for obj in (regiocompetitie_klas                # pragma: no cover
                     .objects
                     .select_related('competitie',
                                     'regio',
@@ -54,7 +54,7 @@ def migreer_uit_competitie(apps, _):
         regioronde_klas = apps.get_model('CompLaagRegio', 'RegioRonde')
 
         count = 0
-        for obj in (regiocompetitieronde_klas
+        for obj in (regiocompetitieronde_klas           # pragma: no cover
                     .objects
                     .select_related('regiocompetitie',
                                     'cluster')
@@ -82,7 +82,7 @@ def migreer_uit_competitie(apps, _):
         regiodeelnemer_klas = apps.get_model('CompLaagRegio', 'RegioDeelnemer')
 
         count = 0
-        for obj in (regiocompetitiesporterboog_klas
+        for obj in (regiocompetitiesporterboog_klas         # pragma: no cover
                     .objects
                     .select_related('regiocompetitie',
                                     'sporterboog',
@@ -139,7 +139,7 @@ def migreer_uit_competitie(apps, _):
         regioteam_klas = apps.get_model('CompLaagRegio', 'RegioTeam')
 
         count = 0
-        for obj in (regiocompetiteteam_klas
+        for obj in (regiocompetiteteam_klas             # pragma: no cover
                     .objects
                     .select_related('regiocompetitie',
                                     'vereniging',
@@ -176,7 +176,7 @@ def migreer_uit_competitie(apps, _):
         regiopoule_klas = apps.get_model('CompLaagRegio', 'RegioPoule')
 
         count = 0
-        for obj in (regiocompetitieteampoule_klas
+        for obj in (regiocompetitieteampoule_klas           # pragma: no cover
                     .objects
                     .select_related('regiocompetitie')
                     .prefetch_related('teams')
@@ -203,7 +203,7 @@ def migreer_uit_competitie(apps, _):
         regiorondeteam_klas = apps.get_model('CompLaagRegio', 'RegioRondeTeam')
 
         count = 0
-        for obj in (regiocompetitierondeteam_klas
+        for obj in (regiocompetitierondeteam_klas           # pragma: no cover
                     .objects
                     .select_related('team')
                     .prefetch_related('deelnemers_geselecteerd',
