@@ -24,7 +24,9 @@ def dataapi_opschonen(stdout):
 
     qset = DataApiLidmaatschap.objects.filter(afmeld_datum__lte=vijf_jaar_geleden)
 
-    stdout.write('[DEBUG] DataApi zou %s lidmaatschappen op kunnen schonen' % qset.count())
+    count = qset.count()
+    if count > 0:
+        stdout.write('[DEBUG] DataApi zou %s lidmaatschappen op kunnen schonen' % qset.count())
 
 
 # end of file

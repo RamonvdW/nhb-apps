@@ -15,14 +15,14 @@ def migreer_regio(apps, _):
     regiocomp_klas = apps.get_model('CompLaagRegio', 'RegioComp')
 
     regio_nr_afstand2regiocomp = dict()
-    for regiocomp in regiocomp_klas.objects.select_related('competitie', 'regio').all():
+    for regiocomp in regiocomp_klas.objects.select_related('competitie', 'regio').all():    # pragma: no cover
         regio_nr = regiocomp.regio.regio_nr
         afstand = regiocomp.competitie.afstand
         tup = (regio_nr, afstand)
         regio_nr_afstand2regiocomp[tup] = regiocomp
     # for
 
-    for mutatie in (mutatie_klas
+    for mutatie in (mutatie_klas            # pragma: no cover
                     .objects
                     .exclude(regiocompetitie=None)
                     .select_related('regiocompetitie',

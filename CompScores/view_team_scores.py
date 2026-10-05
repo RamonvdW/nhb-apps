@@ -534,6 +534,7 @@ class CorrigeerRegioTeamRondeView(UserPassesTestMixin, TemplateScoresRegioTeamsV
 
         self._verwerk_post(request)
 
+        assert isinstance(self.deelcomp, RegioComp)
         url = reverse('CompScores:corrigeer-team-ronde-selecteer', kwargs={'comp_pk': self.deelcomp.competitie.pk})
         return HttpResponseRedirect(url)
 

@@ -27,7 +27,7 @@ def maak_afgemeld(apps, _):
 
     # afgemeld omzetten
     bulk = list()
-    for inschrijving in (klas_inschrijving
+    for inschrijving in (klas_inschrijving              # pragma: no cover
                         .objects
                         .filter(status=WEDSTRIJD_INSCHRIJVING_STATUS_AFGEMELD)
                         .select_related('wedstrijd',
@@ -79,7 +79,7 @@ def maak_afgemeld(apps, _):
 
     klas_afgemeld.objects.bulk_create(bulk)
 
-    if len(remove_pks):
+    if len(remove_pks):         # pragma: no cover
         klas_inschrijving.objects.filter(pk__in=remove_pks).delete()
 
 
