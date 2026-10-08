@@ -41,7 +41,11 @@
         }
 
         function toon_wedstrijden_2() {
-            document.getElementById('id_wedstrijden_2').classList.remove('hide');
+            const els = document.getElementsByClassName('wedstrijden_2');
+            Array.prototype.forEach.call(els, function (el) {
+                el.classList.remove('hide');
+            });
+
             document.getElementById('id_wedstrijden_2_knop').classList.add('hide');
         }
     </script>
@@ -67,20 +71,25 @@
                             <table class="sv-kader-tabel">
 
                                 {% if wedstrijden_1 %}    <!-- inschrijfmethode 1 -->
-                                    <tr>
-                                        <td>
-                                            {% for wedstrijd in wedstrijden_1 %}
+                                    {% for wedstrijd in wedstrijden_1 %}
+                                        <tr>
+                                            <td>
                                                 <label style="margin-left: 20px">
                                                     <input type="checkbox" class="filled-in" name="wedstrijd_{{ wedstrijd.pk }}" onchange="tel_wedstrijden()"{% if wedstrijd.is_gekozen %} checked{% endif %}>
-                                                    <span class="black-text">{{ wedstrijd.datum_wanneer|date:"l j E Y" }} om {{ wedstrijd.tijd_begin_wedstrijd }} bij <b>{{ wedstrijd.vereniging.naam }}</b><span class="hide-on-small-only"> te {{ wedstrijd.vereniging.plaats }}</span></span>
+                                                    <span></span>
                                                 </label>
-                                                <br>
-                                            {% endfor %}
-                                        </td>
-                                    </tr>
+                                            </td>
+                                            <td>
+                                                <span class="black-text">{{ wedstrijd.datum_wanneer|date:"l j E Y" }} om {{ wedstrijd.tijd_begin_wedstrijd }}</span>
+                                            </td>
+                                            <td>bij <b>{{ wedstrijd.vereniging.naam }}</b>
+                                                <span class="hide-on-small-only"> te {{ wedstrijd.vereniging.plaats }}</span>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
                                 {% else %}
                                     <tr>
-                                        <td class="center">
+                                        <td colspan="3" class="center">
                                             <i>Sorry, geen wedstrijden aanwezig</i>
                                         </td>
                                     </tr>
@@ -88,20 +97,25 @@
 
                                 {% if wedstrijden_2 %}
                                     <tr id="id_wedstrijden_2_knop">
-                                        <td><button class="btn-sv-blauw" type="button" onclick="toon_wedstrijden_2()">Toon meer wedstrijden</button>&nbsp;&nbsp;Er zijn nog {{ wedstrijden_2|length }} wedstrijden in de regio, wat verder weg.</td>
-                                    </tr>
-
-                                    <tr id="id_wedstrijden_2" class="hide">
-                                        <td>
-                                            {% for wedstrijd in wedstrijden_2 %}
-                                                <label style="margin-left: 20px">
-                                                    <input type="checkbox" class="filled-in" name="wedstrijd_{{ wedstrijd.pk }}" onchange="tel_wedstrijden()">
-                                                    <span class="black-text">{{ wedstrijd.datum_wanneer|date:"l j E Y" }} om {{ wedstrijd.tijd_begin_wedstrijd }} bij <b>{{ wedstrijd.vereniging.naam }}</b><span class="hide-on-small-only"> te {{ wedstrijd.vereniging.plaats }}</span></span>
-                                                </label>
-                                                <br>
-                                            {% endfor %}
+                                        <td colspan="3" class="center">Er zijn nog {{ wedstrijden_2|length }} wedstrijden in de regio, wat verder weg.<br><br>
+                                            <button class="btn-sv-blauw" type="button" onclick="toon_wedstrijden_2()">Toon meer wedstrijden</button>
                                         </td>
                                     </tr>
+
+                                    {% for wedstrijd in wedstrijden_2 %}
+                                        <tr class="hide wedstrijden_2">
+                                            <td>
+                                                <label style="margin-left: 20px">
+                                                    <input type="checkbox" class="filled-in" name="wedstrijd_{{ wedstrijd.pk }}" onchange="tel_wedstrijden()">
+                                                    <span></span>
+                                                </label>
+                                            </td>
+                                            <td>{{ wedstrijd.datum_wanneer|date:"l j E Y" }} om {{ wedstrijd.tijd_begin_wedstrijd }}</td>
+                                            <td>bij <b>{{ wedstrijd.vereniging.naam }}</b>
+                                                <span class="hide-on-small-only"> te {{ wedstrijd.vereniging.plaats }}</span>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
                                 {% endif %}
 
                             </table>
