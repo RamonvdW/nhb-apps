@@ -130,8 +130,8 @@ class TestDataApiImportHistCrmVer(E2EHelpers, TestCase):
                 huisnummer=0,
                 postcode='',
                 plaats='',
-                lat='',
-                lon='')
+                lat='1',
+                lon='2')
 
         out = OutputBuffer()
         v = ImportHistCrmVerenigingen(out, True, '')
@@ -148,8 +148,8 @@ class TestDataApiImportHistCrmVer(E2EHelpers, TestCase):
                 'location_name': 'Boogstad',
                 'coc_number': '12345678',
                 'iso_abbr': 'NL',
-                'latitude': '12',
-                'longitude': '34',
+                'latitude': '12',       # '' -> '12' wordt niet gerapporteerd
+                'longitude': '34',      # '' -> '34' wordt niet gerapporteerd
             },
             {
                 'club_number': '2',
@@ -159,8 +159,8 @@ class TestDataApiImportHistCrmVer(E2EHelpers, TestCase):
                 'postal_code': '',
                 'location_name': '',
                 'iso_abbr': '',
-                'latitude': '',
-                'longitude': '',
+                'latitude': '11',       # '1' --> '11' wordt gerapporteerd
+                'longitude': '22',      # '2' --> '22' wordt gerapporteerd
             },
             {
                 'club_number': '3',
@@ -179,6 +179,9 @@ class TestDataApiImportHistCrmVer(E2EHelpers, TestCase):
         v.importeer(data)
         # print('\nout: %s' % out.getvalue())
         self.assertTrue("[INFO] Vereniging 2 wordt weer actief gemaakt" in out.getvalue())
+        self.assertTrue("[INFO] Vereniging 2 wijziging lat: '1' --> '11'" in out.getvalue())
+        self.assertTrue("[INFO] Vereniging 2 wijziging lon: '2' --> '22'" in out.getvalue())
+        self.assertFalse("' --> '12'" in out.getvalue())
 
         # nu echt importeren
         out = OutputBuffer()

@@ -4,7 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from DataApi.models import DataApiVereniging
 from DataApi.operations import ImportHistCrmLidmaatschappen
 from TestHelpers.e2ehelpers import E2EHelpers, OutputBuffer
@@ -215,10 +215,14 @@ class TestDataApiImportHistCrmLms(E2EHelpers, TestCase):
                 'member_until_club': 'ymd',         # bad date
                 'date_of_death': None,
             },
+            {
+                'member_number': 123456,            # wordt overgeslagen
+            },
         ]
 
-        v.importeer(data)
-        # print('\nout: %s' % out.getvalue())
+        with override_settings(CRM_IMPORT_SKIP_MEMBERS=(123456,)):
+            v.importeer(data)
+        print('\nout: %s' % out.getvalue())
 
         self.assertTrue("[ERROR] Foutief bondsnummer: x (geen getal)" in out.getvalue())
         self.assertTrue("[ERROR] Lid 100001 heeft geen valide geboortedatum: 'ymd'" in out.getvalue())
@@ -229,5 +233,15 @@ class TestDataApiImportHistCrmLms(E2EHelpers, TestCase):
         self.assertTrue("[ERROR] Lid 100006 heeft geen valide member_from[_club]: '2010-14-02'" in out.getvalue())
         self.assertTrue("[ERROR] Lid 100007 heeft geen valide member_from[_club]: '2010-14-02'" in out.getvalue())
         self.assertTrue("[ERROR] Lid 100008 heeft geen valide datum member_until[_club]: 'ymd" in out.getvalue())
+
+        # ontbrekende keys
+        out = OutputBuffer()
+        v = ImportHistCrmLidmaatschappen(out, True, '')
+        data = [{'test': 'nope'}]
+        v.importeer(data)
+        # print('\nout: %s' % out.getvalue())
+        # [ERROR] [FATAL] Verplichte sleutel 'member_until_club' niet aanwezig in de 'member{sporters}' data
+        self.assertEqual(out.getvalue().count('[ERROR] [FATAL] Verplichte sleutel'), 10)
+        self.assertTrue("[WARNING] Extra sleutel aanwezig in de 'member{sporters}' data: ['test']" in out.getvalue())
 
 # end of file
