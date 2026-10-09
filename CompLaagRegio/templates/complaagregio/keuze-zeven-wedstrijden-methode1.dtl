@@ -6,14 +6,14 @@
 {% endcomment %}
 {% load static %}
 
-{% block title %}Voorkeuren{% endblock %}
+{% block title %}Wedstrijden kiezen{% endblock %}
 
 {% block pagina %}
 
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h1 class="sv-kopje-pagina">Aanpassen</h1>
+            <h1 class="sv-kopje-pagina">Wedstrijden kiezen</h1>
             {% if is_hwl %}
                 <p>Als HWL kan je via scherm de keuzes voor lid <b>{{ deelnemer.sporterboog.sporter.lid_nr_en_volledige_naam }}</b> van jouw vereniging aanpassen<br>voor de <b>{{ deelnemer.regiocomp.competitie.beschrijving }}</b></p>
             {% else %}
@@ -22,33 +22,6 @@
             {% endif %}
         </div>
     </div>
-
-    <script>
-        function tel_wedstrijden() {
-            // tel hoeveel checkboxes aangekruist zijn
-            const count = document.querySelectorAll('input[name^="wedstrijd_"]:checked').length;
-
-            const el_aantal = document.getElementById('aantal');
-            el_aantal.innerText = count.toString() + ' wedstrijden';
-
-            const el = document.getElementById('submit_knop');
-            el.disabled = (count > 7)
-            if (count > 7) {
-                el_aantal.classList.add('sv-rood-text');
-            } else {
-                el_aantal.classList.remove('sv-rood-text');
-            }
-        }
-
-        function toon_wedstrijden_2() {
-            const els = document.getElementsByClassName('wedstrijden_2');
-            Array.prototype.forEach.call(els, function (el) {
-                el.classList.remove('hide');
-            });
-
-            document.getElementById('id_wedstrijden_2_knop').classList.add('hide');
-        }
-    </script>
 
     <!-- witruimte -->
     <div class="row center">
@@ -75,7 +48,7 @@
                                         <tr>
                                             <td>
                                                 <label style="margin-left: 20px">
-                                                    <input type="checkbox" class="filled-in" name="wedstrijd_{{ wedstrijd.pk }}" onchange="tel_wedstrijden()"{% if wedstrijd.is_gekozen %} checked{% endif %}>
+                                                    <input type="checkbox" class="filled-in" name="wedstrijd_{{ wedstrijd.pk }}"{% if wedstrijd.is_gekozen %} checked{% endif %}>
                                                     <span></span>
                                                 </label>
                                             </td>
@@ -98,7 +71,7 @@
                                 {% if wedstrijden_2 %}
                                     <tr id="id_wedstrijden_2_knop">
                                         <td colspan="3" class="center">Er zijn nog {{ wedstrijden_2|length }} wedstrijden in de regio, wat verder weg.<br><br>
-                                            <button class="btn-sv-blauw" type="button" onclick="toon_wedstrijden_2()">Toon meer wedstrijden</button>
+                                            <button id="id_button_toon_meer_wedstrijden" class="btn-sv-blauw" type="button">Toon meer wedstrijden</button>
                                         </td>
                                     </tr>
 
@@ -131,13 +104,7 @@
         </div>
     </div>
 
-
-    <!-- initialisatie -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            tel_wedstrijden();
-        })
-    </script>
+    <script src="{% static 'complaagregio_js/keuze_7_wedstrijden.js' %}"></script>
 
     {% include 'feedback/sidebar.dtl' with op_pagina="complaagregio-keuze-zeven-wedstrijden-methode1" %}
 

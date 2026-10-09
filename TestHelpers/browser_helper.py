@@ -13,6 +13,7 @@ from BasisTypen.definities import GESLACHT_ALLE
 from BasisTypen.models import BoogType, TeamType, Leeftijdsklasse
 from Bestelling.models import BestellingMandje, BestellingHoogsteBestelNr
 from Betaal.models import BetaalInstellingenVereniging
+from Competitie.definities import INSCHRIJF_METHODE_1
 from Competitie.models import Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMatch
 from CompLaagRegio.models import RegioComp, RegioRonde, RegioDeelnemer
 from Functie.models import Functie, VerklaringHanterenPersoonsgegevens
@@ -82,8 +83,10 @@ class BrowserTestCase(TestCase):
     webwinkel_product: WebwinkelProduct = None              # product in de webwinkel
     comp: Competitie = None
     regio_comp: RegioComp = None                            # regiocompetitie voor regio van sporter
+    regio_comp1: RegioComp = None                           # regiocompetitie met inschrijfmethode 1
     regio_match: CompetitieMatch = None
     regio_deelnemer_r: RegioDeelnemer = None
+    regio_deelnemer_c: RegioDeelnemer = None
     regio_deelnemer_bb: RegioDeelnemer = None
     mandje: BestellingMandje = None
     wedstrijd_1: Wedstrijd = None
@@ -677,6 +680,11 @@ def database_vullen(inst):
                                     beschrijving='Recurve',
                                     volgorde=10)        # zelfde volgorde als het standaard object
 
+    inst.boog_c = BoogType.objects.create(
+                                    afkorting='C',
+                                    beschrijving='Compound',
+                                    volgorde=11)        # zelfde volgorde als het standaard object
+
     inst.boog_bb = BoogType.objects.create(
                                     afkorting='BB',
                                     beschrijving='Barebow',
@@ -691,6 +699,11 @@ def database_vullen(inst):
     inst.sporterboog_r = SporterBoog.objects.create(
                                     sporter=inst.sporter,
                                     boogtype=inst.boog_r,
+                                    voor_wedstrijd=True)
+
+    inst.sporterboog_c = SporterBoog.objects.create(
+                                    sporter=inst.sporter,
+                                    boogtype=inst.boog_c,
                                     voor_wedstrijd=True)
 
     inst.sporterboog_bb = SporterBoog.objects.create(
@@ -716,8 +729,10 @@ def database_vullen(inst):
     inst.functie_mww.beschrijving = 'Manager Webwinkel'
     inst.functie_mww.bevestigde_email = 'mww@test.not'
     inst.functie_mww.save()
-
     inst.functie_mww.accounts.add(inst.account_bb)
+
+    #inst.functie_cs = Functie.objects.create(rol='CS')
+    #inst.functie_cs.accounts.add(inst.account_bb)
 
     inst.functie_mwz = Functie.objects.create(
                                 rol='MWZ',
@@ -783,6 +798,14 @@ def database_vullen(inst):
                                 min_ag=0,
                                 is_onbekend=True)
     inst.klasse_indiv_r.leeftijdsklassen.add(inst.lkl_all)
+
+    inst.klasse_indiv_c = CompetitieIndivKlasse.objects.create(
+                                competitie=inst.comp,
+                                boogtype=inst.boog_c,
+                                volgorde=2,
+                                min_ag=0,
+                                is_onbekend=True)
+    inst.klasse_indiv_c.leeftijdsklassen.add(inst.lkl_all)
 
     inst.klasse_indiv_bb = CompetitieIndivKlasse.objects.create(
                                 competitie=inst.comp,
@@ -890,6 +913,29 @@ def database_vullen(inst):
                         locatie=inst.locatie_outdoor)
     inst.wedstrijd_1.save()
 
+    inst.regio101 = Regio.objects.create(regio_nr=101, rayon_nr=inst.rayon.rayon_nr, rayon=inst.rayon)
+
+    inst.regio_comp1 = RegioComp.objects.create(
+                            competitie=inst.comp,
+                            regio=inst.regio101,
+                            inschrijf_methode=INSCHRIJF_METHODE_1,
+                            functie=inst.functie_hwl)   # zou moeten zijn: RCL
+
+    inst.regio_deelnemer_c = RegioDeelnemer.objects.create(
+                                    regiocomp=inst.regio_comp1,
+                                    sporterboog=inst.sporterboog_c,
+                                    bij_vereniging=inst.sporterboog_c.sporter.bij_vereniging,
+                                    indiv_klasse=inst.klasse_indiv_c,
+                                    inschrijf_voorkeur_team=True,
+                                    ag_voor_team_mag_aangepast_worden=True,
+                                    ag_voor_team=7.0)
+
+    inst.regio_ronde1 = RegioRonde.objects.create(
+                                regiocomp=inst.regio_comp1,
+                                week_nr=1,
+                                beschrijving='Ronde 1')
+    inst.regio_ronde1.matches.add(inst.regio_match)
+    inst.regio_ronde1.matches.add(match)
 
 def database_opschonen(_inst):
     # wordt aangeroepen vanuit Plein/tests/test_js_in_browser
@@ -913,13 +959,16 @@ def populate_inst(self, inst):
     inst.sporter = self.sporter
     inst.account_bb = self.account_bb
     inst.regio_comp = self.regio_comp
+    inst.regio_comp1 = self.regio_comp1
     inst.regio_match = self.regio_match
     inst.functie_hwl = self.functie_hwl
     inst.wedstrijd_1 = self.wedstrijd_1
     inst.sporterboog_r = self.sporterboog_r
+    inst.sporterboog_c = self.sporterboog_c
     inst.sporterboog_bb = self.sporterboog_bb
     inst.locatie_outdoor = self.locatie_outdoor
     inst.regio_deelnemer_r = self.regio_deelnemer_r
+    inst.regio_deelnemer_c = self.regio_deelnemer_c
     inst.regio_deelnemer_bb = self.regio_deelnemer_bb
     inst.webwinkel_product = self.webwinkel_product
 
