@@ -88,7 +88,7 @@
 
                             <tr>
                                 <th>Beschrijving</th>
-                                <td>Bondscompetitie Indoor</td>
+                                <td style="width:60%">Bondscompetitie Indoor</td>
                             </tr>
 
                             <tr>
@@ -173,6 +173,13 @@
                                         <th>Resultaat (totaal 60 pijlen)</th>
                                         <td>
                                             <input type="number" name="{{ score.name_str }}_result" value="{{ score.resultaat }}" min="0" max="600">
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <th>Link naar de gepubliceerde uitslag</th>
+                                        <td style="width:60%">
+                                            <input type="url" name="{{ score.name_str }}_uitslag" value="{{ score.uitslag }}" maxlength="250">
                                         </td>
                                     </tr>
 
