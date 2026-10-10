@@ -72,6 +72,58 @@
         }
     </script>
 
+    {% if indoor_scores %}
+        <div class="row-sv-blauw">
+            <div class="col s12 l10 offset-l1 xl8 offset-xl2">
+                <div class="sv-kader">
+
+                    <table>
+                        {% if automatisch_18m_score1 %}
+                            <tr>
+                                <td colspan="2" class="center">
+                                    <span class="sv-kopje-in-tabel">Jouw 1e resultaat van de bondscompetitie Indoor</span>
+                                    <p>(dit wordt automatisch bijgewerkt)</p>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th>Beschrijving</th>
+                                <td>Bondscompetitie Indoor</td>
+                            </tr>
+
+                            <tr>
+                                <th>Resultaat (totaal 60 pijlen)</th>
+                                <td>{{ automatisch_18m_score1 }}</td>
+                            </tr>
+                        {% endif %}
+
+                        {% if automatisch_18m_score2 %}
+                            <tr>
+                                <td colspan="2" class="center">
+                                    <br>
+                                    <span class="sv-kopje-in-tabel">Jouw 2e resultaat van de bondscompetitie Indoor</span>
+                                    <p>(dit wordt automatisch bijgewerkt)</p>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th>Beschrijving</th>
+                                <td>Bondscompetitie Indoor</td>
+                            </tr>
+
+                            <tr>
+                                <th>Resultaat (totaal 60 pijlen)</th>
+                                <td>{{ automatisch_18m_score2 }}</td>
+                            </tr>
+                        {% endif %}
+
+                    </table>
+
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
     <!-- blauwe balk met dialoog venster -->
     <div class="row-sv-blauw">
         <div class="col s12 l10 offset-l1 xl8 offset-xl2">
