@@ -93,8 +93,8 @@ class VerwerkMutatiesRegio:
         # for
 
     def _verwerk_mutatie_regio_team_ronde(self, mutatie: CompetitieMutatie):
-        self.stdout.write('[INFO] Verwerk mutatie %s: regio team ronde' % mutatie.pk)
         deelcomp = mutatie.regiocomp
+        self.stdout.write('[INFO] Verwerk mutatie %s: team ronde %s' % (mutatie.pk, deelcomp))
 
         # bepaal de volgende ronde
         if deelcomp.huidige_team_ronde > 7:
