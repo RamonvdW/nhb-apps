@@ -235,15 +235,16 @@
                     </tr>
                     <tr class="sv-table-header">
                         <td class="sv-table-zijrand"></td>
-                        <th><!-- rank --></th>
+                        <th class="hide-on-small-only"><!-- rank --></th>
+                        <th class="center">{% if toon_punten %}Punten{% endif %}</th>
                         <th>Team</th>
                         <th class="center" colspan="21">{% if toon_punten %}Scores<span class="hide-on-small-only"> / Punten</span>{% else %}Scores{% endif %}</th>
                         <th class="right-align hide-on-small-only">Totaal</th>
-                        <th class="right-align">{% if toon_punten %}Punten{% endif %}</th>
                         <td class="sv-table-zijrand"></td>
                     </tr>
                     <tr class="sv-table-header">
                         <td class="sv-table-zijrand" rowspan="{{ team.aantal_in_groep }}"></td>
+                        <td class="hide-on-small-only" style="padding-top:0"></td>
                         <td style="padding-top:0"></td>
                         <th style="padding-top:0" class="right-align">Ronde:</th>
                         <th style="padding-top:0" class="center" colspan="3">1</th>
@@ -253,15 +254,15 @@
                         <th style="padding-top:0" class="center" colspan="3">5</th>
                         <th style="padding-top:0" class="center" colspan="3">6</th>
                         <th style="padding-top:0" class="center" colspan="3">7</th>
-                        <td style="padding-top:0"></td>
-                        <td style="padding-top:0"></td>
+                        <td class="hide-on-small-only" style="padding-top:0"></td>
                         <td class="sv-table-zijrand" rowspan="{{ team.aantal_in_groep }}"></td>
                     </tr>
                 {% endif %}
 
                 {% if not team.is_afsluiter %}
                     <tr>
-                        <td class="center smal">{{ team.rank }}</td>
+                        <td class="center smal hide-on-small-only">{{ team.rank }}</td>
+                        <td class="center">{% if toon_punten %}{{ team.totaal_punten }}{% endif %}</td>
                         <td class="smal">{{ team.naam_str }}</td>
                         {% for score, punten in team.ronde_scores %}
                             <td class="right-align smal">{{ score }}</td>
@@ -273,7 +274,6 @@
                             </td>
                         {% endfor %}
                         <td class="right-align hide-on-small-only">{{ team.totaal_score }}</td>
-                        <td class="right-align">{% if toon_punten %}{{ team.totaal_punten }}{% endif %}</td>
                     </tr>
 
                     {% if team.onderrand %}
@@ -284,7 +284,7 @@
                 {% endif %}
 
                 {% if forloop.last %}
-                    <!-- row with all cells defined, to avoid linting errors -->
+                    <!-- row with all cells defined, to avoid HTML linting errors -->
                     <tr style="display:none">
                         <td></td> <td></td> <td></td> <td></td> <td></td>
                         <td></td> <td></td> <td></td> <td></td> <td></td>
