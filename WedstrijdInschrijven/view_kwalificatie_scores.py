@@ -88,8 +88,19 @@ class KwalificatieScoresOpgevenView(UserPassesTestMixin, TemplateView):
             scores = [score for score in scores if score > 0]
             scores.sort(reverse=True)       # hoogste eerst
             scores = scores[:4]             # top 4
-            scores = [str(score) for score in scores]
-            context['indoor_scores'] = ", ".join(scores)
+
+            scores_str = [str(score) for score in scores]
+            context['indoor_scores'] = ", ".join(scores_str)
+
+            if len(scores) == 1:
+                context['automatisch_18m_score1'] = scores_str[0]
+            elif len(scores) >= 2:
+                context['automatisch_18m_score1'] = "%s (%s + %s)" % (sum(scores[:2]), scores[0], scores[1])
+
+            if len(scores) == 3:
+                context['automatisch_18m_score2'] = scores[2]
+            elif len(scores) == 4:
+                context['automatisch_18m_score2'] = "%s (%s + %s)" % (sum(scores[2:]), scores[2], scores[3])
 
         # einddatum is de zondag van het weekend voor de wedstrijd
         # weekday 0 = maandag
