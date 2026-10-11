@@ -173,6 +173,9 @@ class KwalificatiescoreAdmin(admin.ModelAdmin):
 
     readonly_fields = ('inschrijving',)
 
+    search_fields = ('inschrijving__sporterboog__sporter__lid_nr',
+                     'inschrijving__sporterboog__sporter__unaccented_naam')
+
 
 class AfgemeldBijVerenigingFilter(admin.SimpleListFilter):
 

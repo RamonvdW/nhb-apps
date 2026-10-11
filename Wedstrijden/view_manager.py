@@ -29,12 +29,15 @@ TEMPLATE_WEDSTRIJDEN_OVERZICHT_MANAGER = 'wedstrijden/overzicht-manager.dtl'
 
 
 class KalenderManagerView(UserPassesTestMixin, View):
-    """ Via deze view kan de BB de wedstrijdkalender beheren """
+    """ Via deze view kan de MWZ de wedstrijdkalender beheren """
 
     # class variables shared by all instances
     template_name = TEMPLATE_WEDSTRIJDEN_OVERZICHT_MANAGER
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
     permission_denied_message = 'Geen toegang'
+    toon_dagen = 31
+    toon_tekst = 'tot 2 maanden terug'
+    toon_meer = 'Wedstrijden:manager-status-zes-maanden'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -45,8 +48,7 @@ class KalenderManagerView(UserPassesTestMixin, View):
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
         return self.rol_nu == Rol.ROL_MWZ
 
-    @staticmethod
-    def _maak_filter_knoppen(context, gekozen_status):
+    def _maak_filter_knoppen(self, context, gekozen_status):
         """ filter knoppen voor de wedstrijdstatus """
 
         context['status_filters'] = status_filters = list()
@@ -84,11 +86,12 @@ class KalenderManagerView(UserPassesTestMixin, View):
             status_str = kwargs['status'][:15]          # afkappen voor de veiligheid
             status = WEDSTRIJD_URL2STATUS[status_str]
         except KeyError:
+            status_str = 'alle'
             status = None
 
         # begin 2 maanden terug in tijd (oudere wedstrijden zijn niet interessant)
         vandaag = timezone.now().date()
-        datum_vanaf = vandaag - datetime.timedelta(days=61)
+        datum_vanaf = vandaag - datetime.timedelta(days=self.toon_dagen)
 
         # pak de 50 meest recente wedstrijden
         wedstrijden = (Wedstrijd
@@ -125,6 +128,11 @@ class KalenderManagerView(UserPassesTestMixin, View):
 
         context['wedstrijden'] = wedstrijden
 
+        context['toon_tekst'] = self.toon_tekst
+
+        if self.toon_meer:
+            context['url_toon_meer'] = reverse(self.toon_meer, kwargs={'status': status_str})
+
         context['huidige_rol'] = rol_get_beschrijving(request)
 
         self._maak_filter_knoppen(context, status)
@@ -134,6 +142,24 @@ class KalenderManagerView(UserPassesTestMixin, View):
         )
 
         return render(request, self.template_name, context)
+
+
+class KalenderManagerZesMaandenView(KalenderManagerView):
+    toon_dagen = 182            # vanaf 6 maanden geleden (182=365/2)
+    toon_tekst = 'tot 6 maanden terug'
+    toon_meer = 'Wedstrijden:manager-status-een-jaar'
+
+
+class KalenderManagerEenJaarView(KalenderManagerView):
+    toon_dagen = 365            # vanaf 1 jaar terug
+    toon_tekst = 'tot 1 jaar terug'
+    toon_meer = 'Wedstrijden:manager-status-twee-jaar'
+
+
+class KalenderManagerTweeJaarView(KalenderManagerView):
+    toon_dagen = 2 * 365        # vanaf 2 jaar terug
+    toon_tekst = 'tot 2 jaar terug'
+    toon_meer = None
 
 
 class ZetStatusWedstrijdView(UserPassesTestMixin, View):

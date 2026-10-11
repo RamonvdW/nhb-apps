@@ -11,8 +11,7 @@ from Bestelling.models import BestellingRegel
 from Sporter.models import SporterBoog
 from Wedstrijden.definities import (WEDSTRIJD_INSCHRIJVING_STATUS_CHOICES,
                                     WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_MANDJE,
-                                    WEDSTRIJD_INSCHRIJVING_STATUS_TO_STR,
-                                    KWALIFICATIE_CHECK_CHOICES, KWALIFICATIE_CHECK_NOG_DOEN)
+                                    WEDSTRIJD_INSCHRIJVING_STATUS_TO_STR)
 from decimal import Decimal
 from .korting import WedstrijdKorting
 from .sessie import WedstrijdSessie
@@ -93,35 +92,6 @@ class WedstrijdInschrijving(models.Model):
             models.UniqueConstraint(fields=('sessie', 'sporterboog'),
                                     name='Geen dubbele wedstrijd inschrijving'),
         ]
-
-    objects = models.Manager()      # for the editor only
-
-
-class Kwalificatiescore(models.Model):
-
-    # voor welke inschrijving is dit?
-    inschrijving = models.ForeignKey(WedstrijdInschrijving, on_delete=models.CASCADE)
-
-    # wanneer was de wedstrijd
-    datum = models.DateField(default='2000-01-01')
-
-    # naam van de wedstrijd
-    naam = models.CharField(max_length=50)
-
-    # locatie van de wedstrijd (plaats + land)
-    waar = models.CharField(max_length=50)
-
-    # behaald resultaat
-    resultaat = models.PositiveSmallIntegerField(default=0)
-
-    # controle status
-    check_status = models.CharField(max_length=1, default=KWALIFICATIE_CHECK_NOG_DOEN,
-                                    choices=KWALIFICATIE_CHECK_CHOICES)
-
-    log = models.TextField(default='')
-
-    def __str__(self):
-        return "[%s] %s: %s (%s)" % (self.datum, self.resultaat, self.naam, self.waar)
 
     objects = models.Manager()      # for the editor only
 

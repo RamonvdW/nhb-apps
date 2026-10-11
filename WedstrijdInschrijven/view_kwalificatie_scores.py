@@ -117,7 +117,7 @@ class KwalificatieScoresOpgevenView(UserPassesTestMixin, TemplateView):
         kwalificatie_scores = list(Kwalificatiescore
                                    .objects
                                    .filter(inschrijving=inschrijving)
-                                   .order_by('datum'))
+                                   .order_by('datum', 'pk'))
 
         context['eerste_keer'] = inschrijving.status in (WEDSTRIJD_INSCHRIJVING_STATUS_RESERVERING_MANDJE,
                                                          WEDSTRIJD_INSCHRIJVING_STATUS_BESTELD)
@@ -248,6 +248,7 @@ class KwalificatieScoresOpgevenView(UserPassesTestMixin, TemplateView):
             naam_str = request.POST.get(name_str + '_naam', '')[:50]        # afkappen voor de veiligheid
             waar_str = request.POST.get(name_str + '_waar', '')[:50]        # afkappen voor de veiligheid
             result_str = request.POST.get(name_str + '_result', '')[:5]     # afkappen voor de veiligheid
+            uitslag = request.POST.get(name_str + '_uitslag', '')[:250]
 
             try:
                 datum = datetime.datetime.strptime(datum_str, '%Y-%m-%d').date()
@@ -276,8 +277,9 @@ class KwalificatieScoresOpgevenView(UserPassesTestMixin, TemplateView):
                 score.naam = naam_str
                 score.waar = waar_str
                 score.resultaat = result
-                score.log += '[%s] Eerste opgaaf door %s: datum: %s, naam: %s, waar: %s, resultaat: %s\n' % (
-                            now_str, door_str, datum, repr(naam_str), repr(waar_str), result)
+                score.uitslag = uitslag
+                score.log += '[%s] Eerste opgaaf door %s: datum: %s, naam: %s, waar: %s, resultaat: %s, uitslag: %s\n' % (
+                            now_str, door_str, datum, repr(naam_str), repr(waar_str), result, uitslag)
 
             else:
                 changes = list()
@@ -296,6 +298,10 @@ class KwalificatieScoresOpgevenView(UserPassesTestMixin, TemplateView):
                 if score.resultaat != result:
                     changes.append("resultaat: %s -> %s" % (score.resultaat, result))
                     score.resultaat = result
+
+                if score.uitslag != uitslag:
+                    changes.append("uitslag: %s -> %s" % (score.uitslag, uitslag))
+                    score.uitslag = uitslag
 
                 if len(changes):
                     # schrijf in logboek

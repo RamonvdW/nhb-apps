@@ -5,8 +5,9 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from .afgemeld import WedstrijdAfgemeld
-from .inschrijving import WedstrijdInschrijving, Kwalificatiescore
+from .inschrijving import WedstrijdInschrijving
 from .korting import WedstrijdKorting, beschrijf_korting
+from .kwalificatiescores import Kwalificatiescore
 from .sessie import WedstrijdSessie
 from .wedstrijd import Wedstrijd
 

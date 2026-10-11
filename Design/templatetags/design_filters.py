@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2025 Ramon van der Winkel.
+#  Copyright (c) 2019-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -84,15 +84,15 @@ def filter_wbr_email(text):
     return mark_safe(new_text)
 
 
-def filter_wbr_www(text):
+def filter_wbr_www(text, max_len=50):
     """  wbr_email filter looks for places where the e-mail address could be wrapped
          and insert a <wbr> html tag before that character.
     """
 
     too_long = False
-    if len(text) > 50:
+    if len(text) > max_len:
         too_long = True
-        text = text[:50]
+        text = text[:max_len]
 
     new_text = ""
 

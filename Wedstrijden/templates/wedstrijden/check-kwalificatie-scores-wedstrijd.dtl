@@ -6,6 +6,7 @@
 {% endcomment %}
 {% load static %}
 {% load design_icons %}
+{% load design_link %}
 
 {% block title %}Check kwalificatie-scores{% endblock %}
 
@@ -33,6 +34,10 @@
                 <tr>
                     <th>Waar</th>
                     <td>{{ ref_score.waar}}</td>
+                </tr>
+                <tr>
+                    <th>Uitslag</th>
+                    <td>{% if ref_score.uitslag %}{% sv-link-ext url=ref_score.uitslag max_len=100 %}{% endif %}</td>
                 </tr>
             </table>
         </div>
