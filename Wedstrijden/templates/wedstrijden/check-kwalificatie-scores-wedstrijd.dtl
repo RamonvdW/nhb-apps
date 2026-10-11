@@ -37,7 +37,13 @@
                 </tr>
                 <tr>
                     <th>Uitslag</th>
-                    <td>{% if ref_score.uitslag %}{% sv-link-ext url=ref_score.uitslag max_len=100 %}{% endif %}</td>
+                    <td>
+                        {% for url in uitslag_urls %}
+                            {% sv-link-ext url=url max_len=100 %}<br>
+                        {% empty %}
+                            <i>Niets opgegeven</i>
+                        {% endfor %}
+                    </td>
                 </tr>
             </table>
         </div>
