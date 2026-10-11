@@ -227,6 +227,8 @@ class Command(BaseCommand):
         lms = None
 
         for lms_lp in lms_lijst:
+            assert isinstance(lms_lp, DataApiLidmaatschap)
+
             if lms_lp.ver_nr == ver_nr:
                 # lid kan knipperlicht relatie hebben met vereniging
 
@@ -237,7 +239,9 @@ class Command(BaseCommand):
                 if lms_lp.aanmeld_datum == aanmeld_datum:
                     return
 
-                lms = lms_lp
+                if lms_lp.afmeld_datum == '' or aanmeld_datum < lms_lp.afmeld_datum:
+                    # beste keuze
+                    lms = lms_lp
         # for
 
         if lms:

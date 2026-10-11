@@ -67,6 +67,10 @@ class DataApiLidmaatschap(models.Model):
     # uitgegeven nummer voor dit lid (kan hergebruikt worden)
     lid_nr = models.PositiveIntegerField()
 
+    # wordt het lid nummer onderdruk in de rapportage?
+    # 2 jaar na einde lms wordt deze op False gezet --> mutatie_datum wordt aangepast --> update wordt doorgegeven
+    lid_nr_doorgeven = models.BooleanField(default=True)
+
     # lid bij welke vereniging? (verplicht)
     ver_nr = models.PositiveIntegerField()
 

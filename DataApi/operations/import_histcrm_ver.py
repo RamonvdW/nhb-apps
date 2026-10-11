@@ -86,8 +86,8 @@ class ImportHistCrmVerenigingen(ImportCrmBase):
             updated.append('naam')
 
         if kvk and kvk != ver.kvk_nummer:
-            # self.out_info('Vereniging %s wijziging kvk_nummer: %s --> %s' %
-            #                 (ver_nr, repr(ver.kvk_nummer), repr(kvk)))
+            self.out_info('Vereniging %s wijziging kvk_nummer: %s --> %s' %
+                            (ver_nr, repr(ver.kvk_nummer), repr(kvk)))
             ver.kvk_nummer = kvk
             updated.append('kvk_nummer')
 
