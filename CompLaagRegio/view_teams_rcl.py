@@ -655,7 +655,7 @@ class StartVolgendeTeamRondeView(UserPassesTestMixin, TemplateView):
                     raise Http404('Te weinig scores')
 
                 # pas de wedstrijdpunten toe
-                # TODO: verplaats naar background task
+                # TODO: verplaats naar achtergrondtaak ->> regiocomp_tussenstand doet dit ook al
                 if deelcomp.regio_team_punten_model == TEAM_PUNTEN_MODEL_TWEE:
                     for regel in alle_regels:
                         regel.ronde_team1.team_punten = regel.team1_wp
