@@ -62,14 +62,18 @@
             <table class="sv-kader-tabel" id="table1">
                 <thead>
                     <tr>        <!-- filter veld -->
-                        <td></td>
+                        <td>
+                            {% if url_toon_meer %}
+                                <a class="btn-sv-blauw" href="{{ url_toon_meer }}" style="margin-left:10px">Toon eerdere</a>
+                            {% endif %}
+                        </td>
                         <td colspan="3" class="table-filter">
                             <input class="table-filter" oninput="tabel_filter(this, 'table1')" placeholder="Zoeken"/>
                         </td>
                         <td colspan="2"></td>
                     </tr>
                     <tr>
-                        <th>Wanneer</th>
+                        <th>Wanneer ({{ toon_tekst }})</th>
                         <th data-filter="on">Vereniging</th>
                         <th data-filter="on">Titel</th>
                         <th data-filter="on">Discipline</th>

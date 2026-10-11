@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2025 Ramon van der Winkel.
+#  Copyright (c) 2021-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -14,6 +14,7 @@ from Taken.models import Taak
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
 from Wedstrijden.models import Wedstrijd
+import datetime
 
 
 class TestWedstrijdenManager(E2EHelpers, TestCase):
@@ -22,6 +23,7 @@ class TestWedstrijdenManager(E2EHelpers, TestCase):
 
     url_wedstrijden_manager = '/wedstrijden/manager/'
     url_wedstrijden_manager_geannuleerd = '/wedstrijden/manager/geannuleerd/'
+    url_wedstrijden_manager_alle_2jaar = '/wedstrijden/manager/alle/lijst-twee-jaar/'
     url_wedstrijden_vereniging = '/wedstrijden/vereniging/lijst/'
     url_wedstrijden_maak_nieuw = '/wedstrijden/vereniging/kies-type/'
     url_wedstrijden_wijzig_wedstrijd = '/wedstrijden/%s/wijzig/'  # wedstrijd_pk
@@ -108,7 +110,8 @@ class TestWedstrijdenManager(E2EHelpers, TestCase):
 
         wedstrijd = Wedstrijd.objects.first()
         wedstrijd.eis_kwalificatie_scores = True
-        wedstrijd.save(update_fields=['eis_kwalificatie_scores'])
+        wedstrijd.is_ter_info = True
+        wedstrijd.save(update_fields=['eis_kwalificatie_scores', 'is_ter_info'])
 
         # haal het overzicht op
         with self.assert_max_queries(20):
@@ -118,6 +121,17 @@ class TestWedstrijdenManager(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('wedstrijden/overzicht-manager.dtl', 'design/site_layout.dtl'))
 
         self.e2e_assert_other_http_commands_not_supported(self.url_wedstrijden_manager, post=False)
+
+        # zorg dat wedstrijd in blauw getoond wordt
+        wedstrijd.datum_einde -= datetime.timedelta(days=100)
+        wedstrijd.save(update_fields=['datum_einde'])
+
+        # lijst tot 2 jaar terug (heeft geen "toon meer")
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_wedstrijden_manager_alle_2jaar)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('wedstrijden/overzicht-manager.dtl', 'design/site_layout.dtl'))
 
     def test_zet_status(self):
         self.e2e_login_and_pass_otp(self.account_admin)

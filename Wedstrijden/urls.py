@@ -67,6 +67,18 @@ urlpatterns = [
          view_manager.KalenderManagerView.as_view(),
          name='manager-status'),
 
+    path('manager/<status>/lijst-zes-maanden/',
+         view_manager.KalenderManagerZesMaandenView.as_view(),
+         name='manager-status-zes-maanden'),
+
+    path('manager/<status>/lijst-een-jaar/',
+         view_manager.KalenderManagerEenJaarView.as_view(),
+         name='manager-status-een-jaar'),
+
+    path('manager/<status>/lijst-twee-jaar/',
+         view_manager.KalenderManagerTweeJaarView.as_view(),
+         name='manager-status-twee-jaar'),
+
     path('manager/check-kwalificatie-scores/<wedstrijd_pk>/',
          view_kwalificatie_scores.CheckKwalificatieScoresView.as_view(),
          name='check-kwalificatie-scores'),
