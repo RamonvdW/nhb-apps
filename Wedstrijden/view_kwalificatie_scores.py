@@ -184,6 +184,8 @@ class CheckKwalificatieScoresWedstrijdView(UserPassesTestMixin, TemplateView):
             KWALIFICATIE_CHECK_AFGEKEURD: 3,
         }
 
+        uitslag_urls = list()
+
         for score in scores:
             sporterboog = score.inschrijving.sporterboog
             score.sporter_str = sporterboog.sporter.lid_nr_en_volledige_naam()
@@ -192,9 +194,13 @@ class CheckKwalificatieScoresWedstrijdView(UserPassesTestMixin, TemplateView):
             score.url_status = reverse('Wedstrijden:check-kwalificatie-scores-wedstrijd',
                                        kwargs={'score_pk': score.pk})
             score.id = 'score%s' % score.pk
+
+            if score.uitslag.strip() != '':
+                uitslag_urls.append(score.uitslag)
         # for
 
         context['scores'] = scores
+        context['uitslag_urls'] = uitslag_urls
 
         if self.rol_nu == Rol.ROL_HWL:
             context['kruimels'] = (
