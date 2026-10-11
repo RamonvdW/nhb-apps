@@ -9,6 +9,7 @@
 
 from django.db import connection
 from django.conf import settings
+from django.utils import timezone
 from django.db.utils import DataError, OperationalError, IntegrityError, DEFAULT_DB_ALIAS
 from django.db.models import F, Q
 from django.core.management.base import BaseCommand
@@ -395,6 +396,9 @@ class Command(BaseCommand):
     def update_team_scores(self):
         """ Update alle team scores aan de hand van wie er in de teams zitten en de door de RCL geselecteerde scores
         """
+
+        stamp = timezone.now().strftime('%Y-%m-%d %H:%M:%S')
+
         for deelcomp in RegioComp.objects.filter(is_afgesloten=False).order_by('competitie__afstand', 'regio__regio_nr'):
             # pak alle teams in deze regiocompetitie erbij
             teams = RegioTeam.objects.filter(regiocomp=deelcomp).values_list('pk', flat=True)
@@ -448,8 +452,9 @@ class Command(BaseCommand):
                         if ronde_team.team_score != team_score:
                             # print('nieuwe team_score voor team %s: %s --> %s' % (
                             #           ronde_team, ronde_team.team_score, team_score))
+                            ronde_team.logboek += '[%s] {regiocomp_tussenstand} team_score %s --> %s\n' % (stamp, ronde_team.team_score, team_score)
                             ronde_team.team_score = team_score
-                            ronde_team.save(update_fields=['team_score'])
+                            ronde_team.save(update_fields=['team_score', 'logboek'])
 
                     # for (ronde team)
 
@@ -461,18 +466,24 @@ class Command(BaseCommand):
                         # pas de wedstrijdpunten toe
                         if deelcomp.regio_team_punten_model == TEAM_PUNTEN_MODEL_TWEE:
                             for regel in alle_regels:
-                                regel.ronde_team1.team_punten = regel.team1_wp
-                                regel.ronde_team1.save(update_fields=['team_punten'])
+                                if regel.ronde_team1.team_punten != regel.team1_wp:
+                                    regel.ronde_team1.logboek += '[%s] {regiocomp_tussenstand} wp %s --> %s\n' % (stamp, regel.ronde_team1.team_punten, regel.team1_wp)
+                                    regel.ronde_team1.team_punten = regel.team1_wp
+                                    regel.ronde_team1.save(update_fields=['team_punten', 'logboek'])
 
                                 if regel.ronde_team2:  # None == Bye
-                                    regel.ronde_team2.team_punten = regel.team2_wp
-                                    regel.ronde_team2.save(update_fields=['team_punten'])
+                                    if regel.ronde_team2.team_punten != regel.team2_wp:
+                                        regel.ronde_team2.logboek += '[%s] {regiocomp_tussenstand} wp %s --> %s\n' % (stamp, regel.ronde_team2.team_punten, regel.team2_wp)
+                                        regel.ronde_team2.team_punten = regel.team2_wp
+                                        regel.ronde_team2.save(update_fields=['team_punten', 'logboek'])
                             # for
 
                         elif deelcomp.regio_team_punten_model == TEAM_PUNTEN_MODEL_FORMULE1:
                             for ronde_team in alle_regels:
-                                ronde_team.team_punten = ronde_team.ronde_wp
-                                ronde_team.save(update_fields=['team_punten'])
+                                if ronde_team.team_punten != ronde_team.ronde_wp:
+                                    ronde_team.logboek += '[%s] {regiocomp_tussenstand} wp %s --> %s\n' % (stamp, ronde_team.team_punten, ronde_team.ronde_wp)
+                                    ronde_team.team_punten = ronde_team.ronde_wp
+                                    ronde_team.save(update_fields=['team_punten', 'logboek'])
                             # for
 
             # for ronde_nr

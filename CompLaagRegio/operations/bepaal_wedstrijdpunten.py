@@ -63,7 +63,9 @@ def bepaal_wedstrijdpunten(deelcomp: RegioComp, ronde_nr: int):
             maak_poule_schema(poule)
 
             # haal de juiste ronde eruit
-            schemas = [schema for nr, schema in poule.schema if nr == deelcomp.huidige_team_ronde]
+            schemas = [schema
+                       for nr, schema in poule.schema
+                       if nr == ronde_nr]
             if len(schemas) != 1:       # pragma: no cover
                 raise Http404('Probleem met poule wedstrijdschema')
 
