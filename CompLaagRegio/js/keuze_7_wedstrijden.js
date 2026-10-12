@@ -16,7 +16,7 @@ function tel_wedstrijden() {
     el_aantal.innerText = count.toString() + ' wedstrijden';
 
     const el = document.getElementById('submit_knop');
-    el.disabled = (count > 7)
+    el.disabled = (count > 7);
     if (count > 7) {
         el_aantal.classList.add('sv-rood-text');
     } else {

@@ -1216,8 +1216,8 @@ def maak_voorwaarden_nl_graadspelden(apps, _):
             speld=spelden[5202],        # Veld, 2e graad
             leeftijdsklasse=lkl_heren,
             wedstrijd_soort=soort_veld,
-            benodigde_score=27,
-            aantal_doelen=240),
+            benodigde_score=270,
+            aantal_doelen=24),
         voorwaarden_klas(
             speld=spelden[5203],        # Veld, 3e graad
             leeftijdsklasse=lkl_heren,
