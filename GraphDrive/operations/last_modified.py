@@ -4,7 +4,6 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.conf import settings
 from .access_token import get_bearer_token
 from .drives import get_drive_id
 from .site import GraphSite
@@ -43,45 +42,43 @@ def get_file_metadata(out, site: GraphSite, fpath: str) -> dict | None:
         out.write("[ERROR] {get_file_metadata} Exceptie tijdens request: %s" % str(exc))
         return None
 
-    """
-        {
-            '@odata.context': 'https://graph.microsoft.com/v1.0/$metadata#Collection(driveItem)/$entity',
-            '@microsoft.graph.downloadUrl': 'https://####.sharepoint.com/sites/####/_layouts/15/download.aspx?UniqueId=###&Translate=false&tempauth=v1.###&ApiVersion=2.0',
-            'createdBy': {...},
-            'createdDateTime': '2026-03-19T07:24:08Z',
-            'eTag': '###',
-            'id': '###',
-            'lastModifiedBy': {...},
-            'lastModifiedDateTime': '2026-04-05T19:10:08Z',
-            'name': 'Test.xlsx',
-            'parentReference': {
-                'driveType': 'documentLibrary',
-                'driveId': '####',
-                'id': '###',
-                'name': 'General',
-                'path': '/drives/###/root:/General',
-                'siteId': '###'
-            },
-            'webUrl': 'https://####.sharepoint.com/sites/###/_layouts/15/Doc.aspx?sourcedoc=###&file=Test.xlsx&action=default&mobileredirect=true',
-            'cTag': '###',
-            'file': {
-                'fileExtension': '.xlsx',
-                'hashes': {
-                    'quickXorHash': '###'
-                },
-                'mimeType': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-            },
-            'fileSystemInfo': {
-                'createdDateTime': '2026-03-19T07:24:08Z',
-                'lastModifiedDateTime': '2026-04-05T19:10:08Z'
-            },
-            'isAuthoritative': False,
-            'shared': {
-                'scope': 'users'
-            },
-            'size': 12310
-        }
-    """
+    # {
+    #     '@odata.context': 'https://graph.microsoft.com/v1.0/$metadata#Collection(driveItem)/$entity',
+    #     '@microsoft.graph.downloadUrl': 'https://####.sharepoint.com/sites/####/_layouts/15/download.aspx?UniqueId=###&Translate=false&tempauth=v1.###&ApiVersion=2.0',
+    #     'createdBy': {...},
+    #     'createdDateTime': '2026-03-19T07:24:08Z',
+    #     'eTag': '###',
+    #     'id': '###',
+    #     'lastModifiedBy': {...},
+    #     'lastModifiedDateTime': '2026-04-05T19:10:08Z',
+    #     'name': 'Test.xlsx',
+    #     'parentReference': {
+    #         'driveType': 'documentLibrary',
+    #         'driveId': '####',
+    #         'id': '###',
+    #         'name': 'General',
+    #         'path': '/drives/###/root:/General',
+    #         'siteId': '###'
+    #     },
+    #     'webUrl': 'https://####.sharepoint.com/sites/###/_layouts/15/Doc.aspx?sourcedoc=###&file=Test.xlsx&action=default&mobileredirect=true',
+    #     'cTag': '###',
+    #     'file': {
+    #         'fileExtension': '.xlsx',
+    #         'hashes': {
+    #             'quickXorHash': '###'
+    #         },
+    #         'mimeType': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    #     },
+    #     'fileSystemInfo': {
+    #         'createdDateTime': '2026-03-19T07:24:08Z',
+    #         'lastModifiedDateTime': '2026-04-05T19:10:08Z'
+    #     },
+    #     'isAuthoritative': False,
+    #     'shared': {
+    #         'scope': 'users'
+    #     },
+    #     'size': 12310
+    # }
 
     return resp.json()
 
