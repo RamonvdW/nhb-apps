@@ -33,20 +33,20 @@ def upload_file(out, site: GraphSite, local_filename: str, remote_fpath: str):
 
     out.write('[DEBUG] {upload} fpath=%s, url_fpath=%s' % (repr(remote_fpath), repr(url_fpath)))
     try:
-        f = open(local_filename, 'rb')
-        with requests.put(url, data=f, headers=headers, stream=False) as r:
-            if r.status_code != 201:        # 201 Created is het normale antwoord
-                out.write(
-                    "[ERROR] upload request gaf onverwacht antwoord! response encoding:%s, status_code:%s" % (
-                        repr(r.encoding), repr(r.status_code)))
-                out.write("[ERROR] Full response: %s" % repr(r.text))
-                return None
+        with open(local_filename, 'rb') as f:
+            with requests.put(url, data=f, headers=headers, stream=False) as r:
+                if r.status_code != 201:        # 201 Created is het normale antwoord
+                    out.write(
+                        "[ERROR] upload request gaf onverwacht antwoord! response encoding:%s, status_code:%s" % (
+                            repr(r.encoding), repr(r.status_code)))
+                    out.write("[ERROR] Full response: %s" % repr(r.text))
+                    return None
 
-            out.write('[DEBUG] {upload} is gelukt')
-            return "OK"
+        out.write('[DEBUG] {upload} is gelukt')
+        return "OK"
 
     except (requests.exceptions.SSLError, requests.exceptions.ConnectionError) as exc:
-        out.write("[ERROR] Exceptie tijdens download: %s" % str(exc))
+        out.write("[ERROR] Exceptie tijdens upload: %s" % str(exc))
         return None
 
 

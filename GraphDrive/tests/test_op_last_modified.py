@@ -91,7 +91,7 @@ class TestGraphDriveOpLastModified(E2EHelpers, TestCase):
         with patch('requests.get', side_effect=SSLError('uitzondering')):
             res = get_file_metadata(out, site, fname)
             self.assertIsNone(res)
-        self.assertTrue('[ERROR] {get_file_metadata} Exceptie tijdens request: uitzondering' in out.getvalue())
+        self.assertTrue('[ERROR] {get_file_metadata} Exceptie tijdens get request: uitzondering' in out.getvalue())
 
         out = OutputBuffer()
         site = GraphSite(out)

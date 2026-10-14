@@ -69,7 +69,7 @@ class TestGraphDriveOpDownload(E2EHelpers, TestCase):
 
         # connection error
         out = OutputBuffer()
-        with patch('requests.get', side_effect=SSLError('uitzondering')):
+        with patch('GraphDrive.operations.download.requests.get', side_effect=SSLError('uitzondering')):
             local_fname = download_file(out, site, 'remote', self.test_fname)
             self.assertIsNone(local_fname)
         # print('\nout:', out.getvalue())

@@ -39,7 +39,7 @@ def get_file_metadata(out, site: GraphSite, fpath: str) -> dict | None:
             out.write("[ERROR] Full response: %s" % repr(resp.text))
             return None
     except (requests.exceptions.SSLError, requests.exceptions.ConnectionError) as exc:
-        out.write("[ERROR] {get_file_metadata} Exceptie tijdens request: %s" % str(exc))
+        out.write("[ERROR] {get_file_metadata} Exceptie tijdens get request: %s" % str(exc))
         return None
 
     # {
