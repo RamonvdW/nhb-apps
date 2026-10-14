@@ -15,26 +15,17 @@ from tempfile import NamedTemporaryFile
 
 class ResponseMock:
 
-    def __init__(self, status_code=200, heeft_value=True):
+    def __init__(self, status_code=200):
         self.status_code = status_code
         self.text = 'mock'
         self.bytes = b'mock bytes'
         self.encoding = 'mock'
-        self._heeft_value = heeft_value
-        self._files = [{'folder': True, 'name': 'folder_name'},
-                       {'name': 'file1', 'size': '1', 'id': 'item_id1', 'lastModifiedDateTime': 'stamp1'}]
 
     def __enter__(self):
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         pass
-
-    def json(self):
-        d = {}
-        if self._heeft_value:
-            d['value'] = self._files
-        return d
 
 
 class TestGraphDriveOpUpload(E2EHelpers, TestCase):
