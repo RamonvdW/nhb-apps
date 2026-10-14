@@ -78,7 +78,7 @@ class TestGraphDriveOpDownload(E2EHelpers, TestCase):
         # status code != 200
         rsp = ResponseMock(status_code=404)
         out = OutputBuffer()
-        with patch('requests.get', return_value=rsp):
+        with patch('GraphDrive.operations.download.requests.get', return_value=rsp):
             local_fname = download_file(out, site, 'remote', self.test_fname)
             self.assertIsNone(local_fname)
         # print('\nout:', out.getvalue())
@@ -86,7 +86,7 @@ class TestGraphDriveOpDownload(E2EHelpers, TestCase):
 
         rsp = ResponseMock(status_code=200)
         out = OutputBuffer()
-        with patch('requests.get', return_value=rsp):
+        with patch('GraphDrive.operations.download.requests.get', return_value=rsp):
             local_fname = download_file(out, site, 'remote', self.test_fname)
             self.assertEqual(local_fname, self.test_fname)
 

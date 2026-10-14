@@ -21,7 +21,8 @@ class ResponseMock:
         self.encoding = 'mock'
         self._has_value = True
 
-    def json(self):
+    @staticmethod
+    def json():
         return {
             'lastModifiedDateTime': '2026-04-05T19:10:08Z'
         }

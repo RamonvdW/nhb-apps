@@ -18,7 +18,7 @@ def delete_item(out, site: GraphSite, item_id: str):
     """
 
     if not get_bearer_token(out, site):
-        return None, None
+        return
 
     url = "https://graph.microsoft.com/v1.0/sites/%s/drive/items/%s" % (site.site_id, item_id)
 
@@ -37,7 +37,7 @@ def delete_item(out, site: GraphSite, item_id: str):
                 out.write("[ERROR] Full response: %s" % repr(r.text))
 
     except (requests.exceptions.SSLError, requests.exceptions.ConnectionError) as exc:
-        out.write("[ERROR] Exceptie tijdens l: %s" % str(exc))
+        out.write("[ERROR] {delete_item} Exceptie tijdens delete request: %s" % str(exc))
 
 
 # end of file
