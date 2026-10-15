@@ -4,6 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
+from django.conf import settings
 from DataApi.models import DataApiLidmaatschap
 import datetime
 
@@ -15,18 +16,18 @@ def dataapi_opschonen(stdout):
         we verwijderen lidmaatschappen die meer dan 5 jaar geleden afgemeld zijn
     """
 
-    jaren = 5
-    dagen = jaren * 365
-    dagen += jaren // 4  # schrikkeljaren hebben 1 dag meer
+    now = datetime.datetime.now()
+    oudste_afmeld_datum = now - datetime.timedelta(days=settings.DDI_LMS_KEEP_HISTORY_DAYS)
+    oudste_mutatie_datum = now - datetime.timedelta(days=settings.DDI_LMS_KEEP_MUTATED_DAYS)
 
-    vijf_jaar_geleden = datetime.datetime.now() - datetime.timedelta(days=dagen)
-    vijf_jaar_geleden = vijf_jaar_geleden.strftime('%Y-%m-%d')
-
-    qset = DataApiLidmaatschap.objects.filter(afmeld_datum__lte=vijf_jaar_geleden)
+    qset = DataApiLidmaatschap.objects.exclude(afmeld_datum='')
+    qset = qset.exclude(mutatie_datum__gte=oudste_mutatie_datum)
+    qset = qset.exclude(afmeld_datum__gte=oudste_afmeld_datum)
 
     count = qset.count()
-    if count > 0:
-        stdout.write('[DEBUG] DataApi zou %s lidmaatschappen op kunnen schonen' % qset.count())
+    stdout.write('[INFO] Opschonen DataApi: %s lidmaatschappen worden verwijderd' % qset.count())
 
+    if count > 0:
+        qset.delete()
 
 # end of file
