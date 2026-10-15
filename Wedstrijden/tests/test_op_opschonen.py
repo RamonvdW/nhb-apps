@@ -107,7 +107,7 @@ class TestWedstrijdenOpOpschonen(E2EHelpers, TestCase):
     def test_opschonen(self):
         stdout = OutputBuffer()
         wedstrijden_opschonen(stdout)
-        print(stdout.getvalue())
+        # print(stdout.getvalue())
         self.assertTrue("[INFO] Verwijder 1 oude wedstrijden met 1 sessies, 1 inschrijvingen en 1 afmeldingen" in stdout.getvalue())
         self.assertTrue("[INFO] Verwijder 1 wedstrijdkortingen" in stdout.getvalue())
         self.assertTrue("[INFO] Verwijder 1 ongekoppelde wedstrijdsessies" in stdout.getvalue())

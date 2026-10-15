@@ -34,11 +34,14 @@ class TestCompBeheerStats(E2EHelpers, TestCase):
         data.maak_accounts_admin_en_bb()
         data.maak_clubs_en_sporters()
         data.maak_bondscompetities(2020)
-        ver_nr = data.regio_ver_nrs[101][1]
+        regio_nr = 101
+        ver_nr = data.regio_ver_nrs[regio_nr][1]
         data.maak_inschrijvingen_regiocompetitie(18, ver_nr)
         data.maak_inschrijvingen_regiocompetitie(25, ver_nr)
         data.maak_inschrijvingen_regio_teamcompetitie(18, ver_nr)
         data.maak_inschrijvingen_regio_teamcompetitie(25, ver_nr)
+        data.maak_rk_deelnemers(25, ver_nr, regio_nr)
+        data.maak_rk_teams(25, ver_nr, zet_klasse=True)
 
         # zet de teamcompetitie uit in een regio
         regio_nr = 112
@@ -49,6 +52,16 @@ class TestCompBeheerStats(E2EHelpers, TestCase):
 
         # verwijder all sporters in een regio
         Sporter.objects.filter(bij_vereniging__regio__regio_nr=103).all().delete()
+
+        deelnemer = data.comp18_deelnemers[0]
+        assert isinstance(deelnemer, RegioDeelnemer)
+        deelnemer.aantal_scores = 5
+        deelnemer.save(update_fields=['aantal_scores'])
+
+        deelnemer = data.comp25_deelnemers[0]
+        assert isinstance(deelnemer, RegioDeelnemer)
+        deelnemer.aantal_scores = 6     # must be >5, for coverage
+        deelnemer.save(update_fields=['aantal_scores'])
 
         s2 = timezone.now()
         d = s2 - s1
