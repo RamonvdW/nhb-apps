@@ -47,12 +47,6 @@ class Command(BaseCommand):
         y = dmy[6:6+4]
         return y + '-' + m + '-' + d
 
-    @staticmethod
-    def _bereken_dagen_tussen_datums(d1, d2):
-        d1 = datetime.datetime.strptime(d1, "%Y-%m-%d")
-        d2 = datetime.datetime.strptime(d2, "%Y-%m-%d")
-        return abs((d2 - d1).days)
-
     def _laad_alle_actieve_lidmaatschappen(self):
         count_lms = count_leden = 0
 
@@ -108,18 +102,6 @@ class Command(BaseCommand):
                     lms_gevonden.save(update_fields=['afmeld_datum'])
                 self.count_afgemeld += 1
                 return
-
-            dagen = self._bereken_dagen_tussen_datums(lms_gevonden.afmeld_datum, afmeld_datum)
-            if dagen <= 300:
-                # klein correct accepteren we
-                lms_gevonden.afmeld_datum = afmeld_datum
-                if not self.dry_run:
-                    lms_gevonden.save(update_fields=['afmeld_datum'])
-                self.count_wijzigingen += 1
-                return
-
-            self.stdout.write('[WARNING] Grote correctie (%s dagen) afmelddatum nodig: %s --> %s' % (dagen, lms_gevonden.afmeld_datum, afmeld_datum))
-            return
 
         self.stdout.write('[WARNING] Overstap onduidelijk voor lid %s weg van ver %s afmelddatum %s' % (lid_nr, ver_nr_oud, afmeld_datum))
         for lms in lms_lijst:

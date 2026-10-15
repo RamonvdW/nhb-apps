@@ -58,7 +58,7 @@ class Command(BaseCommand):
         self.stdout.write('[INFO] Controleer alle verenigingen')
         for ver in DataApiVereniging.objects.all():
             id_str = '[ver %s (pk %s)]' % (ver.ver_nr, ver.pk)
-            if ver.aanmeld_datum:
+            if ver.aanmeld_datum:       # pragma: no branch
                 self._check_ymd(ver.aanmeld_datum, 'aanmelddatum', id_str)
             if ver.afmeld_datum:
                 self._check_ymd(ver.afmeld_datum, 'afmelddatum', id_str)

@@ -6,6 +6,7 @@
 
 from django.test import TestCase
 from django.utils import timezone
+from Competitie.models import Competitie
 from Competitie.operations import competities_aanmaken
 from Competitie.test_utils.tijdlijn import zet_competitie_fase_regio_prep
 from CompLaagRegio.models import RegioDeelnemer
@@ -102,6 +103,14 @@ class TestCompBeheerStats(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('compbeheer/statistiek-tabellen.dtl', 'design/site_layout.dtl'))
 
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_stats_grafieken)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('compbeheer/statistiek-grafieken.dtl', 'design/site_layout.dtl'))
+
+        # geen data
+        Competitie.objects.all().delete()
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_stats_grafieken)
         self.assertEqual(resp.status_code, 200)     # 200 = OK

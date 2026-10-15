@@ -11,20 +11,13 @@ import tempfile
 import csv
 import os
 
-
-CLI_IMPORT_HISTCRM = 'import_histcrm_json'
-CLI_IMPORT_KISS_LEDEN = 'import_kiss_leden'
 CLI_IMPORT_KISS_VERENIGINGEN = 'import_kiss_verenigingen'
-CLI_CHECK_DATA_KWALITEIT = 'check_data_kwaliteit'
-
-TESTFILE_NOT_EXISTING = './DataApi/does-not-exist'
 TEST_KISS_PAD = './DataApi/test/'
-AFMELD_DATUM = '2026-09-07'
 
 
-class TestDataApiCli(E2EHelpers, TestCase):
+class TestDataApiCliImportKissVerenigingen(E2EHelpers, TestCase):
 
-    """ tests voor de DataApi applicatie, management commando's """
+    """ tests voor de DataApi applicatie, management commando import_kiss_verenigingen """
 
     def setUp(self):
         # maak een paar testbestanden aan
@@ -74,7 +67,8 @@ class TestDataApiCli(E2EHelpers, TestCase):
             # geen oprichtsdatum
             writer.writerow(['1001', 'Kleine club', 'Actief', '', '12345679', 'Pijlstraat', '', '1111AA', 'Boogstad'])
 
-    def _maak_data(self):
+    @staticmethod
+    def _maak_data():
         # actief
         DataApiVereniging.objects.create(
                 ver_nr=1000,
@@ -183,12 +177,15 @@ class TestDataApiCli(E2EHelpers, TestCase):
                 land_iso='BE',
                 postcode='1234')
 
-    def test_histcrm(self):
-        f1, f2 = self.run_management_command(CLI_IMPORT_HISTCRM,
-                                             TESTFILE_NOT_EXISTING,
-                                             AFMELD_DATUM)
-        self.assertEqual(f1.getvalue(), '')
-        self.assertTrue('[ERROR] Bestand kan niet gelezen worden' in f2.getvalue())
+        DataApiLidmaatschap.objects.create(
+                lid_nr=100006,
+                ver_nr=42,
+                aanmeld_datum='2022+06+02',     # fout formaat
+                afmeld_datum='2023-01-01',
+                geboorte_datum='1999-01-01',
+                geslacht='V',
+                land_iso='BE',
+                postcode='1234')
 
     def test_verenigingen(self):
         f1, f2 = self.run_management_command(CLI_IMPORT_KISS_VERENIGINGEN,
@@ -260,45 +257,6 @@ class TestDataApiCli(E2EHelpers, TestCase):
                                              report_exit_code=False)
         # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
         self.assertTrue("[ERROR] Bestand heeft unicode problemen" in f2.getvalue())
-
-    def test_leden(self):
-        f1, f2 = self.run_management_command(CLI_IMPORT_KISS_LEDEN,
-                                             TEST_KISS_PAD,
-                                             1900,
-                                             report_exit_code=False)
-        # f1 bevat "[TEST] Management command raised SystemExit(1)"
-        # self.assertEqual(f1.getvalue(), '')
-        self.assertTrue('[ERROR] Bestand kan niet gelezen worden' in f2.getvalue())
-
-        self._maak_test_csvs()
-
-        f1, f2 = self.run_management_command(CLI_IMPORT_KISS_LEDEN,
-                                             self.csv_path,
-                                             self.jaar,
-                                             report_exit_code=False)
-        # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
-
-        f1, f2 = self.run_management_command(CLI_IMPORT_KISS_LEDEN,
-                                             self.csv_path,
-                                             self.jaar,
-                                             report_exit_code=False)
-        # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
-
-        lid = DataApiLidmaatschap.objects.first()
-        self.assertIsNotNone(lid)
-        self.assertTrue(str(lid) != '')     # coverage
-
-    def test_kwaliteit(self):
-        self._maak_data()
-
-        f1, f2 = self.run_management_command(CLI_CHECK_DATA_KWALITEIT)
-        # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
-        self.assertTrue("[ERROR] Vereniging 1001 is afgemeld per 2022-12-31 maar heeft nog 1 lidmaatschappen:" in f2.getvalue())
-        self.assertTrue("[WARNING] Vereniging 1001 is afgemeld per 2022-12-31 maar 1 lidmaatschappen lopen langer door:"  in f2.getvalue())
-        self.assertTrue("[ERROR] Lid 100002 heeft meerdere actieve lms:" in f2.getvalue())
-        self.assertTrue("[WARNING] Niet standaard postcode '1234' (land NL) voor Lid 100002" in f2.getvalue())
-        self.assertTrue("[ERROR] Onbekende vereniging 1003 voor lms Lid 100003" in f2.getvalue())
-        self.assertTrue("[WARNING] Onverwachte land code: 'XX' in Lid 100003" in f2.getvalue())
 
 
 # end of file
