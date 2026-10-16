@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from DataApi.models import DataApiVereniging, DataApiLidmaatschap
+from DataApi.models import DataApiLidmaatschap
 from TestHelpers.e2ehelpers import E2EHelpers
 import tempfile
 import csv
@@ -105,8 +105,8 @@ class TestDataApiCliImportKissOverstappers(E2EHelpers, TestCase):
         f1, f2 = self.run_management_command(CLI_IMPORT_KISS_OVERSTAPPERS,
                                              self.csv_1,
                                              CUT_OFF_DATE)
-        print(f1.getvalue())
-        print(f2.getvalue())
+        # print(f1.getvalue())
+        # print(f2.getvalue())
         self.assertEqual(f1.getvalue(), '')
         #self.assertTrue('[ERROR] Bestand kan niet gelezen worden' in f2.getvalue())
 
@@ -115,23 +115,25 @@ class TestDataApiCliImportKissOverstappers(E2EHelpers, TestCase):
                                              self.csv_2,
                                              CUT_OFF_DATE,
                                              '--dryrun')
-        print(f1.getvalue())
-        print(f2.getvalue())
+        # print(f1.getvalue())
+        # print(f2.getvalue())
         self.assertEqual(f1.getvalue(), '')
 
         f1, f2 = self.run_management_command(CLI_IMPORT_KISS_OVERSTAPPERS,
                                              self.csv_2,
                                              CUT_OFF_DATE)
-        print(f1.getvalue())
-        print(f2.getvalue())
+        # print(f1.getvalue())
+        # print(f2.getvalue())
         self.assertEqual(f1.getvalue(), '')
         #self.assertTrue('[WARNING] Overstap onduidelijk voor lid 100004 weg van ver 1001' in f2.getvalue())
 
         # herhaal zelfde bestand --> geen nieuwe mutatie
         c1 = DataApiLidmaatschap.objects.count()
-        self.run_management_command(CLI_IMPORT_KISS_OVERSTAPPERS,
-                                    self.csv_2,
-                                    CUT_OFF_DATE)
+        f1, f2 = self.run_management_command(CLI_IMPORT_KISS_OVERSTAPPERS,
+                                             self.csv_2,
+                                             CUT_OFF_DATE)
+        # print(f1.getvalue())
+        # print(f2.getvalue())
         c2 = DataApiLidmaatschap.objects.count()
         self.assertEqual(c1, c2)
 

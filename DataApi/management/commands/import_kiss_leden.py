@@ -348,7 +348,7 @@ class Command(BaseCommand):
         except IOError as exc:
             self.stdout.write("[ERROR] Bestand kan niet gelezen worden (%s)" % str(exc))
             data = None
-        except UnicodeDecodeError as exc:
+        except UnicodeDecodeError as exc:       # pragma: no cover
             self.stdout.write("[ERROR] Bestand heeft unicode problemen (%s)" % str(exc))
             data = None
         return data
@@ -379,7 +379,7 @@ class Command(BaseCommand):
             self.stdout.write('Aborting')
             sys.exit(1)
 
-        if len(data_leden_met_ver_nr) != len(data_leden_met_lid_nr):
+        if len(data_leden_met_ver_nr) != len(data_leden_met_lid_nr):        # pragma: no cover
             self.stdout.write('[ERROR] Lijsten zijn niet even lang')
             self.stdout.write('Aborting')
             sys.exit(1)

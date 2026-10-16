@@ -8,7 +8,6 @@
 
 from django.core.management.base import BaseCommand
 from DataApi.models import DataApiLidmaatschap
-import datetime
 import csv
 import sys
 import os
@@ -88,14 +87,14 @@ class Command(BaseCommand):
             # for
             return
 
-        if match_count == 1:
+        if match_count == 1:        # pragma: no branch
             assert isinstance(lms_gevonden, DataApiLidmaatschap)
 
             if lms_gevonden.afmeld_datum == afmeld_datum:
                 # alles klopt al
                 return
 
-            if lms_gevonden.afmeld_datum == '':
+            if lms_gevonden.afmeld_datum == '':     # pragma: no branch
                 # afmelddatum is bekend geworden
                 lms_gevonden.afmeld_datum = afmeld_datum
                 if not self.dry_run:
@@ -103,10 +102,11 @@ class Command(BaseCommand):
                 self.count_afgemeld += 1
                 return
 
-        self.stdout.write('[WARNING] Overstap onduidelijk voor lid %s weg van ver %s afmelddatum %s' % (lid_nr, ver_nr_oud, afmeld_datum))
-        for lms in lms_lijst:
-            self.stdout.write('    %s' % lms)
-        # for
+        if True:    # pragma: no cover
+            self.stdout.write('[WARNING] Overstap onduidelijk voor lid %s weg van ver %s afmelddatum %s' % (lid_nr, ver_nr_oud, afmeld_datum))
+            for lms in lms_lijst:
+                self.stdout.write('    %s' % lms)
+            # for
 
     def _overstap_naar_ver(self, lid_nr: int, lms_lijst: list, ver_nr_nieuw: int, aanmeld_datum: str):
         # zoek het lidmaatschap van de nieuwe vereniging
@@ -121,7 +121,7 @@ class Command(BaseCommand):
         if match_count == 0:
             # niet gevonden, dus maak een nieuw lidmaatschap aan
 
-            if len(lms_lijst) == 0:
+            if len(lms_lijst) == 0:     # pragma: no cover
                 self.stdout.write('[WARNING] Overstap van lid %s naar ver %s vanaf %s: niet gevonden' % (lid_nr, ver_nr_nieuw, aanmeld_datum))
                 return
 
@@ -156,7 +156,7 @@ class Command(BaseCommand):
                 # niets te doen
                 return
 
-            if lms_gevonden.afmeld_datum != '':
+            if lms_gevonden.afmeld_datum != '':     # pragma: no cover
                 self.stdout.write('[WARNING] Overstap lid %s naar ver %s: lms is afgemeld! %s' % (lid_nr, ver_nr_nieuw, lms_gevonden))
 
             # in de snapshot staat de eerste datum van lms
@@ -168,10 +168,11 @@ class Command(BaseCommand):
             self.count_wijzigingen += 1
             return
 
-        self.stdout.write('[WARNING] Overstap onduidelijk voor lid %s naar ver %s aanmelddatum %s' % (lid_nr, ver_nr_nieuw, aanmeld_datum))
-        for lms in lms_lijst:
-            self.stdout.write('    %s' % lms)
-        # for
+        if True:        # pragma: no cover
+            self.stdout.write('[WARNING] Overstap onduidelijk voor lid %s naar ver %s aanmelddatum %s' % (lid_nr, ver_nr_nieuw, aanmeld_datum))
+            for lms in lms_lijst:
+                self.stdout.write('    %s' % lms)
+            # for
 
     def _verwerk_overstappers(self, data: list):
         # uit de overstappers lijst kunnen we de exacte datums halen

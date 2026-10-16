@@ -27,9 +27,9 @@ class LidmaatschappenView(View):
     @staticmethod
     def _maak_lidmaatschapid(lms: DataApiLidmaatschap) -> str:
         # maak een unieke code die stabiel is
-        # gebruik: lid_nr, geboortedatum, geslacht, postcode, land, ver_nr, aanmelddatum
+        # gebruik: lid_nr, ver_nr, aanmelddatum
         calc = hashlib.sha1()
-        data = "v1 %s %s %s" % (lms.lid_nr, lms.ver_nr, lms.aanmeld_datum)
+        data = "MH v1 %s %s %s" % (lms.lid_nr, lms.ver_nr, lms.aanmeld_datum)
         calc.update(data.encode())
         digest = calc.hexdigest()
         return digest
