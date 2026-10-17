@@ -93,7 +93,6 @@ class TestDataApiCliImportKissOverstappers(E2EHelpers, TestCase):
                 land_iso='NL',
                 postcode='4444CC')
 
-
     def test_overstappers(self):
         f1, f2 = self.run_management_command(CLI_IMPORT_KISS_OVERSTAPPERS,
                                              TESTFILE_NOT_EXISTING,
@@ -102,38 +101,37 @@ class TestDataApiCliImportKissOverstappers(E2EHelpers, TestCase):
         self.assertTrue('[TEST] Management command raised SystemExit(1)' in f1.getvalue())
 
         self._maak_test_csvs()
+
+        # eerste csv
         f1, f2 = self.run_management_command(CLI_IMPORT_KISS_OVERSTAPPERS,
                                              self.csv_1,
                                              CUT_OFF_DATE)
         # print(f1.getvalue())
         # print(f2.getvalue())
         self.assertEqual(f1.getvalue(), '')
-        #self.assertTrue('[ERROR] Bestand kan niet gelezen worden' in f2.getvalue())
+        self.assertTrue('[ERROR] Overstapper 100042 niet bekend' in f2.getvalue())
 
         # dry-run, for extra coverage
         f1, f2 = self.run_management_command(CLI_IMPORT_KISS_OVERSTAPPERS,
                                              self.csv_2,
                                              CUT_OFF_DATE,
                                              '--dryrun')
-        # print(f1.getvalue())
-        # print(f2.getvalue())
         self.assertEqual(f1.getvalue(), '')
 
+        # tweede csv
         f1, f2 = self.run_management_command(CLI_IMPORT_KISS_OVERSTAPPERS,
                                              self.csv_2,
                                              CUT_OFF_DATE)
         # print(f1.getvalue())
         # print(f2.getvalue())
         self.assertEqual(f1.getvalue(), '')
-        #self.assertTrue('[WARNING] Overstap onduidelijk voor lid 100004 weg van ver 1001' in f2.getvalue())
+        self.assertTrue('[WARNING] Overstap onduidelijk voor lid 100004 weg van ver 1001' in f2.getvalue())
 
         # herhaal zelfde bestand --> geen nieuwe mutatie
         c1 = DataApiLidmaatschap.objects.count()
         f1, f2 = self.run_management_command(CLI_IMPORT_KISS_OVERSTAPPERS,
                                              self.csv_2,
                                              CUT_OFF_DATE)
-        # print(f1.getvalue())
-        # print(f2.getvalue())
         c2 = DataApiLidmaatschap.objects.count()
         self.assertEqual(c1, c2)
 

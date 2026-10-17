@@ -64,7 +64,7 @@ class TestDataApiCliImportHistCrmJson(E2EHelpers, TestCase):
                                              json_fname,
                                              AFMELD_DATUM,
                                              '--dryrun')
-        print(f2.getvalue())
+        # print(f2.getvalue())
         self.assertTrue("[ERROR] Geen data voor top-level sleutel 'rayons'" in f2.getvalue())
         self.assertTrue("[WARNING] Extra sleutel aanwezig in de" in f2.getvalue())
 
