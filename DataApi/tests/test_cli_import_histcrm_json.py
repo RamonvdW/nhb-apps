@@ -28,8 +28,7 @@ class TestDataApiCliImportHistCrmJson(E2EHelpers, TestCase):
         self._tmp_dir = None
 
     def tearDown(self):
-        if self._tmp_dir:
-            self._tmp_dir.cleanup()
+        self._tmp_dir.cleanup()
 
     def test_histcrm(self):
         self._tmp_dir = tempfile.TemporaryDirectory()

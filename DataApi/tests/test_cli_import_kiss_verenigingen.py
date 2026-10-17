@@ -26,8 +26,7 @@ class TestDataApiCliImportKissVerenigingen(E2EHelpers, TestCase):
         self.jaar = 2020
 
     def tearDown(self):
-        if self._tmp_dir:
-            self._tmp_dir.cleanup()
+        self._tmp_dir.cleanup()
 
     def _maak_test_csvs(self):
         # handmatig opruimen als deze functie 2x aangeroepen wordt
@@ -66,126 +65,6 @@ class TestDataApiCliImportKissVerenigingen(E2EHelpers, TestCase):
             # geen huisnr
             # geen oprichtsdatum
             writer.writerow(['1001', 'Kleine club', 'Actief', '', '12345679', 'Pijlstraat', '', '1111AA', 'Boogstad'])
-
-    @staticmethod
-    def _maak_data():
-        # actief
-        DataApiVereniging.objects.create(
-                ver_nr=1000,
-                naam='Grote club',
-                aanmeld_datum='2000-01-01',
-                afmeld_datum='',
-                kvk_nummer='12345678',
-                straatnaam='Pijlstraat',
-                huisnummer=42,
-                postcode='1111AA',
-                plaats='Boogstad',
-                land_iso='NL',
-                lat='',
-                lon='')
-
-        # afgemeld
-        DataApiVereniging.objects.create(
-                ver_nr=1001,
-                naam='Kleine club',
-                aanmeld_datum='2020-01-01',
-                afmeld_datum='2022-12-31',
-                kvk_nummer='12345678',
-                straatnaam='Pijlstraat',
-                huisnummer=42,
-                postcode='1111AA',
-                plaats='Boogstad',
-                land_iso='NL',
-                lat='',
-                lon='')
-
-        # afgemeld, geen leden
-        # geen accommodatie
-        DataApiVereniging.objects.create(
-                ver_nr=1002,
-                naam='Afgemelde club',
-                aanmeld_datum='2020-01-01',
-                afmeld_datum='2022-12-31',
-                kvk_nummer='12345678',
-                straatnaam='Pijlstraat',
-                huisnummer=0,
-                postcode='',
-                plaats='',
-                land_iso='NL',
-                lat='',
-                lon='')
-
-        DataApiLidmaatschap.objects.create(
-                lid_nr=100001,
-                ver_nr=1000,
-                aanmeld_datum='2001-06-01',
-                afmeld_datum='',
-                geboorte_datum='1972-01-01',
-                geslacht='X',
-                land_iso='NL',
-                postcode='1234AB')
-
-        DataApiLidmaatschap.objects.create(
-                lid_nr=100002,
-                ver_nr=1000,
-                aanmeld_datum='2001-06-01',
-                afmeld_datum='',
-                geboorte_datum='1972-01-01',
-                geslacht='X',
-                land_iso='NL',
-                postcode='1234')        # fout
-
-        # actief lid bij afgemelde ver
-        DataApiLidmaatschap.objects.create(
-                lid_nr=100002,
-                ver_nr=1001,
-                aanmeld_datum='2025-06-01',
-                afmeld_datum='',
-                geboorte_datum='1972-01-01',
-                geslacht='X',
-                land_iso='NL',
-                postcode='1234')        # fout
-
-        DataApiLidmaatschap.objects.create(
-                lid_nr=100003,
-                ver_nr=1003,            # fout
-                aanmeld_datum='2024-06-02',
-                afmeld_datum='2024-12-31',
-                geboorte_datum='1999-01-01',
-                geslacht='M',
-                land_iso='XX',          # fout
-                postcode='1234')
-
-        # afgemeld lid bij afgemelde ver
-        DataApiLidmaatschap.objects.create(
-                lid_nr=100004,
-                ver_nr=1001,
-                aanmeld_datum='2022-06-02',
-                afmeld_datum='2022-12-30',      # moet voor 2022-12-31 zijn
-                geboorte_datum='1999-01-01',
-                geslacht='M',
-                land_iso='BE',
-                postcode='1234')
-
-        DataApiLidmaatschap.objects.create(
-                lid_nr=100005,
-                ver_nr=1001,
-                aanmeld_datum='2022-06-02',
-                afmeld_datum='2023-01-01',      # moet na 2022-12-31 zijn
-                geboorte_datum='1999-01-01',
-                geslacht='V',
-                land_iso='BE',
-                postcode='1234')
-
-        DataApiLidmaatschap.objects.create(
-                lid_nr=100006,
-                ver_nr=42,
-                aanmeld_datum='2022+06+02',     # fout formaat
-                afmeld_datum='2023-01-01',
-                geboorte_datum='1999-01-01',
-                geslacht='V',
-                land_iso='BE',
-                postcode='1234')
 
     def test_verenigingen(self):
         f1, f2 = self.run_management_command(CLI_IMPORT_KISS_VERENIGINGEN,

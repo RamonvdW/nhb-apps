@@ -26,8 +26,7 @@ class TestDataApiCliImportKissLeden(E2EHelpers, TestCase):
         self.jaar = 2020
 
     def tearDown(self):
-        if self._tmp_dir:
-            self._tmp_dir.cleanup()
+        self._tmp_dir.cleanup()
 
     def _maak_test_csvs(self):
         # handmatig opruimen als deze functie 2x aangeroepen wordt
