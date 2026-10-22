@@ -454,6 +454,7 @@ OPLEIDING_CODES = (
     ('040', 'SR3', 'Verenigingsscheidsrechter', ('041', '042')),
     ('041', 'SR4', 'Bondsscheidsrechter', ('042',)),
     ('042', 'SR5', 'Scheidsrechter internationaal', ()),
+    ('SR0', '', 'Scheidsrechter in opleiding', ()),
     ('043', '', 'Basisblok', ()),
     ('044', '', 'Scheidsrechter allround', ()),
 
