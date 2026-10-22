@@ -16,7 +16,7 @@
         <div class="col s12">
             <h1 class="sv-kopje-pagina">Korps scheidsrechters</h1>
             <p>Hieronder volgt de lijst van alle {{ aantal }} scheidsrechters</p>
-            <p>SR5 = Internationaal scheidsrechter<br>SR4 = Bondsscheidsrechter<br>SR3 = Verenigingsscheidsrechter</p>
+            <p>SR5 = Internationaal scheidsrechter<br>SR4 = Bondsscheidsrechter<br>SR3 = Verenigingsscheidsrechter<br>SR0 = Scheidsrechter in opleiding</p>
             <p>Contactgegevens worden alleen getoond als de scheidsrechter daarvoor gekozen heeft</p>
         </div>
     </div>

@@ -398,6 +398,12 @@ then
         [ -n "$COV_INCLUDE" ] && COV_INCLUDE="--include=$COV_INCLUDE"
         python3 -m coverage report $COVRC "$COV_INCLUDE" "$OMIT"
         python3 -m coverage html $COVRC -d "$REPORT_DIR" --skip-covered "$COV_INCLUDE" "$OMIT" &>>"$LOG"
+        # hide the totals line because it has unreal percentages
+        for html in "index.html" "function_index.html" "class_index.html"
+        do
+            sed -i 's/tr class="total"/tr class="total" style="display:none"/' "${REPORT_DIR}/$html"
+            sed -i 's/table class=/table style="margin-bottom:10px" class=/' "${REPORT_DIR}/$html"
+        done
     fi
 
     rm "$COVERAGE_FILE"

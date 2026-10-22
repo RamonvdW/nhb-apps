@@ -1,16 +1,17 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023-2024 Ramon van der Winkel.
+#  Copyright (c) 2023-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from BasisTypen.definities import SCHEIDS_BOND, SCHEIDS_INTERNATIONAAL, SCHEIDS_VERENIGING
+from BasisTypen.definities import SCHEIDS_BOND, SCHEIDS_INTERNATIONAAL, SCHEIDS_VERENIGING, SCHEIDS_IN_OPLEIDING
 
 
 SCHEIDS2LEVEL = {
     SCHEIDS_INTERNATIONAAL: 'SR5',
     SCHEIDS_BOND: 'SR4',
-    SCHEIDS_VERENIGING: 'SR3'
+    SCHEIDS_VERENIGING: 'SR3',
+    SCHEIDS_IN_OPLEIDING: 'SR0',
 }
 
 
