@@ -40,7 +40,7 @@ class ImportHistCrmLidmaatschappen(ImportCrmBase):
 
             if lms.afmeld_datum != '':
                 self.count_gestopt += 1
-            elif lms.ver_nr == 0:
+            elif lms.ver_nr == 0:               # pragma: no cover
                 self.count_ver_null += 1
             else:
                 self.count_actief += 1
@@ -190,25 +190,52 @@ class ImportHistCrmLidmaatschappen(ImportCrmBase):
         self._store_wijzigingen(lms, geboorte_datum, geslacht, postcode, land_iso)
 
         if not ver_nr:
-            if lms.afmeld_datum != '':
+            if afmeld_datum != '' and lms.afmeld_datum != '':
+                # valt de echte range in de oude range?
+                if lms.aanmeld_datum != aanmeld_datum or afmeld_datum != lms.afmeld_datum:
+                    if lms.aanmeld_datum <= aanmeld_datum and afmeld_datum <= lms.afmeld_datum:
+                        self.out_info('Correctie datums lms %s --> [%s .. %s]' % (lms, aanmeld_datum, afmeld_datum))
+                        lms.aanmeld_datum = aanmeld_datum
+                        lms.afmeld_datum = afmeld_datum
+                        if not self.dryrun:
+                            lms.save(update_fields=['aanmeld_datum', 'afmeld_datum'])
+                        return
+
+                if aanmeld_datum > lms.afmeld_datum:
+                    # assume: terug bij zelfde vereniging
+                    lms = self._maak_lms(lid_nr, lms.ver_nr, geslacht, geboorte_datum, aanmeld_datum, land_iso, postcode)
+                    self.out_info('Nieuw lms: %s' % lms)
+                    self._afmelden(lms, afmeld_datum)
+                    return
+
+                if lms.aanmeld_datum != aanmeld_datum:
+                    self.out_error('Lid %s [%s .. %s] oude lms %s' % (lid_nr, aanmeld_datum, afmeld_datum, lms))
+
                 # al geregistreerd
                 return
 
             # huidige record afsluiten
-            if not afmeld_datum:
+            if afmeld_datum:
+                if afmeld_datum < lms.aanmeld_datum:
+                    self.out_error('Lid %s afmeld_datum %s hoort niet bij (1) lms %s' % (lid_nr, afmeld_datum, lms))
+                else:
+                    self._afmelden(lms, afmeld_datum)
+            else:
                 self.out_error('Lid %s oude lms moet afgesloten worden, maar er is geen afmelddatum! (1)' % lid_nr)
-            self._afmelden(lms, afmeld_datum)
+
             return
 
         if lms.ver_nr != ver_nr:
             self.out_info('Overstap lid %s naar ver %s' % (lid_nr, ver_nr))
-            for lms2 in lms_lijst:
-                self.out_debug(str(lms2))
+            # for lms2 in lms_lijst:
+            #     self.out_debug(str(lms2))
 
             if lms.afmeld_datum == '':
                 # huidige record afsluiten en nieuwe beginnen
                 if not afmeld_datum:
                     self.out_error('Lid %s oude lms moet afgesloten worden, maar er is geen afmelddatum! (2)' % lid_nr)
+                elif afmeld_datum < lms.aanmeld_datum:
+                    self.out_error('Lid %s afmeld_datum %s hoort niet bij (2) lms %s' % (lid_nr, afmeld_datum, lms))
                 else:
                     self._afmelden(lms, afmeld_datum)
 

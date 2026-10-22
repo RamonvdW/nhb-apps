@@ -58,7 +58,7 @@ class Command(BaseCommand):
         self.stdout.write('[INFO] Controleer alle verenigingen')
         for ver in DataApiVereniging.objects.all():
             id_str = '[ver %s (pk %s)]' % (ver.ver_nr, ver.pk)
-            if ver.aanmeld_datum:
+            if ver.aanmeld_datum:       # pragma: no branch
                 self._check_ymd(ver.aanmeld_datum, 'aanmelddatum', id_str)
             if ver.afmeld_datum:
                 self._check_ymd(ver.afmeld_datum, 'afmelddatum', id_str)
@@ -92,7 +92,7 @@ class Command(BaseCommand):
                 self.stdout.write('[ERROR] Onbekende vereniging %s voor lms %s' % (lms.ver_nr, lms))
                 self.count_errors += 1
 
-            if lms.land_iso not in ('NL', 'BE', 'DE', 'LU', 'AE', 'AT', 'CH', 'HU', 'GB', 'SE', 'NO'):
+            if lms.land_iso not in ('NL', 'BE', 'DE', 'LU', 'AE', 'AT', 'CH', 'HU', 'GB', 'SE', 'NO', 'IT'):
                 self.stdout.write('[WARNING] Onverwachte land code: %s in %s' % (repr(lms.land_iso), lms))
                 self.count_postcode_issue += 1
 

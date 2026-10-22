@@ -26,34 +26,41 @@ class TestGraphDriveCliDownload(E2EHelpers, TestCase):
         self.mock_download_good = patch('GraphDrive.management.commands.graph_download.download_file', return_value='/tmp/local')
 
     def test_download(self):
-        self.mock_metadata_none.start()
         site_index = 1
+        local_folder = '/tmp/local'
+        remote_file = '/remote/does/not/exist/missing.txt'
 
-        f1, f2 = self.run_management_command(self.cli_download, site_index, '/remote/does/not/exist/missing.txt', '/tmp/local')
+        self.mock_metadata_none.start()
+        f1, f2 = self.run_management_command(self.cli_download, site_index, remote_file, local_folder)
         self.assertEqual(f1.getvalue(), '')
         # print('f2:', f2.getvalue())
 
         self.mock_metadata_none.stop()
 
         self.mock_metadata_bad.start()
-        f1, f2 = self.run_management_command(self.cli_download, site_index, '/remote/does/not/exist/missing.txt', '/tmp/local')
+        f1, f2 = self.run_management_command(self.cli_download, site_index, remote_file, local_folder)
         self.assertEqual(f1.getvalue(), '')
         self.mock_metadata_bad.stop()
 
         self.mock_metadata_good.start()
 
         self.mock_download_none.start()
-        f1, f2 = self.run_management_command(self.cli_download, site_index, '/remote/does/not/exist/missing.txt', '/tmp/local')
+        f1, f2 = self.run_management_command(self.cli_download, site_index, remote_file, local_folder)
         self.assertEqual(f1.getvalue(), '')
         self.mock_download_none.stop()
 
         self.mock_download_good.start()
-        f1, f2 = self.run_management_command(self.cli_download, site_index, '/remote/does/not/exist/missing.txt', '/tmp/local')
+        f1, f2 = self.run_management_command(self.cli_download, site_index, remote_file, local_folder)
         self.assertEqual(f1.getvalue(), '')
         # print('f2:', f2.getvalue())
         self.assertTrue("[INFO] Download gelukt naar '/tmp/local'" in f2.getvalue())
         self.mock_download_good.stop()
 
         self.mock_metadata_good.stop()
+
+        f1, f2 = self.run_management_command(self.cli_download, 9999, remote_file, local_folder)
+        self.assertEqual(f1.getvalue(), '')
+        # print('f2:', f2.getvalue())
+        self.assertTrue("[ERROR] Kan site index 9999 niet vinden in GRAPH_IDS" in f2.getvalue())
 
 # end of file

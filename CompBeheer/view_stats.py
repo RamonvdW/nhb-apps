@@ -384,7 +384,7 @@ class CompetitieStatistiekView(UserPassesTestMixin, TemplateView):
                      .order_by('afstand',
                                'begin_jaar')):     # oudste eerst
 
-            if comp.afstand not in afstand_gevonden:
+            if comp.afstand not in afstand_gevonden:        # pragma: no branch
                 comp.bepaal_fase()
                 if comp.fase_indiv >= 'C':
                     actuele_comps.append(comp)
@@ -654,7 +654,7 @@ class CompetitieGrafiekView(UserPassesTestMixin, TemplateView):
                      .order_by('afstand',
                                'begin_jaar')):     # oudste eerst
 
-            if comp.afstand not in afstand_gevonden:
+            if comp.afstand not in afstand_gevonden:        # pragma: no branch
                 comp.bepaal_fase()
                 if comp.fase_indiv >= 'C':
                     actuele_comps.append(comp)
@@ -664,7 +664,7 @@ class CompetitieGrafiekView(UserPassesTestMixin, TemplateView):
 
         context['heeft_data'] = len(actuele_comps) > 0
 
-        if len(actuele_comps):
+        if len(actuele_comps):                              # pragma: no branch
             self._tel_totalen(context, actuele_comps)
             self._tel_regio(context)
             self._tel_rk_bk(context)

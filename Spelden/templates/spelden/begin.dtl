@@ -103,7 +103,7 @@
     {% else %}
 
         <p class="center">Bestellen via MijnHandboogsport volgt binnenkort.<br>Gebruik voorlopig het bestelformulier op de hoofdsite.</p>
-        <p class="center">Let op: je moet de scorebriefjes met handtekening van de hoofdscheidsrechter toevoegen aan je aanvraag.</p>
+        <p class="center">Let op: je moet de scorebriefjes met handtekening van de scheidsrechters toevoegen aan je aanvraag.</p>
 
     {% endif %}
 

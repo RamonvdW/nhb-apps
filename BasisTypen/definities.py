@@ -137,16 +137,20 @@ SCHEIDS_NIET = 'N'
 SCHEIDS_BOND = 'B'
 SCHEIDS_VERENIGING = 'V'
 SCHEIDS_INTERNATIONAAL = 'I'
+SCHEIDS_IN_OPLEIDING = 'O'
+
 SCHEIDS_CHOICES = (
     (SCHEIDS_NIET, "Niet"),
     (SCHEIDS_BOND, "Bondsscheidsrechter"),
     (SCHEIDS_VERENIGING, "Verenigingsscheidsrechter"),
     (SCHEIDS_INTERNATIONAAL, "Internationaal Scheidsrechter"),
+    (SCHEIDS_IN_OPLEIDING, "Scheidsrechter in opleiding"),
 )
 SCHEIDS_TO_STR = {
     SCHEIDS_BOND: "Bondsscheidsrechter",
     SCHEIDS_VERENIGING: "Verenigingsscheidsrechter",
     SCHEIDS_INTERNATIONAAL: "Internationaal Scheidsrechter",
+    SCHEIDS_IN_OPLEIDING: "Scheidsrechter in opleiding",
 }
 
 

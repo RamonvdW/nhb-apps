@@ -76,31 +76,29 @@ def get_drive_id(out, site: GraphSite) -> bool:
 
     drive = drives[0]
 
-    """
-        {
-            'createdDateTime': '2026-03-01T23:24:15Z',
-            'description': '',
-            'id': '####',
-            'lastModifiedDateTime': '2026-03-19T07:15:03Z',
-            'name': 'Documents',
-            'webUrl': 'https://####.sharepoint.com/sites/#name#/Shared%20Documents',
-            'driveType': 'documentLibrary',
-            'createdBy': {...},
-            'lastModifiedBy': {
-                'user': {...}
-            },
-            'owner': {
-                'group': {...}
-            },
-            'quota': {
-                'deleted': 0,
-                'remaining': 27487788921712,
-                'state': 'normal',
-                'total': 27487790694400,
-                'used': 1772688
-            }
-        }
-    """
+    # {
+    #     'createdDateTime': '2026-03-01T23:24:15Z',
+    #     'description': '',
+    #     'id': '####',
+    #     'lastModifiedDateTime': '2026-03-19T07:15:03Z',
+    #     'name': 'Documents',
+    #     'webUrl': 'https://####.sharepoint.com/sites/#name#/Shared%20Documents',
+    #     'driveType': 'documentLibrary',
+    #     'createdBy': {...},
+    #     'lastModifiedBy': {
+    #         'user': {...}
+    #     },
+    #     'owner': {
+    #         'group': {...}
+    #     },
+    #     'quota': {
+    #         'deleted': 0,
+    #         'remaining': 27487788921712,
+    #         'state': 'normal',
+    #         'total': 27487790694400,
+    #         'used': 1772688
+    #     }
+    # }
 
     try:
         site.drive_id = drive['id']

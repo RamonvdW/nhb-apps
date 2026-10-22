@@ -62,7 +62,7 @@ APPS_DIR = os.path.dirname(BASE_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2026-10-12'
+SITE_VERSIE = '2026-10-22'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -454,6 +454,7 @@ OPLEIDING_CODES = (
     ('040', 'SR3', 'Verenigingsscheidsrechter', ('041', '042')),
     ('041', 'SR4', 'Bondsscheidsrechter', ('042',)),
     ('042', 'SR5', 'Scheidsrechter internationaal', ()),
+    ('SR0', '', 'Scheidsrechter in opleiding', ()),
     ('043', '', 'Basisblok', ()),
     ('044', '', 'Scheidsrechter allround', ()),
 
@@ -587,6 +588,11 @@ GOOGLE_DRIVE_FOLDER_NAME_TOP = 'MH wedstrijdformulieren'        # moet uniek zij
 GOOGLE_DRIVE_FOLDER_NAME_TEMPLATES = 'MH templates RK/BK'       # moet uniek zijn in de drive
 GOOGLE_DRIVE_FOLDER_SITE = NAAM_SITE
 
+# hoe dagen na afmelding blijft een lms bewaard?
+# als een lms vandaag afgemeld wordt dan blijft het nog 2 jaar bewaard
+# als een lms vandaag gecorrigeerd wordt (voorbeeld: afmelding 3 jaar geleden), dan blijft het nog 6 maanden bewaard
+DDI_LMS_KEEP_HISTORY_DAYS=365*2      # 2 jaar na afmelden
+DDI_LMS_KEEP_MUTATED_DAYS=182        # 6 maanden na mutatie
 
 # -------------------------------------------
 # defaults for 'dev' and 'test' options below

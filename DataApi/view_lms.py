@@ -27,9 +27,9 @@ class LidmaatschappenView(View):
     @staticmethod
     def _maak_lidmaatschapid(lms: DataApiLidmaatschap) -> str:
         # maak een unieke code die stabiel is
-        # gebruik: lid_nr, geboortedatum, geslacht, postcode, land, ver_nr, aanmelddatum
+        # gebruik: lid_nr, ver_nr, aanmelddatum
         calc = hashlib.sha1()
-        data = "v1 %s %s %s" % (lms.lid_nr, lms.ver_nr, lms.aanmeld_datum)
+        data = "MH v1 %s %s %s" % (lms.lid_nr, lms.ver_nr, lms.aanmeld_datum)
         calc.update(data.encode())
         digest = calc.hexdigest()
         return digest
@@ -46,12 +46,20 @@ class LidmaatschappenView(View):
         else:
             stop_nr = self._offset + 10
 
+        sporttak = ["handboogsport",]       # herbruikbaar (scheelt geheugen)
+
         for lms in qset.order_by('pk')[start_nr:stop_nr]:
             ver_code = str(lms.ver_nr) if lms.ver_nr > 0 else ''
 
+            if lms.lid_nr_doorgeven:
+                lid_nr_str = str(lms.lid_nr)
+            else:
+                # actief onderdrukken
+                lid_nr_str = ""
+
             lijst.append({
                 "LidmaatschapsID": self._maak_lidmaatschapid(lms),
-                "Lidcode": str(lms.lid_nr),
+                "Lidcode": lid_nr_str,
                 "Verenigingscode": ver_code,
                 "Postcode": lms.postcode,
                 "Land": lms.land_iso,
@@ -59,9 +67,7 @@ class LidmaatschappenView(View):
                 "Geslacht": lms.geslacht.lower(),
                 "Aanmelddatum": lms.aanmeld_datum,
                 "Afmelddatum": lms.afmeld_datum,
-                "Sporttak": [
-                    "handboogsport",
-                ]
+                "Sporttak": sporttak,
             })
         # for
 

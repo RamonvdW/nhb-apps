@@ -72,8 +72,7 @@ def list_folders_and_files(out, site: GraphSite, folder: str) -> Tuple[list[str]
                 return dir_lijst, file_lijst
 
     except (requests.exceptions.SSLError, requests.exceptions.ConnectionError) as exc:
-        out.write("[ERROR] Exceptie tijdens l: %s" % str(exc))
-        return None, None
+        out.write("[ERROR] {list_folders_and_files} Exceptie tijdens get request: %s" % str(exc))
 
     return None, None
 

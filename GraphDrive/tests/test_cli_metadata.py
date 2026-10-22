@@ -10,7 +10,7 @@ from unittest.mock import patch
 
 
 class TestGraphDriveCliMetadata(E2EHelpers, TestCase):
-    """ unittests voor de GraphDrive applicatie, management commands """
+    """ unittests voor de GraphDrive applicatie, management command graph_metadata """
 
     cli_metadata = 'graph_metadata'
 

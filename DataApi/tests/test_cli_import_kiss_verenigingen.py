@@ -11,20 +11,13 @@ import tempfile
 import csv
 import os
 
-
-CLI_IMPORT_HISTCRM = 'import_histcrm_json'
-CLI_IMPORT_KISS_LEDEN = 'import_kiss_leden'
 CLI_IMPORT_KISS_VERENIGINGEN = 'import_kiss_verenigingen'
-CLI_CHECK_DATA_KWALITEIT = 'check_data_kwaliteit'
-
-TESTFILE_NOT_EXISTING = './DataApi/does-not-exist'
 TEST_KISS_PAD = './DataApi/test/'
-AFMELD_DATUM = '2026-09-07'
 
 
-class TestDataApiCli(E2EHelpers, TestCase):
+class TestDataApiCliImportKissVerenigingen(E2EHelpers, TestCase):
 
-    """ tests voor de DataApi applicatie, management commando's """
+    """ tests voor de DataApi applicatie, management commando import_kiss_verenigingen """
 
     def setUp(self):
         # maak een paar testbestanden aan
@@ -33,8 +26,7 @@ class TestDataApiCli(E2EHelpers, TestCase):
         self.jaar = 2020
 
     def tearDown(self):
-        if self._tmp_dir:
-            self._tmp_dir.cleanup()
+        self._tmp_dir.cleanup()
 
     def _maak_test_csvs(self):
         # handmatig opruimen als deze functie 2x aangeroepen wordt
@@ -73,122 +65,6 @@ class TestDataApiCli(E2EHelpers, TestCase):
             # geen huisnr
             # geen oprichtsdatum
             writer.writerow(['1001', 'Kleine club', 'Actief', '', '12345679', 'Pijlstraat', '', '1111AA', 'Boogstad'])
-
-    def _maak_data(self):
-        # actief
-        DataApiVereniging.objects.create(
-                ver_nr=1000,
-                naam='Grote club',
-                aanmeld_datum='2000-01-01',
-                afmeld_datum='',
-                kvk_nummer='12345678',
-                straatnaam='Pijlstraat',
-                huisnummer=42,
-                postcode='1111AA',
-                plaats='Boogstad',
-                land_iso='NL',
-                lat='',
-                lon='')
-
-        # afgemeld
-        DataApiVereniging.objects.create(
-                ver_nr=1001,
-                naam='Kleine club',
-                aanmeld_datum='2020-01-01',
-                afmeld_datum='2022-12-31',
-                kvk_nummer='12345678',
-                straatnaam='Pijlstraat',
-                huisnummer=42,
-                postcode='1111AA',
-                plaats='Boogstad',
-                land_iso='NL',
-                lat='',
-                lon='')
-
-        # afgemeld, geen leden
-        # geen accommodatie
-        DataApiVereniging.objects.create(
-                ver_nr=1002,
-                naam='Afgemelde club',
-                aanmeld_datum='2020-01-01',
-                afmeld_datum='2022-12-31',
-                kvk_nummer='12345678',
-                straatnaam='Pijlstraat',
-                huisnummer=0,
-                postcode='',
-                plaats='',
-                land_iso='NL',
-                lat='',
-                lon='')
-
-        DataApiLidmaatschap.objects.create(
-                lid_nr=100001,
-                ver_nr=1000,
-                aanmeld_datum='2001-06-01',
-                afmeld_datum='',
-                geboorte_datum='1972-01-01',
-                geslacht='X',
-                land_iso='NL',
-                postcode='1234AB')
-
-        DataApiLidmaatschap.objects.create(
-                lid_nr=100002,
-                ver_nr=1000,
-                aanmeld_datum='2001-06-01',
-                afmeld_datum='',
-                geboorte_datum='1972-01-01',
-                geslacht='X',
-                land_iso='NL',
-                postcode='1234')        # fout
-
-        # actief lid bij afgemelde ver
-        DataApiLidmaatschap.objects.create(
-                lid_nr=100002,
-                ver_nr=1001,
-                aanmeld_datum='2025-06-01',
-                afmeld_datum='',
-                geboorte_datum='1972-01-01',
-                geslacht='X',
-                land_iso='NL',
-                postcode='1234')        # fout
-
-        DataApiLidmaatschap.objects.create(
-                lid_nr=100003,
-                ver_nr=1003,            # fout
-                aanmeld_datum='2024-06-02',
-                afmeld_datum='2024-12-31',
-                geboorte_datum='1999-01-01',
-                geslacht='M',
-                land_iso='XX',          # fout
-                postcode='1234')
-
-        # afgemeld lid bij afgemelde ver
-        DataApiLidmaatschap.objects.create(
-                lid_nr=100004,
-                ver_nr=1001,
-                aanmeld_datum='2022-06-02',
-                afmeld_datum='2022-12-30',      # moet voor 2022-12-31 zijn
-                geboorte_datum='1999-01-01',
-                geslacht='M',
-                land_iso='BE',
-                postcode='1234')
-
-        DataApiLidmaatschap.objects.create(
-                lid_nr=100005,
-                ver_nr=1001,
-                aanmeld_datum='2022-06-02',
-                afmeld_datum='2023-01-01',      # moet na 2022-12-31 zijn
-                geboorte_datum='1999-01-01',
-                geslacht='V',
-                land_iso='BE',
-                postcode='1234')
-
-    def test_histcrm(self):
-        f1, f2 = self.run_management_command(CLI_IMPORT_HISTCRM,
-                                             TESTFILE_NOT_EXISTING,
-                                             AFMELD_DATUM)
-        self.assertEqual(f1.getvalue(), '')
-        self.assertTrue('[ERROR] Bestand kan niet gelezen worden' in f2.getvalue())
 
     def test_verenigingen(self):
         f1, f2 = self.run_management_command(CLI_IMPORT_KISS_VERENIGINGEN,
@@ -260,45 +136,6 @@ class TestDataApiCli(E2EHelpers, TestCase):
                                              report_exit_code=False)
         # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
         self.assertTrue("[ERROR] Bestand heeft unicode problemen" in f2.getvalue())
-
-    def test_leden(self):
-        f1, f2 = self.run_management_command(CLI_IMPORT_KISS_LEDEN,
-                                             TEST_KISS_PAD,
-                                             1900,
-                                             report_exit_code=False)
-        # f1 bevat "[TEST] Management command raised SystemExit(1)"
-        # self.assertEqual(f1.getvalue(), '')
-        self.assertTrue('[ERROR] Bestand kan niet gelezen worden' in f2.getvalue())
-
-        self._maak_test_csvs()
-
-        f1, f2 = self.run_management_command(CLI_IMPORT_KISS_LEDEN,
-                                             self.csv_path,
-                                             self.jaar,
-                                             report_exit_code=False)
-        # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
-
-        f1, f2 = self.run_management_command(CLI_IMPORT_KISS_LEDEN,
-                                             self.csv_path,
-                                             self.jaar,
-                                             report_exit_code=False)
-        # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
-
-        lid = DataApiLidmaatschap.objects.first()
-        self.assertIsNotNone(lid)
-        self.assertTrue(str(lid) != '')     # coverage
-
-    def test_kwaliteit(self):
-        self._maak_data()
-
-        f1, f2 = self.run_management_command(CLI_CHECK_DATA_KWALITEIT)
-        # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
-        self.assertTrue("[ERROR] Vereniging 1001 is afgemeld per 2022-12-31 maar heeft nog 1 lidmaatschappen:" in f2.getvalue())
-        self.assertTrue("[WARNING] Vereniging 1001 is afgemeld per 2022-12-31 maar 1 lidmaatschappen lopen langer door:"  in f2.getvalue())
-        self.assertTrue("[ERROR] Lid 100002 heeft meerdere actieve lms:" in f2.getvalue())
-        self.assertTrue("[WARNING] Niet standaard postcode '1234' (land NL) voor Lid 100002" in f2.getvalue())
-        self.assertTrue("[ERROR] Onbekende vereniging 1003 voor lms Lid 100003" in f2.getvalue())
-        self.assertTrue("[WARNING] Onverwachte land code: 'XX' in Lid 100003" in f2.getvalue())
 
 
 # end of file

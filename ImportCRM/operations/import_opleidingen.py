@@ -5,9 +5,10 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.conf import settings
-from BasisTypen.definities import SCHEIDS_NIET, SCHEIDS_VERENIGING, SCHEIDS_BOND, SCHEIDS_INTERNATIONAAL
+from BasisTypen.definities import (SCHEIDS_NIET,
+                                   SCHEIDS_VERENIGING, SCHEIDS_BOND, SCHEIDS_INTERNATIONAAL, SCHEIDS_IN_OPLEIDING)
 from ImportCRM.import_base import ImportCrmBase
-from Opleiding.definities import CODE_SR_VER, CODE_SR_BOND, CODE_SR_INTERNATIONAAL
+from Opleiding.definities import CODE_SR_VER, CODE_SR_BOND, CODE_SR_INTERNATIONAAL, CODE_SR_IN_OPLEIDING
 from Opleiding.models import OpleidingDiploma
 
 
@@ -109,17 +110,20 @@ class ImportCrmOpleidingen(ImportCrmBase):
 
                         # opleiding codes voor scheidsrechters
                         if code == CODE_SR_VER:
-                            # voorkom downgrade
+                            # voorkom downgrade als ze meerdere diploma's hebben
                             if lid_scheids == SCHEIDS_NIET:
                                 lid_scheids = SCHEIDS_VERENIGING
 
                         elif code == CODE_SR_BOND:
-                            # voorkom downgrade
+                            # voorkom downgrade als ze meerdere diploma's hebben
                             if lid_scheids != SCHEIDS_INTERNATIONAAL:
                                 lid_scheids = SCHEIDS_BOND
 
                         elif code == CODE_SR_INTERNATIONAAL:
                             lid_scheids = SCHEIDS_INTERNATIONAAL
+
+                        elif code == CODE_SR_IN_OPLEIDING:
+                            lid_scheids = SCHEIDS_IN_OPLEIDING
             # for
 
             if obj.scheids != lid_scheids:

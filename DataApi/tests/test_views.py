@@ -99,6 +99,7 @@ class TestDataApiViews(E2EHelpers, TestCase):
                 aanmeld_datum='2021-06-01',
                 afmeld_datum='2022-12-31',
                 geboorte_datum='1972-01-01',
+                lid_nr_doorgeven=False,
                 geslacht='X',
                 land_iso='BE',
                 postcode='1234')

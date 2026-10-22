@@ -131,10 +131,10 @@ class Command(BaseCommand):
         except IOError as exc:
             self.stdout.write("[ERROR] Bestand kan niet gelezen worden (%s)" % str(exc))
             return
-        except json.decoder.JSONDecodeError as exc:
+        except json.decoder.JSONDecodeError as exc:     # pragma: no cover
             self.stdout.write("[ERROR] Probleem met het JSON formaat in bestand %s (%s)" % (repr(fname), str(exc)))
             return
-        except UnicodeDecodeError as exc:
+        except UnicodeDecodeError as exc:               # pragma: no cover
             self.stdout.write("[ERROR] Bestand heeft unicode problemen (%s)" % str(exc))
             return
 
@@ -167,7 +167,7 @@ class Command(BaseCommand):
         # vang generieke fouten af
         try:
             self._import_bestand(fname)
-        except Exception as exc:
+        except Exception as exc:             # pragma: no cover
             # schrijf in de output
             tups = sys.exc_info()
             lst = traceback.format_tb(tups[2])

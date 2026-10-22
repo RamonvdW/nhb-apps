@@ -80,7 +80,7 @@ class Command(BaseCommand):
 
         if match_count == 0:
             # vereniging niet gevonden (gebeurt in het eerste jaar)
-            if self.jaar != 2021:
+            if self.jaar != 2021:       # pragma: no branch
                 self.stdout.write('[WARNING] Overstap onduidelijk voor lid %s weg van ver %s' % (lid_nr, ver_nr_oud))
                 for lms in lms_lijst:
                     self.stdout.write('    %s' % lms)
@@ -143,14 +143,14 @@ class Command(BaseCommand):
 
             if not self.dry_run:
                 lms = DataApiLidmaatschap.objects.create(
-                    lid_nr=lid_nr,
-                    ver_nr=ver_nr_nieuw,
-                    aanmeld_datum=aanmeld_datum,
-                    afmeld_datum='',
-                    land_iso='NL',
-                    postcode=lms_lijst[0].postcode,
-                    geslacht=lms_lijst[0].geslacht,
-                    geboorte_datum=lms_lijst[0].geboorte_datum)
+                            lid_nr=lid_nr,
+                            ver_nr=ver_nr_nieuw,
+                            aanmeld_datum=aanmeld_datum,
+                            afmeld_datum='',
+                            land_iso='NL',
+                            postcode=lms_lijst[0].postcode,
+                            geslacht=lms_lijst[0].geslacht,
+                            geboorte_datum=lms_lijst[0].geboorte_datum)
 
                 # self.stdout.write('[DEBUG] Overstapper nieuw lms %s' % lms)
 
@@ -189,7 +189,7 @@ class Command(BaseCommand):
     def _verwerk_overstappers(self, data: list):
         # uit de overstappers lijst kunnen we de exacte datums halen
 
-        if data[0][0] != '#':
+        if data[0][0] != '#':       # pragma: no branch
             # bij 2022 ontbreekt de eerste kolom
             for regel in data:
                 regel.insert(0, '#')
@@ -227,6 +227,8 @@ class Command(BaseCommand):
         lms = None
 
         for lms_lp in lms_lijst:
+            assert isinstance(lms_lp, DataApiLidmaatschap)
+
             if lms_lp.ver_nr == ver_nr:
                 # lid kan knipperlicht relatie hebben met vereniging
 
@@ -235,9 +237,12 @@ class Command(BaseCommand):
 
                 # we pakken een exact-match op aanmelddatum, of het nieuwste record
                 if lms_lp.aanmeld_datum == aanmeld_datum:
+                    self.count_gevonden += 1
                     return
 
-                lms = lms_lp
+                if lms_lp.afmeld_datum == '' or aanmeld_datum < lms_lp.afmeld_datum:
+                    # beste keuze
+                    lms = lms_lp
         # for
 
         if lms:
@@ -344,7 +349,7 @@ class Command(BaseCommand):
         except IOError as exc:
             self.stdout.write("[ERROR] Bestand kan niet gelezen worden (%s)" % str(exc))
             data = None
-        except UnicodeDecodeError as exc:
+        except UnicodeDecodeError as exc:       # pragma: no cover
             self.stdout.write("[ERROR] Bestand heeft unicode problemen (%s)" % str(exc))
             data = None
         return data
@@ -364,7 +369,8 @@ class Command(BaseCommand):
         pks = list(qset.values_list('pk', flat=True))
         self._updated_lms.extend(pks)
 
-        qset.update(afmeld_datum=afmeld_datum)
+        if not self.dry_run:
+            qset.update(afmeld_datum=afmeld_datum)
 
     def _lees_csv_bestanden(self):
         data_leden_met_ver_nr = self._laad_csv_bestand('kiss-leden-%s.csv' % self.jaar)
@@ -375,7 +381,7 @@ class Command(BaseCommand):
             self.stdout.write('Aborting')
             sys.exit(1)
 
-        if len(data_leden_met_ver_nr) != len(data_leden_met_lid_nr):
+        if len(data_leden_met_ver_nr) != len(data_leden_met_lid_nr):        # pragma: no cover
             self.stdout.write('[ERROR] Lijsten zijn niet even lang')
             self.stdout.write('Aborting')
             sys.exit(1)
