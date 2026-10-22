@@ -40,7 +40,7 @@ class ImportHistCrmLidmaatschappen(ImportCrmBase):
 
             if lms.afmeld_datum != '':
                 self.count_gestopt += 1
-            elif lms.ver_nr == 0:
+            elif lms.ver_nr == 0:               # pragma: no cover
                 self.count_ver_null += 1
             else:
                 self.count_actief += 1

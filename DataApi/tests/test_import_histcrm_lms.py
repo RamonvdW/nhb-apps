@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase, override_settings
-from DataApi.models import DataApiVereniging
+from DataApi.models import DataApiVereniging, DataApiLidmaatschap
 from DataApi.operations import ImportHistCrmLidmaatschappen
 from TestHelpers.e2ehelpers import E2EHelpers, OutputBuffer
 
@@ -30,7 +30,7 @@ class TestDataApiImportHistCrmLms(E2EHelpers, TestCase):
                 lon='')
 
         out = OutputBuffer()
-        v = ImportHistCrmLidmaatschappen(out, True, '')
+        v = ImportHistCrmLidmaatschappen(out, False, '')        # dryrun = False
         self.assertEqual(v.count_gestopt, 0)
         self.assertEqual(v.count_actief, 0)
         self.assertEqual(v.count_ver_null, 0)
@@ -101,6 +101,27 @@ class TestDataApiImportHistCrmLms(E2EHelpers, TestCase):
         # intentie, want dry-run
         v.importeer(data)
         # print('\nout: %s' % out.getvalue())
+        self.assertTrue("[ERROR] Lid 100001 heeft geen valide member_from[_club]: None" in out.getvalue())
+        self.assertTrue("[ERROR] Lid 100002 heeft geen valide member_from[_club]: None" in out.getvalue())
+        self.assertTrue("[ERROR] Lid 100003 heeft geen valide member_from[_club]: None" in out.getvalue())
+        self.assertTrue("[WARNING] Lid 100003 uit plaats ?, land NL heeft postcode '3409'" in out.getvalue())
+        self.assertTrue("[INFO] Nieuw lms: Lid 100004" in out.getvalue())
+        self.assertTrue("[INFO] Nieuw lms: Lid 100005" in out.getvalue())
+
+        # maak een afgemeld record aan
+        DataApiLidmaatschap.objects.create(
+                lid_nr=999999,
+                ver_nr=1,
+                aanmeld_datum='2000-01-01',
+                afmeld_datum='2099-01-01',          # triggers count_gestopt
+                geboorte_datum='1977-05-06',
+                geslacht='M',
+                land_iso='NZ',
+                postcode='1')
+
+        # opnieuw aanmaken, zodat er iets te cachen valt
+        out = OutputBuffer()
+        ImportHistCrmLidmaatschappen(out, True, '')
 
     def test_bad(self):
         out = OutputBuffer()
@@ -222,8 +243,7 @@ class TestDataApiImportHistCrmLms(E2EHelpers, TestCase):
 
         with override_settings(CRM_IMPORT_SKIP_MEMBERS=(123456,)):
             v.importeer(data)
-        print('\nout: %s' % out.getvalue())
-
+        # print('\nout: %s' % out.getvalue())
         self.assertTrue("[ERROR] Foutief bondsnummer: x (geen getal)" in out.getvalue())
         self.assertTrue("[ERROR] Lid 100001 heeft geen valide geboortedatum: 'ymd'" in out.getvalue())
         self.assertTrue("[ERROR] Lid 100002 heeft onbekend geslacht: Y" in out.getvalue())
