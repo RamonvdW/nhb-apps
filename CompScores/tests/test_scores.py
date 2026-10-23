@@ -13,6 +13,8 @@ from CompLaagRegio.models import RegioRonde
 from Score.models import Uitslag
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
+from Vereniging.definities import TYPE_EXTERNE_SCORES_CENTAUR
+from Vereniging.models import ExterneScores
 import json
 
 
@@ -33,6 +35,8 @@ class TestCompScoresScores(E2EHelpers, TestCase):
 
     url_uitslag_controleren = '/bondscompetities/scores/uitslag-controleren/%s/'    # match_pk
     url_uitslag_accorderen = '/bondscompetities/scores/uitslag-accorderen/%s/'      # match_pk
+
+    url_uitslag_extern = '/bondscompetities/scores/uitslag-extern-ophalen/%s/'      # match_pk
 
     url_scores_regio = '/bondscompetities/scores/regio/%s/'                         # deelcomp_pk
     url_bekijk_uitslag = '/bondscompetities/scores/bekijk-uitslag/%s/'              # match_pk
@@ -113,6 +117,17 @@ class TestCompScoresScores(E2EHelpers, TestCase):
         match.save()
         match.indiv_klassen.set(indiv_klassen)
         self.match25_pk = match.pk
+
+        # configureer voor externe scores, dan wordt dat extra kaartje ook getoond
+        self.ver = self.testdata.vereniging[self.ver_nr]
+        self.ext = ExterneScores.objects.create(
+                            is_actief=True,
+                            vereniging=self.ver,
+                            type=TYPE_EXTERNE_SCORES_CENTAUR,
+                            url_auth='test',
+                            url_ophalen='test',
+                            username='test',
+                            password='test')
 
     def test_anon(self):
         self.client.logout()
@@ -832,5 +847,38 @@ class TestCompScoresScores(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_regio_teams % deelcomp.pk)
         self.assert404(resp, 'Geen teamcompetitie in deze regio')
+
+    def test_extern(self):
+        # log in als HWL
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
+        self.e2e_wissel_naar_functie(self.testdata.functie_hwl[self.ver_nr])
+        self.e2e_check_rol('HWL')
+
+        resp = self.client.get(self.url_uitslag_extern % '999999')
+        self.assert404(resp, 'Wedstrijd niet gevonden')
+
+        url = self.url_uitslag_extern % self.match18.pk
+        resp = self.client.get(url, {'snel': '1'})
+        self.assert_is_redirect_not_plein(resp)
+
+        # geen externe scores configuratie
+        self.ext.is_actief = False
+        self.ext.save(update_fields=['is_actief'])
+        resp = self.client.get(url, {'snel': '1'})
+        self.assert403(resp, 'Niet ondersteund')
+
+        # HWL van verkeerde vereniging
+        ver2 = self.testdata.regio_ver_nrs[116][1]
+        self.e2e_wissel_naar_functie(self.testdata.functie_hwl[ver2])
+        self.e2e_check_rol('HWL')
+        resp = self.client.get(url, {'snel': '1'})
+        self.assert403(resp, 'Niet de beheerder')
+
+        # geen HWL/WL
+        self.e2e_login_and_pass_otp(self.testdata.comp18_account_rcl[101])
+        self.e2e_wissel_naar_functie(self.testdata.comp18_functie_rcl[101])
+        resp = self.client.get(url, {'snel': '1'})
+        self.assert403(resp, 'Geen toegang')
+
 
 # end of file
