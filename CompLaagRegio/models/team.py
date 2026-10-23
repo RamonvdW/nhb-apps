@@ -6,7 +6,7 @@
 
 from django.db import models
 from BasisTypen.models import TeamType
-from Competitie.models.competitie import CompetitieTeamKlasse
+from Competitie.models import CompetitieTeamKlasse
 from Vereniging.models import Vereniging
 from .regiocomp import RegioComp
 from .deelnemer import RegioDeelnemer

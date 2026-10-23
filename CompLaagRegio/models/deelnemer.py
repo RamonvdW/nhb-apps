@@ -7,7 +7,7 @@
 from django.db import models
 from Account.models import Account
 from Competitie.definities import DAGDELEN
-from Competitie.models.competitie import CompetitieMatch, CompetitieIndivKlasse
+from Competitie.models import CompetitieMatch, CompetitieIndivKlasse
 from Score.models import Score
 from Sporter.models import SporterBoog
 from Vereniging.models import Vereniging

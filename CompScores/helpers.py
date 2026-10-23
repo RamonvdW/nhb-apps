@@ -7,6 +7,7 @@
 from django.http import Http404
 from Competitie.models import CompetitieMatch
 from Score.models import Uitslag
+from Vereniging.models import Vereniging, ExterneScores
 
 
 def mag_deelcomp_wedstrijd_wijzigen(wedstrijd, functie_nu, deelcomp):
@@ -63,6 +64,11 @@ def bepaal_match_en_deelcomp_of_404(match_pk, mag_database_wijzigen=False):
     match.afstand = uitslag.afstand
 
     return match, deelcomp, ronde
+
+
+def vereniging_heeft_externe_scores(ver: Vereniging) -> bool:
+    ext = ExterneScores.objects.exclude(is_actief=False).filter(vereniging=ver).first()
+    return ext is not None
 
 
 # end of file

@@ -7,9 +7,10 @@
 from django.utils import timezone
 from BasisTypen.definities import ORGANISATIE_KHSN
 from BasisTypen.operations import get_organisatie_teamtypen
-from Competitie.definities import MUTATIE_REGIO_TEAM_RONDE
+from Competitie.definities import MUTATIE_REGIO_TEAM_RONDE, MUTATIE_REGIO_EXTERN_SCORES_OPHALEN
 from Competitie.models import CompetitieMutatie
 from CompLaagRegio.models import RegioDeelnemer, RegioTeam, RegioRondeTeam
+from CompScores.operations.uitslag_extern_ophalen import comp_scores_uitslag_extern_ophalen
 from Functie.models import Functie
 from Taken.operations import maak_taak
 import datetime
@@ -247,8 +248,16 @@ class VerwerkMutatiesRegio:
         # geef de HWL's een taak om de invallers te koppelen
         self._geef_hwl_taak_team_ronde(deelcomp.competitie, ronde_nr, taak_ver)
 
+    def _verwerk_mutatie_scores_extern_ophalen(self, mutatie: CompetitieMutatie):
+        match = mutatie.match
+        ver = match.vereniging
+        self.stdout.write('[INFO] Verwerk mutatie %s: scores extern ophalen voor match %s' % (mutatie.pk, match))
+
+        comp_scores_uitslag_extern_ophalen(self.stdout, mutatie.door_account, ver, match)
+
     HANDLERS = {
         MUTATIE_REGIO_TEAM_RONDE: _verwerk_mutatie_regio_team_ronde,
+        MUTATIE_REGIO_EXTERN_SCORES_OPHALEN: _verwerk_mutatie_scores_extern_ophalen,
     }
 
     def verwerk(self, mutatie: CompetitieMutatie) -> bool:
@@ -265,7 +274,6 @@ class VerwerkMutatiesRegio:
         return True
 
     def verwerk_in_achtergrond(self):
-        # doe een klein beetje werk
         pass
 
 

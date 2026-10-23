@@ -115,6 +115,8 @@ class Command(BaseCommand):
                        .select_related('competitie',
                                        'regiocomp',
                                        'regiocomp__competitie',
+                                       'match',
+                                       'match__vereniging',
                                        'kamp_rk',
                                        'kamp_rk__competitie',
                                        'kamp_bk',

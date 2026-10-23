@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import models
-from Competitie.models.competitie import CompetitieMatch
+from Competitie.models import CompetitieMatch
 from Geo.models import Cluster
 from .regiocomp import RegioComp
 

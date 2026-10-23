@@ -224,6 +224,11 @@
             <!-- waarschijnlijke deelnemers -->
             {% include 'design/card_icon.dtl' with title="Lijst ophalen" text="Waarschijnlijke deelnemers toevoegen aan de uitslag." sv_icon="comp scores deelnemers" js_id="id_lijst_ophalen" %}
 
+            <!-- extern ophalen -->
+            {% if url_extern_ophalen %}
+                {% include 'design/card_icon.dtl' with title="Download uitslag" text="Haal de uitslag op uit jullie applicatie" sv_icon="download" url=url_extern_ophalen %}
+            {% endif %}
+
         </div>
 
     </div>

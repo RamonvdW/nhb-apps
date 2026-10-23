@@ -7,7 +7,7 @@
 from django.db import models
 from Competitie.definities import (INSCHRIJF_METHODES, INSCHRIJF_METHODE_2,
                                    TEAM_PUNTEN, TEAM_PUNTEN_MODEL_TWEE)
-from Competitie.models.competitie import Competitie
+from Competitie.models import Competitie
 from CompLaagRegio.operations.tijdlijn_regio import bepaal_fase_teams_regio
 from Functie.models import Functie
 from Geo.models import Regio

@@ -11,7 +11,8 @@ from django.core.exceptions import PermissionDenied
 from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from CompLaagRegio.models import RegioDeelnemer, RegioTeam, RegioRondeTeam
-from CompScores.helpers import mag_deelcomp_wedstrijd_wijzigen, bepaal_match_en_deelcomp_of_404
+from CompScores.helpers import (mag_deelcomp_wedstrijd_wijzigen, bepaal_match_en_deelcomp_of_404,
+                                vereniging_heeft_externe_scores)
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
 from Score.definities import SCORE_WAARDE_VERWIJDERD, SCORE_TYPE_SCORE
@@ -127,6 +128,11 @@ class WedstrijdUitslagInvoerenView(UserPassesTestMixin, TemplateView):
         context['url_check_bondsnummer'] = reverse('CompScores:dynamic-check-bondsnummer')
         context['url_opslaan'] = reverse('CompScores:dynamic-scores-opslaan')
         context['url_deelnemers_ophalen'] = reverse('CompScores:dynamic-deelnemers-ophalen')
+
+        if self.rol_nu in (Rol.ROL_HWL, Rol.ROL_WL):
+            if vereniging_heeft_externe_scores(self.functie_nu.vereniging):
+                context['url_extern_ophalen'] = reverse('CompScores:uitslag-extern-ophalen',
+                                                        kwargs={'match_pk': match.pk})
 
         if deelcomp.regio_organiseert_teamcompetitie:
             context['team_pk2naam'] = team_pk2naam = dict()
