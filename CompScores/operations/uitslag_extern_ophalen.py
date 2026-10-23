@@ -29,15 +29,9 @@ class ExterneScoresCentaur:
     def _get_of_maak_match_uitslag(self):
         # maak de uitslag aan indien nog niet gedaan
         if not self._match.uitslag:
-            uitslag = Uitslag()
-            if self._match.competitie.is_indoor():
-                uitslag.max_score = 300
-                uitslag.afstand = 18
-            else:
-                uitslag.max_score = 250
-                uitslag.afstand = 25
-
-            uitslag.save()
+            uitslag = Uitslag.objects.create(
+                        max_score=300 if self._match.competitie.is_indoor() else 250,
+                        afstand=18 if self._match.competitie.is_indoor() else 25)
             self._match.uitslag = uitslag
             self._match.save(update_fields=['uitslag'])
 
@@ -56,18 +50,19 @@ class ExterneScoresCentaur:
                             headers=headers,
                             json=data)
         except (requests.exceptions.SSLError, requests.exceptions.ConnectionError) as exc:
-            self.stdout.write("[ERROR] {%s} Onverwachte fout tijdens authenticate: %s" % (_func, str(exc)))
+            self.stdout.write("[ERROR] {%s} Onverwachte fout tijdens authenticatie: %s" % (_func, exc))
             return
 
         if resp.status_code != 200:
-            self.stdout.write("[ERROR] {%s} Onverwachte status tijdens authenticate: %s" % (_func, resp.status_code))
+            self.stdout.write("[ERROR] {%s} Onverwachte status tijdens authenticatie: %s" % (_func, resp.status_code))
+            return
 
         data = resp.json()
         # self.stdout.write('[DEBUG] {%s} resp data=%s' % (_func, repr(data)))
 
         token = data.get('token', '')
         if not token:
-            self.stdout.write('[ERROR] {%s} Geen token gekregen tijdens authenticate: data=%s' % (_func, repr(data)))
+            self.stdout.write('[ERROR] {%s} Geen token gekregen tijdens authenticatie: data=%s' % (_func, repr(data)))
             return
 
         self.stdout.write('[INFO] {%s} token ontvangen (len=%s)' % (_func, len(token)))
@@ -97,11 +92,12 @@ class ExterneScoresCentaur:
                             headers=headers,
                             json=data)
         except (requests.exceptions.SSLError, requests.exceptions.ConnectionError) as exc:
-            self.stdout.write("[ERROR] {%s} Onverwachte fout tijdens authenticate: %s" % (_func, str(exc)))
+            self.stdout.write("[ERROR] {%s} Onverwachte fout tijdens ophalen: %s" % (_func, exc))
             return
 
         if resp.status_code != 200:
-            self.stdout.write("[ERROR] {%s} Onverwachte status tijdens authenticate: %s" % (_func, resp.status_code))
+            self.stdout.write("[ERROR] {%s} Onverwachte status tijdens ophalen: %s" % (_func, resp.status_code))
+            return
 
         data = resp.json()
         # self.stdout.write('[DEBUG] {%s} resp data=%s' % (_func, repr(data)))
@@ -250,6 +246,9 @@ def comp_scores_uitslag_extern_ophalen(stdout, door_account: Account, ver: Veren
     if ext.type == TYPE_EXTERNE_SCORES_CENTAUR:
         ophaler = ExterneScoresCentaur(stdout, door_account, ext, match)
         ophaler.ophalen()
+        return
+
+    stdout.write('[ERROR] ExterneSscores.type %s niet geimplementeerd' % ext.type)
 
 
 # end of file

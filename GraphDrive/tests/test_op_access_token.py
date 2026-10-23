@@ -9,8 +9,8 @@ from django.utils import timezone
 from GraphDrive.operations.access_token import get_bearer_token
 from GraphDrive.operations import GraphSite
 from TestHelpers.e2ehelpers import E2EHelpers, OutputBuffer
-from unittest.mock import patch
 from requests.exceptions import SSLError
+from unittest.mock import patch
 from datetime import timedelta
 
 
