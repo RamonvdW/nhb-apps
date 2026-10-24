@@ -614,13 +614,10 @@ def database_vullen(inst):
                                 bevestigde_email='bro@test.not',
                                 email_is_bevestigd=True)
 
-    inst.rayon = Rayon.objects.create(rayon_nr=5, naam="Rayon 5")
-    inst.regio = Regio.objects.create(regio_nr=117, rayon_nr=inst.rayon.rayon_nr, rayon=inst.rayon)
+    inst.rayon = Rayon.objects.get(rayon_nr=5)
+    inst.regio = Regio.objects.get(regio_nr=117)
 
-    inst.ver_bond = Vereniging.objects.create(
-                            ver_nr=settings.WEBWINKEL_VERKOPER_VER_NR,
-                            naam='Bondsbureau',
-                            regio=inst.regio)
+    inst.ver_bond = Vereniging.objects.get(ver_nr=settings.WEBWINKEL_VERKOPER_VER_NR)
 
     inst.ontvanger = BetaalInstellingenVereniging.objects.create(
                             vereniging=inst.ver_bond,
@@ -768,7 +765,7 @@ def database_vullen(inst):
     inst.mandje = BestellingMandje.objects.create(
                     account=inst.account)
 
-    BestellingHoogsteBestelNr(hoogste_gebruikte_bestel_nr=42000).save()
+    # BestellingHoogsteBestelNr(hoogste_gebruikte_bestel_nr=42000).save()
 
     # maak een competitiewedstrijd aan waarop scores ingevoerd kunnen worden
     volgende_maand = timezone.now().date()
