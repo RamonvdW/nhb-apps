@@ -7,6 +7,7 @@
 from django.urls import path
 from CompScores import (view_wedstrijden, view_scores_dynamic,
                         view_indiv_scores_regio, view_indiv_scores_invoeren, view_indiv_scores_bekijken,
+                        view_indiv_scores_extern,
                         view_team_scores)
 
 app_name = 'CompScores'
@@ -52,6 +53,10 @@ urlpatterns = [
     path('uitslag-invoeren/<match_pk>/',
          view_indiv_scores_invoeren.WedstrijdUitslagInvoerenView.as_view(),
          name='uitslag-invoeren'),
+
+    path('uitslag-extern-ophalen/<match_pk>/',
+         view_indiv_scores_extern.UitslagExternOphalenView.as_view(),
+         name='uitslag-extern-ophalen'),
 
     path('uitslag-controleren/<match_pk>/',
          view_indiv_scores_invoeren.WedstrijdUitslagControlerenView.as_view(),

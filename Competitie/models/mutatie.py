@@ -6,12 +6,13 @@
 
 from django.db import models
 from django.utils import timezone
+from Account.models import Account
 from Competitie.definities import (MUTATIE_TO_STR,
                                    MUTATIE_KAMP_AANMELDEN_RK_INDIV, MUTATIE_KAMP_AFMELDEN_RK_INDIV,
                                    MUTATIE_KAMP_AANMELDEN_BK_INDIV, MUTATIE_KAMP_AFMELDEN_BK_INDIV,
                                    MUTATIE_KAMP_RK_WIJZIG_INDIV_CUT, MUTATIE_KAMP_RK_WIJZIG_TEAMS_CUT,
                                    MUTATIE_KAMP_BK_WIJZIG_INDIV_CUT)
-from Competitie.models.competitie import Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse
+from Competitie.models import Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMatch
 from CompLaagBond.models import KampBK, DeelnemerBK
 from CompLaagRayon.models import KampRK, DeelnemerRK
 from CompLaagRegio.models import RegioComp
@@ -37,6 +38,11 @@ class CompetitieMutatie(models.Model):
     # als er geen account is (sporter zonder account) dan lid details
     door = models.CharField(max_length=150, default='')
 
+    # door wie is de mutatie geïnitieerd?
+    door_account = models.ForeignKey(Account,
+                                     on_delete=models.CASCADE,
+                                     null=True, blank=True)
+
     # op welke competitie heeft deze mutatie betrekking?
     competitie = models.ForeignKey(Competitie,
                                    on_delete=models.CASCADE,
@@ -46,6 +52,11 @@ class CompetitieMutatie(models.Model):
     regiocomp = models.ForeignKey(RegioComp,
                                   on_delete=models.CASCADE,
                                   null=True, blank=True)
+
+    # op welke wedstrijd heeft deze mutatie betrekking?
+    match = models.ForeignKey(CompetitieMatch,
+                              on_delete=models.CASCADE,
+                              null=True, blank=True)
 
     # op welke kampioenschap heeft deze mutatie betrekking?
     kamp_rk = models.ForeignKey(KampRK,
@@ -96,6 +107,9 @@ class CompetitieMutatie(models.Model):
 
         if self.mutatie in (MUTATIE_KAMP_RK_WIJZIG_INDIV_CUT, MUTATIE_KAMP_BK_WIJZIG_INDIV_CUT, MUTATIE_KAMP_RK_WIJZIG_TEAMS_CUT):
             msg += " (%s --> %s)" % (self.cut_oud, self.cut_nieuw)
+
+        if self.match:
+            msg += ' %s' % self.match
 
         return msg
 

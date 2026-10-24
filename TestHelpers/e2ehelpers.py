@@ -25,7 +25,6 @@ import inspect
 import pyotp
 import io
 
-
 # debug optie: toon waar in de code de queries vandaan komen
 FAIL_UNSAFE_DATABASE_MODIFICATION = False
 

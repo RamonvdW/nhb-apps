@@ -4,8 +4,9 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from .competitie import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMatch,
-                         get_competitie_boog_typen, get_competitie_indiv_leeftijdsklassen)
+from .competitie import Competitie, get_competitie_boog_typen
+from .klassen import CompetitieIndivKlasse, CompetitieTeamKlasse, get_competitie_indiv_leeftijdsklassen
+from .match import CompetitieMatch
 from .mutatie import CompetitieMutatie, CompetitieTaken, update_uitslag_teamcompetitie
 
 

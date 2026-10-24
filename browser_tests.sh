@@ -146,8 +146,12 @@ PID_TAIL=$(jobs -p | tail -1)
 # flush de database zodat we geen foutmeldingen krijgen over al bestaande records nadat de vorige test afgebroken was
 # let op: dit reset NIET de migraties, die blijven gedaan. Statische records aangemaakt door migratie zijn dus weg.
 ./manage.py flush --database=test --noinput &>>"$LOG"
-./manage.py shell --settings="$SETTINGS_AUTOTEST_BROWSER" -v 0 -c 'CompetitieTaken().save()'
-./manage.py shell --settings="$SETTINGS_AUTOTEST_BROWSER" -v 0 -c 'from Bestelling.definities import BESTELLING_HOOGSTE_BESTEL_NR_FIXED_PK as PK; BestellingHoogsteBestelNr(pk=PK).save()'
+# maak records aan die de achtergrondtaken nodig hebben
+./manage.py shell --settings="$SETTINGS_AUTOTEST_BROWSER" -v 0 -c 'CompetitieTaken.objects.using("test").create()'
+./manage.py shell --settings="$SETTINGS_AUTOTEST_BROWSER" -v 0 -c 'Functie.objects.using("test").create(rol="CS", beschrijving="CS")'
+./manage.py shell --settings="$SETTINGS_AUTOTEST_BROWSER" -v 0 -c 'rayon=Rayon.objects.using("test").create(rayon_nr=5, naam="Rayon 5"); Regio.objects.using("test").create(regio_nr=117, rayon=rayon, rayon_nr=5)'
+./manage.py shell --settings="$SETTINGS_AUTOTEST_BROWSER" -v 0 -c 'regio=Regio.objects.using("test").get(regio_nr=117); Vereniging.objects.using("test").create(ver_nr=1368, naam="Bondsbureau", regio=regio)'
+./manage.py shell --settings="$SETTINGS_AUTOTEST_BROWSER" -v 0 -c 'from Bestelling.definities import BESTELLING_HOOGSTE_BESTEL_NR_FIXED_PK as PK; BestellingHoogsteBestelNr.objects.using("test").create(pk=PK, hoogste_gebruikte_bestel_nr=42000)'
 
 # start de achtergrondtaken
 

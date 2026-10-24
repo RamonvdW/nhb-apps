@@ -212,7 +212,7 @@
         </div>
 
         <script src="{% static 'design_js/materialize-mh.js' %}"></script>
-        <script src="{% static 'plein_js/site_layout.js' %}"></script>
+        <script src="{% static 'design_js/site_layout.js' %}"></script>
 
     </body>
 </html>
