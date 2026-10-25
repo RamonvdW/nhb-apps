@@ -605,7 +605,8 @@ class Command(BaseCommand):
                     .select_related('wedstrijd',
                                     'gekozen_hoofd_sr',
                                     'gekozen_sr1', 'gekozen_sr2', 'gekozen_sr3', 'gekozen_sr4', 'gekozen_sr5',
-                                    'gekozen_sr6', 'gekozen_sr7', 'gekozen_sr8', 'gekozen_sr9')):
+                                    'gekozen_sr6', 'gekozen_sr7', 'gekozen_sr8', 'gekozen_sr9',
+                                    'gekozen_srio1', 'gekozen_srio2', 'gekozen_srio3')):
 
             dag.notified_laatste = '%s door %s' % (when_str, mutatie.door)
             dag.save(update_fields=['notified_laatste'])
@@ -613,7 +614,8 @@ class Command(BaseCommand):
             notified_pks = list(dag.notified_srs.all().values_list('pk', flat=True))
 
             for sporter in (dag.gekozen_hoofd_sr, dag.gekozen_sr1, dag.gekozen_sr2, dag.gekozen_sr3, dag.gekozen_sr4,
-                            dag.gekozen_sr5, dag.gekozen_sr6, dag.gekozen_sr7, dag.gekozen_sr8, dag.gekozen_sr9):
+                            dag.gekozen_sr5, dag.gekozen_sr6, dag.gekozen_sr7, dag.gekozen_sr8, dag.gekozen_sr9,
+                            dag.gekozen_srio1, dag.gekozen_srio2, dag.gekozen_srio3):
                 if sporter:
                     if sporter.pk in notified_pks:
                         # sporter heeft al eens een berichtje gehad, dus deze kunnen we overslaan
@@ -660,7 +662,9 @@ class Command(BaseCommand):
                     .filter(match=match)
                     .select_related('gekozen_hoofd_sr',
                                     'gekozen_sr1',
-                                    'gekozen_sr2')
+                                    'gekozen_sr2',
+                                    'gekozen_srio1',
+                                    'gekozen_srio2')
                     ).first()
 
         if match_sr:
@@ -669,7 +673,9 @@ class Command(BaseCommand):
 
             notified_pks = list(match_sr.notified_srs.all().values_list('pk', flat=True))
 
-            for sporter in (match_sr.gekozen_hoofd_sr, match_sr.gekozen_sr1, match_sr.gekozen_sr2):
+            for sporter in (match_sr.gekozen_hoofd_sr,
+                            match_sr.gekozen_sr1, match_sr.gekozen_sr2,
+                            match_sr.gekozen_srio1, match_sr.gekozen_srio2):
                 if sporter:
                     if sporter.pk in notified_pks:
                         # sporter heeft al eens een berichtje gehad, dus deze kunnen we overslaan

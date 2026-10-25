@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023-2025 Ramon van der Winkel.
+#  Copyright (c) 2023-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -59,11 +59,11 @@ class WedstrijdDagScheidsrechters(models.Model):
     # eerste dag is 0
     dag_offset = models.SmallIntegerField(default=0)
 
-    # welke hoofdscheidsrechter is gekozen?
+    # welke hoofdscheidsrechter (SR4/SR5) is gekozen?
     gekozen_hoofd_sr = models.ForeignKey(Sporter, on_delete=models.SET_NULL, related_name='gekozen_hoofd_sr',
                                          null=True, blank=True)              # mag leeg zijn
 
-    # welke scheidsrechters zijn er nog meer gekozen?
+    # welke scheidsrechters zijn er nog meer gekozen (SR3/SR4/SR5)?
     gekozen_sr1 = models.ForeignKey(Sporter, on_delete=models.SET_NULL, related_name='gekozen_sr1',
                                     null=True, blank=True)
 
@@ -89,6 +89,14 @@ class WedstrijdDagScheidsrechters(models.Model):
                                     null=True, blank=True)
 
     gekozen_sr9 = models.ForeignKey(Sporter, on_delete=models.SET_NULL, related_name='gekozen_sr9',
+                                    null=True, blank=True)
+
+    # welke scheidsrechters in opleiding (SR0) zijn er gekozen?
+    gekozen_srio1 = models.ForeignKey(Sporter, on_delete=models.SET_NULL, related_name='gekozen_srio1',
+                                    null=True, blank=True)
+    gekozen_srio2 = models.ForeignKey(Sporter, on_delete=models.SET_NULL, related_name='gekozen_srio2',
+                                    null=True, blank=True)
+    gekozen_srio3 = models.ForeignKey(Sporter, on_delete=models.SET_NULL, related_name='gekozen_srio3',
                                     null=True, blank=True)
 
     # welke scheidsrechters hebben een mailtje gekregen dat ze gekozen zijn voor een wedstrijd?
@@ -122,6 +130,12 @@ class MatchScheidsrechters(models.Model):
                                     null=True, blank=True)
 
     gekozen_sr2 = models.ForeignKey(Sporter, on_delete=models.SET_NULL, related_name='match_gekozen_sr2',
+                                    null=True, blank=True)
+
+    # welke scheidsrechters in opleiding (SR0) zijn er gekozen?
+    gekozen_srio1 = models.ForeignKey(Sporter, on_delete=models.SET_NULL, related_name='match_gekozen_srio1',
+                                    null=True, blank=True)
+    gekozen_srio2 = models.ForeignKey(Sporter, on_delete=models.SET_NULL, related_name='match_gekozen_srio2',
                                     null=True, blank=True)
 
     # welke scheidsrechters hebben een mailtje gekregen dat ze gekozen zijn voor een wedstrijd?

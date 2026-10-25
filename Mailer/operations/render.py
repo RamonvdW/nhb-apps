@@ -134,6 +134,7 @@ def render_email_template(context, email_template_name):
     text_content = text_content.replace('\n', '')
     text_content = text_content[text_content.find('|')+1:]      # strip all before first pipeline, including pipeline
     text_content = text_content.replace('|', '\n')
+    text_content = text_content.replace('<', ' ')               # < is placeholder voor spatie
     text_content = unescape(text_content)
 
     html_content = _inline_styles(html_content)

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023-2025 Ramon van der Winkel.
+#  Copyright (c) 2023-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -19,6 +19,7 @@ class WedstrijdDagScheidsrechtersAdmin(admin.ModelAdmin):
         ('Hoofdscheidsrechter', {'fields': ('gekozen_hoofd_sr',)}),
         ('Scheidsrechters', {'fields': ('gekozen_sr1', 'gekozen_sr2', 'gekozen_sr3', 'gekozen_sr4', 'gekozen_sr5',
                                         'gekozen_sr6', 'gekozen_sr7', 'gekozen_sr8', 'gekozen_sr9')}),
+        ('Student scheids', {'fields': ('gekozen_srio1', 'gekozen_srio2', 'gekozen_srio3')}),
         ('Berichtgeving', {'fields': ('notified_srs',)})
     )
 

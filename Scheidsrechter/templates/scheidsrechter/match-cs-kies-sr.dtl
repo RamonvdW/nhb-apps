@@ -101,6 +101,24 @@
                                         </tr>
                                     {% endif %}
 
+                                    {% if match_sr.toon_student_sr %}
+                                        <tr>
+                                            <th>Student scheidsrechters</th>
+                                            <td>
+                                                <ul>
+                                                    {% for beschikbaar in match_sr.beschikbaar_srio %}
+                                                        <li>
+                                                            <label class="black-text" for="{{ beschikbaar.id_li }}">
+                                                                <input class="filled-in" type="checkbox" name="{{ beschikbaar.sel }}" id="{{ beschikbaar.id_li }}"{% if beschikbaar.is_onzeker %} disabled{% else %}{% if beschikbaar.is_selected %} checked{% endif %} onchange="gewijzigd()"{% endif %}>
+                                                                <span{% if beschikbaar.is_onzeker %} class="grey-text"{% endif %}>{{ beschikbaar.level_naam_str }}{% if beschikbaar.waarschuw_niet_meer_beschikbaar %}<span class="sv-rood-text"> LET OP: Niet meer beschikbaar</span>{% endif %}</span>
+                                                            </label>
+                                                        </li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    {% endif %}
+
                                     <tr>
                                         <th>Notificaties zijn verstuurd aan</th>
                                         <td>

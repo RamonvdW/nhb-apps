@@ -17,7 +17,8 @@ from Functie.definities import Rol
 from Functie.models import Functie
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie, gebruiker_is_scheids
 from Locatie.models import Reistijd
-from Scheidsrechter.definities import SCHEIDS2LEVEL, BESCHIKBAAR_DENK, BESCHIKBAAR_NEE, BESCHIKBAAR_JA
+from Scheidsrechter.definities import (SCHEIDS2LEVEL, SCHEIDS_IN_OPLEIDING,
+                                       BESCHIKBAAR_DENK, BESCHIKBAAR_NEE, BESCHIKBAAR_JA)
 from Scheidsrechter.models import MatchScheidsrechters, ScheidsBeschikbaarheid
 from Scheidsrechter.mutaties import scheids_mutatieverzoek_stuur_notificaties_match
 from Scheidsrechter.operations import get_bezette_scheidsrechters
@@ -265,14 +266,18 @@ class MatchDetailsView(UserPassesTestMixin, TemplateView):
                         .objects
                         .select_related('gekozen_hoofd_sr',
                                         'gekozen_sr1',
-                                        'gekozen_sr2')
+                                        'gekozen_sr2',
+                                        'gekozen_srio1',
+                                        'gekozen_srio2')
                         .get(match=match))
         except MatchScheidsrechters.DoesNotExist:
             # nog niet aangemaakt
             pass
         else:
             match.gekozen = list()
-            for sr in (match_sr.gekozen_hoofd_sr, match_sr.gekozen_sr1, match_sr.gekozen_sr2):
+            for sr in (match_sr.gekozen_hoofd_sr,
+                       match_sr.gekozen_sr1, match_sr.gekozen_sr2,
+                       match_sr.gekozen_srio1, match_sr.gekozen_srio2):
                 if sr:
                     level_naam_str = '%s: %s' % (SCHEIDS2LEVEL[sr.scheids], sr.volledige_naam())
                     match.gekozen.append(level_naam_str)
@@ -425,7 +430,9 @@ class MatchDetailsCSView(UserPassesTestMixin, TemplateView):
         else:
             context['match_sr'] = match_sr
 
-            for sr in (match_sr.gekozen_hoofd_sr, match_sr.gekozen_sr1, match_sr.gekozen_sr2):
+            for sr in (match_sr.gekozen_hoofd_sr,
+                       match_sr.gekozen_sr1, match_sr.gekozen_sr2,
+                       match_sr.gekozen_srio1, match_sr.gekozen_srio2):
                 if sr:
                     sr.level_naam_str = '%s: %s' % (SCHEIDS2LEVEL[sr.scheids], sr.volledige_naam())
             # for
@@ -434,6 +441,7 @@ class MatchDetailsCSView(UserPassesTestMixin, TemplateView):
 
             beschikbaar_hsr = list()
             beschikbaar_sr = list()
+            beschikbaar_srio = list()
             bevat_fouten = False
 
             geen_hsr = SimpleNamespace(
@@ -449,6 +457,7 @@ class MatchDetailsCSView(UserPassesTestMixin, TemplateView):
             hsr_nog_beschikbaar = False
             for beschikbaar in (ScheidsBeschikbaarheid
                                 .objects
+                                .exclude(scheids__scheids=SCHEIDS_IN_OPLEIDING)
                                 .filter(wedstrijd=rk_bk_wedstrijd,
                                         datum=match.datum_wanneer,
                                         opgaaf=BESCHIKBAAR_JA)
@@ -504,11 +513,14 @@ class MatchDetailsCSView(UserPassesTestMixin, TemplateView):
                 # haal de beschikbare scheidsrechters op
                 for beschikbaar in (ScheidsBeschikbaarheid
                                     .objects
+                                    .exclude(scheids__scheids=SCHEIDS_IN_OPLEIDING)
                                     .filter(wedstrijd=rk_bk_wedstrijd,
                                             datum=match.datum_wanneer)
                                     .exclude(opgaaf=BESCHIKBAAR_NEE)
                                     .select_related('scheids')
-                                    .order_by('scheids__voornaam', 'scheids__achternaam', 'scheids__lid_nr')):
+                                    .order_by('scheids__voornaam',
+                                              'scheids__achternaam',
+                                              'scheids__lid_nr')):
 
                     beschikbaar.id_li = 'id_sr_%s' % beschikbaar.pk
                     beschikbaar.sel = 'sr_%s' % beschikbaar.pk
@@ -559,6 +571,53 @@ class MatchDetailsCSView(UserPassesTestMixin, TemplateView):
                 # voorkom dat de knop "Stuur notificatie emails" getoond wordt
                 bevat_fouten = True
 
+            gekozen_srio = [gekozen_sr.pk
+                            for gekozen_sr in (match_sr.gekozen_srio1, match_sr.gekozen_srio2)
+                            if gekozen_sr is not None]
+
+            # haal de beschikbare student-scheidsrechters op
+            toon_student_sr = False
+            for beschikbaar in (ScheidsBeschikbaarheid
+                                .objects
+                                .filter(scheids__scheids=SCHEIDS_IN_OPLEIDING)
+                                .filter(wedstrijd=rk_bk_wedstrijd,
+                                        datum=match.datum_wanneer)
+                                .exclude(opgaaf=BESCHIKBAAR_NEE)
+                                .select_related('scheids')
+                                .order_by('scheids__voornaam',
+                                          'scheids__achternaam',
+                                          'scheids__lid_nr')):
+
+                toon_student_sr = True
+
+                beschikbaar.id_li = 'id_srio_%s' % beschikbaar.pk
+                beschikbaar.sel = 'srio_%s' % beschikbaar.pk
+                beschikbaar.is_onzeker = (beschikbaar.opgaaf == BESCHIKBAAR_DENK)
+                if beschikbaar.scheids.pk in gekozen_srio:
+                    beschikbaar.is_selected = True
+                    gekozen_srio.remove(beschikbaar.scheids.pk)
+                else:
+                    beschikbaar.is_selected = False
+
+                beschikbaar.waarschuw_niet_meer_beschikbaar = (beschikbaar.is_selected and
+                                                               beschikbaar.opgaaf != BESCHIKBAAR_JA)
+                if beschikbaar.waarschuw_niet_meer_beschikbaar:
+                    bevat_fouten = True
+                    beschikbaar.is_onzeker = False  # voorkom disable van checkbox
+
+                beschikbaar.level_naam_str = "%s: %s" % (SCHEIDS2LEVEL[beschikbaar.scheids.scheids],
+                                                         beschikbaar.scheids.volledige_naam())
+
+                if beschikbaar.scheids.lid_nr in bezette_srs:
+                    beschikbaar.is_onzeker = True
+                    beschikbaar.level_naam_str += ' [bezet]'
+                else:
+                    if beschikbaar.is_onzeker:
+                        beschikbaar.level_naam_str += ' [overweegt]'
+
+                beschikbaar_srio.append(beschikbaar)
+            # for
+
             notified_lijst = [sr for sr in match_sr.notified_srs.order_by('lid_nr')]
 
             context['notify_last'] = match_sr.notified_laatste
@@ -566,8 +625,10 @@ class MatchDetailsCSView(UserPassesTestMixin, TemplateView):
             match_sr.nr_hsr = "hsr"
             match_sr.beschikbaar_hoofd_sr = beschikbaar_hsr
             match_sr.beschikbaar_sr = beschikbaar_sr
+            match_sr.beschikbaar_srio = beschikbaar_srio
             match_sr.bevat_fouten = bevat_fouten
             match_sr.toon_additionele_sr = toon_additionele_sr
+            match_sr.toon_student_sr = toon_student_sr
             match_sr.notified_wie = notified_lijst
 
             if bevat_fouten:
@@ -602,79 +663,6 @@ class MatchDetailsCSView(UserPassesTestMixin, TemplateView):
         except (ValueError, CompetitieMatch.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
-        # aantal scheidsrechters
-        aantal_scheids_str = request.POST.get('aantal_scheids', '')
-        try:
-            aantal_scheids = int(aantal_scheids_str[:3])  # afkappen voor de veiligheid
-        except ValueError:
-            # no change
-            pass
-        else:
-            if 1 <= aantal_scheids <= 3:
-                if match.aantal_scheids != aantal_scheids:
-                    match.aantal_scheids = aantal_scheids
-                    match.save(update_fields=['aantal_scheids'])
-
-        try:
-            match_sr = (MatchScheidsrechters
-                        .objects
-                        .select_related('gekozen_hoofd_sr',
-                                        'gekozen_sr1',
-                                        'gekozen_sr2')
-                        .get(match=match))
-        except MatchScheidsrechters.DoesNotExist:
-            # nog niet aangemaakt
-            pass
-        else:
-            # zoek de RK/BK wedstrijd erbij (beschikbaarheid SR is hieraan gekoppeld)
-            rk_bk_wedstrijd = self._vind_wedstrijd(match)
-            if rk_bk_wedstrijd:
-                # SR koppelen
-                nr_hsr = "hsr"
-                gekozen = request.POST.get(nr_hsr, '')
-                gekozen = str(gekozen)[:7]      # afkappen voor de veiligheid
-                if gekozen:
-                    if gekozen == 'geen':
-                        match_sr.gekozen_hoofd_sr = None
-                    else:
-                        try:
-                            pk = int(gekozen)
-                            beschikbaar = (ScheidsBeschikbaarheid
-                                           .objects
-                                           .filter(wedstrijd=rk_bk_wedstrijd,
-                                                   datum=match.datum_wanneer,
-                                                   opgaaf=BESCHIKBAAR_JA)           # exclude NEE en DENK
-                                           .select_related('scheids')
-                                           .get(pk=pk))
-                        except (ValueError, ScheidsBeschikbaarheid.DoesNotExist):
-                            raise Http404('Slechte parameter (1)')
-
-                        match_sr.gekozen_hoofd_sr = beschikbaar.scheids
-
-                # kijk welke scheidsrechters gekozen zijn
-                gekozen_srs = list()
-                for beschikbaar in (ScheidsBeschikbaarheid
-                                    .objects
-                                    .filter(wedstrijd=rk_bk_wedstrijd,
-                                            datum=match.datum_wanneer)
-                                    .filter(opgaaf=BESCHIKBAAR_JA)      # exclude NEE en DENK
-                                    .select_related('scheids')):
-
-                    sel = 'sr_%s' % beschikbaar.pk
-                    gekozen = request.POST.get(sel, '')
-                    if gekozen:
-                        if match_sr.gekozen_hoofd_sr != beschikbaar.scheids:
-                            gekozen_srs.append(beschikbaar.scheids)
-                # for
-
-                # zorg dat er minimaal 2 entries in de lijst staan
-                gekozen_srs.extend([None]*2)
-
-                match_sr.gekozen_sr1 = gekozen_srs[0]
-                match_sr.gekozen_sr2 = gekozen_srs[1]
-
-                match_sr.save(update_fields=['gekozen_hoofd_sr', 'gekozen_sr1', 'gekozen_sr2'])
-
         # notificatie
         do_notify = str(request.POST.get('notify', ''))[:1] == 'J'
         if do_notify:
@@ -685,6 +673,107 @@ class MatchDetailsCSView(UserPassesTestMixin, TemplateView):
             snel = str(request.POST.get('snel', ''))[:1]
 
             scheids_mutatieverzoek_stuur_notificaties_match(match, door_str, snel == '1')
+        else:
+            # aantal scheidsrechters
+            aantal_scheids_str = request.POST.get('aantal_scheids', '')
+            try:
+                aantal_scheids = int(aantal_scheids_str[:3])  # afkappen voor de veiligheid
+            except ValueError:
+                # no change
+                pass
+            else:
+                if 1 <= aantal_scheids <= 3:
+                    if match.aantal_scheids != aantal_scheids:
+                        match.aantal_scheids = aantal_scheids
+                        match.save(update_fields=['aantal_scheids'])
+
+            try:
+                match_sr = (MatchScheidsrechters
+                            .objects
+                            .select_related('gekozen_hoofd_sr',
+                                            'gekozen_sr1',
+                                            'gekozen_sr2',
+                                            'gekozen_srio1',
+                                            'gekozen_srio2')
+                            .get(match=match))
+            except MatchScheidsrechters.DoesNotExist:
+                # nog niet aangemaakt
+                pass
+            else:
+                # zoek de RK/BK wedstrijd erbij (beschikbaarheid SR is hieraan gekoppeld)
+                rk_bk_wedstrijd = self._vind_wedstrijd(match)
+                if rk_bk_wedstrijd:
+                    # SR koppelen
+                    nr_hsr = "hsr"
+                    gekozen = request.POST.get(nr_hsr, '')
+                    gekozen = str(gekozen)[:7]      # afkappen voor de veiligheid
+                    if gekozen:
+                        if gekozen == 'geen':
+                            match_sr.gekozen_hoofd_sr = None
+                        else:
+                            try:
+                                pk = int(gekozen)
+                                beschikbaar = (ScheidsBeschikbaarheid
+                                               .objects
+                                               .exclude(scheids__scheids=SCHEIDS_IN_OPLEIDING)
+                                               .filter(wedstrijd=rk_bk_wedstrijd,
+                                                       datum=match.datum_wanneer,
+                                                       opgaaf=BESCHIKBAAR_JA)           # exclude NEE en DENK
+                                               .select_related('scheids')
+                                               .get(pk=pk))
+                            except (ValueError, ScheidsBeschikbaarheid.DoesNotExist):
+                                raise Http404('Slechte parameter (1)')
+
+                            match_sr.gekozen_hoofd_sr = beschikbaar.scheids
+
+                    # kijk welke scheidsrechters gekozen zijn
+                    gekozen_srs = list()
+                    for beschikbaar in (ScheidsBeschikbaarheid
+                                        .objects
+                                        .exclude(scheids__scheids=SCHEIDS_IN_OPLEIDING)
+                                        .filter(wedstrijd=rk_bk_wedstrijd,
+                                                datum=match.datum_wanneer)
+                                        .filter(opgaaf=BESCHIKBAAR_JA)      # exclude NEE en DENK
+                                        .select_related('scheids')):
+
+                        sel = 'sr_%s' % beschikbaar.pk
+                        gekozen = request.POST.get(sel, '')
+                        if gekozen:
+                            if match_sr.gekozen_hoofd_sr != beschikbaar.scheids:
+                                gekozen_srs.append(beschikbaar.scheids)
+                    # for
+
+                    # zorg dat er minimaal 2 entries in de lijst staan
+                    gekozen_srs.extend([None]*2)
+
+                    match_sr.gekozen_sr1 = gekozen_srs[0]
+                    match_sr.gekozen_sr2 = gekozen_srs[1]
+
+                    # kijk welke student-sr gekozen zijn
+                    gekozen_srio = list()
+                    for beschikbaar in (ScheidsBeschikbaarheid
+                                        .objects
+                                        .filter(scheids__scheids=SCHEIDS_IN_OPLEIDING)
+                                        .filter(wedstrijd=rk_bk_wedstrijd,
+                                                datum=match.datum_wanneer)
+                                        .filter(opgaaf=BESCHIKBAAR_JA)      # exclude NEE en DENK
+                                        .select_related('scheids')):
+
+                        sel = 'srio_%s' % beschikbaar.pk
+                        gekozen = request.POST.get(sel, '')
+                        if gekozen:
+                            gekozen_srio.append(beschikbaar.scheids)
+                    # for
+
+                    # zorg dat er minimaal 2 entries in de lijst staan
+                    gekozen_srio.extend([None]*2)
+
+                    match_sr.gekozen_srio1 = gekozen_srio[0]
+                    match_sr.gekozen_srio2 = gekozen_srio[1]
+
+                    match_sr.save(update_fields=['gekozen_hoofd_sr',
+                                                 'gekozen_sr1', 'gekozen_sr2',
+                                                 'gekozen_srio1', 'gekozen_srio2'])
 
         url = reverse('Scheidsrechter:competitie')
         return HttpResponseRedirect(url)

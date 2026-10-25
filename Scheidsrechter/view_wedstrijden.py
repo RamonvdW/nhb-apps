@@ -15,7 +15,7 @@ from Account.models import get_account
 from BasisTypen.definities import ORGANISATIE_IFAA
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie, gebruiker_is_scheids
-from Scheidsrechter.definities import (SCHEIDS_VERENIGING, SCHEIDS2LEVEL,
+from Scheidsrechter.definities import (SCHEIDS_VERENIGING, SCHEIDS_IN_OPLEIDING, SCHEIDS2LEVEL,
                                        BESCHIKBAAR_DENK, BESCHIKBAAR_NEE, BESCHIKBAAR_JA)
 from Scheidsrechter.models import WedstrijdDagScheidsrechters, ScheidsBeschikbaarheid
 from Scheidsrechter.mutaties import scheids_mutatieverzoek_stuur_notificaties_wedstrijd
@@ -211,14 +211,14 @@ class WedstrijdDetailsView(UserPassesTestMixin, TemplateView):
                     .filter(wedstrijd=wedstrijd)
                     .select_related('gekozen_hoofd_sr',
                                     'gekozen_sr1', 'gekozen_sr2', 'gekozen_sr3', 'gekozen_sr4', 'gekozen_sr5',
-                                    'gekozen_sr6', 'gekozen_sr7', 'gekozen_sr8', 'gekozen_sr9')
+                                    'gekozen_sr6', 'gekozen_sr7', 'gekozen_sr8', 'gekozen_sr9',
+                                    'gekozen_srio1', 'gekozen_srio2', 'gekozen_srio3')
                     .order_by('dag_offset')):       # chronologisch
 
             datum = wedstrijd.datum_begin + datetime.timedelta(days=dag.dag_offset)
-            dag.wed_datum = date_format(datum, "j F Y")
+            dag.wed_datum = date_format(datum, "j F Y")     # 25 oktober 2026
 
             dag.gekozen_srs = list()
-
             dag.gekozen_srs_geen = True
 
             sr = dag.gekozen_hoofd_sr
@@ -258,11 +258,183 @@ class WedstrijdDetailsCSView(UserPassesTestMixin, TemplateView):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.rol_nu = None
+        self.wedstrijd = None
+        self.toon_additionele_sr = False
+        self.bevat_fouten = False
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu = rol_get_huidige(self.request)
         return self.rol_nu == Rol.ROL_CS
+
+    def _zoek_hsr(self, dag: WedstrijdDagScheidsrechters, datum: datetime.date):
+        beschikbaar_hsr = list()
+
+        geen_hsr = SimpleNamespace(
+            pk='geen',
+            scheids=None,
+            is_selected=dag.gekozen_hoofd_sr is None,
+            id_li='id_hsr_%s_geen' % dag.dag_offset,
+            is_onzeker=False,
+            sel='geen')
+        beschikbaar_hsr.append(geen_hsr)
+
+        # voeg de beschikbare hoofdscheidsrechter toe
+        hsr_nog_beschikbaar = False
+        for beschikbaar in (ScheidsBeschikbaarheid
+                .objects
+                .filter(wedstrijd=self.wedstrijd,
+                        datum=datum,
+                        opgaaf=BESCHIKBAAR_JA)
+                .exclude(scheids__scheids__in=(SCHEIDS_VERENIGING,  # geen SR3
+                                               SCHEIDS_IN_OPLEIDING))  # geen SR0
+                .select_related('scheids')
+                .order_by('scheids__voornaam', 'scheids__achternaam', 'scheids__lid_nr')):
+            beschikbaar.id_li = 'id_hsr_%s' % beschikbaar.pk
+            beschikbaar.is_onzeker = (beschikbaar.opgaaf == BESCHIKBAAR_DENK)
+            beschikbaar.is_selected = (dag.gekozen_hoofd_sr == beschikbaar.scheids)
+            hsr_nog_beschikbaar |= (dag.gekozen_hoofd_sr == beschikbaar.scheids)
+
+            beschikbaar.level_naam_str = "%s: %s" % (SCHEIDS2LEVEL[beschikbaar.scheids.scheids],
+                                                     beschikbaar.scheids.volledige_naam())
+            beschikbaar_hsr.append(beschikbaar)
+        # for
+
+        if not hsr_nog_beschikbaar and dag.gekozen_hoofd_sr:
+            # gekozen hoofdscheidsrechter is niet meer beschikbaar
+            self.bevat_fouten = True
+            niet_meer_hsr = SimpleNamespace(
+                                pk=0,  # wordt gebruikt als value
+                                id_li='id_hsr_niet_%s' % dag.gekozen_hoofd_sr.pk,
+                                scheids=dag.gekozen_hoofd_sr,
+                                is_selected=True,
+                                waarschuw_niet_meer_beschikbaar=True,
+                                level_naam_str="%s: %s" % (SCHEIDS2LEVEL[dag.gekozen_hoofd_sr.scheids],
+                                                           dag.gekozen_hoofd_sr.volledige_naam()))
+            beschikbaar_hsr.insert(1, niet_meer_hsr)
+
+        return beschikbaar_hsr
+
+    def _zoek_hulp_sr(self, dag: WedstrijdDagScheidsrechters, datum: datetime.date):
+        beschikbaar_sr = list()
+
+        gekozen_srs = [gekozen_sr.pk
+                       for gekozen_sr in (dag.gekozen_sr1, dag.gekozen_sr2, dag.gekozen_sr3,
+                                          dag.gekozen_sr4, dag.gekozen_sr5, dag.gekozen_sr6,
+                                          dag.gekozen_sr7, dag.gekozen_sr8, dag.gekozen_sr9)
+                       if gekozen_sr is not None]
+
+        self.toon_additionele_sr = False
+        if len(gekozen_srs) > 0 or self.wedstrijd.aantal_scheids > 1:
+            self.toon_additionele_sr = True
+
+            # haal de beschikbare scheidsrechters op
+            for beschikbaar in (ScheidsBeschikbaarheid
+                    .objects
+                    .filter(wedstrijd=self.wedstrijd,
+                            datum=datum)
+                    .exclude(opgaaf=BESCHIKBAAR_NEE)
+                    .exclude(scheids__scheids=SCHEIDS_IN_OPLEIDING)  # geen SR0
+                    .select_related('scheids')
+                    .order_by('scheids__voornaam', 'scheids__achternaam', 'scheids__lid_nr')):
+
+                beschikbaar.id_li = 'id_sr_%s' % beschikbaar.pk
+                beschikbaar.sel = 'sr_%s_%s' % (dag.dag_offset, beschikbaar.pk)
+                beschikbaar.is_onzeker = (beschikbaar.opgaaf == BESCHIKBAAR_DENK)
+                if beschikbaar.scheids.pk in gekozen_srs:
+                    beschikbaar.is_selected = True
+                    gekozen_srs.remove(beschikbaar.scheids.pk)
+                else:
+                    beschikbaar.is_selected = False
+
+                beschikbaar.waarschuw_niet_meer_beschikbaar = (beschikbaar.is_selected and
+                                                               beschikbaar.opgaaf != BESCHIKBAAR_JA)
+                if beschikbaar.waarschuw_niet_meer_beschikbaar:
+                    self.bevat_fouten = True
+                    beschikbaar.is_onzeker = False  # voorkom disable van checkbox
+
+                beschikbaar.level_naam_str = "%s: %s" % (SCHEIDS2LEVEL[beschikbaar.scheids.scheids],
+                                                         beschikbaar.scheids.volledige_naam())
+                beschikbaar_sr.append(beschikbaar)
+            # for
+
+            # kijk welke scheidsrechters nog over zijn en dus niet meer kunnen
+            for gekozen_sr in (dag.gekozen_sr1, dag.gekozen_sr2, dag.gekozen_sr3,
+                               dag.gekozen_sr4, dag.gekozen_sr5, dag.gekozen_sr6,
+                               dag.gekozen_sr7, dag.gekozen_sr8, dag.gekozen_sr9):
+
+                if gekozen_sr and gekozen_sr.pk in gekozen_srs:
+                    niet_meer_sr = SimpleNamespace(
+                                        id_li='id_sr_niet_%s' % gekozen_sr.pk,
+                                        sel='sr_%s_niet_%s' % (dag.dag_offset, gekozen_sr.pk),
+                                        scheids=gekozen_sr,
+                                        is_selected=True,
+                                        waarschuw_niet_meer_beschikbaar=True,
+                                        level_naam_str="%s: %s" % (SCHEIDS2LEVEL[gekozen_sr.scheids],
+                                                                   gekozen_sr.volledige_naam()))
+                    beschikbaar_sr.insert(0, niet_meer_sr)
+                    self.bevat_fouten = True
+            # for
+
+        return beschikbaar_sr
+
+    def _zoek_srio(self, dag: WedstrijdDagScheidsrechters, datum: datetime.date):
+        beschikbaar_srio = list()
+
+        gekozen_srios = [gekozen_sr.pk
+                         for gekozen_sr in (dag.gekozen_srio1, dag.gekozen_srio2, dag.gekozen_srio3)
+                         if gekozen_sr is not None]
+
+        self.toon_student_sr = False
+
+        # haal de beschikbare student-scheidsrechters op
+        for beschikbaar in (ScheidsBeschikbaarheid
+                            .objects
+                            .filter(wedstrijd=self.wedstrijd,
+                                    datum=datum)
+                            .exclude(opgaaf=BESCHIKBAAR_NEE)
+                            .filter(scheids__scheids=SCHEIDS_IN_OPLEIDING)  # geen SR0
+                            .select_related('scheids')
+                            .order_by('scheids__voornaam', 'scheids__achternaam', 'scheids__lid_nr')):
+
+            self.toon_student_sr = True
+
+            beschikbaar.id_li = 'id_srio_%s' % beschikbaar.pk
+            beschikbaar.sel = 'srio_%s_%s' % (dag.dag_offset, beschikbaar.pk)
+            beschikbaar.is_onzeker = (beschikbaar.opgaaf == BESCHIKBAAR_DENK)
+            if beschikbaar.scheids.pk in gekozen_srios:
+                beschikbaar.is_selected = True
+                gekozen_srios.remove(beschikbaar.scheids.pk)
+            else:
+                beschikbaar.is_selected = False
+
+            beschikbaar.waarschuw_niet_meer_beschikbaar = (beschikbaar.is_selected and
+                                                           beschikbaar.opgaaf != BESCHIKBAAR_JA)
+            if beschikbaar.waarschuw_niet_meer_beschikbaar:
+                self.bevat_fouten = True
+                beschikbaar.is_onzeker = False  # voorkom disable van checkbox
+
+            beschikbaar.level_naam_str = "%s: %s" % (SCHEIDS2LEVEL[beschikbaar.scheids.scheids],
+                                                     beschikbaar.scheids.volledige_naam())
+            beschikbaar_srio.append(beschikbaar)
+        # for
+
+        # kijk welke scheidsrechters nog over zijn en dus niet meer kunnen
+        for gekozen_sr in (dag.gekozen_srio1, dag.gekozen_srio2, dag.gekozen_srio3):
+            if gekozen_sr and gekozen_sr.pk in gekozen_srios:
+                niet_meer_srio = SimpleNamespace(
+                                    id_li='id_srio_niet_%s' % gekozen_sr.pk,
+                                    sel='srio_%s_niet_%s' % (dag.dag_offset, gekozen_sr.pk),
+                                    scheids=gekozen_sr,
+                                    is_selected=True,
+                                    waarschuw_niet_meer_beschikbaar=True,
+                                    level_naam_str="%s: %s" % (SCHEIDS2LEVEL[gekozen_sr.scheids],
+                                                               gekozen_sr.volledige_naam()))
+                beschikbaar_srio.insert(0, niet_meer_srio)
+                self.bevat_fouten = True
+        # for
+
+        return beschikbaar_srio
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -283,7 +455,7 @@ class WedstrijdDetailsCSView(UserPassesTestMixin, TemplateView):
         except (ValueError, Wedstrijd.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
-        context['wed'] = wedstrijd
+        context['wed'] = self.wedstrijd = wedstrijd
 
         wedstrijd.organisatie_str = WEDSTRIJD_ORGANISATIE_TO_STR[wedstrijd.organisatie]
 
@@ -357,119 +529,21 @@ class WedstrijdDetailsCSView(UserPassesTestMixin, TemplateView):
 
         context['dagen'] = dagen = list()
         context['notify_last'] = None
+
         for dag in (WedstrijdDagScheidsrechters
                     .objects
                     .filter(wedstrijd=wedstrijd)
                     .select_related('gekozen_hoofd_sr',
                                     'gekozen_sr1', 'gekozen_sr2', 'gekozen_sr3', 'gekozen_sr4', 'gekozen_sr5',
-                                    'gekozen_sr6', 'gekozen_sr7', 'gekozen_sr8', 'gekozen_sr9')
+                                    'gekozen_sr6', 'gekozen_sr7', 'gekozen_sr8', 'gekozen_sr9',
+                                    'gekozen_srio1', 'gekozen_srio2', 'gekozen_srio3')
                     .order_by('dag_offset')):
 
             datum = wedstrijd.datum_begin + datetime.timedelta(days=dag.dag_offset)
-
-            beschikbaar_hsr = list()
-            beschikbaar_sr = list()
-            bevat_fouten = False
-
-            geen_hsr = SimpleNamespace(
-                                pk='geen',
-                                scheids=None,
-                                is_selected=dag.gekozen_hoofd_sr is None,
-                                id_li='id_hsr_%s_geen' % dag.dag_offset,
-                                is_onzeker=False,
-                                sel='geen')
-            beschikbaar_hsr.append(geen_hsr)
-
-            # voeg de beschikbare hoofdscheidsrechter toe
-            hsr_nog_beschikbaar = False
-            for beschikbaar in (ScheidsBeschikbaarheid
-                                .objects
-                                .filter(wedstrijd=wedstrijd,
-                                        datum=datum,
-                                        opgaaf=BESCHIKBAAR_JA)
-                                .exclude(scheids__scheids=SCHEIDS_VERENIGING)  # mag geen hoofdscheidsrechter zijn
-                                .select_related('scheids')
-                                .order_by('scheids__voornaam', 'scheids__achternaam', 'scheids__lid_nr')):
-
-                beschikbaar.id_li = 'id_hsr_%s' % beschikbaar.pk
-                beschikbaar.is_onzeker = (beschikbaar.opgaaf == BESCHIKBAAR_DENK)
-                beschikbaar.is_selected = (dag.gekozen_hoofd_sr == beschikbaar.scheids)
-                hsr_nog_beschikbaar |= (dag.gekozen_hoofd_sr == beschikbaar.scheids)
-
-                beschikbaar.level_naam_str = "%s: %s" % (SCHEIDS2LEVEL[beschikbaar.scheids.scheids],
-                                                         beschikbaar.scheids.volledige_naam())
-                beschikbaar_hsr.append(beschikbaar)
-            # for
-
-            if not hsr_nog_beschikbaar and dag.gekozen_hoofd_sr:
-                # gekozen hoofdscheidsrechter is niet meer beschikbaar
-                bevat_fouten = True
-                niet_meer_hsr = SimpleNamespace(
-                                    pk=0,       # wordt gebruikt als value
-                                    id_li='id_hsr_niet_%s' % dag.gekozen_hoofd_sr.pk,
-                                    scheids=dag.gekozen_hoofd_sr,
-                                    is_selected=True,
-                                    waarschuw_niet_meer_beschikbaar=True,
-                                    level_naam_str="%s: %s" % (SCHEIDS2LEVEL[dag.gekozen_hoofd_sr.scheids],
-                                                               dag.gekozen_hoofd_sr.volledige_naam()))
-                beschikbaar_hsr.insert(1, niet_meer_hsr)
-
-            gekozen_srs = [gekozen_sr.pk
-                           for gekozen_sr in (dag.gekozen_sr1, dag.gekozen_sr2, dag.gekozen_sr3,
-                                              dag.gekozen_sr4, dag.gekozen_sr5, dag.gekozen_sr6,
-                                              dag.gekozen_sr7, dag.gekozen_sr8, dag.gekozen_sr9)
-                           if gekozen_sr is not None]
-
-            toon_additionele_sr = False
-            if len(gekozen_srs) > 0 or wedstrijd.aantal_scheids > 1:
-                toon_additionele_sr = True
-
-                # haal de beschikbare scheidsrechters op
-                for beschikbaar in (ScheidsBeschikbaarheid
-                                    .objects
-                                    .filter(wedstrijd=wedstrijd,
-                                            datum=datum)
-                                    .exclude(opgaaf=BESCHIKBAAR_NEE)
-                                    .select_related('scheids')
-                                    .order_by('scheids__voornaam', 'scheids__achternaam', 'scheids__lid_nr')):
-
-                    beschikbaar.id_li = 'id_sr_%s' % beschikbaar.pk
-                    beschikbaar.sel = 'sr_%s_%s' % (dag.dag_offset, beschikbaar.pk)
-                    beschikbaar.is_onzeker = (beschikbaar.opgaaf == BESCHIKBAAR_DENK)
-                    if beschikbaar.scheids.pk in gekozen_srs:
-                        beschikbaar.is_selected = True
-                        gekozen_srs.remove(beschikbaar.scheids.pk)
-                    else:
-                        beschikbaar.is_selected = False
-
-                    beschikbaar.waarschuw_niet_meer_beschikbaar = (beschikbaar.is_selected and
-                                                                   beschikbaar.opgaaf != BESCHIKBAAR_JA)
-                    if beschikbaar.waarschuw_niet_meer_beschikbaar:
-                        bevat_fouten = True
-                        beschikbaar.is_onzeker = False  # voorkom disable van checkbox
-
-                    beschikbaar.level_naam_str = "%s: %s" % (SCHEIDS2LEVEL[beschikbaar.scheids.scheids],
-                                                             beschikbaar.scheids.volledige_naam())
-                    beschikbaar_sr.append(beschikbaar)
-                # for
-
-                # kijk welke scheidsrechters nog over zijn en dus niet meer kunnen
-                for gekozen_sr in (dag.gekozen_sr1, dag.gekozen_sr2, dag.gekozen_sr3,
-                                   dag.gekozen_sr4, dag.gekozen_sr5, dag.gekozen_sr6,
-                                   dag.gekozen_sr7, dag.gekozen_sr8, dag.gekozen_sr9):
-
-                    if gekozen_sr and gekozen_sr.pk in gekozen_srs:
-                        niet_meer_sr = SimpleNamespace(
-                                        id_li='id_sr_niet_%s' % gekozen_sr.pk,
-                                        sel='sr_%s_niet_%s' % (dag.dag_offset, gekozen_sr.pk),
-                                        scheids=gekozen_sr,
-                                        is_selected=True,
-                                        waarschuw_niet_meer_beschikbaar=True,
-                                        level_naam_str="%s: %s" % (SCHEIDS2LEVEL[gekozen_sr.scheids],
-                                                                   gekozen_sr.volledige_naam()))
-                        beschikbaar_sr.insert(0, niet_meer_sr)
-                        bevat_fouten = True
-                # for
+            self.bevat_fouten = False
+            beschikbaar_hsr = self._zoek_hsr(dag, datum)
+            beschikbaar_sr = self._zoek_hulp_sr(dag, datum)
+            beschikbaar_srio = self._zoek_srio(dag, datum)
 
             if len(beschikbaar_hsr) == 1:
                 # alleen de optie "nog niet gekozen" is beschikbaar
@@ -481,13 +555,15 @@ class WedstrijdDetailsCSView(UserPassesTestMixin, TemplateView):
             context['notify_last'] = dag.notified_laatste
 
             dag = SimpleNamespace(
-                    datum=datum,
-                    nr_hsr="hsr_%s" % dag.dag_offset,
-                    beschikbaar_hoofd_sr=beschikbaar_hsr,
-                    beschikbaar_sr=beschikbaar_sr,
-                    bevat_fouten=bevat_fouten,
-                    toon_additionele_sr=toon_additionele_sr,
-                    notified_wie=notified_lijst)
+                        datum=datum,
+                        nr_hsr="hsr_%s" % dag.dag_offset,
+                        beschikbaar_hoofd_sr=beschikbaar_hsr,
+                        beschikbaar_sr=beschikbaar_sr,
+                        beschikbaar_srio=beschikbaar_srio,
+                        bevat_fouten=self.bevat_fouten,
+                        toon_additionele_sr=self.toon_additionele_sr,
+                        toon_student_sr=self.toon_student_sr,
+                        notified_wie=notified_lijst)
             dagen.append(dag)
         # for
 
@@ -558,6 +634,7 @@ class WedstrijdDetailsCSView(UserPassesTestMixin, TemplateView):
                             pk = int(gekozen)
                             beschikbaar = (ScheidsBeschikbaarheid
                                            .objects
+                                           .exclude(scheids__scheids__in=(SCHEIDS_VERENIGING, SCHEIDS_IN_OPLEIDING))
                                            .filter(wedstrijd=wedstrijd,
                                                    datum=datum,
                                                    opgaaf=BESCHIKBAAR_JA)           # exclude NEE en DENK
@@ -572,6 +649,7 @@ class WedstrijdDetailsCSView(UserPassesTestMixin, TemplateView):
                 gekozen_srs = list()
                 for beschikbaar in (ScheidsBeschikbaarheid
                                     .objects
+                                    .exclude(scheids__scheids=SCHEIDS_IN_OPLEIDING)
                                     .filter(wedstrijd=wedstrijd,
                                             datum=datum)
                                     .filter(opgaaf=BESCHIKBAAR_JA)      # exclude NEE en DENK
@@ -597,9 +675,33 @@ class WedstrijdDetailsCSView(UserPassesTestMixin, TemplateView):
                 dag.gekozen_sr8 = gekozen_srs[7]
                 dag.gekozen_sr9 = gekozen_srs[8]
 
+                # scheidsrechters in opleiding
+                gekozen_srio = list()
+                for beschikbaar in (ScheidsBeschikbaarheid
+                                    .objects
+                                    .filter(scheids__scheids=SCHEIDS_IN_OPLEIDING)
+                                    .filter(wedstrijd=wedstrijd,
+                                            datum=datum)
+                                    .filter(opgaaf=BESCHIKBAAR_JA)      # exclude NEE en DENK
+                                    .select_related('scheids')):
+
+                    sel = 'srio_%s_%s' % (dag.dag_offset, beschikbaar.pk)
+                    gekozen = request.POST.get(sel, '')
+                    if gekozen:
+                        gekozen_srio.append(beschikbaar.scheids)
+                # for
+
+                # zorg dat er minimaal 3 entries in de lijst staan
+                gekozen_srio.extend([None]*3)
+
+                dag.gekozen_srio1 = gekozen_srio[0]
+                dag.gekozen_srio2 = gekozen_srio[1]
+                dag.gekozen_srio3 = gekozen_srio[2]
+
                 dag.save(update_fields=['gekozen_hoofd_sr',
                                         'gekozen_sr1', 'gekozen_sr2', 'gekozen_sr3', 'gekozen_sr4', 'gekozen_sr5',
-                                        'gekozen_sr6', 'gekozen_sr7', 'gekozen_sr8', 'gekozen_sr9'])
+                                        'gekozen_sr6', 'gekozen_sr7', 'gekozen_sr8', 'gekozen_sr9',
+                                        'gekozen_srio1', 'gekozen_srio2', 'gekozen_srio3'])
             # for
 
         url = reverse('Scheidsrechter:wedstrijden')
