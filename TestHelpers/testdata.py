@@ -14,7 +14,8 @@ from Account.operations import account_create
 from BasisTypen.definities import (GESLACHT_ANDERS,
                                    ORGANISATIE_WA, ORGANISATIE_KHSN, ORGANISATIE_IFAA,
                                    MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT,
-                                   SCHEIDS_NIET, SCHEIDS_BOND, SCHEIDS_VERENIGING, SCHEIDS_INTERNATIONAAL)
+                                   SCHEIDS_NIET,
+                                   SCHEIDS_BOND, SCHEIDS_VERENIGING, SCHEIDS_INTERNATIONAAL, SCHEIDS_IN_OPLEIDING)
 from BasisTypen.operations import get_organisatie_boogtypen, get_organisatie_teamtypen
 from Competitie.definities import DEELNAME_JA, DEELNAME_NEE, DEELNAME_ONBEKEND, KAMP_RANK_RESERVE
 from Competitie.models import Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse
@@ -93,7 +94,7 @@ class TestData(object):
         (18, 'M', 'Jun18b', 'C',      (False, True,  '',    False, 0, 0)),
         (18, 'M', 'Jun18c', 'BB',     (False, True,  '',    False, 0, 0)),
         (18, 'V', 'Jun18',  'BB',     (False, True,  '',    False, 0, 0)),
-        (19, 'V', 'Jun19',  'R',      (False, True,  '',    False, 0, 0)),
+        (19, 'V', 'Jun19',  'R',      (True,  True,  '',    False, 0, 6)),      # SR0 + account
         (19, 'V', 'Jun19b', 'C',      (True,  True,  '',    False, 0, 3)),      # SR3 + account
         (20, 'M', 'Jun20',  'R',      (False, True,  '',    False, 0, 3)),      # SR3
         (20, 'M', 'Jun20b', 'LB',     (False, True,  '',    False, 0, 0)),
@@ -112,7 +113,7 @@ class TestData(object):
         (36, 'M', 'Sen36',  'C',      (False, True,  'W2',  True,  0, 0)),
         (36, 'M', 'Sen36b', 'BB',     (False, True,  '',    False, 0, 0)),
         (37, 'V', 'Sen37',  'R',      (False, True,  'VI1', True,  0, 5)),      # SR5
-        (38, 'M', 'Sen38',  'LB',     (False, True,  '',    False, 0, 0)),
+        (38, 'M', 'Sen38',  'LB',     (True,  True,  '',    False, 0, 6)),      # SR0 + account
         (39, 'V', 'Sen39',  'R',      (True,  True,  '',    False, 0, 0)),      # Sen39 = BKO/RKO/RCL
         (40, 'M', 'Sen40',  'C+FSC',  (False, True,  '',    False, 0, 0)),
         (41, 'V', 'Sen41',  'R',      (False, False, '',    False, 0, 0)),      # geen voorkeur rk/bk
@@ -162,6 +163,7 @@ class TestData(object):
             SCHEIDS_INTERNATIONAAL: [],
             SCHEIDS_BOND: [],
             SCHEIDS_VERENIGING: [],
+            SCHEIDS_IN_OPLEIDING: [],
         }
 
         # competities
@@ -576,6 +578,7 @@ class TestData(object):
             3: SCHEIDS_VERENIGING,
             4: SCHEIDS_BOND,
             5: SCHEIDS_INTERNATIONAAL,
+            6: SCHEIDS_IN_OPLEIDING,
         }
 
         lid_nr = MIN_LID_NR

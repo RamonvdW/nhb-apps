@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023-2025 Ramon van der Winkel.
+#  Copyright (c) 2023-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -178,9 +178,9 @@ class TestScheidsrechterBeschikbaarheid(E2EHelpers, TestCase):
             resp = self.client.post(self.url_beschikbaarheid_opvragen, {'wedstrijd': self.wedstrijd.pk, 'snel': 1})
         self.assert_is_redirect(resp, self.url_overzicht)
         self.assertEqual(1, ScheidsMutatie.objects.count())
-        mutatie = ScheidsMutatie.objects.first()
-        f1, f2 = self.verwerk_scheids_mutaties()
-        # print('\nf1:', f1.getvalue(), '\nf2:', f2.getvalue())
+        # mutatie = ScheidsMutatie.objects.first()
+        _f1, _f2 = self.verwerk_scheids_mutaties()
+        # print('\nf1:', _f1.getvalue(), '\nf2:', _f2.getvalue())
         self.assertEqual(2, WedstrijdDagScheidsrechters.objects.count())
 
         self.client.logout()
@@ -210,6 +210,8 @@ class TestScheidsrechterBeschikbaarheid(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_overzicht)
         self.assertEqual(1, ScheidsBeschikbaarheid.objects.count())
         beschikbaar = ScheidsBeschikbaarheid.objects.first()
+        self.assertIsNotNone(beschikbaar)
+        assert beschikbaar is not None
         self.assertEqual(beschikbaar.opgaaf, 'N')       # 3 = Nee
         self.assertEqual(beschikbaar.opmerking, 'Test opmerking SR3')
         self.assertTrue(str(beschikbaar) != '')
@@ -231,6 +233,7 @@ class TestScheidsrechterBeschikbaarheid(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_overzicht)
         self.assertEqual(1, ScheidsBeschikbaarheid.objects.count())
         beschikbaar = ScheidsBeschikbaarheid.objects.first()
+        assert beschikbaar is not None
         self.assertEqual(beschikbaar.opgaaf, 'N')       # ongewijzigd
 
         # forceer een niet theoretisch keuze
@@ -265,9 +268,9 @@ class TestScheidsrechterBeschikbaarheid(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_overzicht)
         self.assertEqual(2, ScheidsMutatie.objects.count())
 
-        mutatie = ScheidsMutatie.objects.first()
-        f1, f2 = self.verwerk_scheids_mutaties()
-        # print('\nf1:', f1.getvalue(), '\nf2:', f2.getvalue())
+        # mutatie = ScheidsMutatie.objects.first()
+        _f1, _f2 = self.verwerk_scheids_mutaties()
+        # print('\nf1:', _f1.getvalue(), '\nf2:', _f2.getvalue())
         self.assertEqual(3, WedstrijdDagScheidsrechters.objects.count())
 
         dag = WedstrijdDagScheidsrechters.objects.first()
@@ -290,6 +293,7 @@ class TestScheidsrechterBeschikbaarheid(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_overzicht)
         self.assertEqual(1, ScheidsBeschikbaarheid.objects.count())
         beschikbaar = ScheidsBeschikbaarheid.objects.first()
+        assert beschikbaar is not None
         self.assertEqual(beschikbaar.opgaaf, 'D')       # 1 = Denk = misschien
 
         # beschikbaarheid
@@ -305,6 +309,7 @@ class TestScheidsrechterBeschikbaarheid(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_overzicht)
         self.assertEqual(1, ScheidsBeschikbaarheid.objects.count())
         beschikbaar = ScheidsBeschikbaarheid.objects.first()
+        assert beschikbaar is not None
         self.assertEqual(beschikbaar.opgaaf, 'J')       # 1 = Ja
 
         self.sr4_met_account.adres_lat = ''
@@ -323,6 +328,7 @@ class TestScheidsrechterBeschikbaarheid(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_overzicht)
         self.assertEqual(1, ScheidsBeschikbaarheid.objects.count())
         beschikbaar = ScheidsBeschikbaarheid.objects.first()
+        assert beschikbaar is not None
         self.assertEqual(beschikbaar.opgaaf, 'J')       # 1 = Ja
 
     def test_cs_opvragen(self):
@@ -338,9 +344,10 @@ class TestScheidsrechterBeschikbaarheid(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_overzicht)
         self.assertEqual(1, ScheidsMutatie.objects.count())
         mutatie = ScheidsMutatie.objects.first()
+        assert mutatie is not None
         self.assertEqual(mutatie.door, 'CS Bond de Admin')
-        f1, f2 = self.verwerk_scheids_mutaties()
-        # print('\nf1:', f1.getvalue(), '\nf2:', f2.getvalue())
+        _f1, _f2 = self.verwerk_scheids_mutaties()
+        # print('\nf1:', _f1.getvalue(), '\nf2:', _f2.getvalue())
         self.assertEqual(2, WedstrijdDagScheidsrechters.objects.count())
 
         # verhoog het aantal scheidsrechters en stuur nieuwe verzoeken
@@ -382,8 +389,8 @@ class TestScheidsrechterBeschikbaarheid(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_overzicht)
         self.assertEqual(0, WedstrijdDagScheidsrechters.objects.count())
         self.assertEqual(1, ScheidsMutatie.objects.count())
-        f1, f2 = self.verwerk_scheids_mutaties()
-        # print('\nf1:', f1.getvalue(), '\nf2:', f2.getvalue())
+        _f1, _f2 = self.verwerk_scheids_mutaties()
+        # print('\nf1:', _f1.getvalue(), '\nf2:', _f2.getvalue())
         self.assertEqual(2, WedstrijdDagScheidsrechters.objects.count())
 
         # beschikbaarheid inzien voor een wedstrijd

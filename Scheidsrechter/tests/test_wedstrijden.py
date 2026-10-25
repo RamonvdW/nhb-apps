@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 import datetime
 
-#  Copyright (c) 2023-2025 Ramon van der Winkel.
+#  Copyright (c) 2023-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
 from django.utils import timezone
-from BasisTypen.definities import SCHEIDS_BOND, SCHEIDS_VERENIGING
+from BasisTypen.definities import SCHEIDS_BOND, SCHEIDS_VERENIGING, SCHEIDS_IN_OPLEIDING
 from BasisTypen.models import KalenderWedstrijdklasse
 from Functie.models import Functie
 from Locatie.models import WedstrijdLocatie, Reistijd
@@ -43,6 +43,7 @@ class TestScheidsrechterWedstrijden(E2EHelpers, TestCase):
 
     lijst_hsr = list()
     lijst_sr = list()
+    lijst_srio = list()
 
     hsr_beschikbaar_pk = 0
     hsr_scheids_pk = 0
@@ -79,6 +80,11 @@ class TestScheidsrechterWedstrijden(E2EHelpers, TestCase):
         for sporter in data.sporters_scheids[SCHEIDS_VERENIGING]:       # pragma: no branch
             if sporter.account is not None:
                 cls.lijst_sr.append(sporter)
+        # for
+
+        for sporter in data.sporters_scheids[SCHEIDS_IN_OPLEIDING]:     # pragma: no branch
+            if sporter.account is not None:
+                cls.lijst_srio.append(sporter)
         # for
 
     def setUp(self):
@@ -350,6 +356,16 @@ class TestScheidsrechterWedstrijden(E2EHelpers, TestCase):
                 self.sr_niet_beschikbaar_pk = beschikbaar.pk
         # for
 
+        # scheidsrechter in opleiding
+        sr = self.lijst_srio[0]
+        opgaaf = BESCHIKBAAR_JA
+        beschikbaar = ScheidsBeschikbaarheid(
+                                scheids=sr,
+                                wedstrijd=wedstrijd,
+                                datum=datum,
+                                opgaaf=opgaaf)
+        beschikbaar.save()
+
     def test_cs_kies_sr(self):
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wissel_naar_functie(self.functie_cs)
@@ -364,6 +380,7 @@ class TestScheidsrechterWedstrijden(E2EHelpers, TestCase):
         self.verwerk_scheids_mutaties()
         self.assertEqual(1, WedstrijdDagScheidsrechters.objects.count())
         dag = WedstrijdDagScheidsrechters.objects.first()
+        assert dag is not None
 
         MailQueue.objects.all().delete()
 
@@ -417,8 +434,8 @@ class TestScheidsrechterWedstrijden(E2EHelpers, TestCase):
             resp = self.client.post(url, {'notify': 'J', 'snel': 1})
         self.assert_is_redirect(resp, self.url_wedstrijden)
 
-        f1, f2 = self.verwerk_scheids_mutaties()
-        # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
+        _f1, _f2 = self.verwerk_scheids_mutaties()
+        # print('\nf1: %s\nf2: %s' % (_f1.getvalue(), _f2.getvalue()))
 
         # controleer dat 3 scheidsrechters gekozen zijn en maar 2 een mailtje krijgen
         dag.refresh_from_db()
@@ -528,6 +545,7 @@ class TestScheidsrechterWedstrijden(E2EHelpers, TestCase):
         self.verwerk_scheids_mutaties()
         self.assertEqual(1, WedstrijdDagScheidsrechters.objects.count())
         dag = WedstrijdDagScheidsrechters.objects.first()
+        assert dag is not None
 
         # geeft SR beschikbaarheid in
         self._zet_beschikbaarheid(self.wedstrijd, 0)

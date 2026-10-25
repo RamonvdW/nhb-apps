@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2024-2025 Ramon van der Winkel.
+#  Copyright (c) 2024-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from django.utils import timezone
-from BasisTypen.definities import SCHEIDS_BOND, SCHEIDS_VERENIGING
+# from django.utils import timezone
+from BasisTypen.definities import SCHEIDS_BOND, SCHEIDS_VERENIGING, SCHEIDS_IN_OPLEIDING
 from Competitie.models import CompetitieMatch, CompetitieIndivKlasse, CompetitieTeamKlasse
 from Functie.models import Functie
 from Locatie.models import WedstrijdLocatie
@@ -39,6 +39,7 @@ class TestScheidsrechterCompetitie(E2EHelpers, TestCase):
 
     lijst_hsr = list()
     lijst_sr = list()
+    lijst_srio = list()
 
     hsr_beschikbaar_pk = 0
     hsr_scheids_pk = 0
@@ -79,6 +80,11 @@ class TestScheidsrechterCompetitie(E2EHelpers, TestCase):
                 cls.lijst_sr.append(sporter)
         # for
 
+        for sporter in data.sporters_scheids[SCHEIDS_IN_OPLEIDING]:     # pragma: no branch
+            if sporter.account is not None:
+                cls.lijst_srio.append(sporter)
+        # for
+
     def setUp(self):
         """ initialisatie van de test case """
         self.assertIsNotNone(self.sr3_met_account)
@@ -86,8 +92,8 @@ class TestScheidsrechterCompetitie(E2EHelpers, TestCase):
         self.functie_cs.bevestigde_email = 'cs@khsn.not'
         self.functie_cs.save(update_fields=['bevestigde_email'])
 
-        now = timezone.now()
-        datum = now.date()      # pas op met testen ronde 23:59
+        # now = timezone.now()
+        # datum = now.date()      # pas op met testen ronde 23:59
 
         self.functie_hwl1, _ = Functie.objects.get_or_create(rol='HWL', vereniging=self.ver1)
         self.functie_hwl2, _ = Functie.objects.get_or_create(rol='HWL', vereniging=self.ver2)
@@ -196,8 +202,8 @@ class TestScheidsrechterCompetitie(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_beschikbaarheid_opvragen, {'snel': 1})
         self.assert_is_redirect(resp, self.url_overzicht)
-        f1, f2 = self.verwerk_scheids_mutaties()
-        # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
+        _f1, _f2 = self.verwerk_scheids_mutaties()
+        # print('\nf1: %s\nf2: %s' % (_f1.getvalue(), _f2.getvalue()))
 
         match_sr = MatchScheidsrechters.objects.get(match=self.match_bk)
         self.assertIsNone(match_sr.gekozen_hoofd_sr)
@@ -272,8 +278,8 @@ class TestScheidsrechterCompetitie(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_beschikbaarheid_opvragen, {'snel': 1})
         self.assert_is_redirect(resp, self.url_overzicht)
-        f1, f2 = self.verwerk_scheids_mutaties()
-        # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
+        _f1, _f2 = self.verwerk_scheids_mutaties()
+        # print('\nf1: %s\nf2: %s' % (_f1.getvalue(), _f2.getvalue()))
         # zijn nu 2 wedstrijden aangemaakt: RK en BK
         self.assertEqual(2, Wedstrijd.objects.count())
         self.assertEqual(4, MatchScheidsrechters.objects.count())
@@ -304,8 +310,8 @@ class TestScheidsrechterCompetitie(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_beschikbaarheid_opvragen, {'snel': 1})
         self.assert_is_redirect(resp, self.url_overzicht)
-        f1, f2 = self.verwerk_scheids_mutaties()
-        # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
+        _f1, _f2 = self.verwerk_scheids_mutaties()
+        # print('\nf1: %s\nf2: %s' % (_f1.getvalue(), _f2.getvalue()))
 
         # wijzig de datum-reeks voor het BK
         self.match_bk.datum_wanneer += timedelta(days=1)
@@ -322,8 +328,8 @@ class TestScheidsrechterCompetitie(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_beschikbaarheid_opvragen, {'snel': 1})
         self.assert_is_redirect(resp, self.url_overzicht)
-        f1, f2 = self.verwerk_scheids_mutaties()
-        # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
+        _f1, _f2 = self.verwerk_scheids_mutaties()
+        # print('\nf1: %s\nf2: %s' % (_f1.getvalue(), _f2.getvalue()))
 
         # corner case: RK wedstrijden zijn verwijderd
         Wedstrijd.objects.filter(titel__startswith='RK').delete()
@@ -339,8 +345,8 @@ class TestScheidsrechterCompetitie(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_beschikbaarheid_opvragen, {'snel': 1})
         self.assert_is_redirect(resp, self.url_overzicht)
-        f1, f2 = self.verwerk_scheids_mutaties()
-        # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
+        _f1, _f2 = self.verwerk_scheids_mutaties()
+        # print('\nf1: %s\nf2: %s' % (_f1.getvalue(), _f2.getvalue()))
 
         # corner case: BK wedstrijden zijn verwijderd
         Wedstrijd.objects.filter(titel__startswith='BK').delete()
@@ -422,6 +428,16 @@ class TestScheidsrechterCompetitie(E2EHelpers, TestCase):
                 self.sr_niet_beschikbaar_pk = beschikbaar.pk
         # for
 
+        # scheidsrechter in opleiding
+        sr = self.lijst_srio[0]
+        opgaaf = BESCHIKBAAR_JA
+        beschikbaar = ScheidsBeschikbaarheid(
+                                scheids=sr,
+                                wedstrijd=wedstrijd,
+                                datum=datum,
+                                opgaaf=opgaaf)
+        beschikbaar.save()
+
     def test_cs_kies_sr(self):
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wissel_naar_functie(self.functie_cs)
@@ -458,8 +474,8 @@ class TestScheidsrechterCompetitie(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_beschikbaarheid_opvragen, {'snel': 1})
         self.assert_is_redirect(resp, self.url_overzicht)
-        f1, f2 = self.verwerk_scheids_mutaties()
-        # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
+        _f1, _f2 = self.verwerk_scheids_mutaties()
+        # print('\nf1: %s\nf2: %s' % (_f1.getvalue(), _f2.getvalue()))
         # zijn nu 2 wedstrijden aangemaakt: RK en BK
         self.assertEqual(2, Wedstrijd.objects.count())
         self.assertEqual(4, MatchScheidsrechters.objects.count())
@@ -499,6 +515,8 @@ class TestScheidsrechterCompetitie(E2EHelpers, TestCase):
 
         obj_ja = ScheidsBeschikbaarheid.objects.filter(wedstrijd=wedstrijd, opgaaf=BESCHIKBAAR_JA).first()
         obj_denk = ScheidsBeschikbaarheid.objects.filter(wedstrijd=wedstrijd, opgaaf=BESCHIKBAAR_DENK).first()
+        assert obj_ja is not None
+        assert obj_denk is not None
 
         # maak keuzes
         with self.assert_max_queries(20):
@@ -617,6 +635,7 @@ class TestScheidsrechterCompetitie(E2EHelpers, TestCase):
         self._zet_beschikbaarheid(wedstrijd, 0)
 
         obj_ja = ScheidsBeschikbaarheid.objects.filter(wedstrijd=wedstrijd, opgaaf=BESCHIKBAAR_JA).first()
+        assert obj_ja is not None
         match_sr = MatchScheidsrechters.objects.get(match=self.match_bk)
         match_sr.gekozen_hoofd_sr = obj_ja.scheids
         match_sr.save(update_fields=['gekozen_hoofd_sr'])
