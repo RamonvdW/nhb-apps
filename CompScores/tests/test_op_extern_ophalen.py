@@ -51,10 +51,10 @@ class ResponseMock:
                         # deelnemer 1
                         res.append({'score': '200', 'lidnummer': '300344', 'boogtype': 'Recurve'})
 
-                        # deelnemer 2
-                        res.append({'score': '280', 'lidnummer': '300327', 'boogtype': 'Compound'})
+                        # deelnemer 2; heeft 2 bogen
+                        res.append({'score': '280', 'lidnummer': '300326', 'boogtype': 'Compound'})
 
-                        # deelnemer 3, zelfde score
+                        # deelnemer 3
                         res.append({'score': '190', 'lidnummer': '300339', 'boogtype': 'Barebow'})
                     else:
                         # deelnemer 1, aangepaste score
@@ -217,7 +217,7 @@ class TestCompScoresOpExternOphalen(E2EHelpers, TestCase):
         # print(stdout.getvalue())
         self.assertTrue("[ERROR] {ExterneScoresCentaur._uitslag_opslaan} slechte score waarde: ''" in stdout.getvalue())
         self.assertTrue("[ERROR] {ExterneScoresCentaur._uitslag_opslaan} slechte score waarde: '301'" in stdout.getvalue())
-        self.assertTrue("[ERROR] {ExterneScoresCentaur._uitslag_opslaan} Kan sporterboog niet vinden: lid_nr='100001', boogtype='Recurve'" in stdout.getvalue())
+        self.assertTrue("[WARNING] {ExterneScoresCentaur._uitslag_opslaan} is geen regio deelnemer: ('100001', 'Recurve')" in stdout.getvalue())
 
         self.match18.refresh_from_db()
         count = self.match18.uitslag.scores.count()

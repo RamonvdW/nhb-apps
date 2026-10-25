@@ -7,6 +7,7 @@
 from django.utils import timezone
 from Account.models import Account
 from Competitie.models import CompetitieMatch
+from CompLaagRegio.models import RegioDeelnemer
 from Score.definities import SCORE_WAARDE_VERWIJDERD
 from Score.models import Score, ScoreHist, Uitslag
 from Sporter.models import SporterBoog
@@ -25,6 +26,23 @@ class ExterneScoresCentaur:
         self._match: CompetitieMatch = match
         self._token: str = ''
         self._externe_uitslag = list()
+        self._lid_nr_boogtype2sporterboog = dict()  # [("lid_nr", "boogtype beschrijving")] = SporterBoog
+
+    def _cache_sporterboog(self):
+        # van alle ingeschreven deelnemers, sla de sporterboog op
+        for deelnemer in (RegioDeelnemer
+                          .objects
+                          .filter(regiocomp__competitie=self._match.competitie)
+                          .select_related('sporterboog',
+                                          'sporterboog__boogtype',
+                                          'sporterboog__sporter')):
+
+            sb = deelnemer.sporterboog
+            boogtype = sb.boogtype
+            sporter = sb.sporter
+
+            self._lid_nr_boogtype2sporterboog[(str(sporter.lid_nr), boogtype.beschrijving)] = sb
+        # for
 
     def _get_of_maak_match_uitslag(self):
         # maak de uitslag aan indien nog niet gedaan
@@ -155,7 +173,15 @@ class ExterneScoresCentaur:
                 continue
 
             tup = (lid_nr_str, boogtype_str)
-            in_uitslag.append(tup)
+
+            sporterboog = self._lid_nr_boogtype2sporterboog.get(tup, None)
+            if not sporterboog:
+                # niet ingeschreven --> skip
+                self.stdout.write('[WARNING] {%s} is geen regio deelnemer: %s' % (_func, repr(tup)))
+                continue
+
+            in_uitslag.append(tup)      # niet verwijderen uit uitslag
+
             score = lid_nr_boogtype2score.get(tup, None)
 
             if score:
@@ -178,28 +204,20 @@ class ExterneScoresCentaur:
                 # else: zelfde score --> niets doen
             else:
                 # nieuw toevoegen
-                try:
-                    sporterboog = SporterBoog.objects.get(sporter__lid_nr=lid_nr_str,
-                                                          boogtype__beschrijving=boogtype_str)
-                except (ValueError, SporterBoog.DoesNotExist):
-                    # garbage --> ignore
-                    self.stdout.write('[ERROR] {%s} Kan sporterboog niet vinden: lid_nr=%s, boogtype=%s' % (
-                                        _func, repr(lid_nr_str), repr(boogtype_str)))
-                else:
-                    score = Score(sporterboog=sporterboog,
-                                  waarde=waarde,
-                                  afstand_meter=uitslag.afstand)
-                    score.save()
-                    uitslag.scores.add(score)
+                score = Score(sporterboog=sporterboog,
+                              waarde=waarde,
+                              afstand_meter=uitslag.afstand)
+                score.save()
+                uitslag.scores.add(score)
 
-                    hist = ScoreHist(
-                                score=score,
-                                oude_waarde=0,
-                                nieuwe_waarde=waarde,
-                                when=self._when,
-                                door_account=self._door_account,
-                                notitie="Download externe uitslag wedstrijd")
-                    bulk_hist.append(hist)
+                hist = ScoreHist(
+                            score=score,
+                            oude_waarde=0,
+                            nieuwe_waarde=waarde,
+                            when=self._when,
+                            door_account=self._door_account,
+                            notitie="Download externe uitslag wedstrijd")
+                bulk_hist.append(hist)
         # for
 
         # verwijder iedereen uit de uitslag die er niet meer in voorkomt
@@ -234,6 +252,7 @@ class ExterneScoresCentaur:
 
         # stap 3: opslaan
         if len(self._externe_uitslag):
+            self._cache_sporterboog()
             self._uitslag_opslaan()
 
 
