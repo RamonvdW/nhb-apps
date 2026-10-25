@@ -481,7 +481,7 @@ class CorrigeerRegioTeamRondeView(UserPassesTestMixin, TemplateScoresRegioTeamsV
                              .select_related('competitie')
                              .get(pk=deelcomp_pk))
         except (ValueError, RegioComp.DoesNotExist):
-            raise Http404('Competitie niet gevonden')
+            raise Http404('Regiocompetitie niet gevonden')
 
         assert isinstance(self.deelcomp, RegioComp)
 
@@ -521,11 +521,10 @@ class CorrigeerRegioTeamRondeView(UserPassesTestMixin, TemplateScoresRegioTeamsV
             (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
             (reverse('CompBeheer:overzicht',
                      kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
-            (reverse('CompLaagRegio:start-volgende-team-ronde',
-                     kwargs={'deelcomp_pk': self.deelcomp.pk}), 'Team Ronde'),
+            (reverse('CompScores:corrigeer-team-ronde-selecteer',
+                     kwargs={'comp_pk': comp.pk}), 'Correctie team ronde'),
             (None, 'Team scores')
         )
-
         return context
 
     def post(self, request, *args, **kwargs):
@@ -572,13 +571,14 @@ class CorrigeerRegioTeamRondeSelecteerView(UserPassesTestMixin, TemplateView):
             raise Http404('Competitie niet gevonden')
 
         if comp.afstand != self.functie_nu.comp_type:
-            raise Http404('Geen toegang')
+            raise PermissionDenied('Niet de beheerder')
 
         context['regios'] = regios = list()
         for deelcomp in (RegioComp
                          .objects
                          .filter(competitie=comp)
                          .exclude(regio_organiseert_teamcompetitie=False)
+                         .select_related('regio')
                          .order_by('regio__regio_nr')):
             rondes = list()
             regio = SimpleNamespace(
@@ -586,6 +586,7 @@ class CorrigeerRegioTeamRondeSelecteerView(UserPassesTestMixin, TemplateView):
                             rondes=rondes)
             regios.append(regio)
 
+            # alle rondes aanbieden, behalve de huidige ronde
             for ronde_nr in range(1, deelcomp.huidige_team_ronde):
                 url = reverse('CompScores:corrigeer-team-ronde', kwargs={'regiocomp_pk': deelcomp.pk,
                                                                          'ronde_nr': ronde_nr})

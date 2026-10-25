@@ -43,6 +43,9 @@ class TestCompScoresScores(E2EHelpers, TestCase):
 
     url_regio_teams = '/bondscompetities/scores/teams/%s/'                          # deelcomp_pk
 
+    url_corrigeer = '/bondscompetities/scores/teams/corrigeer-ronde/selecteer/%s/'  # comp_pk
+    url_corrigeer_ronde = '/bondscompetities/scores/teams/corrigeer-ronde/%s/%s/'   # regiocomp_pk, ronde_nr
+
     url_vaststellen = '/bondscompetities/beheer/%s/klassengrenzen-vaststellen/'     # comp_pk
 
     ver_nr = 0      # wordt in setUpTestData ingevuld
@@ -848,6 +851,57 @@ class TestCompScoresScores(E2EHelpers, TestCase):
             resp = self.client.post(self.url_regio_teams % deelcomp.pk)
         self.assert404(resp, 'Geen teamcompetitie in deze regio')
 
+    def test_corrigeer_team_scores(self):
+        # wordt BKO
+        self.e2e_login_and_pass_otp(self.testdata.comp18_account_bko)
+        self.e2e_wissel_naar_functie(self.testdata.comp18_functie_bko)
+
+        deelcomp = self.testdata.deelcomp18_regio[101]
+
+        # zet ronde = 2, zodat ronde 1 beschikbaar is om te wijzigen
+        deelcomp.huidige_team_ronde = 2
+        deelcomp.save(update_fields=['huidige_team_ronde'])
+
+        # haal de overzichtspagina op
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_corrigeer % self.testdata.comp18.pk)
+        self.assertEqual(resp.status_code, 200)       # 200 = OK
+        self.assert_template_used(resp, ('compscores/bko-selecteer-regio-ronde.dtl', 'design/site_layout.dtl'))
+        self.assert_html_ok(resp)
+
+        # haal de pagina voor een specifieke ronde op
+        url = self.url_corrigeer_ronde % (self.testdata.deelcomp18_regio[101].pk, 1)
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)       # 200 = OK
+        self.assert_template_used(resp, ('compscores/rcl-scores-regio-teams.dtl', 'design/site_layout.dtl'))
+        self.assert_html_ok(resp)
+
+        # wijzigingen opslaan
+        resp = self.client.post(url)
+        self.assert_is_redirect(resp, self.url_corrigeer % self.testdata.comp18.pk)
+
+        # niet bestaande competitie
+        resp = self.client.get(self.url_corrigeer % 999999)
+        self.assert404(resp, 'Competitie niet gevonden')
+        resp = self.client.get(self.url_corrigeer_ronde % (999999, 1))
+        self.assert404(resp, 'Regiocompetitie niet gevonden')
+
+        # verkeerde beheerder
+        resp = self.client.get(self.url_corrigeer % self.testdata.comp25.pk)
+        self.assert403(resp, 'Niet de beheerder')
+        resp = self.client.get(self.url_corrigeer_ronde % (self.testdata.deelcomp25_regio[101].pk, 1))
+        self.assert403(resp, 'Niet de beheerder')
+
+        # slechte team ronde
+        resp = self.client.get(self.url_corrigeer_ronde % (self.testdata.deelcomp18_regio[101].pk, 'xx'))
+        self.assert404(resp, 'Ronde niet gevonden')
+
+        # regio organiseert geen teamcompetitie
+        deelcomp.regio_organiseert_teamcompetitie = False
+        deelcomp.save(update_fields=['regio_organiseert_teamcompetitie'])
+        resp = self.client.get(url)
+        self.assert404(resp, 'Geen teamcompetitie in deze regio')
+
     def test_extern(self):
         # log in als HWL
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
@@ -879,6 +933,5 @@ class TestCompScoresScores(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.testdata.comp18_functie_rcl[101])
         resp = self.client.get(url, {'snel': '1'})
         self.assert403(resp, 'Geen toegang')
-
 
 # end of file
