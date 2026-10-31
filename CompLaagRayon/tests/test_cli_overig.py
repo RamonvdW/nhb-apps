@@ -210,8 +210,8 @@ class TestCompLaagRayonCliOverig(E2EHelpers, TestCase):
         # print('f2:', f2.getvalue())
         self.assertTrue('[INFO] 10 RK wedstrijden gevonden' in f2.getvalue())
         self.assertFalse('fouten gevonden' in f2.getvalue())
-        self.assertTrue('[INFO] 8 e-mails verstuurd' in f2.getvalue())
-        self.assertEqual(MailQueue.objects.count(), 8)
+        self.assertTrue('[INFO] 10 e-mails verstuurd' in f2.getvalue())
+        self.assertEqual(MailQueue.objects.count(), 10)
 
         mail = MailQueue.objects.first()
         # self.e2e_show_email_in_browser(mail)

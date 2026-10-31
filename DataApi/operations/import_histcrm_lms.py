@@ -30,6 +30,7 @@ class ImportHistCrmLidmaatschappen(ImportCrmBase):
         self._cache_actieve_lidmaatschappen = dict()    # [lid_nr] = [DataApiLidmaatschap, ...]
         self._vul_cache()
         self._changed_and_new_lms_pks = list()
+        self.date_now = datetime.datetime.now().date()
 
     def _vul_cache(self):
         for lms in DataApiLidmaatschap.objects.order_by('pk'):      # oudste eerst
@@ -163,6 +164,11 @@ class ImportHistCrmLidmaatschappen(ImportCrmBase):
         geboorte_datum = geboorte_datum.strftime('%Y-%m-%d')
         aanmeld_datum = lid_sinds.strftime('%Y-%m-%d')          # dit is de historische aanmelddatum
         afmeld_datum = lid_tot.strftime('%Y-%m-%d') if lid_tot else ''
+        surrogaat_afmeld_datum = ''
+        if not afmeld_datum:
+            temp = lid_sinds - datetime.timedelta(days=1)
+            if temp < self.date_now:
+                surrogaat_afmeld_datum = temp.strftime('%Y-%m-%d')
 
         lms_lijst = self._cache_actieve_lidmaatschappen.get(lid_nr, [])
         if len(lms_lijst) == 0:
@@ -182,7 +188,7 @@ class ImportHistCrmLidmaatschappen(ImportCrmBase):
 
             # nieuw lid
             lms = self._maak_lms(lid_nr, ver_nr, geslacht, geboorte_datum, aanmeld_datum, land_iso, postcode)
-            self.out_info('Nieuw lms: %s' % lms)
+            self.out_info('Nieuw lms (1): %s' % lms)
             return
 
         lms = lms_lijst[-1]
@@ -204,7 +210,7 @@ class ImportHistCrmLidmaatschappen(ImportCrmBase):
                 if aanmeld_datum > lms.afmeld_datum:
                     # assume: terug bij zelfde vereniging
                     lms = self._maak_lms(lid_nr, lms.ver_nr, geslacht, geboorte_datum, aanmeld_datum, land_iso, postcode)
-                    self.out_info('Nieuw lms: %s' % lms)
+                    self.out_info('Nieuw lms (2): %s' % lms)
                     self._afmelden(lms, afmeld_datum)
                     return
 
@@ -215,13 +221,17 @@ class ImportHistCrmLidmaatschappen(ImportCrmBase):
                 return
 
             # huidige record afsluiten
+            if lms.afmeld_datum != '':
+                # niets te doen
+                return
+
             if afmeld_datum:
                 if afmeld_datum < lms.aanmeld_datum:
                     self.out_error('Lid %s afmeld_datum %s hoort niet bij (1) lms %s' % (lid_nr, afmeld_datum, lms))
                 else:
                     self._afmelden(lms, afmeld_datum)
             else:
-                self.out_error('Lid %s oude lms moet afgesloten worden, maar er is geen afmelddatum! (1)' % lid_nr)
+                self.out_error('Lid %s oude lms moet afgesloten worden, maar er is geen afmelddatum! (1) surrogaat=%s' % (lid_nr, surrogaat_afmeld_datum))
 
             return
 
@@ -232,6 +242,9 @@ class ImportHistCrmLidmaatschappen(ImportCrmBase):
 
             if lms.afmeld_datum == '':
                 # huidige record afsluiten en nieuwe beginnen
+                if not afmeld_datum:
+                    afmeld_datum = surrogaat_afmeld_datum
+
                 if not afmeld_datum:
                     self.out_error('Lid %s oude lms moet afgesloten worden, maar er is geen afmelddatum! (2)' % lid_nr)
                 elif afmeld_datum < lms.aanmeld_datum:
@@ -244,10 +257,14 @@ class ImportHistCrmLidmaatschappen(ImportCrmBase):
                         return
 
             lms = self._maak_lms(lid_nr, ver_nr, geslacht, geboorte_datum, aanmeld_datum, land_iso, postcode)
-            self.out_info('Nieuw lms: %s' % lms)
+            self.out_info('Nieuw lms (3): %s' % lms)
             return
 
         # ver_nr matcht
+
+        if afmeld_datum == lms.afmeld_datum:
+            # administratie klopt - niets meer aan doen
+            return
 
         if afmeld_datum == '' and lms.afmeld_datum == '':
             # lms is het actieve lidmaatschap bij een vereniging
@@ -268,7 +285,7 @@ class ImportHistCrmLidmaatschappen(ImportCrmBase):
         if lms.afmeld_datum != '' and afmeld_datum == '':
             # we hebben een nieuw record nodig
             lms = self._maak_lms(lid_nr, ver_nr, geslacht, geboorte_datum, aanmeld_datum, land_iso, postcode)
-            self.out_info('Nieuw lms: %s' % lms)
+            self.out_info('Nieuw lms (4): %s' % lms)
             return
 
         if lms.afmeld_datum == '' and afmeld_datum != '' and lms.aanmeld_datum == aanmeld_datum:
@@ -294,8 +311,6 @@ class ImportHistCrmLidmaatschappen(ImportCrmBase):
         # houd bij welke leden lid_nrs in de database zitten
         # als deze niet meer voorkomen, dan zijn ze verwijderd
         lid_nrs = list(self._cache_actieve_lidmaatschappen.keys())
-
-        date_now = datetime.datetime.now().date()
 
         """ JSON velden (string, except):
              'member_number':       int,
@@ -385,7 +400,7 @@ class ImportHistCrmLidmaatschappen(ImportCrmBase):
                     continue
 
                 # ignore toekomstige einddatums (die kunnen nog wijzigen)
-                if lid_tot > date_now:
+                if lid_tot > self.date_now:
                     lid_tot = None
 
             # datum overlijden

@@ -108,6 +108,25 @@ class Command(BaseCommand):
                 self._check_ymd(lms.afmeld_datum, 'afmelddatum', id_str)
         # for
 
+    def _print_stats(self):
+        # rapporteer de samenvatting en schrijf deze ook in het logboek
+        delen = [
+            "%s fouten" % self.count_errors,
+            "%s waarschuwingen" % self.count_warnings,
+            "%s postcode issues" % self.count_postcode_issue,
+            "%s actieve verenigingen" % DataApiVereniging.objects.filter(afmeld_datum='').count(),
+            "%s actieve lidmaatschappen" % DataApiLidmaatschap.objects.filter(afmeld_datum='').count(),
+            "%s gestopte verenigingen" % DataApiVereniging.objects.exclude(afmeld_datum='').count(),
+            "%s gestopte lidmaatschappen" % DataApiLidmaatschap.objects.exclude(afmeld_datum='').count(),
+        ]
+
+        self.stdout.write("\n")
+        self.stdout.write("Samenvatting:")
+        for deel in delen:
+            self.stdout.write('   %s' % deel)
+        # for
+
+
     def handle(self, *args, **options):
         # self.dryrun = options['dryrun']
 
@@ -118,6 +137,7 @@ class Command(BaseCommand):
 
         self._check_ver()
         self._check_lms()
+        self._print_stats()
 
         self.stdout.write('%s errors, %s warnings, %s postcode issues' % (self.count_errors,
                                                                           self.count_warnings,

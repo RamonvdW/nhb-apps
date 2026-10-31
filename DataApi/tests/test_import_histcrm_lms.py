@@ -105,8 +105,8 @@ class TestDataApiImportHistCrmLms(E2EHelpers, TestCase):
         self.assertTrue("[ERROR] Lid 100002 heeft geen valide member_from[_club]: None" in out.getvalue())
         self.assertTrue("[ERROR] Lid 100003 heeft geen valide member_from[_club]: None" in out.getvalue())
         self.assertTrue("[WARNING] Lid 100003 uit plaats ?, land NL heeft postcode '3409'" in out.getvalue())
-        self.assertTrue("[INFO] Nieuw lms: Lid 100004" in out.getvalue())
-        self.assertTrue("[INFO] Nieuw lms: Lid 100005" in out.getvalue())
+        self.assertTrue("[INFO] Nieuw lms (1): Lid 100004" in out.getvalue())
+        self.assertTrue("[INFO] Nieuw lms (1): Lid 100005" in out.getvalue())
 
         # maak een afgemeld record aan
         DataApiLidmaatschap.objects.create(

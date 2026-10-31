@@ -321,7 +321,7 @@ kill "$PID_TAIL"
 wait "$PID_TAIL" 2>/dev/null
 
 # launch log in editor
-[ $RES -eq 0 ] || geany --new-instance --no-msgwin "$LOG" &
+[ $RES -eq 0 ] || geany --new-instance --no-msgwin "$LOG" 2>/dev/null &
 
 if [ $ABORTED -eq 0 ]
 then

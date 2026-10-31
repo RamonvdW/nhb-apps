@@ -188,13 +188,13 @@ class ImportCrmSporters(ImportCrmBase):
             if not lid_voornaam:
                 lid_voornaam = member['initials']
                 if not lid_voornaam:
-                    self.out_error('Lid %s heeft geen voornaam of initials' % lid_nr)
-                    continue
+                    self.out_error('Lid %s heeft geen voornaam of initialen' % lid_nr)
+                    continue        # data niet compleet voor dit lid
 
             lid_achternaam = member['name']
             if not lid_achternaam:
                 self.stdout.write("[ERROR] Lid %s heeft geen achternaam" % lid_nr)
-                continue        # data niet compleet voor dit lid
+                continue            # data niet compleet voor dit lid
 
             lid_is_erelid = False
             pos = lid_achternaam.find('(')
@@ -341,6 +341,13 @@ class ImportCrmSporters(ImportCrmBase):
             # lat_lon = (member['latitude'], member['longitude'])  --> is van dorp ipv adres?
             if postcode is not None and postadres is not None:
                 postcode = postcode.upper()     # sommige postcodes zijn kleine letters
+
+                land_iso = member['iso_abbr']
+                if land_iso == 'NL':
+                    no_space_postcode = postcode.replace(' ', '')
+                    if len(no_space_postcode) != 6:
+                        self.out_error('Lid %s in NL heeft slechte postcode: %s' % (lid_nr, repr(no_space_postcode)))
+
                 pos = postadres.find(postcode)
                 if pos < 0:
                     self.out_error('Postcode %s niet gevonden in adres %s' % (repr(postcode), repr(postadres)))
