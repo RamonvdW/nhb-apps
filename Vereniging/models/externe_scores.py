@@ -30,6 +30,7 @@ class ExterneScores(models.Model):
     # authenticatie gegevens
     username = models.CharField(max_length=128, blank=True, default='')
     password = models.CharField(max_length=128, blank=True, default='')
+    token = models.CharField(max_length=128, blank=True, default='')
 
     class Meta:
         """ meta data voor de admin interface """

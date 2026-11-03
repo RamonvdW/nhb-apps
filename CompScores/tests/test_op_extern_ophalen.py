@@ -242,6 +242,6 @@ class TestCompScoresOpExternOphalen(E2EHelpers, TestCase):
         self.ext.save(update_fields=['type'])
         stdout = OutputBuffer()
         comp_scores_uitslag_extern_ophalen(stdout, self.testdata.account_bb, self.ver, self.match18)
-        self.assertTrue("ExterneSscores.type 0 niet geimplementeerd" in stdout.getvalue())
+        self.assertTrue("ExterneScores.type 0 niet geimplementeerd" in stdout.getvalue())
 
 # end of file
