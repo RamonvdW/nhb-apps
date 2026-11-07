@@ -266,6 +266,7 @@ class TestCompUitslagenRK(E2EHelpers, TestCase):
 
         # zet 1 team in de Recurve ERE klasse
         team = TeamRK.objects.filter(volg_nr=1).first()
+        assert team is not None
         team.team_klasse = CompetitieTeamKlasse.objects.get(competitie=self.testdata.comp25, volgorde=15)
         team.save(update_fields=['team_klasse'])
 
@@ -300,17 +301,19 @@ class TestCompUitslagenRK(E2EHelpers, TestCase):
 
         # zet wat resultaten
         team = TeamRK.objects.filter(volg_nr=1).first()
+        assert team is not None
         team.result_rank = 1
         team.save(update_fields=['result_rank'])
 
         # koppel feitelijke leden
         team.feitelijke_leden.set(team.gekoppelde_leden.order_by('sporterboog__sporter__lid_nr')[:3])
-        deelnemer = team.feitelijke_leden.first()
-        #deelnemer.result_rk_teamscore_1 = 100
-        #deelnemer.result_rk_teamscore_2 = 110
-        #deelnemer.save(update_fields=['result_rk_teamscore_1', 'result_rk_teamscore_2'])
+        # deelnemer = team.feitelijke_leden.first()
+        # deelnemer.result_rk_teamscore_1 = 100
+        # deelnemer.result_rk_teamscore_2 = 110
+        # deelnemer.save(update_fields=['result_rk_teamscore_1', 'result_rk_teamscore_2'])
 
         team2 = TeamRK.objects.filter(volg_nr=2).first()
+        assert team2 is not None
         team2.result_rank = KAMP_RANK_BLANCO
         team2.save(update_fields=['result_rank'])
 
@@ -319,6 +322,7 @@ class TestCompUitslagenRK(E2EHelpers, TestCase):
         team.feitelijke_leden.add(deelnemer)
 
         team = TeamRK.objects.filter(volg_nr=3).first()
+        assert team is not None
         team.deelname = DEELNAME_NEE
         team.save(update_fields=['deelname'])
 

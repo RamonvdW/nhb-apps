@@ -108,7 +108,7 @@ class ExterneScoresArrowcast:
 
     def _uitslag_opslaan(self):
         """ sla de opgeslaagde uitslag op """
-        _func = 'ExterneScoreArrowCast._uitslag_opslaan'
+        _func = 'ExterneScoresArrowcast._uitslag_opslaan'
 
         uitslag = self._get_of_maak_match_uitslag()
 
@@ -131,7 +131,7 @@ class ExterneScoresArrowcast:
 
         self.stdout.write('[INFO] Uitslag bevat %s regels' % len(self._externe_uitslag))
         for result_d in self._externe_uitslag:
-            self.stdout.write('[DEBUG] %s result_d: %s' % (_func, repr(result_d)))
+            # self.stdout.write('[DEBUG] %s result_d: %s' % (_func, repr(result_d)))
 
             score_str = str(result_d.get('score', ''))[:6]              # afkappen voor de veiligheid
             lid_nr_str = result_d.get('lidnummer', '')[:6]              # afkappen voor de veiligheid
