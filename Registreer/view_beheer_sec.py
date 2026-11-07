@@ -13,7 +13,7 @@ from django.views import View
 from django.db.models import Q
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Account.models import get_account, Account
+from Account.models import get_account
 from BasisTypen.definities import GESLACHT2STR
 from Bestelling.definities import BESTELLING_STATUS2STR
 from Bestelling.models import BestellingMandje, Bestelling
@@ -212,6 +212,7 @@ class GastAccountsView(UserPassesTestMixin, TemplateView):
                     gast.geen_inlog = 3
                 else:
                     gast.geen_inlog = 1
+                    continue        # niet meer tonen
 
             gast.ophef = 0
 
@@ -445,6 +446,7 @@ class BestellingOverzettenView(UserPassesTestMixin, View):
             bestelling.account = self.account_new
             regel_pks = list(bestelling.regels.values_list('pk', flat=True))
 
+            inschrijving: WedstrijdInschrijving
             for inschrijving in WedstrijdInschrijving.objects.filter(bestelling_regel__pk__in=regel_pks):
 
                 if self.sporter_old == inschrijving.sporterboog.sporter:
