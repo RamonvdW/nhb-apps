@@ -54,6 +54,7 @@ def get_authorization_url(account_username: str, account_email: str):
                                         state=transactie.unieke_code)
 
     my_logger.info("{handle_authentication_response} unieke_code=%s, state=%s" % (repr(unieke_code), repr(state)))
+    my_logger.info("{handle_authentication_response} flow.code_verifier=%s" % repr(flow.code_verifier))
 
     msg += "[%s] authorization_url: %s\n" % (stamp_str, repr(authorization_url))
     transactie.log = msg
