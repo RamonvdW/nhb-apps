@@ -42,8 +42,7 @@ def get_authorization_url(account_username: str, account_email: str):
     flow = Flow.from_client_secrets_file(
                             CLIENT_ID_AND_SECRET,
                             scopes=SCOPES,
-                            redirect_uri=redirect_uri,
-                            autogenerate_code_verifier=True)
+                            redirect_uri=redirect_uri)
 
     # handshake met Google om de URL te krijgen waar we de gebruiker heen moeten sturen
     authorization_url, state = flow.authorization_url(
@@ -63,13 +62,19 @@ def get_authorization_url(account_username: str, account_email: str):
     return authorization_url
 
 
-def handle_authentication_response(webhook_uri):
+def handle_authentication_response(webhook_uri, transactie: Transactie):
     my_logger.info("{handle_authentication_response} webhook_uri=%s" % webhook_uri)
+
+    # indicate where the API server will redirect the user after the user completes the authorization flow.
+    # moet overeenkomen met een URI die opgezet is in Google console
+    redirect_uri = settings.SITE_URL + reverse('GoogleDrive:oauth-webhook')
 
     # lees de json met de credentials
     flow = Flow.from_client_secrets_file(
                         CLIENT_ID_AND_SECRET,
-                        scopes=SCOPES)
+                        scopes=SCOPES,
+                        redirect_uri=redirect_uri,      # TODO: nodig?
+                        state=transactie.unieke_code)
 
     try:
         host = settings.SITE_URL.replace('http://', 'https://')

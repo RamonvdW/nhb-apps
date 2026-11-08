@@ -58,7 +58,7 @@ class OAuthWebhookView(View):
         transactie.log += "[%s] Webhook aanroep: %s\n" % (stamp_str, uri)
         transactie.save(update_fields=['log', 'has_been_used'])
 
-        token = handle_authentication_response(uri)
+        token = handle_authentication_response(uri, transactie)
         if not token:
             # voeg een foutmelding toe aan het logboek van de transactie
             now = timezone.now()
