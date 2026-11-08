@@ -66,10 +66,21 @@
                     <td>{{ wedstrijd.vereniging.plaats }}</td>
                 </tr>
 
+                {% if import_log %}
+                    <tr class="sv-rood-text">
+                        <th>Download fouten</th>
+                        <td>
+                            {% for regel in import_log %}
+                                <span>{{ regel }}</span><br>
+                            {% endfor %}
+                        </td>
+                    </tr>
+                {% endif %}
+
             </table>
+
         </div>
     </div>
-
 
     <!-- witruimte -->
     <div class="row center">

@@ -11,13 +11,14 @@ from CompLaagRegio.models import RegioRonde
 from CompScores.operations.uitslag_extern_ophalen import comp_scores_uitslag_extern_ophalen
 from TestHelpers.e2ehelpers import E2EHelpers, OutputBuffer
 from TestHelpers.testdata import TestData
-from Vereniging.definities import TYPE_EXTERNE_SCORES_CENTAUR, TYPE_EXTERNE_SCORES_ONBEKEND
+from Vereniging.definities import (TYPE_EXTERNE_SCORES_CENTAUR, TYPE_EXTERNE_SCORES_ARROWCAST,
+                                   TYPE_EXTERNE_SCORES_ONBEKEND)
 from Vereniging.models import ExterneScores
 from requests.exceptions import SSLError
 from unittest.mock import patch
 
 
-class ResponseMock:
+class ResponseMockCentaur:
 
     def __init__(self, status_code: int=200, give_token: bool=True, nr_of_results: int=0):
         self.is_auth = True
@@ -68,6 +69,53 @@ class ResponseMock:
 
             elif self.nr_of_results == -2:
                 d['results'] = -2        # not a list
+
+        return d
+
+
+class ResponseMockArrowcast:
+
+    def __init__(self, status_code: int=200, nr_of_results: int=0):
+        self.status_code = status_code
+        self.nr_of_results = nr_of_results
+
+    def json(self):
+        d = dict()
+
+        if self.nr_of_results >= 0:
+            d['results'] = res = list()
+
+            if self.nr_of_results >= 1:
+                # slecht score, wordt overgeslagen
+                res.append({'score': '', 'lidnummer': '', 'boogtype': ''})
+
+                # te hoge score, wordt overgeslagen
+                res.append({'score': '301', 'lidnummer': '', 'boogtype': ''})
+
+                # onbekende deelnemer
+                res.append({'score': '200', 'lidnummer': '100001', 'boogtype': 'R'})
+
+                if self.nr_of_results > 4:
+                    # deelnemer 1
+                    res.append({'score': '200', 'lidnummer': '300344', 'boogtype': 'R'})
+
+                    # deelnemer 2; heeft 2 bogen
+                    res.append({'score': '280', 'lidnummer': '300326', 'boogtype': 'C'})
+
+                    # deelnemer 3
+                    res.append({'score': '190', 'lidnummer': '300339', 'boogtype': 'BB'})
+                else:
+                    # deelnemer 1, aangepaste score
+                    res.append({'score': '222', 'lidnummer': '300344', 'boogtype': 'R'})
+
+                    # deelnemer 2 is verwijderd
+
+                    # deelnemer 3, zelfde score
+                    res.append({'score': '190', 'lidnummer': '300339', 'boogtype': 'BB'})
+
+
+        elif self.nr_of_results == -2:
+            d['results'] = -2        # not a list
 
         return d
 
@@ -129,7 +177,7 @@ class TestCompScoresOpExternOphalen(E2EHelpers, TestCase):
 
         self.ver = self.testdata.vereniging[self.ver_nr]
 
-        self.ext = ExterneScores.objects.create(
+        self.ext1 = ExterneScores.objects.create(
                             is_actief=False,
                             vereniging=self.ver,
                             type=TYPE_EXTERNE_SCORES_CENTAUR,
@@ -138,17 +186,24 @@ class TestCompScoresOpExternOphalen(E2EHelpers, TestCase):
                             username='secret_name',
                             password='secret_pass')
 
+        self.ext2 = ExterneScores.objects.create(
+                            is_actief=False,
+                            vereniging=self.ver,
+                            type=TYPE_EXTERNE_SCORES_ARROWCAST,
+                            url_ophalen='https://test.not/api/ophalen/',
+                            token='secret_token')
+
         # for deelnemer in self.testdata.comp18_deelnemers:
         #     print(deelnemer)
 
-    def test_extern(self):
+    def test_centaur(self):
         # niet actief
         stdout = OutputBuffer()
         comp_scores_uitslag_extern_ophalen(stdout, self.testdata.account_bb, self.ver, self.match18)
         self.assertTrue("heeft geen externe scores geconfigureerd" in stdout.getvalue())
 
-        self.ext.is_actief = True
-        self.ext.save(update_fields=['is_actief'])
+        self.ext1.is_actief = True
+        self.ext1.save(update_fields=['is_actief'])
 
         # SSLError
         stdout = OutputBuffer()
@@ -158,21 +213,21 @@ class TestCompScoresOpExternOphalen(E2EHelpers, TestCase):
 
         # foutcode
         stdout = OutputBuffer()
-        resp = ResponseMock(status_code=404)
+        resp = ResponseMockCentaur(status_code=404)
         with patch('requests.post', return_value=resp):
             comp_scores_uitslag_extern_ophalen(stdout, self.testdata.account_bb, self.ver, self.match18)
         self.assertTrue("[ERROR] {ExterneScoresCentaur._fetch_token} Onverwachte status tijdens authenticatie: 404" in stdout.getvalue())
 
         # geen token
         stdout = OutputBuffer()
-        resp = ResponseMock(give_token=False)
+        resp = ResponseMockCentaur(give_token=False)
         with patch('requests.post', return_value=resp):
             comp_scores_uitslag_extern_ophalen(stdout, self.testdata.account_bb, self.ver, self.match18)
         self.assertTrue("[ERROR] {ExterneScoresCentaur._fetch_token} Geen token gekregen tijdens authenticatie: data=" in stdout.getvalue())
 
         # geen resultaten
         stdout = OutputBuffer()
-        resp = ResponseMock(nr_of_results=-1)
+        resp = ResponseMockCentaur(nr_of_results=-1)
         with patch('requests.post', return_value=resp):
             comp_scores_uitslag_extern_ophalen(stdout, self.testdata.account_bb, self.ver, self.match18)
         self.assertTrue("[INFO] {ExterneScoresCentaur._fetch_token} token ontvangen (len=4)" in stdout.getvalue())
@@ -180,30 +235,29 @@ class TestCompScoresOpExternOphalen(E2EHelpers, TestCase):
 
         # SSLError tijdens tweede request
         stdout = OutputBuffer()
-        resp = ResponseMock(nr_of_results=-1)
+        resp = ResponseMockCentaur(nr_of_results=-1)
         with patch('requests.post', side_effect=[resp, SSLError('uitzondering')]):
             comp_scores_uitslag_extern_ophalen(stdout, self.testdata.account_bb, self.ver, self.match18)
         self.assertTrue("[ERROR] {ExterneScoresCentaur._fetch_uitslag} Onverwachte fout tijdens ophalen: uitzondering" in stdout.getvalue())
 
         # foutcode
         stdout = OutputBuffer()
-        resp1 = ResponseMock(nr_of_results=0)
-        resp2 = ResponseMock(status_code=404)
+        resp1 = ResponseMockCentaur(nr_of_results=0)
+        resp2 = ResponseMockCentaur(status_code=404)
         with patch('requests.post', side_effect=[resp1, resp2]):
             comp_scores_uitslag_extern_ophalen(stdout, self.testdata.account_bb, self.ver, self.match18)
         self.assertTrue("[ERROR] {ExterneScoresCentaur._fetch_uitslag} Onverwachte status tijdens ophalen: 404" in stdout.getvalue())
 
         # verkeerde resultaten
         stdout = OutputBuffer()
-        resp = ResponseMock(nr_of_results=-2)
+        resp = ResponseMockCentaur(nr_of_results=-2)
         with patch('requests.post', return_value=resp):
             comp_scores_uitslag_extern_ophalen(stdout, self.testdata.account_bb, self.ver, self.match18)
-        # print(stdout.getvalue())
         self.assertTrue("[ERROR] {ExterneScoresCentaur._fetch_uitslag} results in data is geen lijst {'results': -2}" in stdout.getvalue())
 
         # lege resultaten
         stdout = OutputBuffer()
-        resp = ResponseMock(nr_of_results=0)
+        resp = ResponseMockCentaur(nr_of_results=0)
         with patch('requests.post', return_value=resp):
             comp_scores_uitslag_extern_ophalen(stdout, self.testdata.account_bb, self.ver, self.match18)
         self.assertTrue("ERROR] {ExterneScoresCentaur._fetch_uitslag} Geen results in data {'results': []}" in stdout.getvalue())
@@ -211,10 +265,9 @@ class TestCompScoresOpExternOphalen(E2EHelpers, TestCase):
         # met echte data
         # dit maakt ook de uitslag aan
         stdout = OutputBuffer()
-        resp = ResponseMock(nr_of_results=5)
+        resp = ResponseMockCentaur(nr_of_results=5)
         with patch('requests.post', return_value=resp):
             comp_scores_uitslag_extern_ophalen(stdout, self.testdata.account_bb, self.ver, self.match18)
-        # print(stdout.getvalue())
         self.assertTrue("[ERROR] {ExterneScoresCentaur._uitslag_opslaan} slechte score waarde: ''" in stdout.getvalue())
         self.assertTrue("[ERROR] {ExterneScoresCentaur._uitslag_opslaan} slechte score waarde: '301'" in stdout.getvalue())
         self.assertTrue("[WARNING] {ExterneScoresCentaur._uitslag_opslaan} is geen regio deelnemer: ('100001', 'Recurve')" in stdout.getvalue())
@@ -226,7 +279,7 @@ class TestCompScoresOpExternOphalen(E2EHelpers, TestCase):
         # nog een keer - geeft andere coverage
         # verwijdert 1 uit de uitslag
         stdout = OutputBuffer()
-        resp = ResponseMock(nr_of_results=1)
+        resp = ResponseMockCentaur(nr_of_results=1)
         with patch('requests.post', return_value=resp):
             comp_scores_uitslag_extern_ophalen(stdout, self.testdata.account_bb, self.ver, self.match18)
         # print(stdout.getvalue())
@@ -238,10 +291,81 @@ class TestCompScoresOpExternOphalen(E2EHelpers, TestCase):
         self.assertEqual(count, 3)
 
         # onbekend type
-        self.ext.type = TYPE_EXTERNE_SCORES_ONBEKEND
-        self.ext.save(update_fields=['type'])
+        self.ext1.type = TYPE_EXTERNE_SCORES_ONBEKEND
+        self.ext1.save(update_fields=['type'])
         stdout = OutputBuffer()
         comp_scores_uitslag_extern_ophalen(stdout, self.testdata.account_bb, self.ver, self.match18)
-        self.assertTrue("ExterneSscores.type 0 niet geimplementeerd" in stdout.getvalue())
+        self.assertTrue("ExterneScores.type 0 niet geimplementeerd" in stdout.getvalue())
+
+    def test_arrowcast(self):
+        self.ext2.is_actief = True
+        self.ext2.save(update_fields=['is_actief'])
+
+        # SSLError
+        stdout = OutputBuffer()
+        with patch('requests.post', side_effect=SSLError('uitzondering')):
+            comp_scores_uitslag_extern_ophalen(stdout, self.testdata.account_bb, self.ver, self.match18)
+        self.assertTrue("[ERROR] {ExterneScoresArrowcast._fetch_uitslag} Onverwachte fout tijdens ophalen: uitzondering" in stdout.getvalue())
+
+        # foutcode
+        stdout = OutputBuffer()
+        resp = ResponseMockCentaur(status_code=404)
+        with patch('requests.post', return_value=resp):
+            comp_scores_uitslag_extern_ophalen(stdout, self.testdata.account_bb, self.ver, self.match18)
+        self.assertTrue("[ERROR] {ExterneScoresArrowcast._fetch_uitslag} Onverwachte status tijdens ophalen: 404" in stdout.getvalue())
+
+        # geen results in json
+        stdout = OutputBuffer()
+        resp = ResponseMockArrowcast(nr_of_results=-1)
+        with patch('requests.post', return_value=resp):
+            comp_scores_uitslag_extern_ophalen(stdout, self.testdata.account_bb, self.ver, self.match18)
+        self.assertTrue("[ERROR] {ExterneScoresArrowcast._fetch_uitslag} Geen results in data {}" in stdout.getvalue())
+
+        # verkeerd type results
+        stdout = OutputBuffer()
+        resp = ResponseMockArrowcast(nr_of_results=-2)
+        with patch('requests.post', return_value=resp):
+            comp_scores_uitslag_extern_ophalen(stdout, self.testdata.account_bb, self.ver, self.match18)
+        self.assertTrue("[ERROR] {ExterneScoresArrowcast._fetch_uitslag} results in data is geen lijst {'results': -2}" in stdout.getvalue())
+
+        # lege resultaten
+        stdout = OutputBuffer()
+        resp = ResponseMockArrowcast(nr_of_results=0)
+        with patch('requests.post', return_value=resp):
+            comp_scores_uitslag_extern_ophalen(stdout, self.testdata.account_bb, self.ver, self.match18)
+        self.assertTrue("ERROR] {ExterneScoresArrowcast._fetch_uitslag} Geen results in data {'results': []}" in stdout.getvalue())
+
+        # met echte data
+        # dit maakt ook de uitslag aan
+        stdout = OutputBuffer()
+        resp = ResponseMockArrowcast(nr_of_results=5)
+        with patch('requests.post', return_value=resp):
+            comp_scores_uitslag_extern_ophalen(stdout, self.testdata.account_bb, self.ver, self.match18)
+        self.assertTrue("[ERROR] {ExterneScoresArrowcast._uitslag_opslaan} slechte score waarde: ''" in stdout.getvalue())
+        self.assertTrue("[ERROR] {ExterneScoresArrowcast._uitslag_opslaan} slechte score waarde: '301'" in stdout.getvalue())
+        self.assertTrue("[WARNING] {ExterneScoresArrowcast._uitslag_opslaan} is geen regio deelnemer: ('100001', 'R')" in stdout.getvalue())
+        self.match18.refresh_from_db()
+        count = self.match18.uitslag.scores.count()
+        self.assertEqual(count, 3)
+
+        # nog een keer - geeft andere coverage
+        # verwijdert 1 uit de uitslag
+        stdout = OutputBuffer()
+        resp = ResponseMockArrowcast(nr_of_results=1)
+        with patch('requests.post', return_value=resp):
+            comp_scores_uitslag_extern_ophalen(stdout, self.testdata.account_bb, self.ver, self.match18)
+        # print(stdout.getvalue())
+        self.assertTrue("[INFO] {ExterneScoresArrowcast._uitslag_opslaan} bijgewerkte score:" in stdout.getvalue())
+        self.assertTrue("[INFO] {ExterneScoresArrowcast._uitslag_opslaan} verwijder uit uitslag:" in stdout.getvalue())
+        count = self.match18.uitslag.scores.count()
+        self.assertEqual(count, 3)      # verwijderde score: sporter staat er nog steeds in, met speciale score
+
+        # geen token ingesteld
+        self.ext2.token = ''
+        self.ext2.save(update_fields=['token'])
+        stdout = OutputBuffer()
+        comp_scores_uitslag_extern_ophalen(stdout, self.testdata.account_bb, self.ver, self.match18)
+        self.assertEqual('', stdout.getvalue())
+
 
 # end of file

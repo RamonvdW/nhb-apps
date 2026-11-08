@@ -55,12 +55,10 @@ class TestCompBeheerStats(E2EHelpers, TestCase):
         Sporter.objects.filter(bij_vereniging__regio__regio_nr=103).all().delete()
 
         deelnemer = data.comp18_deelnemers[0]
-        assert isinstance(deelnemer, RegioDeelnemer)
         deelnemer.aantal_scores = 5
         deelnemer.save(update_fields=['aantal_scores'])
 
         deelnemer = data.comp25_deelnemers[0]
-        assert isinstance(deelnemer, RegioDeelnemer)
         deelnemer.aantal_scores = 6     # must be >5, for coverage
         deelnemer.save(update_fields=['aantal_scores'])
 

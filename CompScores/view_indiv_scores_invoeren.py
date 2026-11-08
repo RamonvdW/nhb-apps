@@ -11,6 +11,7 @@ from django.core.exceptions import PermissionDenied
 from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from CompLaagRegio.models import RegioDeelnemer, RegioTeam, RegioRondeTeam
+from CompScores.models import ExterneScoresImportLogboek
 from CompScores.helpers import (mag_deelcomp_wedstrijd_wijzigen, bepaal_match_en_deelcomp_of_404,
                                 vereniging_heeft_externe_scores)
 from Functie.definities import Rol
@@ -133,6 +134,10 @@ class WedstrijdUitslagInvoerenView(UserPassesTestMixin, TemplateView):
             if vereniging_heeft_externe_scores(self.functie_nu.vereniging):
                 context['url_extern_ophalen'] = reverse('CompScores:uitslag-extern-ophalen',
                                                         kwargs={'match_pk': match.pk})
+
+                import_log = ExterneScoresImportLogboek.objects.filter(match=match).first()
+                if import_log and len(import_log.logboek) > 0:
+                    context['import_log'] = import_log.logboek.split('\n')
 
         if deelcomp.regio_organiseert_teamcompetitie:
             context['team_pk2naam'] = team_pk2naam = dict()

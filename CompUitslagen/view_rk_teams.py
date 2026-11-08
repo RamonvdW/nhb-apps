@@ -250,6 +250,7 @@ class UitslagenRayonTeamsView(TemplateView):
         alle_ranks = list()
         eerste_reserve = True
 
+        team = None
         for team in (TeamRK
                      .objects
                      .filter(kamp=deelkamp,
@@ -389,21 +390,22 @@ class UitslagenRayonTeamsView(TemplateView):
                     # for
         # for
 
-        teller = self._finalize_klasse(deelkamp,
-                                       klasse_teams_done, klasse_teams_plan, klasse_teams_afgemeld,
-                                       alle_matchscores, alle_ranks)
-        if teller:
-            teller.aantal_regels = aantal_regels
-            teller.break_klasse = True
-            if teller.team_klasse:
-                teller.klasse_str = teller.team_klasse.beschrijving
-                teller.klasse_hashtag = make_valid_hashtag(teller.klasse_str)
-                try:
-                    teller.match = teamklasse2match[teller.team_klasse.pk]
-                except KeyError:
-                    pass
-            else:
-                teller.klasse_str = team.team_type.beschrijving + " - Nog niet ingedeeld in een wedstrijdklasse"
+        if team:
+            teller = self._finalize_klasse(deelkamp,
+                                           klasse_teams_done, klasse_teams_plan, klasse_teams_afgemeld,
+                                           alle_matchscores, alle_ranks)
+            if teller:
+                teller.aantal_regels = aantal_regels
+                teller.break_klasse = True
+                if teller.team_klasse:
+                    teller.klasse_str = teller.team_klasse.beschrijving
+                    teller.klasse_hashtag = make_valid_hashtag(teller.klasse_str)
+                    try:
+                        teller.match = teamklasse2match[teller.team_klasse.pk]
+                    except KeyError:
+                        pass
+                else:
+                    teller.klasse_str = team.team_type.beschrijving + " - Nog niet ingedeeld in een wedstrijdklasse"
 
         totaal_lijst.extend(klasse_teams_done)
         totaal_lijst.extend(klasse_teams_plan)

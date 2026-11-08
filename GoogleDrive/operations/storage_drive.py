@@ -191,12 +191,14 @@ class StorageGoogleDrive(StorageBase):
             # self.stdout.write('[INFO] {share_seizoen_folder} perms.list response=%s' % repr(response))
 
             share_with = self._share_with_emails[:]
-            for perm in response['permissions']:
-                if perm['type'] == 'user' and perm['emailAddress'] in share_with:
-                    # already shared with this user
-                    # remove from list to prevent sharing again
-                    share_with.remove(perm['emailAddress'])
-            # for
+
+            if response and isinstance(response, dict):
+                for perm in response['permissions']:
+                    if perm['type'] == 'user' and perm['emailAddress'] in share_with:
+                        # already shared with this user
+                        # remove from list to prevent sharing again
+                        share_with.remove(perm['emailAddress'])
+                # for
 
             # add new sharing permissions
             for email in share_with:
@@ -207,7 +209,7 @@ class StorageGoogleDrive(StorageBase):
                                                          "emailAddress": email,
                                                      },
                                                      sendNotificationEmail=False)
-                response = self._execute(request)
+                _response = self._execute(request)
                 # self.stdout.write('[INFO] {share_seizoen_folder} perms.create response=%s' % repr(response))
             # for
 
@@ -224,10 +226,11 @@ class StorageGoogleDrive(StorageBase):
         response = self._execute(request)
         # self.stdout.write('[DEBUG] {vind_comp_bestand} response: %s' % repr(response))
 
-        all_files = response['files']
-        if len(all_files) > 0:
-            first_file = all_files[0]
-            return first_file['id']
+        if response and isinstance(response, dict):
+            all_files = response['files']
+            if len(all_files) > 0:
+                first_file = all_files[0]
+                return first_file['id']
         return ""
 
     def _maak_bestand_uit_template(self, folder_name, fname) -> str:
@@ -291,7 +294,7 @@ class StorageGoogleDrive(StorageBase):
             bestand.log = msg
             bestand.save(update_fields=['log'])
 
-    def maak_sheet_van_template(self, afstand: int, is_teams: bool, is_bk: bool, klasse_pk: int, rayon_nr: int, fname: str) -> str:
+    def maak_sheet_van_template(self, afstand: int, is_teams: bool, is_bk: bool, klasse_pk: int, rayon_nr: int, fname: str) -> str | None:
         """ maak een Google Sheet aan """
 
         error_msg = None

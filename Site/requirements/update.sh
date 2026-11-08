@@ -32,6 +32,9 @@ read -r
 echo "[INFO] Running pip-sync requirements_dev.txt"
 pip-sync requirements_dev.txt
 
+# de een of andere reden wordt deze soms toch geinstalleerd
+pip uninstall opentelemetry-api
+
 echo
 echo "[INFO] Getting licenses"
 cd ../..

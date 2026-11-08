@@ -209,44 +209,44 @@ class TestData(object):
         self.comp25_klassen_rk_bk_teams = dict()    # [teamtype afkorting] = [klasse, ...]
 
         # all inschrijvingen
-        self.comp18_deelnemers = list()             # [RegioDeelnemer, ...]
-        self.comp25_deelnemers = list()             # [RegioDeelnemer, ...]
+        self.comp18_deelnemers: list[RegioDeelnemer] = list()
+        self.comp25_deelnemers: list[RegioDeelnemer] = list()
 
         # inschrijvingen zonder team voorkeur
-        self.comp18_deelnemers_geen_team = list()   # [RegioDeelnemer, ...]
-        self.comp25_deelnemers_geen_team = list()   # [RegioDeelnemer, ...]
+        self.comp18_deelnemers_geen_team: list[RegioDeelnemer] = list()
+        self.comp25_deelnemers_geen_team: list[RegioDeelnemer] = list()
 
         # inschrijvingen met team voorkeur
-        self.comp18_deelnemers_team = list()        # [RegioDeelnemer, ...]
-        self.comp25_deelnemers_team = list()        # [RegioDeelnemer, ...]
+        self.comp18_deelnemers_team: list[RegioDeelnemer] = list()
+        self.comp25_deelnemers_team: list[RegioDeelnemer] = list()
 
         # aangemaakte regio teams
-        self.comp18_regioteams = list()
-        self.comp25_regioteams = list()
+        self.comp18_regioteams: list[RegioTeam] = list()
+        self.comp25_regioteams: list[RegioTeam] = list()
 
         # aangemaakte regio poules
-        self.comp18_poules = list()
-        self.comp25_poules = list()
+        self.comp18_poules: list[RegioPoule] = list()
+        self.comp25_poules: list[RegioPoule] = list()
 
         # regiokampioenen
-        self.comp18_regiokampioenen = list()    # [DeelnemerRK met kampioen_label != '', ...]
-        self.comp25_regiokampioenen = list()    # [DeelnemerRK met kampioen_label != '', ...]
+        self.comp18_regiokampioenen: list[DeelnemerRK] = list()   # DeelnemerRK met kampioen_label != ''
+        self.comp25_regiokampioenen: list[DeelnemerRK] = list()   # DeelnemerRK met kampioen_label != ''
 
         # aangemaakte RK sporters
-        self.comp18_rk_deelnemers = list()      # [DeelnemerRK, ...]
-        self.comp25_rk_deelnemers = list()      # [DeelnemerRK, ...]
+        self.comp18_rk_deelnemers: list[DeelnemerRK] = list()
+        self.comp25_rk_deelnemers: list[DeelnemerRK] = list()
 
         # aangemaakte RK teams
-        self.comp18_rk_teams = list()
-        self.comp25_rk_teams = list()
+        self.comp18_rk_teams: list[TeamRK] = list()
+        self.comp25_rk_teams: list[TeamRK] = list()
 
         # aangemaakte BK sporters
-        self.comp18_bk_deelnemers = list()
-        self.comp25_bk_deelnemers = list()
+        self.comp18_bk_deelnemers: list[DeelnemerBK] = list()
+        self.comp25_bk_deelnemers: list[DeelnemerBK] = list()
 
         # aangemaakte BK teams
-        self.comp18_bk_teams = list()
-        self.comp25_bk_teams = list()
+        self.comp18_bk_teams: list[TeamBK] = list()
+        self.comp25_bk_teams: list[TeamBK] = list()
 
         self._accounts_beheerders = list()      # 1 per vereniging, voor BKO, RKO, RCL
 
