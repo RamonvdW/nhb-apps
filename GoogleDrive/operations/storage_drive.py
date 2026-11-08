@@ -107,8 +107,11 @@ class StorageGoogleDrive(StorageBase):
                 self.stdout.write('[ERROR] {execute} google.auth.TransportError: %s' % exc)
             except ServerNotFoundError as exc:      # pragma: no cover
                 self.stdout.write('[ERROR] {execute} httplib2.error.ServerNotFoundError: %s' % exc)
+            except RefreshError as exc:
+                self.stdout.write('[ERROR] {execute} RefreshError: %s' % exc)
+                return None
             else:
-                # self.stdout.write('[DEBUG] {execute} response=%s' % repr(response))
+                self.stdout.write('[DEBUG] {execute} response=%s' % repr(response))
                 return response
 
             self.stdout.write('[DEBUG] {execute} Retrying in %s seconds' % wait_sec)
