@@ -2611,8 +2611,8 @@ $jscomp.polyfill = function (e, r, p, m) {
         var triggerBRect = this.el.getBoundingClientRect();
         var dropdownBRect = this.dropdownEl.getBoundingClientRect();
 
-        var idealHeight = dropdownBRect.height;
-        var idealWidth = dropdownBRect.width;
+        var idealHeight = 1 + Math.round(dropdownBRect.height);    // rounding to avoid off-by-1px wrapping
+        var idealWidth = 1 + Math.round(dropdownBRect.width);      // rounding to avoid off-by-1px wrapping
         var idealXPos = triggerBRect.left - dropdownBRect.left;
         var idealYPos = triggerBRect.top - dropdownBRect.top;
 
