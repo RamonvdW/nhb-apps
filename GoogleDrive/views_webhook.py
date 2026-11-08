@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-#  Copyright (c) 2025 Ramon van der Winkel.
+#  Copyright (c) 2025-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -63,7 +63,7 @@ class OAuthWebhookView(View):
             # voeg een foutmelding toe aan het logboek van de transactie
             now = timezone.now()
             stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
-            transactie.log += "[%s] Geen bruikbaar token of geen refresh token)\n" % stamp_str
+            transactie.log += "[%s] Geen bruikbaar token of geen refresh token\n" % stamp_str
             transactie.save(update_fields=['log'])
 
             next_url = reverse('GoogleDrive:resultaat-mislukt')
