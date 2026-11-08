@@ -54,6 +54,8 @@ def get_authorization_url(account_username: str, account_email: str):
                                         #prompt='select_account',
                                         state=transactie.unieke_code)
 
+    my_logger.debug("{handle_authentication_response} unieke_code=%s, state=%s" % (repr(unieke_code), repr(state)))
+
     msg += "[%s] authorization_url: %s\n" % (stamp_str, repr(authorization_url))
     transactie.log = msg
     transactie.save(update_fields=['log'])
@@ -62,6 +64,8 @@ def get_authorization_url(account_username: str, account_email: str):
 
 
 def handle_authentication_response(webhook_uri):
+    my_logger.debug("{handle_authentication_response} webhook_uri=%s" % webhook_uri)
+
     # lees de json met de credentials
     flow = Flow.from_client_secrets_file(
                         CLIENT_ID_AND_SECRET,
@@ -69,7 +73,6 @@ def handle_authentication_response(webhook_uri):
 
     try:
         host = settings.SITE_URL.replace('http://', 'https://')
-        my_logger.debug("{handle_authentication_response} redirect_uri=%s, host=%s, webhook_uri=%s" % (flow.redirect_uri, host, webhook_uri))
         flow.fetch_token(authorization_response=host + webhook_uri)
     except AccessDeniedError as exc:
         # gebruiker heeft toestemming niet gegeven
