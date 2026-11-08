@@ -47,14 +47,14 @@ def get_authorization_url(account_username: str, account_email: str):
     # handshake met Google om de URL te krijgen waar we de gebruiker heen moeten sturen
     authorization_url, state = flow.authorization_url(
                                         access_type='offline',              # recommended for web server
-                                        #include_granted_scopes='true',     # optional; recommended
-                                        #login_hint=account_email,          # laat keuze aan de gebruiker
-                                        #prompt='consent',
-                                        #prompt='select_account',
+                                        # include_granted_scopes='true',    # optional; recommended
+                                        # login_hint=account_email,         # laat keuze aan de gebruiker
+                                        # prompt='consent',
+                                        # prompt='select_account',
                                         state=transactie.unieke_code)
 
-    my_logger.info("{handle_authentication_response} unieke_code=%s, state=%s" % (repr(unieke_code), repr(state)))
-    my_logger.info("{handle_authentication_response} flow.code_verifier=%s" % repr(flow.code_verifier))
+    # my_logger.info("{handle_authentication_response} unieke_code=%s, state=%s" % (repr(unieke_code), repr(state)))
+    # my_logger.info("{handle_authentication_response} flow.code_verifier=%s" % repr(flow.code_verifier))
 
     transactie.code_verifier = flow.code_verifier
 
@@ -79,9 +79,6 @@ def handle_authentication_response(webhook_uri, transactie: Transactie):
                         scopes=SCOPES,
                         redirect_uri=redirect_uri,      # TODO: nodig?
                         state=transactie.unieke_code)
-
-    my_logger.info("{handle_authentication_response} flow.code_verifier=%s" % repr(flow.code_verifier))
-    my_logger.info("{handle_authentication_response} transactie.code_verifier=%s" % repr(transactie.code_verifier))
 
     try:
         host = settings.SITE_URL.replace('http://', 'https://')
