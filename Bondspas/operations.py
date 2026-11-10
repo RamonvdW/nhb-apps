@@ -10,6 +10,7 @@ from django.utils.formats import date_format
 from BasisTypen.definities import GESLACHT_ANDERS
 from Bondspas.models import BondspasJaar
 from Opleiding.models import OpleidingDiploma
+from Spelden.definities import SPELD_CATEGORIE_TO_VOLGORDE_OP_PAS
 from Spelden.models import SpeldToegekend
 from Sporter.leeftijdsklassen import (bereken_leeftijdsklasse_wa,
                                       bereken_leeftijdsklasse_khsn,
@@ -100,22 +101,27 @@ def maak_bondspas_regels(sporter: Sporter, jaar_pas):
         regels.append(("Opleidingen", "n.v.t."))
 
     # prestatiespelden
-    afkortingen = list()
+    pas_codes = list()
     prev_cat = None
     for toegekend in (SpeldToegekend
                       .objects
                       .filter(sporter=sporter)
                       .select_related('speld')
                       .order_by('speld__categorie',
-                                'speld__volgorde')):    # laagste eerst = beste eerst
+                                '-speld__volgorde')):    # hoogste eerst = beste binnen de categorie
 
         if toegekend.speld.categorie != prev_cat:
-            afkortingen.append(toegekend.speld.pas_code)
+            # pak de eerste in deze categorie
+            volgorde_op_pas = SPELD_CATEGORIE_TO_VOLGORDE_OP_PAS[toegekend.speld.categorie]
+            tup = (volgorde_op_pas, toegekend.speld.pas_code)
+            pas_codes.append(tup)
             prev_cat = toegekend.speld.categorie
     # for
 
-    if len(afkortingen):
-        msg = ", ".join(afkortingen)
+    if len(pas_codes):
+        # sorted op de gewenste volgorde waarin we de codes willen tonen
+        pas_codes.sort()
+        msg = ", ".join([pas_code for _, pas_code in pas_codes])
         if len(msg) > 30:
             pos = msg.find(', ', int(len(msg)/2))
             regels.append(("Speelsterkte", msg[:pos+1]))  # inclusief komma
