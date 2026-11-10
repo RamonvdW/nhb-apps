@@ -184,9 +184,11 @@
                         <td class="center">
                             {% if regel.url_details %}
                                 {% if regel.is_voor_sluitingsdatum %}
-                                    <a class="btn-sv-rood" href="{{ regel.url_details }}">Details</a>
+                                    {% sv-knop-nav url=regel.url_details icon='kalender details wedstrijd' extra_class='hide-on-large-and-up' tekst='' %}
+                                    {% sv-knop-nav url=regel.url_details icon='' extra_class='hide-on-med-and-down' tekst='Details' %}
                                 {% else %}
-                                    <a class="btn-sv-blauw" href="{{ regel.url_details }}">Details</a>
+                                    {% sv-knop-nav url=regel.url_details kleur='blauw' icon='kalender details wedstrijd' extra_class='hide-on-large-and-up' tekst='' %}
+                                    {% sv-knop-nav url=regel.url_details kleur='blauw' icon='' extra_class='hide-on-med-and-down' tekst='Details' %}
                                 {% endif %}
                             {% endif %}
                         </td>

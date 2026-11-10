@@ -401,6 +401,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
         self.voorkeuren = get_sporter_voorkeuren(self.sporter)
 
         if self.ver:
+            # TODO: ook afdwingen op de wedstrijdkalender?
             is_administratief = self.ver.regio.is_administratief      # dus helemaal geen wedstrijden
             is_extern = self.ver.is_extern                            # dus geen bondscompetities
         else:
@@ -454,7 +455,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                     context['toon_bondscompetities'] = False
 
             context['prestatiespelden'] = self._find_prestatiespelden()
-            context['url_procedures'] = settings.URL_PROCEDURES
+            # context['url_procedures'] = settings.URL_PROCEDURES
 
             context['diplomas'] = self._find_diplomas()
 

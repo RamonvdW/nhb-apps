@@ -295,7 +295,7 @@ class TestGoogleDriveOpStorageDrive(E2EHelpers, TestCase):
             my_service.prime_error('test B', 'top', 'RefreshError')
             with self.assertRaises(StorageError) as exc:
                 drive.maak_sheet_van_template(18, False, False, 1, 3, 'fname')
-            self.assertTrue("RefreshError: test B" in str(exc.exception))
+            self.assertEqual("{vind_globale_folder} Missing 'files' in response", str(exc.exception))
         del drive
 
         # geen 'files' in response
