@@ -30,7 +30,8 @@ class TestGoogleDriveOpAuthenticatie(E2EHelpers, TestCase):
     def test_response(self):
         # TODO: deze test is afhankelijk van een credentials bestand dat in /tmp moet staan
         url = 'x'
-        token = handle_authentication_response(url)
+        transactie = Transactie.objects.create(unieke_code='1234')
+        token = handle_authentication_response(url, transactie)
         self.assertIsNone(token)
 
         # url = '/webhook/?code=1234'

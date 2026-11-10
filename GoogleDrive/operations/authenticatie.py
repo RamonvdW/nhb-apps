@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2025 Ramon van der Winkel.
+#  Copyright (c) 2025-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -12,12 +12,15 @@ from django.utils import timezone
 from google_auth_oauthlib.flow import Flow
 from oauthlib.oauth2 import AccessDeniedError, OAuth2Error
 from GoogleDrive.models import Transactie, Token, maak_unieke_code
+import logging
 import os.path
 
 CLIENT_ID_AND_SECRET = os.path.join(settings.CREDENTIALS_PATH,
                                     settings.CREDENTIALS_OAUTH_GOOGLE_DRIVE)
 
 SCOPES = ['https://www.googleapis.com/auth/drive']  # edit, create and delete all of your google drive files
+
+my_logger = logging.getLogger('MH.GoogleDrive')
 
 
 def get_authorization_url(account_username: str, account_email: str):
@@ -31,44 +34,63 @@ def get_authorization_url(account_username: str, account_email: str):
     unieke_code = maak_unieke_code(when=stamp_str, username=account_username, email=account_email)
     transactie = Transactie.objects.create(unieke_code=unieke_code)
 
-    # lees de json met de credentials
-    flow = Flow.from_client_secrets_file(CLIENT_ID_AND_SECRET, scopes=SCOPES)
-
     # indicate where the API server will redirect the user after the user completes the authorization flow.
     # moet overeenkomen met een URI die opgezet is in Google console
-    flow.redirect_uri = settings.SITE_URL + reverse('GoogleDrive:oauth-webhook')
+    redirect_uri = settings.SITE_URL + reverse('GoogleDrive:oauth-webhook')
+
+    # lees de json met de credentials
+    flow = Flow.from_client_secrets_file(
+                            CLIENT_ID_AND_SECRET,
+                            scopes=SCOPES,
+                            redirect_uri=redirect_uri)
 
     # handshake met Google om de URL te krijgen waar we de gebruiker heen moeten sturen
     authorization_url, state = flow.authorization_url(
                                         access_type='offline',              # recommended for web server
-                                        #include_granted_scopes='true',     # optional; recommended
-                                        #login_hint=account_email,          # laat keuze aan de gebruiker
-                                        #prompt='consent',
-                                        #prompt='select_account',
+                                        # include_granted_scopes='true',    # optional; recommended
+                                        # login_hint=account_email,         # laat keuze aan de gebruiker
+                                        # prompt='consent',
+                                        # prompt='select_account',
                                         state=transactie.unieke_code)
+
+    # my_logger.info("{handle_authentication_response} unieke_code=%s, state=%s" % (repr(unieke_code), repr(state)))
+    # my_logger.info("{handle_authentication_response} flow.code_verifier=%s" % repr(flow.code_verifier))
+
+    transactie.code_verifier = flow.code_verifier
 
     msg += "[%s] authorization_url: %s\n" % (stamp_str, repr(authorization_url))
     transactie.log = msg
-    transactie.save(update_fields=['log'])
+
+    transactie.save(update_fields=['log', 'code_verifier'])
 
     return authorization_url
 
 
-def handle_authentication_response(webhook_uri):
-    # lees de json met de credentials
-    flow = Flow.from_client_secrets_file(CLIENT_ID_AND_SECRET, scopes=SCOPES)
+def handle_authentication_response(webhook_uri, transactie: Transactie):
+    my_logger.info("{handle_authentication_response} webhook_uri=%s" % webhook_uri)
 
     # indicate where the API server will redirect the user after the user completes the authorization flow.
     # moet overeenkomen met een URI die opgezet is in Google console
-    flow.redirect_uri = settings.SITE_URL + reverse('GoogleDrive:oauth-webhook')
+    redirect_uri = settings.SITE_URL + reverse('GoogleDrive:oauth-webhook')
+
+    # lees de json met de credentials
+    flow = Flow.from_client_secrets_file(
+                        CLIENT_ID_AND_SECRET,
+                        scopes=SCOPES,
+                        redirect_uri=redirect_uri,      # TODO: nodig?
+                        state=transactie.unieke_code)
 
     try:
         host = settings.SITE_URL.replace('http://', 'https://')
-        flow.fetch_token(authorization_response=host + webhook_uri)
-    except (AccessDeniedError, OAuth2Error):
+        flow.fetch_token(
+                    authorization_response=host + webhook_uri,
+                    code_verifier=transactie.code_verifier)
+    except AccessDeniedError as exc:
         # gebruiker heeft toestemming niet gegeven
-        # of andere (algemene) fout
-        # print('[ERROR] AccessDeniedError')
+        my_logger.error("{handle_authentication_response} AccessDeniedError: %s" % exc)
+        token = None
+    except OAuth2Error as exc:
+        my_logger.error("{handle_authentication_response} OAuth2Error: %s" % exc)
         token = None
     else:
         creds = flow.credentials

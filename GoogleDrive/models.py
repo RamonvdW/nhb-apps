@@ -24,6 +24,9 @@ class Transactie(models.Model):
     # we gebruiken dit voor een unieke code en gebruiken dit om de webhook te beveiligen tegen misbruik
     unieke_code = models.CharField(max_length=32)
 
+    # een code die we lokaal aanmaken, opslaan en weer gebruiken om het antwoord te controleren
+    code_verifier = models.CharField(max_length=128, default='', blank=True)
+
     # elke transactie is maar 1x bruikbaar
     has_been_used = models.BooleanField(default=False)
 
