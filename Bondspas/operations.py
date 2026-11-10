@@ -236,8 +236,12 @@ def plaatje_teken(jaar_pas, regels):
     fpath = os_path.join(settings.INSTALL_PATH, 'Bondspas', 'files', 'achtergrond_bondspas-%s.jpg' % jaar_pas)
     image = Image.open(fpath)
 
-    _, _, width, height = image.getbbox()
-    # standard size = 1418 x 2000
+    tup = image.getbbox()
+    if tup:
+        _, _, width, height = tup
+    else:
+        # standard size = 1418 x 2000
+        width, height = 1418, 2000
 
     draw = ImageDraw.Draw(image)
     font = ImageFont.truetype(settings.BONDSPAS_FONT, size=40)
