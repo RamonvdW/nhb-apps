@@ -9,7 +9,8 @@ from Bondspas.operations import bepaal_jaar_bondspas, maak_bondspas_regels
 from Bondspas.models import BondspasJaar
 from Geo.models import Regio
 from Opleiding.models import OpleidingDiploma
-from Sporter.models import Sporter, Speelsterkte
+from Spelden.models import Speld, SpeldToegekend
+from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
 from unittest.mock import patch
@@ -90,59 +91,20 @@ class TestBondspasOperations(E2EHelpers, TestCase):
 
         sporter.save()
 
-        Speelsterkte(
-                sporter=sporter,
-                datum=now,
-                beschrijving='test',
-                discipline='Recurve',
-                category='Cadet',
-                pas_code='RC1200',
-                volgorde=143).save()
+        speld = Speld.objects.get(pas_code='R1000Z')
+        SpeldToegekend.objects.create(sporter=sporter, speld=speld, datum=now)
 
-        Speelsterkte(
-                sporter=sporter,
-                datum=now,
-                beschrijving='test',
-                discipline='Recurve',
-                category='Master',
-                pas_code='RM1000',
-                volgorde=155).save()
+        speld = Speld.objects.get(pas_code='R1100Z')
+        SpeldToegekend.objects.create(sporter=sporter, speld=speld, datum=now)
 
-        Speelsterkte(
-                sporter=sporter,
-                datum=now,
-                beschrijving='test',
-                discipline='Recurve',
-                category='Master',
-                pas_code='RM1100',
-                volgorde=154).save()
+        speld = Speld.objects.get(pas_code='R1000')
+        SpeldToegekend.objects.create(sporter=sporter, speld=speld, datum=now)
 
-        Speelsterkte(
-                sporter=sporter,
-                datum=now,
-                beschrijving='test',
-                discipline='Recurve',
-                category='Senior',
-                pas_code='R1000',
-                volgorde=135).save()
+        speld = Speld.objects.get(pas_code='TS1150')
+        SpeldToegekend.objects.create(sporter=sporter, speld=speld, datum=now)
 
-        Speelsterkte(
-                sporter=sporter,
-                datum=now,
-                beschrijving='test',
-                discipline='KHSN Tussenspeld',
-                category='Senior',
-                pas_code='TS1150',
-                volgorde=201).save()
-
-        Speelsterkte(
-                sporter=sporter,
-                datum=now,
-                beschrijving='Gouden Pijl',
-                discipline='Algemeen',
-                category='Senior',
-                pas_code='GPIJL',
-                volgorde=600).save()
+        speld = Speld.objects.get(pas_code='GPIJL')
+        SpeldToegekend.objects.create(sporter=sporter, speld=speld, datum=now)
 
         OpleidingDiploma(
                 sporter=sporter,
@@ -161,7 +123,7 @@ class TestBondspasOperations(E2EHelpers, TestCase):
         regels = maak_bondspas_regels(sporter, year)
         # print(regels)
 
-        self.assertTrue(('Speelsterkte', 'R1000, RM1100, TS1150, GPIJL') in regels)
+        self.assertTrue(('Speelsterkte', 'TS1150, GPIJL, R1000, R1100Z') in regels)
 
 
 # end of file

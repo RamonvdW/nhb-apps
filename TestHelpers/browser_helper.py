@@ -11,7 +11,7 @@ from django.utils import timezone
 from Account.models import Account
 from BasisTypen.definities import GESLACHT_ALLE
 from BasisTypen.models import BoogType, TeamType, Leeftijdsklasse
-from Bestelling.models import BestellingMandje, BestellingHoogsteBestelNr
+from Bestelling.models import BestellingMandje
 from Betaal.models import BetaalInstellingenVereniging
 from Competitie.definities import INSCHRIJF_METHODE_1
 from Competitie.models import Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMatch
@@ -38,7 +38,6 @@ import datetime
 import pyotp
 import time
 import json
-import sys
 
 coverage_data = dict()
 
@@ -73,24 +72,24 @@ def js_cov_import():
 class BrowserTestCase(TestCase):
 
     # deze members worden centraal gevuld in Plein/tests/test_js_in_browser
-    sporter: Sporter = None                                 # sporter 100001
-    sporterboog_r: SporterBoog = None                       # sporterboog 100001, recurve
-    sporterboog_bb: SporterBoog = None                      # sporterboog 100001, barebow
-    account_bb: Account = None                              # account 100001 (gekoppeld aan sporter)
-    account: Account = None                                 # account 100002
-    ver: Vereniging = None                                  # vereniging van de sporter
-    functie_hwl: Functie = None                             # account is hwl
-    webwinkel_product: WebwinkelProduct = None              # product in de webwinkel
-    comp: Competitie = None
-    regio_comp: RegioComp = None                            # regiocompetitie voor regio van sporter
-    regio_comp1: RegioComp = None                           # regiocompetitie met inschrijfmethode 1
-    regio_match: CompetitieMatch = None
-    regio_deelnemer_r: RegioDeelnemer = None
-    regio_deelnemer_c: RegioDeelnemer = None
-    regio_deelnemer_bb: RegioDeelnemer = None
-    mandje: BestellingMandje = None
-    wedstrijd_1: Wedstrijd = None
-    locatie_outdoor = WedstrijdLocatie = None
+    sporter: Sporter|None = None                                 # sporter 100001
+    sporterboog_r: SporterBoog|None = None                       # sporterboog 100001, recurve
+    sporterboog_bb: SporterBoog|None = None                      # sporterboog 100001, barebow
+    account_bb: Account|None = None                              # account 100001 (gekoppeld aan sporter)
+    account: Account|None = None                                 # account 100002
+    ver: Vereniging|None = None                                  # vereniging van de sporter
+    functie_hwl: Functie|None = None                             # account is hwl
+    webwinkel_product: WebwinkelProduct|None = None              # product in de webwinkel
+    comp: Competitie|None = None
+    regio_comp: RegioComp|None = None                            # regiocompetitie voor regio van sporter
+    regio_comp1: RegioComp|None = None                           # regiocompetitie met inschrijfmethode 1
+    regio_match: CompetitieMatch|None = None
+    regio_deelnemer_r: RegioDeelnemer|None = None
+    regio_deelnemer_c: RegioDeelnemer|None = None
+    regio_deelnemer_bb: RegioDeelnemer|None = None
+    mandje: BestellingMandje|None = None
+    wedstrijd_1: Wedstrijd|None = None
+    locatie_outdoor: WedstrijdLocatie|None = None
     pause_after_console_log = 2
 
     # urls voor do_navigate_to()
@@ -166,7 +165,7 @@ class BrowserTestCase(TestCase):
 
         return None
 
-    def find_elements_buttons(self, must_have_id=True, must_have_attributes: list=None):
+    def find_elements_buttons(self, must_have_id=True, must_have_attributes: list|None=None):
         buttons = list()
         for button in self._driver.find_elements(By.TAG_NAME, 'button'):
             store = True
@@ -436,6 +435,7 @@ class BrowserTestCase(TestCase):
             # gelukt
             self.assert_no_console_log()
 
+            assert self.account_bb is not None
             self._driver.find_element(By.ID, 'id_login_naam').send_keys(self.account_bb.username)
             self._driver.find_element(By.ID, 'id_wachtwoord').send_keys(TEST_WACHTWOORD)
 
@@ -466,6 +466,7 @@ class BrowserTestCase(TestCase):
         self.assertEqual(self._driver.title, 'Controle tweede factor MijnHandboogsport')
         self.assert_no_console_log()
 
+        assert self.account_bb is not None
         otp_code = pyotp.TOTP(self.account_bb.otp_code).now()
         self._driver.find_element(By.ID, 'otp1').send_keys(otp_code)
         self._driver.find_element(By.ID, 'submit_knop').click()
@@ -502,16 +503,15 @@ class BrowserTestCase(TestCase):
             if self.show_browser:  # pragma: no cover
                 print('{do_wissel_naar_hwl} titel was %s. Ga naar wissel naar rol' % self._driver.title)
             self.do_navigate_to(self.url_wissel_van_rol, check_console_log=False)
-        page = radio = ""
-        hwl_id = 'id_eigen_%s' % self.functie_hwl.pk        # radio button voor HWL
+        assert self.functie_hwl is not None
+        hwl_id = 'submit_knop%s' % self.functie_hwl.pk      # button voor rol HWL
         try:
-            radio = self.find_element_by_id(hwl_id)
+            button = self.find_element_by_id(hwl_id)
         except NoSuchElementException:                      # pragma: no cover
             page = self.get_page_html()
-        if page:                                            # pragma: no cover
-            self.fail('[ERROR] Failed to find radiobutton for HWL role (id=%s)! page:\n%s' % (repr(hwl_id), page))
-        self.get_following_sibling(radio).click()
-        self.find_element_by_id('activeer_eigen').click()       # activeer knop
+            self.fail('[ERROR] Failed to button for HWL role (id=%s)! page:\n%s' % (repr(hwl_id), page))
+        else:
+            button.click()
         self.wait_until_url_not(self.url_wissel_van_rol)        # redirect naar /vereniging/
 
     def do_wissel_naar_bb(self):
@@ -521,9 +521,8 @@ class BrowserTestCase(TestCase):
             if self.show_browser:  # pragma: no cover
                 print('{do_wissel_naar_bb} titel was %s. Ga naar wissel naar rol' % self._driver.title)
             self.do_navigate_to(self.url_wissel_van_rol)
-        radio = self.find_element_by_id('id_eigen_90002')       # radio button voor Manager MH
-        self.get_following_sibling(radio).click()
-        self.find_element_by_id('activeer_eigen').click()       # activeer knop
+        button = self.find_element_by_id('submit_knop90002')        # knop voor rol Manager MH
+        button.click()
         self.wait_until_url_not(self.url_wissel_van_rol)
 
     def do_wissel_naar_sporter(self):
@@ -533,9 +532,8 @@ class BrowserTestCase(TestCase):
             if self.show_browser:  # pragma: no cover
                 print('{do_wissel_naar_sporter} titel was %s. Ga naar wissel naar rol' % self._driver.title)
             self.do_navigate_to(self.url_wissel_van_rol)
-        radio = self.find_element_by_id('id_eigen_90000')       # radio button voor Sporter
-        self.get_following_sibling(radio).click()
-        self.find_element_by_id('activeer_eigen').click()       # activeer knop
+        button = self.find_element_by_id('submit_knop90000')        # knop voor rol Sporter
+        button.click()
         self.wait_until_url_not(self.url_wissel_van_rol)
 
     def get_browser_cookie_value(self, cookie_name):

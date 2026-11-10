@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2024-2025 Ramon van der Winkel.
+#  Copyright (c) 2024-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -13,7 +13,7 @@ from Functie.rol import rol_get_huidige
 from Instaptoets.operations import instaptoets_is_beschikbaar, vind_toets_prioriteer_geslaagd, toets_geldig
 from Opleiding.definities import OPLEIDING_STATUS_INSCHRIJVEN
 from Opleiding.models import Opleiding
-from Sporter.models import get_sporter
+from Sporter.operations import get_sporter
 
 TEMPLATE_OPLEIDINGEN_BASISCURSUS = 'opleiding/basiscursus.dtl'
 

@@ -19,7 +19,8 @@ from Evenement.models import Evenement, EvenementInschrijving
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie
 from Kalender.definities import MAAND2URL
-from Sporter.models import Sporter, get_sporter
+from Sporter.models import Sporter
+from Sporter.operations import get_sporter
 from datetime import timedelta
 
 

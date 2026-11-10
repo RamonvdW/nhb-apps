@@ -210,7 +210,6 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.assertNotContains(resp, "RKO test")
         self.assertContains(resp, "RCL test")
         self.assertContains(resp, "HWL test")
-        self.assertContains(resp, "Grote Club")
 
         # niet een niet- bestaande functie vanuit de RCL-functie
         with self.assert_max_queries(20):

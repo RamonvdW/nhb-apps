@@ -11,7 +11,9 @@ from Bondspas.models import BondspasJaar
 from Functie.tests.helpers import maak_functie
 from Geo.models import Regio
 from Opleiding.models import OpleidingDiploma
-from Sporter.models import Sporter, SporterVoorkeuren, Speelsterkte
+from Spelden.definities import SPELD_CATEGORIE_CHOICES
+from Spelden.models import Speld, SpeldToegekend
+from Sporter.models import Sporter, SporterVoorkeuren
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
 from unittest.mock import patch
@@ -208,23 +210,8 @@ class TestBondspasOnline(E2EHelpers, TestCase):
                     beschrijving='n/a',
                     toon_op_pas=True).save()
 
-        Speelsterkte(
-                sporter=self.sporter,
-                datum='2000-01-01',
-                beschrijving='test',
-                discipline='test',
-                category='test',
-                pas_code='TST',
-                volgorde=100).save()
-
-        Speelsterkte(
-                sporter=self.sporter,
-                datum='2000-01-01',
-                beschrijving='test',
-                discipline='test',      # zelfde als hierboven
-                category='test',
-                pas_code='TST',
-                volgorde=101).save()
+        speld = Speld.objects.get(pas_code='R1100Z')
+        SpeldToegekend.objects.create(sporter=self.sporter, speld=speld, datum='2000-01-01')
 
         with override_settings(OPLEIDING_CODES=test_opleiding_codes):
             with self.assert_max_queries(20):
@@ -345,15 +332,19 @@ class TestBondspasOnline(E2EHelpers, TestCase):
         self.assert404(resp, 'Geen valide parameter')
 
     def test_speelsterkte(self):
-        for lp in range(15):
-            Speelsterkte(
+        nr = 0
+        for cat, _ in SPELD_CATEGORIE_CHOICES:
+            nr += 1
+            speld = Speld.objects.create(
+                    volgorde=nr,
+                    categorie=cat,
+                    beschrijving='test',
+                    pas_code='CodeLangst')
+
+            SpeldToegekend.objects.create(
                 sporter=self.sporter,
                 datum='2000-01-01',
-                beschrijving='test',
-                discipline='uniek %s' % lp,
-                category='test',
-                pas_code='CodeLang',
-                volgorde=600 + lp).save()
+                speld=speld)
         # for
 
         # sporter

@@ -20,7 +20,7 @@ from Functie.rol import rol_get_huidige
 from Instaptoets.operations import vind_toets_prioriteer_geslaagd, toets_geldig
 from Opleiding.definities import OPLEIDING_STATUS_INSCHRIJVEN, OPLEIDING_INSCHRIJVING_STATUS_INSCHRIJVEN
 from Opleiding.models import Opleiding, OpleidingInschrijving
-from Sporter.models import get_sporter
+from Sporter.operations import get_sporter
 import json
 
 TEMPLATE_OPLEIDINGEN_INSCHRIJVEN_BASISCURSUS = 'opleiding/inschrijven-basiscursus.dtl'

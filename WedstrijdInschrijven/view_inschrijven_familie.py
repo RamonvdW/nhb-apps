@@ -12,8 +12,8 @@ from Account.models import get_account
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
 from Kalender.definities import MAAND2URL
-from Sporter.models import Sporter, SporterBoog, get_sporter
-from Sporter.operations import get_sporter_voorkeuren
+from Sporter.models import Sporter, SporterBoog
+from Sporter.operations import get_sporter, get_sporter_voorkeuren
 from Wedstrijden.definities import WEDSTRIJD_INSCHRIJVING_STATUS_TO_STR
 from Wedstrijden.models import Wedstrijd, WedstrijdInschrijving
 from WedstrijdInschrijven.helpers import inschrijving_open_of_404

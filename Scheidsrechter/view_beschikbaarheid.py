@@ -20,7 +20,8 @@ from Scheidsrechter.definities import (BESCHIKBAAR_LEEG, BESCHIKBAAR_JA, BESCHIK
 from Scheidsrechter.models import WedstrijdDagScheidsrechters, ScheidsBeschikbaarheid
 from Scheidsrechter.mutaties import (scheids_mutatieverzoek_beschikbaarheid_opvragen,
                                      scheids_mutatieverzoek_competitie_beschikbaarheid_opvragen)
-from Sporter.models import get_sporter, Sporter
+from Sporter.models import Sporter
+from Sporter.operations import get_sporter
 from Wedstrijden.definities import WEDSTRIJD_STATUS_GEACCEPTEERD
 from Wedstrijden.models import Wedstrijd
 from collections import OrderedDict

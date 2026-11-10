@@ -401,8 +401,12 @@ then
         # hide the totals line because it has unreal percentages
         for html in "index.html" "function_index.html" "class_index.html"
         do
-            sed -i 's/tr class="total"/tr class="total" style="display:none"/' "${REPORT_DIR}/$html"
-            sed -i 's/table class=/table style="margin-bottom:10px" class=/' "${REPORT_DIR}/$html"
+            fname="{REPORT_DIR}/$html"
+            if [ -e "$fname" ]
+            then
+                sed -i 's/tr class="total"/tr class="total" style="display:none"/' "$fname"
+                sed -i 's/table class=/table style="margin-bottom:10px" class=/' "$fname"
+            fi
         done
     fi
 

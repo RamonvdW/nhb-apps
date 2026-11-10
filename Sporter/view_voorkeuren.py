@@ -14,8 +14,8 @@ from BasisTypen.definities import (GESLACHT_MAN, GESLACHT_VROUW, GESLACHT_ANDERS
                                    ORGANISATIE_IFAA, SCHEIDS_NIET)
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie, rol_mag_wisselen
-from Sporter.models import Sporter, get_sporter
-from Sporter.operations import get_sporter_voorkeuren, get_sporterboog
+from Sporter.models import Sporter
+from Sporter.operations import get_sporter, get_sporter_voorkeuren, get_sporterboog
 from types import SimpleNamespace
 import logging
 

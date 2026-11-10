@@ -166,7 +166,7 @@ class ImportCrmSporters(ImportCrmBase):
              'blocked':             bool
              'wa':                  string
              'educations':          lijst van opleidingen
-             'skill_level':         lijst van speelsterktes
+             'skill_level':         lijst van toegekende spelden
         """
         for member in data:
             is_valid = True

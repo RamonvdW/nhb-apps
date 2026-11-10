@@ -272,7 +272,11 @@ class WedstrijdBestelPlugin(BestelPluginBase):
                                                      ", ".join(aanpassingen),
                                                      door_account_str)
         inschrijving.log += msg
-        inschrijving.save()
+        try:
+            inschrijving.save()
+        except IntegrityError as exc:
+            self.stdout.write('[ERROR] Save wedstrijdinschrijving pk=%s gaf IntegrityError: %s' % (inschrijving.pk, exc))
+
         self.stdout.write('[INFO] WedstrijdInschrijving pk=%s is aangepast' % inschrijving.pk)
 
     def annuleer(self, regel: BestellingRegel):

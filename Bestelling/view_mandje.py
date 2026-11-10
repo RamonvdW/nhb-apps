@@ -18,7 +18,7 @@ from Betaal.format import format_bedrag_euro
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
 from Registreer.definities import REGISTRATIE_FASE_COMPLEET
-from Sporter.models import get_sporter
+from Sporter.operations import get_sporter
 from Vereniging.models import Vereniging
 from decimal import Decimal
 

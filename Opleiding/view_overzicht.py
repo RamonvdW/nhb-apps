@@ -16,7 +16,7 @@ from Instaptoets.operations import vind_toets
 from Opleiding.definities import (OPLEIDING_STATUS_GEANNULEERD, OPLEIDING_STATUS_VOORBEREIDEN,
                                   OPLEIDING_STATUS_INSCHRIJVEN, OPLEIDING_STATUS_TO_STR)
 from Opleiding.models import Opleiding, OpleidingDiploma
-from Sporter.models import get_sporter
+from Sporter.operations import get_sporter
 
 TEMPLATE_OPLEIDINGEN_OVERZICHT = 'opleiding/overzicht.dtl'
 TEMPLATE_OPLEIDINGEN_DETAILS = 'opleiding/details.dtl'

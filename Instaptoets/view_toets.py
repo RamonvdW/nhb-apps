@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2024-2025 Ramon van der Winkel.
+#  Copyright (c) 2024-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -17,7 +17,7 @@ from Functie.rol import rol_get_huidige
 from Instaptoets.models import Instaptoets
 from Instaptoets.operations import (selecteer_toets_vragen, selecteer_huidige_vraag, toets_geldig, controleer_toets,
                                     vind_toets, instaptoets_is_beschikbaar)
-from Sporter.models import get_sporter
+from Sporter.operations import get_sporter
 
 TEMPLATE_BEGIN_TOETS = 'instaptoets/begin-toets.dtl'
 TEMPLATE_TOON_UITSLAG = 'instaptoets/toon-uitslag.dtl'

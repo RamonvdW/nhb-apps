@@ -5,7 +5,8 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.conf import settings
-from django.shortcuts import render, reverse
+from django.shortcuts import render
+from django.urls import reverse
 from django.views.generic import TemplateView
 from Account.operations import AccountCreateError, account_create, account_email_bevestiging_ontvangen
 from Functie.models import Functie
@@ -13,7 +14,7 @@ from Logboek.operations import schrijf_in_logboek
 from Mailer.operations import mailer_email_is_valide, mailer_obfuscate_email, mailer_queue_email, render_email_template
 from Overig.helpers import get_safe_from_ip
 from Registreer.forms import RegistreerNormaalForm
-from Sporter.models import Sporter, SporterGeenEmail, SporterInactief
+from Sporter.models import Sporter
 from TijdelijkeCodes.definities import RECEIVER_BEVESTIG_EMAIL_REG_LID
 from TijdelijkeCodes.operations import set_tijdelijke_codes_receiver, maak_tijdelijke_code_bevestig_email_registreer_lid
 from Vereniging.models import Secretaris
@@ -27,6 +28,18 @@ TEMPLATE_REGISTREER_EMAIL_BEVESTIGD = 'registreer/registreer-lid-02-email-bevest
 EMAIL_TEMPLATE_REGISTREER_LID_BEVESTIG = 'email_registreer/lid-bevestig-toegang-email.dtl'
 
 my_logger = logging.getLogger('MH.Registreer')
+
+
+class SporterGeenEmail(Exception):
+    """ Specifieke foutmelding omdat sporter geen e-mail adres heeft in het CRM """
+
+    def __init__(self, sporter):
+        self.sporter = sporter
+
+
+class SporterInactief(Exception):
+    """ Specifieke foutmelding omdat de sporter inactief is volgens het CRM """
+    pass
 
 
 def registreer_receive_bevestiging_aanmaken_account(request, account):

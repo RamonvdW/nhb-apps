@@ -10,9 +10,11 @@ from django.utils.formats import date_format
 from BasisTypen.definities import GESLACHT_ANDERS
 from Bondspas.models import BondspasJaar
 from Opleiding.models import OpleidingDiploma
+from Spelden.models import SpeldToegekend
 from Sporter.leeftijdsklassen import (bereken_leeftijdsklasse_wa,
                                       bereken_leeftijdsklasse_khsn,
                                       bereken_leeftijdsklasse_ifaa)
+from Sporter.models import Sporter
 from Sporter.operations import get_sporter_voorkeuren
 from PIL import Image, ImageFont, ImageDraw
 from PIL.TiffImagePlugin import ImageFileDirectory_v2
@@ -47,7 +49,7 @@ def bepaal_jaar_bondspas() -> int:
     return jaar_pas
 
 
-def maak_bondspas_regels(sporter, jaar_pas):
+def maak_bondspas_regels(sporter: Sporter, jaar_pas):
     """ Bepaal de regels tekst die op de bondspas moeten komen voor deze specifieke sporter
     """
     regels = []
@@ -97,20 +99,19 @@ def maak_bondspas_regels(sporter, jaar_pas):
     else:
         regels.append(("Opleidingen", "n.v.t."))
 
-    # speelsterkte
+    # prestatiespelden
     afkortingen = list()
-    prev_cat_disc = None
-    for sterkte in sporter.speelsterkte_set.order_by('volgorde'):    # laagste eerst = beste eerst
-        cat_disc = sterkte.discipline
-        if sterkte.category == 'Cadet':
-            # toon cadet codes totdat er een senior code geregistreerd is
-            cat_disc += 'Senior'
-        else:
-            cat_disc += sterkte.category    # Senior / Master
+    prev_cat = None
+    for toegekend in (SpeldToegekend
+                      .objects
+                      .filter(sporter=sporter)
+                      .select_related('speld')
+                      .order_by('speld__categorie',
+                                '-speld__volgorde')):    # hoogste eerst = beste eerst
 
-        if cat_disc != prev_cat_disc:
-            afkortingen.append(sterkte.pas_code)
-            prev_cat_disc = cat_disc
+        if toegekend.speld.categorie != prev_cat:
+            afkortingen.append(toegekend.speld.pas_code)
+            prev_cat = toegekend.speld.categorie
     # for
 
     if len(afkortingen):

@@ -10,7 +10,8 @@ from django.utils import timezone
 from django.utils.formats import localize
 from Account.models import get_account
 from Kalender.definities import MAAND2URL
-from Sporter.models import SporterBoog, get_sporter
+from Sporter.models import SporterBoog
+from Sporter.operations import get_sporter
 from Wedstrijden.definities import WEDSTRIJD_STATUS_GEACCEPTEERD, WEDSTRIJD_DISCIPLINES, DISCIPLINE2URL, URL2DISCIPLINE
 from Wedstrijden.models import Wedstrijd
 from types import SimpleNamespace

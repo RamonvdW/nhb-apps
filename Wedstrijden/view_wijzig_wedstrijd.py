@@ -23,7 +23,7 @@ from Functie.definities import Rol
 from Functie.rol import rol_get_huidige_functie
 from Locatie.definities import BAAN_TYPE_BUITEN, BAAN_TYPE_EXTERN
 from Locatie.models import WedstrijdLocatie
-from Sporter.models import get_sporter
+from Sporter.operations import get_sporter
 from Vereniging.models import Vereniging
 from Wedstrijden.definities import (ORGANISATIE_WEDSTRIJD_DISCIPLINE_STRS, WEDSTRIJD_STATUS_TO_STR,
                                     WEDSTRIJD_WA_STATUS_TO_STR, WEDSTRIJD_STATUS_ONTWERP, WEDSTRIJD_STATUS2URL,

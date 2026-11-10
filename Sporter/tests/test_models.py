@@ -10,7 +10,7 @@ from django.contrib.auth import get_user_model
 from Account.models import Account
 from BasisTypen.models import BoogType
 from Geo.models import Regio
-from Sporter.models import Sporter, SporterBoog, Speelsterkte
+from Sporter.models import Sporter, SporterBoog
 from Vereniging.models import Vereniging
 import datetime
 
@@ -103,23 +103,12 @@ class TestSporterModels(TestCase):
 
         self.assertTrue(sporter.lid_nr_en_volledige_naam() != '')
 
-    def test_str(self):
         # dekking van speciale functies
-        obj = Speelsterkte(
-                    beschrijving='test',
-                    discipline='test',
-                    category='test',
-                    volgorde=1,
-                    datum='2001-02-03',
-                    sporter=self.sporter1)
-        self.assertTrue(str(obj) != '')
-
         obj = SporterBoog(
                     sporter=None,
                     boogtype=BoogType.objects.first())
         self.assertTrue(str(obj) != '')
         obj.sporter = self.sporter1
         self.assertTrue(str(obj) != '')
-
 
 # end of file

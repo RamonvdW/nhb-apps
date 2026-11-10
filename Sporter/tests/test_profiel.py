@@ -22,7 +22,8 @@ from Records.models import IndivRecord
 from Registreer.definities import REGISTRATIE_FASE_COMPLEET
 from Registreer.models import GastRegistratie
 from Score.models import Aanvangsgemiddelde, AanvangsgemiddeldeHist
-from Sporter.models import Sporter, SporterBoog, Speelsterkte
+from Spelden.models import Speld, SpeldToegekend
+from Sporter.models import Sporter, SporterBoog
 from Sporter.operations import get_sporterboog
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers.testdata import TestData
@@ -193,15 +194,8 @@ class TestSporterProfiel(E2EHelpers, TestCase):
                                    datum_begin='2020-01-01')
         diploma.save()
 
-        speld = Speelsterkte(
-                    sporter=self.sporter1,
-                    datum='2020-02-02',
-                    beschrijving='Test speld',
-                    discipline='Test disc',
-                    category='Test cat',
-                    pas_code='TST',
-                    volgorde=42)
-        speld.save()
+        speld = Speld.objects.first()
+        SpeldToegekend.objects.create(sporter=self.sporter1, speld=speld, datum='2020-02-02')
 
     def _prep_voorkeuren(self, sporter):
         get_sporterboog(sporter, mag_database_wijzigen=True)
@@ -247,7 +241,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         # als er geen SEC gekoppeld is, dan wordt de secretaris van de vereniging gebruikt
         self.functie_sec.accounts.remove(self.account_normaal)
 
-        with self.assert_max_queries(28):
+        with self.assert_max_queries(29):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -255,7 +249,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         # maak dit een vereniging zonder secretaris
         Secretaris.objects.filter(vereniging=self.ver).delete()
 
-        with self.assert_max_queries(26):
+        with self.assert_max_queries(27):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -276,7 +270,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         # self._prep_voorkeuren()       --> niet aanroepen, dan geen sporterboog
 
         # haal de profiel pagina op
-        with self.assert_max_queries(26):
+        with self.assert_max_queries(27):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -317,7 +311,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
             account=self.account_normaal,
             log='testje').save()
 
-        with self.assert_max_queries(26):
+        with self.assert_max_queries(27):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -384,7 +378,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
                             log='test')
         inschrijving.save()
 
-        with self.assert_max_queries(27):
+        with self.assert_max_queries(28):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -400,7 +394,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         wedstrijd.eis_kwalificatie_scores = True
         wedstrijd.save(update_fields=['eis_kwalificatie_scores'])
 
-        with self.assert_max_queries(27):
+        with self.assert_max_queries(28):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -440,7 +434,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         gast.sporter = self.sporter1
         gast.save(update_fields=['fase', 'sporter'])
 
-        with self.assert_max_queries(28):
+        with self.assert_max_queries(29):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -460,7 +454,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         functie_rcl25.bevestigde_email = 'test25@mh.not'
         functie_rcl25.save(update_fields=['bevestigde_email'])
 
-        with self.assert_max_queries(26):
+        with self.assert_max_queries(27):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -473,7 +467,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         functie_rcl18.accounts.add(self.account_normaal)
         functie_rcl25.accounts.add(self.account_normaal)
 
-        with self.assert_max_queries(26):
+        with self.assert_max_queries(27):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -496,7 +490,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
                     notitie='AG test')
         ag_hist.save()
 
-        with self.assert_max_queries(27):
+        with self.assert_max_queries(28):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)

@@ -6,6 +6,7 @@
 
 from django.db import transaction, IntegrityError
 from django.db.models import ProtectedError
+from Account.models import Account
 from BasisTypen.definities import GESLACHT_ANDERS
 from BasisTypen.models import BoogType
 from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
@@ -155,6 +156,13 @@ def get_sporterboog(sporter, mag_database_wijzigen=False, geen_wedstrijden=False
                 objs = bulk
 
         return objs
+
+
+def get_sporter(account: Account) -> Sporter:
+    """ Centrale methode om de bij een Account behorende Sporter te vinden
+        Kan None terug geven, maar dat zou in de praktijk niet voor moeten komen
+    """
+    return account.sporter_set.select_related('bij_vereniging__regio').first()          # can return None!
 
 
 # end of file

@@ -12,7 +12,7 @@ from Functie.models import Functie, VerklaringHanterenPersoonsgegevens
 from Functie.rol import rol_get_huidige_functie
 from Geo.models import Regio
 from Mailer.operations import mailer_queue_email, render_email_template
-from Sporter.models import get_sporter
+from Sporter.operations import get_sporter
 from TijdelijkeCodes.operations import maak_tijdelijke_code_bevestig_email_functie
 from Vereniging.models import Vereniging
 import datetime

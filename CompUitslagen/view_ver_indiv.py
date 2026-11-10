@@ -13,7 +13,7 @@ from Competitie.models import Competitie
 from Competitie.seizoenen import get_comp_pk
 from CompLaagRegio.models import RegioComp, RegioDeelnemer
 from Functie.rol import rol_get_huidige_functie
-from Sporter.models import get_sporter
+from Sporter.operations import get_sporter
 from Vereniging.models import Vereniging
 
 

@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.contrib import admin
-from Sporter.models import Sporter, SporterVoorkeuren, SporterBoog, Speelsterkte
+from Sporter.models import Sporter, SporterVoorkeuren, SporterBoog
 
 
 class HeeftWaIdListFilter(admin.SimpleListFilter):
@@ -110,21 +110,8 @@ class SporterVoorkeurenAdmin(admin.ModelAdmin):
     )
 
 
-class SpeelsterkteAdmin(admin.ModelAdmin):
-    """ Admin configuratie voor Speelsterkte klasse """
-
-    search_fields = ('beschrijving', 'category', 'discipline', 'sporter__unaccented_naam', 'sporter__lid_nr')
-
-    list_filter = ('discipline', 'pas_code', 'category', 'beschrijving')
-
-    readonly_fields = ('sporter',)
-
-    list_select_related = True
-
-
 admin.site.register(Sporter, SporterAdmin)
 admin.site.register(SporterBoog, SporterBoogAdmin)
 admin.site.register(SporterVoorkeuren, SporterVoorkeurenAdmin)
-admin.site.register(Speelsterkte, SpeelsterkteAdmin)
 
 # end of file

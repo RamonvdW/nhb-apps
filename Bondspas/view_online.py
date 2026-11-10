@@ -13,7 +13,8 @@ from Account.models import get_account
 from Bondspas.operations import bepaal_jaar_bondspas, maak_bondspas_regels, maak_bondspas_jpeg_en_pdf
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie
-from Sporter.models import Sporter, get_sporter
+from Sporter.models import Sporter
+from Sporter.operations import get_sporter
 import base64
 
 

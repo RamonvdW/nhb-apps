@@ -20,8 +20,8 @@ from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
 from Score.definities import AG_NUL, AG_DOEL_INDIV, AG_DOEL_TEAM
 from Score.models import AanvangsgemiddeldeHist, Aanvangsgemiddelde
-from Sporter.models import SporterBoog, get_sporter
-from Sporter.operations import get_sporter_voorkeuren
+from Sporter.models import SporterBoog
+from Sporter.operations import get_sporter, get_sporter_voorkeuren
 from decimal import Decimal
 
 
