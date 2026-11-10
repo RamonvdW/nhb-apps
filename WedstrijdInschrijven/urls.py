@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2023 Ramon van der Winkel.
+#  Copyright (c) 2021-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from WedstrijdInschrijven import view_inschrijven, view_kwalificatie_scores
+from WedstrijdInschrijven import (view_inschrijven, view_inschrijven_sporter, view_inschrijven_groepje,
+                                  view_inschrijven_familie, view_inschrijven_handmatig, view_kwalificatie_scores)
 
 app_name = 'WedstrijdInschrijven'
 
@@ -15,35 +16,35 @@ urlpatterns = [
 
     # inschrijven
     path('<wedstrijd_pk>/sporter/<boog_afk>/',
-         view_inschrijven.WedstrijdInschrijvenSporter.as_view(),
+         view_inschrijven_sporter.WedstrijdInschrijvenSporter.as_view(),
          name='inschrijven-sporter-boog'),
 
     path('<wedstrijd_pk>/sporter/',
-         view_inschrijven.WedstrijdInschrijvenSporter.as_view(),
+         view_inschrijven_sporter.WedstrijdInschrijvenSporter.as_view(),
          name='inschrijven-sporter'),
 
     path('<wedstrijd_pk>/groep/<lid_nr>/<boog_afk>/',
-         view_inschrijven.WedstrijdInschrijvenGroepje.as_view(),
+         view_inschrijven_groepje.WedstrijdInschrijvenGroepje.as_view(),
          name='inschrijven-groepje-lid-boog'),
 
     path('<wedstrijd_pk>/groep/',
-         view_inschrijven.WedstrijdInschrijvenGroepje.as_view(),
+         view_inschrijven_groepje.WedstrijdInschrijvenGroepje.as_view(),
          name='inschrijven-groepje'),
 
     path('<wedstrijd_pk>/familie/<lid_nr>/<boog_afk>/',
-         view_inschrijven.WedstrijdInschrijvenFamilie.as_view(),
+         view_inschrijven_familie.WedstrijdInschrijvenFamilie.as_view(),
          name='inschrijven-familie-lid-boog'),
 
     path('<wedstrijd_pk>/familie/',
-         view_inschrijven.WedstrijdInschrijvenFamilie.as_view(),
+         view_inschrijven_familie.WedstrijdInschrijvenFamilie.as_view(),
          name='inschrijven-familie'),
 
     path('<wedstrijd_pk>/handmatig/<lid_nr>/<boog_afk>/',
-         view_inschrijven.WedstrijdInschrijvenHandmatig.as_view(),
+         view_inschrijven_handmatig.WedstrijdInschrijvenHandmatig.as_view(),
          name='inschrijven-handmatig-lid-boog'),
 
     path('<wedstrijd_pk>/handmatig/',
-         view_inschrijven.WedstrijdInschrijvenHandmatig.as_view(),
+         view_inschrijven_handmatig.WedstrijdInschrijvenHandmatig.as_view(),
          name='inschrijven-handmatig'),
 
     # toevoegen aan winkelwagentje

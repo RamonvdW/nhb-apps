@@ -93,7 +93,8 @@ def sv_knop_mailto(kleur='rood', icon='email', email='', tekst='', usability_lab
         new_text += sv_icon('email', kleur='wit', use='button', extra_style='vertical-align:text-bottom')
         new_text += '</span>\n'
 
-    new_text += '<span style="display:inline">' + str(tekst) + '</span>\n'
+    if tekst:
+        new_text += '<span style="display:inline">' + str(tekst) + '</span>\n'
 
     new_text += '</a>\n'
 

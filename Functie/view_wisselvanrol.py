@@ -130,6 +130,7 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
                 obj.url = reverse('Functie:activeer-rol', kwargs={'rol': rol2url[rol]})
                 obj.selected = (self.rol_nu == rol)
                 obj.pk = 90002
+                obj.is_primair = True
                 volgorde = 2
                 tup = (volgorde, obj.pk, obj)
                 objs.append(tup)
@@ -139,6 +140,7 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
                 obj.url = reverse('Functie:activeer-rol', kwargs={'rol': rol2url[rol]})
                 obj.selected = (self.rol_nu == rol)
                 obj.pk = volgorde = 90000
+                obj.is_primair = True
                 tup = (volgorde, obj.pk, obj)
                 objs.append(tup)
 
@@ -159,7 +161,6 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
 
                 obj.url = reverse('Functie:activeer-functie',
                                   kwargs={'functie_pk': obj.pk})
-
                 volgorde = functie_volgorde(obj)
                 tup = (volgorde, obj.pk, obj)
                 objs.append(tup)

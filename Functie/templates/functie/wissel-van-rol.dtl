@@ -78,19 +78,13 @@
                     {% if heeft_alle_rollen %}
                         <h3 class="sv-kopje-klein center" style="margin-bottom:20px">Jouw rollen</h3>
                     {% endif %}
-                    <ul>
                     {% for obj in eigen_rollen %}
-                        <li>
-                            <label class="black-text" for="id_eigen_{{ obj.pk }}">
-                                <input class="with-gap" type="radio" name="rol" value="{{ obj.pk }}" required id="id_eigen_{{ obj.pk }}" data-url="{{ obj.url }}" {% if obj.selected %}checked{% endif %}>
-                                <span>{{ obj.beschrijving }}{% if obj.ver_naam %}&nbsp;&nbsp;{{ obj.ver_naam }}{% endif %}</span>
-                            </label>
-                        </li>
+                        <form style="display:inline" action="{{ obj.url }}" method="post" onsubmit="document.getElementById('submit_knop{{ obj.pk }}').disabled=true; return true;">
+                            {% csrf_token %}
+                            <button class="{% if obj.is_primair %}btn-sv-rood{% else %}btn-sv-blauw{% endif %}" style="margin:1px" id="submit_knop{{ obj.pk }}" type="submit">{{ obj.beschrijving }}</button>
+                        </form>
+                        <br>
                     {% endfor %}
-                    </ul>
-                    <p class="center">
-                        <button class="btn-sv-rood" id="activeer_eigen" onclick="wissel_naar_rol()">Activeer</button>
-                    </p>
                 </div>
             </div>
 

@@ -699,7 +699,7 @@
                         <tr>
                             <th class="center">Wanneer</th>
                             <th class="center">Beschrijving</th>
-                            <th class="center">Locatie</th>
+                            <th class="center"><span class="hide-on-small-and-down">Locatie</span></th>
                             <th><!-- kolom voor knoppen --></th>
                         </tr>
                     </thead>
@@ -718,15 +718,27 @@
                                     <span class="sv-rood-text">Let op: {{ obj.status_str }}</span>
                                 {% endif %}
                             </td>
-                            <td class="center">{{ obj.plaats_str }}</td>
+                            <td class="center"><span class="hide-on-small-and-down">{{ obj.plaats_str }}</span></td>
                             <td class="center">
-                                <a class="btn-sv-blauw" href="{{ obj.url_details }}">Details</a>
-                                {% if obj.url_kwalificatie_scores %}
-                                    <br>
-                                    <a style="margin-top:10px" class="{% if obj.mag_kwalificatiescores_aanpassen %}btn-sv-rood{% else %}btn-sv-blauw{% endif %}" href="{{ obj.url_kwalificatie_scores }}">Kwalificatiescores</a>
-                                {% endif %}
+                                {% sv-knop-nav url=obj.url_details kleur='blauw' icon='kalender details wedstrijd' extra_class='hide-on-large-and-up' tekst='' %}
+                                {% sv-knop-nav url=obj.url_details kleur='blauw' icon='' extra_class='hide-on-med-and-down' tekst='Details' %}
                             </td>
                         </tr>
+
+                        {% if obj.url_kwalificatie_scores %}
+                            <tr>
+                                <td></td>
+                                <td class="center">
+                                    {% if obj.mag_kwalificatiescores_aanpassen %}
+                                        {% sv-knop-nav url=obj.url_kwalificatie_scores icon='' tekst='Kwalificatiescores' %}
+                                    {% else %}
+                                        {% sv-knop-nav url=obj.url_kwalificatie_scores icon='' tekst='Kwalificatiescores' kleur='blauw' %}
+                                    {% endif %}
+                                </td>
+                                <td colspan="2"></td>
+                            </tr>
+                        {% endif %}
+
                     {% endfor %}
                 </table>
             </div>
@@ -791,10 +803,10 @@
                         <tr>
                             <th class="center">Datum</th>
                             <th class="center">Soort record</th>
-                            <th class="center">Boog type</th>
+                            <th class="center"><span class="hide-on-small-and-down">Boog type</span></th>
                             <th class="center">Score</th>
                             {% if show_loc %}
-                                <th class="center">Plaats</th>
+                                <th class="center"><span class="hide-on-small-and-down">Plaats</span></th>
                             {% endif %}
                             <th><!-- kolom voor knop --></th>
                         </tr>
@@ -804,12 +816,15 @@
                         <tr>
                             <td class="center">{{ obj.datum }}</td>
                             <td class="center">{{ obj.soort_record }}</td>
-                            <td class="center">{{ obj.boog_str }}</td>
+                            <td class="center"><span class="hide-on-small-and-down">{{ obj.boog_str }}</span></td>
                             <td class="center">{{ obj.score_str }}</td>
                             {% if show_loc %}
-                                <td class="center">{{ obj.loc_str }}</td>
+                                <td class="center"><span class="hide-on-small-and-down">{{ obj.loc_str }}</span></td>
                             {% endif %}
-                            <td class="center"><a class="btn-sv-rood" href="{{ obj.url }}">Details</a></td>
+                            <td class="center">
+                                {% sv-knop-nav url=obj.url icon='zoom details' extra_class='hide-on-large-and-up' tekst='' %}
+                                {% sv-knop-nav url=obj.url icon='' extra_class='hide-on-med-and-down' tekst='Details' %}
+                            </td>
                         </tr>
                     {% endfor %}
                 </table>
@@ -848,14 +863,12 @@
                             <td class="center hide-on-small-only">{{ obj.code_pas_str }}</td>
                         </tr>
                     {% endfor %}
-
-                    <tr>
-                        <td colspan="3" class="center">
-                            <span>Kijk op <code>www.handboogsport.nl</code> onder Procedures hoe je een prestatiespeld aan kan vragen:</span><br><br>
-                            {% sv-knop-ext url=url_procedures tekst='Link' %}
-                        </td>
-                    </tr>
                 </table>
+
+                <!-- prestatiespelden -->
+                {% url 'Spelden:begin' as card_url %}
+                {% include 'design/card_icon.dtl' with title="Prestatiespelden" text="Meer informatie over de prestatiespelden" sv_icon="spelden" url=card_url %}
+
             </div>
         </div>
 
