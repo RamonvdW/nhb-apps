@@ -15,7 +15,7 @@ class SpeldToegekend(models.Model):
     # welke speld heeft de sporter behaald?
     speld = models.ForeignKey(Speld, on_delete=models.PROTECT)
 
-    # welke sporter heeft deze speelsterkte behaald?
+    # welke sporter heeft deze speld toegekend gekregen?
     sporter = models.ForeignKey(Sporter, on_delete=models.CASCADE)
 
     # wanneer is deze speld toegekend?

@@ -107,7 +107,7 @@ def maak_bondspas_regels(sporter: Sporter, jaar_pas):
                       .filter(sporter=sporter)
                       .select_related('speld')
                       .order_by('speld__categorie',
-                                '-speld__volgorde')):    # hoogste eerst = beste eerst
+                                'speld__volgorde')):    # laagste eerst = beste eerst
 
         if toegekend.speld.categorie != prev_cat:
             afkortingen.append(toegekend.speld.pas_code)
