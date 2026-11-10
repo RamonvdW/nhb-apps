@@ -162,94 +162,25 @@
                 <thead>
                     <tr>
                         <th class="center">Ronde</th>
+                        <th class="center">Aantal pijlen</th>
                         <th class="center">Wit</th>
                         <th class="center">Zwart</th>
                         <th class="center">Blauw</th>
                         <th class="center">Rood</th>
                         <th class="center">Goud</th>
-                        <th class="center">Paars</th>
+                        <th class="center">Purper</th>
                     </tr>
                 </thead>
 
-                <tr>
-                    <td class="center">70m ronde</td>
-                    <td class="center">500</td>
-                    <td class="center">550</td>
-                    <td class="center">600</td>
-                    <td class="center">650</td>
-                    <td class="center">675</td>
-                    <td class="center">700</td>
-                </tr>
-
-                <tr>
-                    <td class="center">900 ronde</td>
-                    <td class="center">750</td>
-                    <td class="center">800</td>
-                    <td class="center">830</td>
-                    <td class="center">860</td>
-                    <td class="center">875</td>
-                    <td class="center">890</td>
-                </tr>
-
-                <tr>
-                    <td class="center">25 ronde</td>
-                    <td class="center">500</td>
-                    <td class="center">525</td>
-                    <td class="center">550</td>
-                    <td class="center">575</td>
-                    <td class="center">585</td>
-                    <td class="center">595</td>
-                </tr>
-
-                <tr>
-                    <td class="center">18m ronde</td>
-                    <td class="center">500</td>
-                    <td class="center">525</td>
-                    <td class="center">550</td>
-                    <td class="center">575</td>
-                    <td class="center">585</td>
-                    <td class="center">595</td>
-                </tr>
-
-                <tr>
-                    <td class="center">Barebow 18m ronde</td>
-                    <td class="center">480</td>
-                    <td class="center">500</td>
-                    <td class="center">520</td>
-                    <td class="center">540</td>
-                    <td class="center">550</td>
-                    <td class="center">560</td>
-                </tr>
-
-                <tr>
-                    <td class="center">Barebow 50m ronde</td>
-                    <td class="center">480</td>
-                    <td class="center">500</td>
-                    <td class="center">550</td>
-                    <td class="center">600</td>
-                    <td class="center">625</td>
-                    <td class="center">640</td>
-                </tr>
-
-                <tr>
-                    <td class="center">Compound 50m ronde</td>
-                    <td class="center">500</td>
-                    <td class="center">550</td>
-                    <td class="center">600</td>
-                    <td class="center">650</td>
-                    <td class="center">675</td>
-                    <td class="center">700</td>
-                </tr>
-
-                <tr>
-                    <td class="center">60m ronde</td>
-                    <td class="center">500</td>
-                    <td class="center">550</td>
-                    <td class="center">600</td>
-                    <td class="center">650</td>
-                    <td class="center">675</td>
-                    <td class="center">700</td>
-                </tr>
+                {% for ronde, aantal_pijlen, scores in voorwaarden %}
+                    <tr>
+                        <td class="center">{{ ronde }}</td>
+                        <td class="center">{{ aantal_pijlen }}</td>
+                        {% for score in scores %}
+                            <td class="center">{{ score }}</td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
 
             </table>
         </div>

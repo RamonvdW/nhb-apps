@@ -5,7 +5,8 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from Spelden import view_begin, view_info, view_bestel_stap1, view_bestel_stap2, view_bestel_stap3
+from Spelden import (view_begin, view_info, view_info_arrowhead, view_info_target_awards,
+                     view_bestel_stap1, view_bestel_stap2, view_bestel_stap3)
 
 app_name = 'Spelden'
 
@@ -34,7 +35,7 @@ urlpatterns = [
     #      name='groep-tussenspelden'),
 
     path('target-awards/',
-         view_info.TargetAwardsView.as_view(),
+         view_info_target_awards.TargetAwardsView.as_view(),
          name='groep-target-awards'),
 
     path('sterspelden/',
@@ -42,7 +43,7 @@ urlpatterns = [
          name='groep-sterspelden'),
 
     path('arrowhead/',
-         view_info.ArrowheadView.as_view(),
+         view_info_arrowhead.ArrowheadView.as_view(),
          name='groep-arrowhead'),
 
 

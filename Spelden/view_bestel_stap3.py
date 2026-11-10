@@ -14,9 +14,9 @@ from BasisTypen.definities import BOOGTYPE_AFKORTING2STR, GESLACHT2STR
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
 from Spelden.definities import SPELD_DISCIPLINE_VELD, SPELD_DISCIPLINE2STR, SPELD_CATEGORIE2STR
-from Spelden.models import SpeldAanvraagPrep
+from Spelden.models import SpeldAanvraagPrep, SpeldVoorwaarden, SpeldToegekend
 from Spelden.operations import get_mogelijke_spelden
-from Sporter.models import get_sporter
+from Sporter.operations import get_sporter
 
 TEMPLATE_PRESTATIESPELDEN_BESTEL_STAP3 = 'spelden/bestel_stap3.dtl'
 
@@ -31,7 +31,7 @@ class BestelStap3View(TemplateView):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.prep = None
-        self.al_besteld = list()
+        self.al_toegekende_speld_pks = list()
 
     def _load_prep(self):
         if rol_get_huidige(self.request) != Rol.ROL_SPORTER:
@@ -50,10 +50,14 @@ class BestelStap3View(TemplateView):
         if not self.prep.heeft_data_stap2:
             raise Http404('Onvolledige verzoek (2)')
 
-    def _load_al_besteld(self):
-        pass
+    def _load_al_toegekend(self):
+        account = get_account(self.request)
+        sporter = get_sporter(account)
 
-    def _prep_pagina(self, context, opties):
+        pks = list(SpeldToegekend.objects.filter(sporter=sporter).values_list('speld__pk', flat=True))
+        self.al_toegekende_speld_pks = pks
+
+    def _prep_pagina(self, context, opties: list[SpeldVoorwaarden]):
         context['sporter_str'] = self.prep.voor_sporter.lid_nr_en_volledige_naam()
 
         # geslacht is alleen relevant voor de arrowhead spelden (andere scores), dus toon alleen voor discipline veld
@@ -65,7 +69,7 @@ class BestelStap3View(TemplateView):
         context['boogtype_str'] = BOOGTYPE_AFKORTING2STR[self.prep.boog]
         context['score'] = self.prep.score
 
-        mogelijke_spelden = list()
+        context['mogelijke_spelden'] = mogelijke_spelden = list()
 
         # informatie die verzameld is in stap 2
         if self.prep.discipline == SPELD_DISCIPLINE_VELD:
@@ -86,28 +90,35 @@ class BestelStap3View(TemplateView):
                     mogelijke_spelden.append(optie)
             # for
 
-        # optie 1: geen van de spelden kan besteld worden --> toon score nodig voor eerste speld
-        # optie 2: een of meerdere spelden kan besteld worden, maar sporter heeft ze allemaal al
-        # optie 3: een of meerdere spelden kan besteld worden
+        alle_soorten = []
+        for optie in mogelijke_spelden:
+            if optie.wedstrijd_soort not in alle_soorten:
+                alle_soorten.append(optie.wedstrijd_soort)
+        # for
+        if len(alle_soorten) == 1:
+            context['wedstrijd_soort'] = alle_soorten[0]
+
+        # doorloop alle spelden die passen bij de gemaakte keuzes
+        # vergelijk de ingevoerde score met de benodigde score
 
         for optie in mogelijke_spelden:
             optie.speld.categorie_str = SPELD_CATEGORIE2STR[optie.speld.categorie]
 
             # controleer dat de score hoog genoeg is
-            optie.ok_score = self.prep.score >= optie.benodigde_score
+            optie.nok_score = self.prep.score < optie.benodigde_score   # toon in rood
+            optie.ok_score = self.prep.score >= optie.benodigde_score   # toon in groen
             if not optie.ok_score:
                 optie.opmerking = "Score niet hoog genoeg"
 
-            # TODO: controleer dat de speld niet al besteld is
-            optie.al_besteld = False
+            if optie.speld.pk in self.al_toegekende_speld_pks:
+                optie.opmerking = "Deze speld heb je al"
+                optie.ok_score = optie.nok_score = False      # niet in groen of rood tonen
         # for
 
         # # verwijder spelden die niet besteld kunnen worden (met hogere score vereiste)
         # while len(mogelijke_spelden) and not mogelijke_spelden[-1].ok_score:
         #     mogelijke_spelden.pop(-1)
         # # while
-
-        context['mogelijke_spelden'] = mogelijke_spelden
 
         context['url_opslaan'] = reverse('Spelden:bestel-stap3')    # voor doorgave keuzes (form POST)
         context['url_stap2'] = reverse('Spelden:bestel-stap2')
@@ -125,7 +136,7 @@ class BestelStap3View(TemplateView):
         context = super().get_context_data(**kwargs)
 
         self._load_prep()
-        self._load_al_besteld()
+        self._load_al_toegekend()
 
         opties = get_mogelijke_spelden(self.prep.discipline,
                                        self.prep.boog,

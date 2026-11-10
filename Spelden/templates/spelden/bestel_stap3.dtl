@@ -45,6 +45,12 @@
                     <th>Behaalde score</th>
                     <td>{{ score }}</td>
                 </tr>
+                {% if wedstrijd_soort %}
+                    <tr>
+                        <th>Soort wedstrijd</th>
+                        <td>{{ wedstrijd_soort }}</td>
+                    </tr>
+                {% endif %}
                 {% if afstanden %}
                     <tr>
                         <th>Afstand(en)</th>
@@ -100,7 +106,7 @@
                             <tr>
                                 <td>{{ optie.speld.categorie_str }}</td>
                                 <td>{{ optie.speld.beschrijving }}</td>
-                                <td class="{% if optie.ok_score %}green-text{% else %}sv-rood-text{% endif %}">{{ optie.benodigde_score }}</td>
+                                <td class="{% if optie.ok_score %}green-text{% elif optie.nok_score %}sv-rood-text{% endif %}">{{ optie.benodigde_score }}</td>
                                 <td>{{ optie.opmerking }}</td>
                             </tr>
                         {% endfor %}

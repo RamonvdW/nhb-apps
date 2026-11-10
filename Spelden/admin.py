@@ -74,11 +74,18 @@ class SpeldAanvraagPrepAdmin(admin.ModelAdmin):
     readonly_fields = ('voor_sporter',)
 
 
+class SpeldToegekendAdmin(admin.ModelAdmin):
+
+    readonly_fields = ('sporter', 'speld')
+
+    search_fields = ('sporter__lid_nr', 'sporter__unaccented_naam')
+
+
 admin.site.register(Speld, SpeldAdmin)
 admin.site.register(SpeldVoorwaarden, SpeldVoorwaardenAdmin)
 admin.site.register(SpeldAanvraagPrep, SpeldAanvraagPrepAdmin)
 admin.site.register(SpeldAanvraag, SpeldAanvraagAdmin)
-admin.site.register(SpeldToegekend)
+admin.site.register(SpeldToegekend, SpeldToegekendAdmin)
 admin.site.register(SpeldBijlage)
 
 # end of file

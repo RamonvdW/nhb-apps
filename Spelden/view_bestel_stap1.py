@@ -16,7 +16,8 @@ from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
 from Spelden.definities import SPELD_DISCIPLINE_CHOICES, SPELD_DISCIPLINE_NVT, SPELD_BOOGTYPE_CHOICES
 from Spelden.models import SpeldAanvraagPrep
-from Sporter.models import get_sporter, SporterBoog
+from Sporter.models import SporterBoog
+from Sporter.operations import get_sporter
 from Sporter.operations import get_sporter_voorkeuren
 from Wedstrijden.definities import WEDSTRIJD_DISCIPLINE_MAXLEN
 from types import SimpleNamespace

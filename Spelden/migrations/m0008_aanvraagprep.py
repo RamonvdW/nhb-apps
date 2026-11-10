@@ -345,7 +345,7 @@ def maak_voorwaarden_wa_target_awards(apps, _):
 
         lkl = lkls[volgorde]
         afstanden = "25"
-        aantal_pijlen = 2 * 25
+        aantal_pijlen = 2 * 30
 
         for discipline in (SPELD_DISCIPLINE_OUTDOOR, SPELD_DISCIPLINE_INDOOR):
             for boog in (boog_r, boog_c, boog_bb):
@@ -481,7 +481,7 @@ def maak_voorwaarden_wa_target_awards(apps, _):
     # for
 
     # 18m ronde (barebow)
-    soort = '18m ronde (Barebow)'
+    soort = 'Barebow 18m ronde'
     for volgorde in (
             41,     # Senioren dames
             42,     # Senioren heren
@@ -552,7 +552,7 @@ def maak_voorwaarden_wa_target_awards(apps, _):
     # for
 
     # 50m ronde (barebow)
-    soort = '50m Barebow ronde'
+    soort = 'Barebow 50m ronde'
     for volgorde in (
             41,     # Senioren dames
             42,     # Senioren heren
@@ -588,7 +588,7 @@ def maak_voorwaarden_wa_target_awards(apps, _):
                 boog_type=boog_bb,
                 afstanden="50",
                 aantal_pijlen=2*36,
-                benodigde_score=520),
+                benodigde_score=550),
             voorwaarden_klas(
                 speld=spelden[3004],        # rood
                 discipline=SPELD_DISCIPLINE_OUTDOOR,
@@ -597,7 +597,7 @@ def maak_voorwaarden_wa_target_awards(apps, _):
                 boog_type=boog_bb,
                 afstanden="50",
                 aantal_pijlen=2*36,
-                benodigde_score=540),
+                benodigde_score=600),
             voorwaarden_klas(
                 speld=spelden[3005],        # goud
                 discipline=SPELD_DISCIPLINE_OUTDOOR,
@@ -606,7 +606,7 @@ def maak_voorwaarden_wa_target_awards(apps, _):
                 boog_type=boog_bb,
                 afstanden="50",
                 aantal_pijlen=2*36,
-                benodigde_score=550),
+                benodigde_score=625),
             voorwaarden_klas(
                 speld=spelden[3006],        # purper
                 discipline=SPELD_DISCIPLINE_OUTDOOR,
@@ -615,12 +615,12 @@ def maak_voorwaarden_wa_target_awards(apps, _):
                 boog_type=boog_bb,
                 afstanden="50",
                 aantal_pijlen=2*36,
-                benodigde_score=560),
+                benodigde_score=640),
         ])
     # for
 
     # 50m ronde (compound)
-    soort = '50m Compound ronde'
+    soort = 'Compound 50m ronde'
     for volgorde in (
             41,     # Senioren dames
             42,     # Senioren heren

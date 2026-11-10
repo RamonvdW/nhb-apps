@@ -16,7 +16,7 @@ from Functie.rol import rol_get_huidige
 from Spelden.definities import SPELD_DISCIPLINE_VELD, SPELD_DISCIPLINE_INDOOR, SPELD_DISCIPLINE2STR
 from Spelden.models import SpeldAanvraagPrep
 from Spelden.operations import get_mogelijke_spelden
-from Sporter.models import get_sporter
+from Sporter.operations import get_sporter
 from types import SimpleNamespace
 
 TEMPLATE_PRESTATIESPELDEN_BESTEL_STAP2 = 'spelden/bestel_stap2.dtl'
@@ -104,7 +104,9 @@ class BestelStap2View(TemplateView):
                 filter_opties.append(obj)
             # for
 
-        context['url_opslaan'] = reverse('Spelden:bestel-stap2')    # voor doorgave keuzes (form POST)
+        if len(filter_opties) > 0:
+            context['url_opslaan'] = reverse('Spelden:bestel-stap2')    # voor doorgave keuzes (form POST)
+
         context['url_stap1'] = reverse('Spelden:bestel-stap1')
 
         context['menu_toon_mandje'] = True

@@ -21,13 +21,8 @@ class SpeldToegekend(models.Model):
     # wanneer is deze speld toegekend?
     datum = models.DateField()
 
-    # Senior / Master / Cadet
-    # sommige spelden zijn apart te behalen in verschillende categorieën
-    category = models.CharField(max_length=50)      # FUTURE: Obsolete
-
     def __str__(self):
-        return "[%s] %s - %s (%s) " % (self.datum, self.speld.beschrijving,
-                                       self.sporter.volledige_naam(), self.category)
+        return "[%s] %s - %s" % (self.datum, self.speld.beschrijving, self.sporter.volledige_naam())
 
     class Meta:
         """ meta data voor de admin interface """

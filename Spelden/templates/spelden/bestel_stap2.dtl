@@ -49,76 +49,86 @@
         </div>
     </div>
 
+    {% if not url_opslaan %}
 
-    <!-- witruimte -->
-    <div class="row center">
-        <div class="col s12">
-            <h2 class="sv-kopje-row">Stap 2</h2>
-            <p>Vertel ons wat meer over de wedstrijd.</p>
-        </div>
-    </div>
-
-    <!-- blauwe balk filters -->
-    <div class="row-sv-blauw">
-
-        <form action="{{ url_opslaan }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
-            {% csrf_token %}
-
-            <!-- filter: wedstrijddiscipline -->
-            <div class="col s10 offset-s1 m6 offset-m3 l4 offset-l4 sv-kader-form">
-                <div class="form-padding">
-
-                    <table>
-                        {% if doelen_opties %}
-                            <tr>
-                                <th>Aantal doelen</th>
-                                <td>
-                                    <ul id="id_doelen">
-                                        {% for opt in doelen_opties %}
-                                            <li>
-                                                <label class="black-text" for="id_{{ opt.afkorting }}">
-                                                    <input class="with-gap" type="radio" name="doelen" value="{{ opt.afkorting }}" required id="id_{{ opt.afkorting }}"{% if opt.actief %} checked{% endif %}>
-                                                    <span>{{ opt.beschrijving }}</span>
-                                                </label>
-                                            </li>
-                                        {% endfor %}
-                                    </ul>
-                                </td>
-                            </tr>
-                        {% endif %}
-
-                        {% if afstanden_opties %}
-                            <tr>
-                                <th>{{ afstanden_titel }}</th>
-                                <td>
-                                    <ul id="id_afstanden">
-                                        {% for opt in afstanden_opties %}
-                                            <li>
-                                                <label class="black-text" for="id_{{ opt.afkorting }}">
-                                                    <input class="with-gap" type="radio" name="afstand" value="{{ opt.afkorting }}" required id="id_{{ opt.afkorting }}"{% if opt.actief %} checked{% endif %}>
-                                                    <span>{{ opt.beschrijving }}</span>
-                                                </label>
-                                            </li>
-                                        {% endfor %}
-                                    </ul>
-                                </td>
-                            </tr>
-                        {% endif %}
-
-                        <tr>
-                            <td colspan="2" class="center">
-                                <button class="btn-sv-rood" id="submit_knop" type="submit">Volgende stap</button>
-                            </td>
-                        </tr>
-
-                    </table>
-
-                </div>
+        <!-- rood bordje -->
+        <div class="row sv-bordje-wrapper">
+            <div class="col s12 m8 offset-m2 l6 offset-l3 sv-bordje-rood">
+                <p>Er zijn geen spelden beschikbaar voor deze combinatie</p>
             </div>
+        </div>
 
-        </form>
-    </div>
+    {% else %}
 
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <h2 class="sv-kopje-row">Stap 2</h2>
+                <p>Vertel ons wat meer over de wedstrijd.</p>
+            </div>
+        </div>
+
+        <!-- blauwe balk filters -->
+        <div class="row-sv-blauw">
+
+            <form action="{{ url_opslaan }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
+                {% csrf_token %}
+
+                <!-- filter: wedstrijddiscipline -->
+                <div class="col s10 offset-s1 m6 offset-m3 l4 offset-l4 sv-kader-form">
+                    <div class="form-padding">
+
+                        <table>
+                            {% if doelen_opties %}
+                                <tr>
+                                    <th>Aantal doelen</th>
+                                    <td>
+                                        <ul id="id_doelen">
+                                            {% for opt in doelen_opties %}
+                                                <li>
+                                                    <label class="black-text" for="id_{{ opt.afkorting }}">
+                                                        <input class="with-gap" type="radio" name="doelen" value="{{ opt.afkorting }}" required id="id_{{ opt.afkorting }}"{% if opt.actief %} checked{% endif %}>
+                                                        <span>{{ opt.beschrijving }}</span>
+                                                    </label>
+                                                </li>
+                                            {% endfor %}
+                                        </ul>
+                                    </td>
+                                </tr>
+                            {% endif %}
+
+                            {% if afstanden_opties %}
+                                <tr>
+                                    <th>{{ afstanden_titel }}</th>
+                                    <td>
+                                        <ul id="id_afstanden">
+                                            {% for opt in afstanden_opties %}
+                                                <li>
+                                                    <label class="black-text" for="id_{{ opt.afkorting }}">
+                                                        <input class="with-gap" type="radio" name="afstand" value="{{ opt.afkorting }}" required id="id_{{ opt.afkorting }}"{% if opt.actief %} checked{% endif %}>
+                                                        <span>{{ opt.beschrijving }}</span>
+                                                    </label>
+                                                </li>
+                                            {% endfor %}
+                                        </ul>
+                                    </td>
+                                </tr>
+                            {% endif %}
+
+                            <tr>
+                                <td colspan="2" class="center">
+                                    <button class="btn-sv-rood" id="submit_knop" type="submit">Volgende stap</button>
+                                </td>
+                            </tr>
+
+                        </table>
+
+                    </div>
+                </div>
+
+            </form>
+        </div>
+    {% endif %}
 
     <p class="center">
         {% sv-knop-nav url=url_stap1 icon='terug' tekst='Terug naar stap 1' kleur='blauw' %}

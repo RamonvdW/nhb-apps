@@ -12,7 +12,7 @@ from Wedstrijden.definities import WEDSTRIJD_DISCIPLINE_VELD
 
 
 def get_hall_of_fame():
-    """ Geef de Speelsterkte queries terug van de sporters met pascodes GM, MS, AS,
+    """ Geef de SpeldToegekend queries terug van de sporters met pascodes GM, MS, AS,
         elk gesorteerd op datum (oudste eerst) en lidnummer.
         Sporters die niet meer actief lid zijn van een vereniging worden eruit gefilterd.
     """
@@ -48,7 +48,9 @@ def tel_hall_of_fame():
     return gm_count, ms_count, as_count
 
 
-def get_mogelijke_spelden(discipline: str, boog: str, score: int, wedstrijd_geslacht: str, geboorte_jaar: int):
+def get_mogelijke_spelden(discipline: str, boog: str, score: int,
+                          wedstrijd_geslacht: str, geboorte_jaar: int) -> list[SpeldVoorwaarden]:
+
     """ Bepaalt de mogelijke spelden aan de hand van ingevoerde informatie
 
         discipline:         uit SPELD_DISCIPLINE_CHOICES: 'OD', 'IN', '25', 'VE'
