@@ -19,6 +19,17 @@
         </div>
     </div>
 
+    <script>
+        function wedstrijd_gekozen() {
+            const el_inp_plaats = document.getElementById('invoer_plaats');
+            const el_inp_land = document.getElementById('invoer_land');
+            const el_select = document.getElementById('kies_wedstrijd');
+            const gekozen = el_select.options[el_select.selectedIndex];
+            el_inp_plaats.value = gekozen.dataset.plaats;
+            el_inp_land.value = "Nederland";
+        }
+    </script>
+
     <!-- blauwe balk met informatie in tabel-vorm:  label - info -->
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
@@ -45,30 +56,10 @@
                     <th>Behaalde score</th>
                     <td>{{ score }}</td>
                 </tr>
-                {% if wedstrijd_soort %}
-                    <tr>
-                        <th>Soort wedstrijd</th>
-                        <td>{{ wedstrijd_soort }}</td>
-                    </tr>
-                {% endif %}
-                {% if afstanden %}
-                    <tr>
-                        <th>Afstand(en)</th>
-                        <td>{{ afstanden }}</td>
-                    </tr>
-                {% endif %}
-                {% if aantal_pijlen %}
-                    <tr>
-                        <th>Aantal pijlen</th>
-                        <td>{{ aantal_pijlen }}</td>
-                    </tr>
-                {% endif %}
-                {% if aantal_doelen %}
-                    <tr>
-                        <th>Aantal doelen</th>
-                        <td>{{ aantal_doelen }}</td>
-                    </tr>
-                {% endif %}
+                <tr>
+                    <th>Datum van de wedstrijd</th>
+                    <td>{{ wedstrijd_datum }}</td>
+                </tr>
             </table>
         </div>
     </div>
@@ -78,51 +69,69 @@
     <div class="row center">
         <div class="col s12">
             <h2 class="sv-kopje-row">Stap 3</h2>
-            <p>Hieronder zie je de spelden die je kunt bestellen.</p>
+            <p>Vertel ons wat meer over de wedstrijd</p>
         </div>
     </div>
 
     <!-- blauwe balk filters -->
     <div class="row-sv-blauw">
 
-        <form action="{{ url_opslaan }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
-            {% csrf_token %}
-
-            <!-- filter: wedstrijddiscipline -->
-            <div class="col s10 offset-s1 sv-kader-form">
-                <div class="form-padding">
+        <!-- filter: wedstrijddiscipline -->
+        <div class="col s10 offset-s1 sv-kader-form">
+            <div class="form-padding">
+                <form action="{{ url_opslaan }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
+                    {% csrf_token %}
 
                     <table>
-                        <thead>
-                            <tr>
-                                <th>Soort speld</th>
-                                <th>Details</th>
-                                <th>Benodige score</th>
-                                <th>Opmerking</th>
-                            </tr>
-                        </thead>
+                        <tr>
+                            <th>Kies uit deze wedstrijden:</th>
+                            <td>
+                                <ul id="id_wedstrijden">
+                                    {% for obj in kalender_lijst %}
+                                        <li>
+                                            <label class="black-text" for="id_wed{{ obj.pk }}">
+                                                <input class="with-gap" type="radio" name="wedstrijd" value="wed_{{ obj.pk }}" id="id_wed{{ obj.pk }}"{% if wedstrijd_pk == obj.pk %} checked{% endif %}>
+                                                <span>{{ obj.titel }}{% if obj.plaats %} ({{ obj.plaats }}){% endif %}</span>
+                                            </label>
+                                        </li>
+                                    {% endfor %}
 
-                        {% for optie in mogelijke_spelden %}
-                            <tr>
-                                <td>{{ optie.speld.categorie_str }}</td>
-                                <td>{{ optie.speld.beschrijving }}</td>
-                                <td class="{% if optie.ok_score %}green-text{% elif optie.nok_score %}sv-rood-text{% endif %}">{{ optie.benodigde_score }}</td>
-                                <td>{{ optie.opmerking }}</td>
-                            </tr>
-                        {% endfor %}
+                                    <li>
+                                        <label class="black-text" for="id_wed_geen">
+                                            <input class="with-gap" type="radio" name="wedstrijd" value="geen" id="id_wed_geen"{% if wedstrijd_pk == 'geen' %} checked{% endif %}>
+                                            <span>(geen van deze)</span>
+                                        </label>
+                                    </li>
+                                </ul>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th>Of vul deze velden in:</th>
+                            <td>
+                                <div class="input-field">
+                                    <label for="invoer_plaats">Plaats</label>
+                                    <input id="invoer_plaats" name="plaats" type="text" maxlength="30" value="{{ plaats }}">
+                                </div>
+                                <br>
+                                <div class="input-field">
+                                    <label for="invoer_land">Land</label>
+                                    <input id="invoer_land" name="land" type="text" maxlength="30" value="{{ land }}">
+                                </div>
+                            </td>
+                        </tr>
 
                         <tr>
                             <td colspan="2" class="center">
+                                <!-- TODO: disable button todat alle invoer gegeven is -->
                                 <button class="btn-sv-rood" id="submit_knop" type="submit">Volgende stap</button>
                             </td>
                         </tr>
 
                     </table>
-
-                </div>
+                </form>
             </div>
-
-        </form>
+        </div>
     </div>
 
 

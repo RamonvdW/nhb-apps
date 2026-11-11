@@ -20,6 +20,27 @@
         </div>
     </div>
 
+    <script>
+        let ignore_datum_changes = true;
+
+        function datum_omzetten(is_initial=false) {
+            // ignore calls tijdens initialisatie
+            if (is_initial) ignore_datum_changes = false;
+
+            if (!ignore_datum_changes) {
+                // nieuwe datum gekozen met de datepicker
+                const el1 = document.querySelector('#id_datum_post');
+                const el2 = document.querySelector('#id_datum');
+                let gekozen_datum = el2.M_Datepicker.toString('yyyy-mm-dd');
+                if (gekozen_datum === '') {
+                    // niets gekozen met de datepicker; missing handmatig iets ingevoerd
+                    gekozen_datum = el2.value
+                }
+                el1.value = gekozen_datum
+            }
+        }
+    </script>
+
     <!-- blauwe balk met informatie in tabel-vorm:  label - info -->
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
@@ -48,7 +69,7 @@
             {% csrf_token %}
 
             <!-- filter: wedstrijddiscipline -->
-            <div class="col s10 offset-s1 m6 offset-m3 l4 offset-l4 sv-kader-form">
+            <div class="col s10 offset-s1 m8 offset-m2 l6 offset-l3 xl4 offset-xl4 sv-kader-form">
                 <div class="form-padding">
 
                     <table>
@@ -95,7 +116,16 @@
                         </tr>
 
                         <tr>
+                            <th>Datum van de wedstrijd</th>
+                            <td>
+                                <input type="text" class="nl_datepicker" id="id_datum" required onchange="datum_omzetten()">
+                                <input type="hidden" name="wed_datum" id="id_datum_post"> <!-- voor POST, in juiste formaat -->
+                            </td>
+                        </tr>
+
+                        <tr>
                             <td colspan="2" class="center">
+                                <!-- TODO: disable button todat alle invoer gegeven is -->
                                 <button class="btn-sv-rood" id="submit_knop" type="submit">Volgende stap</button>
                             </td>
                         </tr>
@@ -108,6 +138,29 @@
         </form>
     </div>
 
+    <!-- initialisatie van de datum kiezers -->
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const minDate = new Date("{{ min_date|date:'Y-m-d' }}");
+            const maxDate = new Date("{{ max_date|date:'Y-m-d' }}");
+
+            let el = document.querySelector('#id_datum');
+            if (el) {
+                let options = { defaultDate: new Date("{{ wed_datum|date:'Y-m-d' }}"),
+                                setDefaultDate: true,
+                                format: "d mmmm yyyy",
+                                minDate: minDate,
+                                maxDate: maxDate,
+                                yearRange: [{{ min_date.year }}, {{ max_date.year }}]};
+
+                M.Datepicker.init(el, options);
+
+                // initialisatie is klaar
+                datum_omzetten(true);
+            }
+        })
+    </script>
 
     {% include 'feedback/sidebar.dtl' with op_pagina="spelden-bestel-stap1" %}
 

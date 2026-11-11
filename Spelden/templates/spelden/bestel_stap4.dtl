@@ -1,0 +1,152 @@
+{% extends 'design/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2026 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+{% load design_knop %}
+
+{% block title %}Bestelformulier, stap 3{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h1 class="sv-kopje-pagina">Bestelformulier</h1>
+            <p>Bestel prestatiespelden, voor jezelf</p>
+        </div>
+    </div>
+
+    <!-- blauwe balk met informatie in tabel-vorm:  label - info -->
+    <div class="row-sv-blauw">
+        <div class="col s12 m10 offset-m1 l8 offset-l2">
+            <table class="sv-kader-tabel">
+                <tr>
+                    <th>Sporter</th>
+                    <td>{{ sporter_str }}</td>
+                </tr>
+                <tr>
+                    <th>Wedstrijddiscipline</th>
+                    <td>{{ discipline_str }}</td>
+                </tr>
+                {% if geslacht_str %}
+                    <tr>
+                        <th>Wedstrijdgeslacht</th>
+                        <td>{{ geslacht_str }}</td>
+                    </tr>
+                {% endif %}
+                <tr>
+                    <th>Gebruikte boog</th>
+                    <td>{{ boogtype_str }}</td>
+                </tr>
+                <tr>
+                    <th>Behaalde score</th>
+                    <td>{{ score }}</td>
+                </tr>
+                <tr>
+                    <th>Datum van de wedstrijd</th>
+                    <td>{{ wedstrijd_datum }}</td>
+                </tr>
+                {% if wedstrijd_titel %}
+                    <tr>
+                        <th>Wedstrijd</th>
+                        <td>{{ wedstrijd_titel }}</td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <th>Wedstrijd plaats, land</th>
+                        <td>{{ wedstrijd_plaats_land }}</td><
+                    </tr>
+                {% endif %}
+                {% if wedstrijd_soort %}
+                    <tr>
+                        <th>Soort wedstrijd</th>
+                        <td>{{ wedstrijd_soort }}</td>
+                    </tr>
+                {% endif %}
+                {% if afstanden %}
+                    <tr>
+                        <th>Afstand(en)</th>
+                        <td>{{ afstanden }}</td>
+                    </tr>
+                {% endif %}
+                {% if aantal_pijlen %}
+                    <tr>
+                        <th>Aantal pijlen</th>
+                        <td>{{ aantal_pijlen }}</td>
+                    </tr>
+                {% endif %}
+                {% if aantal_doelen %}
+                    <tr>
+                        <th>Aantal doelen</th>
+                        <td>{{ aantal_doelen }}</td>
+                    </tr>
+                {% endif %}
+            </table>
+        </div>
+    </div>
+
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h2 class="sv-kopje-row">Stap 4</h2>
+            <p>Hieronder zie je de relevante spelden.</p>
+        </div>
+    </div>
+
+    <!-- blauwe balk filters -->
+    <div class="row-sv-blauw">
+
+        <!-- filter: wedstrijddiscipline -->
+        <div class="col s10 offset-s1 sv-kader-form">
+            <div class="form-padding">
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="center">Speld</th>
+                            <th class="center">Benodige score</th>
+                            <th class="center">Analyse</th>
+                            <th class="center">Prijs</th>
+                        </tr>
+                    </thead>
+
+                    {% for optie in mogelijke_spelden %}
+                        <tr>
+                            <td class="center">{{ optie.speld.beschrijving }}</td>
+                            <td class="center {% if optie.ok_score %}green-text{% elif optie.nok_score %}sv-rood-text{% endif %}">{{ optie.benodigde_score }}</td>
+                            <td class="center">{{ optie.opmerking }}</td>
+                            <td class="center">{% if optie.prijs_str %}{{ optie.prijs_str }}{% endif %}</td>
+                        </tr>
+                    {% endfor %}
+
+                    {% if url_leg_in_mandje %}
+                        <tr>
+                            <td colspan="4" class="center">
+                                <p>Je kan {{ aantal_bestelbaar }} speld{% if aantal_bestelbaar > 1 %}en{% endif %} bestellen, voor totaal {{ totale_prijs_str }}</p>
+
+                                <form action="{{ url_leg_in_mandje }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
+                                    {% csrf_token %}
+                                    <button class="btn-sv-rood" id="submit_knop" type="submit">Leg in mijn mandje</button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endif %}
+
+                </table>
+
+            </div>
+        </div>
+    </div>
+
+
+    <p class="center">
+        {% sv-knop-nav url=url_stap3 icon='terug' tekst='Terug naar stap 3' kleur='blauw' %}
+    </p>
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="spelden-bestel-stap4" %}
+
+{% endblock %}
