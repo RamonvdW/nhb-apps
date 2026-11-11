@@ -1,0 +1,64 @@
+{% extends 'design/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2026 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Reservering{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h1 class="sv-kopje-pagina">Reservering is gemaakt</h1>
+            <p>De spelden zijn toegevoegd aan je winkelmandje</p>
+        </div>
+    </div>
+
+    {% include 'design/check_js_enabled.dtl' %}
+
+    <!-- blauwe balk met informatie -->
+    <div class="row-sv-blauw">
+        <div class="col s12 l10 offset-l1 xl8 offset-xl2">
+            <div class="sv-kader">
+                <p>We hebben de spelden in je mandje gelegd.</p>
+                <p>Je bestelling is pas definitief na het <b>afronden</b> van je bestelling en eventuele <b>betaling</b>.</p>
+                <br>
+                <p>Rechts bovenin vind je de knop voor je <b>winkelmandje</b>.</p>
+                <p>Je kan meerdere producten toevoegen aan je mandje en daarna in &eacute;&eacute;n keer de bestelling afronden en afrekenen.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h2 class="sv-kopje-row">Wat wil je doen?</h2>
+        </div>
+    </div>
+
+
+    <!-- blauwe balk met kaartjes -->
+    <div class="row-sv-blauw">
+        <div class="col s12">
+
+            <!-- naar de prestatiespelden -->
+            {% include 'design/card_icon.dtl' with title="Verder winkelen" text="Terug naar de prestatiespelden." sv_icon="spelden" url=url_naar_spelden %}
+
+            <!-- naar de webwinkel -->
+            {% include 'design/card_icon.dtl' with title="Webwinkel" text="Kijk de producten in de webwinkel." sv_icon="webwinkel" url=url_naar_webwinkel %}
+
+            <!-- mandje -->
+            {% url 'Bestelling:toon-inhoud-mandje' as card_url %}
+            {% include 'design/card_icon.dtl' with title="Naar mijn mandje" text="Mandje bekijken, bestelling afronden en betalen." sv_icon="mandje" url=card_url %}
+
+        </div>
+    </div>
+
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="spelden-bestel-toegevoegd-aan-mandje" %}
+
+{% endblock %}

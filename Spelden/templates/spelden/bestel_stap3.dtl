@@ -78,51 +78,53 @@
     <div class="row center">
         <div class="col s12">
             <h2 class="sv-kopje-row">Stap 3</h2>
-            <p>Hieronder zie je de spelden die je kunt bestellen.</p>
+            <p>Hieronder zie je de relevante spelden.</p>
         </div>
     </div>
 
     <!-- blauwe balk filters -->
     <div class="row-sv-blauw">
 
-        <form action="{{ url_opslaan }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
-            {% csrf_token %}
+        <!-- filter: wedstrijddiscipline -->
+        <div class="col s10 offset-s1 sv-kader-form">
+            <div class="form-padding">
 
-            <!-- filter: wedstrijddiscipline -->
-            <div class="col s10 offset-s1 sv-kader-form">
-                <div class="form-padding">
-
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Soort speld</th>
-                                <th>Details</th>
-                                <th>Benodige score</th>
-                                <th>Opmerking</th>
-                            </tr>
-                        </thead>
-
-                        {% for optie in mogelijke_spelden %}
-                            <tr>
-                                <td>{{ optie.speld.categorie_str }}</td>
-                                <td>{{ optie.speld.beschrijving }}</td>
-                                <td class="{% if optie.ok_score %}green-text{% elif optie.nok_score %}sv-rood-text{% endif %}">{{ optie.benodigde_score }}</td>
-                                <td>{{ optie.opmerking }}</td>
-                            </tr>
-                        {% endfor %}
-
+                <table>
+                    <thead>
                         <tr>
-                            <td colspan="2" class="center">
-                                <button class="btn-sv-rood" id="submit_knop" type="submit">Volgende stap</button>
+                            <th class="center">Speld</th>
+                            <th class="center">Benodige score</th>
+                            <th class="center">Analyse</th>
+                            <th class="center">Prijs</th>
+                        </tr>
+                    </thead>
+
+                    {% for optie in mogelijke_spelden %}
+                        <tr>
+                            <td class="center">{{ optie.speld.beschrijving }}</td>
+                            <td class="center {% if optie.ok_score %}green-text{% elif optie.nok_score %}sv-rood-text{% endif %}">{{ optie.benodigde_score }}</td>
+                            <td class="center">{{ optie.opmerking }}</td>
+                            <td class="center">{% if optie.prijs_str %}{{ optie.prijs_str }}{% endif %}</td>
+                        </tr>
+                    {% endfor %}
+
+                    {% if url_leg_in_mandje %}
+                        <tr>
+                            <td colspan="4" class="center">
+                                <p>Je kan {{ aantal_bestelbaar }} speld(en) bestellen, voor totaal {{ totale_prijs_str }}</p>
+
+                                <form action="{{ url_leg_in_mandje }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
+                                    {% csrf_token %}
+                                    <button class="btn-sv-rood" id="submit_knop" type="submit">Leg in mijn mandje</button>
+                                </form>
                             </td>
                         </tr>
+                    {% endif %}
 
-                    </table>
+                </table>
 
-                </div>
             </div>
-
-        </form>
+        </div>
     </div>
 
 
