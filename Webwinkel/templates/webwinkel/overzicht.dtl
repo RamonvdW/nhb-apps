@@ -24,40 +24,6 @@
         </div>
     </div>
 
-    {% if url_spelden and False %}
-
-        <!-- witruimte -->
-        <div class="row center">
-            <div class="col s12">
-                <h2 class="sv-kopje-row">Prestatiespelden</h2>
-            </div>
-        </div>
-
-        <!-- blauwe balk met kaartjes -->
-        <div class="row-sv-blauw">
-            <div class="col s12">
-
-                <a href="{{ url_spelden }}">
-                    <div class="sv-card">
-                        <div class="sv-card-content-webwinkel">
-
-                            <div class="sv-card-image-webwinkel">
-                                <!-- achtergrondplaatje -->
-                                <img src="{{ img_spelden }}" alt="spelden" draggable="false">
-                            </div>
-
-                            <div class="sv-card-webwinkel-titel">Prestatiespelden</div>
-
-                            <div class="sv-card-webwinkel-prijs">Vanaf &euro;&nbsp;5,-</div>
-                        </div>
-                    </div>
-                </a>
-
-            </div>
-        </div>
-
-    {% endif %}
-
     {% for product in producten %}
 
         {% if product.sectie_afsluiten %}

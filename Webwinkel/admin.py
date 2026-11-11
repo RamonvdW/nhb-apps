@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022 Ramon van der Winkel.
+#  Copyright (c) 2022-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -9,7 +9,10 @@ from Webwinkel.models import WebwinkelFoto, WebwinkelProduct, WebwinkelKeuze
 
 
 class WebwinkelFotoAdmin(admin.ModelAdmin):
-    pass
+
+    ordering = ('locatie', 'volgorde')
+
+    search_fields = ('locatie', )
 
 
 class WebwinkelProductAdmin(admin.ModelAdmin):

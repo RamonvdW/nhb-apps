@@ -28,7 +28,7 @@
         </div>
 
         <div class="col s12">
-            <p>Op deze website van de Koninklijke HandboogSport Nederland (KHSN) kan je informatie vinden over de handboogsport<br>zoals records, wedstrijden en uitslagen.</p>
+            <p>Als lid van de Koninklijke HandboogSport Nederland (KHSN) kan je op deze website je inschrijven voor wedstrijden en opleidingen, uitslagen en records inzien en bestellingen doen.</p>
         </div>
     </div>
 
@@ -80,7 +80,7 @@
 
             <!-- webwinkel -->
             {% url 'Webwinkel:overzicht' as card_url %}
-            {% include 'design/card_icon.dtl' with title="Webwinkel" text="Bekijk onze webwinkel." sv_icon="webwinkel" url=card_url %}
+            {% include 'design/card_icon.dtl' with title="Webwinkel" text="Bekijk de producten in onze webwinkel." sv_icon="webwinkel" url=card_url %}
 
             <!-- records -->
             {% url 'Records:overzicht' as card_url %}
