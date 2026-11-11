@@ -73,15 +73,18 @@ class StorageGoogleSheet:
                 self.stdout.write('[ERROR] {execute} Socket error: %s' % exc)
             except googleapiclient.errors.HttpError as exc:
                 self.stdout.write('[ERROR] {execute} HttpError from API: %s' % exc)
+            except ConnectionResetError as exc:
+                self.stdout.write('[ERROR] {execute} Connection reset by peer: %s' % exc)
             else:
                 # self.stdout.write('[DEBUG] {execute} response=%s' % repr(response))
                 return response
 
-            self.stdout.write('[DEBUG] {execute} Retrying in %s seconds' % wait_sec)
+            if retries > 0:
+                self.stdout.write('[DEBUG] {execute} Retrying in %s seconds' % wait_sec)
 
-            time.sleep(wait_sec)
-            wait_sec *= 2       # 1, 2, 4, 8, 16, 32, 64
-            retries -= 1
+                time.sleep(wait_sec)
+                wait_sec *= 2       # 1, 2, 4, 8, 16, 32, 64
+                retries -= 1
         # while
 
         return None
@@ -89,19 +92,33 @@ class StorageGoogleSheet:
     def _get_sheet_ids(self):
         self._sheet_name2id = dict()
 
-        request = self._api_spreadsheets.get(spreadsheetId=self._file_id,
-                                             fields="sheets.properties.title,sheets.properties.sheetId")
+        wait_sec = 1
+        retries = 3
+        while retries > 0:
 
-        response = self._execute(request)
-        if response:
-            for sheet in response['sheets']:
-                properties = sheet['properties']
-                # properties = {'title': 'bla', 'sheetId': 1234}
-                self._sheet_name2id[properties['title']] = properties['sheetId']
-            # for
-        else:
-            # TODO: consider retry
-            raise StorageError('{get_sheet_ids} Could not retrieve sheets for file %s' % self._file_id)
+            request = self._api_spreadsheets.get(spreadsheetId=self._file_id,
+                                                 fields="sheets.properties.title,sheets.properties.sheetId")
+
+            response = self._execute(request)
+            if response:
+                for sheet in response['sheets']:
+                    properties = sheet['properties']
+                    # properties = {'title': 'bla', 'sheetId': 1234}
+                    self._sheet_name2id[properties['title']] = properties['sheetId']
+                # for
+                return
+
+            self.stdout.write('[ERROR] {get_sheet_ids} Could not retrieve sheets for file %s' % self._file_id)
+
+            if retries > 0:
+                self.stdout.write('[DEBUG] {execute} Retrying in %s seconds' % wait_sec)
+
+                time.sleep(wait_sec)
+                wait_sec *= 2  # 1, 2, 4, 8, 16, 32, 64
+                retries -= 1
+        # while
+
+        raise StorageError('{get_sheet_ids} Could not retrieve sheets for file %s' % self._file_id)
 
     def selecteer_file(self, file_id):
         self._setup_api()
