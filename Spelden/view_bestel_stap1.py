@@ -7,6 +7,7 @@
 from django.urls import reverse
 from django.conf import settings
 from django.http import HttpResponseRedirect, Http404
+from django.utils import timezone
 from django.shortcuts import render
 from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
@@ -21,6 +22,7 @@ from Sporter.operations import get_sporter
 from Sporter.operations import get_sporter_voorkeuren
 from Wedstrijden.definities import WEDSTRIJD_DISCIPLINE_MAXLEN
 from types import SimpleNamespace
+import datetime
 
 TEMPLATE_PRESTATIESPELDEN_BESTEL_STAP1 = 'spelden/bestel_stap1.dtl'
 
@@ -54,7 +56,7 @@ class BestelStap1View(TemplateView):
             raise Http404('Onvolledige verzoek')        # pragma: no cover
 
         if mag_database_wijzigen:
-            self.prep, _ = SpeldAanvraagPrep.objects.get_or_create(voor_sporter=sporter)
+            self.prep, is_created = SpeldAanvraagPrep.objects.get_or_create(voor_sporter=sporter)
         else:
             self.prep = SpeldAanvraagPrep.objects.filter(voor_sporter=sporter).select_related('voor_sporter').first()
             if not self.prep:
@@ -100,6 +102,18 @@ class BestelStap1View(TemplateView):
         # for
 
         context['score'] = self.prep.score
+
+        # configureer de datepicker
+        now = timezone.now().date()
+        min_date = now - datetime.timedelta(days=2*365)
+        context['min_date'] = min_date
+        context['max_date'] = now
+
+        if isinstance(self.prep.datum_wedstrijd, str) or self.prep.datum_wedstrijd.year < 2001:
+            # toon initieel een leeg invoerveld, want de initiele datum is bewust onredelijk
+            context['wed_datum'] = ''  # was: now
+        else:
+            context['wed_datum'] = self.prep.datum_wedstrijd
 
         context['url_opslaan'] = reverse('Spelden:bestel-stap1')    # voor doorgave keuzes (form POST)
 
@@ -154,12 +168,37 @@ class BestelStap1View(TemplateView):
         except (ValueError, TypeError):
             raise Http404('Slechte score')
 
+        wed_datum = request.POST.get('wed_datum', None)
+        datum_is_ok = False
+        if wed_datum:
+            try:
+                datum = datetime.datetime.strptime(wed_datum, '%Y-%m-%d')
+            except ValueError:
+                # verkeerd formaat
+                pass
+            else:
+                datum = datum.date()
+
+                # check dat de datum in de toegestane range is
+                # we staan hier express een iets ruimere periode toe
+                now = timezone.now().date()
+                min_date = now - datetime.timedelta(days=2 * 365)
+                datum_is_ok = min_date <= datum <= now
+
+                if datum_is_ok:
+                    self.prep.datum_wedstrijd = datum
+
+        if not datum_is_ok:
+            # beter om terug te sturen naar het invoerscherm
+            url = reverse('Spelden:bestel-stap1')
+            return HttpResponseRedirect(url)
+
         if score and 1 <= score <= 2880:
             # acceptable score --> opslaan en door naar stap 2
 
             self.prep.score = score
             self.prep.heeft_data_stap1 = True
-            self.prep.save(update_fields=['heeft_data_stap1', 'discipline', 'boog', 'score'])
+            self.prep.save(update_fields=['heeft_data_stap1', 'discipline', 'boog', 'score', 'datum_wedstrijd'])
 
             url = reverse('Spelden:bestel-stap2')
             return HttpResponseRedirect(url)

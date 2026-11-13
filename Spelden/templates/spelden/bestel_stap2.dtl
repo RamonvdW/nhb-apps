@@ -45,6 +45,10 @@
                     <th>Behaalde score</th>
                     <td>{{ score }}</td>
                 </tr>
+                <tr>
+                    <th>Datum van de wedstrijd</th>
+                    <td>{{ wedstrijd_datum }}</td>
+                </tr>
             </table>
         </div>
     </div>

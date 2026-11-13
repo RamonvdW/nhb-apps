@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2025 Ramon van der Winkel.
+#  Copyright (c) 2022-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -190,18 +190,36 @@ class Command(BaseCommand):
                     klant_account = klant_account[:BETAAL_KLANT_ACCOUNT_MAXLENGTH]
                 except KeyError:
                     self.stderr.write(
-                        '[ERROR] {payment_opslaan} Incomplete details over consumer (methodr=%s): %s' % (repr(methode),
+                        '[ERROR] {payment_opslaan} Gegevens ontbreken over consumer (methodr=%s): %s' % (repr(methode),
                                                                                                          repr(details)))
                     return None
 
             elif methode == 'creditcard':
                 # methode 2: credit cards (inclusief apple pay)
+                bad = False
                 try:
                     klant_naam = details['cardHolder']
+                except KeyError:
+                    # sommige betalingen komen zonder de cardHolder
+                    # gebruik cardLabel, cardMaskedNumber en cardFingerprint
+                    try:
+                        klant_naam = '(geen naam) %s' % details['cardFingerprint']
+                    except KeyError:
+                        bad = True
+
+                try:
                     klant_account = '%s %s %s' % (details['cardCountryCode'], details['cardLabel'],
                                                   details['cardNumber'])
                 except KeyError:
-                    self.stderr.write('[ERROR] {payment_opslaan} Incomplete details voor card: %s' % repr(details))
+                    # sommige betalingen geven maar gedeeltelijke informatie
+                    try:
+                        klant_account = '%s %s %s' % (details['cardFingerprint'], details['cardLabel'],
+                                                      details['cardMaskedNumber'])
+                    except KeyError:
+                        bad = True
+
+                if bad:
+                    self.stderr.write('[ERROR] {payment_opslaan} Gegevens ontbreken voor creditcard: %s' % repr(details))
                     return None
 
             elif methode == 'paypal':
@@ -212,7 +230,7 @@ class Command(BaseCommand):
                                                   details['paypalReference'], details['paypalPayerId'])
                 except KeyError:
                     self.stderr.write(
-                        '[ERROR] {payment_opslaan} Incomplete details voor paypal: %s' % repr(details))
+                        '[ERROR] {payment_opslaan} Gegevens ontbreken over paypal: %s' % repr(details))
                     return None
 
             elif methode == 'banktransfer':
@@ -227,11 +245,11 @@ class Command(BaseCommand):
                     klant_account = klant_account[:BETAAL_KLANT_ACCOUNT_MAXLENGTH]
                 except KeyError:
                     self.stderr.write(
-                        '[ERROR] {payment_opslaan} Incomplete details voor  banktransfer: %s' % repr(details))
+                        '[ERROR] {payment_opslaan} Gegevens ontbreken over  banktransfer: %s' % repr(details))
                     return None
 
             if klant_naam is None or klant_account is None:
-                self.stderr.write('[ERROR] {payment_opslaan} Incomplete informatie over betaler: %s, %s' % (
+                self.stderr.write('[ERROR] {payment_opslaan} Gegevens ontbreken over betaler: %s, %s' % (
                     repr(klant_naam), repr(klant_account)))
                 return None
 

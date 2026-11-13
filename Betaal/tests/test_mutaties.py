@@ -530,17 +530,22 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
         self.assertTrue('Betaling is mislukt' in actief.log)
 
         # een status=paid, with issue
-        self._prep_mollie_websim(425)       # hergebruik standaard websim payment_id
+        self._prep_mollie_websim(425)       # creditcard met cardHolder
         betaal_mutatieverzoek_payment_status_changed(payment_id)
         f1, f2 = self._run_achtergrondtaak()
-        self.assertTrue('[ERROR] {payment_opslaan} Incomplete details voor card: ' in f1.getvalue())
+        self.assertTrue('[ERROR] {payment_opslaan} Gegevens ontbreken over creditcard: ' in f1.getvalue())
         self.assertTrue('[WARNING] Payment tr_1234AbcdEFGH bevat een probleem' in f2.getvalue())
+
+        self._prep_mollie_websim(4251)      # creditcard met cardFingerprint ipv cardHolder
+        betaal_mutatieverzoek_payment_status_changed(payment_id)
+        f1, f2 = self._run_achtergrondtaak()
+        self.assertEqual(f1.getvalue(), "")
 
         # een status=paid, with issue
         self._prep_mollie_websim(426)       # hergebruik standaard websim payment_id
         betaal_mutatieverzoek_payment_status_changed(payment_id)
         f1, f2 = self._run_achtergrondtaak()
-        self.assertTrue('[ERROR] {payment_opslaan} Incomplete details over consumer: ' in f1.getvalue())
+        self.assertTrue('[ERROR] {payment_opslaan} Gegevens ontbreken over consumer: ' in f1.getvalue())
         self.assertTrue('[WARNING] Payment tr_1234AbcdEFGH bevat een probleem' in f2.getvalue())
 
         # een status=paid, with issue

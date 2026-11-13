@@ -58,6 +58,7 @@ class BestelStap2View(TemplateView):
         context['discipline_str'] = SPELD_DISCIPLINE2STR[self.prep.discipline]
         context['boogtype_str'] = BOOGTYPE_AFKORTING2STR[self.prep.boog]
         context['score'] = self.prep.score
+        context['wedstrijd_datum'] = self.prep.datum_wedstrijd
 
         # geslacht is alleen relevant voor de arrowhead spelden (andere scores), dus toon alleen voor discipline veld
         if self.prep.discipline == SPELD_DISCIPLINE_VELD:
@@ -78,7 +79,7 @@ class BestelStap2View(TemplateView):
                 obj = SimpleNamespace(
                             afkorting=aantal,
                             beschrijving=aantal + ' doelen',
-                            actief=(self.prep.aantal_doelen == aantal))
+                            actief=(str(self.prep.aantal_doelen) == aantal))
                 filter_opties.append(obj)
             # for
         else:

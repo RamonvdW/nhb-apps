@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2024 Ramon van der Winkel.
+#  Copyright (c) 2022-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -112,10 +112,19 @@ class MyServer(BaseHTTPRequestHandler):
                         details['consumerBic'] = 'RABONL2U'  # noqa
 
                     elif resp['method'] == 'creditcard':
-                        details['cardHolder'] = 'T. TEST'
-                        details['cardNumber'] = '12345678901234'
-                        details['cardLabel'] = 'Dankort'  # noqa
-                        details['cardCountryCode'] = 'DK'
+                        if test_code == '4251':
+                            details['cardToken'] = 'tkn_123456789'
+                            details['cardFingerprint'] = 'blablabla'
+                            details['cardNumber'] = '1234'
+                            details['cardLabel'] = 'Mastercard'
+                            details['cardMaskedNumber'] = '517699******1234'
+                            details['cardCountryCode'] = 'US'
+                            details['wallet'] = 'applepay'
+                        else:
+                            details['cardHolder'] = 'T. TEST'
+                            details['cardNumber'] = '12345678901234'
+                            details['cardLabel'] = 'Dankort'  # noqa
+                            details['cardCountryCode'] = 'DK'
 
                     elif resp['method'] == 'paypal':
                         details['consumerName'] = 'T. TEST'
@@ -424,7 +433,7 @@ class MyServer(BaseHTTPRequestHandler):
             # print('POST: test_code=%s' % test_code)
             if test_code in ('421', '426', '427', '428', '429', '49'):
                 resp['method'] = 'ideal'
-            elif test_code in ('422', '425'):
+            elif test_code in ('422', '425', '4251'):
                 resp['method'] = 'creditcard'
             elif test_code == '423':
                 resp['method'] = 'paypal'
@@ -467,7 +476,7 @@ class MyServer(BaseHTTPRequestHandler):
             # 48 = te lange checkout URL
             # 49 = partly refunded
             if test_code in ("39", "40", "41", "42",
-                             "421", "422", "423", "424", "425", "426", "427", "428", "429", "4291",
+                             "421", "422", "423", "424", "425", "4251", "426", "427", "428", "429", "4291",
                              "43", "44", "45", "46", "47", "48", "49"):
                 self._write_response(200, resp)
         else:

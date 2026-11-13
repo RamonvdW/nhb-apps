@@ -6,7 +6,7 @@
 
 from django.urls import path
 from Spelden import (view_begin, view_info, view_info_arrowhead, view_info_target_awards,
-                     view_bestel_stap1, view_bestel_stap2, view_bestel_stap3)
+                     view_bestel_stap1, view_bestel_stap2, view_bestel_stap3, view_bestel_stap4)
 
 app_name = 'Spelden'
 
@@ -58,6 +58,10 @@ urlpatterns = [
     path('bestel/stap3/',
          view_bestel_stap3.BestelStap3View.as_view(),
          name='bestel-stap3'),
+
+    path('bestel/stap4/',
+         view_bestel_stap4.BestelStap4View.as_view(),
+         name='bestel-stap4'),
 ]
 
 # end of file
