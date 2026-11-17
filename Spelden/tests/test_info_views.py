@@ -21,7 +21,7 @@ class TestSpeldenInfoViews(E2EHelpers, TestCase):
     url_arrowhead = '/spelden/arrowhead/'
     url_sterspelden = '/spelden/sterspelden/'
     url_graadspelden = '/spelden/graadspelden/'
-    #url_tussenspelden = '/spelden/tussenspelden/'
+    url_tussenspelden = '/spelden/tussenspelden/'
     url_target_awards = '/spelden/target-awards/'
     url_meesterspelden = '/spelden/meesterspelden/'
     url_hall_of_fame = '/spelden/meesterspelden/hall-of-fame/'
@@ -122,11 +122,11 @@ class TestSpeldenInfoViews(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('spelden/khsn-graadspelden.dtl', 'design/site_layout.dtl'))
 
         # tussenspelden
-        # with self.assert_max_queries(20):
-        #     resp = self.client.get(self.url_tussenspelden)
-        # self.assertEqual(resp.status_code, 200)
-        # self.assert_html_ok(resp)
-        # self.assert_template_used(resp, ('spelden/khsn-tussenspelden.dtl', 'design/site_layout.dtl'))
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_tussenspelden)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('spelden/khsn-tussenspelden.dtl', 'design/site_layout.dtl'))
 
         # arrowhead
         with self.assert_max_queries(20):
@@ -158,7 +158,7 @@ class TestSpeldenInfoViews(E2EHelpers, TestCase):
         voorwaarden = SpeldVoorwaarden(aantal_doelen=1)
         self.assertTrue(str(voorwaarden) != '')
 
-        aanvraag = SpeldAanvraag(door_account=self.account_sporter, datum_wedstrijd='Hallo')
+        aanvraag = SpeldAanvraag(voor_sporter=self.sporter_100001, datum_wedstrijd='Hallo')
         self.assertTrue(str(aanvraag) != '')
 
         toegekend = SpeldToegekend.objects.first()

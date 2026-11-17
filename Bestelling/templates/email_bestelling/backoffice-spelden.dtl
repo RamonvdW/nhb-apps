@@ -1,0 +1,230 @@
+{% extends 'email_mailer/email_basis.dtl' %}
+{% comment %}
+                Copyright (c) 2022-2025 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+
+{% block inhoud_text %}
+    |Hallo backoffice!
+    |
+    |Deze e-mail is de bevestiging van een bestelling via {{ naam_site }} en opdracht tot het opvragen van het scorebriefje (via e-mail), controle dat de bestelling rechtmatig is (score), invoeren van de behaalde spelden (in het CRM) en dan het versturen van de fysieke spelden.
+    |
+    {% if waarschuw_test_server %}
+        |LET OP: DIT KOMT VAN DE TESTOMGEVING EN IS GEEN ECHTE BESTELLING!
+        |
+    {% endif %}
+    |Bestelnummer: {{ bestelling.mh_bestel_nr }}
+    |Betaalstatus: Voldaan
+    |
+    |Koper en verzendadres
+    |
+    |{{ koper_sporter.volledige_naam }}
+    |{{ bestelling.afleveradres_regel_1 }}
+    |{{ bestelling.afleveradres_regel_2 }}
+    {% if bestelling.afleveradres_regel_3 %}
+        |{{ bestelling.afleveradres_regel_3 }}
+        {% if bestelling.afleveradres_regel_4 %}
+            |{{ bestelling.afleveradres_regel_4 }}
+            {% if bestelling.afleveradres_regel_5 %}
+                |{{ bestelling.afleveradres_regel_5 }}
+            {% endif %}
+        {% endif %}
+    {% endif %}
+
+    |
+    |Contactgegevens
+    |
+    |E-mail: {{ koper_sporter.email }}
+    |Telefoon: {{ koper_sporter.telefoon }}
+    |Bondsnummer: {{ koper_sporter.lid_nr }}
+
+    |
+    |Producten
+    {% for product in regels %}
+        |
+        |[{{ product.regel_nr }}]
+
+        {% for tekst in product.beschrijving %}
+            |    {{ tekst }}
+        {% endfor %}
+
+        |    Bedrag: {{ product.bedrag_euro_str }}
+
+    {% endfor %}
+
+    |
+    |TOTAAL: {{ totaal_euro_str }}
+
+    <!-- BTW toevoegen -->
+    {% if bestelling.btw_percentage_cat1 or bestelling.btw_percentage_cat2 or bestelling.btw_percentage_cat3 %}
+        |
+        {% if bestelling.btw_percentage_cat1 %}
+            |Waarvan BTW {{ bestelling.btw_percentage_cat1 }}%: {{ bestelling.btw_euro_cat1_str }}
+        {% endif %}
+        {% if bestelling.btw_percentage_cat2 %}
+            |Waarvan BTW {{ bestelling.btw_percentage_cat2 }}%: {{ bestelling.btw_euro_cat2_str }}
+        {% endif %}
+        {% if bestelling.btw_percentage_cat3 %}
+            |Waarvan BTW {{ bestelling.btw_percentage_cat3 }}%: {{ bestelling.btw_euro_cat3_str }}
+        {% endif %}
+    {% endif %}
+
+    {% for transactie in transacties %}
+        |
+        |Betaling:
+
+        {% if transactie.is_restitutie %}
+            |    Restitutie: {{ transactie.bedrag_str }}
+        {% else %}
+            |    Ontvangen: {{ transactie.bedrag_str }}
+            {% if transactie.klant_naam %}
+                <!-- geen klant naam bij overschrijving -->
+                |    van {{ transactie.klant_naam }}
+            {% endif %}
+        {% endif %}
+
+        |    op {{ transactie.when_str }}
+        |    Beschrijving: {{ transactie.beschrijving }}
+    {% endfor %}
+
+    |
+    |Bedankt voor het oppakken!
+{% endblock %}
+
+{% block footer_text %}
+    |
+    |MijnHandboogsport
+{% endblock %}
+
+
+{% block inhoud_html %}
+    <div>Hallo backoffice!</div>
+    <br>
+    <div>Deze e-mail is de bevestiging van een bestelling via {{ naam_site }} en opdracht tot het opvragen van het scorebriefje (via e-mail), controle dat de bestelling rechtmatig is (score), invoeren van de behaalde spelden (in het CRM) en dan het versturen van de fysieke spelden.</div>
+    <br>
+
+    {% if waarschuw_test_server %}
+        <div>LET OP: DIT KOMT VAN DE TESTOMGEVING EN IS GEEN ECHTE BESTELLING!</div>
+        <br>
+    {% endif %}
+
+    <table>
+        <tr><th>Bestelnummer:</th><td>{{ bestelling.mh_bestel_nr }}</td></tr>
+        <tr><th>Betaalstatus:</th><td>Voldaan</td></tr>
+    </table>
+
+    <h1>Koper en verzendadres</h1>
+
+    <p>{{ koper_sporter.volledige_naam }}<br>{{ bestelling.afleveradres_regel_1 }}<br>
+        <span>{{ bestelling.afleveradres_regel_2 }}</span>
+        {% if bestelling.afleveradres_regel_3 %}
+            <br><span>{{ bestelling.afleveradres_regel_3 }}</span>
+            {% if bestelling.afleveradres_regel_4 %}
+                <br><span>{{ bestelling.afleveradres_regel_4 }}</span>
+                {% if bestelling.afleveradres_regel_5 %}
+                    <br><span>{{ bestelling.afleveradres_regel_5 }}</span>
+                {% endif %}
+            {% endif %}
+        {% endif %}
+    </p>
+
+    <h1>Contactgegevens</h1>
+
+    <p>
+        <span>E-mail: {{ koper_sporter.email }}</span><br>
+        <span>Telefoon: {{ koper_sporter.telefoon }}</span><br>
+        <span>Bondsnummer: {{ koper_sporter.lid_nr }}</span>
+    </p>
+
+    <h1>Producten</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Product</th>
+                <th>Bedrag</th>
+            </tr>
+        </thead>
+
+        {% for product in regels %}
+            <tr>
+                <td style="vertical-align:top">{{ product.regel_nr }}.</td>
+                <td>
+                    {% for tekst in product.beschrijving %}
+                        <span>{{ tekst }}</span><br>
+                    {% endfor %}
+                </td>
+                <td style="text-align:right;vertical-align:top">{{ product.bedrag_euro_str }}</td>
+            </tr>
+
+        {% endfor %}
+
+        <!-- Totaal regel toevoegen -->
+        <tr>
+            <td></td>
+            <td style="text-align:right">TOTAAL:</td>
+            <td style="text-align:right">{{ totaal_euro_str }}</td>
+        </tr>
+
+        <!-- BTW toevoegen -->
+        {% if bestelling.btw_percentage_cat1 %}
+            <tr>
+                <td></td>
+                <td>Waarvan BTW {{ bestelling.btw_percentage_cat1 }}%</td>
+                <td style="text-align:right;vertical-align:top">{{ bestelling.btw_euro_cat1_str }}</td>
+            </tr>
+        {% endif %}
+        {% if bestelling.btw_percentage_cat2 %}
+            <tr>
+                <td></td>
+                <td>Waarvan BTW {{ bestelling.btw_percentage_cat2 }}%</td>
+                <td style="text-align:right;vertical-align:top">{{ bestelling.btw_euro_cat2_str }}</td>
+            </tr>
+        {% endif %}
+        {% if bestelling.btw_percentage_cat3 %}
+            <tr>
+                <td></td>
+                <td>Waarvan BTW {{ bestelling.btw_percentage_cat3 }}%</td>
+                <td style="text-align:right;vertical-align:top">{{ bestelling.btw_euro_cat3_str }}</td>
+            </tr>
+        {% endif %}
+    </table>
+
+
+    <h1>Betaling</h1>
+
+    <table>
+        {% for transactie in transacties %}
+            <tr>
+                {% if transactie.is_restitutie %}
+                    <td style="vertical-align:top">Restitutie:</td>
+                    <td>
+                        <span>op {{ transactie.when_str }}</span><br>
+                        <span>Beschrijving: {{ transactie.beschrijving }}</span>
+                    </td>
+                {% else %}
+                    <td style="vertical-align:top">Ontvangen:</td>
+                    <td>
+                        <span>op {{ transactie.when_str }}</span><br>
+                        {% if transactie.klant_naam %}
+                            <!-- geen klant naam bij overschrijving -->
+                            <span>van {{ transactie.klant_naam }}</span><br>
+                        {% endif %}
+                        <span>Beschrijving: {{ transactie.beschrijving }}</span>
+                    </td>
+                {% endif %}
+                <td style="text-align:right; vertical-align:top">{{ transactie.bedrag_str }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+
+    <br>
+    <div>Bedankt voor het oppakken!</div>
+{% endblock %}
+
+{% block footer_html %}
+    <br>
+    <div>MijnHandboogsport</div>
+{% endblock %}

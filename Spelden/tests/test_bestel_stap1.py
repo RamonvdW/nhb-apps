@@ -109,17 +109,55 @@ class TestSpeldenBestelStap1(E2EHelpers, TestCase):
                                                                 'boogtype': 'BB'})          # Barebow
             self.assert404(resp, 'Slechte score')
 
+            # goede score en datum
+            datum_goed = (datetime.datetime.now() - datetime.timedelta(days=31)).strftime('%Y-%m-%d')
             with self.assert_max_queries(20):
                 resp = self.client.post(self.url_bestel_stap1, {'discipline': 'IN',         # Indoor
                                                                 'boogtype': 'BB',           # Barebow
-                                                                'score': '1234'})
+                                                                'score': '1234',
+                                                                'wed_datum': datum_goed})
             self.assert_is_redirect(resp, self.url_bestel_stap2)
+
+            # datum te ver in het verleden
+            datum_bad = (datetime.datetime.now() - datetime.timedelta(days=3*365)).strftime('%Y-%m-%d')
+            with self.assert_max_queries(20):
+                resp = self.client.post(self.url_bestel_stap1, {'discipline': 'IN',         # Indoor
+                                                                'boogtype': 'BB',           # Barebow
+                                                                'score': '1234',
+                                                                'wed_datum': datum_bad})
+            self.assert_is_redirect(resp, self.url_bestel_stap1)
+
+            # datum in de toekomst
+            datum_bad = (datetime.datetime.now() + datetime.timedelta(days=31)).strftime('%Y-%m-%d')
+            with self.assert_max_queries(20):
+                resp = self.client.post(self.url_bestel_stap1, {'discipline': 'IN',         # Indoor
+                                                                'boogtype': 'BB',           # Barebow
+                                                                'score': '1234',
+                                                                'wed_datum': datum_bad})
+            self.assert_is_redirect(resp, self.url_bestel_stap1)
+
+            # datum fout format
+            datum_bad = '01-01-1900'
+            with self.assert_max_queries(20):
+                resp = self.client.post(self.url_bestel_stap1, {'discipline': 'IN',         # Indoor
+                                                                'boogtype': 'BB',           # Barebow
+                                                                'score': '1234',
+                                                                'wed_datum': datum_bad})
+            self.assert_is_redirect(resp, self.url_bestel_stap1)
+
+            # geen datum
+            with self.assert_max_queries(20):
+                resp = self.client.post(self.url_bestel_stap1, {'discipline': 'IN',         # Indoor
+                                                                'boogtype': 'BB',           # Barebow
+                                                                'score': '500'})
+            self.assert_is_redirect(resp, self.url_bestel_stap1)
 
             # foute score
             with self.assert_max_queries(20):
                 resp = self.client.post(self.url_bestel_stap1, {'discipline': 'IN',         # Indoor
                                                                 'boogtype': 'BB',           # Barebow
-                                                                'score': '0'})
+                                                                'score': '0',
+                                                                'wed_datum': datum_goed})
             self.assertEqual(resp.status_code, 200)
             self.assert_html_ok(resp)
             self.assert_template_used(resp, ('spelden/bestel_stap1.dtl', 'design/site_layout.dtl'))

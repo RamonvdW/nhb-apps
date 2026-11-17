@@ -24,7 +24,9 @@ TEMPLATE_PRESTATIESPELDEN_BESTEL_STAP2 = 'spelden/bestel_stap2.dtl'
 
 class BestelStap2View(TemplateView):
 
-    """ In deze view weten we de score en kan de sporter met filter knoppen nog wat extra zaken invoeren """
+    """ In deze view kan de geschoten afstand(en) gekozen worden
+        De mogelijkheden worden gefilterd gebaseerd op de eerder ingevoerde informatie: discipline, boog, score.
+    """
 
     # class variables shared by all instances
     template_name = TEMPLATE_PRESTATIESPELDEN_BESTEL_STAP2

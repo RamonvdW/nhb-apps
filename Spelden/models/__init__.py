@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from .spelden import Speld, SpeldVoorwaarden
-from .aanvraag import SpeldAanvraagPrep, SpeldAanvraag
+from .aanvraag import SpeldAanvraagPrep, SpeldAanvraag, SpeldBestelling
 from .toegekend import SpeldToegekend
 
 __all__ = [
@@ -13,6 +13,7 @@ __all__ = [
     'SpeldVoorwaarden',
     'SpeldAanvraagPrep',
     'SpeldAanvraag',
+    'SpeldBestelling',
     'SpeldToegekend',
 ]
 

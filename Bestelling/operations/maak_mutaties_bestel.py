@@ -15,12 +15,14 @@ from Bestelling.definities import (BESTELLING_MUTATIE_WEDSTRIJD_INSCHRIJVEN, BES
                                    BESTELLING_MUTATIE_TRANSPORT, BESTELLING_STATUS_BETALING_ACTIEF,
                                    BESTELLING_MUTATIE_EVENEMENT_INSCHRIJVEN, BESTELLING_MUTATIE_EVENEMENT_AFMELDEN,
                                    BESTELLING_MUTATIE_OPLEIDING_INSCHRIJVEN, BESTELLING_MUTATIE_OPLEIDING_AFMELDEN,
-                                   BESTELLING_MUTATIE_WEDSTRIJD_AANPASSEN, BESTELLING_MUTATIE_WEDSTRIJD_HANDMATIG)
+                                   BESTELLING_MUTATIE_WEDSTRIJD_AANPASSEN, BESTELLING_MUTATIE_WEDSTRIJD_HANDMATIG,
+                                   BESTELLING_MUTATIE_AANVRAAG_SPELD)
 from Bestelling.models import BestellingMutatie, Bestelling, BestellingRegel
 from Betaal.models import BetaalActief
 from Evenement.models import EvenementInschrijving
 from Opleiding.models import OpleidingInschrijving
 from Site.core.background_sync import BackgroundSync
+from Spelden.models import SpeldBestelling
 from Sporter.models import SporterBoog
 from Webwinkel.models import WebwinkelKeuze
 from Wedstrijden.models import WedstrijdInschrijving, WedstrijdSessie
@@ -123,6 +125,23 @@ def bestel_mutatieverzoek_webwinkel_keuze(account: Account, keuze: WebwinkelKeuz
                                     code=BESTELLING_MUTATIE_WEBWINKEL_KEUZE,
                                     account=account,
                                     product_pk=keuze.pk,
+                                    is_verwerkt=False)
+
+    if is_created:
+        mutatie.save()
+
+        # wacht kort op de achtergrondtaak
+        _bestel_ping_achtergrondtaak(mutatie, snel)
+
+
+def bestel_mutatieverzoek_aanvraag_spelden(account: Account, product: SpeldBestelling, snel: bool):
+
+    # zet dit verzoek door naar het mutaties process
+    # voorkom duplicates (niet 100%)
+    mutatie, is_created = BestellingMutatie.objects.get_or_create(
+                                    code=BESTELLING_MUTATIE_AANVRAAG_SPELD,
+                                    account=account,
+                                    product_pk=product.pk,
                                     is_verwerkt=False)
 
     if is_created:

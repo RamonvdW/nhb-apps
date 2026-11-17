@@ -19,14 +19,15 @@ from Spelden.models import SpeldAanvraagPrep
 from Sporter.operations import get_sporter
 from Wedstrijden.definities import ORGANISATIE_IFAA, WEDSTRIJD_STATUS_GEACCEPTEERD
 from Wedstrijden.models import Wedstrijd
-import datetime
 
 TEMPLATE_PRESTATIESPELDEN_BESTEL_STAP3 = 'spelden/bestel_stap3.dtl'
 
 
 class BestelStap3View(TemplateView):
 
-    """ In deze view tonen we de mogelijke spelden, gebaseerd op de informatie in SpeldAanvraagPrep """
+    """ In deze view tonen vragen we meer informatie over de wedstrijd: plaats en land
+        en indien aanwezig kan direct een wedstrijd van de kalender gekozen worden.
+    """
 
     # class variables shared by all instances
     template_name = TEMPLATE_PRESTATIESPELDEN_BESTEL_STAP3
@@ -87,7 +88,10 @@ class BestelStap3View(TemplateView):
             context['wedstrijd_pk'] = self.prep.wedstrijd_id
         else:
             context['wedstrijd_pk'] = 'geen'
-        context['kalender_lijst'] = self.qset_wedstrijden
+
+
+        if len(self.qset_wedstrijden) > 0:
+            context['kalender_lijst'] = self.qset_wedstrijden
 
         spl = self.prep.informatie_wedstrijd.split('|')
         if len(spl) >= 1:

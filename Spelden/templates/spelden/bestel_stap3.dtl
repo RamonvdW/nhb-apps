@@ -83,31 +83,35 @@
                     {% csrf_token %}
 
                     <table>
-                        <tr>
-                            <th>Kies uit deze wedstrijden:</th>
-                            <td>
-                                <ul id="id_wedstrijden">
-                                    {% for obj in kalender_lijst %}
+                        {% if kalender_lijst %}
+                            <tr>
+                                <th>Kies uit deze wedstrijden:</th>
+                                <td>
+                                    <ul id="id_wedstrijden">
+                                        {% for obj in kalender_lijst %}
+                                            <li>
+                                                <label class="black-text" for="id_wed{{ obj.pk }}">
+                                                    <input class="with-gap" type="radio" name="wedstrijd" value="wed_{{ obj.pk }}" id="id_wed{{ obj.pk }}"{% if wedstrijd_pk == obj.pk %} checked{% endif %}>
+                                                    <span>{{ obj.titel }}{% if obj.plaats %} ({{ obj.plaats }}){% endif %}</span>
+                                                </label>
+                                            </li>
+                                        {% endfor %}
+
                                         <li>
-                                            <label class="black-text" for="id_wed{{ obj.pk }}">
-                                                <input class="with-gap" type="radio" name="wedstrijd" value="wed_{{ obj.pk }}" id="id_wed{{ obj.pk }}"{% if wedstrijd_pk == obj.pk %} checked{% endif %}>
-                                                <span>{{ obj.titel }}{% if obj.plaats %} ({{ obj.plaats }}){% endif %}</span>
+                                            <label class="black-text" for="id_wed_geen">
+                                                <input class="with-gap" type="radio" name="wedstrijd" value="geen" id="id_wed_geen"{% if wedstrijd_pk == 'geen' %} checked{% endif %}>
+                                                <span>(geen van deze)</span>
                                             </label>
                                         </li>
-                                    {% endfor %}
-
-                                    <li>
-                                        <label class="black-text" for="id_wed_geen">
-                                            <input class="with-gap" type="radio" name="wedstrijd" value="geen" id="id_wed_geen"{% if wedstrijd_pk == 'geen' %} checked{% endif %}>
-                                            <span>(geen van deze)</span>
-                                        </label>
-                                    </li>
-                                </ul>
-                            </td>
-                        </tr>
+                                    </ul>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <input type="hidden" name="wedstrijd" value="geen">
+                        {% endif %}
 
                         <tr>
-                            <th>Of vul deze velden in:</th>
+                            <th>{% if kalender_lijst %}Of vul deze velden in:{% else %}Waar was deze wedstrijd?{% endif %}</th>
                             <td>
                                 <div class="input-field">
                                     <label for="invoer_plaats">Plaats</label>
