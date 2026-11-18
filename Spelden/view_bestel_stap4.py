@@ -16,9 +16,10 @@ from Bestelling.operations import mandje_tel_inhoud, bestel_mutatieverzoek_aanvr
 from Betaal.format import format_bedrag_euro
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
-from Spelden.definities import SPELD_DISCIPLINE_VELD, SPELD_DISCIPLINE2STR, SPELD_CATEGORIE2STR
+from Spelden.definities import (SPELD_DISCIPLINE_VELD, SPELD_DISCIPLINE_OUTDOOR,
+                                SPELD_DISCIPLINE2STR, SPELD_CATEGORIE2STR)
 from Spelden.models import SpeldAanvraagPrep, SpeldVoorwaarden, SpeldToegekend, SpeldAanvraag, SpeldBestelling
-from Spelden.operations import get_mogelijke_spelden
+from Spelden.operations import get_mogelijke_spelden_wa, get_mogelijke_spelden_khsn
 from Sporter.operations import get_sporter
 from decimal import Decimal
 
@@ -64,7 +65,7 @@ class BestelStap4View(TemplateView):
         pks = list(SpeldToegekend.objects.filter(sporter=self.sporter).values_list('speld__pk', flat=True))
         self.al_toegekende_speld_pks = pks
 
-    def _analyseer_opties(self, opties: list[SpeldVoorwaarden]):
+    def _analyseer_opties_wa(self, opties: list[SpeldVoorwaarden]):
         """ Analyseer elk van de opties en bepaal of deze speld besteld mag worden
             aan de hand van de spelden die sporter al heeft en de behaalde score.
 
@@ -116,14 +117,18 @@ class BestelStap4View(TemplateView):
     def _prep_pagina(self, context, opties: list[SpeldVoorwaarden]):
         context['sporter_str'] = self.prep.voor_sporter.lid_nr_en_volledige_naam()
 
-        # geslacht is alleen relevant voor de arrowhead spelden (andere scores), dus toon alleen voor discipline veld
-        if self.prep.discipline == SPELD_DISCIPLINE_VELD:
+        # geslacht is relevant voor de arrowhead spelden (andere scores M/V)
+        # geslacht is relevant voor de ster spelden (andere scores M/V)
+        # dus toon voor veld en outdoor
+        if self.prep.discipline in (SPELD_DISCIPLINE_VELD, SPELD_DISCIPLINE_OUTDOOR):
             context['geslacht_str'] = GESLACHT2STR[self.prep.wedstrijd_geslacht]
 
         # informatie die verzameld is in stap 1
         context['discipline_str'] = SPELD_DISCIPLINE2STR[self.prep.discipline]
         context['boogtype_str'] = BOOGTYPE_AFKORTING2STR[self.prep.boog]
         context['score'] = self.prep.score
+        if self.prep.score_sm > 0:
+            context['score_sm'] = self.prep.score_sm
         context['wedstrijd_datum'] = self.prep.datum_wedstrijd
 
         if self.prep.wedstrijd:
@@ -173,25 +178,31 @@ class BestelStap4View(TemplateView):
         self._load_prep()
         self._load_al_toegekend()
 
-        opties = get_mogelijke_spelden(self.prep.discipline,
-                                       self.prep.boog,
-                                       self.prep.score,
-                                       self.prep.wedstrijd_geslacht,
-                                       self.prep.voor_sporter.geboorte_datum.year)
-        self._analyseer_opties(opties)
-        self._prep_pagina(context, opties)
+        opties1 = get_mogelijke_spelden_wa(self.prep.discipline,
+                                           self.prep.boog,
+                                           self.prep.score,
+                                           self.prep.wedstrijd_geslacht,
+                                           self.prep.voor_sporter.geboorte_datum.year)
+        self._analyseer_opties_wa(opties1)
+
+
+        opties2 = get_mogelijke_spelden_khsn(self.prep.discipline,
+                                             self.prep.score)
+
+
+        self._prep_pagina(context, opties1)
         return context
 
     def post(self, request, *args, **kwargs):
         self._load_prep()
         self._load_al_toegekend()
 
-        opties = get_mogelijke_spelden(self.prep.discipline,
-                                       self.prep.boog,
-                                       self.prep.score,
-                                       self.prep.wedstrijd_geslacht,
-                                       self.prep.voor_sporter.geboorte_datum.year)
-        self._analyseer_opties(opties)
+        opties = get_mogelijke_spelden_wa(self.prep.discipline,
+                                          self.prep.boog,
+                                          self.prep.score,
+                                          self.prep.wedstrijd_geslacht,
+                                          self.prep.voor_sporter.geboorte_datum.year)
+        self._analyseer_opties_wa(opties)
 
         spelden = [optie.speld
                    for optie in self.mogelijke_spelden

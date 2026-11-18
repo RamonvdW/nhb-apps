@@ -48,6 +48,13 @@ class SpeldAanvraagPrep(models.Model):
 
     ## STAP 2 ##
 
+    # op welke wedstrijd is de prestatie neergezet?
+    wedstrijd = models.ForeignKey(Wedstrijd, on_delete=models.SET_NULL, null=True, blank=True)
+
+    informatie_wedstrijd = models.CharField(max_length=128, default='', blank=True)
+
+    ## STAP 3 ##
+
     # enkele of meerdere afstanden
     # langste: "90, 70, 50, 30" = 12
     afstanden = models.CharField(max_length=15, default='')
@@ -58,12 +65,8 @@ class SpeldAanvraagPrep(models.Model):
     # aantal doelen
     aantal_doelen = models.PositiveSmallIntegerField(default=0)
 
-    ## STAP 3 ##
-
-    # op welke wedstrijd is de prestatie neergezet?
-    wedstrijd = models.ForeignKey(Wedstrijd, on_delete=models.SET_NULL, null=True, blank=True)
-
-    informatie_wedstrijd = models.CharField(max_length=128, default='', blank=True)
+    # voor een 1440 wedstrijd, de Short Metric scores
+    score_sm = models.PositiveSmallIntegerField(default=0)
 
     def __str__(self):
         msg = "%s: " % self.voor_sporter.lid_nr_en_volledige_naam()

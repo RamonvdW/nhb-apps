@@ -6,9 +6,11 @@
 
 from django.conf import settings
 from django.utils import timezone
+from Spelden.definities import SPELD_DISCIPLINE_OUTDOOR, SPELD_DISCIPLINE_INDOOR, SPELD_DISCIPLINE_VELD
 from Spelden.models import SpeldVoorwaarden, SpeldToegekend
 from Sporter.leeftijdsklassen import bereken_leeftijdsklassen_wa, hogere_en_lagere_lkl_wa
-from Wedstrijden.definities import WEDSTRIJD_DISCIPLINE_VELD
+from Wedstrijden.definities import (WEDSTRIJD_DISCIPLINE_OUTDOOR, WEDSTRIJD_DISCIPLINE_INDOOR,
+                                    WEDSTRIJD_DISCIPLINE_25M1P, WEDSTRIJD_DISCIPLINE_VELD)
 
 
 def get_hall_of_fame():
@@ -48,8 +50,8 @@ def tel_hall_of_fame():
     return gm_count, ms_count, as_count
 
 
-def get_mogelijke_spelden(discipline: str, boog: str, score: int,
-                          wedstrijd_geslacht: str, geboorte_jaar: int) -> list[SpeldVoorwaarden]:
+def get_mogelijke_spelden_wa(discipline: str, boog: str, score: int,
+                             wedstrijd_geslacht: str, geboorte_jaar: int) -> list[SpeldVoorwaarden]:
 
     """ Bepaalt de mogelijke spelden aan de hand van ingevoerde informatie
 
@@ -62,8 +64,8 @@ def get_mogelijke_spelden(discipline: str, boog: str, score: int,
         returns:    list of SpeldVoorwaarden
     """
 
-    # print('{get_mogelijke_spelden} discpline=%s, boog=%s, score=%s, wedstrijd_geslacht=%s' % (
-    #               repr(discipline), repr(boog), score, repr(wedstrijd_geslacht)))
+    print('{get_mogelijke_spelden} discpline=%s, boog=%s, score=%s, wedstrijd_geslacht=%s' % (
+                  repr(discipline), repr(boog), score, repr(wedstrijd_geslacht)))
 
     qset = (SpeldVoorwaarden
             .objects
@@ -108,6 +110,31 @@ def get_mogelijke_spelden(discipline: str, boog: str, score: int,
         qset = qset.filter(leeftijdsklasse__in=alle_lkl)
 
     return list(qset)
+
+
+def get_mogelijke_spelden_khsn(discipline: str, score: int):
+
+
+
+    return list()
+
+
+def speld_discipline2wedstrijd_discplines(speld_discipline: str):
+    """ maak een Wedstrijden discpline filter aan de hand van de gekozen discipline voor de spelden """
+    
+    if speld_discipline == SPELD_DISCIPLINE_OUTDOOR:
+        wed_disciplines = (WEDSTRIJD_DISCIPLINE_OUTDOOR,)
+
+    elif speld_discipline == SPELD_DISCIPLINE_INDOOR:
+        wed_disciplines = (WEDSTRIJD_DISCIPLINE_INDOOR, WEDSTRIJD_DISCIPLINE_25M1P)
+
+    elif speld_discipline == SPELD_DISCIPLINE_VELD:
+        wed_disciplines = (WEDSTRIJD_DISCIPLINE_VELD,)
+
+    else:
+        wed_disciplines = ()
+
+    return wed_disciplines
 
 
 # end of file
