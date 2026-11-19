@@ -8,7 +8,7 @@ from django.conf import settings
 from django.utils import timezone
 from Bestelling.bestel_plugin_base import BestelPluginBase
 from Bestelling.definities import BESTELLING_REGEL_CODE_WEBWINKEL
-from Bestelling.models import BestellingRegel
+from Bestelling.models import Bestelling, BestellingRegel, BestellingMandje
 from Betaal.format import format_bedrag_euro
 from Webwinkel.definities import (KEUZE_STATUS_RESERVERING_MANDJE, KEUZE_STATUS_BESTELD, KEUZE_STATUS_BACKOFFICE,
                                   KEUZE_STATUS_GEANNULEERD, VERZENDKOSTEN_BRIEFPOST, VERZENDKOSTEN_PAKKETPOST)
