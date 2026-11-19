@@ -8,7 +8,7 @@ from django.conf import settings
 from django.utils import timezone
 from Bestelling.bestel_plugin_base import BestelPluginBase
 from Bestelling.definities import BESTELLING_REGEL_CODE_WEBWINKEL
-from Bestelling.models import Bestelling, BestellingRegel, BestellingMandje
+from Bestelling.models import BestellingRegel
 from Betaal.format import format_bedrag_euro
 from Webwinkel.definities import (KEUZE_STATUS_RESERVERING_MANDJE, KEUZE_STATUS_BESTELD, KEUZE_STATUS_BACKOFFICE,
                                   KEUZE_STATUS_GEANNULEERD, VERZENDKOSTEN_BRIEFPOST, VERZENDKOSTEN_PAKKETPOST)
@@ -33,11 +33,12 @@ class WebwinkelBestelPlugin(BestelPluginBase):
 
             # onthoud in welk mandje deze lag
             mandje = regel.bestellingmandje_set.first()
-            if mandje.pk not in mandje_pks:
-                mandje_pks.append(mandje.pk)
+            if mandje:
+                if mandje.pk not in mandje_pks:
+                    mandje_pks.append(mandje.pk)
 
-            self.stdout.write('[INFO] Vervallen: BestellingRegel pk=%s webwinkel keuze (%s) in mandje van %s' % (
-                              regel.pk, keuze, mandje.account))
+                self.stdout.write('[INFO] Vervallen: BestellingRegel pk=%s webwinkel keuze (%s) in mandje van %s' % (
+                                  regel.pk, keuze, mandje.account))
 
             self.annuleer(regel)
 
@@ -92,13 +93,12 @@ class WebwinkelBestelPlugin(BestelPluginBase):
         btw_euro = round(btw_euro, 2)             # afronden op 2 decimalen
 
         # maak een product regel aan voor de bestelling
-        regel = BestellingRegel(
+        regel = BestellingRegel.objects.create(
                         korte_beschrijving=kort,
                         bedrag_euro=prijs_euro,
                         btw_percentage=btw_str,
                         btw_euro=btw_euro,
                         code=BESTELLING_REGEL_CODE_WEBWINKEL)
-        regel.save()
 
         webwinkel_keuze.bestelling_regel = regel
 

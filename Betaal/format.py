@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2024 Ramon van der Winkel.
+#  Copyright (c) 2024-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from decimal import Decimal
 
 
-def format_bedrag_euro(euros: Decimal):
+def format_bedrag_euro(euros: Decimal, gratis=False):
     """
         Formatteer het bedrag naar een string met een euro prefix en twee decimalen achter de komma.
         Als het bedrag negatief is, zet dan een minteken voor het euro teken
@@ -15,6 +15,9 @@ def format_bedrag_euro(euros: Decimal):
           € 12,34
         - € 12,34
     """
+    if gratis and euros < 0.0001:
+        return "Gratis"
+
     msg = "€ "
 
     if euros < 0:

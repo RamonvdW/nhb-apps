@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import models
-from Bestelling.definities import BESTELLING_REGEL_CODE_WEBWINKEL
+from Bestelling.definities import BESTELLING_REGEL_CODE_WEBWINKEL, BESTELLING_REGEL_CODE_SPELD
 from decimal import Decimal
 
 
@@ -49,6 +49,9 @@ class BestellingRegel(models.Model):
 
     def is_webwinkel(self):
         return self.code == BESTELLING_REGEL_CODE_WEBWINKEL
+
+    def is_speld(self):
+        return self.code == BESTELLING_REGEL_CODE_SPELD
 
     def __str__(self):
         """ beschrijving voor de admin interface """

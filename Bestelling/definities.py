@@ -45,6 +45,7 @@ BESTELLING_MUTATIE_OPLEIDING_INSCHRIJVEN = 13       # inschrijven op opleiding
 BESTELLING_MUTATIE_OPLEIDING_AFMELDEN = 14          # afmelden (na betaling)
 BESTELLING_MUTATIE_WEDSTRIJD_AANPASSEN = 15         # sporter aanpassen: boog, sessie, wedstrijdklasse
 BESTELLING_MUTATIE_WEDSTRIJD_HANDMATIG = 16         # handmatig toegevoegd door HWL
+BESTELLING_MUTATIE_AANVRAAG_SPELD = 17              # aanvraag prestatiespeld (ook herbestelling)
 
 BESTELLING_MUTATIE_TO_STR = {
     BESTELLING_MUTATIE_WEDSTRIJD_INSCHRIJVEN: "Inschrijven op wedstrijd",
@@ -63,6 +64,7 @@ BESTELLING_MUTATIE_TO_STR = {
     BESTELLING_MUTATIE_OPLEIDING_AFMELDEN: "Afmelden voor opleiding",
     BESTELLING_MUTATIE_WEDSTRIJD_AANPASSEN: "Wedstrijdinschrijving aanpassen",
     BESTELLING_MUTATIE_WEDSTRIJD_HANDMATIG: "Wedstrijdinschrijving handmatig toegevoegd",
+    BESTELLING_MUTATIE_AANVRAAG_SPELD: "Aanvraag prestatiespeld",
 }
 
 
@@ -86,6 +88,7 @@ BESTELLING_TRANSPORT2STR = {
 BESTELLING_REGEL_CODE_WEDSTRIJD_KORTING = "wedstrijd_korting"  # length: 17
 BESTELLING_REGEL_CODE_EVENEMENT         = "evenement"
 BESTELLING_REGEL_CODE_OPLEIDING         = "opleiding"
+BESTELLING_REGEL_CODE_SPELD             = "speld"
 BESTELLING_REGEL_CODE_WEDSTRIJD         = "wedstrijd"
 BESTELLING_REGEL_CODE_WEBWINKEL         = "Y_webwinkel"        # Y = sorteervolgorde
 BESTELLING_REGEL_CODE_VERZENDKOSTEN     = "Z_verzendkosten"    # Z = sorteervolgorde
@@ -95,6 +98,7 @@ BESTELLING_REGEL_CODE2STR = {
     BESTELLING_REGEL_CODE_WEDSTRIJD_KORTING: "Korting",
     BESTELLING_REGEL_CODE_EVENEMENT: "Evenement",
     BESTELLING_REGEL_CODE_OPLEIDING: "Opleiding",
+    BESTELLING_REGEL_CODE_SPELD: "Speld",
     BESTELLING_REGEL_CODE_WEDSTRIJD: "Wedstrijd",
     BESTELLING_REGEL_CODE_WEBWINKEL: "Webwinkel",
     BESTELLING_REGEL_CODE_VERZENDKOSTEN: "Verzendkosten",

@@ -50,7 +50,7 @@
 
                 <tbody>
                     {% for sporter in korps %}
-                        <tr>
+                        <tr{% if sporter.toon_inactief %} class="grey-text"{% endif %}>
                             <td>{{ sporter.volledige_naam }}</td>
                             <td class="center">{{ sporter.level_str }}</td>
                             <td class="hide-on-small-only center">{{ sporter.level_sinds }}</td>
@@ -64,6 +64,8 @@
             </table>
         </div>
     </div>
+
+    <p class="center">Van de scheidsrechters getoond in grijs wordt geen beschikbaarheid opgevraagd.</p>
 
     <script src="{% static 'overig_js/tabel_filter.js' %}"></script>
 

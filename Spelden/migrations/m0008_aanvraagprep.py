@@ -1108,7 +1108,7 @@ def maak_voorwaarden_nl_graadspelden(apps, _):
     afstanden_outdoor = "90, 70, 50, 30"
     afstanden_short_metric = "50, 30"
 
-    aantal_pijlen_indoor = 3*30
+    aantal_pijlen_indoor = 2*30
     aantal_pijlen_outdoor = 4*36
     aantal_pijlen_short_metric = 2*36
 

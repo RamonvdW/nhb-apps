@@ -47,7 +47,7 @@ class WedstrijdBestelPlugin(BestelPluginBase):
                               regel.pk, inschrijving, inschrijving.koper))
 
             mandje = regel.bestellingmandje_set.first()
-            if mandje.pk not in mandje_pks:
+            if mandje and mandje.pk not in mandje_pks:
                 mandje_pks.append(mandje.pk)
 
             self.annuleer(regel)

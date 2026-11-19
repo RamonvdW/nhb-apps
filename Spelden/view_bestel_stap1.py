@@ -32,7 +32,7 @@ DEFAULT_BOOGTYPE = SPELD_BOOGTYPE_CHOICES[0][0]           # eerste optie = recur
 
 class BestelStap1View(TemplateView):
 
-    """ In deze view begint het bestelproces met de invoer van de behaalde score en de wedstrijddiscipline """
+    """ In deze view begint het bestelproces met de invoer van de behaalde score, boog, discipline en datum """
 
     # class variables shared by all instances
     template_name = TEMPLATE_PRESTATIESPELDEN_BESTEL_STAP1
@@ -120,9 +120,8 @@ class BestelStap1View(TemplateView):
         context['menu_toon_mandje'] = True
 
         context['kruimels'] = (
-            (reverse('Webwinkel:overzicht'), 'Webwinkel'),
             (reverse('Spelden:begin'), 'Prestatiespelden'),
-            (None, 'Bestellen - Stap 1'),
+            (None, 'Bestellen stap 1'),
         )
 
     def get_context_data(self, **kwargs):
