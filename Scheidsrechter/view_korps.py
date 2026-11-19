@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023-2025 Ramon van der Winkel.
+#  Copyright (c) 2023-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import reverse
+from django.conf import settings
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.definities import SCHEIDS_NIET
@@ -129,10 +130,9 @@ class KorpsCSView(UserPassesTestMixin, TemplateView):
         # for
 
         korps = list()
-        for sporter in (Sporter
-                        .objects
-                        .exclude(scheids=SCHEIDS_NIET)
-                        .exclude(is_overleden=True)):
+        for sporter in Sporter.objects.filter(pk__in=pks):
+
+            sporter.toon_inactief = sporter.lid_nr in settings.LID_NRS_GEEN_SCHEIDS_BESCHIKBAARHEID_OPVRAGEN
 
             sporter.level_str = SCHEIDS2LEVEL[sporter.scheids]
 
