@@ -217,6 +217,7 @@ ICON_NAME2MATERIAL_SYMBOL_NAME = {
     'spelden tussenspelden': 'trending_up',
     'spelden bestel': 'shopping_cart',
     'spelden vervang': 'sync_problem',
+    'spelden kosten': 'euro_symbol',
     'sporter voorkeuren': 'tune',
     'sporter afmelden': 'cancel',
     'sporter para opmerkingen': 'fact_check',
