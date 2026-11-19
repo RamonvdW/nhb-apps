@@ -97,6 +97,9 @@
                 {% comment %}
                 {% include 'design/card_icon.dtl' with title="Verloren" text="Een verloren prestatiespeld opnieuw bestellen." sv_icon="spelden vervang" url=url_bestel %}
                 {% endcomment %}
+
+                <!-- kosten -->
+                {% include 'design/card_icon.dtl' with title="Prijslijst" text="Bekijk de prijzen van de prestatiespelden" sv_icon="spelden kosten" url=url_kosten %}
             </div>
         </div>
 

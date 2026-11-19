@@ -10,8 +10,11 @@ from Bestelling.bestel_plugin_base import BestelPluginBase
 from Bestelling.definities import BESTELLING_REGEL_CODE_SPELD, BESTELLING_KORT_BREAK
 from Bestelling.models import BestellingRegel
 from Betaal.format import format_bedrag_euro
-from Spelden.definities import SPELD_DISCIPLINE2STR, SPELD_BOOGTYPE2STR
-from Spelden.models import SpeldBestelling
+from Spelden.definities import (SPELD_DISCIPLINE2STR, SPELD_BOOGTYPE2STR, SPELD_CATEGORIE_NL_GRAADSPELD_INDOOR,
+                                SPELD_CATEGORIE_NL_GRAADSPELD_OUTDOOR, SPELD_CATEGORIE_NL_GRAADSPELD_VELD,
+                                SPELD_CATEGORIE_NL_GRAADSPELD_SHORT_METRIC, SPELD_CATEGORIE_NL_GRAADSPELD_ALGEMEEN,
+                                SPELD_CATEGORIE_NL_TUSSENSPELD)
+from Spelden.models import Speld, SpeldBestelling
 from Webwinkel.definities import KEUZE_STATUS_RESERVERING_MANDJE, KEUZE_STATUS_BESTELD, KEUZE_STATUS_BACKOFFICE
 from decimal import Decimal
 
@@ -49,6 +52,20 @@ class SpeldenBestelPlugin(BestelPluginBase):
 
         return mandje_pks
 
+    def _bepaal_speld_prijs(self, speld: Speld, is_nieuwe_aanvraag: bool) -> Decimal:
+        if not is_nieuwe_aanvraag:
+            return Decimal(settings.SPELD_PRIJS_VERVANG)
+
+        if speld.categorie in (SPELD_CATEGORIE_NL_GRAADSPELD_INDOOR,
+                               SPELD_CATEGORIE_NL_GRAADSPELD_OUTDOOR,
+                               SPELD_CATEGORIE_NL_GRAADSPELD_VELD,
+                               SPELD_CATEGORIE_NL_GRAADSPELD_SHORT_METRIC,
+                               SPELD_CATEGORIE_NL_GRAADSPELD_ALGEMEEN,
+                               SPELD_CATEGORIE_NL_TUSSENSPELD):
+            return Decimal(settings.SPELD_PRIJS_KHSN)
+
+        return Decimal(settings.SPELD_PRIJS_WA)
+
     def reserveer(self, product_pk: int, mandje_van_str: str) -> BestellingRegel | None:
         """ De speld wordt in het mandje gelegd.
             Geef een BestellingRegel terug.
@@ -67,30 +84,24 @@ class SpeldenBestelPlugin(BestelPluginBase):
 
         speld = bestelling.speld
 
-        if bestelling.is_nieuwe_aanvraag:
-            # spelden zijn gratis
-            prijs_euro = Decimal(0.0)
-            btw_euro = Decimal(0.0)
-            btw_str = '0'
-        else:
-            # herbestelling is niet gratis
-            prijs_euro = speld.prijs_euro
+        # bepaal de prijs van de speld
+        prijs_euro = self._bepaal_speld_prijs(speld, bestelling.is_nieuwe_aanvraag)
 
-            # TODO: bij levering aan het buitenland (ook particulieren) 0% btw in rekening brengen
-            # zie https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/belastingdienst/zakelijk/btw/zakendoen_met_het_buitenland/zakendoen_buiten_de_eu/btw_berekenen/btw_berekenen_bij_export_van_goederen_naar_niet_eu_landen/btw_berekenen_bij_het_uitvoeren_naar_niet_eu_landen
+        # TODO: bij levering aan het buitenland (ook particulieren) 0% btw in rekening brengen
+        # zie https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/belastingdienst/zakelijk/btw/zakendoen_met_het_buitenland/zakendoen_buiten_de_eu/btw_berekenen/btw_berekenen_bij_export_van_goederen_naar_niet_eu_landen/btw_berekenen_bij_het_uitvoeren_naar_niet_eu_landen
 
-            btw_str = "%.2f" % settings.WEBWINKEL_BTW_PERCENTAGE
-            while btw_str[-1] == '0':
-                btw_str = btw_str[:-1]              # 21,10 --> 21,1 / 21,00 --> 21,
-            btw_str = btw_str.replace('.', ',')     # localize
-            if btw_str[-1] == ",":
-                btw_str = btw_str[:-1]              # drop the trailing dot/comma: 21, --> 21
+        btw_str = "%.2f" % settings.WEBWINKEL_BTW_PERCENTAGE
+        while btw_str[-1] == '0':
+            btw_str = btw_str[:-1]              # 21,10 --> 21,1 / 21,00 --> 21,
+        btw_str = btw_str.replace('.', ',')     # localize
+        if btw_str[-1] == ",":
+            btw_str = btw_str[:-1]              # drop the trailing dot/comma: 21, --> 21
 
-            # de prijs is inclusief BTW, dus 100% + BTW% (voorbeeld: 121%)
-            # reken uit hoeveel daarvan de BTW is (voorbeeld: 21 / 121)
-            btw_deel = Decimal(settings.WEBWINKEL_BTW_PERCENTAGE / (100 + settings.WEBWINKEL_BTW_PERCENTAGE))
-            btw_euro = prijs_euro * btw_deel
-            btw_euro = round(btw_euro, 2)             # afronden op 2 decimalen
+        # de prijs is inclusief BTW, dus 100% + BTW% (voorbeeld: 121%)
+        # reken uit hoeveel daarvan de BTW is (voorbeeld: 21 / 121)
+        btw_deel = Decimal(settings.WEBWINKEL_BTW_PERCENTAGE / (100 + settings.WEBWINKEL_BTW_PERCENTAGE))
+        btw_euro = prijs_euro * btw_deel
+        btw_euro = round(btw_euro, 2)             # afronden op 2 decimalen
 
         aanvraag = bestelling.aanvraag
 

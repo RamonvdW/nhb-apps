@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from Spelden import (view_begin, view_info,
+from Spelden import (view_begin, view_info, view_kosten,
                      view_info_arrowhead, view_info_target_awards, view_info_graadspelden, view_info_sterspelden,
                      view_bestel_stap1, view_bestel_stap3, view_bestel_stap2, view_bestel_stap4)
 
@@ -47,6 +47,9 @@ urlpatterns = [
          view_info_arrowhead.ArrowheadView.as_view(),
          name='groep-arrowhead'),
 
+    path('kosten/',
+         view_kosten.KostenView.as_view(),
+         name='kosten'),
 
     path('bestel/stap1/',
          view_bestel_stap1.BestelStap1View.as_view(),

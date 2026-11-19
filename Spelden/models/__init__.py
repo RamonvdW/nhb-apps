@@ -4,9 +4,10 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from .spelden import Speld, SpeldVoorwaarden
+from .spelden import Speld
 from .aanvraag import SpeldAanvraagPrep, SpeldAanvraag, SpeldBestelling
 from .toegekend import SpeldToegekend
+from .voorwaarden import SpeldVoorwaarden
 
 __all__ = [
     'Speld',

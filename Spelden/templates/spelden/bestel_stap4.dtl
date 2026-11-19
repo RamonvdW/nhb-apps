@@ -7,7 +7,7 @@
 {% load static %}
 {% load design_knop %}
 
-{% block title %}Bestelformulier, stap 3{% endblock %}
+{% block title %}Bestelformulier, stap 4{% endblock %}
 
 {% block pagina %}
 

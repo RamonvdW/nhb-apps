@@ -132,9 +132,8 @@ class BestelStap3View(TemplateView):
         context['menu_toon_mandje'] = True
 
         context['kruimels'] = (
-            (reverse('Webwinkel:overzicht'), 'Webwinkel'),
             (reverse('Spelden:begin'), 'Prestatiespelden'),
-            (None, 'Bestellen - Stap 2'),
+            (None, 'Bestellen stap 3'),
         )
 
     def get_context_data(self, **kwargs):

@@ -17,9 +17,10 @@ from Betaal.format import format_bedrag_euro
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
 from Spelden.definities import (SPELD_DISCIPLINE_VELD, SPELD_DISCIPLINE_OUTDOOR,
+                                SPELD_CATEGORIE_NL_GRAADSPELD_SHORT_METRIC,
                                 SPELD_DISCIPLINE2STR, SPELD_CATEGORIE2STR)
 from Spelden.models import SpeldAanvraagPrep, SpeldVoorwaarden, SpeldToegekend, SpeldAanvraag, SpeldBestelling
-from Spelden.operations import get_mogelijke_spelden_wa, get_mogelijke_spelden_khsn
+from Spelden.operations import get_mogelijke_spelden_wa, get_mogelijke_graadspelden_khsn
 from Sporter.operations import get_sporter
 from decimal import Decimal
 
@@ -72,7 +73,8 @@ class BestelStap4View(TemplateView):
             vult self.mogelijke_spelden
         """
 
-        self.mogelijke_spelden = list()
+        speld_prijs_wa = Decimal(settings.SPELD_PRIJS_WA)
+        speld_prijs_wa_str = format_bedrag_euro(speld_prijs_wa, gratis=True)
 
         for optie in opties:
             optie.opmerking = '?'
@@ -105,16 +107,48 @@ class BestelStap4View(TemplateView):
                     self.aantal_bestelbaar += 1
                     optie.opmerking = "Deze speld kan je bestellen"
                     optie.mag_besteld_worden = True
-                    if optie.speld.prijs_euro < 0.001:
-                        optie.prijs_str = "Gratis"
-                    else:
-                        optie.prijs_str = format_bedrag_euro(optie.speld.prijs_euro)
-                        self.totale_prijs += optie.speld.prijs_euro
+                    optie.prijs_str = speld_prijs_wa_str
+                    self.totale_prijs += speld_prijs_wa
                 else:
                     optie.opmerking = "Score niet hoog genoeg"
         # for
 
-    def _prep_pagina(self, context, opties: list[SpeldVoorwaarden]):
+    def _analyseer_opties_khsn(self, opties: list[SpeldVoorwaarden]):
+
+        speld_prijs_khsn = Decimal(settings.SPELD_PRIJS_KHSN)
+        speld_prijs_khsn_str = format_bedrag_euro(speld_prijs_khsn, gratis=True)
+
+        for optie in opties:
+            print('{optie khsn} %s' % optie)
+            optie.opmerking = '?'
+
+            optie.speld.categorie_str = SPELD_CATEGORIE2STR[optie.speld.categorie]
+            optie.mag_besteld_worden = False
+
+            if optie.speld.pk in self.al_toegekende_speld_pks:
+                optie.opmerking = "Deze speld heb je al"
+                optie.ok_score = optie.nok_score = False  # niet in groen of rood tonen
+            else:
+                # controleer of de behaalde score hoog genoeg is
+                if optie.speld.categorie == SPELD_CATEGORIE_NL_GRAADSPELD_SHORT_METRIC:
+                    score = self.prep.score_sm
+                else:
+                    score = self.prep.score
+                optie.nok_score = score < optie.benodigde_score  # toon in rood
+                optie.ok_score = score >= optie.benodigde_score  # toon in groen
+                if optie.ok_score:
+                    self.aantal_bestelbaar += 1
+                    optie.opmerking = "Deze speld kan je bestellen"
+                    optie.mag_besteld_worden = True
+                    optie.prijs_str = speld_prijs_khsn_str
+                    self.totale_prijs += speld_prijs_khsn
+                else:
+                    optie.opmerking = "Score niet hoog genoeg"
+
+            self.mogelijke_spelden.append(optie)
+        # for
+
+    def _prep_pagina(self, context):
         context['sporter_str'] = self.prep.voor_sporter.lid_nr_en_volledige_naam()
 
         # geslacht is relevant voor de arrowhead spelden (andere scores M/V)
@@ -126,11 +160,17 @@ class BestelStap4View(TemplateView):
         # informatie die verzameld is in stap 1
         context['discipline_str'] = SPELD_DISCIPLINE2STR[self.prep.discipline]
         context['boogtype_str'] = BOOGTYPE_AFKORTING2STR[self.prep.boog]
+
+        if self.prep.discipline == SPELD_DISCIPLINE_VELD:
+            context['aantal_doelen'] = self.prep.aantal_doelen
+        else:
+            context['aantal_pijlen'] = self.prep.aantal_pijlen
+
         context['score'] = self.prep.score
         if self.prep.score_sm > 0:
             context['score_sm'] = self.prep.score_sm
-        context['wedstrijd_datum'] = self.prep.datum_wedstrijd
 
+        context['wedstrijd_datum'] = self.prep.datum_wedstrijd
         if self.prep.wedstrijd:
             context['wedstrijd_titel'] = self.prep.wedstrijd.titel
             locatie = self.prep.wedstrijd.locatie
@@ -166,9 +206,8 @@ class BestelStap4View(TemplateView):
         context['menu_toon_mandje'] = True
 
         context['kruimels'] = (
-            (reverse('Webwinkel:overzicht'), 'Webwinkel'),
             (reverse('Spelden:begin'), 'Prestatiespelden'),
-            (None, 'Bestellen - Stap 4'),
+            (None, 'Bestellen stap 4'),
         )
 
     def get_context_data(self, **kwargs):
@@ -185,24 +224,40 @@ class BestelStap4View(TemplateView):
                                            self.prep.voor_sporter.geboorte_datum.year)
         self._analyseer_opties_wa(opties1)
 
+        opties2 = get_mogelijke_graadspelden_khsn(self.prep.discipline,
+                                                  self.prep.afstanden,
+                                                  self.prep.aantal_doelen,
+                                                  self.prep.aantal_pijlen,
+                                                  self.prep.wedstrijd_geslacht,
+                                                  self.prep.score,
+                                                  self.prep.score_sm)
+        self._analyseer_opties_khsn(opties2)
 
-        opties2 = get_mogelijke_spelden_khsn(self.prep.discipline,
-                                             self.prep.score)
-
-
-        self._prep_pagina(context, opties1)
+        self._prep_pagina(context)
         return context
 
     def post(self, request, *args, **kwargs):
         self._load_prep()
         self._load_al_toegekend()
 
-        opties = get_mogelijke_spelden_wa(self.prep.discipline,
-                                          self.prep.boog,
-                                          self.prep.score,
-                                          self.prep.wedstrijd_geslacht,
-                                          self.prep.voor_sporter.geboorte_datum.year)
-        self._analyseer_opties_wa(opties)
+        opties1 = get_mogelijke_spelden_wa(self.prep.discipline,
+                                           self.prep.boog,
+                                           self.prep.score,
+                                           self.prep.wedstrijd_geslacht,
+                                           self.prep.voor_sporter.geboorte_datum.year)
+        self._analyseer_opties_wa(opties1)
+
+        opties2 = get_mogelijke_graadspelden_khsn(self.prep.discipline,
+                                                  self.prep.afstanden,
+                                                  self.prep.aantal_doelen,
+                                                  self.prep.aantal_pijlen,
+                                                  self.prep.wedstrijd_geslacht,
+                                                  self.prep.score,
+                                                  self.prep.score_sm)
+        self._analyseer_opties_khsn(opties2)
+
+        del opties1
+        del opties2
 
         spelden = [optie.speld
                    for optie in self.mogelijke_spelden
@@ -251,7 +306,6 @@ class BestelStap4View(TemplateView):
         context['menu_toon_mandje'] = True
 
         context['kruimels'] = (
-            (reverse('Webwinkel:overzicht'), 'Webwinkel'),
             (reverse('Spelden:begin'), 'Prestatiespelden'),
             (None, 'Bestellen - Toegevoegd aan mandje'),
         )
