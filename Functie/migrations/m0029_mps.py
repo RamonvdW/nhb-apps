@@ -7,13 +7,13 @@
 from django.db import migrations
 
 
-def maak_functie_mpp(apps, _):
-    """ maak rollen uit die niet met de bondscompetities te doen hebben """
+def maak_functie_mps(apps, _):
+    """ maak de functie voor de Manager Prestatiespelden """
 
     # haal de klassen op die van toepassing zijn op het moment van migratie
     functie_klas = apps.get_model('Functie', 'Functie')
 
-    functie_klas(rol='MPP', beschrijving='Manager Prestatiespelden').save()
+    functie_klas(rol='MPS', beschrijving='Manager Prestatiespelden').save()
 
 
 class Migration(migrations.Migration):
@@ -27,7 +27,7 @@ class Migration(migrations.Migration):
 
     # migratie functies
     operations = [
-        migrations.RunPython(maak_functie_mpp),
+        migrations.RunPython(maak_functie_mps),
     ]
 
 # end of file

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2025 Ramon van der Winkel.
+#  Copyright (c) 2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -18,7 +18,7 @@ EMAIL_TEMPLATE_BACKOFFICE_VERSTUREN = 'email_bestelling/backoffice-spelden.dtl'
 
 
 def _get_emailadres_backoffice() -> str:
-    return Functie.objects.get(rol='MPP').bevestigde_email
+    return Functie.objects.get(rol='MPS').bevestigde_email
 
 
 def _beschrijf_bestelling(bestelling: Bestelling) -> list:
