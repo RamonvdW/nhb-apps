@@ -20,6 +20,12 @@
         </div>
     </div>
 
+    <style>
+        td.has-event {
+            background-color: #0aa0e1;  /* lichtblauw */
+        }
+    </style>
+
     <script>
         let ignore_datum_changes = true;
 
@@ -148,12 +154,21 @@
 
             let el = document.querySelector('#id_datum');
             if (el) {
-                let options = { defaultDate: new Date("{{ wed_datum|date:'Y-m-d' }}"),
-                                setDefaultDate: true,
-                                format: "d mmmm yyyy",
-                                minDate: minDate,
-                                maxDate: maxDate,
-                                yearRange: [{{ min_date.year }}, {{ max_date.year }}]};
+                let options = {
+                    defaultDate: new Date("{{ wed_datum|date:'Y-m-d' }}"),
+                    setDefaultDate: true,
+                    format: "d mmmm yyyy",
+                    minDate: minDate,
+                    maxDate: maxDate,
+                    yearRange: [{{ min_date.year }}, {{ max_date.year }}],
+                    events: [
+                        {% for event_datum in event_datums %}
+                            new Date("{{ event_datum|date:'Y-m-d' }}").toDateString(),
+                        {% endfor %}
+                    ],
+                };
+
+                console.log(options.events);
 
                 M.Datepicker.init(el, options);
 

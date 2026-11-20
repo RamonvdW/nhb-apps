@@ -27,7 +27,7 @@ class Migration(migrations.Migration):
 
     # migratie functies
     operations = [
-        migrations.RunPython(maak_functie_mps),
+        migrations.RunPython(maak_functie_mps, reverse_code=migrations.RunPython.noop),
     ]
 
 # end of file

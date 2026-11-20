@@ -119,7 +119,7 @@ class BestelStap4View(TemplateView):
         speld_prijs_khsn_str = format_bedrag_euro(speld_prijs_khsn, gratis=True)
 
         for optie in opties:
-            print('{optie khsn} %s' % optie)
+            # print('{optie khsn} %s' % optie)
             optie.opmerking = '?'
 
             optie.speld.categorie_str = SPELD_CATEGORIE2STR[optie.speld.categorie]
