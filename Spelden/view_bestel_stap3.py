@@ -34,7 +34,7 @@ class BestelStap3View(TemplateView):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.prep = None
+        self.prep: SpeldAanvraagPrep = SpeldAanvraagPrep()
 
     def _load_prep(self):
         if rol_get_huidige(self.request) != Rol.ROL_SPORTER:
@@ -45,10 +45,14 @@ class BestelStap3View(TemplateView):
 
         account = get_account(self.request)
         sporter = get_sporter(account)
+        if not sporter:                                 # pragma: no branch
+            raise Http404('Onvolledige verzoek')        # pragma: no cover
 
-        self.prep = SpeldAanvraagPrep.objects.filter(voor_sporter=sporter).select_related('voor_sporter').first()
-        if not self.prep:
+        prep = SpeldAanvraagPrep.objects.filter(voor_sporter=sporter).select_related('voor_sporter').first()
+        if not prep:
             raise Http404('Onvolledige verzoek (1)')
+
+        self.prep = prep
 
         if not self.prep.heeft_data_stap2:
             raise Http404('Onvolledige verzoek (2)')
@@ -174,8 +178,9 @@ class BestelStap3View(TemplateView):
                 raise Http404('Onbekend aantal doelen')
 
             self.prep.aantal_doelen = doelen
+            self.prep.score_sm = 0
             self.prep.heeft_data_stap2 = True
-            self.prep.save(update_fields=['heeft_data_stap2', 'aantal_doelen'])
+            self.prep.save(update_fields=['heeft_data_stap2', 'aantal_doelen', 'score_sm'])
             # note: aantal_pijlen wordt niet gebruikt voor veld
 
         else:
@@ -189,9 +194,9 @@ class BestelStap3View(TemplateView):
 
             self.prep.afstanden = afstand
 
+            self.prep.score_sm = 0
             if afstand in ('90, 70, 50, 30', '70, 60, 50, 30'):
                 score_sm_str = request.POST.get('score_sm', '')[:3]
-                self.prep.score_sm = 0
                 if score_sm_str:
                     try:
                         score_sm = int(score_sm_str)

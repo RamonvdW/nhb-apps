@@ -26,7 +26,7 @@ class BeginView(TemplateView):
 
         if rol_get_huidige(self.request) == Rol.ROL_SPORTER:
             if settings.TOON_SPELDEN_BESTELLEN:
-                context['url_bestel'] = reverse('Spelden:bestel-stap1')
+                context['url_bestel'] = reverse('Spelden:bestel-stap0')
                 context['url_kosten'] = reverse('Spelden:kosten')
 
         context['kruimels'] = (

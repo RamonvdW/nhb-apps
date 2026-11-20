@@ -7,7 +7,7 @@
 from django.urls import path
 from Spelden import (view_begin, view_info, view_kosten,
                      view_info_arrowhead, view_info_target_awards, view_info_graadspelden, view_info_sterspelden,
-                     view_bestel_stap1, view_bestel_stap3, view_bestel_stap2, view_bestel_stap4)
+                     view_bestel_stap0, view_bestel_stap1, view_bestel_stap3, view_bestel_stap2, view_bestel_stap4)
 
 app_name = 'Spelden'
 
@@ -50,6 +50,10 @@ urlpatterns = [
     path('kosten/',
          view_kosten.KostenView.as_view(),
          name='kosten'),
+
+    path('bestel/',
+         view_bestel_stap0.BestelStap0View.as_view(),
+         name='bestel-stap0'),
 
     path('bestel/stap1/',
          view_bestel_stap1.BestelStap1View.as_view(),

@@ -46,6 +46,8 @@ class BestelStap2View(TemplateView):
 
         account = get_account(self.request)
         sporter = get_sporter(account)
+        if not sporter:                                 # pragma: no branch
+            raise Http404('Onvolledige verzoek')        # pragma: no cover
 
         prep = SpeldAanvraagPrep.objects.filter(voor_sporter=sporter).first()
         if prep is None:
