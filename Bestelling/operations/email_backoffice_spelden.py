@@ -1,30 +1,33 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022-2025 Ramon van der Winkel.
+#  Copyright (c) 2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.conf import settings
 from django.utils import timezone
-from Bestelling.definities import BESTELLING_KORT_BREAK, BESTELLING_TRANSPORT_OPHALEN
+from Bestelling.definities import (BESTELLING_KORT_BREAK,
+                                   BESTELLING_REGEL_CODE_SPELD, BESTELLING_REGEL_CODE_VERZENDKOSTEN)
 from Bestelling.models import Bestelling
 from Betaal.definities import TRANSACTIE_TYPE_MOLLIE_RESTITUTIE
 from Betaal.format import format_bedrag_euro
 from Functie.models import Functie
 from Mailer.operations import mailer_queue_email, render_email_template
-from types import SimpleNamespace
-from decimal import Decimal
 
-EMAIL_TEMPLATE_BACKOFFICE_VERSTUREN = 'email_bestelling/backoffice-versturen.dtl'
+EMAIL_TEMPLATE_BACKOFFICE_VERSTUREN = 'email_bestelling/backoffice-spelden.dtl'
 
 
 def _get_emailadres_backoffice() -> str:
-    return Functie.objects.get(rol='MWW').bevestigde_email
+    return Functie.objects.get(rol='MPS').bevestigde_email
 
 
 def _beschrijf_bestelling(bestelling: Bestelling) -> list:
     regel_nr = 0
-    regels = list(bestelling.regels.order_by('code', 'pk'))
+    regels = list(bestelling
+                             .regels
+                             .filter(code__in=(BESTELLING_REGEL_CODE_SPELD,
+                                               BESTELLING_REGEL_CODE_VERZENDKOSTEN))
+                             .order_by('code', 'pk'))
     for regel in regels:
         # nieuwe regel op de bestelling
         regel_nr += 1
@@ -55,8 +58,8 @@ def _beschrijf_transacties(bestelling: Bestelling):
     return transacties
 
 
-def stuur_email_webwinkel_backoffice(stdout, bestelling: Bestelling):
-    """ Stuur een e-mail om de betaalde bestelling te bevestigen """
+def stuur_email_spelden_backoffice(stdout, bestelling: Bestelling):
+    """ Stuur een e-mail om het verwerken in gang te zetten van de spelden bestelling  """
 
     account = bestelling.account
     sporter = account.sporter_set.first()
@@ -81,10 +84,10 @@ def stuur_email_webwinkel_backoffice(stdout, bestelling: Bestelling):
     email = _get_emailadres_backoffice()
 
     mailer_queue_email(email,
-                       'Verstuur webwinkel producten (%s)' % bestelling.mh_bestel_nr(),
+                       'Bestelling spelden (%s)' % bestelling.mh_bestel_nr(),
                        mail_body)
 
-    stdout.write('[INFO] E-mail naar webwinkel back-office voor bestelling %s is verstuurd' % bestelling.mh_bestel_nr())
+    stdout.write('[INFO] E-mail naar spelden back-office voor bestelling %s is verstuurd' % bestelling.mh_bestel_nr())
 
 # end of file
 

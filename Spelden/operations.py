@@ -6,9 +6,15 @@
 
 from django.conf import settings
 from django.utils import timezone
+from Spelden.definities import (SPELD_DISCIPLINE_OUTDOOR, SPELD_DISCIPLINE_INDOOR, SPELD_DISCIPLINE_VELD,
+                                SPELD_DISCIPLINE_NVT,
+                                SPELD_CATEGORIE_NL_GRAADSPELD_INDOOR, SPELD_CATEGORIE_NL_GRAADSPELD_OUTDOOR,
+                                SPELD_CATEGORIE_NL_GRAADSPELD_VELD, SPELD_CATEGORIE_NL_GRAADSPELD_SHORT_METRIC,
+                                SPELD_CATEGORIE_NL_GRAADSPELD_ALGEMEEN)
 from Spelden.models import SpeldVoorwaarden, SpeldToegekend
 from Sporter.leeftijdsklassen import bereken_leeftijdsklassen_wa, hogere_en_lagere_lkl_wa
-from Wedstrijden.definities import WEDSTRIJD_DISCIPLINE_VELD
+from Wedstrijden.definities import (WEDSTRIJD_DISCIPLINE_OUTDOOR, WEDSTRIJD_DISCIPLINE_INDOOR,
+                                    WEDSTRIJD_DISCIPLINE_25M1P, WEDSTRIJD_DISCIPLINE_VELD)
 
 
 def get_hall_of_fame():
@@ -48,8 +54,8 @@ def tel_hall_of_fame():
     return gm_count, ms_count, as_count
 
 
-def get_mogelijke_spelden(discipline: str, boog: str, score: int,
-                          wedstrijd_geslacht: str, geboorte_jaar: int) -> list[SpeldVoorwaarden]:
+def get_mogelijke_spelden_wa(discipline: str, boog: str, score: int,
+                             wedstrijd_geslacht: str, geboorte_jaar: int) -> list[SpeldVoorwaarden]:
 
     """ Bepaalt de mogelijke spelden aan de hand van ingevoerde informatie
 
@@ -108,6 +114,81 @@ def get_mogelijke_spelden(discipline: str, boog: str, score: int,
         qset = qset.filter(leeftijdsklasse__in=alle_lkl)
 
     return list(qset)
+
+
+def get_mogelijke_graadspelden_khsn(discipline: str, afstanden: str, aantal_doelen: int, aantal_pijlen: int, wedstrijdgeslacht: str, score: int, score_sm: int):
+    print('{get_mogelijke_graadspelden_khsn} discipline=%s, afstanden=%s, aantal doelen=%s, aantal_pijlen=%s, m/v=%s, score=%s' % (discipline, afstanden, aantal_doelen, aantal_pijlen, wedstrijdgeslacht, score))
+
+    lkl = 'SH'
+    if wedstrijdgeslacht != 'M':
+        lkl = 'SV'
+
+    opties = list()
+
+    if discipline == SPELD_DISCIPLINE_OUTDOOR:
+        qset = (SpeldVoorwaarden
+                .objects
+                .filter(discipline=SPELD_DISCIPLINE_NVT,
+                        wedstrijd_soort='Outdoor',
+                        leeftijdsklasse__afkorting=lkl,
+                        speld__categorie=SPELD_CATEGORIE_NL_GRAADSPELD_OUTDOOR)
+                .select_related('speld')
+                .order_by('speld__volgorde'))
+        opties.extend(list(qset))
+
+        # short metric
+        if score_sm > 0:
+            qset = (SpeldVoorwaarden
+                    .objects
+                    .filter(discipline=SPELD_DISCIPLINE_NVT,
+                            wedstrijd_soort='Short Metric',
+                            leeftijdsklasse__afkorting=lkl,
+                            speld__categorie=SPELD_CATEGORIE_NL_GRAADSPELD_SHORT_METRIC)
+                    .select_related('speld')
+                    .order_by('speld__volgorde'))
+            opties.extend(list(qset))
+
+    if discipline == SPELD_DISCIPLINE_VELD and aantal_doelen == 24:
+        qset = (SpeldVoorwaarden
+                .objects
+                .filter(discipline=SPELD_DISCIPLINE_NVT,
+                        wedstrijd_soort='Veld',
+                        leeftijdsklasse__afkorting=lkl,
+                        speld__categorie=SPELD_CATEGORIE_NL_GRAADSPELD_VELD)
+                .select_related('speld')
+                .order_by('speld__volgorde'))
+        opties.extend(list(qset))
+
+    if discipline == SPELD_DISCIPLINE_INDOOR and afstanden == '18' and aantal_pijlen == 60:
+        qset = (SpeldVoorwaarden
+                .objects
+                .filter(discipline=SPELD_DISCIPLINE_NVT,
+                        wedstrijd_soort='Indoor',
+                        leeftijdsklasse__afkorting=lkl,
+                        speld__categorie=SPELD_CATEGORIE_NL_GRAADSPELD_INDOOR)
+                .select_related('speld')
+                .order_by('speld__volgorde'))
+        opties.extend(list(qset))
+
+    return opties
+
+
+def speld_discipline2wedstrijd_discplines(speld_discipline: str):
+    """ maak een Wedstrijden discpline filter aan de hand van de gekozen discipline voor de spelden """
+    
+    if speld_discipline == SPELD_DISCIPLINE_OUTDOOR:
+        wed_disciplines = (WEDSTRIJD_DISCIPLINE_OUTDOOR,)
+
+    elif speld_discipline == SPELD_DISCIPLINE_INDOOR:
+        wed_disciplines = (WEDSTRIJD_DISCIPLINE_INDOOR, WEDSTRIJD_DISCIPLINE_25M1P)
+
+    elif speld_discipline == SPELD_DISCIPLINE_VELD:
+        wed_disciplines = (WEDSTRIJD_DISCIPLINE_VELD,)
+
+    else:
+        wed_disciplines = ()
+
+    return wed_disciplines
 
 
 # end of file

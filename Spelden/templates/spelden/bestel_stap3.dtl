@@ -19,17 +19,6 @@
         </div>
     </div>
 
-    <script>
-        function wedstrijd_gekozen() {
-            const el_inp_plaats = document.getElementById('invoer_plaats');
-            const el_inp_land = document.getElementById('invoer_land');
-            const el_select = document.getElementById('kies_wedstrijd');
-            const gekozen = el_select.options[el_select.selectedIndex];
-            el_inp_plaats.value = gekozen.dataset.plaats;
-            el_inp_land.value = "Nederland";
-        }
-    </script>
-
     <!-- blauwe balk met informatie in tabel-vorm:  label - info -->
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
@@ -60,80 +49,119 @@
                     <th>Datum van de wedstrijd</th>
                     <td>{{ wedstrijd_datum }}</td>
                 </tr>
+                {% if wedstrijd_titel %}
+                    <tr>
+                        <th>Wedstrijd</th>
+                        <td>{{ wedstrijd_titel }}</td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <th>Wedstrijd plaats, land</th>
+                        <td>{{ wedstrijd_plaats_land }}</td>
+                    </tr>
+                {% endif %}
             </table>
         </div>
     </div>
 
+    {% if not url_opslaan %}
 
-    <!-- witruimte -->
-    <div class="row center">
-        <div class="col s12">
-            <h2 class="sv-kopje-row">Stap 3</h2>
-            <p>Vertel ons wat meer over de wedstrijd</p>
-        </div>
-    </div>
-
-    <!-- blauwe balk filters -->
-    <div class="row-sv-blauw">
-
-        <!-- filter: wedstrijddiscipline -->
-        <div class="col s10 offset-s1 sv-kader-form">
-            <div class="form-padding">
-                <form action="{{ url_opslaan }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
-                    {% csrf_token %}
-
-                    <table>
-                        <tr>
-                            <th>Kies uit deze wedstrijden:</th>
-                            <td>
-                                <ul id="id_wedstrijden">
-                                    {% for obj in kalender_lijst %}
-                                        <li>
-                                            <label class="black-text" for="id_wed{{ obj.pk }}">
-                                                <input class="with-gap" type="radio" name="wedstrijd" value="wed_{{ obj.pk }}" id="id_wed{{ obj.pk }}"{% if wedstrijd_pk == obj.pk %} checked{% endif %}>
-                                                <span>{{ obj.titel }}{% if obj.plaats %} ({{ obj.plaats }}){% endif %}</span>
-                                            </label>
-                                        </li>
-                                    {% endfor %}
-
-                                    <li>
-                                        <label class="black-text" for="id_wed_geen">
-                                            <input class="with-gap" type="radio" name="wedstrijd" value="geen" id="id_wed_geen"{% if wedstrijd_pk == 'geen' %} checked{% endif %}>
-                                            <span>(geen van deze)</span>
-                                        </label>
-                                    </li>
-                                </ul>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <th>Of vul deze velden in:</th>
-                            <td>
-                                <div class="input-field">
-                                    <label for="invoer_plaats">Plaats</label>
-                                    <input id="invoer_plaats" name="plaats" type="text" maxlength="30" value="{{ plaats }}">
-                                </div>
-                                <br>
-                                <div class="input-field">
-                                    <label for="invoer_land">Land</label>
-                                    <input id="invoer_land" name="land" type="text" maxlength="30" value="{{ land }}">
-                                </div>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td colspan="2" class="center">
-                                <!-- TODO: disable button todat alle invoer gegeven is -->
-                                <button class="btn-sv-rood" id="submit_knop" type="submit">Volgende stap</button>
-                            </td>
-                        </tr>
-
-                    </table>
-                </form>
+        <!-- rood bordje -->
+        <div class="row sv-bordje-wrapper">
+            <div class="col s12 m8 offset-m2 l6 offset-l3 sv-bordje-rood">
+                <p>Er zijn geen spelden beschikbaar voor deze combinatie</p>
             </div>
         </div>
-    </div>
 
+    {% else %}
+
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <h2 class="sv-kopje-row">Stap 3</h2>
+                <p>Vertel ons wat meer over de wedstrijd.</p>
+            </div>
+        </div>
+
+        <!-- blauwe balk filters -->
+        <div class="row-sv-blauw">
+
+            <form action="{{ url_opslaan }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
+                {% csrf_token %}
+
+                <!-- filter: wedstrijddiscipline -->
+                <div class="col s10 offset-s1 m8 offset-m2 l6 offset-l3 xl4 offset-xl4 sv-kader-form">
+                    <div class="form-padding">
+
+                        <table>
+                            {% if doelen_opties %}
+                                <tr>
+                                    <th>Aantal doelen</th>
+                                    <td>
+                                        <ul id="id_doelen">
+                                            {% for opt in doelen_opties %}
+                                                <li>
+                                                    <label class="black-text" for="id_{{ opt.afkorting }}">
+                                                        <input class="with-gap" type="radio" name="doelen" value="{{ opt.afkorting }}" required id="id_{{ opt.afkorting }}"{% if opt.actief %} checked{% endif %}>
+                                                        <span>{{ opt.beschrijving }}</span>
+                                                    </label>
+                                                </li>
+                                            {% endfor %}
+                                        </ul>
+                                    </td>
+                                </tr>
+                            {% endif %}
+
+                            {% if afstanden_opties %}
+                                <tr>
+                                    <th>{{ afstanden_titel }}</th>
+                                    <td>
+                                        <ul id="id_afstanden">
+                                            {% for opt in afstanden_opties %}
+                                                <li>
+                                                    <label class="black-text" for="id_{{ opt.afkorting }}">
+                                                        <input class="with-gap" type="radio" name="afstand" value="{{ opt.afkorting }}" required id="id_{{ opt.afkorting }}"{% if opt.actief %} checked{% endif %}>
+                                                        <span>{{ opt.beschrijving }}</span>
+                                                    </label>
+                                                </li>
+                                            {% endfor %}
+                                        </ul>
+                                    </td>
+                                </tr>
+
+                                {% if toon_sm %}
+                                    <tr>
+                                        <td colspan="2" class="center">
+                                            <span>Je kan voor deze wedstrijd ook de Short Metric speld verdienen.</span><br>
+                                            <span>Voer hiervoor het totaal van je scores op 50 en 30 meter in.</span>
+                                        </tr>
+                                    <tr>
+                                        <th>Short Metric score</th>
+                                        <td>
+                                            <div class="input-field" style="max-width:100px">
+                                                <label for="invoer_score">Score</label>
+                                                <input id="invoer_score" name="score_sm" type="number" min="0" max="720" autofocus value="{{ score_sm }}">
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endif %}
+
+                            {% endif %}
+
+                            <tr>
+                                <td colspan="2" class="center">
+                                    <button class="btn-sv-rood" id="submit_knop" type="submit">Volgende stap</button>
+                                </td>
+                            </tr>
+
+                        </table>
+
+                    </div>
+                </div>
+
+            </form>
+        </div>
+    {% endif %}
 
     <p class="center">
         {% sv-knop-nav url=url_stap2 icon='terug' tekst='Terug naar stap 2' kleur='blauw' %}

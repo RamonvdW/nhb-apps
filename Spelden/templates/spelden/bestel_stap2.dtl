@@ -7,7 +7,7 @@
 {% load static %}
 {% load design_knop %}
 
-{% block title %}Bestelformulier{% endblock %}
+{% block title %}Bestelformulier, stap 2{% endblock %}
 
 {% block pagina %}
 
@@ -18,6 +18,17 @@
             <p>Bestel prestatiespelden, voor jezelf</p>
         </div>
     </div>
+
+    <script>
+        function wedstrijd_gekozen() {
+            const el_inp_plaats = document.getElementById('invoer_plaats');
+            const el_inp_land = document.getElementById('invoer_land');
+            const el_select = document.getElementById('kies_wedstrijd');
+            const gekozen = el_select.options[el_select.selectedIndex];
+            el_inp_plaats.value = gekozen.dataset.plaats;
+            el_inp_land.value = "Nederland";
+        }
+    </script>
 
     <!-- blauwe balk met informatie in tabel-vorm:  label - info -->
     <div class="row-sv-blauw">
@@ -53,86 +64,85 @@
         </div>
     </div>
 
-    {% if not url_opslaan %}
 
-        <!-- rood bordje -->
-        <div class="row sv-bordje-wrapper">
-            <div class="col s12 m8 offset-m2 l6 offset-l3 sv-bordje-rood">
-                <p>Er zijn geen spelden beschikbaar voor deze combinatie</p>
-            </div>
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h2 class="sv-kopje-row">Stap 2</h2>
+            <p>Vertel ons wat meer over de wedstrijd</p>
         </div>
+    </div>
 
-    {% else %}
+    <!-- blauwe balk filters -->
+    <div class="row-sv-blauw">
 
-        <!-- witruimte -->
-        <div class="row center">
-            <div class="col s12">
-                <h2 class="sv-kopje-row">Stap 2</h2>
-                <p>Vertel ons wat meer over de wedstrijd.</p>
-            </div>
-        </div>
+        <!-- filter: wedstrijddiscipline -->
+        <div class="col s12 m10 offset-m1 sv-kader-form">
+            <div class="form-padding">
+                <form action="{{ url_opslaan }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
+                    {% csrf_token %}
 
-        <!-- blauwe balk filters -->
-        <div class="row-sv-blauw">
+                    <table>
+                        <tr>
+                            {% if kalender_lijst %}
+                                <th>Kies uit deze wedstrijden</th>
+                                <td>
+                                    <ul id="id_wedstrijden">
+                                        {% for obj in kalender_lijst %}
+                                            <li>
+                                                <label class="black-text" for="id_wed{{ obj.pk }}">
+                                                    <input class="with-gap" type="radio" name="wedstrijd" value="wed_{{ obj.pk }}" id="id_wed{{ obj.pk }}"{% if wedstrijd_pk == obj.pk %} checked{% endif %}>
+                                                    <span>{{ obj.titel }}{% if obj.plaats %} ({{ obj.plaats }}){% endif %}</span>
+                                                </label>
+                                            </li>
+                                        {% endfor %}
 
-            <form action="{{ url_opslaan }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
-                {% csrf_token %}
-
-                <!-- filter: wedstrijddiscipline -->
-                <div class="col s10 offset-s1 m6 offset-m3 l4 offset-l4 sv-kader-form">
-                    <div class="form-padding">
-
-                        <table>
-                            {% if doelen_opties %}
-                                <tr>
-                                    <th>Aantal doelen</th>
-                                    <td>
-                                        <ul id="id_doelen">
-                                            {% for opt in doelen_opties %}
-                                                <li>
-                                                    <label class="black-text" for="id_{{ opt.afkorting }}">
-                                                        <input class="with-gap" type="radio" name="doelen" value="{{ opt.afkorting }}" required id="id_{{ opt.afkorting }}"{% if opt.actief %} checked{% endif %}>
-                                                        <span>{{ opt.beschrijving }}</span>
-                                                    </label>
-                                                </li>
-                                            {% endfor %}
-                                        </ul>
-                                    </td>
-                                </tr>
-                            {% endif %}
-
-                            {% if afstanden_opties %}
-                                <tr>
-                                    <th>{{ afstanden_titel }}</th>
-                                    <td>
-                                        <ul id="id_afstanden">
-                                            {% for opt in afstanden_opties %}
-                                                <li>
-                                                    <label class="black-text" for="id_{{ opt.afkorting }}">
-                                                        <input class="with-gap" type="radio" name="afstand" value="{{ opt.afkorting }}" required id="id_{{ opt.afkorting }}"{% if opt.actief %} checked{% endif %}>
-                                                        <span>{{ opt.beschrijving }}</span>
-                                                    </label>
-                                                </li>
-                                            {% endfor %}
-                                        </ul>
-                                    </td>
-                                </tr>
-                            {% endif %}
-
-                            <tr>
-                                <td colspan="2" class="center">
-                                    <button class="btn-sv-rood" id="submit_knop" type="submit">Volgende stap</button>
+                                        <li>
+                                            <label class="black-text" for="id_wed_geen">
+                                                <input class="with-gap" type="radio" name="wedstrijd" value="geen" id="id_wed_geen"{% if wedstrijd_pk == 'geen' %} checked{% endif %}>
+                                                <span>(geen van deze)</span>
+                                            </label>
+                                        </li>
+                                    </ul>
                                 </td>
-                            </tr>
+                            {% else %}
+                                <th></th>
+                                <td>
+                                    <i>We hebben geen passende wedstrijd kunnen vinden op onze kalender.</i><br>
+                                    <i>Controleer datum en discipline, of voer de onderstaande velden in.</i>
+                                </td>
+                                <input type="hidden" name="wedstrijd" value="geen">
+                            {% endif %}
+                        </tr>
 
-                        </table>
+                        <tr>
+                            <th>{% if kalender_lijst %}Of vul deze velden in{% else %}Waar was deze wedstrijd?{% endif %}</th>
+                            <td>
+                                <div class="input-field">
+                                    <label for="invoer_plaats">Plaats</label>
+                                    <input id="invoer_plaats" name="plaats" type="text" maxlength="30" value="{{ plaats }}">
+                                </div>
+                                <br>
+                                <div class="input-field">
+                                    <label for="invoer_land">Land</label>
+                                    <input id="invoer_land" name="land" type="text" maxlength="30" value="{{ land }}">
+                                </div>
+                            </td>
+                        </tr>
 
-                    </div>
-                </div>
+                        <tr>
+                            <td colspan="2" class="center">
+                                <!-- TODO: disable button todat alle invoer gegeven is -->
+                                <button class="btn-sv-rood" id="submit_knop" type="submit">Volgende stap</button>
+                            </td>
+                        </tr>
 
-            </form>
+                    </table>
+                </form>
+            </div>
         </div>
-    {% endif %}
+    </div>
+
 
     <p class="center">
         {% sv-knop-nav url=url_stap1 icon='terug' tekst='Terug naar stap 1' kleur='blauw' %}

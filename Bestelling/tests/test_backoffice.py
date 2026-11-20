@@ -145,7 +145,7 @@ class TestBestellingBackoffice(E2EHelpers, TestCase):
         self.assertEqual(MailQueue.objects.count(), 3)      # 1=bevestig bestelling, 2=bevestig betaling, 3=backoffice
         mail = MailQueue.objects.filter(mail_to=self.email_backoffice).first()
         # self.e2e_show_email_in_browser(mail)
-        self.assert_email_html_ok(mail, 'email_bestelling/backoffice-versturen.dtl')
+        self.assert_email_html_ok(mail, 'email_bestelling/backoffice-webwinkel.dtl')
         self.assert_consistent_email_html_text(mail, ignore=('>Korting:', 'Verenigingskorting: 50%<', 'Betaling:'))
 
         self.assertTrue(self.sporter.postadres_1 in mail.mail_text)
@@ -197,7 +197,7 @@ class TestBestellingBackoffice(E2EHelpers, TestCase):
         self.assertEqual(MailQueue.objects.count(), 3)      # 1=bevestig bestelling, 2=bevestig betaling, 3=backoffice
         mail = MailQueue.objects.filter(mail_to=self.email_backoffice).first()
         # self.e2e_show_email_in_browser(mail)
-        self.assert_email_html_ok(mail, 'email_bestelling/backoffice-versturen.dtl')
+        self.assert_email_html_ok(mail, 'email_bestelling/backoffice-webwinkel.dtl')
         self.assert_consistent_email_html_text(mail, ignore=('>Korting:', 'Verenigingskorting: 50%<', 'Betaling:'))
 
         self.assertTrue("Ophalen op het bondsbureau" in mail.mail_text)
@@ -231,7 +231,7 @@ class TestBestellingBackoffice(E2EHelpers, TestCase):
         stdout = OutputBuffer()
         stuur_email_webwinkel_backoffice(stdout, bestelling)
         mail = MailQueue.objects.first()
-        self.assert_email_html_ok(mail, 'email_bestelling/backoffice-versturen.dtl')
+        self.assert_email_html_ok(mail, 'email_bestelling/backoffice-webwinkel.dtl')
         # self.e2e_show_email_in_browser(mail)
 
         self.assertTrue("Waarvan BTW 1,42%" in mail.mail_text)
@@ -260,7 +260,7 @@ class TestBestellingBackoffice(E2EHelpers, TestCase):
         self.verwerk_bestel_mutaties()
 
         mail = MailQueue.objects.first()
-        self.assert_email_html_ok(mail, 'email_bestelling/backoffice-versturen.dtl')
+        self.assert_email_html_ok(mail, 'email_bestelling/backoffice-webwinkel.dtl')
         # self.e2e_show_email_in_browser(mail)
 
 

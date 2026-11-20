@@ -6,7 +6,6 @@
 
 from django.urls import reverse
 from django.conf import settings
-from django.utils import timezone
 from django.http import HttpResponseRedirect, Http404
 from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
@@ -14,27 +13,28 @@ from Account.models import get_account
 from BasisTypen.definities import BOOGTYPE_AFKORTING2STR, GESLACHT2STR
 from Functie.definities import Rol
 from Functie.rol import rol_get_huidige
-from Spelden.definities import SPELD_DISCIPLINE_VELD, SPELD_DISCIPLINE2STR
+from Spelden.definities import (SPELD_DISCIPLINE_VELD, SPELD_DISCIPLINE_INDOOR, SPELD_DISCIPLINE_OUTDOOR,
+                                SPELD_DISCIPLINE2STR)
 from Spelden.models import SpeldAanvraagPrep
+from Spelden.operations import get_mogelijke_spelden_wa
 from Sporter.operations import get_sporter
-from Wedstrijden.definities import ORGANISATIE_IFAA, WEDSTRIJD_STATUS_GEACCEPTEERD
-from Wedstrijden.models import Wedstrijd
-import datetime
+from types import SimpleNamespace
 
 TEMPLATE_PRESTATIESPELDEN_BESTEL_STAP3 = 'spelden/bestel_stap3.dtl'
 
 
 class BestelStap3View(TemplateView):
 
-    """ In deze view tonen we de mogelijke spelden, gebaseerd op de informatie in SpeldAanvraagPrep """
+    """ In deze view kan de geschoten afstand(en) gekozen worden
+        De mogelijkheden worden gefilterd gebaseerd op de eerder ingevoerde informatie: discipline, boog, score.
+    """
 
     # class variables shared by all instances
     template_name = TEMPLATE_PRESTATIESPELDEN_BESTEL_STAP3
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.prep: SpeldAanvraagPrep = SpeldAanvraagPrep()
-        self.qset_wedstrijden = None
+        self.prep = None
 
     def _load_prep(self):
         if rol_get_huidige(self.request) != Rol.ROL_SPORTER:
@@ -46,73 +46,94 @@ class BestelStap3View(TemplateView):
         account = get_account(self.request)
         sporter = get_sporter(account)
 
-        prep = SpeldAanvraagPrep.objects.filter(voor_sporter=sporter).first()
-        if prep is None:
+        self.prep = SpeldAanvraagPrep.objects.filter(voor_sporter=sporter).select_related('voor_sporter').first()
+        if not self.prep:
             raise Http404('Onvolledige verzoek (1)')
-        else:
-            self.prep = prep
 
         if not self.prep.heeft_data_stap2:
             raise Http404('Onvolledige verzoek (2)')
 
-    def _vind_wedstrijden(self):
-        self.qset_wedstrijden = (Wedstrijd
-                                 .objects
-                                 .exclude(toon_op_kalender=False)
-                                 .exclude(organisatie=ORGANISATIE_IFAA)      # spelden zijn voor WA en KHSN
-                                 .exclude(is_ter_info=True)
-                                 .filter(status=WEDSTRIJD_STATUS_GEACCEPTEERD,
-                                         datum_begin__gte=self.prep.datum_wedstrijd,
-                                         datum_einde__lte=self.prep.datum_wedstrijd)
-                                 .order_by('-datum_begin',      # nieuwste bovenaan
-                                           'pk'))               # consistente volgorde
-
-        for obj in self.qset_wedstrijden:
-            obj.plaats = obj.locatie.plaats if obj.locatie else ''
-        # for
-
-    def _prep_pagina(self, context):
-        context['sporter_str'] = self.prep.voor_sporter.lid_nr_en_volledige_naam()
-
-        # geslacht is alleen relevant voor de arrowhead spelden (andere scores), dus toon alleen voor discipline veld
-        if self.prep.discipline == SPELD_DISCIPLINE_VELD:
-            context['geslacht_str'] = GESLACHT2STR[self.prep.wedstrijd_geslacht]
+    def _prep_pagina(self, context, opties):
+        """ herbruikbare code voor get and post handlers """
 
         # informatie die verzameld is in stap 1
+        context['sporter_str'] = self.prep.voor_sporter.lid_nr_en_volledige_naam()
         context['discipline_str'] = SPELD_DISCIPLINE2STR[self.prep.discipline]
         context['boogtype_str'] = BOOGTYPE_AFKORTING2STR[self.prep.boog]
         context['score'] = self.prep.score
         context['wedstrijd_datum'] = self.prep.datum_wedstrijd
+
         if self.prep.wedstrijd:
-            context['wedstrijd_pk'] = self.prep.wedstrijd_id
+            context['wedstrijd_titel'] = self.prep.wedstrijd.titel
+            locatie = self.prep.wedstrijd.locatie
+            if locatie:
+                context['wedstrijd_titel'] += ' (%s)' % locatie.plaats
         else:
-            context['wedstrijd_pk'] = 'geen'
-        context['kalender_lijst'] = self.qset_wedstrijden
+            spl = self.prep.informatie_wedstrijd.split('|')
+            context['wedstrijd_plaats_land'] = ", ".join(spl[:2])
 
-        spl = self.prep.informatie_wedstrijd.split('|')
-        if len(spl) >= 1:
-            context['plaats'] = spl[0]
+        # geslacht is relevant voor de arrowhead spelden (andere scores M/V)
+        # geslacht is relevant voor de ster spelden (andere scores M/V)
+        # dus toon voor veld en outdoor
+        if self.prep.discipline in (SPELD_DISCIPLINE_VELD, SPELD_DISCIPLINE_OUTDOOR):
+            context['geslacht_str'] = GESLACHT2STR[self.prep.wedstrijd_geslacht]
+
+        # for optie in opties:
+        #     print('{optie} %s' % repr(optie))
+
+        # filter opties
+        if self.prep.discipline == SPELD_DISCIPLINE_VELD:
+            aantal_doelen = [str(optie.aantal_doelen)
+                             for optie in opties]
+            aantal_doelen = list(set(aantal_doelen))
+            aantal_doelen.sort()
+
+            context['doelen_opties'] = filter_opties = list()
+            for aantal in aantal_doelen:
+                obj = SimpleNamespace(
+                            afkorting=aantal,
+                            beschrijving=aantal + ' doelen',
+                            actief=(str(self.prep.aantal_doelen) == aantal))
+                filter_opties.append(obj)
+            # for
         else:
-            context['plaats'] = ''
-        if len(spl) > 1:
-            context['land'] = spl[1]
-        else:
-            context['land'] = 'Nederland'
+            afstanden = [(len(optie.afstanden), optie.afstanden)
+                         for optie in opties]
+            afstanden = list(set(afstanden))
 
-        # # verwijder spelden die niet besteld kunnen worden (met hogere score vereiste)
-        # while len(mogelijke_spelden) and not mogelijke_spelden[-1].ok_score:
-        #     mogelijke_spelden.pop(-1)
-        # # while
+            if self.prep.discipline == SPELD_DISCIPLINE_INDOOR:
+                afstanden.sort()                    # laagste eerst: 18m, 25m
+            else:
+                afstanden.sort(reverse=True)        # langste string eerst; langste afstand eerst
 
-        context['url_opslaan'] = reverse('Spelden:bestel-stap3')
+            context['afstanden_titel'] = 'Geschoten afstand'
+            context['afstanden_opties'] = filter_opties = list()
+            for _, afstand_str in afstanden:
+                if ", " in afstand_str:
+                    context['afstanden_titel'] = 'Geschoten afstand(en)'
+
+                obj = SimpleNamespace(
+                            afkorting=afstand_str,
+                            beschrijving=afstand_str + ' meter',
+                            actief=(self.prep.afstanden == afstand_str))
+                filter_opties.append(obj)
+
+                if afstand_str in ("90, 70, 50, 30", "70, 60, 50, 30"):
+                    # short metric (50 + 30m) scores opvragen bij WA-1440 wedstrijd
+                    context['toon_sm'] = True
+                    context['score_sm'] = self.prep.score_sm
+            # for
+
+        if len(filter_opties) > 0:
+            context['url_opslaan'] = reverse('Spelden:bestel-stap3')    # voor doorgave keuzes (form POST)
+
         context['url_stap2'] = reverse('Spelden:bestel-stap2')
 
         context['menu_toon_mandje'] = True
 
         context['kruimels'] = (
-            (reverse('Webwinkel:overzicht'), 'Webwinkel'),
             (reverse('Spelden:begin'), 'Prestatiespelden'),
-            (None, 'Bestellen - Stap 3'),
+            (None, 'Bestellen stap 3'),
         )
 
     def get_context_data(self, **kwargs):
@@ -120,9 +141,15 @@ class BestelStap3View(TemplateView):
         context = super().get_context_data(**kwargs)
 
         self._load_prep()
-        self._vind_wedstrijden()
 
-        self._prep_pagina(context)
+        opties = get_mogelijke_spelden_wa(self.prep.discipline,
+                                          self.prep.boog,
+                                          self.prep.score,
+                                          self.prep.wedstrijd_geslacht,
+                                          self.prep.voor_sporter.geboorte_datum.year)
+
+        self._prep_pagina(context, opties)
+
         return context
 
     def post(self, request, *args, **kwargs):
@@ -130,35 +157,69 @@ class BestelStap3View(TemplateView):
 
         self._load_prep()
 
-        # is de wedstrijd gekozen uit de lijst?
-        wed_pk_str = request.POST.get('wedstrijd', '')[:10]     # afkappen voor de veiligheid
-        if wed_pk_str.startswith('wed_'):
-            self._vind_wedstrijden()
+        opties = get_mogelijke_spelden_wa(self.prep.discipline,
+                                          self.prep.boog,
+                                          self.prep.score,
+                                          self.prep.wedstrijd_geslacht,
+                                          self.prep.voor_sporter.geboorte_datum.year)
 
-            try:
-                wed_pk = int(wed_pk_str[4:4+6])
-                obj = self.qset_wedstrijden.get(pk=wed_pk)
-            except (ValueError, TypeError, Wedstrijd.DoesNotExist):
-                raise Http404('Wedstrijd niet gevonden')
+        if self.prep.discipline == SPELD_DISCIPLINE_VELD:
 
-            self.prep.wedstrijd = obj
+            aantal_doelen = [str(optie.aantal_doelen)
+                             for optie in opties]
 
-            locatie = self.prep.wedstrijd.locatie
-            if locatie:
-                # we ondersteunen alleen wedstrijdlocaties in Nederland
-                self.prep.informatie_wedstrijd = '%s|%s' % (locatie.plaats, 'Nederland')
+            doelen = request.POST.get('doelen', '')[:2]          # "24" of "48"
+
+            if doelen not in aantal_doelen:
+                raise Http404('Onbekend aantal doelen')
+
+            self.prep.aantal_doelen = doelen
+            self.prep.heeft_data_stap2 = True
+            self.prep.save(update_fields=['heeft_data_stap2', 'aantal_doelen'])
+            # note: aantal_pijlen wordt niet gebruikt voor veld
+
         else:
-            self.prep.wedstrijd = None
+            afstanden = [optie.afstanden
+                         for optie in opties]
+            afstanden = list(set(afstanden))
 
-            plaats = request.POST.get('plaats', '')[:100]
-            land = request.POST.get('land', '')[:100]
-            combi = '%s|%s' % (plaats, land)
-            self.prep.informatie_wedstrijd = combi[:128]     # limiet van het veld
+            afstand = request.POST.get('afstand', '')[:15]      # "90, 70, 50, 30" = 14
+            if afstand not in afstanden:
+                raise Http404('Onbekende afstand')
 
-        self.prep.heeft_data_stap3 = True
-        self.prep.save(update_fields=['wedstrijd', 'informatie_wedstrijd', 'heeft_data_stap3',])
+            self.prep.afstanden = afstand
+
+            if afstand in ('90, 70, 50, 30', '70, 60, 50, 30'):
+                score_sm_str = request.POST.get('score_sm', '')[:3]
+                self.prep.score_sm = 0
+                if score_sm_str:
+                    try:
+                        score_sm = int(score_sm_str)
+                    except (ValueError, TypeError):
+                        raise Http404('Slechte score (1)')
+
+                    if 0 <= score_sm <= 720:
+                        self.prep.score_sm = score_sm
+                    else:
+                        raise Http404('Slechte score (2)')
+
+            # zet ook meteen het aantal pijlen
+            aantal_pijlen = [optie.aantal_pijlen
+                             for optie in opties
+                             if optie.afstanden == afstand]
+            aantal_pijlen = list(set(aantal_pijlen))
+
+            # in principe mapt elke afstand op een uniek aantal pijlen
+            if len(aantal_pijlen) != 1:
+                raise Http404('Kan aantal pijlen niet vaststellen (%s)' % len(aantal_pijlen))
+
+            self.prep.aantal_pijlen = aantal_pijlen[0]
+
+            self.prep.heeft_data_stap3 = True
+            self.prep.save(update_fields=['heeft_data_stap3', 'afstanden', 'aantal_pijlen', 'score_sm'])
 
         url = reverse('Spelden:bestel-stap4')
         return HttpResponseRedirect(url)
+
 
 # end of file

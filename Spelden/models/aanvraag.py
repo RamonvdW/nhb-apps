@@ -7,14 +7,11 @@
 from django.db import models
 from Account.models import Account
 from BasisTypen.definities import GESLACHT_MV, GESLACHT_MAN
-from BasisTypen.models import BoogType, Leeftijdsklasse
 from Bestelling.models import BestellingRegel
-from Spelden.definities import (SPELD_CATEGORIE_CHOICES, SPELD_CATEGORIE_WA_STER_R,
-                                SPELD_DISCIPLINE_CHOICES, SPELD_DISCIPLINE_NVT,
-                                SPELD_BOOGTYPE_CHOICES,
-                                SOORT_BIJLAGE_CHOICES, SOORT_BIJLAGE_SCOREBRIEFJE,
-                                SOORT_BESTAND_CHOICES, SOORT_BESTAND_FOTO)
+from Spelden.definities import SPELD_DISCIPLINE_CHOICES, SPELD_DISCIPLINE_NVT, SPELD_BOOGTYPE_CHOICES
+from .spelden import Speld
 from Sporter.models import Sporter
+from Webwinkel.definities import KEUZE_STATUS_CHOICES, KEUZE_STATUS_RESERVERING_MANDJE
 from Wedstrijden.models import Wedstrijd
 
 
@@ -51,6 +48,13 @@ class SpeldAanvraagPrep(models.Model):
 
     ## STAP 2 ##
 
+    # op welke wedstrijd is de prestatie neergezet?
+    wedstrijd = models.ForeignKey(Wedstrijd, on_delete=models.SET_NULL, null=True, blank=True)
+
+    informatie_wedstrijd = models.CharField(max_length=128, default='', blank=True)
+
+    ## STAP 3 ##
+
     # enkele of meerdere afstanden
     # langste: "90, 70, 50, 30" = 12
     afstanden = models.CharField(max_length=15, default='')
@@ -61,12 +65,8 @@ class SpeldAanvraagPrep(models.Model):
     # aantal doelen
     aantal_doelen = models.PositiveSmallIntegerField(default=0)
 
-    ## STAP 3 ##
-
-    # op welke wedstrijd is de prestatie neergezet?
-    wedstrijd = models.ForeignKey(Wedstrijd, on_delete=models.SET_NULL, null=True, blank=True)
-
-    informatie_wedstrijd = models.CharField(max_length=128, default='', blank=True)
+    # voor een 1440 wedstrijd, de Short Metric scores
+    score_sm = models.PositiveSmallIntegerField(default=0)
 
     def __str__(self):
         msg = "%s: " % self.voor_sporter.lid_nr_en_volledige_naam()
@@ -83,24 +83,16 @@ class SpeldAanvraagPrep(models.Model):
 
 
 class SpeldAanvraag(models.Model):
-    """ Aanvraag prestatiespeld """
+    """ Informatie die nodig is voor de aanvraag van een nieuwe prestatiespeld """
 
     # een datumstempel om een aanvraag op te kunnen ruimen als deze niet afgemaakt wordt
     aangemaakt_op = models.DateField(auto_now_add=True)
-
-    # door wie wordt de aanvraag gedaan?
-    door_account = models.ForeignKey(Account, on_delete=models.SET_NULL, null=True, blank=True)
 
     # voor welke sporter wordt de aanvraag gedaan?
     voor_sporter = models.ForeignKey(Sporter, on_delete=models.CASCADE)
 
     # voor arrowhead spelden (discipline veld) zijn de scores verschillend voor mannen en vrouwen
     wedstrijd_geslacht = models.CharField(max_length=1, choices=GESLACHT_MV, default=GESLACHT_MAN)
-
-    # om welke speld gaat dit?
-    speld = models.CharField(max_length=4,
-                             default=SPELD_CATEGORIE_WA_STER_R,
-                             choices=SPELD_CATEGORIE_CHOICES)
 
     # discipline outdoor/indoor/veld
     discipline = models.CharField(max_length=2,
@@ -119,20 +111,50 @@ class SpeldAanvraag(models.Model):
     # op welke wedstrijd is de prestatie neergezet?
     wedstrijd = models.ForeignKey(Wedstrijd, on_delete=models.SET_NULL, null=True, blank=True)
 
+    # plaats en land
     informatie_wedstrijd = models.CharField(max_length=128, default='', blank=True)
 
-    # koppeling aan het mandje / een bestelling
-    bestelling_regel = models.ForeignKey(BestellingRegel, on_delete=models.CASCADE, null=True, blank=True)
-
-    # logboekje van de gemaakte wijzigingen
-    log = models.TextField(default='', blank=True)
-
     def __str__(self):
-        return "(%s) [%s] %s" % (self.pk, self.datum_wedstrijd, self.door_account.volledige_naam())
+        return "(%s) [%s] %s" % (self.pk, self.datum_wedstrijd, self.voor_sporter.volledige_naam())
 
     class Meta:
         verbose_name = "Speld aanvraag"
         verbose_name_plural = "Speld aanvragen"
+
+
+class SpeldBestelling(models.Model):
+
+    # een datumstempel om een aanvraag op te kunnen ruimen als deze niet afgemaakt wordt
+    aangemaakt_op = models.DateField(auto_now_add=True)
+
+    # door wie wordt de aanvraag gedaan?
+    door_account = models.ForeignKey(Account, on_delete=models.SET_NULL, null=True, blank=True)
+
+    # is dit een nieuwe aanvraag, of een herbestelling voor een verloren speld?
+    is_nieuwe_aanvraag = models.BooleanField(default=True)
+
+    # status van deze keuze: in het mandje, bestelling, betaald
+    status = models.CharField(max_length=2, choices=KEUZE_STATUS_CHOICES,
+                              default=KEUZE_STATUS_RESERVERING_MANDJE)
+
+    # welke spelden worden aangevraagd?
+    speld = models.ForeignKey(Speld, on_delete=models.PROTECT)
+
+    # informatie die nodig is voor de aanvraag van een nieuwe speld
+    aanvraag = models.ForeignKey(SpeldAanvraag, on_delete=models.CASCADE, null=True, blank=True)
+
+    # koppeling aan het mandje / een bestelling
+    bestelling_regel = models.ForeignKey(BestellingRegel, on_delete=models.CASCADE, null=True, blank=True)
+
+    # log van bestelling, betalingen en eventuele wijzigingen
+    log = models.TextField(blank=True)
+
+    def __str__(self):
+        return "(%s) [%s] %s" % (self.pk, self.speld.beschrijving, self.door_account.volledige_naam())
+
+    class Meta:
+        verbose_name = "Speld bestelling"
+        verbose_name_plural = "Speld bestellingen"
 
 
 # end of file

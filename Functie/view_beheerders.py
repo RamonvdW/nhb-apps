@@ -51,7 +51,7 @@ class LijstBeheerdersView(UserPassesTestMixin, ListView):
             BKO < RKO < RCL
             op volgorde van rayon- of regionummer (oplopend)
         """
-        sort_level = {'MWZ': 1, 'MLA': 2, 'MO': 3, 'MWW': 4, 'CS': 5, 'SUP': 6, 'BKO': 7, 'RKO': 8, 'RCL': 9}
+        sort_level = {'MWZ': 1, 'MLA': 2, 'MO': 3, 'MWW': 4, 'MPS': 5, 'CS': 6, 'SUP': 7, 'BKO': 8, 'RKO': 9, 'RCL': 10}
         tup2obj = dict()
         sort_me = list()
         for obj in objs:
@@ -81,7 +81,7 @@ class LijstBeheerdersView(UserPassesTestMixin, ListView):
 
         if self.rol_nu == Rol.ROL_BB:
             wijzigbare_functie_rollen = ('CS', 'MWW', 'MO', 'MWZ', 'MLA', 'SUP')
-            wijzigbare_email_rollen = ('CS', 'MWW', 'MO', 'MWZ', 'MLA', 'SUP')
+            wijzigbare_email_rollen = ('CS', 'MWW', 'MO', 'MWZ', 'MLA', 'SUP', 'MPS')
 
         for obj in objs:
             obj.wijzig_url = None
@@ -110,7 +110,7 @@ class LijstBeheerdersView(UserPassesTestMixin, ListView):
 
         # maak een lijst van de functies
         objs = (Functie.objects
-                .filter(rol__in=('MWZ', 'MWW', 'MLA', 'SUP', 'MO', 'CS'))
+                .filter(rol__in=('MWZ', 'MWW', 'MPP', 'MLA', 'SUP', 'MO', 'CS'))
                 .prefetch_related('accounts'))
 
         objs = self._sorteer_functies(objs)

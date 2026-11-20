@@ -16,7 +16,7 @@ from Vereniging.models import Vereniging
 from Webwinkel.definities import (VERZENDKOSTEN_PAKKETPOST, VERZENDKOSTEN_BRIEFPOST,
                                   KEUZE_STATUS_RESERVERING_MANDJE, KEUZE_STATUS_BESTELD, KEUZE_STATUS_BACKOFFICE)
 from Webwinkel.models import WebwinkelKeuze, WebwinkelProduct
-from Webwinkel.plugin_bestelling import WebwinkelBestelPlugin, VerzendkostenBestelPlugin
+from Webwinkel.plugin_bestelling import WebwinkelBestelPlugin
 from decimal import Decimal
 import datetime
 
@@ -131,15 +131,6 @@ class TestWebwinkelBestellingPlugin(E2EHelpers, TestCase):
         self.assertTrue('[INFO] BestellingRegel met pk=' in stdout.getvalue())
         self.assertTrue('wordt verwijderd' in stdout.getvalue())
 
-        stdout = OutputBuffer()
-        plugin = VerzendkostenBestelPlugin()
-        plugin.zet_stdout(stdout)
-
-        verval = timezone.now() - datetime.timedelta(days=3)
-
-        mandje_pks = plugin.mandje_opschonen(verval)
-        self.assertEqual(mandje_pks, [])
-
     def test_reserveer(self):
         stdout = OutputBuffer()
         plugin = WebwinkelBestelPlugin()
@@ -245,12 +236,6 @@ class TestWebwinkelBestellingPlugin(E2EHelpers, TestCase):
         self.assertEqual(keuze.status, KEUZE_STATUS_BESTELD)
         self.assertTrue("] Reservering is omgezet in een bestelling\n" in keuze.log)
 
-        # coverage
-        stdout = OutputBuffer()
-        plugin = VerzendkostenBestelPlugin()
-        plugin.zet_stdout(stdout)
-        plugin.is_besteld(regel)
-
     def test_is_betaald(self):
         stdout = OutputBuffer()
         plugin = WebwinkelBestelPlugin()
@@ -281,12 +266,6 @@ class TestWebwinkelBestellingPlugin(E2EHelpers, TestCase):
         self.assertEqual(keuze.status, KEUZE_STATUS_BACKOFFICE)
         self.assertTrue("] Betaling is ontvangen" in keuze.log)
 
-        # coverage
-        stdout = OutputBuffer()
-        plugin = VerzendkostenBestelPlugin()
-        plugin.zet_stdout(stdout)
-        plugin.is_betaald(regel, bedrag_ontvangen)
-
     def test_get_verkoper_ver_nr(self):
         plugin = WebwinkelBestelPlugin()
         stdout = OutputBuffer()
@@ -301,46 +280,6 @@ class TestWebwinkelBestellingPlugin(E2EHelpers, TestCase):
         ver_nr = plugin.get_verkoper_ver_nr(regel)
         self.assertEqual(ver_nr, settings.WEBWINKEL_VERKOPER_VER_NR)
 
-        plugin = VerzendkostenBestelPlugin()
-        stdout = OutputBuffer()
-        plugin.zet_stdout(stdout)
-
-        ver_nr = plugin.get_verkoper_ver_nr(regel)
-        self.assertEqual(ver_nr, settings.WEBWINKEL_VERKOPER_VER_NR)
-
-    def test_verzendkosten(self):
-        stdout = OutputBuffer()
-        plugin = VerzendkostenBestelPlugin()
-        plugin.zet_stdout(stdout)
-
-        # leeg mandje
-        kosten, btw_perc, btw_euro = plugin.bereken_verzendkosten(self.mandje)
-        self.assertEqual(kosten, 0)
-
-        regel = BestellingRegel(
-                    korte_beschrijving='webwinkel 2',
-                    bedrag_euro=Decimal(5.0),
-                    code=BESTELLING_REGEL_CODE_WEBWINKEL)
-        regel.save()
-
-        keuze2 = WebwinkelKeuze(
-                    wanneer=timezone.now(),
-                    status=KEUZE_STATUS_RESERVERING_MANDJE,
-                    bestelling_regel=regel,
-                    product=self.product,
-                    aantal=1)
-        keuze2.save()
-
-        # pakketpost
-        self.mandje.regels.add(regel)
-        kosten, btw_perc, btw_euro = plugin.bereken_verzendkosten(self.mandje)
-        self.assertEqual(kosten, Decimal(settings.WEBWINKEL_PAKKET_10KG_VERZENDKOSTEN_EURO))
-
-        # briefpost
-        self.product.type_verzendkosten = VERZENDKOSTEN_BRIEFPOST
-        self.product.save(update_fields=['type_verzendkosten'])
-        kosten, btw_perc, btw_euro = plugin.bereken_verzendkosten(self.mandje)
-        self.assertEqual(kosten, Decimal(settings.WEBWINKEL_PAKKET_2KG_VERZENDKOSTEN_EURO))
 
 
 # end of file

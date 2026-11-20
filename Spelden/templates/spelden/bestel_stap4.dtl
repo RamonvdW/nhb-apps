@@ -7,7 +7,7 @@
 {% load static %}
 {% load design_knop %}
 
-{% block title %}Bestelformulier, stap 3{% endblock %}
+{% block title %}Bestelformulier, stap 4{% endblock %}
 
 {% block pagina %}
 
@@ -45,6 +45,10 @@
                     <th>Behaalde score</th>
                     <td>{{ score }}</td>
                 </tr>
+                {% if score_sm %}
+                    <th>Short Metric score</th>
+                    <td>{{ score_sm }}</td>
+                {% endif %}
                 <tr>
                     <th>Datum van de wedstrijd</th>
                     <td>{{ wedstrijd_datum }}</td>
@@ -57,7 +61,7 @@
                 {% else %}
                     <tr>
                         <th>Wedstrijd plaats, land</th>
-                        <td>{{ wedstrijd_plaats_land }}</td><
+                        <td>{{ wedstrijd_plaats_land }}</td>
                     </tr>
                 {% endif %}
                 {% if wedstrijd_soort %}
@@ -123,25 +127,26 @@
                         </tr>
                     {% endfor %}
 
-                    {% if url_leg_in_mandje %}
-                        <tr>
-                            <td colspan="4" class="center">
+                    <tr>
+                        <td colspan="4" class="center">
+                            {% if url_leg_in_mandje %}
                                 <p>Je kan {{ aantal_bestelbaar }} speld{% if aantal_bestelbaar > 1 %}en{% endif %} bestellen, voor totaal {{ totale_prijs_str }}</p>
 
                                 <form action="{{ url_leg_in_mandje }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
                                     {% csrf_token %}
                                     <button class="btn-sv-rood" id="submit_knop" type="submit">Leg in mijn mandje</button>
                                 </form>
-                            </td>
-                        </tr>
-                    {% endif %}
+                            {% else %}
+                                <p><i>Er zijn helaas geen spelden die je kan bestellen</i></p>
+                            {% endif %}
+                        </td>
+                    </tr>
 
                 </table>
 
             </div>
         </div>
     </div>
-
 
     <p class="center">
         {% sv-knop-nav url=url_stap3 icon='terug' tekst='Terug naar stap 3' kleur='blauw' %}

@@ -5,12 +5,13 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from Spelden import (view_begin, view_info, view_info_arrowhead, view_info_target_awards,
-                     view_bestel_stap1, view_bestel_stap2, view_bestel_stap3, view_bestel_stap4)
+from Spelden import (view_begin, view_info, view_kosten,
+                     view_info_arrowhead, view_info_target_awards, view_info_graadspelden, view_info_sterspelden,
+                     view_bestel_stap1, view_bestel_stap3, view_bestel_stap2, view_bestel_stap4)
 
 app_name = 'Spelden'
 
-# basis = /webwinkel/spelden/
+# basis = /spelden/
 
 urlpatterns = [
 
@@ -19,33 +20,36 @@ urlpatterns = [
          name='begin'),
 
     path('meesterspelden/',
-         view_info.MeesterspeldenView.as_view(),
+         view_info_graadspelden.MeesterspeldenView.as_view(),
          name='groep-meesterspelden'),
 
     path('meesterspelden/hall-of-fame/',
-         view_info.HallOfFameView.as_view(),
+         view_info_graadspelden.HallOfFameView.as_view(),
          name='meesterspelden-hall-of-fame'),
 
     path('graadspelden/',
-         view_info.GraadspeldenView.as_view(),
+         view_info_graadspelden.GraadspeldenView.as_view(),
          name='groep-graadspelden'),
 
-    # path('tussenspelden/',
-    #      view_info.TussenspeldenView.as_view(),
-    #      name='groep-tussenspelden'),
+    path('tussenspelden/',
+         view_info.TussenspeldenView.as_view(),
+         name='groep-tussenspelden'),
 
     path('target-awards/',
          view_info_target_awards.TargetAwardsView.as_view(),
          name='groep-target-awards'),
 
     path('sterspelden/',
-         view_info.SterspeldenView.as_view(),
+         view_info_sterspelden.SterspeldenView.as_view(),
          name='groep-sterspelden'),
 
     path('arrowhead/',
          view_info_arrowhead.ArrowheadView.as_view(),
          name='groep-arrowhead'),
 
+    path('kosten/',
+         view_kosten.KostenView.as_view(),
+         name='kosten'),
 
     path('bestel/stap1/',
          view_bestel_stap1.BestelStap1View.as_view(),

@@ -15,7 +15,8 @@ from Bestelling.definities import (BESTELLING_MUTATIE_WEDSTRIJD_INSCHRIJVEN, BES
                                    BESTELLING_MUTATIE_EVENEMENT_AFMELDEN, BESTELLING_MUTATIE_OPLEIDING_INSCHRIJVEN,
                                    BESTELLING_MUTATIE_OPLEIDING_AFMELDEN, BESTELLING_MUTATIE_WEDSTRIJD_AANPASSEN,
                                    BESTELLING_TRANSPORT_NVT, BESTELLING_TRANSPORT_VERZEND, BESTELLING_TRANSPORT_OPHALEN,
-                                   BESTELLING_MUTATIE_WEBWINKEL_KEUZE, BESTELLING_REGEL_CODE_VERZENDKOSTEN)
+                                   BESTELLING_MUTATIE_WEBWINKEL_KEUZE, BESTELLING_REGEL_CODE_VERZENDKOSTEN,
+                                   BESTELLING_MUTATIE_AANVRAAG_SPELD)
 from Bestelling.definities import (BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_BETALING_ACTIEF,
                                    BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_MISLUKT, BESTELLING_STATUS_GEANNULEERD,
                                    BESTELLING_HOOGSTE_BESTEL_NR_FIXED_PK,
@@ -25,7 +26,7 @@ from Bestelling.models import (Bestelling, BestellingRegel, BestellingMandje,
                                BestellingHoogsteBestelNr, BestellingMutatie)
 from Bestelling.operations import (stuur_email_naar_koper_bestelling_details,
                                    stuur_email_naar_koper_betaalbevestiging,
-                                   stuur_email_webwinkel_backoffice)
+                                   stuur_email_webwinkel_backoffice, stuur_email_spelden_backoffice)
 from Bestelling.plugins.alle_bestel_plugins import bestel_plugins
 from Betaal.definities import TRANSACTIE_TYPE_MOLLIE_RESTITUTIE, TRANSACTIE_TYPE_HANDMATIG
 from Betaal.format import format_bedrag_euro
@@ -38,9 +39,11 @@ from decimal import Decimal
 import datetime
 
 # plugins
+from Bestelling.plugins.plugin_bestelling_verzendkosten import verzendkosten_bestel_plugin
 from Evenement.plugin_bestelling import evenement_bestel_plugin
 from Opleiding.plugin_bestelling import opleiding_bestel_plugin
-from Webwinkel.plugin_bestelling import webwinkel_bestel_plugin, verzendkosten_bestel_plugin
+from Spelden.plugin_bestelling import spelden_bestel_plugin
+from Webwinkel.plugin_bestelling import webwinkel_bestel_plugin
 from Wedstrijden.plugin_bestelling import wedstrijd_bestel_plugin
 from Wedstrijden.operations.bepaal_kortingen import BepaalAutomatischeKorting
 
@@ -192,7 +195,7 @@ class VerwerkBestelMutaties:
 
         mandje.verzendkosten_euro, _, _ = verzendkosten_bestel_plugin.bereken_verzendkosten(mandje)
 
-        if mandje.verzendkosten_euro < Decimal(0.001):
+        if mandje.verzendkosten_euro < Decimal(0.00001):
             # geen fysieke producten (meer)
             mandje.transport = BESTELLING_TRANSPORT_NVT
         else:
@@ -538,7 +541,7 @@ class VerwerkBestelMutaties:
             # toon het BTW-nummer alleen als het relevant is
             if ver_nr == settings.WEBWINKEL_VERKOPER_VER_NR:
                 if bestelling.btw_percentage_cat1 != '':
-                    # BTW is van toepassing (wordt alleen gebruikt voor de webwinkel)
+                    # BTW is van toepassing (wordt alleen gebruikt voor de webwinkel, inclusief de spelden)
                     bestelling.verkoper_btw_nr = settings.WEBWINKEL_VERKOPER_BTW_NR
 
             bestelling.save(update_fields=['totaal_euro', 'verkoper_btw_nr'])
@@ -569,12 +572,17 @@ class VerwerkBestelMutaties:
 
         # kijk welke bestellingen een nul-bedrag hebben en daarom meteen afgerond kunnen worden
         for bestelling in nieuwe_bestellingen:
+
+            bevat_webwinkel = False
+            bevat_speld = False
             if bestelling.totaal_euro < Decimal('0.001'):
                 self.stdout.write('[INFO] Bestelling pk=%s met bedrag €0,00 wordt meteen afgerond' % bestelling.pk)
 
                 for regel in bestelling.regels.all():
                     plugin = bestel_plugins[regel.code]
                     plugin.is_betaald(regel, Decimal(0.0))
+                    bevat_webwinkel |= regel.is_webwinkel()
+                    bevat_speld |= regel.is_speld()
                 # for
 
                 msg = "\n[%s] Bestelling is afgerond (volledig betaald)" % when_str
@@ -584,6 +592,13 @@ class VerwerkBestelMutaties:
             else:
                 # laat de status op BESTELLING_STATUS_NIEUW staan totdat de betaling opgestart is
                 pass
+
+            # stuur een e-mail naar het backoffice
+            if bevat_webwinkel:
+                stuur_email_webwinkel_backoffice(self.stdout, bestelling)
+
+            if bevat_speld:
+                stuur_email_spelden_backoffice(self.stdout, bestelling)
 
             # stuur voor elke bestelling een bevestiging naar de koper met details van de bestelling
             # en instructies voor betaling (niet nodig / handmatig / via Mollie)
@@ -688,15 +703,21 @@ class VerwerkBestelMutaties:
                 bestelling.save(update_fields=['status', 'log'])
 
                 bevat_webwinkel = False
+                bevat_speld = False
                 for regel in bestelling.regels.all():
+                    assert isinstance(regel, BestellingRegel)
                     plugin = bestel_plugins[regel.code]
                     plugin.is_betaald(regel, regel.bedrag_euro)
                     bevat_webwinkel |= regel.is_webwinkel()
+                    bevat_speld |= regel.is_speld()
                 # for
 
                 # stuur een e-mail naar het backoffice
                 if bevat_webwinkel:
                     stuur_email_webwinkel_backoffice(self.stdout, bestelling)
+
+                if bevat_speld:
+                    stuur_email_spelden_backoffice(self.stdout, bestelling)
 
                 # stuur een e-mail aan de koper
                 stuur_email_naar_koper_betaalbevestiging(self.stdout, bestelling)
@@ -759,15 +780,20 @@ class VerwerkBestelMutaties:
             bestelling.save(update_fields=['status', 'log'])
 
             bevat_webwinkel = False
+            bevat_speld = False
             for regel in bestelling.regels.all():
                 plugin = bestel_plugins[regel.code]
                 plugin.is_betaald(regel, regel.bedrag_euro)
                 bevat_webwinkel |= regel.is_webwinkel()
+                bevat_speld |= regel.is_speld()
             # for
 
             # stuur een e-mail naar het backoffice
             if bevat_webwinkel:
                 stuur_email_webwinkel_backoffice(self.stdout, bestelling)
+
+            if bevat_speld:
+                stuur_email_spelden_backoffice(self.stdout, bestelling)
 
             # stuur een e-mail aan de koper
             stuur_email_naar_koper_betaalbevestiging(self.stdout, bestelling)
@@ -831,6 +857,27 @@ class VerwerkBestelMutaties:
         else:
             self.stdout.write('[WARNING] Kan mandje niet vinden voor mutatie pk=%s' % mutatie.pk)
 
+    def _verwerk_mutatie_aanvraag_speld(self, mutatie: BestellingMutatie):
+        """ Verwerk een mutatie via de achtergrondtaak voor bestellen van een speld
+            Voeg deze toe aan het mandje van de gebruiker
+        """
+        self.stdout.write('[INFO] Verwerk mutatie %s: aanvraag speld (product_pk=%s)' % (mutatie.pk,
+                                                                                         mutatie.product_pk))
+        mandje = self._get_mandje(mutatie)
+        if mandje:  # pragma: no branch
+            regel = spelden_bestel_plugin.reserveer(
+                mutatie.product_pk,
+                mandje.account.get_account_full_name())
+            if regel:
+                mandje.regels.add(regel)
+
+                # bereken het totaal opnieuw
+                self._bepaal_verzendkosten_mandje(mandje)
+                _mandje_bepaal_btw(mandje)
+                mandje.bepaal_totaalprijs_opnieuw()
+        else:
+            self.stdout.write('[WARNING] Kan mandje niet vinden voor mutatie pk=%s' % mutatie.pk)
+
     HANDLERS = {
         BESTELLING_MUTATIE_WEDSTRIJD_INSCHRIJVEN: _verwerk_mutatie_wedstrijd_inschrijven,
         BESTELLING_MUTATIE_EVENEMENT_INSCHRIJVEN: _verwerk_mutatie_evenement_inschrijven,
@@ -847,6 +894,7 @@ class VerwerkBestelMutaties:
         BESTELLING_MUTATIE_OPLEIDING_AFMELDEN: _verwerk_mutatie_opleiding_afmelden,
         BESTELLING_MUTATIE_WEDSTRIJD_AANPASSEN: _verwerk_mutatie_wedstrijd_aanpassen,
         BESTELLING_MUTATIE_WEDSTRIJD_HANDMATIG: _verwerk_mutatie_wedstrijd_handmatig_toevoegen,
+        BESTELLING_MUTATIE_AANVRAAG_SPELD: _verwerk_mutatie_aanvraag_speld,
     }
 
     def verwerk(self, mutatie: BestellingMutatie):

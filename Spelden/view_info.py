@@ -7,113 +7,8 @@
 from django.urls import reverse
 from django.utils import timezone
 from django.views.generic import TemplateView
-from BasisTypen.definities import GESLACHT_VROUW
-from Spelden.definities import (SPELD_CATEGORIE_NL_GRAADSPELD_INDOOR, SPELD_CATEGORIE_NL_GRAADSPELD_OUTDOOR,
-                                SPELD_CATEGORIE_NL_GRAADSPELD_VELD, SPELD_CATEGORIE_NL_GRAADSPELD_SHORT_METRIC)
-from Spelden.models import SpeldVoorwaarden
-from Spelden.operations import get_hall_of_fame, tel_hall_of_fame
 
-TEMPLATE_PRESTATIESPELDEN_HALL_OF_FAME = 'spelden/khsn-meesterspelden_hall-of-fame.dtl'
-TEMPLATE_PRESTATIESPELDEN_MEESTERSPELDEN = 'spelden/khsn-meesterspelden.dtl'
-TEMPLATE_PRESTATIESPELDEN_GRAADSPELDEN = 'spelden/khsn-graadspelden.dtl'
 TEMPLATE_PRESTATIESPELDEN_TUSSENSPELDEN = 'spelden/khsn-tussenspelden.dtl'
-TEMPLATE_PRESTATIESPELDEN_TARGET_AWARDS = 'spelden/wa-target-awards.dtl'
-TEMPLATE_PRESTATIESPELDEN_STERSPELDEN = 'spelden/wa-sterspelden.dtl'
-
-
-class HallOfFameView(TemplateView):
-
-    # class variables shared by all instances
-    template_name = TEMPLATE_PRESTATIESPELDEN_HALL_OF_FAME
-
-    def get_context_data(self, **kwargs):
-        """ called by the template system to get the context data for the template """
-        context = super().get_context_data(**kwargs)
-
-        context['leden_gm'], context['leden_ms'], context['leden_as'] = get_hall_of_fame()
-
-        context['kruimels'] = (
-            (reverse('Spelden:begin'), 'Prestatiespelden'),
-            (reverse('Spelden:groep-meesterspelden'), 'Meesterspelden'),
-            (None, 'Hall of Fame'),
-        )
-        return context
-
-
-class MeesterspeldenView(TemplateView):
-
-    # class variables shared by all instances
-    template_name = TEMPLATE_PRESTATIESPELDEN_MEESTERSPELDEN
-
-    def get_context_data(self, **kwargs):
-        """ called by the template system to get the context data for the template """
-        context = super().get_context_data(**kwargs)
-
-        context['aantal_gm'], context['aantal_ms'], context['aantal_as'] = tel_hall_of_fame()
-
-        context['url_hall_of_fame'] = reverse('Spelden:meesterspelden-hall-of-fame')
-
-        context['kruimels'] = (
-            (reverse('Spelden:begin'), 'Prestatiespelden'),
-            (None, 'Meesterspelden')
-        )
-
-        return context
-
-
-class GraadspeldenView(TemplateView):
-
-    # class variables shared by all instances
-    template_name = TEMPLATE_PRESTATIESPELDEN_GRAADSPELDEN
-
-    def get_context_data(self, **kwargs):
-        """ called by the template system to get the context data for the template """
-        context = super().get_context_data(**kwargs)
-
-        # TODO: revise!
-        qset = (SpeldVoorwaarden
-                .objects
-                .filter(speld__categorie__in=(SPELD_CATEGORIE_NL_GRAADSPELD_INDOOR,
-                                              SPELD_CATEGORIE_NL_GRAADSPELD_OUTDOOR,
-                                              SPELD_CATEGORIE_NL_GRAADSPELD_VELD,
-                                              SPELD_CATEGORIE_NL_GRAADSPELD_SHORT_METRIC))
-                .select_related('speld',
-                                'leeftijdsklasse')
-                .order_by('speld__volgorde',
-                          'leeftijdsklasse__wedstrijd_geslacht'))
-
-        context['speld_scores'] = speld_scores = list()
-
-        prev = None
-        prev_discipline = ''
-        for obj in qset:
-            if obj.leeftijdsklasse.wedstrijd_geslacht == GESLACHT_VROUW:
-                # toevoegen aan het vorige record
-                prev.benodigde_score_vrouw = obj.benodigde_score
-            else:
-                if obj.speld.categorie == SPELD_CATEGORIE_NL_GRAADSPELD_INDOOR:
-                    obj.discipline = 'Indoor'
-                elif obj.speld.categorie == SPELD_CATEGORIE_NL_GRAADSPELD_OUTDOOR:
-                    obj.discipline = 'Outdoor'
-                elif obj.speld.categorie == SPELD_CATEGORIE_NL_GRAADSPELD_VELD:
-                    obj.discipline = 'Veld'
-                else:   # if SPELD_CATEGORIE_NL_GRAADSPELD_SHORT_METRIC
-                    obj.discipline = 'Short Metric'
-
-                if obj.discipline != prev_discipline:
-                    prev_discipline = obj.discipline
-                    obj.break_discipline = True
-
-                speld_scores.append(obj)
-                prev = obj
-        # for
-
-        context['kruimels'] = (
-            (reverse('Spelden:begin'), 'Prestatiespelden'),
-            (None, 'Graadspelden')
-        )
-
-        return context
 
 
 class TussenspeldenView(TemplateView):
@@ -137,43 +32,6 @@ class TussenspeldenView(TemplateView):
         context['kruimels'] = (
             (reverse('Spelden:begin'), 'Prestatiespelden'),
             (None, 'Tussenspelden')
-        )
-
-        return context
-
-
-class TargetAwardsView(TemplateView):
-
-    # class variables shared by all instances
-    template_name = TEMPLATE_PRESTATIESPELDEN_TARGET_AWARDS
-
-    def get_context_data(self, **kwargs):
-        """ called by the template system to get the context data for the template """
-        context = super().get_context_data(**kwargs)
-
-        context['kruimels'] = (
-            (reverse('Spelden:begin'), 'Prestatiespelden'),
-            (None, 'Target awards')
-        )
-
-        return context
-
-
-class SterspeldenView(TemplateView):
-
-    # class variables shared by all instances
-    template_name = TEMPLATE_PRESTATIESPELDEN_STERSPELDEN
-
-    def get_context_data(self, **kwargs):
-        """ called by the template system to get the context data for the template """
-        context = super().get_context_data(**kwargs)
-
-        # if rol_get_huidige(self.request) == Rol.ROL_SPORTER:
-        #     context['menu_toon_mandje'] = True
-
-        context['kruimels'] = (
-            (reverse('Spelden:begin'), 'Prestatiespelden'),
-            (None, 'Sterspelden')
         )
 
         return context

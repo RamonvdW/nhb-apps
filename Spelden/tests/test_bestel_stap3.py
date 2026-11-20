@@ -6,7 +6,7 @@
 
 from django.test import TestCase, override_settings
 from Geo.models import Regio
-from Spelden.models import SpeldAanvraagPrep
+from Spelden.models import SpeldAanvraagPrep, SpeldVoorwaarden
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
@@ -15,10 +15,11 @@ import datetime
 
 class TestSpeldenBestelStap3(E2EHelpers, TestCase):
 
-    """ tests voor de Spelden applicatie, bestelprocess stap 3 """
+    """ tests voor de Spelden applicatie, bestelprocess stap 2 """
 
     url_begin = '/spelden/'
     url_bestel_stap3 = '/spelden/bestel/stap3/'
+    url_bestel_stap4 = '/spelden/bestel/stap4/'
 
     def setUp(self):
         """ initialisatie van de test case """
@@ -50,24 +51,23 @@ class TestSpeldenBestelStap3(E2EHelpers, TestCase):
                                 voor_sporter=sporter,
                                 wedstrijd_geslacht='M',
                                 heeft_data_stap1=True,
-                                discipline='OD',
-                                boog='R',
-                                score='500',
                                 heeft_data_stap2=True,
-                                afstanden='70',
-                                aantal_pijlen=72,
-                                aantal_doelen=48)
+                                discipline='IN',
+                                boog='R',
+                                score='1234',
+                                datum_wedstrijd='2000-01-01',
+                                informatie_wedstrijd='Boogstad|Schietland')
 
     def test_stap3_foutjes(self):
         self.e2e_login(self.account_sporter)
 
         with override_settings(TOON_SPELDEN_BESTELLEN=True):
-            # GET zonder data van stap2
-            self.prep.heeft_data_stap2 = False
+            # GET zonder data van stap1
+            self.prep.heeft_data_stap1 = False
             self.prep.save()
 
             with self.assert_max_queries(20):
-                resp = self.client.get(self.url_bestel_stap3)
+                resp = self.client.get(self.url_bestel_stap4)
             self.assert404(resp, 'Onvolledige verzoek (2)')
 
             # GET zonder SpeldenAanvraagPrep
@@ -84,12 +84,48 @@ class TestSpeldenBestelStap3(E2EHelpers, TestCase):
         self.assert404(resp, 'Bestellen is niet mogelijk')
 
         with override_settings(TOON_SPELDEN_BESTELLEN=True):
-            # GET, discipline outdoor
+            # GET, discipline indoor
             with self.assert_max_queries(20):
                 resp = self.client.get(self.url_bestel_stap3)
             self.assertEqual(resp.status_code, 200)
             self.assert_html_ok(resp)
             self.assert_template_used(resp, ('spelden/bestel_stap3.dtl', 'design/site_layout.dtl'))
+
+            # GET, discipline outdoor
+            self.prep.discipline = 'OD'
+            self.prep.score = 560           # acceptable for 70m
+            self.prep.save()
+            with self.assert_max_queries(20):
+                resp = self.client.get(self.url_bestel_stap3)
+            self.assertEqual(resp.status_code, 200)
+            self.assert_html_ok(resp)
+            self.assert_template_used(resp, ('spelden/bestel_stap3.dtl', 'design/site_layout.dtl'))
+
+            # POST, discipline outdoor, geen afstand
+            with self.assert_max_queries(20):
+                resp = self.client.post(self.url_bestel_stap3)
+            self.assert404(resp, 'Onbekende afstand')
+
+            with self.assert_max_queries(20):
+                resp = self.client.get(self.url_bestel_stap3)
+
+            # POST, discipline outdoor
+            with self.assert_max_queries(20):
+                resp = self.client.post(self.url_bestel_stap3, {'afstand': '70'})
+            self.assert_is_redirect(resp, self.url_bestel_stap4)
+
+            # POST, discipline outdoor met onzeker aantal pijlen
+            voorwaarde = SpeldVoorwaarden.objects.filter(
+                                    discipline='OD',
+                                    afstanden='70',
+                                    boog_type__afkorting='R',
+                                    leeftijdsklasse__afkorting='SH').first()
+            assert voorwaarde is not None
+            voorwaarde.aantal_pijlen -= 1
+            voorwaarde.save()
+            with self.assert_max_queries(20):
+                resp = self.client.post(self.url_bestel_stap3, {'afstand': '70'})
+            self.assert404(resp, 'Kan aantal pijlen niet vaststellen')
 
             # GET, discipline veld
             self.prep.discipline = 'VE'
@@ -100,5 +136,13 @@ class TestSpeldenBestelStap3(E2EHelpers, TestCase):
             self.assert_html_ok(resp)
             self.assert_template_used(resp, ('spelden/bestel_stap3.dtl', 'design/site_layout.dtl'))
 
+            # POST, discipline veld, geen aantal doelen
+            with self.assert_max_queries(20):
+                resp = self.client.post(self.url_bestel_stap3)
+            self.assert404(resp, 'Onbekend aantal doelen')
+
+            with self.assert_max_queries(20):
+                resp = self.client.post(self.url_bestel_stap3, {'doelen': '24'})
+            self.assert_is_redirect(resp, self.url_bestel_stap4)
 
 # end of file

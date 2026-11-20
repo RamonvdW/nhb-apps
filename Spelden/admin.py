@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.contrib import admin
-from Spelden.models import Speld, SpeldVoorwaarden, SpeldAanvraagPrep, SpeldAanvraag, SpeldToegekend
+from Spelden.models import Speld, SpeldVoorwaarden, SpeldAanvraagPrep, SpeldAanvraag, SpeldToegekend, SpeldBestelling
 
 
 class SpeldAdmin(admin.ModelAdmin):
@@ -66,12 +66,21 @@ class SpeldVoorwaardenAdmin(admin.ModelAdmin):
 
 class SpeldAanvraagAdmin(admin.ModelAdmin):
 
-    autocomplete_fields = ('door_account', 'voor_sporter', 'wedstrijd')
+    readonly_fields = ('voor_sporter', 'wedstrijd')
 
 
 class SpeldAanvraagPrepAdmin(admin.ModelAdmin):
 
     readonly_fields = ('voor_sporter',)
+
+    search_fields = ('voor_sporter__lid_nr', 'voor_sporter__unaccented_naam')
+
+
+class SpeldBestellingAdmin(admin.ModelAdmin):
+
+    readonly_fields = ('door_account', 'aanvraag')
+
+    search_fields = ('door_account__username',)
 
 
 class SpeldToegekendAdmin(admin.ModelAdmin):
@@ -85,6 +94,7 @@ admin.site.register(Speld, SpeldAdmin)
 admin.site.register(SpeldVoorwaarden, SpeldVoorwaardenAdmin)
 admin.site.register(SpeldAanvraagPrep, SpeldAanvraagPrepAdmin)
 admin.site.register(SpeldAanvraag, SpeldAanvraagAdmin)
+admin.site.register(SpeldBestelling, SpeldBestellingAdmin)
 admin.site.register(SpeldToegekend, SpeldToegekendAdmin)
 
 # end of file
