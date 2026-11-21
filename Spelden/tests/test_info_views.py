@@ -196,11 +196,11 @@ class TestSpeldenInfoViews(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('spelden/khsn-graadspelden.dtl', 'design/site_layout.dtl'))
 
         # tussenspelden
-        # with self.assert_max_queries(20):
-        #     resp = self.client.get(self.url_tussenspelden)
-        # self.assertEqual(resp.status_code, 200)
-        # self.assert_html_ok(resp)
-        # self.assert_template_used(resp, ('spelden/khsn-tussenspelden.dtl', 'design/site_layout.dtl'))
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_tussenspelden)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('spelden/khsn-tussenspelden.dtl', 'design/site_layout.dtl'))
 
         # arrowhead
         with self.assert_max_queries(20):
