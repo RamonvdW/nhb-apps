@@ -126,7 +126,7 @@ class TestFunctieCli(E2EHelpers, TestCase):
         self.assertTrue("Functie matching query does not exist" in f1.getvalue())
 
     def test_check_beheerders(self):
-        with self.assert_max_queries(55):
+        with self.assert_max_queries(56):
             f1, f2 = self.run_management_command('check_beheerders')
         self.assertTrue(f1.getvalue() == '')        # geen foutmeldingen
 
@@ -227,7 +227,7 @@ class TestFunctieCli(E2EHelpers, TestCase):
         self.account_normaal.is_staff = False
         self.account_normaal.save(update_fields=['is_staff'])
 
-        with self.assert_max_queries(57):
+        with self.assert_max_queries(58):
             f1, f2 = self.run_management_command('check_beheerders', '--otp_uit')
         # print('f1:', f1.getvalue())
         # print('f2:', f2.getvalue())

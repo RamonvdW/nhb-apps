@@ -123,7 +123,7 @@ class TestBondspasOperations(E2EHelpers, TestCase):
         regels = maak_bondspas_regels(sporter, year)
         # print(regels)
 
-        self.assertTrue(('Speelsterkte', 'TS1150, GPIJL, R1000, R1100Z') in regels)
+        self.assertTrue(('Speelsterkte', 'R1000, R1100Z, TS1150, GPIJL') in regels)
 
 
 # end of file

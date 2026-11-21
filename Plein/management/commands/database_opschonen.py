@@ -44,6 +44,7 @@ class Command(BaseCommand):
         # scheidsrechter gaat volledig via cascade van wedstrijd/competitie match
         # TODO: opleiding
         # TODO: evenement
+        # TODO: spelden
 
         self.stdout.write('Klaar')
 
