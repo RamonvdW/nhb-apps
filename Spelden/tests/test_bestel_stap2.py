@@ -23,6 +23,7 @@ class TestSpeldenBestelStap2(E2EHelpers, TestCase):
 
     url_begin = '/spelden/'
     url_bestel_stap2 = '/spelden/bestel/stap2/'
+    url_bestel_stap3 = '/spelden/bestel/stap3/'
 
     def setUp(self):
         """ initialisatie van de test case """
@@ -54,17 +55,17 @@ class TestSpeldenBestelStap2(E2EHelpers, TestCase):
         now = timezone.now()
         wed_datum = (now - datetime.timedelta(days=60)).date()
 
-        loc = WedstrijdLocatie.objects.create(
-                        naam='test',
-                        adres='',
-                        notities='')
+        self.locatie = WedstrijdLocatie.objects.create(
+                                naam='test',
+                                adres='',
+                                notities='')
 
-        Wedstrijd.objects.create(
-                    status=WEDSTRIJD_STATUS_GEACCEPTEERD,
-                    datum_begin=wed_datum,
-                    datum_einde=wed_datum,
-                    organiserende_vereniging=ver,
-                    locatie=loc)
+        self.wedstrijd = Wedstrijd.objects.create(
+                                status=WEDSTRIJD_STATUS_GEACCEPTEERD,
+                                datum_begin=wed_datum,
+                                datum_einde=wed_datum,
+                                organiserende_vereniging=ver,
+                                locatie=self.locatie)
 
         self.prep = SpeldAanvraagPrep.objects.create(
                                 voor_sporter=sporter,
@@ -109,14 +110,39 @@ class TestSpeldenBestelStap2(E2EHelpers, TestCase):
             self.assert_html_ok(resp)
             self.assert_template_used(resp, ('spelden/bestel_stap2.dtl', 'design/site_layout.dtl'))
 
-            # GET, discipline veld
+            # GET, discipline veld + wedstrijd gekozen
             self.prep.discipline = 'VE'
+            self.prep.wedstrijd = self.wedstrijd
+            self.prep.informatie_wedstrijd = 'Plaats|Land'
             self.prep.save()
             with self.assert_max_queries(20):
                 resp = self.client.get(self.url_bestel_stap2)
             self.assertEqual(resp.status_code, 200)
             self.assert_html_ok(resp)
             self.assert_template_used(resp, ('spelden/bestel_stap2.dtl', 'design/site_layout.dtl'))
+
+            # post met geen wedstrijd + land en plaats
+            with self.assert_max_queries(20):
+                resp = self.client.post(self.url_bestel_stap2, {'plaats': 'Test1', 'land': 'Test2'})
+            self.assert_is_redirect(resp, self.url_bestel_stap3)
+            self.prep.refresh_from_db()
+            self.assertEqual(self.prep.informatie_wedstrijd, 'Test1|Test2')
+
+            # post met wedstrijd
+            with self.assert_max_queries(20):
+                resp = self.client.post(self.url_bestel_stap2, {'wedstrijd': 'wed_%s' % self.wedstrijd.pk})
+            self.assert404(resp, 'Wedstrijd niet gevonden')
+
+            self.prep.discipline = self.wedstrijd.discipline  # werkt omdat WEDSTRIJD_DISCIPLINE* == SPELD_DISCIPLINE*
+            self.prep.save()
+            self.locatie.plaats = 'Boogstad'
+            self.locatie.save()
+            with self.assert_max_queries(20):
+                resp = self.client.post(self.url_bestel_stap2, {'wedstrijd': 'wed_%s' % self.wedstrijd.pk})
+            self.assert_is_redirect(resp, self.url_bestel_stap3)
+            self.prep.refresh_from_db()
+            self.assertEqual(self.prep.wedstrijd_id, self.wedstrijd.pk)
+            self.assertEqual(self.prep.informatie_wedstrijd, 'Boogstad|Nederland')
 
 
 # end of file

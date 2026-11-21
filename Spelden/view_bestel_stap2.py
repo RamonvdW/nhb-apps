@@ -96,10 +96,7 @@ class BestelStap2View(TemplateView):
             context['kalender_lijst'] = self.qset_wedstrijden
 
         spl = self.prep.informatie_wedstrijd.split('|')
-        if len(spl) >= 1:
-            context['plaats'] = spl[0]
-        else:
-            context['plaats'] = ''
+        context['plaats'] = spl[0]
         if len(spl) > 1:
             context['land'] = spl[1]
         else:
@@ -149,7 +146,7 @@ class BestelStap2View(TemplateView):
             self.prep.wedstrijd = obj
 
             locatie = self.prep.wedstrijd.locatie
-            if locatie:
+            if locatie:     # pragma: no branch
                 # we ondersteunen alleen wedstrijdlocaties in Nederland
                 self.prep.informatie_wedstrijd = '%s|%s' % (locatie.plaats, 'Nederland')
         else:
