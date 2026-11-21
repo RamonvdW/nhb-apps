@@ -66,21 +66,14 @@ class StorageGoogleSheet:
         while retries > 0:
             try:
                 response = request.execute()
-            except socket.timeout as exc:           # pragma: no cover
-                self.stdout.write('[ERROR] {execute} Socket timeout: %s' % exc)
-            except socket.gaierror as exc:          # pragma: no cover
-                # example: [Errno -3] Temporary failure in name resolution
-                self.stdout.write('[ERROR] {execute} Socket error: %s' % exc)
-            except googleapiclient.errors.HttpError as exc:
-                self.stdout.write('[ERROR] {execute} HttpError from API: %s' % exc)
-            except ConnectionResetError as exc:
-                self.stdout.write('[ERROR] {execute} Connection reset by peer: %s' % exc)
+            except Exception as exc:
+                self.stdout.write('[ERROR] {storage_sheets, execute} Unexpected exception: %s' % exc)
             else:
                 # self.stdout.write('[DEBUG] {execute} response=%s' % repr(response))
                 return response
 
             if retries > 0:
-                self.stdout.write('[DEBUG] {execute} Retrying in %s seconds' % wait_sec)
+                self.stdout.write('[DEBUG] {storage_sheets, execute} Retrying in %s seconds' % wait_sec)
 
                 time.sleep(wait_sec)
                 wait_sec *= 2       # 1, 2, 4, 8, 16, 32, 64
