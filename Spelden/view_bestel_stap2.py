@@ -145,10 +145,9 @@ class BestelStap2View(TemplateView):
 
             self.prep.wedstrijd = obj
 
+            # we ondersteunen alleen wedstrijdlocaties in Nederland
             locatie = self.prep.wedstrijd.locatie
-            if locatie:     # pragma: no branch
-                # we ondersteunen alleen wedstrijdlocaties in Nederland
-                self.prep.informatie_wedstrijd = '%s|%s' % (locatie.plaats, 'Nederland')
+            self.prep.informatie_wedstrijd = '%s|%s' % (locatie.plaats, 'Nederland')
         else:
             self.prep.wedstrijd = None
 

@@ -70,8 +70,7 @@ class BestelStap3View(TemplateView):
         if self.prep.wedstrijd:
             context['wedstrijd_titel'] = self.prep.wedstrijd.titel
             locatie = self.prep.wedstrijd.locatie
-            if locatie:
-                context['wedstrijd_titel'] += ' (%s)' % locatie.plaats
+            context['wedstrijd_titel'] += ' (%s)' % locatie.plaats
         else:
             spl = self.prep.informatie_wedstrijd.split('|')
             context['wedstrijd_plaats_land'] = ", ".join(spl[:2])
