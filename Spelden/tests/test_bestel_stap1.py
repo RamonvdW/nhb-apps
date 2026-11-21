@@ -5,11 +5,15 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase, override_settings
+from django.utils import timezone
 from BasisTypen.models import BoogType
 from Geo.models import Regio
+from Locatie.models import WedstrijdLocatie
 from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
+from Wedstrijden.definities import WEDSTRIJD_STATUS_GEACCEPTEERD
+from Wedstrijden.models import Wedstrijd
 import datetime
 
 
@@ -53,6 +57,22 @@ class TestSpeldenBestelStap1(E2EHelpers, TestCase):
         self.sporterboog = SporterBoog.objects.create(sporter=sporter, boogtype=boog_bb, voor_wedstrijd=True)
 
         self.voorkeuren = SporterVoorkeuren.objects.create(sporter=sporter, wedstrijd_geslacht_gekozen=False)
+
+        # zet een wedstrijd op de kalender, 2 maanden terug
+        now = timezone.now()
+        datum = (now - datetime.timedelta(days=60)).date()
+
+        loc = WedstrijdLocatie.objects.create(
+                        naam='test',
+                        adres='',
+                        notities='')
+
+        Wedstrijd.objects.create(
+                    status=WEDSTRIJD_STATUS_GEACCEPTEERD,
+                    datum_begin=datum,
+                    datum_einde=datum,
+                    organiserende_vereniging=ver,
+                    locatie=loc)
 
     def test_anon(self):
         self.client.logout()

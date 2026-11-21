@@ -5,11 +5,15 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase, override_settings
+from django.utils import timezone
 from Geo.models import Regio
+from Locatie.models import WedstrijdLocatie
 from Spelden.models import SpeldAanvraagPrep
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
+from Wedstrijden.definities import WEDSTRIJD_STATUS_GEACCEPTEERD
+from Wedstrijden.models import Wedstrijd
 import datetime
 
 
@@ -46,6 +50,22 @@ class TestSpeldenBestelStap2(E2EHelpers, TestCase):
         sporter.save()
         self.sporter_100001 = sporter
 
+        # zet een wedstrijd op de kalender, 2 maanden terug
+        now = timezone.now()
+        wed_datum = (now - datetime.timedelta(days=60)).date()
+
+        loc = WedstrijdLocatie.objects.create(
+                        naam='test',
+                        adres='',
+                        notities='')
+
+        Wedstrijd.objects.create(
+                    status=WEDSTRIJD_STATUS_GEACCEPTEERD,
+                    datum_begin=wed_datum,
+                    datum_einde=wed_datum,
+                    organiserende_vereniging=ver,
+                    locatie=loc)
+
         self.prep = SpeldAanvraagPrep.objects.create(
                                 voor_sporter=sporter,
                                 wedstrijd_geslacht='M',
@@ -53,12 +73,10 @@ class TestSpeldenBestelStap2(E2EHelpers, TestCase):
                                 discipline='OD',
                                 boog='R',
                                 score='500',
-                                heeft_data_stap2=True,
-                                afstanden='70',
-                                aantal_pijlen=72,
-                                aantal_doelen=48)
+                                datum_wedstrijd=wed_datum.strftime('%Y-%m-%d'))
 
-    def test_stap3_foutjes(self):
+
+    def test_stap2_foutjes(self):
         self.e2e_login(self.account_sporter)
 
         with override_settings(TOON_SPELDEN_BESTELLEN=True):
@@ -76,7 +94,7 @@ class TestSpeldenBestelStap2(E2EHelpers, TestCase):
                 resp = self.client.get(self.url_bestel_stap2)
             self.assert404(resp, 'Onvolledige verzoek (1)')
 
-    def test_stap3(self):
+    def test_stap2(self):
         self.e2e_login(self.account_sporter)
 
         with override_settings(TOON_SPELDEN_BESTELLEN=False):
