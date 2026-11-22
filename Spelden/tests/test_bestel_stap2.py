@@ -9,6 +9,7 @@ from django.utils import timezone
 from Geo.models import Regio
 from Locatie.models import WedstrijdLocatie
 from Spelden.models import SpeldAanvraagPrep
+from Spelden.operations import speld_discipline2wedstrijd_discplines
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
@@ -85,6 +86,9 @@ class TestSpeldenBestelStap2(E2EHelpers, TestCase):
             self.prep.heeft_data_stap1 = False
             self.prep.save()
 
+            # extra coverage
+            self.assertTrue(str(self.prep) != '')
+
             with self.assert_max_queries(20):
                 resp = self.client.get(self.url_bestel_stap2)
             self.assert404(resp, 'Onvolledige verzoek (2)')
@@ -95,12 +99,19 @@ class TestSpeldenBestelStap2(E2EHelpers, TestCase):
                 resp = self.client.get(self.url_bestel_stap2)
             self.assert404(resp, 'Onvolledige verzoek (1)')
 
+        self.client.logout()
+        resp = self.client.get(self.url_bestel_stap2)
+        self.assert403(resp, 'Niet ingelogd')
+
     def test_stap2(self):
         self.e2e_login(self.account_sporter)
 
         with override_settings(TOON_SPELDEN_BESTELLEN=False):
             resp = self.client.get(self.url_bestel_stap2)
         self.assert404(resp, 'Bestellen is niet mogelijk')
+
+        # extra coverage
+        self.assertTrue(str(self.prep) != '')
 
         with override_settings(TOON_SPELDEN_BESTELLEN=True):
             # GET, discipline outdoor
@@ -144,5 +155,7 @@ class TestSpeldenBestelStap2(E2EHelpers, TestCase):
             self.assertEqual(self.prep.wedstrijd_id, self.wedstrijd.pk)
             self.assertEqual(self.prep.informatie_wedstrijd, 'Boogstad|Nederland')
 
+            # onbekende discipline
+            speld_discipline2wedstrijd_discplines('25')
 
 # end of file

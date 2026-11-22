@@ -102,15 +102,6 @@ class TestSpeldenBestelStap1(E2EHelpers, TestCase):
         resp = self.client.get(self.url_bestel_stap1)
         self.assert403(resp, 'Niet ingelogd')
 
-        resp = self.client.get(self.url_bestel_stap2)
-        self.assert403(resp, 'Niet ingelogd')
-
-        resp = self.client.get(self.url_bestel_stap3)
-        self.assert403(resp, 'Niet ingelogd')
-
-        resp = self.client.get(self.url_bestel_stap4)
-        self.assert403(resp, 'Niet ingelogd')
-
     def test_bestel(self):
         self.e2e_login(self.account_sporter)
 

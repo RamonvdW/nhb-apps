@@ -116,7 +116,7 @@ BEHEER_URLS = (
     '/beheer/Spelden/speld/',
     '/beheer/Spelden/speldaanvraag/',
     '/beheer/Spelden/speldaanvraagprep/',
-    '/beheer/Spelden/speldbijlage/',
+    '/beheer/Spelden/speldbestelling/',
     '/beheer/Spelden/speldtoegekend/',
     '/beheer/Spelden/speldvoorwaarden/',
     '/beheer/Sporter/sporter/',

@@ -7,6 +7,7 @@
 from django.urls import reverse
 from django.conf import settings
 from django.http import Http404
+from django.utils import timezone
 from django.shortcuts import render
 from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
@@ -25,6 +26,8 @@ from Spelden.operations import (get_mogelijke_spelden_wa,
                                 get_mogelijke_meesterspelden_khsn)
 from Sporter.operations import get_sporter
 from decimal import Decimal
+from datetime import timedelta
+
 
 TEMPLATE_PRESTATIESPELDEN_BESTEL_STAP4 = 'spelden/bestel_stap4.dtl'
 TEMPLATE_PRESTATIESPELDEN_BESTEL_TOEGEVOEGD = 'spelden/bestel_toegevoegd-aan-mandje.dtl'
@@ -78,17 +81,24 @@ class BestelStap4View(TemplateView):
         self.al_toegekende_speld_pks = list(qset.values_list('speld__pk', flat=True))
 
     def _load_al_besteld(self):
+        # elke regel in het mandje of een bestelling heeft een SpeldBestelling
         mandje = BestellingMandje.objects.filter(account=self.account).first()
         if mandje:
             regel_pks = list(mandje.regels.values_list('pk', flat=True))
         else:
             regel_pks = []
 
+        # voorkom opnieuw bestellen van spelden die de afgelopen maand besteld zijn
+        # dit geeft het bondsbureau een maand de tijd om de bestelling te verwerken
+        # als de speld afgewezen werd, dan kan deze na een maand pas opnieuw besteld worden
+        afgelopen_maand = (timezone.now() - timedelta(days=30)).date()
         for bestelling in (SpeldBestelling
                            .objects
-                           .filter(door_account=self.account)
+                           .filter(door_account=self.account,
+                                   aangemaakt_op__gte=afgelopen_maand)
                            .select_related('speld')):
 
+            # nodig voor de analyse: deze spelden "heeft" sporter al
             speld = bestelling.speld
             self.al_spelden.append(speld)
 
@@ -253,6 +263,7 @@ class BestelStap4View(TemplateView):
             context['aantal_doelen'] = self.prep.aantal_doelen
         else:
             context['aantal_pijlen'] = self.prep.aantal_pijlen
+            context['afstanden'] = self.prep.afstanden
 
         context['score'] = self.prep.score
         if self.prep.score_sm > 0:
@@ -262,8 +273,7 @@ class BestelStap4View(TemplateView):
         if self.prep.wedstrijd:
             context['wedstrijd_titel'] = self.prep.wedstrijd.titel
             locatie = self.prep.wedstrijd.locatie
-            if locatie:
-                context['wedstrijd_titel'] += ' (%s)' % locatie.plaats
+            context['wedstrijd_titel'] += ' (%s)' % locatie.plaats
         else:
             spl = self.prep.informatie_wedstrijd.split('|')
             context['wedstrijd_plaats_land'] = ", ".join(spl[:2])
@@ -273,10 +283,11 @@ class BestelStap4View(TemplateView):
         # zoek uit of er 1 wedstrijd soort is die we kunnen tonen
         alle_soorten_wedstrijd = []
         for optie in self.mogelijke_spelden:
-            if optie.wedstrijd_soort not in alle_soorten_wedstrijd:
-                alle_soorten_wedstrijd.append(optie.wedstrijd_soort)
+            if optie.discipline != SPELD_DISCIPLINE_NVT:    # skip graadspelden en meesterspelden
+                if optie.wedstrijd_soort not in alle_soorten_wedstrijd:
+                    alle_soorten_wedstrijd.append(optie.wedstrijd_soort)
         # for
-        if len(alle_soorten_wedstrijd) == 1:
+        if len(alle_soorten_wedstrijd) == 1:        # pragma: no branch
             context['wedstrijd_soort'] = alle_soorten_wedstrijd[0]
 
         if self.aantal_bestelbaar > 0:
@@ -366,6 +377,7 @@ class BestelStap4View(TemplateView):
                 # zet door naar de achtergrondtaak, maar wacht niet op het antwoord
                 bestel_mutatieverzoek_aanvraag_spelden(self.account, bestelling, snel=True)
 
+            # maak een bestelling voor deze speld
             bestelling = SpeldBestelling.objects.create(
                             door_account=self.account,
                             is_nieuwe_aanvraag=True,
@@ -374,9 +386,12 @@ class BestelStap4View(TemplateView):
         # for
 
         # zet de laatste aanvraag door naar de achtergrondtaak + wacht op verwerken
-        if bestelling:
+        if bestelling:          # pragma: no branch
             snel = str(request.POST.get('snel', ''))[:1]
             bestel_mutatieverzoek_aanvraag_spelden(self.account, bestelling, snel == '1')
+
+        # verwijder de aanvraag prep, zodat de gebruiker opnieuw kan beginnen
+        self.prep.delete()
 
         mandje_tel_inhoud(self.request, self.account)
 

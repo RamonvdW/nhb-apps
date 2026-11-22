@@ -19,7 +19,7 @@ import datetime
 
 class TestSpeldenBestelStap3(E2EHelpers, TestCase):
 
-    """ tests voor de Spelden applicatie, bestelprocess stap 2 """
+    """ tests voor de Spelden applicatie, bestelprocess stap 3 """
 
     url_begin = '/spelden/'
     url_bestel_stap3 = '/spelden/bestel/stap3/'
@@ -96,12 +96,19 @@ class TestSpeldenBestelStap3(E2EHelpers, TestCase):
                 resp = self.client.get(self.url_bestel_stap3)
             self.assert404(resp, 'Onvolledige verzoek (1)')
 
+        self.client.logout()
+        resp = self.client.get(self.url_bestel_stap3)
+        self.assert403(resp, 'Niet ingelogd')
+
     def test_stap3(self):
         self.e2e_login(self.account_sporter)
 
         with override_settings(TOON_SPELDEN_BESTELLEN=False):
             resp = self.client.get(self.url_bestel_stap3)
         self.assert404(resp, 'Bestellen is niet mogelijk')
+
+        # extra coverage
+        self.assertTrue(str(self.prep) != '')
 
         with override_settings(TOON_SPELDEN_BESTELLEN=True):
             # GET, discipline indoor
