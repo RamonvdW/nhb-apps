@@ -22,30 +22,60 @@
     <!-- blauwe balk met informatie in tabel-vorm:  label - info -->
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
-            <table class="sv-kader-tabel">
-                <tr>
-                    <th>Datum</th>
-                    <td>{{ ref_score.datum }}</td>
-                </tr>
-                <tr>
-                    <th>Wedstrijd</th>
-                    <td>{{ ref_score.naam }}</td>
-                </tr>
-                <tr>
-                    <th>Waar</th>
-                    <td>{{ ref_score.waar}}</td>
-                </tr>
-                <tr>
-                    <th>Uitslag</th>
-                    <td>
-                        {% for url in uitslag_urls %}
-                            {% sv-link-ext url=url max_len=100 %}<br>
-                        {% empty %}
-                            <i>Niets opgegeven</i>
-                        {% endfor %}
-                    </td>
-                </tr>
-            </table>
+            <form action="{{ url_zet_alt }}" method="post">
+                {% csrf_token %}
+                <table class="sv-kader-tabel">
+                    <tr>
+                        <th>Datum</th>
+                        <td colspan="2">{{ ref_score.datum }}</td>
+                    </tr>
+                    <tr>
+                        <th>Wedstrijd</th>
+                        <td>{{ ref_score.naam }}</td>
+                        <td style="max-width:40%">
+                            {% if alt_namen %}
+                                <b>Alternatieven:</b>
+                                <br>
+                                <select name="alt_naam">
+                                    {% for opt in alt_namen %}
+                                        <option value="{{ opt.alt_pk }}">{{ opt.alt_tekst }}</option>
+                                    {% endfor %}
+                                </select>
+                                <br>
+                                <button class="btn-sv-rood" type="submit">Wijzig naar deze</button>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Waar</th>
+                        <td>{{ ref_score.waar}}</td>
+                        <td style="max-width:40%">
+                            {% if alt_waar %}
+                                <b>Alternatieven:</b>
+                                <br>
+                                <select name="alt_waar">
+                                    {% for opt in alt_waar %}
+                                        <option value="{{ opt.alt_pk }}">{{ opt.alt_tekst }}</option>
+                                    {% endfor %}
+                                </select>
+                                <br>
+                                <button class="btn-sv-rood" type="submit">Wijzig naar deze</button>
+                            {% endif %}
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th>Uitslag</th>
+                        <td colspan="2">
+                            {% for url in uitslag_urls %}
+                                {% sv-link-ext url=url max_len=100 %}<br>
+                            {% empty %}
+                                <i>Niets opgegeven</i>
+                            {% endfor %}
+                        </td>
+                    </tr>
+                </table>
+            </form>
         </div>
     </div>
 

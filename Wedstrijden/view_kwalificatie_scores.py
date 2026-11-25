@@ -4,10 +4,10 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.http import Http404, UnreadablePostError, JsonResponse
+from django.http import Http404, HttpResponseRedirect, UnreadablePostError, JsonResponse
 from django.urls import reverse
 from django.utils import timezone
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, View
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
@@ -148,6 +148,45 @@ class CheckKwalificatieScoresWedstrijdView(UserPassesTestMixin, TemplateView):
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
         return self.rol_nu in (Rol.ROL_MWZ, Rol.ROL_HWL)
 
+    def _vind_gelijksoortige(self, ref_score: Kwalificatiescore):
+        alle_namen = list()
+        alle_waar = list()
+
+        alt = SimpleNamespace(
+                    alt_tekst=ref_score.naam,
+                    alt_pk=ref_score.pk)
+        alle_namen.append(alt)
+
+        alt = SimpleNamespace(
+                    alt_tekst=ref_score.waar,
+                    alt_pk=ref_score.pk)
+        alle_waar.append(alt)
+
+        toegevoegde_waar = [ref_score.waar]
+        toegevoegde_namen = [ref_score.naam]
+
+        for obj in(Kwalificatiescore
+                   .objects
+                   .filter(inschrijving__wedstrijd=ref_score.inschrijving.wedstrijd,
+                           datum=ref_score.datum)):
+
+            if obj.naam and obj.naam not in toegevoegde_namen:
+                toegevoegde_namen.append(obj.naam)
+                alt = SimpleNamespace(
+                            alt_tekst=obj.naam,
+                            alt_pk=obj.pk)
+                alle_namen.append(alt)
+
+            if obj.waar and obj.waar not in toegevoegde_waar:
+                toegevoegde_waar.append(obj.waar)
+                alt = SimpleNamespace(
+                            alt_tekst=obj.waar,
+                            alt_pk=obj.pk)
+                alle_waar.append(alt)
+        # for
+
+        return alle_namen, alle_waar
+
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
 
@@ -201,6 +240,14 @@ class CheckKwalificatieScoresWedstrijdView(UserPassesTestMixin, TemplateView):
 
         context['scores'] = scores
         context['uitslag_urls'] = uitslag_urls
+
+        alt_namen, alt_waar = self._vind_gelijksoortige(ref_score)
+        if len(alt_namen) > 1:
+            context['alt_namen'] = alt_namen
+        if len(alt_waar) > 1:
+            context['alt_waar'] = alt_waar
+        context['url_zet_alt'] = reverse('Wedstrijden:wijzig-kwalificatie-scores-naam-waar',
+                                         kwargs={'score_pk': ref_score.pk})
 
         if self.rol_nu == Rol.ROL_HWL:
             context['kruimels'] = (
@@ -276,6 +323,53 @@ class CheckKwalificatieScoresWedstrijdView(UserPassesTestMixin, TemplateView):
 
         out = dict()
         return JsonResponse(out)
+
+
+class WijzigKwalificatieScoresNaamWaarView(View):
+
+    def post(self, request, *args, **kwargs):
+
+        try:
+            score_pk = int(str(kwargs['score_pk'])[:7])      # afkappen voor de veiligheid
+            ref_score = Kwalificatiescore.objects.select_related('inschrijving__wedstrijd').get(pk=score_pk)
+        except (ValueError, Kwalificatiescore.DoesNotExist):
+            raise Http404('Wedstrijd niet gevonden')
+
+        pk = request.POST.get('alt_naam', '')[:7]       # afkappen voor de veiligheid
+        if pk:
+            try:
+                obj = Kwalificatiescore.objects.get(pk=int(pk))
+                nieuwe_naam = obj.naam
+            except (TypeError, ValueError, Kwalificatiescore.DoesNotExist):
+                raise Http404('Kwalificatiescore niet gevonden (1)')
+            else:
+                if nieuwe_naam and nieuwe_naam != ref_score.naam:
+                    qset = (Kwalificatiescore
+                            .objects
+                            .filter(inschrijving__wedstrijd=ref_score.inschrijving.wedstrijd,
+                                    datum=ref_score.datum,
+                                    naam=ref_score.naam))
+                    qset.update(naam=nieuwe_naam)
+
+        pk = request.POST.get('alt_waar', '')[:7]       # afkappen voor de veiligheid
+        if pk:
+            try:
+                obj = Kwalificatiescore.objects.get(pk=int(pk))
+                nieuwe_waar = obj.waar
+            except (TypeError, ValueError, Kwalificatiescore.DoesNotExist):
+                raise Http404('Kwalificatiescore niet gevonden (2)')
+            else:
+                if nieuwe_waar and nieuwe_waar != ref_score.waar:
+                    qset = (Kwalificatiescore
+                            .objects
+                            .filter(inschrijving__wedstrijd=ref_score.inschrijving.wedstrijd,
+                                    datum=ref_score.datum,
+                                    waar=ref_score.waar))
+                    qset.update(waar=nieuwe_waar)
+
+        url = reverse('Wedstrijden:check-kwalificatie-scores',
+                      kwargs={'wedstrijd_pk': ref_score.inschrijving.wedstrijd.pk})
+        return HttpResponseRedirect(url)
 
 
 # end of file
