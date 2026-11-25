@@ -79,6 +79,8 @@ urlpatterns = [
          view_manager.KalenderManagerTweeJaarView.as_view(),
          name='manager-status-twee-jaar'),
 
+
+    # kwalificatiescores
     path('manager/check-kwalificatie-scores/<wedstrijd_pk>/',
          view_kwalificatie_scores.CheckKwalificatieScoresView.as_view(),
          name='check-kwalificatie-scores'),
@@ -87,6 +89,9 @@ urlpatterns = [
          view_kwalificatie_scores.CheckKwalificatieScoresWedstrijdView.as_view(),
          name='check-kwalificatie-scores-wedstrijd'),
 
+    path('manager/check-kwalificatie-scores/wijzig/<score_pk>/',
+         view_kwalificatie_scores.WijzigKwalificatieScoresNaamWaarView.as_view(),
+         name='wijzig-kwalificatie-scores-naam-waar'),
 
     # gedeeld (HWL en MWZ)
     path('<wedstrijd_pk>/wijzig/',
