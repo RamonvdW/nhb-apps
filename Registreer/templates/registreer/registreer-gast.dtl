@@ -37,45 +37,42 @@
                 <div class="sv-kader-form">
                     <div class="form-padding">
 
-                        <form action="{{ url_aanmaken }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
-                            {% csrf_token %}
+                        {% if form.errors %}
+                            <div class="center sv-rood-text" style="margin-bottom:20px">
+                                {% for error in form.non_field_errors %}
+                                    <span>Fout: {{ error|escape }}</span><br>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
 
-                            {% if form.errors %}
-                                <div class="center sv-rood-text" style="margin-bottom:20px">
-                                    {% for error in form.non_field_errors %}
-                                        <span>Fout: {{ error|escape }}</span><br>
-                                    {% endfor %}
-                                </div>
+                        <div class="input-field">
+                            {{ form.voornaam.label_tag }}
+                            {{ form.voornaam }}
+                            {% if form.voornaam.errors %}
+                                <span id="id_voornaam_error" class="sv-rood-text">{{ form.voornaam.errors.0 }}</span><br>
                             {% endif %}
+                        </div>
 
-                            <div class="input-field">
-                                {{ form.voornaam.label_tag }}
-                                {{ form.voornaam }}
-                                {% if form.voornaam.errors %}
-                                    <span id="id_voornaam_error" class="sv-rood-text">{{ form.voornaam.errors.0 }}</span><br>
-                                {% endif %}
-                            </div>
+                        <div class="input-field">
+                            {{ form.achternaam.label_tag }}
+                            {{ form.achternaam }}
+                            {% if form.achternaam.errors %}
+                                <span id="id_achternaam_error" class="sv-rood-text">{{ form.achternaam.errors.0 }}</span><br>
+                            {% endif %}
+                        </div>
 
-                            <div class="input-field">
-                                {{ form.achternaam.label_tag }}
-                                {{ form.achternaam }}
-                                {% if form.achternaam.errors %}
-                                    <span id="id_achternaam_error" class="sv-rood-text">{{ form.achternaam.errors.0 }}</span><br>
-                                {% endif %}
-                            </div>
+                        <div class="input-field">
+                            {{ form.email.label_tag }}
+                            {{ form.email }}
+                            {% if form.email.errors %}
+                                <span id="id_email_error" class="sv-rood-text">{{ form.email.errors.0 }}</span><br>
+                            {% endif %}
+                        </div>
 
-                            <div class="input-field">
-                                {{ form.email.label_tag }}
-                                {{ form.email }}
-                                {% if form.email.errors %}
-                                    <span id="id_email_error" class="sv-rood-text">{{ form.email.errors.0 }}</span><br>
-                                {% endif %}
-                            </div>
+                        <div class="center-align">
+                            <button class="btn-sv-rood" id="submit_knop">Aanmaken</button>
+                        </div>
 
-                            <div class="center-align">
-                                <input class="btn-sv-rood" name="button_registreer" id="submit_knop" type="submit" value="Aanmaken">
-                            </div>
-                        </form>
                     </div>
                 </div>
             </div>
@@ -97,6 +94,12 @@
             {% include 'design/card_icon.dtl' with title="Privacyverklaring" text="Lees hier hoe we omgaan met jouw privacy." sv_icon="privacyverklaring" url=card_url %}
         </div>
     </div>
+
+    <div id="js_data"
+         data-url="{{ url_aanmaken }}"
+         data-csrf="{{ csrf_token }}">
+    </div>
+    <script src="{% static 'registreer_js/gast.js' %}"></script>
 
     <!-- geen feedback: with op_pagina="registreer-gast" -->
 
