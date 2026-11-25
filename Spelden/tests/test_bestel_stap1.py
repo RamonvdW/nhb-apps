@@ -5,11 +5,16 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase, override_settings
+from django.utils import timezone
 from BasisTypen.models import BoogType
 from Geo.models import Regio
+from Locatie.models import WedstrijdLocatie
+from Spelden.models import SpeldAanvraagPrep
 from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
+from Wedstrijden.definities import WEDSTRIJD_STATUS_GEACCEPTEERD
+from Wedstrijden.models import Wedstrijd
 import datetime
 
 
@@ -18,9 +23,11 @@ class TestSpeldenBestelStap1(E2EHelpers, TestCase):
     """ tests voor de Spelden applicatie, bestelprocess stap 1 """
 
     url_begin = '/spelden/'
+    url_bestel = '/spelden/bestel/'
     url_bestel_stap1 = '/spelden/bestel/stap1/'
     url_bestel_stap2 = '/spelden/bestel/stap2/'
     url_bestel_stap3 = '/spelden/bestel/stap3/'
+    url_bestel_stap4 = '/spelden/bestel/stap4/'
 
     def setUp(self):
         """ initialisatie van de test case """
@@ -54,19 +61,79 @@ class TestSpeldenBestelStap1(E2EHelpers, TestCase):
 
         self.voorkeuren = SporterVoorkeuren.objects.create(sporter=sporter, wedstrijd_geslacht_gekozen=False)
 
+        # zet een wedstrijd op de kalender, 2 maanden terug
+        now = timezone.now()
+        datum = (now - datetime.timedelta(days=60)).date()
+
+        loc = WedstrijdLocatie.objects.create(
+                        naam='test',
+                        adres='',
+                        notities='')
+
+        Wedstrijd.objects.create(
+                    status=WEDSTRIJD_STATUS_GEACCEPTEERD,
+                    datum_begin=datum,
+                    datum_einde=datum,
+                    organiserende_vereniging=ver,
+                    locatie=loc)
+
+        # nog een wedstrijd, meerdere datums
+        Wedstrijd.objects.create(
+                    status=WEDSTRIJD_STATUS_GEACCEPTEERD,
+                    datum_begin=datum - datetime.timedelta(days=2),
+                    datum_einde=datum,
+                    organiserende_vereniging=ver,
+                    locatie=loc)
+
+        datum -= datetime.timedelta(days=1)
+        Wedstrijd.objects.create(
+                    status=WEDSTRIJD_STATUS_GEACCEPTEERD,
+                    datum_begin=datum,
+                    datum_einde=datum,
+                    organiserende_vereniging=ver,
+                    locatie=loc)
+
     def test_anon(self):
         self.client.logout()
+
+        resp = self.client.get(self.url_bestel)
+        self.assert403(resp, 'Niet ingelogd')
 
         resp = self.client.get(self.url_bestel_stap1)
         self.assert403(resp, 'Niet ingelogd')
 
-        resp = self.client.get(self.url_bestel_stap2)
-        self.assert403(resp, 'Niet ingelogd')
+    def test_bestel(self):
+        self.e2e_login(self.account_sporter)
 
-        resp = self.client.get(self.url_bestel_stap3)
-        self.assert403(resp, 'Niet ingelogd')
+        with override_settings(TOON_SPELDEN_BESTELLEN=False):
+            resp = self.client.get(self.url_bestel)
+        self.assert404(resp, 'Bestellen is niet mogelijk')
 
-    def test_stap1(self):
+        with override_settings(TOON_SPELDEN_BESTELLEN=True):
+            resp = self.client.get(self.url_bestel)
+            self.assert_is_redirect(resp, self.url_bestel_stap1)
+
+            prep = SpeldAanvraagPrep.objects.create(voor_sporter=self.sporter_100001)
+
+            resp = self.client.get(self.url_bestel)
+            self.assert_is_redirect(resp, self.url_bestel_stap1)
+
+            prep.heeft_data_stap1 = True
+            prep.save()
+            resp = self.client.get(self.url_bestel)
+            self.assert_is_redirect(resp, self.url_bestel_stap2)
+
+            prep.heeft_data_stap2 = True
+            prep.save()
+            resp = self.client.get(self.url_bestel)
+            self.assert_is_redirect(resp, self.url_bestel_stap3)
+
+            prep.heeft_data_stap3 = True
+            prep.save()
+            resp = self.client.get(self.url_bestel)
+            self.assert_is_redirect(resp, self.url_bestel_stap4)
+
+    def test_bestel_stap1(self):
         self.e2e_login(self.account_sporter)
 
         with override_settings(TOON_SPELDEN_BESTELLEN=False):

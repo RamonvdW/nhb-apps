@@ -11,7 +11,7 @@ from Spelden.definities import (SPELD_DISCIPLINE_OUTDOOR, SPELD_DISCIPLINE_INDOO
                                 SPELD_CATEGORIE_NL_GRAADSPELD_INDOOR, SPELD_CATEGORIE_NL_GRAADSPELD_OUTDOOR,
                                 SPELD_CATEGORIE_NL_GRAADSPELD_VELD, SPELD_CATEGORIE_NL_GRAADSPELD_SHORT_METRIC,
                                 SPELD_CATEGORIE_NL_GRAADSPELD_ALGEMEEN)
-from Spelden.models import SpeldVoorwaarden, SpeldToegekend
+from Spelden.models import Speld, SpeldVoorwaarden, SpeldToegekend
 from Sporter.leeftijdsklassen import bereken_leeftijdsklassen_wa, hogere_en_lagere_lkl_wa
 from Wedstrijden.definities import (WEDSTRIJD_DISCIPLINE_OUTDOOR, WEDSTRIJD_DISCIPLINE_INDOOR,
                                     WEDSTRIJD_DISCIPLINE_25M1P, WEDSTRIJD_DISCIPLINE_VELD)
@@ -54,6 +54,24 @@ def tel_hall_of_fame():
     return gm_count, ms_count, as_count
 
 
+def speld_discipline2wedstrijd_discplines(speld_discipline: str):
+    """ maak een Wedstrijden discpline filter aan de hand van de gekozen discipline voor de spelden """
+
+    if speld_discipline == SPELD_DISCIPLINE_OUTDOOR:
+        wed_disciplines = (WEDSTRIJD_DISCIPLINE_OUTDOOR,)
+
+    elif speld_discipline == SPELD_DISCIPLINE_INDOOR:
+        wed_disciplines = (WEDSTRIJD_DISCIPLINE_INDOOR, WEDSTRIJD_DISCIPLINE_25M1P)
+
+    elif speld_discipline == SPELD_DISCIPLINE_VELD:
+        wed_disciplines = (WEDSTRIJD_DISCIPLINE_VELD,)
+
+    else:
+        wed_disciplines = ()
+
+    return wed_disciplines
+
+
 def get_mogelijke_spelden_wa(discipline: str, boog: str, score: int,
                              wedstrijd_geslacht: str, geboorte_jaar: int) -> list[SpeldVoorwaarden]:
 
@@ -91,6 +109,7 @@ def get_mogelijke_spelden_wa(discipline: str, boog: str, score: int,
             aantal_pijlen_geschoten += 1
         # print('{get_mogelijke_spelden} score=%s --> aantal_pijlen=%s' % (score, aantal_pijlen_geschoten))
         qset = qset.exclude(aantal_pijlen__lt=aantal_pijlen_geschoten)
+        qset = qset.exclude(aantal_pijlen__gt=(aantal_pijlen_geschoten-1) * 2)   # filtert 1440 bij lage score
 
         now = timezone.now()
         _, _, _, lkl_lst = bereken_leeftijdsklassen_wa(geboorte_jaar, wedstrijd_geslacht, now.year, lst_als_str=False)
@@ -116,8 +135,9 @@ def get_mogelijke_spelden_wa(discipline: str, boog: str, score: int,
     return list(qset)
 
 
-def get_mogelijke_graadspelden_khsn(discipline: str, afstanden: str, aantal_doelen: int, aantal_pijlen: int, wedstrijdgeslacht: str, score: int, score_sm: int):
-    print('{get_mogelijke_graadspelden_khsn} discipline=%s, afstanden=%s, aantal doelen=%s, aantal_pijlen=%s, m/v=%s, score=%s' % (discipline, afstanden, aantal_doelen, aantal_pijlen, wedstrijdgeslacht, score))
+def get_mogelijke_graadspelden_khsn(discipline: str, afstanden: str, aantal_doelen: int, aantal_pijlen: int, wedstrijdgeslacht: str, score: int, score_sm: int) -> list[SpeldVoorwaarden]:
+    # print('{get_mogelijke_graadspelden_khsn} discipline=%s, afstanden=%s, aantal doelen=%s, aantal_pijlen=%s, m/v=%s, score=%s' % (
+    #           discipline, afstanden, aantal_doelen, aantal_pijlen, wedstrijdgeslacht, score))
 
     lkl = 'SH'
     if wedstrijdgeslacht != 'M':
@@ -173,22 +193,77 @@ def get_mogelijke_graadspelden_khsn(discipline: str, afstanden: str, aantal_doel
     return opties
 
 
-def speld_discipline2wedstrijd_discplines(speld_discipline: str):
-    """ maak een Wedstrijden discpline filter aan de hand van de gekozen discipline voor de spelden """
-    
-    if speld_discipline == SPELD_DISCIPLINE_OUTDOOR:
-        wed_disciplines = (WEDSTRIJD_DISCIPLINE_OUTDOOR,)
+def get_mogelijke_meesterspelden_khsn(heeft_spelden: list[Speld], nieuw_behaald: list[Speld]) -> list[SpeldVoorwaarden]:
+    # print('{get_mogelijke_meesterspelden_khsn} heeft_spelden=%s, nieuw_behaald=%s' % (heeft_spelden, nieuw_behaald))
 
-    elif speld_discipline == SPELD_DISCIPLINE_INDOOR:
-        wed_disciplines = (WEDSTRIJD_DISCIPLINE_INDOOR, WEDSTRIJD_DISCIPLINE_25M1P)
+    nr2speld = dict()
+    for speld in Speld.objects.filter(volgorde__in=(5401, 5402, 5403)):
+        nr2speld[speld.volgorde] = speld
+    # for
 
-    elif speld_discipline == SPELD_DISCIPLINE_VELD:
-        wed_disciplines = (WEDSTRIJD_DISCIPLINE_VELD,)
+    nrs = [speld.volgorde
+           for speld in heeft_spelden + nieuw_behaald]
 
-    else:
-        wed_disciplines = ()
+    # nrs:
+    # 5001, 5002, 5003 = 1e/2e/3e graad Indoor
+    # 5103, 5102, 5101 = 1e/2e/3e graad Outdoor
+    # 5203, 5202, 5201 = 1e/2e/3e graad Veld
+    # 5303, 5302, 5301 = 1e/2e/3e graad Short Metric
 
-    return wed_disciplines
+    opties = list()
+
+    # 5401 = Allround schutter:    3e graad in 4 disciplines
+    allround = 0
+    for nr in (5003, 5101, 5201, 5301):
+        if nr in nrs:
+            allround += 1
+    # for
+
+    optie = SpeldVoorwaarden(
+                speld=nr2speld[5401],
+                wedstrijd_soort='',
+                benodigde_score='4x 3e graad')
+    optie.mag_besteld_worden = (allround == 4)
+    optie.heeft_aantal = allround
+    optie.heeft_nodig = 4
+    optie.graadspeld_soort = '3e graad'
+    opties.append(optie)
+
+    # 5402 = Meesterschutter:      2e graad in 3 disciplines
+    meester = 0
+    for nr in (5002, 5102, 5202, 5302):
+        if nr in nrs:
+            meester += 1
+    # for
+
+    optie = SpeldVoorwaarden(
+                speld=nr2speld[5402],
+                wedstrijd_soort='',
+                benodigde_score='3x 2e graad')
+    optie.mag_besteld_worden = (meester >= 3)
+    optie.heeft_aantal = meester
+    optie.heeft_nodig = 3
+    optie.graadspeld_soort = '2e graad'
+    opties.append(optie)
+
+    # 5403 = Grootmeesterschutter: 1e graad in 3 disciplines
+    groot = 0
+    for nr in (5001, 5103, 5203, 5303):
+        if nr in nrs:
+            groot += 1
+    # for
+
+    optie = SpeldVoorwaarden(
+                speld=nr2speld[5403],
+                wedstrijd_soort='',
+                benodigde_score='3x 1e graad')
+    optie.mag_besteld_worden = (groot >= 3)
+    optie.heeft_aantal = groot
+    optie.heeft_nodig = 3
+    optie.graadspeld_soort = '1e graad'
+    opties.append(optie)
+
+    return opties
 
 
 # end of file

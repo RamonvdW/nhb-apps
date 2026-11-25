@@ -20,7 +20,8 @@ from Spelden.models import SpeldAanvraagPrep
 from Sporter.models import SporterBoog
 from Sporter.operations import get_sporter
 from Sporter.operations import get_sporter_voorkeuren
-from Wedstrijden.definities import WEDSTRIJD_DISCIPLINE_MAXLEN
+from Wedstrijden.definities import ORGANISATIE_IFAA, WEDSTRIJD_STATUS_GEACCEPTEERD, WEDSTRIJD_DISCIPLINE_MAXLEN
+from Wedstrijden.models import Wedstrijd
 from types import SimpleNamespace
 import datetime
 
@@ -104,10 +105,36 @@ class BestelStap1View(TemplateView):
         context['score'] = self.prep.score
 
         # configureer de datepicker
-        now = timezone.now().date()
+        max_date = now = timezone.now().date()
         min_date = now - datetime.timedelta(days=2*365)
         context['min_date'] = min_date
-        context['max_date'] = now
+        context['max_date'] = max_date
+
+        # datums waarop volgende kalender wedstrijden zijn geweest
+        # deze voeren als "events" aan de datepicker
+        event_datums = list()
+        for wedstrijd in (Wedstrijd
+                          .objects
+                          .exclude(toon_op_kalender=False)
+                          .exclude(organisatie=ORGANISATIE_IFAA)  # spelden zijn voor WA en KHSN
+                          .exclude(is_ter_info=True)
+                          .filter(status=WEDSTRIJD_STATUS_GEACCEPTEERD,
+                                  datum_begin__gte=min_date,
+                                  datum_einde__lte=max_date)):
+
+            datum = wedstrijd.datum_begin
+            if datum not in event_datums:
+                event_datums.append(datum)
+            limit = 5
+            while datum != wedstrijd.datum_einde and limit > 0:
+                datum += datetime.timedelta(days=1)
+                if datum not in event_datums:
+                    event_datums.append(datum)
+                limit -= 1
+            # for
+        # for
+
+        context['event_datums'] = event_datums
 
         if isinstance(self.prep.datum_wedstrijd, str) or self.prep.datum_wedstrijd.year < 2001:
             # toon initieel een leeg invoerveld, want de initiele datum is bewust onredelijk

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -54,6 +54,13 @@ class Vereniging(models.Model):
     # bankrekening details
     bank_iban = models.CharField(max_length=18, default='', blank=True)
     bank_bic = models.CharField(max_length=11, default='', blank=True)      # 8 of 11 tekens
+
+    # wanneer is/was deze vereniging aangesloten bij de bond?
+    aangesloten_vanaf = models.DateField(blank=True, null=True, default='1990-01-01')
+    aangesloten_tot = models.DateField(blank=True, null=True, default='3333-12-31')
+
+    # is deze vereniging nu actief?
+    is_actief = models.BooleanField(default=True)
 
     def ver_nr_en_naam(self):
         return "[%s] %s" % (self.ver_nr, self.naam)

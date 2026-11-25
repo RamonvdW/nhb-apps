@@ -200,10 +200,10 @@ def maak_voorwaarden_wa_target_awards(apps, _):
     # 70m ronde (recurve)
     soort = '70m ronde'
     for volgorde in (
-            41,     # Senioren dames
-            42,     # Senioren heren
-            31,     # Onder 21 dames
-            32):    # Onder 21 heren
+            41,     # 41=SV: Senioren dames
+            42,     # 42=SH: Senioren heren
+            31,     # 31=JV: Onder 21 dames
+            32):    # 32=JH: Onder 21 heren
 
         lkl = lkls[volgorde]
 

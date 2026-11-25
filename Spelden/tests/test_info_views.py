@@ -4,7 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from Geo.models import Regio
 from Spelden.models import Speld, SpeldVoorwaarden, SpeldAanvraag, SpeldToegekend
 from Sporter.models import Sporter
@@ -18,6 +18,8 @@ class TestSpeldenInfoViews(E2EHelpers, TestCase):
     """ tests voor de Spelden applicatie, informatie views """
 
     url_begin = '/spelden/'
+    url_bestel = '/spelden/bestel/'
+    url_kosten = '/spelden/kosten/'
     url_arrowhead = '/spelden/arrowhead/'
     url_sterspelden = '/spelden/sterspelden/'
     url_graadspelden = '/spelden/graadspelden/'
@@ -99,6 +101,9 @@ class TestSpeldenInfoViews(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('spelden/begin.dtl', 'design/site_layout.dtl'))
+        urls = self.extract_all_urls(resp, skip_menu=True)
+        self.assertFalse(self.url_bestel in urls)
+        self.assertFalse(self.url_kosten in urls)
 
         # meesterspelden
         with self.assert_max_queries(20):
@@ -167,12 +172,28 @@ class TestSpeldenInfoViews(E2EHelpers, TestCase):
     def test_sporter(self):
         self.e2e_login(self.account_sporter)
 
-        # begin
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_begin)
+        # begin, zonder bestel kaartjes
+        with override_settings(TOON_SPELDEN_BESTELLEN=False):
+            with self.assert_max_queries(20):
+                resp = self.client.get(self.url_begin)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('spelden/begin.dtl', 'design/site_layout.dtl'))
+        urls = self.extract_all_urls(resp, skip_menu=True)
+        # print('urls: %s' % repr(urls))
+        self.assertFalse(self.url_bestel in urls)
+        self.assertFalse(self.url_kosten in urls)
+
+        # begin, met bestel kaartjes
+        with override_settings(TOON_SPELDEN_BESTELLEN=True):
+            with self.assert_max_queries(20):
+                resp = self.client.get(self.url_begin)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('spelden/begin.dtl', 'design/site_layout.dtl'))
+        urls = self.extract_all_urls(resp, skip_menu=True)
+        self.assertTrue(self.url_bestel in urls)
+        self.assertTrue(self.url_kosten in urls)
 
         # meesterspelden
         with self.assert_max_queries(20):
@@ -196,11 +217,11 @@ class TestSpeldenInfoViews(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('spelden/khsn-graadspelden.dtl', 'design/site_layout.dtl'))
 
         # tussenspelden
-        # with self.assert_max_queries(20):
-        #     resp = self.client.get(self.url_tussenspelden)
-        # self.assertEqual(resp.status_code, 200)
-        # self.assert_html_ok(resp)
-        # self.assert_template_used(resp, ('spelden/khsn-tussenspelden.dtl', 'design/site_layout.dtl'))
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_tussenspelden)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('spelden/khsn-tussenspelden.dtl', 'design/site_layout.dtl'))
 
         # arrowhead
         with self.assert_max_queries(20):
@@ -222,5 +243,12 @@ class TestSpeldenInfoViews(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('spelden/wa-target-awards.dtl', 'design/site_layout.dtl'))
+
+        # kosten
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_kosten)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('spelden/kosten.dtl', 'design/site_layout.dtl'))
 
 # end of file

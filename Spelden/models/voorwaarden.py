@@ -7,7 +7,7 @@
 from django.db import models
 from BasisTypen.models import BoogType, Leeftijdsklasse
 from Spelden.definities import SPELD_DISCIPLINE_CHOICES, SPELD_DISCIPLINE_NVT, SPELD_DISCIPLINE2STR
-from .spelden import Speld
+from .speld import Speld
 
 
 class SpeldVoorwaarden(models.Model):

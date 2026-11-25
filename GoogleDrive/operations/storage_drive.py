@@ -96,25 +96,16 @@ class StorageGoogleDrive(StorageBase):
         while retries > 0:
             try:
                 response = request.execute()
-            except socket.timeout as exc:           # pragma: no cover
-                self.stdout.write('[ERROR] {execute} Socket timeout: %s' % exc)
-            except socket.gaierror as exc:          # pragma: no cover
-                # example: [Errno -3] Temporary failure in name resolution
-                self.stdout.write('[ERROR] {execute} Socket error: %s' % exc)
-            except GoogleApiError as exc:           # aka HttpError
-                self.stdout.write('[ERROR] {execute} GoogleApiError: %s' % exc)
-            except TransportError as exc:           # pragma: no cover
-                self.stdout.write('[ERROR] {execute} google.auth.TransportError: %s' % exc)
-            except ServerNotFoundError as exc:      # pragma: no cover
-                self.stdout.write('[ERROR] {execute} httplib2.error.ServerNotFoundError: %s' % exc)
             except RefreshError as exc:
-                self.stdout.write('[ERROR] {execute} RefreshError: %s' % exc)
+                self.stdout.write('[WARNING] {storage_drive, execute} RefreshError: %s' % exc)
                 return None
+            except Exception as exc:
+                self.stdout.write('[ERROR] {storage_drive, execute} Unexpected exception: %s' % exc)
             else:
-                self.stdout.write('[DEBUG] {execute} response=%s' % repr(response))
+                # self.stdout.write('[DEBUG] {storage_drive, execute} response=%s' % repr(response))
                 return response
 
-            self.stdout.write('[DEBUG] {execute} Retrying in %s seconds' % wait_sec)
+            self.stdout.write('[INFO] {storage_drive, execute} Retrying in %s seconds' % wait_sec)
 
             time.sleep(wait_sec)
             wait_sec *= 2       # 1, 2, 4, 8, 16, 32, 64
@@ -317,36 +308,14 @@ class StorageGoogleDrive(StorageBase):
                 file_id = self._maak_bestand_uit_template(folder_name, fname)
             self._save_bestand(afstand, is_teams, is_bk, klasse_pk, rayon_nr, fname, file_id)
 
-        except KeyError as exc:
-            e_type, _, tb = sys.exc_info()
-            tb_list = traceback.format_tb(tb)
-            error_msg = 'KeyError: %s' % exc
+        except StorageError:
+            # pass through
+            raise
 
-        except (IndexError, ValueError) as exc:     # pragma: no cover
+        except Exception as exc:
             e_type, _, tb = sys.exc_info()
             tb_list = traceback.format_tb(tb)
             error_msg = 'Exception: %s' % exc
-
-        except socket.timeout as exc:               # pragma: no cover
-            e_type, _, tb = sys.exc_info()
-            tb_list = traceback.format_tb(tb)
-            error_msg = 'Socket timeout exception: %s' % exc
-
-        except socket.gaierror as exc:              # pragma: no cover
-            e_type, _, tb = sys.exc_info()
-            tb_list = traceback.format_tb(tb)
-            # example: [Errno -3] Temporary failure in name resolution
-            error_msg = 'Socket exception: %s' % exc
-
-        except GoogleApiError as exc:
-            e_type, _, tb = sys.exc_info()
-            tb_list = traceback.format_tb(tb)
-            error_msg = 'GoogleApiError: %s' % exc.reason
-
-        except RefreshError as exc:
-            e_type, _, tb = sys.exc_info()
-            tb_list = traceback.format_tb(tb)
-            error_msg = 'RefreshError: %s' % exc
 
         if error_msg:
             msg = 'Onverwachte fout in storage_drive:\n'

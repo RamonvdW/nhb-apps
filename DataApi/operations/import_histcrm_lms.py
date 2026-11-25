@@ -10,12 +10,14 @@ from DataApi.models import DataApiLidmaatschap
 import datetime
 
 
-EXPECTED_MEMBER_KEYS = ('club_number', 'member_number', 'birthday', 'gender', 'member_from',
-                        'postal_code', 'iso_abbr', 'date_of_death', 'member_from_club', 'member_until_club')
+EXPECTED_MEMBER_KEYS = ('club_number', 'club_prev_number', 'member_number', 'birthday', 'gender',
+                        'postal_code', 'iso_abbr', 'date_of_death', 'member_club_from', 'member_club_until',
+                        'member_club_prev_from', 'member_club_prev_until')
 OPTIONAL_MEMBER_KEYS = ('skill_levels', 'educations', 'latitude', 'longitude', 'location_name',
                         'phone_business', 'phone_mobile', 'phone_private', 'para_code', 'address',
                         'initials', 'name', 'prefix', 'first_name', 'birthplace', 'email', 'wa_id',
-                        'member_until', 'blocked')
+                        'member_from', 'member_until', 'blocked',
+                        'member_from_club', 'member_until_club')        # obsolete
 
 
 class ImportHistCrmLidmaatschappen(ImportCrmBase):

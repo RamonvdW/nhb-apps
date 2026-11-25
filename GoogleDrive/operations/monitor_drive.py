@@ -8,15 +8,9 @@
 
 from django.conf import settings
 from googleapiclient.discovery import build
-from googleapiclient.errors import HttpError as GoogleApiError
 from googleapiclient.http import HttpRequest
 from google.oauth2.service_account import Credentials
-from google.auth.exceptions import TransportError
-from httplib2.error import ServerNotFoundError
-from http.client import IncompleteRead
-from ssl import SSLError
 import datetime
-import socket
 import time
 import os
 
@@ -60,28 +54,13 @@ class MonitorDriveFiles:
         while retries > 0:
             try:
                 response = request.execute()
-            except socket.timeout as exc:           # pragma: no cover
-                self.stdout.write('[ERROR] {execute} Socket timeout: %s' % exc)
-            except socket.gaierror as exc:          # pragma: no cover
-                # example: [Errno -3] Temporary failure in name resolution
-                self.stdout.write('[ERROR] {execute} Socket error: %s' % exc)
-            except GoogleApiError as exc:           # aka HttpError
-                self.stdout.write('[ERROR] {execute} GoogleApiError: %s' % exc)
-            except TransportError as exc:           # pragma: no cover
-                self.stdout.write('[ERROR] {execute} google.auth.TransportError: %s' % exc)
-            except ServerNotFoundError as exc:      # pragma: no cover
-                self.stdout.write('[ERROR] {execute} httplib2.error.ServerNotFoundError: %s' % exc)
-            except IncompleteRead as exc:           # pragma: no cover
-                self.stdout.write('[ERROR] {execute} http.client.IncompleteRead: %s' % exc)
-            except ConnectionResetError as exc:     # pragma: no cover
-                self.stdout.write('[ERROR] {execute} ConnectionResetError: %s' % exc)
-            except SSLError as exc:                 # pragma: no cover
-                self.stdout.write('[ERROR] {execute} SSLError: %s' % exc)
+            except Exception as exc:
+                self.stdout.write('[ERROR] {monitor_drive, execute} Unexpected exception: %s' % exc)
             else:
                 # self.stdout.write('[DEBUG] {execute} response=%s' % repr(response))
                 return response
 
-            self.stdout.write('[DEBUG] {execute} Retrying in %s seconds' % wait_sec)
+            self.stdout.write('[INFO] {execute} Retrying in %s seconds' % wait_sec)
 
             time.sleep(wait_sec)
             wait_sec *= 2       # 1, 2, 4, 8, 16, 32, 64

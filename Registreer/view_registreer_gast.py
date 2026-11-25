@@ -5,10 +5,11 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import transaction
+from django.urls import reverse
 from django.conf import settings
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, Http404
 from django.utils import timezone
-from django.shortcuts import render, reverse, redirect, Http404
+from django.shortcuts import render, redirect
 from django.contrib.auth import update_session_auth_hash
 from django.views.generic import View, TemplateView
 from Account.models import get_account
@@ -154,9 +155,24 @@ class RegistreerGastView(TemplateView):
             return render(request, TEMPLATE_REGISTREER_GAST, context)
 
         # compleetheid is gecontroleerd door het formulier
-        voornaam = form.cleaned_data.get('voornaam')
-        achternaam = form.cleaned_data.get('achternaam')
-        email = form.cleaned_data.get('email')
+        voornaam = form.cleaned_data.get('voornaam', '')
+        achternaam = form.cleaned_data.get('achternaam', '')
+        email = form.cleaned_data.get('email', '')
+
+        try:
+            res = int(request.POST.get('res', ''))
+        except (ValueError, TypeError):
+            res = -1
+
+        # doe dezelfde berekening als in gast.js
+        l1 = 10 + len(voornaam)
+        l2 = 20 + len(achternaam)
+        l3 = 30 + len(email)
+        check = max(l1, l2, l3) * l2
+        if res != check:
+            # verzoek moet geblokkeerd worden
+            form.add_error(None, 'niet compleet')
+            return render(request, TEMPLATE_REGISTREER_GAST, context)
 
         # kijk of er al een verzoek loopt van dezelfde gebruiker
         gast, is_created = GastRegistratie.objects.get_or_create(voornaam=voornaam,

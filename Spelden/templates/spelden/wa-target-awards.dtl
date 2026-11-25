@@ -28,7 +28,7 @@
                             <tr>
                                 <th class="center">Leeftijds<wbr>klassen</th>
                                 <th class="center">Boog type</th>
-                                <th class="center">Wedstrijden</th>
+                                <th class="center">Soort wedstrijd</th>
                                 <th class="center">Aantal pijlen</th>
                                 <th class="center">Soort speld</th>
                             </tr>
@@ -43,31 +43,31 @@
                             <td class="center" rowspan="7">Target Award</td>
                         </tr>
                         <tr>
-                            <td class="center" rowspan="2">Recurve<br>Compound<br>Barebow</td>
+                            <td class="center" rowspan="2" style="padding-left:20px; padding-right:20px">Recurve<br>Compound<br>Barebow</td>
                             <td class="center">900 ronde<br>(60m, 50m, 40m)</td>
-                            <td class="center">3x30</td>
+                            <td class="center">90</td>
                         </tr>
                         <tr>
                             <td class="center">25m ronde</td>
-                            <td class="center">50</td>
+                            <td class="center">60</td>
                         </tr>
                         <tr>
-                            <td class="center">Recurve</td>
+                            <td class="center">Recurve<br>Compound</td>
                             <td class="center">18m ronde</td>
                             <td class="center">60</td>
                         </tr>
                         <tr>
                             <td class="center" rowspan="2">Barebow</td>
-                            <td class="center">Barebow 18m ronde</td>
+                            <td class="center">Barebow 18m&nbsp;ronde</td>
                             <td class="center">60</td>
                         </tr>
                         <tr>
-                            <td class="center">Barebow 50m ronde</td>
+                            <td class="center">Barebow 50m&nbsp;ronde</td>
                             <td class="center">72</td>
                         </tr>
                         <tr>
                             <td class="center">Compound</td>
-                            <td class="center">Compound 50m ronde</td>
+                            <td class="center" style="padding-left:20px; padding-right:20px">Compound 50m&nbsp;ronde</td>
                             <td class="center">72</td>
                         </tr>
 

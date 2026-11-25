@@ -14,7 +14,7 @@ EXPECTED_CLUB_KEYS = ('club_number', 'has_disabled_facilities', 'address', 'post
                       'latitude', 'longitude', )
 OPTIONAL_CLUB_KEYS = ('region_number', 'smoke_free_status', 'name', 'prefix', 'email', 'website', 'phone_business',
                       'phone_private', 'phone_mobile', 'coc_number', 'iso_abbr', 'secretaris', 'iban', 'bic',
-                      'member_admins')
+                      'member_admins', 'member_from', 'date_of_establishment')
 
 
 class ImportCrmLocaties(ImportCrmBase):

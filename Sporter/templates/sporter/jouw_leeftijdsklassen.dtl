@@ -39,45 +39,45 @@
             </div>
         </div>
 
-        <div class="col s12">
+        <div class="col s12 l10 offset-l1 xl8 offset-xl2">
 
             <table class="sv-kader-tabel">
                 <thead>
                     <tr>
-                        <th>Jaartal</th>
-                        <th>Te bereiken leeftijd</th>
-                        <th>Jouw leeftijdsklasse voor wedstrijden het gehele jaar</th>
+                        <th class="center">Jaartal</th>
+                        <th class="center">Te bereiken leeftijd</th>
+                        <th class="center">Jouw leeftijdsklasse voor wedstrijden het gehele jaar</th>
                     </tr>
                 </thead>
 
                 <tr>
-                    <td>{{ huidige_jaar|add:"-1" }}</td>
-                    <td>{{ leeftijd|add:"-1" }}</td>
-                    <td>{{ lkl_wa.0 }}</td>
+                    <td class="center">{{ huidige_jaar|add:"-1" }}</td>
+                    <td class="center">{{ leeftijd|add:"-1" }}</td>
+                    <td class="center">{{ lkl_wa.0 }}</td>
                 </tr>
 
                 <tr class="sv-rood white-text">
-                    <td>{{ huidige_jaar }}</td>
-                    <td>{{ leeftijd }}</td>
-                    <td>{{ lkl_wa.1 }}</td>
+                    <td class="center">{{ huidige_jaar }}</td>
+                    <td class="center">{{ leeftijd }}</td>
+                    <td class="center">{{ lkl_wa.1 }}</td>
                 </tr>
 
                 <tr>
-                    <td>{{ huidige_jaar|add:"1" }}</td>
-                    <td>{{ leeftijd|add:"1" }}</td>
-                    <td>{{ lkl_wa.2 }}</td>
+                    <td class="center">{{ huidige_jaar|add:"1" }}</td>
+                    <td class="center">{{ leeftijd|add:"1" }}</td>
+                    <td class="center">{{ lkl_wa.2 }}</td>
                 </tr>
 
                 <tr>
-                    <td>{{ huidige_jaar|add:"2" }}</td>
-                    <td>{{ leeftijd|add:"2" }}</td>
-                    <td>{{ lkl_wa.3 }}</td>
+                    <td class="center">{{ huidige_jaar|add:"2" }}</td>
+                    <td class="center">{{ leeftijd|add:"2" }}</td>
+                    <td class="center">{{ lkl_wa.3 }}</td>
                 </tr>
 
                 <tr>
-                    <td>{{ huidige_jaar|add:"3" }}</td>
-                    <td>{{ leeftijd|add:"3" }}</td>
-                    <td>{{ lkl_wa.4 }}</td>
+                    <td class="center">{{ huidige_jaar|add:"3" }}</td>
+                    <td class="center">{{ leeftijd|add:"3" }}</td>
+                    <td class="center">{{ lkl_wa.4 }}</td>
                 </tr>
             </table>
 
@@ -109,21 +109,21 @@
             </div>
         </div>
 
-        <div class="col s12">
+        <div class="col s12 l10 offset-l1 xl8 offset-xl2">
 
             <table class="sv-kader-tabel">
                 <thead>
                     <tr>
-                        <th>Jaartal</th>
-                        <th>Wedstrijdklasse tot je verjaardag</th>
-                        <th>Wedstrijdklasse vanaf je verjaardag</th>
+                        <th class="center">Jaartal</th>
+                        <th class="center">Wedstrijdklasse tot je verjaardag</th>
+                        <th class="center">Wedstrijdklasse vanaf je verjaardag</th>
                     </tr>
 
                     {% for jaar, kl1, kl2 in wlst_ifaa %}
                         <tr{% if jaar == huidige_jaar %} class="sv-rood white-text"{% endif %}>
-                            <td>{{ jaar }}</td>
-                            <td>{{ kl1 }}</td>
-                            <td>{{ kl2 }}</td>
+                            <td class="center">{{ jaar }}</td>
+                            <td class="center">{{ kl1 }}</td>
+                            <td class="center">{{ kl2 }}</td>
                         </tr>
                     {% endfor %}
                 </thead>
@@ -157,45 +157,45 @@
             </div>
         </div>
 
-        <div class="col s12">
+        <div class="col s12 l10 offset-l1 xl8 offset-xl2">
 
             <table class="sv-kader-tabel">
                 <thead>
                     <tr>
-                        <th>Jaartal</th>
-                        <th>Te bereiken leeftijd</th>
-                        <th>Jouw leeftijdsklasse voor wedstrijden het gehele jaar</th>
+                        <th class="center">Jaartal</th>
+                        <th class="center">Te bereiken leeftijd</th>
+                        <th class="center">Jouw leeftijdsklasse voor wedstrijden het gehele jaar</th>
                     </tr>
                 </thead>
 
                 <tr>
-                    <td>{{ huidige_jaar|add:"-1" }}</td>
-                    <td>{{ leeftijd|add:"-1" }}</td>
-                    <td>{{ lkl_khsn.0 }}</td>
+                    <td class="center">{{ huidige_jaar|add:"-1" }}</td>
+                    <td class="center">{{ leeftijd|add:"-1" }}</td>
+                    <td class="center">{{ lkl_khsn.0 }}</td>
                 </tr>
 
                 <tr class="sv-rood white-text">
-                    <td>{{ huidige_jaar }}</td>
-                    <td>{{ leeftijd }}</td>
-                    <td>{{ lkl_khsn.1 }}</td>
+                    <td class="center">{{ huidige_jaar }}</td>
+                    <td class="center">{{ leeftijd }}</td>
+                    <td class="center">{{ lkl_khsn.1 }}</td>
                 </tr>
 
                 <tr>
-                    <td>{{ huidige_jaar|add:"1" }}</td>
-                    <td>{{ leeftijd|add:"1" }}</td>
-                    <td>{{ lkl_khsn.2 }}</td>
+                    <td class="center">{{ huidige_jaar|add:"1" }}</td>
+                    <td class="center">{{ leeftijd|add:"1" }}</td>
+                    <td class="center">{{ lkl_khsn.2 }}</td>
                 </tr>
 
                 <tr>
-                    <td>{{ huidige_jaar|add:"2" }}</td>
-                    <td>{{ leeftijd|add:"2" }}</td>
-                    <td>{{ lkl_khsn.3 }}</td>
+                    <td class="center">{{ huidige_jaar|add:"2" }}</td>
+                    <td class="center">{{ leeftijd|add:"2" }}</td>
+                    <td class="center">{{ lkl_khsn.3 }}</td>
                 </tr>
 
                 <tr>
-                    <td>{{ huidige_jaar|add:"3" }}</td>
-                    <td>{{ leeftijd|add:"3" }}</td>
-                    <td>{{ lkl_khsn.4 }}</td>
+                    <td class="center">{{ huidige_jaar|add:"3" }}</td>
+                    <td class="center">{{ leeftijd|add:"3" }}</td>
+                    <td class="center">{{ lkl_khsn.4 }}</td>
                 </tr>
             </table>
 
@@ -225,39 +225,39 @@
             </div>
         </div>
 
-        <div class="col s12">
+        <div class="col s12 l10 offset-l1 xl8 offset-xl2">
 
             <table class="sv-kader-tabel">
                 <thead>
                     <tr>
-                        <th>Seizoen bondscompetitie</th>
-                        <th>Jouw wedstrijdklasse voor het gehele seizoen</th>
+                        <th class="center">Seizoen bondscompetitie</th>
+                        <th class="center">Jouw wedstrijdklasse voor het gehele seizoen</th>
                     </tr>
                 </thead>
 
                 <tr>
-                    <td>{{ lkl_comp.0.seizoen }}</td>
-                    <td>{{ lkl_comp.0.tekst }}</td>
+                    <td class="center">{{ lkl_comp.0.seizoen }}</td>
+                    <td class="center">{{ lkl_comp.0.tekst }}</td>
                 </tr>
 
                 <tr class="sv-rood white-text">
-                    <td>{{ lkl_comp.1.seizoen }}</td>
-                    <td>{{ lkl_comp.1.tekst }}</td>
+                    <td class="center">{{ lkl_comp.1.seizoen }}</td>
+                    <td class="center">{{ lkl_comp.1.tekst }}</td>
                 </tr>
 
                 <tr>
-                    <td>{{ lkl_comp.2.seizoen }}</td>
-                    <td>{{ lkl_comp.2.tekst }}</td>
+                    <td class="center">{{ lkl_comp.2.seizoen }}</td>
+                    <td class="center">{{ lkl_comp.2.tekst }}</td>
                 </tr>
 
                 <tr>
-                    <td>{{ lkl_comp.3.seizoen }}</td>
-                    <td>{{ lkl_comp.3.tekst }}</td>
+                    <td class="center">{{ lkl_comp.3.seizoen }}</td>
+                    <td class="center">{{ lkl_comp.3.tekst }}</td>
                 </tr>
 
                 <tr>
-                    <td>{{ lkl_comp.4.seizoen }}</td>
-                    <td>{{ lkl_comp.4.tekst }}</td>
+                    <td class="center">{{ lkl_comp.4.seizoen }}</td>
+                    <td class="center">{{ lkl_comp.4.tekst }}</td>
                 </tr>
 
             </table>

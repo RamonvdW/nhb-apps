@@ -105,12 +105,13 @@ class SpeldenBestelPlugin(BestelPluginBase):
 
         aanvraag = bestelling.aanvraag
 
+        score = aanvraag.score_sm if speld.categorie == SPELD_CATEGORIE_NL_GRAADSPELD_SHORT_METRIC else aanvraag.score
+
         details1 = [
             SPELD_DISCIPLINE2STR[aanvraag.discipline],
             aanvraag.datum_wedstrijd.strftime('%Y-%m-%d'),
             SPELD_BOOGTYPE2STR[aanvraag.boog] + ' boog',
-            'score %s' % aanvraag.score,
-        ]
+            'score %s' % score]
 
         details2 = list(aanvraag.informatie_wedstrijd.split('|'))
         if aanvraag.wedstrijd:

@@ -709,7 +709,8 @@ class MyTestAsserts(TestCase):
                 resp = self.client.get(resp.url)
 
             # "403 pagina" is een normale pagina met status_code 200
-            if resp.status_code != 200:                                 # pragma: no cover
+            # sommige pagina's verwijzen direct naar een andere pagina: status_code 302
+            if resp.status_code not in (200, 302):                      # pragma: no cover
                 # print('redirected from %s to %s' % (url, resp.url))
                 self.fail(msg='url %s geeft status code %s' % (url, resp.status_code))
 

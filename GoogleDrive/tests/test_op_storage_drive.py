@@ -361,15 +361,6 @@ class TestGoogleDriveOpStorageDrive(E2EHelpers, TestCase):
             self.assertEqual("{list_folder} No 'files' in response", str(exc.exception))
         del drive
 
-        # trigger de KeyError fout tijdens list_folder
-        # drive = StorageGoogleDrive(out, 2025, share_with_emails, 0.01)
-        # my_service = GoogleApiMock(verbose=False)
-        # with patch('GoogleDrive.operations.storage_drive.build', return_value=my_service):
-        #     with self.assertRaises(StorageError) as exc:
-        #         drive.maak_sheet_van_template(18, False, False, 1, 3, 'fname3')
-        #     print('exc: %s' % str(exc.exception))
-        #     self.assertTrue("KeyError: '18 Indiv RK'" in str(exc.exception))
-
     def test_share_seizoen(self):
         # speciale situaties tijdens share_seizoen_folder
         out = OutputBuffer()
@@ -393,27 +384,6 @@ class TestGoogleDriveOpStorageDrive(E2EHelpers, TestCase):
         with patch('GoogleDrive.operations.storage_drive.build', return_value=my_service):
             drive._comp2template_file_id[folder_18_indiv_rk] = 'templ1'
             drive.maak_sheet_van_template(18, False, False, 1, 2, 'fname3')
-
-    # @staticmethod
-    # def _iter_wedstrijdformulieren(arg):
-    #     yield 42, False, False, 1, 'fname1'
-    #     yield 42, True, False, 1, 'fname2'
-    #
-    # def test_ontbrekende(self):
-    #     comp = Competitie.objects.create(begin_jaar=2025, afstand='42')
-    #
-    #     lst = ontbrekende_wedstrijdformulieren_rk_bk(comp)
-    #     self.assertEqual(lst, [])
-    #
-    #     Bestand.objects.create(
-    #                 begin_jaar=comp.begin_jaar,
-    #                 afstand=int(comp.afstand),
-    #                 klasse_pk=1)
-    #
-    #     with patch('GoogleDrive.operations.storage_drive.iter_wedstrijdformulieren',
-    #                side_effect=self._iter_wedstrijdformulieren):
-    #         lst = ontbrekende_wedstrijdformulieren_rk_bk(comp)
-    #         #self.assertEqual(lst, [])
 
 
 # end of file

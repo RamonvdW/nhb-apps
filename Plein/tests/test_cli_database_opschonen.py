@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2025 Ramon van der Winkel.
+#  Copyright (c) 2021-2026 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
 from django.utils import timezone
 from Account.operations import account_create
-from BasisTypen.models import BoogType
 from Bestelling.models import BestellingMandje, Bestelling, BestellingMutatie
 from Betaal.models import BetaalInstellingenVereniging, BetaalMutatie, BetaalActief, BetaalTransactie
 from Feedback.models import Feedback
@@ -18,7 +17,6 @@ from Mailer.operations import mailer_queue_email
 from Registreer.definities import (REGISTRATIE_FASE_CLUB, REGISTRATIE_FASE_CONFIRM, REGISTRATIE_FASE_COMPLEET,
                                    REGISTRATIE_FASE_AFGEWEZEN)
 from Registreer.models import GastRegistratie
-from Spelden.models import SpeldAanvraag
 from Sporter.models import Sporter
 from Taken.models import Taak
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -237,12 +235,6 @@ class TestPleinCliDatabaseOpschonen(E2EHelpers, TestCase):
                         email=self.gast_email_zes,
                         account=None)
         sporter.save()
-
-        SpeldAanvraag(
-                door_account=spook2_account,
-                voor_sporter=sporter,
-                boog_type=BoogType.objects.first(),
-                datum_wedstrijd='2000-01-01').save()
 
     def test_alles(self):
         f1, f2 = self.run_management_command(DATABASE_OPSCHONEN_COMMAND)

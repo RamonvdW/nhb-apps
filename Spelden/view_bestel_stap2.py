@@ -46,6 +46,8 @@ class BestelStap2View(TemplateView):
 
         account = get_account(self.request)
         sporter = get_sporter(account)
+        if not sporter:                                 # pragma: no branch
+            raise Http404('Onvolledige verzoek')        # pragma: no cover
 
         prep = SpeldAanvraagPrep.objects.filter(voor_sporter=sporter).first()
         if prep is None:
@@ -94,10 +96,7 @@ class BestelStap2View(TemplateView):
             context['kalender_lijst'] = self.qset_wedstrijden
 
         spl = self.prep.informatie_wedstrijd.split('|')
-        if len(spl) >= 1:
-            context['plaats'] = spl[0]
-        else:
-            context['plaats'] = ''
+        context['plaats'] = spl[0]
         if len(spl) > 1:
             context['land'] = spl[1]
         else:
@@ -146,10 +145,9 @@ class BestelStap2View(TemplateView):
 
             self.prep.wedstrijd = obj
 
+            # we ondersteunen alleen wedstrijdlocaties in Nederland
             locatie = self.prep.wedstrijd.locatie
-            if locatie:
-                # we ondersteunen alleen wedstrijdlocaties in Nederland
-                self.prep.informatie_wedstrijd = '%s|%s' % (locatie.plaats, 'Nederland')
+            self.prep.informatie_wedstrijd = '%s|%s' % (locatie.plaats, 'Nederland')
         else:
             self.prep.wedstrijd = None
 

@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import models
-from .spelden import Speld
+from .speld import Speld
 from Sporter.models import Sporter
 
 

@@ -9,7 +9,7 @@ from Account.models import Account
 from BasisTypen.definities import GESLACHT_MV, GESLACHT_MAN
 from Bestelling.models import BestellingRegel
 from Spelden.definities import SPELD_DISCIPLINE_CHOICES, SPELD_DISCIPLINE_NVT, SPELD_BOOGTYPE_CHOICES
-from .spelden import Speld
+from .speld import Speld
 from Sporter.models import Sporter
 from Webwinkel.definities import KEUZE_STATUS_CHOICES, KEUZE_STATUS_RESERVERING_MANDJE
 from Wedstrijden.models import Wedstrijd
@@ -104,6 +104,7 @@ class SpeldAanvraag(models.Model):
 
     # behaalde score
     score = models.PositiveSmallIntegerField(default=0)
+    score_sm = models.PositiveSmallIntegerField(default=0)
 
     # op welke datum is de prestatie neergezet?
     datum_wedstrijd = models.DateField()

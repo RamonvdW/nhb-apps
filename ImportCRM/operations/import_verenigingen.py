@@ -12,12 +12,13 @@ from Account.models import Account
 from Functie.operations import koppel_account_aan_functie_sec
 from ImportCRM.import_base import ImportCrmBase
 from Vereniging.models import Vereniging, Secretaris
-
+import datetime
 
 EXPECTED_CLUB_KEYS = ('region_number', 'club_number', 'name', 'prefix', 'email', 'website', 'address', 'location_name',
-                      'coc_number', 'iban', 'bic')
+                      'coc_number', 'iban', 'bic', 'member_from')
 OPTIONAL_CLUB_KEYS = ('smoke_free_status', 'has_disabled_facilities', 'postal_code', 'phone_business', 'phone_private',
-                      'phone_mobile', 'iso_abbr', 'latitude', 'longitude', 'secretaris', 'member_admins')
+                      'phone_mobile', 'iso_abbr', 'latitude', 'longitude', 'secretaris', 'member_admins',
+                      'date_of_establishment')
 
 
 class ImportCrmVerenigingen(ImportCrmBase):
@@ -144,6 +145,7 @@ class ImportCrmVerenigingen(ImportCrmBase):
                 'iso_abbr': 'NL',          ???
                 'latitude', 'longitude',
                 'iban', 'bic',
+                'member_from': '1990-01-01',
                 'secretaris': [{'member_number': int}]
                 'member_admins': [{'member_number': int, 'read_only': true/false}, ...]
         }
@@ -276,6 +278,12 @@ class ImportCrmVerenigingen(ImportCrmBase):
                 ver_bic = ''
                 ver_iban = ''
 
+            ver_member_from = club['member_from']
+            try:
+                ver_member_from = datetime.datetime.strptime(club['member_from'], "%Y-%m-%d").date()   # YYYY-MM-DD
+            except (ValueError, TypeError):
+                ver_member_from = None
+
             # zoek de vereniging op
             is_nieuw = False
             obj = self.vind_vereniging(ver_nr)
@@ -377,29 +385,43 @@ class ImportCrmVerenigingen(ImportCrmBase):
                     obj.bank_bic = ver_bic
                     updated.append('bank_bic')
 
+                if not ver_member_from:
+                    ver_member_from = datetime.date(1990, 1, 1)
+
+                if obj.aangesloten_vanaf != ver_member_from:
+                    self.out_info("Wijziging member_from van vereniging %s: %s --> %s" % (
+                                    ver_nr,
+                                    obj.aangesloten_vanaf.strftime('%Y-%m-%d'),
+                                    ver_member_from.strftime('%Y-%m-%d')))
+                    self.count_wijzigingen += 1
+                    obj.aangesloten_vanaf = ver_member_from
+                    updated.append('aangesloten_vanaf')
+
                 if not self.dryrun:
                     obj.save(update_fields=updated)
 
             if is_nieuw:
                 obj = None
-                ver = Vereniging(
-                            ver_nr=ver_nr,
-                            naam=ver_naam,
-                            plaats=ver_plaats,
-                            geen_wedstrijden=ver_geen_wedstrijden,
-                            kvk_nummer=ver_kvk,
-                            website=ver_website,
-                            telefoonnummer=ver_tel_nr,
-                            contact_email=ver_email,
-                            adres_regel1=ver_adres1,
-                            adres_regel2=ver_adres2)
                 regio_obj = self._import_geo.vind_regio(ver_regio)
                 if not regio_obj:
                     self.out_error('Vereniging %s hoort bij onbekende regio %s' % (ver_nr, ver_regio))
                 else:
+                    ver = Vereniging(
+                                ver_nr=ver_nr,
+                                naam=ver_naam,
+                                plaats=ver_plaats,
+                                geen_wedstrijden=ver_geen_wedstrijden,
+                                kvk_nummer=ver_kvk,
+                                website=ver_website,
+                                telefoonnummer=ver_tel_nr,
+                                contact_email=ver_email,
+                                adres_regel1=ver_adres1,
+                                adres_regel2=ver_adres2,
+                                regio=regio_obj,
+                                aangesloten_vanaf=ver_member_from)
+
                     self.out_info('Vereniging %s aangemaakt: %s' % (ver_nr, repr(ver.naam)))
                     self.count_toevoegingen += 1
-                    ver.regio = regio_obj
                     if not self.dryrun:
                         ver.save()
                         self._cache_ver[ver.pk] = ver
