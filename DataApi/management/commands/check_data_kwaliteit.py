@@ -30,25 +30,39 @@ class Command(BaseCommand):
         if len(datum) != 10 or datum[4] != '-' or datum[7] != '-':
             self.stdout.write('[ERROR] Illegale %s %s in %s' % (field_str, repr(datum), id_str))
 
-    def _check_no_lms_on_ver(self, ver: DataApiVereniging):
-        lms_actief = list()
+    def _check_ver_lms_datums(self, ver: DataApiVereniging):
+        lms_eerder_aangemeld = list()
         lms_later_afgemeld = list()
+        lms_actief = list()
         for lms in DataApiLidmaatschap.objects.filter(ver_nr=ver.ver_nr):
+            if lms.aanmeld_datum < ver.aanmeld_datum:
+                lms_eerder_aangemeld.append(lms)
+
             if lms.afmeld_datum == '':
                 lms_actief.append(lms)
-            elif lms.afmeld_datum > ver.afmeld_datum:
+            elif ver.afmeld_datum != '' and lms.afmeld_datum > ver.afmeld_datum:
                 lms_later_afgemeld.append(lms)
         # for
 
-        if len(lms_actief):
-            self.stdout.write('[ERROR] Vereniging %s is afgemeld per %s maar heeft nog %s lidmaatschappen:' % (ver.ver_nr, ver.afmeld_datum, len(lms_actief)))
+        if ver.afmeld_datum != '' and len(lms_actief):
+            self.stdout.write('[ERROR] Vereniging %s is afgemeld per %s maar heeft nog %s lidmaatschappen:' %
+                                    (ver.ver_nr, ver.afmeld_datum, len(lms_actief)))
             self.count_errors += 1
             for lms in lms_actief:
                 self.stdout.write('        %s' % lms)
             # for
 
+        if len(lms_eerder_aangemeld):
+            self.stdout.write('[WARNING] Vereniging %s is aangemeld per %s maar %s lidmaatschappen beginnen eerder:' %
+                                    (ver.ver_nr, ver.aanmeld_datum, len(lms_eerder_aangemeld)))
+            self.count_warnings += 1
+            for lms in lms_eerder_aangemeld:
+                self.stdout.write('        %s' % lms)
+            # for
+
         if len(lms_later_afgemeld):
-            self.stdout.write('[WARNING] Vereniging %s is afgemeld per %s maar %s lidmaatschappen lopen langer door:' % (ver.ver_nr, ver.afmeld_datum, len(lms_later_afgemeld)))
+            self.stdout.write('[WARNING] Vereniging %s is afgemeld per %s maar %s lidmaatschappen lopen langer door:' %
+                                    (ver.ver_nr, ver.afmeld_datum, len(lms_later_afgemeld)))
             self.count_warnings += 1
             for lms in lms_later_afgemeld:
                 self.stdout.write('        %s' % lms)
@@ -63,10 +77,12 @@ class Command(BaseCommand):
             if ver.afmeld_datum:
                 self._check_ymd(ver.afmeld_datum, 'afmelddatum', id_str)
 
-            if ver.afmeld_datum != '':
-                # vereniging is niet meer actief
-                # alle lidmaatschappen moeten voor deze datum geeindigd zijn
-                self._check_no_lms_on_ver(ver)
+            if ver.afmeld_datum:
+                if ver.afmeld_datum < ver.aanmeld_datum:
+                    self.stdout.write('[ERROR] Vereniging %s heeft afmelddatum %s voor aanmelddatum %s' %
+                                        (ver.ver_nr, ver.afmeld_datum, ver.aanmeld_datum))
+
+            self._check_ver_lms_datums(ver)
         # for
 
     def _check_lms(self):

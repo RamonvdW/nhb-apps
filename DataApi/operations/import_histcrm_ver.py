@@ -10,11 +10,10 @@ from DataApi.models import DataApiVereniging
 
 
 EXPECTED_CLUB_KEYS = ('club_number', 'prefix', 'name', 'address', 'postal_code', 'location_name', 'iso_abbr',
-                      'latitude', 'longitude')
+                      'latitude', 'longitude', 'coc_number', 'member_from')
 OPTIONAL_CLUB_KEYS = ('region_number', 'smoke_free_status', 'has_disabled_facilities', 'phone_business',
                       'phone_private', 'phone_mobile', 'secretaris', 'member_admins', 'prefix', 'iban', 'bic',
-                      'email', 'website',
-                      'coc_number')     # was vroeger niet aanwezig
+                      'email', 'website')
 
 
 class ImportHistCrmVerenigingen(ImportCrmBase):
@@ -46,14 +45,16 @@ class ImportHistCrmVerenigingen(ImportCrmBase):
     def _get_ver_nrs(self):
         return list(self._cache_ver.keys())
 
-    def _store_vereniging(self, ver_nr: int, naam: str, kvk: str, straatnaam: str, huis_nr: int, postcode: str, plaats: str, lat: str, lon: str):
+    def _store_vereniging(self, ver_nr: int, naam: str, kvk: str,
+                          straatnaam: str, huis_nr: int, postcode: str, plaats: str, lat: str, lon: str,
+                          member_from: str):
         ver = self.vind_vereniging(ver_nr)
         if not ver:
             # nieuw record
             ver = DataApiVereniging(
                     ver_nr=ver_nr,
                     naam=naam,
-                    aanmeld_datum=self.aanmelddatum_ver,
+                    aanmeld_datum=member_from,
                     kvk_nummer=kvk,
                     straatnaam=straatnaam,
                     huisnummer=huis_nr,
@@ -128,6 +129,13 @@ class ImportHistCrmVerenigingen(ImportCrmBase):
                                 (ver_nr, repr(ver.lon), repr(lon)))
             ver.lon = lon
             updated.append('lon')
+
+        if member_from != ver.aanmeld_datum:
+            if ver.aanmeld_datum != '':
+                self.out_info('Vereniging %s wijziging aanmeld_datum: %s --> %s' %
+                                (ver_nr, ver.aanmeld_datum, member_from))
+            ver.aanmeld_datum = member_from
+            updated.append('aanmeld_datum')
 
         if len(updated) > 0:
             self.count_wijzigingen += len(updated)
@@ -223,7 +231,12 @@ class ImportHistCrmVerenigingen(ImportCrmBase):
             ver_lat = club['latitude']
             ver_lon = club['longitude']
 
-            self._store_vereniging(ver_nr, ver_naam, ver_kvk, ver_straatnaam, ver_huisnummer, ver_postcode, ver_plaats, ver_lat, ver_lon)
+            ver_member_from = club['member_from']
+
+            self._store_vereniging(ver_nr, ver_naam, ver_kvk,
+                                   ver_straatnaam, ver_huisnummer, ver_postcode, ver_plaats,
+                                   ver_lat, ver_lon,
+                                   ver_member_from)
 
             if ver_nr in ver_nrs:
                 ver_nrs.remove(ver_nr)
